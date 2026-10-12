@@ -6,7 +6,7 @@ import { defineField, type ImageDefinition } from 'sanity'
  * @sanity/image-url and Studio's image tooling work unchanged.
  */
 export function imageField(
-  overrides: Omit<ImageDefinition, 'type'> & { requireAlt?: boolean },
+  overrides: Omit<ImageDefinition, 'type'> & { requireAlt?: boolean; group?: string | string[] },
 ) {
   const { requireAlt = true, fields = [], ...rest } = overrides
   return defineField({

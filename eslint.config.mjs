@@ -5,7 +5,7 @@ import nextTs from 'eslint-config-next/typescript'
 /**
  * Bulletproof React architecture rules. Imports flow one way:
  *
- *   shared (components, config, lib, styles, types)  ->  features  ->  app
+ *   shared (components, config, lib, styles, types, utils)  ->  features  ->  app
  *
  * - Shared code can't import features or app.
  * - Features can't import app, or each other (compose them in app/ instead).
@@ -13,7 +13,7 @@ import nextTs from 'eslint-config-next/typescript'
  *
  * Add a zone below when you add a feature.
  */
-const features = ['pages', 'draft-mode', 'studio']
+const features = ['pages', 'site', 'draft-mode', 'studio']
 
 const crossFeatureZones = features.map((feature) => ({
   target: `./src/features/${feature}`,
@@ -44,6 +44,7 @@ export default defineConfig([
                 './src/lib',
                 './src/styles',
                 './src/types',
+                './src/utils',
               ],
               from: ['./src/features', './src/app'],
               message: 'Shared modules must not import features or app.',

@@ -40,3 +40,16 @@ export const seoFields = /* groq */ `
   noIndex,
   ogImage { ${imageFields} }
 `
+
+/**
+ * Body of a `blockContent` array projection: `body[]{ ${portableTextFields} }`.
+ * Resolves internal link annotations to slugs and inline images to their assets.
+ */
+export const portableTextFields = /* groq */ `
+  ...,
+  markDefs[]{
+    ...,
+    _type == "link" => { ${linkFields} }
+  },
+  _type == "image" => { caption, ${imageFields} }
+`

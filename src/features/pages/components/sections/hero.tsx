@@ -1,4 +1,4 @@
-import { CtaLink } from '@/components/ui/cta-link'
+import { CtaGroup } from '@/components/ui/cta-link'
 import { SanityImage } from '@/components/ui/sanity-image'
 import type { SectionProps } from '../../types'
 
@@ -23,13 +23,7 @@ export function Hero({ data }: SectionProps<'hero'>) {
         {description && (
           <p className="mx-auto mt-6 max-w-2xl text-lg text-pretty text-gray-300">{description}</p>
         )}
-        {ctas?.length ? (
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            {ctas.map((cta) => (
-              <CtaLink key={cta._key} cta={cta} />
-            ))}
-          </div>
-        ) : null}
+        <CtaGroup ctas={ctas} className="mt-10 justify-center" />
       </div>
     </section>
   )

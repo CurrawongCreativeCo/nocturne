@@ -3,8 +3,15 @@ import type { ComponentType } from 'react'
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
 import type { PageSection, SectionProps, SectionType } from '../types'
+import { CtaBanner } from './sections/cta-banner'
+import { Faq } from './sections/faq'
 import { FeaturesGrid } from './sections/features-grid'
 import { Hero } from './sections/hero'
+import { LogoCloud } from './sections/logo-cloud'
+import { MediaText } from './sections/media-text'
+import { RichText } from './sections/rich-text'
+import { Testimonials } from './sections/testimonials'
+// new-section:import
 
 /**
  * `_type` -> component registry. The mapped type is exhaustive: when TypeGen adds
@@ -13,7 +20,14 @@ import { Hero } from './sections/hero'
  */
 const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> } = {
   hero: Hero,
+  richText: RichText,
+  mediaText: MediaText,
   featuresGrid: FeaturesGrid,
+  logoCloud: LogoCloud,
+  testimonials: Testimonials,
+  faq: Faq,
+  ctaBanner: CtaBanner,
+  // new-section:register
 }
 
 interface Props {

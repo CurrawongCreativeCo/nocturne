@@ -14,7 +14,14 @@ import { structureTool } from 'sanity/structure'
 
 import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
 import { pageSchemaTypes } from './src/features/pages/schemas'
+import { pageTemplates } from './src/features/pages/schemas/templates'
+import { siteSchemaTypes } from './src/features/site/schemas'
 import { resolve } from './src/features/studio/presentation'
+import {
+  hideSingletonsFromNewMenu,
+  singletonDocumentActions,
+  withoutSingletonTemplates,
+} from './src/features/studio/singletons'
 import { structure } from './src/features/studio/structure'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
 
@@ -22,7 +29,14 @@ export default defineConfig({
   basePath: studioUrl,
   projectId,
   dataset,
-  schema: { types: [...pageSchemaTypes, ...sharedSchemaTypes] },
+  schema: {
+    types: [...pageSchemaTypes, ...siteSchemaTypes, ...sharedSchemaTypes],
+    templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],
+  },
+  document: {
+    actions: singletonDocumentActions,
+    newDocumentOptions: hideSingletonsFromNewMenu,
+  },
   plugins: [
     structureTool({ structure }),
     presentationTool({

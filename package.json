@@ -12,7 +12,8 @@
     "typegen:watch": "sanity typegen generate --watch",
     "lint": "eslint .",
     "predev": "node scripts/setup/index.mjs",
-    "setup": "node scripts/setup/index.mjs"
+    "setup": "node scripts/setup/index.mjs",
+    "new:section": "node scripts/new-section.mjs"
   },
   "dependencies": {
     "@sanity/icons": "^5.2.3",

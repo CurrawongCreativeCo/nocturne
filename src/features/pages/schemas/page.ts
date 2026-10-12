@@ -53,7 +53,10 @@ export const page = defineType({
       group: 'content',
       of: sectionTypes.map(({ name }) => defineArrayMember({ type: name })),
       options: {
-        insertMenu: { views: [{ name: 'grid' }, { name: 'list' }] },
+        insertMenu: {
+          // Thumbnails live in public/section-previews/<typeName>.svg.
+          views: [{ name: 'grid', previewImageUrl: (type) => `/section-previews/${type}.svg` }, { name: 'list' }],
+        },
       },
     }),
     defineField({ name: 'seo', type: 'seo', group: 'seo' }),

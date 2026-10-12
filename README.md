@@ -12,14 +12,16 @@ This repo is the clean template. Don't run the setup wizard in it; start each ne
 git clone https://github.com/CurrawongCreativeCo/sanity-starter.git my-new-site
 cd my-new-site
 npm install
-npx sanity login   # optional: lets the wizard create your token and CORS origins
+npx sanity login   # lets the wizard create the project, token, CORS origins and starter content
 npm run dev
 ```
 
-The first `npm run dev` opens a setup form at http://localhost:3333. It checks your Sanity credentials,
-writes `.env.local`, and then deletes itself (`scripts/setup/`, the `predev`/`setup` scripts, and this
-section). After that, the site starts as usual. Commit the deletions in the new project only; never
-in this template, or future projects lose the wizard.
+The first `npm run dev` opens a setup form at http://localhost:3333. It can create a new Sanity project
+(or connect an existing one), create a Viewer token, allow the site in CORS, and import starter content
+(Home and About pages, Site settings with a menu and footer). It writes `.env.local`, deletes itself
+(`scripts/setup/`, the `predev`/`setup` scripts, and this section), then starts the site and links you
+to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
+or future projects lose the wizard.
 
 To make the new project its own repo, point it at a new remote before pushing:
 
@@ -38,6 +40,29 @@ npm run dev                  # site on :3000, Studio on :3000/studio
 In sanity.io/manage → API → CORS, add `http://localhost:3000` (with credentials) and your production URL.
 Create a page with slug `home` to populate `/`. After changing schemas or queries, run `npm run typegen`.
 
+## Editing content
+
+Open http://localhost:3000/studio:
+
+- **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
+- **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
+- **Pages → New** offers templates: *Landing page* (hero, features, testimonials, call to action) and
+  *Content page* (hero + rich text), or a blank page.
+- Under **Sections**, *Add item* shows every section with a thumbnail:
+
+| Section | Use it for |
+| --- | --- |
+| Hero | Page headline, intro, up to two buttons, background image |
+| Rich text | Long-form copy: headings, lists, links, inline images |
+| Image + text | A picture beside a short story, image on either side |
+| Features grid | 2–4 columns of benefits with icons |
+| Logo strip | Client or partner logos |
+| Testimonials | Customer quotes with name, role and photo |
+| FAQ | Questions that expand to answers |
+| Call to action banner | A closing prompt in brand, dark or light tone |
+
+The brand color used by buttons, links and the "brand" banner is `--color-brand` in `src/styles/globals.css`.
+
 ## Architecture
 
 **Single repo, Studio embedded at `/studio`.** One deploy, one set of env vars, and schema, queries
@@ -54,7 +79,7 @@ eslint.config.mjs                  enforces the import rules below
 src/
   app/                             routes only: thin files that compose features
     layout.tsx                     bare <html> shell (shared with Studio)
-    (site)/layout.tsx              <SanityLive/>, <VisualEditing/> in draft mode
+    (site)/layout.tsx              header, footer, site metadata, <SanityLive/>, <VisualEditing/>
     (site)/[[...slug]]/page.tsx    every CMS page, including "/"
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
@@ -63,24 +88,28 @@ src/
     pages/                         CMS pages + page builder
       api/                         queries.ts, sections.ts (GROQ), get-page*.ts, get-sitemap.ts
       components/                  page-view, section-renderer, sections/<name>.tsx
-      schemas/                     page.ts, sections/<name>.ts
+      schemas/                     page.ts, sections/<name>.ts, templates.ts (new-page templates)
       types/                       PageSection, SectionOf<'hero'>, SectionProps
+    site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         disable-draft-mode
-    studio/                        desk structure, Presentation resolvers
-  components/ui/                   shared UI: sanity-image, cta-link
+    studio/                        desk structure, singletons, Presentation resolvers
+  components/ui/                   shared UI: sanity-image, cta-link, rich-text
   config/                          env.ts (validated), paths.ts (slug <-> URL)
   lib/sanity/                      client (singleton), live, image, token, data-attribute,
-                                   fragments.ts (shared GROQ), schema/ (link, cta, seo, imageField)
-  styles/globals.css
+                                   fragments.ts (shared GROQ), schema/ (link, cta, seo, blockContent, imageField)
+  styles/globals.css               Tailwind theme, including the brand color
   types/
     sanity.types.ts                GENERATED — commit it
     sanity.ts                      shared types: SanityImageData, CtaData, LinkData
+  utils/links.ts                   resolveHref for CTAs, menus and rich-text links
+public/section-previews/           insert-menu thumbnails, one <typeName>.svg per section
+scripts/new-section.mjs            `npm run new:section` scaffolder
 ```
 
 **Import rules** (`npm run lint` fails on violations):
 
 ```
-components, config, lib, styles, types   ->   features   ->   app
+components, config, lib, styles, types, utils   ->   features   ->   app
 ```
 
 - Shared folders never import from `features/` or `app/`.
@@ -120,13 +149,22 @@ but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 
 ## Adding a section
 
-All inside `src/features/pages/`:
+```bash
+npm run new:section pricing-table
+```
 
-1. `schemas/sections/testimonial.ts`, then add it to `schemas/sections/index.ts`
-2. `testimonialFragment` in `api/sections.ts`, then add it to `pageBuilderFragment`
-3. `npm run typegen`
-4. `components/sections/testimonial.tsx` taking `SectionProps<'testimonial'>`
-5. Register it in `components/section-renderer.tsx`. Until you do, `tsc` fails with "Property 'testimonial' is missing".
+This creates the schema, GROQ fragment, component and thumbnail, registers each one, and runs typegen.
+The section is immediately in Studio's *Add item* menu with a title and text field. Then:
+
+1. Add fields in `src/features/pages/schemas/sections/pricing-table.ts`
+2. Query them in `pricingTableFragment` (`src/features/pages/api/sections.ts`) and run `npm run typegen`
+3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx`, typed from the query
+4. Optionally replace `public/section-previews/pricingTable.svg`
+
+The generator inserts code at the `// new-section:*` marker comments; keep them in place. To add a section
+by hand, follow the same steps and register it in `schemas/sections/index.ts`, `pageBuilderFragment` and
+`components/section-renderer.tsx`. Until a section is registered in the renderer, `tsc` fails with
+"Property '<name>' is missing".
 
 ## Notes
 

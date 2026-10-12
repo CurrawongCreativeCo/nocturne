@@ -2,4 +2,8 @@
 
 @theme {
   --font-sans: ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand color: used by `bg-brand`, `text-brand`, the "brand" CTA banner tone and focus rings. */
+  --color-brand: oklch(0.55 0.2 264);
+  --color-brand-foreground: oklch(0.99 0 0);
 }

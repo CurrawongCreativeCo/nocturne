@@ -1,15 +1,36 @@
+import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { VisualEditing } from 'next-sanity/visual-editing'
+import { Suspense } from 'react'
 
 import { DisableDraftMode } from '@/features/draft-mode/components/disable-draft-mode'
-import { SanityLive } from '@/lib/sanity/live'
+import { getSiteMetadata } from '@/features/site/api/get-site-metadata'
+import { SiteFooter, DraftSiteFooter } from '@/features/site/components/site-footer'
+import { SiteHeader, DraftSiteHeader } from '@/features/site/components/site-header'
+import { PUBLISHED, SanityLive } from '@/lib/sanity/live'
+
+export const generateMetadata = (): Promise<Metadata> => getSiteMetadata()
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled: isDraftMode } = await draftMode()
 
   return (
     <>
-      <main>{children}</main>
+      {isDraftMode ? (
+        <Suspense fallback={null}>
+          <DraftSiteHeader />
+        </Suspense>
+      ) : (
+        <SiteHeader {...PUBLISHED} />
+      )}
+      <main className="flex-1">{children}</main>
+      {isDraftMode ? (
+        <Suspense fallback={null}>
+          <DraftSiteFooter />
+        </Suspense>
+      ) : (
+        <SiteFooter {...PUBLISHED} />
+      )}
       {/* Subscribes to Content Lake changes and expires matching cache tags. */}
       <SanityLive includeDrafts={isDraftMode} />
       {isDraftMode && (

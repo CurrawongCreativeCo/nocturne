@@ -75,6 +75,20 @@
     <fieldset>
       <legend>Project</legend>
       <div class="field">
+        <label for="projectName">Site name</label>
+        <input type="text" id="projectName" name="projectName" autocomplete="off" aria-describedby="projectName-help projectName-error">
+        <p class="help" id="projectName-help">Names the new Sanity project and appears in the starter content. You can change it later in Site settings.</p>
+        <p class="error" id="projectName-error"></p>
+      </div>
+      <label class="choice">
+        <input type="radio" name="projectMode" value="create" checked>
+        <div><strong>Create a new Sanity project</strong><span>Uses your Sanity CLI login. Run <code>npx sanity login</code> in a terminal first.</span></div>
+      </label>
+      <label class="choice">
+        <input type="radio" name="projectMode" value="existing">
+        <div><strong>Use a project I already have</strong></div>
+      </label>
+      <div class="field" id="projectId-field" hidden>
         <label for="projectId">Project ID</label>
         <input type="text" id="projectId" name="projectId" autocomplete="off" spellcheck="false" required aria-describedby="projectId-help projectId-error">
         <p class="help" id="projectId-help">Shown under your project name at <a href="https://www.sanity.io/manage" target="_blank" rel="noopener">sanity.io/manage</a>. No project yet? Create one there first.</p>
@@ -93,7 +107,7 @@
         <input type="radio" name="tokenMode" value="create" checked>
         <div><strong>Create a Viewer token for me</strong><span>Uses your Sanity CLI login. Run <code>npx sanity login</code> in a terminal first if you haven't.</span></div>
       </label>
-      <label class="choice">
+      <label class="choice" id="paste-choice">
         <input type="radio" name="tokenMode" value="paste">
         <div><strong>I'll paste a token</strong><span>Create one in <a id="tokens-link" href="https://www.sanity.io/manage" target="_blank" rel="noopener">Manage</a> → API → Tokens with the <b>Viewer</b> role.</span></div>
       </label>
@@ -105,10 +119,14 @@
     </fieldset>
 
     <fieldset>
-      <legend>Studio access</legend>
+      <legend>Extras</legend>
       <label class="choice">
         <input type="checkbox" name="addCors" checked>
         <div><strong>Allow this site in CORS origins</strong><span>The embedded Studio at <code>/studio</code> needs it. Adds <span id="cors-origins">http://localhost:3000</span> with credentials, using your Sanity CLI login.</span></div>
+      </label>
+      <label class="choice">
+        <input type="checkbox" name="seed" checked>
+        <div><strong>Add starter content</strong><span>A home page and an about page built from the sections, plus site settings with a menu and footer. Never overwrites existing documents. Uses your Sanity CLI login.</span></div>
       </label>
     </fieldset>
 
@@ -142,11 +160,18 @@
 
 <script>
   const form = document.getElementById('form')
-  const fields = ['projectId', 'dataset', 'token', 'siteUrl', 'apiVersion']
+  const fields = ['projectName', 'projectId', 'dataset', 'token', 'siteUrl', 'apiVersion']
   let devPort = 3000
 
   const tokenMode = () => form.tokenMode.value
-  function syncTokenMode() {
+  const projectMode = () => form.projectMode.value
+  function syncModes() {
+    const creating = projectMode() === 'create'
+    document.getElementById('projectId-field').hidden = creating
+    // A brand-new project has no tokens to paste yet.
+    const pasteChoice = document.getElementById('paste-choice')
+    pasteChoice.hidden = creating
+    if (creating) form.tokenMode.value = 'create'
     document.getElementById('token-field').hidden = tokenMode() !== 'paste'
   }
   function syncLinks() {
@@ -160,45 +185,54 @@
   }
 
   function showErrors(errors = {}, message = '') {
+    const hiddenErrors = []
     for (const name of fields) {
       const el = document.getElementById(`${name}-error`)
+      // Errors for fields that aren't visible (e.g. Project ID while creating) go in the banner.
+      const visible = form[name].offsetParent !== null || name === 'siteUrl' || name === 'apiVersion'
+      if (errors[name] && !visible && name !== 'token') hiddenErrors.push(errors[name])
       if (el) el.textContent = errors[name] ?? ''
       form[name].setAttribute('aria-invalid', errors[name] ? 'true' : 'false')
     }
-    document.getElementById('banner').textContent = message
+    document.getElementById('banner').textContent = [message, ...hiddenErrors].filter(Boolean).join(' ')
     if (errors.siteUrl || errors.apiVersion) document.getElementById('advanced').open = true
     const first = fields.find((name) => errors[name])
-    if (first && (first !== 'token' || tokenMode() === 'paste')) form[first].focus()
+    if (first && form[first].offsetParent !== null) form[first].focus()
   }
 
   async function load() {
     const state = await fetch('/api/state').then((r) => r.json())
     devPort = state.devPort
     for (const name of fields) form[name].value = state.values[name] ?? ''
+    if (state.values.projectId) form.projectMode.value = 'existing'
     if (state.values.token) form.tokenMode.value = 'paste'
-    syncTokenMode()
+    syncModes()
     syncLinks()
     if (state.initialError) {
       const { field, message } = state.initialError
       showErrors(field ? { [field]: message } : {}, `Your existing .env.local didn't connect. ${field ? '' : message}`)
     } else {
-      form.projectId.focus()
+      form.projectName.focus()
     }
   }
 
-  form.addEventListener('change', (e) => { if (e.target.name === 'tokenMode') syncTokenMode() })
+  form.addEventListener('change', (e) => {
+    if (e.target.name === 'tokenMode' || e.target.name === 'projectMode') syncModes()
+  })
   form.addEventListener('input', syncLinks)
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
     const button = document.getElementById('submit')
     button.disabled = true
-    button.textContent = tokenMode() === 'create' ? 'Creating token and connecting…' : 'Connecting…'
+    button.textContent = projectMode() === 'create' ? 'Creating your project…' : tokenMode() === 'create' ? 'Creating token and connecting…' : 'Connecting…'
     showErrors()
 
     const payload = Object.fromEntries(fields.map((name) => [name, form[name].value]))
+    payload.projectMode = projectMode()
     payload.tokenMode = tokenMode()
     payload.addCors = form.addCors.checked
+    payload.seed = form.seed.checked
 
     try {
       const res = await fetch('/api/setup', {
@@ -220,7 +254,9 @@
     form.hidden = true
     const done = document.getElementById('done')
     done.hidden = false
+    const manage = `https://www.sanity.io/manage/project/${result.projectId}`
     const items = [
+      result.projectCreated && ['ok', `Created Sanity project <b>${result.projectId}</b> (<a href="${manage}" target="_blank" rel="noopener">manage</a>)`],
       ['ok', `Connected to <b>${result.projectId}</b> / <b>${result.dataset}</b> (${result.pageCount} page${result.pageCount === 1 ? '' : 's'})`],
       result.tokenCreated && ['ok', 'Created a Viewer token'],
       ['ok', 'Wrote <code>.env.local</code>'],
@@ -228,6 +264,9 @@
         c.status === 'failed'
           ? ['warn', `CORS origin ${c.origin} not added. ${escapeHtml(c.message)} You can add it in <a href="https://www.sanity.io/manage/project/${result.projectId}/api" target="_blank" rel="noopener">Manage → API → CORS origins</a> with "Allow credentials" checked.`]
           : ['ok', `CORS origin ${c.origin} ${c.status === 'added' ? 'added' : 'already allowed'}`]),
+      result.seed && (result.seed.ok
+        ? ['ok', 'Added starter content: Home and About pages, Site settings']
+        : ['warn', `Starter content not added. ${escapeHtml(result.seed.message)}`]),
       ['ok', 'Removed the setup wizard. Commit the deleted files.'],
     ].filter(Boolean)
     document.getElementById('checklist').innerHTML = items
@@ -235,10 +274,13 @@
       .join('')
 
     const site = `http://localhost:${devPort}`
-    document.getElementById('studio-link').href = `${site}/studio`
+    // Presentation shows the page and its editor side by side: the quickest way to start editing.
+    document.getElementById('studio-link').href = `${site}/studio/presentation`
     document.getElementById('site-link').href = site
     const next = document.getElementById('next')
-    const homeHint = result.hasHome ? '' : ' Then create a Page with the slug <code>home</code> in Studio and publish it.'
+    const homeHint = result.hasHome
+      ? ' Open Studio to edit pages side by side with the live preview.'
+      : ' Then create a Page with the slug <code>home</code> in Studio and publish it.'
     next.innerHTML = `Starting the site at ${site}…${homeHint}`
     waitForSite(site, () => {
       next.innerHTML = `Your site is running.${homeHint}`

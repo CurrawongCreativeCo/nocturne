@@ -19,6 +19,11 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     },
   ]),
   locations: {
+    settings: defineLocations({
+      message: 'Used on every page (header, footer and default SEO)',
+      tone: 'positive',
+      locations: [{ title: 'Home', href: '/' }],
+    }),
     page: defineLocations({
       select: { title: 'title', slug: 'slug.current' },
       resolve: (doc) => ({

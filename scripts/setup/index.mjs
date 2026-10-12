@@ -2,19 +2,22 @@
  * One-time setup wizard. `npm run dev` runs this first (as `predev`).
  *
  * Serves a form on localhost, verifies the Sanity credentials against the Content
- * Lake, writes .env.local, optionally creates a Viewer token and CORS origins via
- * the Sanity CLI, then deletes itself: this folder, the `predev` and `setup`
- * scripts in package.json, and the README block marked `setup-wizard`.
+ * Lake and writes .env.local. With the user's Sanity CLI login it can also create
+ * the project, a Viewer token and CORS origins, and import starter content.
+ * Then it deletes itself: this folder, the `predev` and `setup` scripts in
+ * package.json, and the README block marked `setup-wizard`.
  *
  * If .env.local already connects successfully, it skips the form and removes itself.
  * Dependency-free on purpose: it must run before anything else is configured.
  */
 import { spawn } from 'node:child_process'
-import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
-import { hostname } from 'node:os'
+import { hostname, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { seedDocuments } from './seed.mjs'
 
 const wizardDir = dirname(fileURLToPath(import.meta.url))
 const root = join(wizardDir, '..', '..')
@@ -22,6 +25,7 @@ const envPath = join(root, '.env.local')
 
 const DEV_PORT = Number(process.env.PORT) || 3000
 const DEFAULTS = {
+  projectName: 'My Site',
   projectId: '',
   dataset: 'production',
   apiVersion: '2026-10-01',
@@ -54,7 +58,7 @@ for (const [field, key] of Object.entries(ENV_KEYS)) {
 
 let initialError = null
 if (prefill.projectId && prefill.token) {
-  const { values, errors } = normalize(prefill, 'paste')
+  const { values, errors } = normalize(prefill, { tokenMode: 'paste', projectMode: 'existing' })
   if (Object.keys(errors).length === 0) {
     const result = await checkConnection(values)
     if (result.ok) {
@@ -71,9 +75,10 @@ startServer()
 // ---------------------------------------------------------------------------
 // Validation
 
-function normalize(input, tokenMode) {
+function normalize(input, { tokenMode, projectMode }) {
   const str = (key) => String(input[key] ?? '').trim()
   const values = {
+    projectName: str('projectName'),
     projectId: str('projectId').toLowerCase(),
     dataset: str('dataset') || DEFAULTS.dataset,
     apiVersion: str('apiVersion') || DEFAULTS.apiVersion,
@@ -82,7 +87,10 @@ function normalize(input, tokenMode) {
   }
   const errors = {}
 
-  if (!values.projectId) errors.projectId = 'Enter your project ID.'
+  if (projectMode === 'create') {
+    if (!/^[\p{L}\p{N}][\p{L}\p{N} ._'&-]{0,79}$/u.test(values.projectName))
+      errors.projectName = 'Use up to 80 letters, numbers, spaces and . _ \' & -'
+  } else if (!values.projectId) errors.projectId = 'Enter your project ID.'
   else if (!/^[a-z0-9][a-z0-9-]{1,63}$/.test(values.projectId))
     errors.projectId = 'Project IDs are lowercase letters, numbers and dashes, e.g. "a1b2c3d4".'
 
@@ -165,6 +173,48 @@ function fail(field, message) {
   return { ok: false, field, message }
 }
 
+/** Reused across retries so a failed later step doesn't create a second project. */
+let createdProjectId = null
+
+async function createProject({ projectName, dataset }) {
+  if (createdProjectId) return { ok: true, projectId: createdProjectId }
+
+  const result = await sanityCli(
+    ['projects', 'create', projectName, '--dataset', dataset, '--dataset-visibility', 'public', '--json', '--yes'],
+    // sanity.cli.ts needs some project ID to load; the new project doesn't exist yet.
+    { projectId: 'placeholder', dataset },
+  )
+  if (result.ok) {
+    try {
+      const projectId = JSON.parse(result.out.slice(result.out.indexOf('{'))).projectId
+      if (projectId) {
+        createdProjectId = projectId
+        return { ok: true, projectId }
+      }
+    } catch {
+      // Fall through to the error below.
+    }
+  }
+  return fail('projectName', cliErrorMessage(result, "Couldn't create the project"))
+}
+
+async function importStarterContent({ projectId, dataset, projectName }) {
+  const dir = mkdtempSync(join(tmpdir(), 'sanity-seed-'))
+  const file = join(dir, 'starter.ndjson')
+  try {
+    const docs = seedDocuments(projectName || 'My Site')
+    writeFileSync(file, docs.map((doc) => JSON.stringify(doc)).join('\n'))
+    // --missing: never overwrite documents that already exist.
+    const result = await sanityCli(['datasets', 'import', file, '--dataset', dataset, '--project-id', projectId, '--missing'], {
+      projectId,
+      dataset,
+    })
+    return result.ok ? { ok: true } : { ok: false, message: cliErrorMessage(result, "Couldn't import starter content") }
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+}
+
 /** Reused across retries so a typo in the dataset doesn't mint a second token. */
 const createdTokens = new Map()
 
@@ -218,7 +268,9 @@ function sanityCli(args, { projectId, dataset }) {
   const isWindows = process.platform === 'win32'
   const bin = join(root, 'node_modules', '.bin', isWindows ? 'sanity.cmd' : 'sanity')
   return new Promise((resolve) => {
-    const child = spawn(bin, args, {
+    // With `shell: true` (Windows), arguments containing spaces must be quoted.
+    const argv = isWindows ? args.map((a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)) : args
+    const child = spawn(bin, argv, {
       cwd: root,
       shell: isWindows,
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -379,9 +431,17 @@ function startServer(port = 3333, attemptsLeft = 10) {
 }
 
 async function runSetup(body) {
-  const tokenMode = body.tokenMode === 'create' ? 'create' : 'paste'
-  const { values, errors } = normalize(body, tokenMode)
+  const projectMode = body.projectMode === 'create' ? 'create' : 'existing'
+  // A brand-new project has no tokens yet, so the wizard must create one.
+  const tokenMode = projectMode === 'create' || body.tokenMode === 'create' ? 'create' : 'paste'
+  const { values, errors } = normalize(body, { tokenMode, projectMode })
   if (Object.keys(errors).length) return { ok: false, errors }
+
+  if (projectMode === 'create') {
+    const project = await createProject(values)
+    if (!project.ok) return { ok: false, errors: { projectName: project.message } }
+    values.projectId = project.projectId
+  }
 
   if (tokenMode === 'create') {
     const created = await createViewerToken(values)
@@ -397,18 +457,21 @@ async function runSetup(body) {
   }
 
   writeEnvFile(values)
-  // Not blocking: the site works without CORS; only the embedded Studio needs it.
+  // The steps below are not blocking: the site works without them, and failures are reported.
   const cors = body.addCors ? await configureCors(values) : []
+  const seed = body.seed ? await importStarterContent(values) : null
   const removed = removeWizard()
 
   return {
     ok: true,
     projectId: values.projectId,
     dataset: values.dataset,
-    pageCount: connection.pageCount,
-    hasHome: connection.hasHome,
+    projectCreated: projectMode === 'create',
     tokenCreated: tokenMode === 'create',
+    pageCount: connection.pageCount,
+    hasHome: connection.hasHome || Boolean(seed?.ok),
     cors,
+    seed,
     removed,
   }
 }
