@@ -1,5 +1,5 @@
 import { BlockContentIcon } from '@sanity/icons/BlockContent'
-import { defineArrayMember, defineField, defineType } from 'sanity'
+import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
 import { imageField } from '@/lib/sanity/schema/image-field'
 
@@ -22,6 +22,10 @@ export const hero = defineType({
   ],
   preview: {
     select: { title: 'title', media: 'backgroundImage' },
-    prepare: ({ title, media }) => ({ title: title || 'Untitled', subtitle: 'Hero', media }),
+    prepare: ({ title, media }: { title?: string; media?: PreviewValue['media'] }) => ({
+      title: title || 'Untitled',
+      subtitle: 'Hero',
+      media,
+    }),
   },
 })

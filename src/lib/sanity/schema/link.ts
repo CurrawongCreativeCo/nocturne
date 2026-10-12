@@ -1,6 +1,10 @@
 import { LinkIcon } from '@sanity/icons/Link'
 import { defineField, defineType } from 'sanity'
 
+interface LinkValue {
+  linkType?: string
+}
+
 /** Internal (reference) or external (URL) link. Reused by CTAs, nav, rich text, etc. */
 export const link = defineType({
   name: 'link',
@@ -27,10 +31,10 @@ export const link = defineType({
       title: 'Page',
       type: 'reference',
       to: [{ type: 'page' }],
-      hidden: ({ parent }) => parent?.linkType !== 'internal',
+      hidden: ({ parent }: { parent?: LinkValue }) => parent?.linkType !== 'internal',
       validation: (rule) =>
         rule.custom((value, { parent }) =>
-          (parent as { linkType?: string })?.linkType === 'internal' && !value
+          (parent as LinkValue | undefined)?.linkType === 'internal' && !value
             ? 'Select a page'
             : true,
         ),
@@ -39,12 +43,12 @@ export const link = defineType({
       name: 'url',
       title: 'URL',
       type: 'url',
-      hidden: ({ parent }) => parent?.linkType !== 'external',
+      hidden: ({ parent }: { parent?: LinkValue }) => parent?.linkType !== 'external',
       validation: (rule) =>
         rule
           .uri({ scheme: ['http', 'https', 'mailto', 'tel'] })
           .custom((value, { parent }) =>
-            (parent as { linkType?: string })?.linkType === 'external' && !value
+            (parent as LinkValue | undefined)?.linkType === 'external' && !value
               ? 'Enter a URL'
               : true,
           ),

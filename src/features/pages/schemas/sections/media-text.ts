@@ -1,5 +1,5 @@
 import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
-import { defineArrayMember, defineField, defineType } from 'sanity'
+import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
 import { imageField } from '@/lib/sanity/schema/image-field'
 
@@ -30,6 +30,10 @@ export const mediaText = defineType({
   ],
   preview: {
     select: { title: 'title', media: 'image' },
-    prepare: ({ title, media }) => ({ title: title || 'Untitled', subtitle: 'Image + text', media }),
+    prepare: ({ title, media }: { title?: string; media?: PreviewValue['media'] }) => ({
+      title: title || 'Untitled',
+      subtitle: 'Image + text',
+      media,
+    }),
   },
 })

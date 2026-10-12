@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation'
 
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
-import { getPage } from '../api/get-page'
 import { SectionRenderer } from './section-renderer'
+import { getPage } from '../api/get-page'
 
 export async function PageView({ slug, ...mode }: { slug: string } & FetchMode) {
   const page = await getPage({ slug, ...mode })

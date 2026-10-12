@@ -1,5 +1,6 @@
 import { CtaGroup } from '@/components/ui/cta-link'
 import { SanityImage } from '@/components/ui/sanity-image'
+
 import type { SectionProps } from '../../types'
 
 /**

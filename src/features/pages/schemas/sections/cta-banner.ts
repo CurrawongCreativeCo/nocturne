@@ -34,6 +34,9 @@ export const ctaBanner = defineType({
   ],
   preview: {
     select: { title: 'title' },
-    prepare: ({ title }) => ({ title: title || 'Untitled', subtitle: 'Call to action banner' }),
+    prepare: ({ title }: { title?: string }) => ({
+      title: title || 'Untitled',
+      subtitle: 'Call to action banner',
+    }),
   },
 })

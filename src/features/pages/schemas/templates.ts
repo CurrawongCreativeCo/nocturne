@@ -19,13 +19,30 @@ export const pageTemplates: Template[] = [
         section('featuresGrid', {
           title: 'Why choose us',
           columns: 3,
-          items: [1, 2, 3].map((n) => ({ _key: key(), _type: 'featureItem', title: `Benefit ${n}`, text: 'Describe the benefit in a sentence or two.' })),
+          items: [1, 2, 3].map((n) => ({
+            _key: key(),
+            _type: 'featureItem',
+            title: `Benefit ${n}`,
+            text: 'Describe the benefit in a sentence or two.',
+          })),
         }),
         section('testimonials', {
           title: 'What our customers say',
-          items: [{ _key: key(), _type: 'testimonial', quote: 'A short, specific quote from a happy customer.', name: 'Customer name', role: 'Role, Company' }],
+          items: [
+            {
+              _key: key(),
+              _type: 'testimonial',
+              quote: 'A short, specific quote from a happy customer.',
+              name: 'Customer name',
+              role: 'Role, Company',
+            },
+          ],
         }),
-        section('ctaBanner', { title: 'Ready to get started?', text: 'Tell visitors what to do next.', tone: 'brand' }),
+        section('ctaBanner', {
+          title: 'Ready to get started?',
+          text: 'Tell visitors what to do next.',
+          tone: 'brand',
+        }),
       ],
     }),
   },
@@ -47,7 +64,13 @@ function section(type: string, fields: Record<string, unknown>) {
 }
 
 function paragraph(text: string) {
-  return { _key: key(), _type: 'block', style: 'normal', markDefs: [], children: [{ _key: key(), _type: 'span', text, marks: [] }] }
+  return {
+    _key: key(),
+    _type: 'block',
+    style: 'normal',
+    markDefs: [],
+    children: [{ _key: key(), _type: 'span', text, marks: [] }],
+  }
 }
 
 function key() {

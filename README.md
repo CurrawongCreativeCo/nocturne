@@ -3,6 +3,7 @@
 Next.js 16 (App Router, Cache Components) · next-sanity 13 · Sanity Studio 6 · Tailwind 4 · TypeScript strict.
 
 <!-- setup-wizard:start -->
+
 ### Starting a new project
 
 This repo is the clean template. Don't run the setup wizard in it; start each new site from a fresh copy
@@ -30,6 +31,7 @@ git remote set-url origin https://github.com/<you>/my-new-site.git
 ```
 
 <!-- setup-wizard:end -->
+
 ### Manual setup
 
 ```bash
@@ -46,20 +48,20 @@ Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
-- **Pages → New** offers templates: *Landing page* (hero, features, testimonials, call to action) and
-  *Content page* (hero + rich text), or a blank page.
-- Under **Sections**, *Add item* shows every section with a thumbnail:
+- **Pages → New** offers templates: _Landing page_ (hero, features, testimonials, call to action) and
+  _Content page_ (hero + rich text), or a blank page.
+- Under **Sections**, _Add item_ shows every section with a thumbnail:
 
-| Section | Use it for |
-| --- | --- |
-| Hero | Page headline, intro, up to two buttons, background image |
-| Rich text | Long-form copy: headings, lists, links, inline images |
-| Image + text | A picture beside a short story, image on either side |
-| Features grid | 2–4 columns of benefits with icons |
-| Logo strip | Client or partner logos |
-| Testimonials | Customer quotes with name, role and photo |
-| FAQ | Questions that expand to answers |
-| Call to action banner | A closing prompt in brand, dark or light tone |
+| Section               | Use it for                                                |
+| --------------------- | --------------------------------------------------------- |
+| Hero                  | Page headline, intro, up to two buttons, background image |
+| Rich text             | Long-form copy: headings, lists, links, inline images     |
+| Image + text          | A picture beside a short story, image on either side      |
+| Features grid         | 2–4 columns of benefits with icons                        |
+| Logo strip            | Client or partner logos                                   |
+| Testimonials          | Customer quotes with name, role and photo                 |
+| FAQ                   | Questions that expand to answers                          |
+| Call to action banner | A closing prompt in brand, dark or light tone             |
 
 The brand color used by buttons, links and the "brand" banner is `--color-brand` in `src/styles/globals.css`.
 
@@ -118,10 +120,10 @@ components, config, lib, styles, types   ->   features   ->   app
 
 ### Data fetching and caching
 
-| Mode | Perspective | Stega | Caching |
-| --- | --- | --- | --- |
-| Published | `published` | off | `'use cache'` + sync-tag `cacheTag`s; prerendered at build |
-| Draft mode | cookie (`drafts` / release) | on | same cache fn, options are cache-key args; rendered in `<Suspense>` |
+| Mode       | Perspective                 | Stega | Caching                                                             |
+| ---------- | --------------------------- | ----- | ------------------------------------------------------------------- |
+| Published  | `published`                 | off   | `'use cache'` + sync-tag `cacheTag`s; prerendered at build          |
+| Draft mode | cookie (`drafts` / release) | on    | same cache fn, options are cache-key args; rendered in `<Suspense>` |
 
 - `defineLive({strict: true})` makes every fetch pass `perspective` and `stega` explicitly. That's the
   Cache Components contract: `draftMode()` and `cookies()` are read outside the cache boundary and passed in.
@@ -160,15 +162,15 @@ cache every 30 seconds), and every open tab calls a small server action on each 
 **Webhook mode** suits sites that regularly have hundreds to a thousand-plus visitors at once. Sanity
 calls one route per publish, and visitors open no connections. Previews stay live either way.
 
-| | Live mode (default) | Webhook mode |
-| --- | --- | --- |
-| Setup | none | webhook + secret per environment |
-| Visitor connections | one per open tab, 1,000 cap | none |
-| Server calls per publish | one per open tab (refetches deduped to ≤2 per query) | one |
-| Open tabs see the change | in place, within ~1 s | on their next navigation |
-| First visitor after a publish | gets the new content | gets the previous version once while the new one renders |
-| What a publish refetches | only results containing the changed documents | every result tagged with the changed type |
-| Works on localhost | yes | no (Sanity can't reach it) |
+|                               | Live mode (default)                                  | Webhook mode                                             |
+| ----------------------------- | ---------------------------------------------------- | -------------------------------------------------------- |
+| Setup                         | none                                                 | webhook + secret per environment                         |
+| Visitor connections           | one per open tab, 1,000 cap                          | none                                                     |
+| Server calls per publish      | one per open tab (refetches deduped to ≤2 per query) | one                                                      |
+| Open tabs see the change      | in place, within ~1 s                                | on their next navigation                                 |
+| First visitor after a publish | gets the new content                                 | gets the previous version once while the new one renders |
+| What a publish refetches      | only results containing the changed documents        | every result tagged with the changed type                |
+| Works on localhost            | yes                                                  | no (Sanity can't reach it)                               |
 
 To switch a deployment to webhook mode:
 
@@ -201,6 +203,45 @@ compiler knows `hero.title` is a `string` and `hero.description` is `string | nu
 Data is typed `StegaBranded`: draft-mode strings carry invisible edit markers. They render normally,
 but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 
+## Code quality
+
+| Command                | Does                                                  |
+| ---------------------- | ----------------------------------------------------- |
+| `npm run check`        | Everything below, read-only. Run it before pushing.   |
+| `npm run typecheck`    | TypeScript, strict mode                               |
+| `npm run lint`         | ESLint, zero warnings allowed (`lint:fix` to autofix) |
+| `npm run format:check` | Prettier (`format` to apply)                          |
+
+**ESLint** layers the strictest presets available:
+
+- Next.js core-web-vitals (React, hooks, Next rules)
+- typescript-eslint `strict-type-checked` + `stylistic-type-checked`: type-aware rules that catch
+  unsafe `any`, unnecessary conditions, floating promises and more
+- **Accessibility:** jsx-a11y `strict`, so all 33 rules are errors, not warnings (Next.js enables only 6, as
+  warnings). It catches missing alt text, unlabeled controls, invalid ARIA, click handlers without
+  keyboard support, positive `tabIndex` and more at build time.
+- Import order, no import cycles, and the architecture boundaries above
+- `eslint-config-prettier` last, so formatting is left entirely to Prettier
+
+Lint can't see rendered output (color contrast, focus order, final heading structure). Check those
+in the browser with Lighthouse or the axe DevTools extension.
+
+**Prettier** formats everything and sorts Tailwind classes into the official order. The VS Code
+settings in `.vscode/` format on save and apply ESLint fixes. Install the recommended extensions
+when VS Code prompts.
+
+### Pre-commit hook (off by default)
+
+```bash
+npm run hooks:on    # enable for this clone
+npm run hooks:off   # disable again
+```
+
+When enabled, each commit runs ESLint (with autofix) and Prettier on the staged files, then a full
+typecheck. A commit with lint or type errors is blocked; formatting is fixed automatically. Skip once
+with `git commit --no-verify`. The hook is opt-in per clone because hooks are personal
+tooling: `npm run check` (or CI) is the shared gate.
+
 ## Adding a section
 
 ```bash
@@ -208,7 +249,7 @@ npm run new:section pricing-table
 ```
 
 This creates the schema, GROQ fragment, component and thumbnail, registers each one, and runs typegen.
-The section is immediately in Studio's *Add item* menu with a title and text field. Then:
+The section is immediately in Studio's _Add item_ menu with a title and text field. Then:
 
 1. Add fields in `src/features/pages/schemas/sections/pricing-table.ts`
 2. Query them in `pricingTableFragment` (`src/features/pages/api/sections.ts`) and run `npm run typegen`

@@ -17,9 +17,16 @@ export function Testimonials({ data }: SectionProps<'testimonials'>) {
           {items.map((item) => (
             <li key={item._key}>
               <figure className="flex h-full flex-col rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
-                <blockquote className="flex-1 text-lg text-pretty text-gray-800">“{item.quote}”</blockquote>
+                <blockquote className="flex-1 text-lg text-pretty text-gray-800">
+                  “{item.quote}”
+                </blockquote>
                 <figcaption className="mt-6 flex items-center gap-4">
-                  <SanityImage image={item.avatar} width={48} height={48} className="size-12 rounded-full object-cover" />
+                  <SanityImage
+                    image={item.avatar}
+                    width={48}
+                    height={48}
+                    className="size-12 rounded-full object-cover"
+                  />
                   <div>
                     <div className="font-semibold">{item.name}</div>
                     {item.role && <div className="text-sm text-gray-600">{item.role}</div>}

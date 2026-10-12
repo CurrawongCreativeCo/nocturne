@@ -20,7 +20,10 @@ export async function POST(request: NextRequest) {
 
   const type = body?._type
   if (!type || !KNOWN_TAGS.has(type)) {
-    return NextResponse.json({ revalidated: false, reason: `No cached queries depend on "${type}"` })
+    return NextResponse.json({
+      revalidated: false,
+      reason: `No cached queries depend on "${type}"`,
+    })
   }
 
   revalidateTag(type, 'max')

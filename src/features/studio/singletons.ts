@@ -9,10 +9,14 @@ export const SINGLETON_TYPES = new Set(['settings'])
 const SINGLETON_ACTIONS = new Set(['publish', 'discardChanges', 'restore'])
 
 export const singletonDocumentActions: DocumentActionsResolver = (prev, { schemaType }) =>
-  SINGLETON_TYPES.has(schemaType) ? prev.filter(({ action }) => action && SINGLETON_ACTIONS.has(action)) : prev
+  SINGLETON_TYPES.has(schemaType)
+    ? prev.filter(({ action }) => action && SINGLETON_ACTIONS.has(action))
+    : prev
 
 export const hideSingletonsFromNewMenu: NewDocumentOptionsResolver = (prev, { creationContext }) =>
-  creationContext.type === 'global' ? prev.filter((item) => !SINGLETON_TYPES.has(item.templateId)) : prev
+  creationContext.type === 'global'
+    ? prev.filter((item) => !SINGLETON_TYPES.has(item.templateId))
+    : prev
 
 export function withoutSingletonTemplates(templates: Template[]): Template[] {
   return templates.filter(({ schemaType }) => !SINGLETON_TYPES.has(schemaType))

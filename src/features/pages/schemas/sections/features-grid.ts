@@ -38,7 +38,7 @@ export const featuresGrid = defineType({
   ],
   preview: {
     select: { title: 'title', items: 'items' },
-    prepare: ({ title, items }) => ({
+    prepare: ({ title, items }: { title?: string; items?: unknown[] }) => ({
       title: title || 'Features grid',
       subtitle: `Features grid · ${items?.length ?? 0} items`,
     }),

@@ -20,7 +20,12 @@ export const testimonials = defineType({
           name: 'testimonial',
           type: 'object',
           fields: [
-            defineField({ name: 'quote', type: 'text', rows: 4, validation: (rule) => rule.required() }),
+            defineField({
+              name: 'quote',
+              type: 'text',
+              rows: 4,
+              validation: (rule) => rule.required(),
+            }),
             defineField({ name: 'name', type: 'string', validation: (rule) => rule.required() }),
             defineField({ name: 'role', type: 'string', description: 'e.g. "CEO, Acme"' }),
             imageField({ name: 'avatar', requireAlt: false }),
@@ -32,7 +37,7 @@ export const testimonials = defineType({
   ],
   preview: {
     select: { title: 'title', items: 'items' },
-    prepare: ({ title, items }) => ({
+    prepare: ({ title, items }: { title?: string; items?: unknown[] }) => ({
       title: title || 'Testimonials',
       subtitle: `Testimonials · ${items?.length ?? 0}`,
     }),

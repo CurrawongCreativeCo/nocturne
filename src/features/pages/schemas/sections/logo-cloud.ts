@@ -20,7 +20,12 @@ export const logoCloud = defineType({
           type: 'object',
           fields: [
             defineField({ name: 'name', type: 'string', validation: (rule) => rule.required() }),
-            imageField({ name: 'image', requireAlt: false, description: 'SVG or transparent PNG.', validation: (rule) => rule.required() }),
+            imageField({
+              name: 'image',
+              requireAlt: false,
+              description: 'SVG or transparent PNG.',
+              validation: (rule) => rule.required(),
+            }),
             defineField({ name: 'url', title: 'Link', type: 'url' }),
           ],
           preview: { select: { title: 'name', media: 'image' } },
@@ -30,7 +35,7 @@ export const logoCloud = defineType({
   ],
   preview: {
     select: { title: 'title', logos: 'logos' },
-    prepare: ({ title, logos }) => ({
+    prepare: ({ title, logos }: { title?: string; logos?: unknown[] }) => ({
       title: title || 'Logo strip',
       subtitle: `Logo strip · ${logos?.length ?? 0} logos`,
     }),

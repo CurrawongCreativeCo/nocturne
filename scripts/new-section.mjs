@@ -24,7 +24,8 @@ const words = input
   .toLowerCase()
   .split(/[^a-z0-9]+/)
   .filter(Boolean)
-if (!words.length || !/^[a-z]/.test(words[0])) exit(`"${input}" isn't a usable name. Start with a letter, e.g. "pricing-table".`)
+if (!words.length || !/^[a-z]/.test(words[0]))
+  exit(`"${input}" isn't a usable name. Start with a letter, e.g. "pricing-table".`)
 
 const kebab = words.join('-')
 const typeName = words[0] + words.slice(1).map(capitalize).join('')
@@ -41,7 +42,8 @@ const paths = {
   placeholder: join(root, 'public/section-previews/_placeholder.svg'),
 }
 
-if (existsSync(paths.schema) || existsSync(paths.component)) exit(`A section called "${kebab}" already exists.`)
+if (existsSync(paths.schema) || existsSync(paths.component))
+  exit(`A section called "${kebab}" already exists.`)
 if (readFileSync(paths.registry, 'utf8').match(new RegExp(`\\b${typeName}\\b`))) {
   exit(`"${typeName}" is already registered in ${rel(paths.registry)}.`)
 }
@@ -58,7 +60,9 @@ const edits = [
 ]
 for (const [file, marker] of edits) {
   if (!readFileSync(file, 'utf8').includes(marker)) {
-    exit(`Couldn't find the "${marker.trim()}" marker in ${rel(file)}. Restore it, or add the section by hand.`)
+    exit(
+      `Couldn't find the "${marker.trim()}" marker in ${rel(file)}. Restore it, or add the section by hand.`,
+    )
   }
 }
 
@@ -69,12 +73,24 @@ for (const [file, marker, text] of edits) {
 }
 if (existsSync(paths.placeholder) && !existsSync(paths.preview)) {
   copyFileSync(paths.placeholder, paths.preview)
-  writeFileSync(paths.preview, readFileSync(paths.preview, 'utf8').replace('New section', escapeXml(title)))
+  writeFileSync(
+    paths.preview,
+    readFileSync(paths.preview, 'utf8').replace('New section', escapeXml(title)),
+  )
 }
 
 console.log(`\n✓ Created the "${title}" section (${typeName}):`)
 for (const file of [paths.schema, paths.component, paths.preview]) console.log(`  + ${rel(file)}`)
-for (const file of [paths.registry, paths.fragments, paths.renderer]) console.log(`  ~ ${rel(file)}`)
+for (const file of [paths.registry, paths.fragments, paths.renderer])
+  console.log(`  ~ ${rel(file)}`)
+
+// Match the project's lint and formatting even when the pre-commit hook is off
+// (e.g. imports added at the markers get sorted into place).
+const touched = [paths.schema, paths.registry, paths.fragments, paths.component, paths.renderer]
+const npx = (args) =>
+  spawnSync('npx', args, { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' })
+npx(['eslint', '--fix', '--no-warn-ignored', ...touched])
+npx(['prettier', '--write', '--log-level', 'warn', ...touched])
 
 console.log('\nRegenerating types…')
 const env = { ...process.env }
@@ -83,7 +99,12 @@ if (!existsSync(join(root, '.env.local'))) {
   env.NEXT_PUBLIC_SANITY_PROJECT_ID ??= 'placeholder'
   env.NEXT_PUBLIC_SANITY_DATASET ??= 'production'
 }
-const typegen = spawnSync('npm', ['run', 'typegen', '--silent'], { cwd: root, env, stdio: 'inherit', shell: process.platform === 'win32' })
+const typegen = spawnSync('npm', ['run', 'typegen', '--silent'], {
+  cwd: root,
+  env,
+  stdio: 'inherit',
+  shell: process.platform === 'win32',
+})
 if (typegen.status !== 0) {
   console.error('\nTypegen failed. Fix the error above, then run `npm run typegen`.')
   process.exit(1)
@@ -116,7 +137,7 @@ export const ${typeName} = defineType({
   ],
   preview: {
     select: { title: 'title' },
-    prepare: ({ title }) => ({ title: title || 'Untitled', subtitle: '${title}' }),
+    prepare: ({ title }: { title?: string }) => ({ title: title || 'Untitled', subtitle: '${title}' }),
   },
 })
 `
@@ -154,7 +175,10 @@ function capitalize(word) {
 }
 
 function escapeXml(text) {
-  return text.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+  return text.replace(
+    /[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+  )
 }
 
 function rel(file) {

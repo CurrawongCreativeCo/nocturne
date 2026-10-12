@@ -18,7 +18,11 @@ export async function SiteFooter(mode: FetchMode) {
         {nav.length > 0 && (
           <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
             {nav.map((item) => (
-              <SanityLink key={item._key} link={item.link} className="text-sm text-gray-600 hover:text-gray-950">
+              <SanityLink
+                key={item._key}
+                link={item.link}
+                className="text-sm text-gray-600 hover:text-gray-950"
+              >
                 {item.label}
               </SanityLink>
             ))}
@@ -34,6 +38,7 @@ export async function DraftSiteFooter() {
 }
 
 /** Cached because Cache Components forbids reading the clock during prerender. */
+// eslint-disable-next-line @typescript-eslint/require-await -- 'use cache' functions must be async
 async function currentYear() {
   'use cache'
   cacheLife('days')

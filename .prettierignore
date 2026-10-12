@@ -1,0 +1,11 @@
+# Generated
+src/types/sanity.types.ts
+schema.json
+next-env.d.ts
+AGENTS.md
+package-lock.json
+
+# Build output and assets
+.next
+out
+public

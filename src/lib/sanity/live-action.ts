@@ -26,7 +26,8 @@ export async function expireLiveTags(unsafeTags: unknown): Promise<'refresh'> {
   if ((await draftMode()).isEnabled) return 'refresh'
 
   const now = Date.now()
-  for (const [tag, window] of windows) if (now >= window.until && !window.trailing) windows.delete(tag)
+  for (const [tag, window] of windows)
+    if (now >= window.until && !window.trailing) windows.delete(tag)
 
   for (const tag of parseTags(unsafeTags).tags) {
     const window = windows.get(tag)

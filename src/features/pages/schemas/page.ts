@@ -3,6 +3,7 @@ import { HomeIcon } from '@sanity/icons/Home'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { HOME_SLUG, slugToPath } from '@/config/paths'
+
 import { sectionTypes } from './sections'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/
@@ -40,11 +41,13 @@ export const page = defineType({
             .replace(/^[-/]+|[-/]+$/g, ''),
       },
       validation: (rule) =>
-        rule.required().custom((slug) =>
-          !slug?.current || SLUG_PATTERN.test(slug.current)
-            ? true
-            : 'Lowercase letters, numbers, hyphens; "/" separates path segments',
-        ),
+        rule
+          .required()
+          .custom((slug) =>
+            !slug?.current || SLUG_PATTERN.test(slug.current)
+              ? true
+              : 'Lowercase letters, numbers, hyphens; "/" separates path segments',
+          ),
     }),
     defineField({
       name: 'pageBuilder',
@@ -55,7 +58,10 @@ export const page = defineType({
       options: {
         insertMenu: {
           // Thumbnails live in public/section-previews/<typeName>.svg.
-          views: [{ name: 'grid', previewImageUrl: (type) => `/section-previews/${type}.svg` }, { name: 'list' }],
+          views: [
+            { name: 'grid', previewImageUrl: (type) => `/section-previews/${type}.svg` },
+            { name: 'list' },
+          ],
         },
       },
     }),
@@ -63,7 +69,7 @@ export const page = defineType({
   ],
   preview: {
     select: { title: 'title', slug: 'slug.current' },
-    prepare: ({ title, slug }) => ({
+    prepare: ({ title, slug }: { title?: string; slug?: string }) => ({
       title: title || 'Untitled',
       subtitle: slugToPath(slug),
       media: slug === HOME_SLUG ? HomeIcon : DocumentIcon,

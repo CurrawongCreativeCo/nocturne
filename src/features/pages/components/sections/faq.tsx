@@ -10,7 +10,11 @@ export function Faq({ data }: SectionProps<'faq'>) {
     <section className="mx-auto max-w-3xl px-6 py-24">
       {(title || intro) && (
         <header className="mb-12 text-center">
-          {title && <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h2>}
+          {title && (
+            <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+              {title}
+            </h2>
+          )}
           {intro && <p className="mt-4 text-lg text-pretty text-gray-600">{intro}</p>}
         </header>
       )}
@@ -19,7 +23,10 @@ export function Faq({ data }: SectionProps<'faq'>) {
           <details key={item._key} className="group py-5">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-medium [&::-webkit-details-marker]:hidden">
               {item.question}
-              <span aria-hidden className="text-2xl leading-none text-gray-400 transition group-open:rotate-45">
+              <span
+                aria-hidden
+                className="text-2xl leading-none text-gray-400 transition group-open:rotate-45"
+              >
                 +
               </span>
             </summary>

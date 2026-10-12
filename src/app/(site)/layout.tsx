@@ -35,7 +35,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         Subscribes to Content Lake changes and expires matching cache tags. In webhook mode
         only editors need it (live previews); visitors' caches are expired by /api/revalidate.
       */}
-      {(isDraftMode || !revalidateSecret) && <SanityLive includeDrafts={isDraftMode} action={expireLiveTags} />}
+      {(isDraftMode || !revalidateSecret) && (
+        <SanityLive includeDrafts={isDraftMode} action={expireLiveTags} />
+      )}
       {isDraftMode && <DraftModeTools />}
     </>
   )

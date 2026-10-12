@@ -89,7 +89,7 @@ function normalize(input, { tokenMode, projectMode }) {
 
   if (projectMode === 'create') {
     if (!/^[\p{L}\p{N}][\p{L}\p{N} ._'&-]{0,79}$/u.test(values.projectName))
-      errors.projectName = 'Use up to 80 letters, numbers, spaces and . _ \' & -'
+      errors.projectName = "Use up to 80 letters, numbers, spaces and . _ ' & -"
   } else if (!values.projectId) errors.projectId = 'Enter your project ID.'
   else if (!/^[a-z0-9][a-z0-9-]{1,63}$/.test(values.projectId))
     errors.projectId = 'Project IDs are lowercase letters, numbers and dashes, e.g. "a1b2c3d4".'
@@ -111,7 +111,8 @@ function normalize(input, { tokenMode, projectMode }) {
   if (tokenMode === 'paste') {
     if (!values.token) errors.token = 'Paste a token, or let the wizard create one.'
     else if (!/^[A-Za-z0-9._-]{20,}$/.test(values.token))
-      errors.token = "That doesn't look like a Sanity API token. Copy the whole value shown when you created it."
+      errors.token =
+        "That doesn't look like a Sanity API token. Copy the whole value shown when you created it."
   }
 
   return { values, errors }
@@ -126,22 +127,36 @@ async function checkConnection({ projectId, dataset, apiVersion, token }) {
 
   let res
   try {
-    res = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15_000) })
+    res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(15_000),
+    })
   } catch {
     return fail(null, "Couldn't reach Sanity. Check your internet connection and try again.")
   }
   const body = await res.json().catch(() => ({}))
-  if (res.ok) return { ok: true, pageCount: body.result?.pages ?? 0, hasHome: Boolean(body.result?.home) }
+  if (res.ok)
+    return { ok: true, pageCount: body.result?.pages ?? 0, hasHome: Boolean(body.result?.home) }
 
   const detail = body.message || body.error || `HTTP ${res.status}`
   switch (res.status) {
     case 401:
-      return fail('token', `Sanity rejected this token (${detail}). Check you copied all of it and that it belongs to this project.`)
+      return fail(
+        'token',
+        `Sanity rejected this token (${detail}). Check you copied all of it and that it belongs to this project.`,
+      )
     case 403:
-      return fail('token', `This token can't read the "${dataset}" dataset. Create one with the Viewer role.`)
+      return fail(
+        'token',
+        `This token can't read the "${dataset}" dataset. Create one with the Viewer role.`,
+      )
     case 404: {
       const datasets = await listDatasets(projectId, token)
-      if (!datasets) return fail('projectId', `No project "${projectId}" was found, or this token doesn't belong to it.`)
+      if (!datasets)
+        return fail(
+          'projectId',
+          `No project "${projectId}" was found, or this token doesn't belong to it.`,
+        )
       return fail(
         'dataset',
         datasets.length
@@ -180,7 +195,17 @@ async function createProject({ projectName, dataset }) {
   if (createdProjectId) return { ok: true, projectId: createdProjectId }
 
   const result = await sanityCli(
-    ['projects', 'create', projectName, '--dataset', dataset, '--dataset-visibility', 'public', '--json', '--yes'],
+    [
+      'projects',
+      'create',
+      projectName,
+      '--dataset',
+      dataset,
+      '--dataset-visibility',
+      'public',
+      '--json',
+      '--yes',
+    ],
     // sanity.cli.ts needs some project ID to load; the new project doesn't exist yet.
     { projectId: 'placeholder', dataset },
   )
@@ -205,11 +230,16 @@ async function importStarterContent({ projectId, dataset, projectName }) {
     const docs = seedDocuments(projectName || 'My Site')
     writeFileSync(file, docs.map((doc) => JSON.stringify(doc)).join('\n'))
     // --missing: never overwrite documents that already exist.
-    const result = await sanityCli(['datasets', 'import', file, '--dataset', dataset, '--project-id', projectId, '--missing'], {
-      projectId,
-      dataset,
-    })
-    return result.ok ? { ok: true } : { ok: false, message: cliErrorMessage(result, "Couldn't import starter content") }
+    const result = await sanityCli(
+      ['datasets', 'import', file, '--dataset', dataset, '--project-id', projectId, '--missing'],
+      {
+        projectId,
+        dataset,
+      },
+    )
+    return result.ok
+      ? { ok: true }
+      : { ok: false, message: cliErrorMessage(result, "Couldn't import starter content") }
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
@@ -221,11 +251,18 @@ const createdTokens = new Map()
 async function createViewerToken({ projectId, dataset }) {
   if (createdTokens.has(projectId)) return { ok: true, token: createdTokens.get(projectId) }
 
-  const label = `nextjs-${hostname().replace(/[^a-zA-Z0-9-]/g, '').slice(0, 40) || 'site'}`
-  const result = await sanityCli(['tokens', 'add', label, '--role', 'viewer', '--json', '--yes', '--project-id', projectId], {
-    projectId,
-    dataset,
-  })
+  const label = `nextjs-${
+    hostname()
+      .replace(/[^a-zA-Z0-9-]/g, '')
+      .slice(0, 40) || 'site'
+  }`
+  const result = await sanityCli(
+    ['tokens', 'add', label, '--role', 'viewer', '--json', '--yes', '--project-id', projectId],
+    {
+      projectId,
+      dataset,
+    },
+  )
   if (result.ok) {
     try {
       const token = JSON.parse(result.out.slice(result.out.indexOf('{'))).token
@@ -242,7 +279,10 @@ async function createViewerToken({ projectId, dataset }) {
 
 async function configureCors({ projectId, dataset, siteUrl }) {
   const origins = [...new Set([`http://localhost:${DEV_PORT}`, siteUrl])]
-  const listed = await sanityCli(['cors', 'list', '--project-id', projectId], { projectId, dataset })
+  const listed = await sanityCli(['cors', 'list', '--project-id', projectId], {
+    projectId,
+    dataset,
+  })
   const results = []
 
   for (const origin of origins) {
@@ -250,10 +290,13 @@ async function configureCors({ projectId, dataset, siteUrl }) {
       results.push({ origin, status: 'exists' })
       continue
     }
-    const added = await sanityCli(['cors', 'add', origin, '--credentials', '--project-id', projectId], {
-      projectId,
-      dataset,
-    })
+    const added = await sanityCli(
+      ['cors', 'add', origin, '--credentials', '--project-id', projectId],
+      {
+        projectId,
+        dataset,
+      },
+    )
     results.push(
       added.ok
         ? { origin, status: 'added' }
@@ -269,7 +312,9 @@ function sanityCli(args, { projectId, dataset }) {
   const bin = join(root, 'node_modules', '.bin', isWindows ? 'sanity.cmd' : 'sanity')
   return new Promise((resolve) => {
     // With `shell: true` (Windows), arguments containing spaces must be quoted.
-    const argv = isWindows ? args.map((a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)) : args
+    const argv = isWindows
+      ? args.map((a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a))
+      : args
     const child = spawn(bin, argv, {
       cwd: root,
       shell: isWindows,
@@ -317,7 +362,9 @@ function readEnvFile() {
 
 /** Updates our keys in place and keeps any other lines already in .env.local. */
 function writeEnvFile(values) {
-  const lines = existsSync(envPath) ? readFileSync(envPath, 'utf8').replace(/\n+$/, '').split('\n') : []
+  const lines = existsSync(envPath)
+    ? readFileSync(envPath, 'utf8').replace(/\n+$/, '').split('\n')
+    : []
   if (lines.length === 0) {
     lines.push('# Written by the setup wizard. See .env.example for what each value does.')
   }
@@ -334,18 +381,22 @@ function removeWizard() {
   const removed = []
   const pkgPath = join(root, 'package.json')
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
-  for (const name of ['predev', 'setup']) {
-    if (pkg.scripts?.[name]?.includes('scripts/setup')) {
-      delete pkg.scripts[name]
-      removed.push(`package.json "${name}" script`)
-    }
+  const scripts = Object.entries(pkg.scripts ?? {})
+  pkg.scripts = Object.fromEntries(
+    scripts.filter(([, command]) => !command.includes('scripts/setup')),
+  )
+  for (const [name, command] of scripts) {
+    if (command.includes('scripts/setup')) removed.push(`package.json "${name}" script`)
   }
   writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`)
 
   const readmePath = join(root, 'README.md')
   if (existsSync(readmePath)) {
     const readme = readFileSync(readmePath, 'utf8')
-    const stripped = readme.replace(/<!-- setup-wizard:start -->[\s\S]*?<!-- setup-wizard:end -->\n*/, '')
+    const stripped = readme.replace(
+      /<!-- setup-wizard:start -->[\s\S]*?<!-- setup-wizard:end -->\n*/,
+      '',
+    )
     if (stripped !== readme) {
       writeFileSync(readmePath, stripped)
       removed.push('README setup section')
@@ -355,7 +406,8 @@ function removeWizard() {
   rmSync(wizardDir, { recursive: true, force: true })
   removed.push('scripts/setup/')
   const scriptsDir = dirname(wizardDir)
-  if (existsSync(scriptsDir) && readdirSync(scriptsDir).length === 0) rmSync(scriptsDir, { recursive: true })
+  if (existsSync(scriptsDir) && readdirSync(scriptsDir).length === 0)
+    rmSync(scriptsDir, { recursive: true })
 
   return removed
 }
@@ -385,7 +437,10 @@ function startServer(port = 3333, attemptsLeft = 10) {
 
     if (req.method === 'POST' && req.url === '/api/setup') {
       const origin = req.headers.origin ?? ''
-      if (!allowedHosts.has(origin.replace(/^https?:\/\//, '')) || !req.headers['content-type']?.includes('application/json')) {
+      if (
+        !allowedHosts.has(origin.replace(/^https?:\/\//, '')) ||
+        !req.headers['content-type']?.includes('application/json')
+      ) {
         return send(res, 403, 'Forbidden')
       }
       let body
@@ -418,7 +473,8 @@ function startServer(port = 3333, attemptsLeft = 10) {
   })
 
   server.on('error', (error) => {
-    if (error.code === 'EADDRINUSE' && attemptsLeft > 0) return startServer(port + 1, attemptsLeft - 1)
+    if (error.code === 'EADDRINUSE' && attemptsLeft > 0)
+      return startServer(port + 1, attemptsLeft - 1)
     throw error
   })
 
@@ -505,7 +561,11 @@ function openBrowser(url) {
         ? ['cmd', ['/c', 'start', '', url]]
         : ['xdg-open', [url]]
   try {
-    spawn(cmd, args, { stdio: 'ignore', detached: true }).on('error', () => {}).unref()
+    spawn(cmd, args, { stdio: 'ignore', detached: true })
+      .on('error', () => {
+        // Ignored: the URL is printed, so the user can open it themselves.
+      })
+      .unref()
   } catch {
     // The URL is printed above; opening the browser is a convenience.
   }

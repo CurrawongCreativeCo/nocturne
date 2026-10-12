@@ -11,7 +11,10 @@ export const richText = defineType({
   ],
   preview: {
     select: { body: 'body' },
-    prepare: ({ body }) => ({ title: blockPreview(body) || 'Empty text', subtitle: 'Rich text' }),
+    prepare: ({ body }: { body?: unknown }) => ({
+      title: blockPreview(body) || 'Empty text',
+      subtitle: 'Rich text',
+    }),
   },
 })
 

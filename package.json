@@ -10,10 +10,16 @@
     "typecheck": "tsc --noEmit",
     "typegen": "sanity schema extract --path=./schema.json --enforce-required-fields --force && sanity typegen generate",
     "typegen:watch": "sanity typegen generate --watch",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "predev": "node scripts/setup/index.mjs",
     "setup": "node scripts/setup/index.mjs",
-    "new:section": "node scripts/new-section.mjs"
+    "new:section": "node scripts/new-section.mjs",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm run format:check",
+    "hooks:on": "husky",
+    "hooks:off": "git config --unset core.hooksPath"
   },
   "dependencies": {
     "@sanity/icons": "^5.2.3",
@@ -34,7 +40,14 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.1"
   }
 }

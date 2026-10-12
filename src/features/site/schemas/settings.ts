@@ -22,7 +22,8 @@ export const settings = defineType({
       title: 'Site name',
       type: 'string',
       group: 'general',
-      description: 'Shown in the header (when there is no logo) and after every page title in search results.',
+      description:
+        'Shown in the header (when there is no logo) and after every page title in search results.',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -31,10 +32,15 @@ export const settings = defineType({
       type: 'text',
       rows: 3,
       group: 'general',
-      description: 'Used for search results and link previews when a page has no description of its own.',
+      description:
+        'Used for search results and link previews when a page has no description of its own.',
       validation: (rule) => rule.max(160).warning('Descriptions over 160 characters get truncated'),
     }),
-    imageField({ name: 'logo', group: 'general', description: 'SVG or transparent PNG. Falls back to the site name.' }),
+    imageField({
+      name: 'logo',
+      group: 'general',
+      description: 'SVG or transparent PNG. Falls back to the site name.',
+    }),
     imageField({
       name: 'ogImage',
       title: 'Default social share image',
@@ -62,7 +68,8 @@ export const settings = defineType({
       name: 'footerText',
       type: 'string',
       group: 'footer',
-      description: 'e.g. "Acme Ltd. All rights reserved." Shown after "© <current year>". Defaults to the site name.',
+      description:
+        'e.g. "Acme Ltd. All rights reserved." Shown after "© <current year>". Defaults to the site name.',
     }),
   ],
   preview: { prepare: () => ({ title: 'Site settings' }) },

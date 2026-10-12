@@ -22,7 +22,9 @@ export function imageField(
         validation: (rule) =>
           requireAlt
             ? rule.custom((alt, { parent }) =>
-                (parent as { asset?: unknown })?.asset && !alt ? 'Alt text is required' : true,
+                (parent as { asset?: unknown } | undefined)?.asset && !alt
+                  ? 'Alt text is required'
+                  : true,
               )
             : rule,
       }),

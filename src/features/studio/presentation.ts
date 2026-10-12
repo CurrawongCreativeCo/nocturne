@@ -1,4 +1,8 @@
-import { defineDocuments, defineLocations, type PresentationPluginOptions } from 'sanity/presentation'
+import {
+  defineDocuments,
+  defineLocations,
+  type PresentationPluginOptions,
+} from 'sanity/presentation'
 
 import { HOME_SLUG, slugToPath } from '@/config/paths'
 
@@ -26,7 +30,7 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     }),
     page: defineLocations({
       select: { title: 'title', slug: 'slug.current' },
-      resolve: (doc) => ({
+      resolve: (doc: { title?: string; slug?: string } | null) => ({
         locations: [{ title: doc?.title || 'Untitled', href: slugToPath(doc?.slug) }],
       }),
     }),

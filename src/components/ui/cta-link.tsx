@@ -37,7 +37,11 @@ export function CtaLink({ cta, surface = 'dark', size = 'md', className = '' }: 
 }
 
 /** Renders up to two CTAs in a row; nothing when the list is empty. */
-export function CtaGroup({ ctas, surface, className = '' }: { ctas: CtaData[] | null | undefined } & Omit<Props, 'cta' | 'size'>) {
+export function CtaGroup({
+  ctas,
+  surface,
+  className = '',
+}: { ctas: CtaData[] | null | undefined } & Omit<Props, 'cta' | 'size'>) {
   if (!ctas?.length) return null
   return (
     <div className={`flex flex-wrap items-center gap-4 ${className}`}>

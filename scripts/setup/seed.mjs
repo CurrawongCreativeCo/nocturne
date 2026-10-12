@@ -8,8 +8,19 @@ export function seedDocuments(siteName) {
   const key = () => `seed${(++n).toString(36)}`
 
   const ref = (id) => ({ _type: 'reference', _ref: id })
-  const internal = (id) => ({ _type: 'link', linkType: 'internal', internal: ref(id), openInNewTab: false })
-  const cta = (label, id, variant = 'primary') => ({ _key: key(), _type: 'cta', label, variant, link: internal(id) })
+  const internal = (id) => ({
+    _type: 'link',
+    linkType: 'internal',
+    internal: ref(id),
+    openInNewTab: false,
+  })
+  const cta = (label, id, variant = 'primary') => ({
+    _key: key(),
+    _type: 'cta',
+    label,
+    variant,
+    link: internal(id),
+  })
   const navItem = (label, id) => ({ _key: key(), _type: 'navItem', label, link: internal(id) })
   const span = (text, marks = []) => ({ _key: key(), _type: 'span', text, marks })
   const block = (children, extra = {}) => ({
@@ -17,7 +28,9 @@ export function seedDocuments(siteName) {
     _type: 'block',
     style: 'normal',
     markDefs: [],
-    children: (Array.isArray(children) ? children : [children]).map((c) => (typeof c === 'string' ? span(c) : c)),
+    children: (Array.isArray(children) ? children : [children]).map((c) =>
+      typeof c === 'string' ? span(c) : c,
+    ),
     ...extra,
   })
   const heading = (text, style = 'h2') => block(text, { style })
@@ -29,7 +42,12 @@ export function seedDocuments(siteName) {
     title: siteName,
     description: `${siteName}: replace this with one sentence about what you do. It appears in search results.`,
     headerNav: [navItem('Home', 'page-home'), navItem('About', 'page-about')],
-    headerCta: { _type: 'cta', label: 'Get in touch', variant: 'primary', link: internal('page-about') },
+    headerCta: {
+      _type: 'cta',
+      label: 'Get in touch',
+      variant: 'primary',
+      link: internal('page-about'),
+    },
     footerNav: [navItem('About', 'page-about')],
     footerText: `${siteName}. All rights reserved.`,
   }
@@ -46,7 +64,8 @@ export function seedDocuments(siteName) {
         _key: key(),
         _type: 'hero',
         title: `Welcome to ${siteName}`,
-        description: 'This is starter content. Open Studio, click any text on this page, and start typing.',
+        description:
+          'This is starter content. Open Studio, click any text on this page, and start typing.',
         ctas: [cta('About us', 'page-about'), cta('Get in touch', 'page-about', 'secondary')],
       },
       {
@@ -56,9 +75,24 @@ export function seedDocuments(siteName) {
         intro: 'Pages are built from sections you can add, remove and reorder in Studio.',
         columns: 3,
         items: [
-          { _key: key(), _type: 'featureItem', title: 'Add sections', text: 'Use "Add item" under Sections to insert any block: hero, image + text, FAQ and more.' },
-          { _key: key(), _type: 'featureItem', title: 'Reorder by dragging', text: 'Drag sections in the list, or right on the page preview in Presentation.' },
-          { _key: key(), _type: 'featureItem', title: 'Publish when ready', text: 'Edits stay as drafts until you press Publish. The live site updates within seconds.' },
+          {
+            _key: key(),
+            _type: 'featureItem',
+            title: 'Add sections',
+            text: 'Use "Add item" under Sections to insert any block: hero, image + text, FAQ and more.',
+          },
+          {
+            _key: key(),
+            _type: 'featureItem',
+            title: 'Reorder by dragging',
+            text: 'Drag sections in the list, or right on the page preview in Presentation.',
+          },
+          {
+            _key: key(),
+            _type: 'featureItem',
+            title: 'Publish when ready',
+            text: 'Edits stay as drafts until you press Publish. The live site updates within seconds.',
+          },
         ],
       },
       {
@@ -69,7 +103,9 @@ export function seedDocuments(siteName) {
         body: [
           {
             ...block([
-              span('Upload an image in this section and choose which side it sits on. Rich text supports '),
+              span(
+                'Upload an image in this section and choose which side it sits on. Rich text supports ',
+              ),
               span('bold', ['strong']),
               span(', lists and '),
               span('links to other pages', [aboutLinkKey]),
@@ -86,8 +122,20 @@ export function seedDocuments(siteName) {
         _type: 'testimonials',
         title: 'What people say',
         items: [
-          { _key: key(), _type: 'testimonial', quote: 'Swap these for real quotes from your customers. Short and specific works best.', name: 'Alex Example', role: 'Customer, Company' },
-          { _key: key(), _type: 'testimonial', quote: 'Add a photo to each testimonial to make it more credible.', name: 'Sam Sample', role: 'Founder, Startup' },
+          {
+            _key: key(),
+            _type: 'testimonial',
+            quote: 'Swap these for real quotes from your customers. Short and specific works best.',
+            name: 'Alex Example',
+            role: 'Customer, Company',
+          },
+          {
+            _key: key(),
+            _type: 'testimonial',
+            quote: 'Add a photo to each testimonial to make it more credible.',
+            name: 'Sam Sample',
+            role: 'Founder, Startup',
+          },
         ],
       },
       {
@@ -99,19 +147,31 @@ export function seedDocuments(siteName) {
             _key: key(),
             _type: 'faqItem',
             question: 'How do I edit this page?',
-            answer: [block('Open /studio and choose Presentation. Click any text on the page to edit it, then press Publish.')],
+            answer: [
+              block(
+                'Open /studio and choose Presentation. Click any text on the page to edit it, then press Publish.',
+              ),
+            ],
           },
           {
             _key: key(),
             _type: 'faqItem',
             question: 'Where do I change the menu and footer?',
-            answer: [block('In Studio, open Site settings at the top of the sidebar. The header, footer and default SEO all live there.')],
+            answer: [
+              block(
+                'In Studio, open Site settings at the top of the sidebar. The header, footer and default SEO all live there.',
+              ),
+            ],
           },
           {
             _key: key(),
             _type: 'faqItem',
             question: 'How do I add a new page?',
-            answer: [block('In Studio, open Pages and create a "Landing page" or "Content page" to start from a template. Add it to the header menu in Site settings.')],
+            answer: [
+              block(
+                'In Studio, open Pages and create a "Landing page" or "Content page" to start from a template. Add it to the header menu in Site settings.',
+              ),
+            ],
           },
         ],
       },
@@ -133,13 +193,20 @@ export function seedDocuments(siteName) {
     slug: { _type: 'slug', current: 'about' },
     seo: { _type: 'seo', noIndex: false },
     pageBuilder: [
-      { _key: key(), _type: 'hero', title: `About ${siteName}`, description: 'A content page: a hero followed by rich text.' },
+      {
+        _key: key(),
+        _type: 'hero',
+        title: `About ${siteName}`,
+        description: 'A content page: a hero followed by rich text.',
+      },
       {
         _key: key(),
         _type: 'richText',
         body: [
           heading('Our story'),
-          block('Write a few paragraphs about who you are and what you do. Use headings to break up longer pages.'),
+          block(
+            'Write a few paragraphs about who you are and what you do. Use headings to break up longer pages.',
+          ),
           heading('What we offer', 'h3'),
           bullet('Use lists for scannable points'),
           bullet('Keep each one short'),

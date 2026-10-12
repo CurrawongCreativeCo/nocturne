@@ -20,7 +20,17 @@ export const seo = defineType({
       rows: 3,
       validation: (rule) => rule.max(160).warning('Descriptions over 160 characters get truncated'),
     }),
-    imageField({ name: 'ogImage', title: 'Social share image', requireAlt: false, description: '1200×630' }),
-    defineField({ name: 'noIndex', title: 'Hide from search engines', type: 'boolean', initialValue: false }),
+    imageField({
+      name: 'ogImage',
+      title: 'Social share image',
+      requireAlt: false,
+      description: '1200×630',
+    }),
+    defineField({
+      name: 'noIndex',
+      title: 'Hide from search engines',
+      type: 'boolean',
+      initialValue: false,
+    }),
   ],
 })

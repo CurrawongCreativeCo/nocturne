@@ -15,10 +15,18 @@ export async function getPage({ slug, ...mode }: { slug: string } & FetchMode) {
   // Unknown URLs (typos, bots probing /wp-admin) are answered from the cached page index
   // instead of costing a request and a cache entry each. Drafts skip this so unpublished
   // pages can still be previewed.
-  if (mode.perspective === 'published' && !(await getPageIndex()).some((page) => page.slug === slug)) {
+  if (
+    mode.perspective === 'published' &&
+    !(await getPageIndex()).some((page) => page.slug === slug)
+  ) {
     return null
   }
-  const { data } = await cachedSanityFetch({ query: PAGE_QUERY, params: { slug }, ...mode, tags: [TAGS.page] })
+  const { data } = await cachedSanityFetch({
+    query: PAGE_QUERY,
+    params: { slug },
+    ...mode,
+    tags: [TAGS.page],
+  })
   return data
 }
 
@@ -32,7 +40,11 @@ export async function getPageMetadata(slug: string): Promise<Metadata> {
 
   const { seo } = page
   const ogImage = seo?.ogImage?.asset
-    ? urlFor({ asset: { _ref: seo.ogImage.asset._id } }).width(1200).height(630).fit('crop').url()
+    ? urlFor({ asset: { _ref: seo.ogImage.asset._id } })
+        .width(1200)
+        .height(630)
+        .fit('crop')
+        .url()
     : undefined
 
   return {
@@ -45,7 +57,11 @@ export async function getPageMetadata(slug: string): Promise<Metadata> {
 }
 
 async function getPageIndex() {
-  const { data } = await cachedSanityFetch({ query: PAGE_INDEX_QUERY, ...PUBLISHED, tags: [TAGS.page] })
+  const { data } = await cachedSanityFetch({
+    query: PAGE_INDEX_QUERY,
+    ...PUBLISHED,
+    tags: [TAGS.page],
+  })
   return data
 }
 

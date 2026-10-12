@@ -44,7 +44,13 @@ interface Props {
   editable?: boolean
 }
 
-export function SectionRenderer({ documentId, documentType, sections, path = 'pageBuilder', editable = false }: Props) {
+export function SectionRenderer({
+  documentId,
+  documentType,
+  sections,
+  path = 'pageBuilder',
+  editable = false,
+}: Props) {
   if (!sections?.length) return null
 
   const Wrapper = editable ? 'div' : Fragment
@@ -53,7 +59,8 @@ export function SectionRenderer({ documentId, documentType, sections, path = 'pa
       {sections.map((section) => {
         // TS can't correlate `section` with `SECTION_COMPONENTS[section._type]` across a
         // union; the registry's mapped type above already guarantees they match.
-        const Section = SECTION_COMPONENTS[section._type] as ComponentType<{ data: PageSection }> | undefined
+        const Section = SECTION_COMPONENTS[section._type] as
+          ComponentType<{ data: PageSection }> | undefined
 
         if (!Section) {
           // Reachable when the dataset has a section type newer than this deployment.
@@ -63,14 +70,15 @@ export function SectionRenderer({ documentId, documentType, sections, path = 'pa
           return null
         }
 
-        return (
-          editable ? (
-            <div key={section._key} data-sanity={dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)}>
-              <Section data={section} />
-            </div>
-          ) : (
-            <Section key={section._key} data={section} />
-          )
+        return editable ? (
+          <div
+            key={section._key}
+            data-sanity={dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)}
+          >
+            <Section data={section} />
+          </div>
+        ) : (
+          <Section key={section._key} data={section} />
         )
       })}
     </Wrapper>
@@ -80,7 +88,8 @@ export function SectionRenderer({ documentId, documentType, sections, path = 'pa
 function UnknownSection({ type }: { type: string }) {
   return (
     <div className="mx-auto my-8 max-w-3xl rounded border border-dashed border-amber-500 bg-amber-50 p-6 text-center text-amber-900">
-      No component registered for section <code>{type}</code>. Add it to <code>section-renderer.tsx</code>.
+      No component registered for section <code>{type}</code>. Add it to{' '}
+      <code>section-renderer.tsx</code>.
     </div>
   )
 }

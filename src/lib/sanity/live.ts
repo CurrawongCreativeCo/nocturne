@@ -67,5 +67,5 @@ export async function getDraftFetchMode(): Promise<FetchMode> {
   const jar = await cookies()
   const perspective = await resolvePerspectiveFromCookies({ cookies: jar })
   const variant = await resolveVariantFromCookies({ cookies: jar })
-  return { perspective: perspective ?? 'drafts', variant, stega: true }
+  return { perspective, variant, stega: true }
 }

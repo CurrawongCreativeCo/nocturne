@@ -1,0 +1,4 @@
+# Off by default. Enable with `npm run hooks:on`, disable with `npm run hooks:off`.
+# Skip once with `git commit --no-verify`.
+npx lint-staged
+npm run typecheck --silent

@@ -27,7 +27,10 @@ export interface SanityImageData {
 }
 
 // `ctaFields` has no standalone query, so its type is read from the first query that projects it.
-type HeroResult = Extract<NonNullable<NonNullable<PAGE_QUERY_RESULT>['pageBuilder']>[number], { _type: 'hero' }>
+type HeroResult = Extract<
+  NonNullable<NonNullable<PAGE_QUERY_RESULT>['pageBuilder']>[number],
+  { _type: 'hero' }
+>
 
 /** Projection of `ctaFields`. */
 export type CtaData = StegaBranded<NonNullable<HeroResult['ctas']>[number]>
