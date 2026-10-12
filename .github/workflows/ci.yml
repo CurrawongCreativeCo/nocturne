@@ -1,0 +1,49 @@
+# Shared quality gate: the pre-commit hook is opt-in, so this is what every push must pass.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Checks run offline; the Sanity CLI and Next only need some config to load.
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ci-placeholder
+      NEXT_PUBLIC_SANITY_DATASET: production
+    steps:
+      # Actions are pinned to commit SHAs (supply-chain safety); Dependabot keeps them current.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generated Sanity types are committed and current
+        run: |
+          npm run typegen
+          git diff --exit-code src/types/sanity.types.ts || {
+            echo "::error::src/types/sanity.types.ts is stale. Run 'npm run typegen' and commit it."
+            exit 1
+          }
+
+      - name: Next.js route types
+        run: npx next typegen
+
+      - name: Typecheck, lint, format
+        run: npm run check

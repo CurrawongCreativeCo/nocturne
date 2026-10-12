@@ -1,9 +1,33 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  /* --font-inter is set by next/font in app/layout.tsx; swap the font there. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  /* Brand color: used by `bg-brand`, `text-brand`, the "brand" CTA banner tone and focus rings. */
+  /* Brand color: used by `bg-brand`, `text-brand` and the "brand" CTA banner tone. */
   --color-brand: oklch(0.55 0.2 264);
   --color-brand-foreground: oklch(0.99 0 0);
+}
+
+@layer base {
+  /*
+   * Keyboard focus: a dark inner ring plus a white outer ring (WCAG technique C40), visible on
+   * any background, including brand and dark sections. :focus-visible skips mouse clicks.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-gray-950);
+    outline-offset: 0;
+    box-shadow: 0 0 0 4px var(--color-white);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

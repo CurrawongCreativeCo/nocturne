@@ -48,7 +48,7 @@ export const revalidateSecret = process.env.SANITY_REVALIDATE_SECRET || undefine
  * Each fetch lists every type its result depends on (including resolved references).
  * Live mode ignores them and uses Sanity's own per-document sync tags.
  */
-export const TAGS = { page: 'page', settings: 'settings' } as const
+export const TAGS = { page: 'page', settings: 'settings', redirect: 'redirect' } as const
 
 export interface FetchMode {
   perspective: LivePerspective

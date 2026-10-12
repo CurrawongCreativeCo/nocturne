@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
 import { CogIcon } from '@sanity/icons/Cog'
 import type { StructureResolver } from 'sanity/structure'
 
@@ -15,10 +16,11 @@ export const structure: StructureResolver = (S) =>
         .child(S.document().schemaType('settings').documentId('settings').title('Site settings')),
       S.divider(),
       S.documentTypeListItem('page').title('Pages'),
+      S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
       S.divider(),
       // Everything else not explicitly listed above.
       ...S.documentTypeListItems().filter((item) => {
         const id = item.getId() ?? ''
-        return id !== 'page' && !SINGLETON_TYPES.has(id)
+        return id !== 'page' && id !== 'redirect' && !SINGLETON_TYPES.has(id)
       }),
     ])

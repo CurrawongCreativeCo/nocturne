@@ -48,6 +48,8 @@ Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
+- **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
+  `/about`. They only apply to paths with no page, so they can't hide a live page.
 - **Pages → New** offers templates: _Landing page_ (hero, features, testimonials, call to action) and
   _Content page_ (hero + rich text), or a blank page.
 - Under **Sections**, _Add item_ shows every section with a thumbnail:
@@ -63,7 +65,34 @@ Open http://localhost:3000/studio:
 | FAQ                   | Questions that expand to answers                          |
 | Call to action banner | A closing prompt in brand, dark or light tone             |
 
-The brand color used by buttons, links and the "brand" banner is `--color-brand` in `src/styles/globals.css`.
+**Branding:** the brand color is `--color-brand` in `src/styles/globals.css`; the font is set
+with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
+the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project.
+
+## Deploying (Vercel)
+
+1. **Import the repo** at vercel.com/new. Next.js is detected automatically. Node comes from
+   `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
+2. **Environment variables** (Production and Preview):
+
+   | Variable                         | Value                                                      |
+   | -------------------------------- | ---------------------------------------------------------- |
+   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                          |
+   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                          |
+   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                          |
+   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash) |
+   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                           |
+   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                          |
+
+3. **Allow the production origin in Sanity**, or Studio and live updates won't connect:
+   `npx sanity cors add https://example.com --credentials` (or sanity.io/manage → API → CORS
+   origins, "Allow credentials" checked). Preview deployments on other domains need their own entry.
+4. **Deploy**, then open `https://example.com/studio` and sign in. Studio is part of the site, so
+   there is nothing separate to deploy.
+5. **Check:** `/sitemap.xml` and `/robots.txt` list production URLs (if they show localhost,
+   `NEXT_PUBLIC_SITE_URL` is wrong), and editing a page in Presentation updates the live site.
+
+Every deploy runs `npm run build`, which regenerates Sanity types from the schema first.
 
 ## Architecture
 
@@ -179,7 +208,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "settings"]` · **Projection:** `{_type}`
+   - **Filter:** `_type in ["page", "settings", "redirect"]` · **Projection:** `{_type}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -205,6 +234,11 @@ but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 
 ## Code quality
 
+**CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It checks
+that the committed Sanity types match the schema, then runs `npm run check`. **Dependabot** opens
+weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
+each release before proposing it.
+
 | Command                | Does                                                  |
 | ---------------------- | ----------------------------------------------------- |
 | `npm run check`        | Everything below, read-only. Run it before pushing.   |
@@ -223,8 +257,10 @@ but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 - Import order, no import cycles, and the architecture boundaries above
 - `eslint-config-prettier` last, so formatting is left entirely to Prettier
 
-Lint can't see rendered output (color contrast, focus order, final heading structure). Check those
-in the browser with Lighthouse or the axe DevTools extension.
+Built in at runtime: a "Skip to content" link (the first Tab stop on every page), a focus ring that
+stays visible on any background (dark inner ring plus white outer ring), and reduced motion for
+visitors who ask for it. Lint can't see rendered output (color contrast, focus order, final heading
+structure). Check those in the browser with Lighthouse or the axe DevTools extension.
 
 **Prettier** formats everything and sorts Tailwind classes into the official order. The VS Code
 settings in `.vscode/` format on save and apply ESLint fixes. Install the recommended extensions
@@ -274,3 +310,10 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
 - Visual Editing `data-sanity` attributes are only rendered in draft mode, keeping public HTML lean.
 - The footer's copyright year is cached for a day, so pages re-render daily. Those re-renders read the
   cached Sanity data and make no requests.
+- Security headers (HSTS, nosniff, referrer and permissions policies, clickjacking protection) are
+  set in `next.config.ts`. There's no full Content-Security-Policy because the embedded Studio
+  needs inline scripts and styles. `/studio` is excluded from the framing restriction.
+- `error.tsx` handles a page that fails to render, keeping the header and footer. `global-error.tsx`
+  handles failures in the layouts themselves.
+- Structured data (schema.org Organization and WebSite) is generated from Site settings on every
+  page, reusing the cached settings query.

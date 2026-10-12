@@ -5,7 +5,7 @@ import { slugToPath, slugToSegments } from '@/config/paths'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
-import { PAGE_INDEX_QUERY, PAGE_QUERY } from './queries'
+import { PAGE_INDEX_QUERY, PAGE_QUERY, REDIRECTS_QUERY } from './queries'
 
 /**
  * Same cached fetch in both modes; `mode` (perspective, stega) is part of the cache key.
@@ -79,4 +79,23 @@ export async function getSitemap(): Promise<MetadataRoute.Sitemap> {
       url: new URL(slugToPath(slug), siteUrl).toString(),
       lastModified: new Date(_updatedAt),
     }))
+}
+
+/** Lowercase, no trailing slash: "/About-Us/" and "/about-us" are the same redirect source. */
+function normalizePath(path: string): string {
+  return path.toLowerCase().replace(/(.)\/+$/, '$1')
+}
+
+/**
+ * Redirect for a path that matched no page, from one cached list of all redirects. Only
+ * reached on a miss, so normal page views never read it.
+ */
+export async function getRedirect(path: string) {
+  const { data } = await cachedSanityFetch({
+    query: REDIRECTS_QUERY,
+    ...PUBLISHED,
+    tags: [TAGS.redirect],
+  })
+  const target = normalizePath(path)
+  return data.find(({ source }) => normalizePath(source) === target) ?? null
 }

@@ -10,7 +10,8 @@ import { pageBuilderFragment } from './sections'
  *
  * Kept deliberately few: each distinct query is a separate cache entry and a
  * separate CDN request whenever its content changes. The page and its metadata
- * share PAGE_QUERY; static params and the sitemap share PAGE_INDEX_QUERY.
+ * share PAGE_QUERY; static params and the sitemap share PAGE_INDEX_QUERY; REDIRECTS_QUERY
+ * is only read for URLs that match no page.
  */
 
 export const PAGE_QUERY = defineQuery(/* groq */ `
@@ -28,5 +29,13 @@ export const PAGE_INDEX_QUERY = defineQuery(/* groq */ `
     "slug": slug.current,
     _updatedAt,
     "noIndex": seo.noIndex == true
+  }
+`)
+
+export const REDIRECTS_QUERY = defineQuery(/* groq */ `
+  *[_type == "redirect" && defined(source) && defined(destination)] {
+    source,
+    destination,
+    "permanent": permanent != false
   }
 `)

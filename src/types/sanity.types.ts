@@ -12,418 +12,429 @@
  * ---------------------------------------------------------------------------------
  */
 
-export declare const internalGroqTypeReferenceTo: unique symbol;
+export declare const internalGroqTypeReferenceTo: unique symbol
 
 // Source: schema.json
 export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-};
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+}
 
 export type Icon = {
-  asset?: SanityImageAssetReference;
-  media?: unknown; // Unable to locate the referenced type "icon.media" in schema
-  hotspot?: SanityImageHotspot;
-  crop?: SanityImageCrop;
-  alt?: string;
-  _type: "image";
-};
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "icon.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
 
 export type LogoImage = {
-  asset?: SanityImageAssetReference;
-  media?: unknown; // Unable to locate the referenced type "logo.image.media" in schema
-  hotspot?: SanityImageHotspot;
-  crop?: SanityImageCrop;
-  alt?: string;
-  _type: "image";
-};
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "logo.image.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
 
 export type Avatar = {
-  asset?: SanityImageAssetReference;
-  media?: unknown; // Unable to locate the referenced type "avatar.media" in schema
-  hotspot?: SanityImageHotspot;
-  crop?: SanityImageCrop;
-  alt?: string;
-  _type: "image";
-};
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "avatar.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
 
 export type BlockContent = Array<
   | {
       children?: Array<{
-        marks?: Array<string>;
-        text?: string;
-        _type: "span";
-        _key: string;
-      }>;
-      style?: "normal" | "h2" | "h3" | "h4" | "blockquote";
-      listItem?: "bullet" | "number";
+        marks?: Array<string>
+        text?: string
+        _type: 'span'
+        _key: string
+      }>
+      style?: 'normal' | 'h2' | 'h3' | 'h4' | 'blockquote'
+      listItem?: 'bullet' | 'number'
       markDefs?: Array<
         {
-          _key: string;
+          _key: string
         } & Link
-      >;
-      level?: number;
-      _type: "block";
-      _key: string;
+      >
+      level?: number
+      _type: 'block'
+      _key: string
     }
   | {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      alt?: string;
-      caption?: string;
-      _type: "image";
-      _key: string;
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      caption?: string
+      _type: 'image'
+      _key: string
     }
->;
+>
 
 export type Seo = {
-  _type: "seo";
-  metaTitle?: string;
-  metaDescription?: string;
+  _type: 'seo'
+  metaTitle?: string
+  metaDescription?: string
   ogImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-  noIndex?: boolean;
-};
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  noIndex?: boolean
+}
 
 export type Cta = {
-  _type: "cta";
-  label: string;
-  link: Link;
-  variant: "primary" | "secondary";
-};
+  _type: 'cta'
+  label: string
+  link: Link
+  variant: 'primary' | 'secondary'
+}
 
 export type PageReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "page";
-};
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'page'
+}
 
 export type Link = {
-  _type: "link";
-  linkType: "internal" | "external";
-  internal?: PageReference;
-  url?: string;
-  openInNewTab?: boolean;
-};
+  _type: 'link'
+  linkType: 'internal' | 'external'
+  internal?: PageReference
+  url?: string
+  openInNewTab?: boolean
+}
 
 export type NavItem = {
-  _type: "navItem";
-  label: string;
-  link: Link;
-};
+  _type: 'navItem'
+  label: string
+  link: Link
+}
 
 export type Settings = {
-  _id: string;
-  _type: "settings";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title: string;
-  description?: string;
+  _id: string
+  _type: 'settings'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title: string
+  description?: string
   logo?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
   ogImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
   headerNav?: Array<
     {
-      _key: string;
+      _key: string
     } & NavItem
-  >;
-  headerCta?: Cta;
+  >
+  headerCta?: Cta
   footerNav?: Array<
     {
-      _key: string;
+      _key: string
     } & NavItem
-  >;
-  footerText?: string;
-};
+  >
+  footerText?: string
+}
 
 export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
+  _type: 'sanity.imageCrop'
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
 
 export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-};
+  _type: 'sanity.imageHotspot'
+  x: number
+  y: number
+  height: number
+  width: number
+}
 
 export type CtaBanner = {
-  _type: "ctaBanner";
-  title: string;
-  text?: string;
+  _type: 'ctaBanner'
+  title: string
+  text?: string
   ctas?: Array<
     {
-      _key: string;
+      _key: string
     } & Cta
-  >;
-  tone: "brand" | "dark" | "light";
-};
+  >
+  tone: 'brand' | 'dark' | 'light'
+}
 
 export type Faq = {
-  _type: "faq";
-  title?: string;
-  intro?: string;
+  _type: 'faq'
+  title?: string
+  intro?: string
   items: Array<{
-    question: string;
-    answer: BlockContent;
-    _type: "faqItem";
-    _key: string;
-  }>;
-};
+    question: string
+    answer: BlockContent
+    _type: 'faqItem'
+    _key: string
+  }>
+}
 
 export type Testimonials = {
-  _type: "testimonials";
-  title?: string;
+  _type: 'testimonials'
+  title?: string
   items: Array<{
-    quote: string;
-    name: string;
-    role?: string;
-    avatar?: Avatar;
-    _type: "testimonial";
-    _key: string;
-  }>;
-};
+    quote: string
+    name: string
+    role?: string
+    avatar?: Avatar
+    _type: 'testimonial'
+    _key: string
+  }>
+}
 
 export type LogoCloud = {
-  _type: "logoCloud";
-  title?: string;
+  _type: 'logoCloud'
+  title?: string
   logos: Array<{
-    name: string;
-    image: LogoImage;
-    url?: string;
-    _type: "logo";
-    _key: string;
-  }>;
-};
+    name: string
+    image: LogoImage
+    url?: string
+    _type: 'logo'
+    _key: string
+  }>
+}
 
 export type FeaturesGrid = {
-  _type: "featuresGrid";
-  title?: string;
-  intro?: string;
-  columns: 2 | 3 | 4;
+  _type: 'featuresGrid'
+  title?: string
+  intro?: string
+  columns: 2 | 3 | 4
   items: Array<{
-    icon?: Icon;
-    title: string;
-    text?: string;
-    _type: "featureItem";
-    _key: string;
-  }>;
-};
+    icon?: Icon
+    title: string
+    text?: string
+    _type: 'featureItem'
+    _key: string
+  }>
+}
 
 export type MediaText = {
-  _type: "mediaText";
-  eyebrow?: string;
-  title: string;
-  body?: BlockContent;
+  _type: 'mediaText'
+  eyebrow?: string
+  title: string
+  body?: BlockContent
   ctas?: Array<
     {
-      _key: string;
+      _key: string
     } & Cta
-  >;
+  >
   image?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-  imagePosition: "left" | "right";
-};
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  imagePosition: 'left' | 'right'
+}
 
 export type RichText = {
-  _type: "richText";
-  body: BlockContent;
-};
+  _type: 'richText'
+  body: BlockContent
+}
 
 export type Hero = {
-  _type: "hero";
-  title: string;
-  description?: string;
+  _type: 'hero'
+  title: string
+  description?: string
   ctas?: Array<
     {
-      _key: string;
+      _key: string
     } & Cta
-  >;
+  >
   backgroundImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-};
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+}
+
+export type Redirect = {
+  _id: string
+  _type: 'redirect'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  source: string
+  destination: string
+  permanent?: boolean
+}
 
 export type Page = {
-  _id: string;
-  _type: "page";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title: string;
-  slug: Slug;
+  _id: string
+  _type: 'page'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title: string
+  slug: Slug
   pageBuilder?: Array<
     | ({
-        _key: string;
+        _key: string
       } & Hero)
     | ({
-        _key: string;
+        _key: string
       } & RichText)
     | ({
-        _key: string;
+        _key: string
       } & MediaText)
     | ({
-        _key: string;
+        _key: string
       } & FeaturesGrid)
     | ({
-        _key: string;
+        _key: string
       } & LogoCloud)
     | ({
-        _key: string;
+        _key: string
       } & Testimonials)
     | ({
-        _key: string;
+        _key: string
       } & Faq)
     | ({
-        _key: string;
+        _key: string
       } & CtaBanner)
-  >;
-  seo?: Seo;
-};
+  >
+  seo?: Seo
+}
 
 export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
-};
+  _type: 'slug'
+  current: string
+  source?: string
+}
 
 export type SanityImagePaletteSwatch = {
-  _type: "sanity.imagePaletteSwatch";
-  background?: string;
-  foreground?: string;
-  population?: number;
-  title?: string;
-};
+  _type: 'sanity.imagePaletteSwatch'
+  background?: string
+  foreground?: string
+  population?: number
+  title?: string
+}
 
 export type SanityImagePalette = {
-  _type: "sanity.imagePalette";
-  darkMuted?: SanityImagePaletteSwatch;
-  lightVibrant?: SanityImagePaletteSwatch;
-  darkVibrant?: SanityImagePaletteSwatch;
-  vibrant?: SanityImagePaletteSwatch;
-  dominant?: SanityImagePaletteSwatch;
-  lightMuted?: SanityImagePaletteSwatch;
-  muted?: SanityImagePaletteSwatch;
-};
+  _type: 'sanity.imagePalette'
+  darkMuted?: SanityImagePaletteSwatch
+  lightVibrant?: SanityImagePaletteSwatch
+  darkVibrant?: SanityImagePaletteSwatch
+  vibrant?: SanityImagePaletteSwatch
+  dominant?: SanityImagePaletteSwatch
+  lightMuted?: SanityImagePaletteSwatch
+  muted?: SanityImagePaletteSwatch
+}
 
 export type SanityImageDimensions = {
-  _type: "sanity.imageDimensions";
-  height: number;
-  width: number;
-  aspectRatio: number;
-};
+  _type: 'sanity.imageDimensions'
+  height: number
+  width: number
+  aspectRatio: number
+}
 
 export type SanityImageMetadata = {
-  _type: "sanity.imageMetadata";
-  location?: Geopoint;
-  dimensions?: SanityImageDimensions;
-  palette?: SanityImagePalette;
-  lqip?: string;
-  blurHash?: string;
-  thumbHash?: string;
-  hasAlpha?: boolean;
-  isOpaque?: boolean;
-};
+  _type: 'sanity.imageMetadata'
+  location?: Geopoint
+  dimensions?: SanityImageDimensions
+  palette?: SanityImagePalette
+  lqip?: string
+  blurHash?: string
+  thumbHash?: string
+  hasAlpha?: boolean
+  isOpaque?: boolean
+}
 
 export type SanityFileAsset = {
-  _id: string;
-  _type: "sanity.fileAsset";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  originalFilename?: string;
-  label?: string;
-  title?: string;
-  description?: string;
-  altText?: string;
-  sha1hash: string;
-  extension: string;
-  mimeType: string;
-  size: number;
-  assetId: string;
-  uploadId?: string;
-  path: string;
-  url: string;
-  source?: SanityAssetSourceData;
-};
+  _id: string
+  _type: 'sanity.fileAsset'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  originalFilename?: string
+  label?: string
+  title?: string
+  description?: string
+  altText?: string
+  sha1hash: string
+  extension: string
+  mimeType: string
+  size: number
+  assetId: string
+  uploadId?: string
+  path: string
+  url: string
+  source?: SanityAssetSourceData
+}
 
 export type SanityAssetSourceData = {
-  _type: "sanity.assetSourceData";
-  name?: string;
-  id?: string;
-  url?: string;
-};
+  _type: 'sanity.assetSourceData'
+  name?: string
+  id?: string
+  url?: string
+}
 
 export type SanityImageAsset = {
-  _id: string;
-  _type: "sanity.imageAsset";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  originalFilename?: string;
-  label?: string;
-  title?: string;
-  description?: string;
-  altText?: string;
-  sha1hash: string;
-  extension: string;
-  mimeType: string;
-  size: number;
-  assetId: string;
-  uploadId?: string;
-  path: string;
-  url: string;
-  metadata?: SanityImageMetadata;
-  source?: SanityAssetSourceData;
-};
+  _id: string
+  _type: 'sanity.imageAsset'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  originalFilename?: string
+  label?: string
+  title?: string
+  description?: string
+  altText?: string
+  sha1hash: string
+  extension: string
+  mimeType: string
+  size: number
+  assetId: string
+  uploadId?: string
+  path: string
+  url: string
+  metadata?: SanityImageMetadata
+  source?: SanityAssetSourceData
+}
 
 export type Geopoint = {
-  _type: "geopoint";
-  lat?: number;
-  lng?: number;
-  alt?: number;
-};
+  _type: 'geopoint'
+  lat?: number
+  lng?: number
+  alt?: number
+}
 
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
@@ -447,6 +458,7 @@ export type AllSanitySchemaTypes =
   | MediaText
   | RichText
   | Hero
+  | Redirect
   | Page
   | Slug
   | SanityImagePaletteSwatch
@@ -456,466 +468,486 @@ export type AllSanitySchemaTypes =
   | SanityFileAsset
   | SanityAssetSourceData
   | SanityImageAsset
-  | Geopoint;
+  | Geopoint
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
 // Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    title,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } } },    pageBuilder[] {     _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } }  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },  _key,  _type }  }
 export type PAGE_QUERY_RESULT = {
-  _id: string;
-  _type: "page";
-  title: string;
+  _id: string
+  _type: 'page'
+  title: string
   seo: {
-    metaTitle: string | null;
-    metaDescription: string | null;
-    noIndex: boolean | null;
+    metaTitle: string | null
+    metaDescription: string | null
+    noIndex: boolean | null
     ogImage: {
-      alt: string | null;
-      crop: SanityImageCrop | null;
-      hotspot: SanityImageHotspot | null;
+      alt: string | null
+      crop: SanityImageCrop | null
+      hotspot: SanityImageHotspot | null
       asset: {
-        _id: string;
-        url: string;
+        _id: string
+        url: string
         metadata: {
-          lqip: string | null;
+          lqip: string | null
           dimensions: {
-            width: number;
-            height: number;
-            aspectRatio: number;
-          } | null;
-        } | null;
-      } | null;
-    } | null;
-  } | null;
+            width: number
+            height: number
+            aspectRatio: number
+          } | null
+        } | null
+      } | null
+    } | null
+  } | null
   pageBuilder: Array<
     | {
-        title: string;
-        text: string | null;
+        title: string
+        text: string | null
         ctas: Array<{
-          _key: string;
-          label: string;
-          variant: "primary" | "secondary";
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
           link: {
-            linkType: "external" | "internal";
-            slug: string | null;
-            url: string | null;
-            openInNewTab: boolean | null;
-          };
-        }> | null;
-        tone: "brand" | "dark" | "light";
-        _key: string;
-        _type: "ctaBanner";
+            linkType: 'external' | 'internal'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+          }
+        }> | null
+        tone: 'brand' | 'dark' | 'light'
+        _key: string
+        _type: 'ctaBanner'
       }
     | {
-        title: string | null;
-        intro: string | null;
+        title: string | null
+        intro: string | null
         items: Array<{
-          _key: string;
-          question: string;
+          _key: string
+          question: string
           answer: Array<
             | {
                 children?: Array<{
-                  marks?: Array<string>;
-                  text?: string;
-                  _type: "span";
-                  _key: string;
-                }>;
-                style?: "blockquote" | "h2" | "h3" | "h4" | "normal";
-                listItem?: "bullet" | "number";
+                  marks?: Array<string>
+                  text?: string
+                  _type: 'span'
+                  _key: string
+                }>
+                style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+                listItem?: 'bullet' | 'number'
                 markDefs: Array<{
-                  _key: string;
-                  _type: "link";
-                  linkType: "external" | "internal";
-                  internal?: PageReference;
-                  url: string | null;
-                  openInNewTab: boolean | null;
-                  slug: string | null;
-                }> | null;
-                level?: number;
-                _type: "block";
-                _key: string;
+                  _key: string
+                  _type: 'link'
+                  linkType: 'external' | 'internal'
+                  internal?: PageReference
+                  url: string | null
+                  openInNewTab: boolean | null
+                  slug: string | null
+                }> | null
+                level?: number
+                _type: 'block'
+                _key: string
               }
             | {
                 asset: {
-                  _id: string;
-                  url: string;
+                  _id: string
+                  url: string
                   metadata: {
-                    lqip: string | null;
+                    lqip: string | null
                     dimensions: {
-                      width: number;
-                      height: number;
-                      aspectRatio: number;
-                    } | null;
-                  } | null;
-                } | null;
-                media?: unknown;
-                hotspot: SanityImageHotspot | null;
-                crop: SanityImageCrop | null;
-                alt: string | null;
-                caption: string | null;
-                _type: "image";
-                _key: string;
-                markDefs: null;
+                      width: number
+                      height: number
+                      aspectRatio: number
+                    } | null
+                  } | null
+                } | null
+                media?: unknown
+                hotspot: SanityImageHotspot | null
+                crop: SanityImageCrop | null
+                alt: string | null
+                caption: string | null
+                _type: 'image'
+                _key: string
+                markDefs: null
               }
-          >;
-        }>;
-        _key: string;
-        _type: "faq";
+          >
+        }>
+        _key: string
+        _type: 'faq'
       }
     | {
-        title: string | null;
-        intro: string | null;
-        columns: 2 | 3 | 4;
+        title: string | null
+        intro: string | null
+        columns: 2 | 3 | 4
         items: Array<{
-          _key: string;
-          title: string;
-          text: string | null;
+          _key: string
+          title: string
+          text: string | null
           icon: {
-            alt: string | null;
-            crop: SanityImageCrop | null;
-            hotspot: SanityImageHotspot | null;
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
             asset: {
-              _id: string;
-              url: string;
+              _id: string
+              url: string
               metadata: {
-                lqip: string | null;
+                lqip: string | null
                 dimensions: {
-                  width: number;
-                  height: number;
-                  aspectRatio: number;
-                } | null;
-              } | null;
-            } | null;
-          } | null;
-        }>;
-        _key: string;
-        _type: "featuresGrid";
+                  width: number
+                  height: number
+                  aspectRatio: number
+                } | null
+              } | null
+            } | null
+          } | null
+        }>
+        _key: string
+        _type: 'featuresGrid'
       }
     | {
-        title: string;
-        description: string | null;
+        title: string
+        description: string | null
         ctas: Array<{
-          _key: string;
-          label: string;
-          variant: "primary" | "secondary";
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
           link: {
-            linkType: "external" | "internal";
-            slug: string | null;
-            url: string | null;
-            openInNewTab: boolean | null;
-          };
-        }> | null;
+            linkType: 'external' | 'internal'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+          }
+        }> | null
         backgroundImage: {
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
           asset: {
-            _id: string;
-            url: string;
+            _id: string
+            url: string
             metadata: {
-              lqip: string | null;
+              lqip: string | null
               dimensions: {
-                width: number;
-                height: number;
-                aspectRatio: number;
-              } | null;
-            } | null;
-          } | null;
-        } | null;
-        _key: string;
-        _type: "hero";
+                width: number
+                height: number
+                aspectRatio: number
+              } | null
+            } | null
+          } | null
+        } | null
+        _key: string
+        _type: 'hero'
       }
     | {
-        title: string | null;
+        title: string | null
         logos: Array<{
-          _key: string;
-          name: string;
-          url: string | null;
+          _key: string
+          name: string
+          url: string | null
           image: {
-            alt: string | null;
-            crop: SanityImageCrop | null;
-            hotspot: SanityImageHotspot | null;
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
             asset: {
-              _id: string;
-              url: string;
+              _id: string
+              url: string
               metadata: {
-                lqip: string | null;
+                lqip: string | null
                 dimensions: {
-                  width: number;
-                  height: number;
-                  aspectRatio: number;
-                } | null;
-              } | null;
-            } | null;
-          };
-        }>;
-        _key: string;
-        _type: "logoCloud";
+                  width: number
+                  height: number
+                  aspectRatio: number
+                } | null
+              } | null
+            } | null
+          }
+        }>
+        _key: string
+        _type: 'logoCloud'
       }
     | {
-        eyebrow: string | null;
-        title: string;
+        eyebrow: string | null
+        title: string
         body: Array<
           | {
               children?: Array<{
-                marks?: Array<string>;
-                text?: string;
-                _type: "span";
-                _key: string;
-              }>;
-              style?: "blockquote" | "h2" | "h3" | "h4" | "normal";
-              listItem?: "bullet" | "number";
+                marks?: Array<string>
+                text?: string
+                _type: 'span'
+                _key: string
+              }>
+              style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+              listItem?: 'bullet' | 'number'
               markDefs: Array<{
-                _key: string;
-                _type: "link";
-                linkType: "external" | "internal";
-                internal?: PageReference;
-                url: string | null;
-                openInNewTab: boolean | null;
-                slug: string | null;
-              }> | null;
-              level?: number;
-              _type: "block";
-              _key: string;
+                _key: string
+                _type: 'link'
+                linkType: 'external' | 'internal'
+                internal?: PageReference
+                url: string | null
+                openInNewTab: boolean | null
+                slug: string | null
+              }> | null
+              level?: number
+              _type: 'block'
+              _key: string
             }
           | {
               asset: {
-                _id: string;
-                url: string;
+                _id: string
+                url: string
                 metadata: {
-                  lqip: string | null;
+                  lqip: string | null
                   dimensions: {
-                    width: number;
-                    height: number;
-                    aspectRatio: number;
-                  } | null;
-                } | null;
-              } | null;
-              media?: unknown;
-              hotspot: SanityImageHotspot | null;
-              crop: SanityImageCrop | null;
-              alt: string | null;
-              caption: string | null;
-              _type: "image";
-              _key: string;
-              markDefs: null;
+                    width: number
+                    height: number
+                    aspectRatio: number
+                  } | null
+                } | null
+              } | null
+              media?: unknown
+              hotspot: SanityImageHotspot | null
+              crop: SanityImageCrop | null
+              alt: string | null
+              caption: string | null
+              _type: 'image'
+              _key: string
+              markDefs: null
             }
-        > | null;
+        > | null
         ctas: Array<{
-          _key: string;
-          label: string;
-          variant: "primary" | "secondary";
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
           link: {
-            linkType: "external" | "internal";
-            slug: string | null;
-            url: string | null;
-            openInNewTab: boolean | null;
-          };
-        }> | null;
+            linkType: 'external' | 'internal'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+          }
+        }> | null
         image: {
-          alt: string | null;
-          crop: SanityImageCrop | null;
-          hotspot: SanityImageHotspot | null;
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
           asset: {
-            _id: string;
-            url: string;
+            _id: string
+            url: string
             metadata: {
-              lqip: string | null;
+              lqip: string | null
               dimensions: {
-                width: number;
-                height: number;
-                aspectRatio: number;
-              } | null;
-            } | null;
-          } | null;
-        } | null;
-        imagePosition: "left" | "right";
-        _key: string;
-        _type: "mediaText";
+                width: number
+                height: number
+                aspectRatio: number
+              } | null
+            } | null
+          } | null
+        } | null
+        imagePosition: 'left' | 'right'
+        _key: string
+        _type: 'mediaText'
       }
     | {
         body: Array<
           | {
               children?: Array<{
-                marks?: Array<string>;
-                text?: string;
-                _type: "span";
-                _key: string;
-              }>;
-              style?: "blockquote" | "h2" | "h3" | "h4" | "normal";
-              listItem?: "bullet" | "number";
+                marks?: Array<string>
+                text?: string
+                _type: 'span'
+                _key: string
+              }>
+              style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+              listItem?: 'bullet' | 'number'
               markDefs: Array<{
-                _key: string;
-                _type: "link";
-                linkType: "external" | "internal";
-                internal?: PageReference;
-                url: string | null;
-                openInNewTab: boolean | null;
-                slug: string | null;
-              }> | null;
-              level?: number;
-              _type: "block";
-              _key: string;
+                _key: string
+                _type: 'link'
+                linkType: 'external' | 'internal'
+                internal?: PageReference
+                url: string | null
+                openInNewTab: boolean | null
+                slug: string | null
+              }> | null
+              level?: number
+              _type: 'block'
+              _key: string
             }
           | {
               asset: {
-                _id: string;
-                url: string;
+                _id: string
+                url: string
                 metadata: {
-                  lqip: string | null;
+                  lqip: string | null
                   dimensions: {
-                    width: number;
-                    height: number;
-                    aspectRatio: number;
-                  } | null;
-                } | null;
-              } | null;
-              media?: unknown;
-              hotspot: SanityImageHotspot | null;
-              crop: SanityImageCrop | null;
-              alt: string | null;
-              caption: string | null;
-              _type: "image";
-              _key: string;
-              markDefs: null;
+                    width: number
+                    height: number
+                    aspectRatio: number
+                  } | null
+                } | null
+              } | null
+              media?: unknown
+              hotspot: SanityImageHotspot | null
+              crop: SanityImageCrop | null
+              alt: string | null
+              caption: string | null
+              _type: 'image'
+              _key: string
+              markDefs: null
             }
-        >;
-        _key: string;
-        _type: "richText";
+        >
+        _key: string
+        _type: 'richText'
       }
     | {
-        title: string | null;
+        title: string | null
         items: Array<{
-          _key: string;
-          quote: string;
-          name: string;
-          role: string | null;
+          _key: string
+          quote: string
+          name: string
+          role: string | null
           avatar: {
-            alt: string | null;
-            crop: SanityImageCrop | null;
-            hotspot: SanityImageHotspot | null;
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
             asset: {
-              _id: string;
-              url: string;
+              _id: string
+              url: string
               metadata: {
-                lqip: string | null;
+                lqip: string | null
                 dimensions: {
-                  width: number;
-                  height: number;
-                  aspectRatio: number;
-                } | null;
-              } | null;
-            } | null;
-          } | null;
-        }>;
-        _key: string;
-        _type: "testimonials";
+                  width: number
+                  height: number
+                  aspectRatio: number
+                } | null
+              } | null
+            } | null
+          } | null
+        }>
+        _key: string
+        _type: 'testimonials'
       }
-  > | null;
-} | null;
+  > | null
+} | null
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_INDEX_QUERY
 // Query: *[_type == "page" && defined(slug.current)] {    "slug": slug.current,    _updatedAt,    "noIndex": seo.noIndex == true  }
 export type PAGE_INDEX_QUERY_RESULT = Array<{
-  slug: string;
-  _updatedAt: string;
-  noIndex: boolean | false;
-}>;
+  slug: string
+  _updatedAt: string
+  noIndex: boolean | false
+}>
+
+// Source: src/features/pages/api/queries.ts
+// Variable: REDIRECTS_QUERY
+// Query: *[_type == "redirect" && defined(source) && defined(destination)] {    source,    destination,    "permanent": permanent != false  }
+export type REDIRECTS_QUERY_RESULT = Array<{
+  source: string
+  destination: string
+  permanent: boolean | true
+}>
 
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
 // Query: *[_id == "settings"][0] {    title,    description,    logo {   alt,  crop,  hotspot,  asset->{    _id,    url,    metadata { lqip, dimensions { width, height, aspectRatio } }  } },    ogImage { asset->{ _id } },    headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerText  }
 export type SETTINGS_QUERY_RESULT =
   | {
-      title: string;
-      description: null;
-      logo: null;
-      ogImage: null;
-      headerNav: null;
-      headerCta: null;
-      footerNav: null;
-      footerText: null;
+      title: null
+      description: null
+      logo: null
+      ogImage: null
+      headerNav: null
+      headerCta: null
+      footerNav: null
+      footerText: null
     }
   | {
-      title: string | null;
-      description: string | null;
-      logo: null;
-      ogImage: null;
-      headerNav: null;
-      headerCta: null;
-      footerNav: null;
-      footerText: null;
+      title: string
+      description: null
+      logo: null
+      ogImage: null
+      headerNav: null
+      headerCta: null
+      footerNav: null
+      footerText: null
     }
   | {
-      title: string;
-      description: string | null;
+      title: string | null
+      description: string | null
+      logo: null
+      ogImage: null
+      headerNav: null
+      headerCta: null
+      footerNav: null
+      footerText: null
+    }
+  | {
+      title: string
+      description: string | null
       logo: {
-        alt: string | null;
-        crop: SanityImageCrop | null;
-        hotspot: SanityImageHotspot | null;
+        alt: string | null
+        crop: SanityImageCrop | null
+        hotspot: SanityImageHotspot | null
         asset: {
-          _id: string;
-          url: string;
+          _id: string
+          url: string
           metadata: {
-            lqip: string | null;
+            lqip: string | null
             dimensions: {
-              width: number;
-              height: number;
-              aspectRatio: number;
-            } | null;
-          } | null;
-        } | null;
-      } | null;
+              width: number
+              height: number
+              aspectRatio: number
+            } | null
+          } | null
+        } | null
+      } | null
       ogImage: {
         asset: {
-          _id: string;
-        } | null;
-      } | null;
+          _id: string
+        } | null
+      } | null
       headerNav: Array<{
-        _key: string;
-        label: string;
+        _key: string
+        label: string
         link: {
-          linkType: "external" | "internal";
-          slug: string | null;
-          url: string | null;
-          openInNewTab: boolean | null;
-        };
-      }> | null;
+          linkType: 'external' | 'internal'
+          slug: string | null
+          url: string | null
+          openInNewTab: boolean | null
+        }
+      }> | null
       headerCta: {
-        _key: null;
-        label: string;
-        variant: "primary" | "secondary";
+        _key: null
+        label: string
+        variant: 'primary' | 'secondary'
         link: {
-          linkType: "external" | "internal";
-          slug: string | null;
-          url: string | null;
-          openInNewTab: boolean | null;
-        };
-      } | null;
+          linkType: 'external' | 'internal'
+          slug: string | null
+          url: string | null
+          openInNewTab: boolean | null
+        }
+      } | null
       footerNav: Array<{
-        _key: string;
-        label: string;
+        _key: string
+        label: string
         link: {
-          linkType: "external" | "internal";
-          slug: string | null;
-          url: string | null;
-          openInNewTab: boolean | null;
-        };
-      }> | null;
-      footerText: string | null;
+          linkType: 'external' | 'internal'
+          slug: string | null
+          url: string | null
+          openInNewTab: boolean | null
+        }
+      }> | null
+      footerText: string | null
     }
-  | null;
+  | null
 
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    title,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n },\n    pageBuilder[] { \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _key,\n  _type\n }\n  }\n': PAGE_QUERY_RESULT;
-    '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_INDEX_QUERY_RESULT;
-    '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n },\n    ogImage { asset->{ _id } },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText\n  }\n': SETTINGS_QUERY_RESULT;
+    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    title,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n },\n    pageBuilder[] { \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _key,\n  _type\n }\n  }\n': PAGE_QUERY_RESULT
+    '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_INDEX_QUERY_RESULT
+    '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
+    '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height, aspectRatio } }\n  }\n },\n    ogImage { asset->{ _id } },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText\n  }\n': SETTINGS_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too
-declare module "@sanity/client" {
+declare module '@sanity/client' {
   interface SanityQueries extends globalThis.SanityQueries {}
 }

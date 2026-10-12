@@ -1,13 +1,19 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect, redirect } from 'next/navigation'
 
+import { slugToPath } from '@/config/paths'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { SectionRenderer } from './section-renderer'
-import { getPage } from '../api/get-page'
+import { getPage, getRedirect } from '../api/get-page'
 
 export async function PageView({ slug, ...mode }: { slug: string } & FetchMode) {
   const page = await getPage({ slug, ...mode })
-  if (!page) notFound()
+  if (!page) {
+    // Old URLs from a previous site: redirects are managed in Studio.
+    const match = await getRedirect(slugToPath(slug))
+    if (match) (match.permanent ? permanentRedirect : redirect)(match.destination)
+    notFound()
+  }
 
   return (
     <SectionRenderer
