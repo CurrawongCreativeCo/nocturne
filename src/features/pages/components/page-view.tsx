@@ -9,7 +9,14 @@ export async function PageView({ slug, ...mode }: { slug: string } & FetchMode) 
   const page = await getPage({ slug, ...mode })
   if (!page) notFound()
 
-  return <SectionRenderer documentId={page._id} documentType={page._type} sections={page.pageBuilder} />
+  return (
+    <SectionRenderer
+      documentId={page._id}
+      documentType={page._type}
+      sections={page.pageBuilder}
+      editable={mode.stega}
+    />
+  )
 }
 
 /** Reads draft-mode cookies, so it must render inside <Suspense>. */

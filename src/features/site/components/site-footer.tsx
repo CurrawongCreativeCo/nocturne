@@ -1,9 +1,9 @@
 import { cacheLife } from 'next/cache'
 
+import { SanityLink } from '@/components/ui/sanity-link'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { getSettings } from '../api/get-settings'
-import { NavLink } from './nav-link'
 
 export async function SiteFooter(mode: FetchMode) {
   const [settings, year] = await Promise.all([getSettings(mode), currentYear()])
@@ -18,7 +18,9 @@ export async function SiteFooter(mode: FetchMode) {
         {nav.length > 0 && (
           <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
             {nav.map((item) => (
-              <NavLink key={item._key} label={item.label} link={item.link} className="text-sm text-gray-600 hover:text-gray-950" />
+              <SanityLink key={item._key} link={item.link} className="text-sm text-gray-600 hover:text-gray-950">
+                {item.label}
+              </SanityLink>
             ))}
           </nav>
         )}

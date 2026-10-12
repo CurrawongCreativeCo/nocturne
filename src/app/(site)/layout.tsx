@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
-import { VisualEditing } from 'next-sanity/visual-editing'
 import { Suspense } from 'react'
 
-import { DisableDraftMode } from '@/features/draft-mode/components/disable-draft-mode'
-import { getSiteMetadata } from '@/features/site/api/get-site-metadata'
+import { DraftModeTools } from '@/features/draft-mode/components/draft-mode-tools'
+import { getSiteMetadata } from '@/features/site/api/get-settings'
 import { SiteFooter, DraftSiteFooter } from '@/features/site/components/site-footer'
 import { SiteHeader, DraftSiteHeader } from '@/features/site/components/site-header'
 import { PUBLISHED, SanityLive } from '@/lib/sanity/live'
@@ -33,12 +32,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       )}
       {/* Subscribes to Content Lake changes and expires matching cache tags. */}
       <SanityLive includeDrafts={isDraftMode} />
-      {isDraftMode && (
-        <>
-          <VisualEditing />
-          <DisableDraftMode />
-        </>
-      )}
+      {isDraftMode && <DraftModeTools />}
     </>
   )
 }

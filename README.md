@@ -79,21 +79,21 @@ eslint.config.mjs                  enforces the import rules below
 src/
   app/                             routes only: thin files that compose features
     layout.tsx                     bare <html> shell (shared with Studio)
-    (site)/layout.tsx              header, footer, site metadata, <SanityLive/>, <VisualEditing/>
+    (site)/layout.tsx              header, footer, site metadata, <SanityLive/>, draft-mode tools
     (site)/[[...slug]]/page.tsx    every CMS page, including "/"
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
     sitemap.ts
   features/
     pages/                         CMS pages + page builder
-      api/                         queries.ts, sections.ts (GROQ), get-page*.ts, get-sitemap.ts
+      api/                         queries.ts, sections.ts (GROQ), get-page.ts (page, metadata, sitemap)
       components/                  page-view, section-renderer, sections/<name>.tsx
       schemas/                     page.ts, sections/<name>.ts, templates.ts (new-page templates)
       types/                       PageSection, SectionOf<'hero'>, SectionProps
     site/                          Site settings singleton: header, footer, default metadata
-    draft-mode/components/         disable-draft-mode
+    draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     studio/                        desk structure, singletons, Presentation resolvers
-  components/ui/                   shared UI: sanity-image, cta-link, rich-text
+  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text
   config/                          env.ts (validated), paths.ts (slug <-> URL)
   lib/sanity/                      client (singleton), live, image, token, data-attribute,
                                    fragments.ts (shared GROQ), schema/ (link, cta, seo, blockContent, imageField)
@@ -101,7 +101,6 @@ src/
   types/
     sanity.types.ts                GENERATED — commit it
     sanity.ts                      shared types: SanityImageData, CtaData, LinkData
-  utils/links.ts                   resolveHref for CTAs, menus and rich-text links
 public/section-previews/           insert-menu thumbnails, one <typeName>.svg per section
 scripts/new-section.mjs            `npm run new:section` scaffolder
 ```
@@ -109,7 +108,7 @@ scripts/new-section.mjs            `npm run new:section` scaffolder
 **Import rules** (`npm run lint` fails on violations):
 
 ```
-components, config, lib, styles, types, utils   ->   features   ->   app
+components, config, lib, styles, types   ->   features   ->   app
 ```
 
 - Shared folders never import from `features/` or `app/`.
@@ -130,6 +129,26 @@ components, config, lib, styles, types, utils   ->   features   ->   app
 - `<SanityLive />` listens to the Live Content API and expires exactly the tags the changed documents
   touched. No webhooks or `revalidate` timers. `cacheLife.default` is set to "forever" for that reason.
 - Use `tags` on a fetch only for read-your-own-writes after a server-action mutation (`updateTag`).
+
+### Request budget
+
+Published reads go to Sanity's API CDN without a token, one request per cache miss. There are only three
+queries: `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, and the
+unknown-URL check) and `SETTINGS_QUERY` (header, footer, site metadata). So:
+
+- **Build:** one request per page, plus two.
+- **Visitors:** zero. Pages are prerendered and every query result is cached until its content changes.
+- **Publishing:** only the cached results containing the changed documents are refetched, once each.
+- **Unknown URLs** (typos, bots probing `/wp-admin`) are answered from the cached page index at no cost.
+- **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
+
+Keep it that way: fetch through `cachedSanityFetch`, call each query with the same argument shape so
+callers share one entry, and fold new data into an existing query rather than adding a parallel one.
+
+Live updates use one connection per open browser tab, and Sanity allows 1,000 live connections per
+dataset. Above that, visitors fall back to re-rendering from the cache every 30 seconds (still no extra
+Sanity requests). If a site regularly has more than ~1,000 visitors at once, switch production to
+webhook revalidation and keep `<SanityLive />` for draft mode only.
 
 ### Type flow
 
@@ -174,3 +193,8 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
   `never` and `tsc` won't flag them, but the bundler will.
 - Page metadata always uses published content, so `<head>` stays prerenderable and drafts don't leak into it.
 - `browserToken` reaches the browser only in draft mode. Use a Viewer-role token.
+- Visual Editing and the "Exit preview" button are lazy-loaded in `draft-mode-tools.tsx`. Importing them
+  directly in a layout ships about 200 KB of gzipped Studio code to every visitor.
+- Visual Editing `data-sanity` attributes are only rendered in draft mode, keeping public HTML lean.
+- The footer's copyright year is cached for a day, so pages re-render daily. Those re-renders read the
+  cached Sanity data and make no requests.

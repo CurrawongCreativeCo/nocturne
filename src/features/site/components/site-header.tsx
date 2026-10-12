@@ -2,10 +2,10 @@ import Link from 'next/link'
 
 import { CtaLink } from '@/components/ui/cta-link'
 import { SanityImage } from '@/components/ui/sanity-image'
+import { SanityLink } from '@/components/ui/sanity-link'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { getSettings } from '../api/get-settings'
-import { NavLink } from './nav-link'
 
 export async function SiteHeader(mode: FetchMode) {
   const settings = await getSettings(mode)
@@ -17,7 +17,8 @@ export async function SiteHeader(mode: FetchMode) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6">
         <Link href="/" className="flex items-center text-lg font-semibold">
           {settings?.logo?.asset ? (
-            <SanityImage image={settings.logo} alt={settings.title ?? 'Home'} height={32} className="h-8 w-auto" preload />
+            // Eager, not preloaded: the hero image is the page's LCP and should win the bandwidth.
+            <SanityImage image={settings.logo} alt={settings.title ?? 'Home'} height={32} className="h-8 w-auto" loading="eager" />
           ) : (
             (settings?.title ?? 'Site')
           )}
@@ -25,9 +26,11 @@ export async function SiteHeader(mode: FetchMode) {
 
         <nav aria-label="Main" className="hidden items-center gap-8 md:flex">
           {nav.map((item) => (
-            <NavLink key={item._key} label={item.label} link={item.link} className="text-sm font-medium text-gray-700 hover:text-gray-950" />
+            <SanityLink key={item._key} link={item.link} className="text-sm font-medium text-gray-700 hover:text-gray-950">
+              {item.label}
+            </SanityLink>
           ))}
-          {cta && <CtaLink cta={cta} surface="light" className="!px-4 !py-2" />}
+          {cta && <CtaLink cta={cta} surface="light" size="sm" />}
         </nav>
 
         {(nav.length > 0 || cta) && (
@@ -42,9 +45,11 @@ export async function SiteHeader(mode: FetchMode) {
             </summary>
             <nav aria-label="Mobile" className="absolute inset-x-0 top-16 flex flex-col gap-1 border-b border-gray-200 bg-white px-6 py-4 shadow-lg">
               {nav.map((item) => (
-                <NavLink key={item._key} label={item.label} link={item.link} className="rounded-md px-2 py-2 font-medium hover:bg-gray-100" />
+                <SanityLink key={item._key} link={item.link} className="rounded-md px-2 py-2 font-medium hover:bg-gray-100">
+                  {item.label}
+                </SanityLink>
               ))}
-              {cta && <CtaLink cta={cta} surface="light" className="mt-2 justify-center" />}
+              {cta && <CtaLink cta={cta} surface="light" className="mt-2" />}
             </nav>
           </details>
         )}

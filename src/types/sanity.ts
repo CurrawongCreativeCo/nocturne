@@ -31,5 +31,3 @@ type HeroResult = Extract<NonNullable<NonNullable<PAGE_QUERY_RESULT>['pageBuilde
 
 /** Projection of `ctaFields`. */
 export type CtaData = StegaBranded<NonNullable<HeroResult['ctas']>[number]>
-/** Projection of `linkFields`. */
-export type LinkData = CtaData['link']

@@ -1,9 +1,8 @@
-import Link from 'next/link'
 import { PortableText, type PortableTextComponents, type PortableTextProps } from 'next-sanity'
 
 import { SanityImage } from '@/components/ui/sanity-image'
+import { SanityLink, type LinkData } from '@/components/ui/sanity-link'
 import type { SanityImageData } from '@/types/sanity'
-import { isExternal, resolveHref, type LinkLike } from '@/utils/links'
 
 /**
  * Renders `blockContent` (queried with `portableTextFields`). Styles live here rather
@@ -25,21 +24,11 @@ const components: PortableTextComponents = {
   },
   marks: {
     code: ({ children }) => <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-sm">{children}</code>,
-    link: ({ value, children }) => {
-      const link = value as LinkLike | undefined
-      const href = resolveHref(link)
-      if (!href) return <>{children}</>
-      const className = 'font-medium text-brand underline underline-offset-2'
-      return isExternal(link) ? (
-        <a href={href} className={className} {...(link?.openInNewTab && { target: '_blank', rel: 'noopener noreferrer' })}>
-          {children}
-        </a>
-      ) : (
-        <Link href={href} className={className}>
-          {children}
-        </Link>
-      )
-    },
+    link: ({ value, children }) => (
+      <SanityLink link={value as LinkData} className="font-medium text-brand underline underline-offset-2">
+        {children}
+      </SanityLink>
+    ),
   },
   types: {
     image: ({ value }) => (

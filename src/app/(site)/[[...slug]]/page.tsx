@@ -3,8 +3,7 @@ import { draftMode } from 'next/headers'
 import { Suspense } from 'react'
 
 import { segmentsToSlug } from '@/config/paths'
-import { getPageStaticParams } from '@/features/pages/api/get-page'
-import { getPageMetadata } from '@/features/pages/api/get-page-metadata'
+import { getPageMetadata, getPageStaticParams } from '@/features/pages/api/get-page'
 import { DraftPageView, PageView } from '@/features/pages/components/page-view'
 import { PUBLISHED } from '@/lib/sanity/live'
 

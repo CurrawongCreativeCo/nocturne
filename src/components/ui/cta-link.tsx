@@ -1,8 +1,7 @@
-import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
+import { SanityLink } from '@/components/ui/sanity-link'
 import type { CtaData } from '@/types/sanity'
-import { isExternal, resolveHref } from '@/utils/links'
 
 /** Button styles per background: `dark` for hero/dark banners, `light` for white or gray sections. */
 const variants = {
@@ -16,36 +15,29 @@ const variants = {
   },
 } as const
 
+const sizes = { md: 'px-6 py-3', sm: 'px-4 py-2' } as const
+
 interface Props {
   /** `_key` is only needed in lists; a standalone CTA (e.g. the header button) has none. */
   cta: Omit<CtaData, '_key'>
   surface?: keyof typeof variants
+  size?: keyof typeof sizes
   className?: string
 }
 
-export function CtaLink({ cta, surface = 'dark', className = '' }: Props) {
-  const href = resolveHref(cta.link)
-  if (!href) return null
-
-  const newTab = cta.link.openInNewTab ?? false
-  const classes = `inline-flex items-center rounded-full px-6 py-3 text-sm font-semibold transition-colors ${variants[surface][stegaClean(cta.variant)]} ${className}`
-
-  if (isExternal(cta.link)) {
-    return (
-      <a href={href} className={classes} {...(newTab && { target: '_blank', rel: 'noopener noreferrer' })}>
-        {cta.label}
-      </a>
-    )
-  }
+export function CtaLink({ cta, surface = 'dark', size = 'md', className = '' }: Props) {
   return (
-    <Link href={href} className={classes} {...(newTab && { target: '_blank' })}>
+    <SanityLink
+      link={cta.link}
+      className={`inline-flex items-center justify-center rounded-full text-sm font-semibold transition-colors ${sizes[size]} ${variants[surface][stegaClean(cta.variant)]} ${className}`}
+    >
       {cta.label}
-    </Link>
+    </SanityLink>
   )
 }
 
 /** Renders up to two CTAs in a row; nothing when the list is empty. */
-export function CtaGroup({ ctas, surface, className = '' }: { ctas: CtaData[] | null | undefined } & Omit<Props, 'cta'>) {
+export function CtaGroup({ ctas, surface, className = '' }: { ctas: CtaData[] | null | undefined } & Omit<Props, 'cta' | 'size'>) {
   if (!ctas?.length) return null
   return (
     <div className={`flex flex-wrap items-center gap-4 ${className}`}>

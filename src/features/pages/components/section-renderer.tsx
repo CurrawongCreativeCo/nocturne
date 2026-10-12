@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import { Fragment, type ComponentType } from 'react'
 
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
@@ -37,13 +37,19 @@ interface Props {
   sections: PageSection[] | null | undefined
   /** Field name holding the array on the parent document. */
   path?: string
+  /**
+   * Adds Visual Editing overlay attributes. Only true in draft mode: the public site
+   * shouldn't ship Studio URLs and document paths it never uses.
+   */
+  editable?: boolean
 }
 
-export function SectionRenderer({ documentId, documentType, sections, path = 'pageBuilder' }: Props) {
+export function SectionRenderer({ documentId, documentType, sections, path = 'pageBuilder', editable = false }: Props) {
   if (!sections?.length) return null
 
+  const Wrapper = editable ? 'div' : Fragment
   return (
-    <div data-sanity={dataAttr(documentId, documentType, path)}>
+    <Wrapper {...(editable && { 'data-sanity': dataAttr(documentId, documentType, path) })}>
       {sections.map((section) => {
         // TS can't correlate `section` with `SECTION_COMPONENTS[section._type]` across a
         // union; the registry's mapped type above already guarantees they match.
@@ -58,12 +64,16 @@ export function SectionRenderer({ documentId, documentType, sections, path = 'pa
         }
 
         return (
-          <div key={section._key} data-sanity={dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)}>
-            <Section data={section} />
-          </div>
+          editable ? (
+            <div key={section._key} data-sanity={dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)}>
+              <Section data={section} />
+            </div>
+          ) : (
+            <Section key={section._key} data={section} />
+          )
         )
       })}
-    </div>
+    </Wrapper>
   )
 }
 
