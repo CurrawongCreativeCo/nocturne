@@ -3,7 +3,7 @@ import type { Metadata, MetadataRoute } from 'next'
 import { siteUrl } from '@/config/env'
 import { slugToPath, slugToSegments } from '@/config/paths'
 import { urlFor } from '@/lib/sanity/image'
-import { cachedSanityFetch, PUBLISHED, type FetchMode } from '@/lib/sanity/live'
+import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 import { PAGE_INDEX_QUERY, PAGE_QUERY } from './queries'
 
@@ -18,7 +18,7 @@ export async function getPage({ slug, ...mode }: { slug: string } & FetchMode) {
   if (mode.perspective === 'published' && !(await getPageIndex()).some((page) => page.slug === slug)) {
     return null
   }
-  const { data } = await cachedSanityFetch({ query: PAGE_QUERY, params: { slug }, ...mode })
+  const { data } = await cachedSanityFetch({ query: PAGE_QUERY, params: { slug }, ...mode, tags: [TAGS.page] })
   return data
 }
 
@@ -45,7 +45,7 @@ export async function getPageMetadata(slug: string): Promise<Metadata> {
 }
 
 async function getPageIndex() {
-  const { data } = await cachedSanityFetch({ query: PAGE_INDEX_QUERY, ...PUBLISHED })
+  const { data } = await cachedSanityFetch({ query: PAGE_INDEX_QUERY, ...PUBLISHED, tags: [TAGS.page] })
   return data
 }
 

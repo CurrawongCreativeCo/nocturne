@@ -36,6 +36,20 @@ export const cachedSanityFetch: StrictDefinedFetchType = async (options) => {
   return sanityFetch(options)
 }
 
+/**
+ * Webhook mode: when set, the public site doesn't open live connections and cache
+ * entries are expired by `/api/revalidate` instead (see README, "Webhook mode").
+ * <SanityLive /> still runs in draft mode so previews stay live.
+ */
+export const revalidateSecret = process.env.SANITY_REVALIDATE_SECRET || undefined
+
+/**
+ * Cache tags for webhook mode, named after the document types the webhook reports.
+ * Each fetch lists every type its result depends on (including resolved references).
+ * Live mode ignores them and uses Sanity's own per-document sync tags.
+ */
+export const TAGS = { page: 'page', settings: 'settings' } as const
+
 export interface FetchMode {
   perspective: LivePerspective
   variant?: string

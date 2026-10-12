@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 
 import { urlFor } from '@/lib/sanity/image'
-import { cachedSanityFetch, PUBLISHED, type FetchMode } from '@/lib/sanity/live'
+import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 import { SETTINGS_QUERY } from './queries'
 
 export async function getSettings(mode: FetchMode) {
-  const { data } = await cachedSanityFetch({ query: SETTINGS_QUERY, ...mode })
+  // Menu links resolve page slugs, so a page change can change the settings result too.
+  const { data } = await cachedSanityFetch({ query: SETTINGS_QUERY, ...mode, tags: [TAGS.settings, TAGS.page] })
   return data
 }
 

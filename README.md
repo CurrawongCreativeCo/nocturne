@@ -95,7 +95,7 @@ src/
     studio/                        desk structure, singletons, Presentation resolvers
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text
   config/                          env.ts (validated), paths.ts (slug <-> URL)
-  lib/sanity/                      client (singleton), live, image, token, data-attribute,
+  lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
                                    fragments.ts (shared GROQ), schema/ (link, cta, seo, blockContent, imageField)
   styles/globals.css               Tailwind theme, including the brand color
   types/
@@ -127,8 +127,13 @@ components, config, lib, styles, types   ->   features   ->   app
   Cache Components contract: `draftMode()` and `cookies()` are read outside the cache boundary and passed in.
 - `cachedSanityFetch` is the **only** `'use cache'` boundary for Sanity data.
 - `<SanityLive />` listens to the Live Content API and expires exactly the tags the changed documents
-  touched. No webhooks or `revalidate` timers. `cacheLife.default` is set to "forever" for that reason.
-- Use `tags` on a fetch only for read-your-own-writes after a server-action mutation (`updateTag`).
+  touched. No `revalidate` timers. `cacheLife.default` is set to "forever" for that reason.
+- Its action, `lib/sanity/live-action.ts`, makes the refresh seamless. Open tabs re-render with the new
+  content in place, within about a second, with no reload or flash. The first tab to report a change
+  expires it immediately. Other tabs within 2 seconds just refresh, so any number of open tabs costs
+  each changed query two refetches at most. (next-sanity's default only marks tags stale, so the tab's
+  refresh would render the old content and the edit wouldn't appear until a later visit.)
+- Fetch `tags` are document-type tags for webhook mode (see below); live mode uses Sanity's sync tags.
 
 ### Request budget
 
@@ -145,10 +150,40 @@ unknown-URL check) and `SETTINGS_QUERY` (header, footer, site metadata). So:
 Keep it that way: fetch through `cachedSanityFetch`, call each query with the same argument shape so
 callers share one entry, and fold new data into an existing query rather than adding a parallel one.
 
-Live updates use one connection per open browser tab, and Sanity allows 1,000 live connections per
-dataset. Above that, visitors fall back to re-rendering from the cache every 30 seconds (still no extra
-Sanity requests). If a site regularly has more than ~1,000 visitors at once, switch production to
-webhook revalidation and keep `<SanityLive />` for draft mode only.
+### Live mode vs. webhook mode
+
+By default (**live mode**), each open browser tab listens to Sanity and expires exactly the cached
+results that a change touched. It needs no setup and works in local dev. Two costs grow with traffic:
+Sanity allows 1,000 live connections per dataset (above that, visitors fall back to re-rendering from
+cache every 30 seconds), and every open tab calls a small server action on each publish.
+
+**Webhook mode** suits sites that regularly have hundreds to a thousand-plus visitors at once. Sanity
+calls one route per publish, and visitors open no connections. Previews stay live either way.
+
+| | Live mode (default) | Webhook mode |
+| --- | --- | --- |
+| Setup | none | webhook + secret per environment |
+| Visitor connections | one per open tab, 1,000 cap | none |
+| Server calls per publish | one per open tab (refetches deduped to ≤2 per query) | one |
+| Open tabs see the change | in place, within ~1 s | on their next navigation |
+| First visitor after a publish | gets the new content | gets the previous version once while the new one renders |
+| What a publish refetches | only results containing the changed documents | every result tagged with the changed type |
+| Works on localhost | yes | no (Sanity can't reach it) |
+
+To switch a deployment to webhook mode:
+
+1. Generate a secret: `openssl rand -hex 32`
+2. Set `SANITY_REVALIDATE_SECRET` to it in the deployment's environment variables (not needed locally).
+3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
+   - **URL:** `https://your-site.com/api/revalidate`
+   - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
+   - **Filter:** `_type in ["page", "settings"]` · **Projection:** `{_type}`
+   - **HTTP method:** POST · **Secret:** the same value as step 1
+   - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
+4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
+
+Results are tagged by document type (`TAGS` in `lib/sanity/live.ts`). When you add a document type
+that pages query, add it to `TAGS`, to the `tags` of every fetch that reads it, and to the webhook filter.
 
 ### Type flow
 
