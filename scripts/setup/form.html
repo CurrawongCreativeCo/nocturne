@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Setup</title>
+<style>
+  :root {
+    --bg: #f6f6f7; --surface: #fff; --text: #16161a; --muted: #5f6068; --border: #dcdce0;
+    --accent: #e3392f; --accent-text: #fff; --error: #c0261c; --error-bg: #fdecea;
+    --ok: #18794e; --warn: #9a5b00; --code-bg: #efeff1; --focus: #2563eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101012; --surface: #1a1a1d; --text: #ededf0; --muted: #a0a0a8; --border: #34343a;
+      --accent: #f0544a; --accent-text: #fff; --error: #ff8a80; --error-bg: #3a1714;
+      --ok: #4cc38a; --warn: #f5b74f; --code-bg: #26262b; --focus: #60a5fa;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 560px; margin: 0 auto; padding: 48px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .lede { color: var(--muted); margin: 0 0 28px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  fieldset { border: 0; padding: 0; margin: 0 0 24px; }
+  legend { font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 12px; }
+  .field { margin-bottom: 16px; }
+  label { display: block; font-weight: 500; margin-bottom: 4px; }
+  input[type=text], input[type=password], input[type=url] {
+    width: 100%; padding: 9px 11px; font: inherit; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  }
+  input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  input[aria-invalid=true] { border-color: var(--error); }
+  .help { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+  .error { color: var(--error); font-size: 13px; margin: 4px 0 0; }
+  .error:empty { display: none; }
+  .choice { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+  .choice input { margin-top: 4px; }
+  .choice strong { display: block; font-weight: 500; }
+  .choice span { color: var(--muted); font-size: 13px; }
+  details { margin-bottom: 24px; }
+  summary { cursor: pointer; color: var(--muted); font-weight: 500; margin-bottom: 12px; }
+  code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  a { color: inherit; }
+  button {
+    width: 100%; padding: 11px; font: inherit; font-weight: 600; border: 0; border-radius: 8px;
+    background: var(--accent); color: var(--accent-text); cursor: pointer;
+  }
+  button[disabled] { opacity: .6; cursor: progress; }
+  .banner { background: var(--error-bg); color: var(--error); border-radius: 8px; padding: 10px 12px; margin-bottom: 20px; font-size: 14px; }
+  .banner:empty { display: none; }
+  .checklist { list-style: none; padding: 0; margin: 0 0 20px; }
+  .checklist li { display: flex; gap: 10px; padding: 6px 0; }
+  .checklist .icon { flex: none; width: 18px; font-weight: 700; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .actions a { flex: 1; text-align: center; padding: 10px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; font-weight: 500; }
+  .actions a.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Connect to Sanity</h1>
+  <p class="lede">One-time setup. Once the connection works, this form writes <code>.env.local</code> and removes itself from the project.</p>
+
+  <form id="form" class="card" novalidate>
+    <div class="banner" id="banner" role="alert"></div>
+
+    <fieldset>
+      <legend>Project</legend>
+      <div class="field">
+        <label for="projectId">Project ID</label>
+        <input type="text" id="projectId" name="projectId" autocomplete="off" spellcheck="false" required aria-describedby="projectId-help projectId-error">
+        <p class="help" id="projectId-help">Shown under your project name at <a href="https://www.sanity.io/manage" target="_blank" rel="noopener">sanity.io/manage</a>. No project yet? Create one there first.</p>
+        <p class="error" id="projectId-error"></p>
+      </div>
+      <div class="field">
+        <label for="dataset">Dataset</label>
+        <input type="text" id="dataset" name="dataset" autocomplete="off" spellcheck="false" aria-describedby="dataset-error">
+        <p class="error" id="dataset-error"></p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Read token</legend>
+      <label class="choice">
+        <input type="radio" name="tokenMode" value="create" checked>
+        <div><strong>Create a Viewer token for me</strong><span>Uses your Sanity CLI login. Run <code>npx sanity login</code> in a terminal first if you haven't.</span></div>
+      </label>
+      <label class="choice">
+        <input type="radio" name="tokenMode" value="paste">
+        <div><strong>I'll paste a token</strong><span>Create one in <a id="tokens-link" href="https://www.sanity.io/manage" target="_blank" rel="noopener">Manage</a> → API → Tokens with the <b>Viewer</b> role.</span></div>
+      </label>
+      <div class="field" id="token-field" hidden>
+        <label for="token">API token</label>
+        <input type="password" id="token" name="token" autocomplete="off" spellcheck="false" aria-describedby="token-error">
+      </div>
+      <p class="error" id="token-error"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Studio access</legend>
+      <label class="choice">
+        <input type="checkbox" name="addCors" checked>
+        <div><strong>Allow this site in CORS origins</strong><span>The embedded Studio at <code>/studio</code> needs it. Adds <span id="cors-origins">http://localhost:3000</span> with credentials, using your Sanity CLI login.</span></div>
+      </label>
+    </fieldset>
+
+    <details id="advanced">
+      <summary>Advanced</summary>
+      <div class="field">
+        <label for="siteUrl">Site URL</label>
+        <input type="url" id="siteUrl" name="siteUrl" aria-describedby="siteUrl-help siteUrl-error">
+        <p class="help" id="siteUrl-help">Used for canonical URLs and the sitemap. Change it to your production URL when you deploy.</p>
+        <p class="error" id="siteUrl-error"></p>
+      </div>
+      <div class="field">
+        <label for="apiVersion">API version</label>
+        <input type="text" id="apiVersion" name="apiVersion" aria-describedby="apiVersion-error">
+        <p class="error" id="apiVersion-error"></p>
+      </div>
+    </details>
+
+    <button type="submit" id="submit">Connect</button>
+  </form>
+
+  <section id="done" class="card" hidden aria-live="polite">
+    <ul class="checklist" id="checklist"></ul>
+    <p id="next" class="help"></p>
+    <div class="actions" id="actions" hidden>
+      <a class="primary" id="studio-link" href="#">Open Studio</a>
+      <a id="site-link" href="#">Open site</a>
+    </div>
+  </section>
+</main>
+
+<script>
+  const form = document.getElementById('form')
+  const fields = ['projectId', 'dataset', 'token', 'siteUrl', 'apiVersion']
+  let devPort = 3000
+
+  const tokenMode = () => form.tokenMode.value
+  function syncTokenMode() {
+    document.getElementById('token-field').hidden = tokenMode() !== 'paste'
+  }
+  function syncLinks() {
+    const id = form.projectId.value.trim()
+    document.getElementById('tokens-link').href = id
+      ? `https://www.sanity.io/manage/project/${encodeURIComponent(id)}/api`
+      : 'https://www.sanity.io/manage'
+    const site = form.siteUrl.value.trim().replace(/\/$/, '')
+    const local = `http://localhost:${devPort}`
+    document.getElementById('cors-origins').textContent = site && site !== local ? `${local} and ${site}` : local
+  }
+
+  function showErrors(errors = {}, message = '') {
+    for (const name of fields) {
+      const el = document.getElementById(`${name}-error`)
+      if (el) el.textContent = errors[name] ?? ''
+      form[name].setAttribute('aria-invalid', errors[name] ? 'true' : 'false')
+    }
+    document.getElementById('banner').textContent = message
+    if (errors.siteUrl || errors.apiVersion) document.getElementById('advanced').open = true
+    const first = fields.find((name) => errors[name])
+    if (first && (first !== 'token' || tokenMode() === 'paste')) form[first].focus()
+  }
+
+  async function load() {
+    const state = await fetch('/api/state').then((r) => r.json())
+    devPort = state.devPort
+    for (const name of fields) form[name].value = state.values[name] ?? ''
+    if (state.values.token) form.tokenMode.value = 'paste'
+    syncTokenMode()
+    syncLinks()
+    if (state.initialError) {
+      const { field, message } = state.initialError
+      showErrors(field ? { [field]: message } : {}, `Your existing .env.local didn't connect. ${field ? '' : message}`)
+    } else {
+      form.projectId.focus()
+    }
+  }
+
+  form.addEventListener('change', (e) => { if (e.target.name === 'tokenMode') syncTokenMode() })
+  form.addEventListener('input', syncLinks)
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const button = document.getElementById('submit')
+    button.disabled = true
+    button.textContent = tokenMode() === 'create' ? 'Creating token and connecting…' : 'Connecting…'
+    showErrors()
+
+    const payload = Object.fromEntries(fields.map((name) => [name, form[name].value]))
+    payload.tokenMode = tokenMode()
+    payload.addCors = form.addCors.checked
+
+    try {
+      const res = await fetch('/api/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const result = await res.json()
+      if (result.ok) return showDone(result)
+      showErrors(result.errors, result.message)
+    } catch {
+      showErrors({}, 'Lost contact with the setup server. Is the terminal still running?')
+    }
+    button.disabled = false
+    button.textContent = 'Connect'
+  })
+
+  function showDone(result) {
+    form.hidden = true
+    const done = document.getElementById('done')
+    done.hidden = false
+    const items = [
+      ['ok', `Connected to <b>${result.projectId}</b> / <b>${result.dataset}</b> (${result.pageCount} page${result.pageCount === 1 ? '' : 's'})`],
+      result.tokenCreated && ['ok', 'Created a Viewer token'],
+      ['ok', 'Wrote <code>.env.local</code>'],
+      ...result.cors.map((c) =>
+        c.status === 'failed'
+          ? ['warn', `CORS origin ${c.origin} not added. ${escapeHtml(c.message)} You can add it in <a href="https://www.sanity.io/manage/project/${result.projectId}/api" target="_blank" rel="noopener">Manage → API → CORS origins</a> with "Allow credentials" checked.`]
+          : ['ok', `CORS origin ${c.origin} ${c.status === 'added' ? 'added' : 'already allowed'}`]),
+      ['ok', 'Removed the setup wizard. Commit the deleted files.'],
+    ].filter(Boolean)
+    document.getElementById('checklist').innerHTML = items
+      .map(([kind, html]) => `<li><span class="icon ${kind}">${kind === 'ok' ? '✓' : '!'}</span><span>${html}</span></li>`)
+      .join('')
+
+    const site = `http://localhost:${devPort}`
+    document.getElementById('studio-link').href = `${site}/studio`
+    document.getElementById('site-link').href = site
+    const next = document.getElementById('next')
+    const homeHint = result.hasHome ? '' : ' Then create a Page with the slug <code>home</code> in Studio and publish it.'
+    next.innerHTML = `Starting the site at ${site}…${homeHint}`
+    waitForSite(site, () => {
+      next.innerHTML = `Your site is running.${homeHint}`
+      document.getElementById('actions').hidden = false
+    })
+  }
+
+  function waitForSite(url, onUp) {
+    // `no-cors` resolves as soon as anything answers, which is all we need to know.
+    fetch(url, { mode: 'no-cors' }).then(onUp, () => setTimeout(() => waitForSite(url, onUp), 1000))
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+  }
+
+  load()
+</script>
+</body>
+</html>

@@ -8,9 +8,11 @@
     "build": "npm run typegen && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "typegen": "sanity schema extract --path=./schema.json --enforce-required-fields && sanity typegen generate",
+    "typegen": "sanity schema extract --path=./schema.json --enforce-required-fields --force && sanity typegen generate",
     "typegen:watch": "sanity typegen generate --watch",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "predev": "node scripts/setup/index.mjs",
+    "setup": "node scripts/setup/index.mjs"
   },
   "dependencies": {
     "@sanity/icons": "^5.2.3",

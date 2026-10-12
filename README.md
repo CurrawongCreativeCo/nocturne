@@ -2,14 +2,29 @@
 
 Next.js 16 (App Router, Cache Components) · next-sanity 13 · Sanity Studio 6 · Tailwind 4 · TypeScript strict.
 
+<!-- setup-wizard:start -->
+### First run
+
+```bash
+npm install
+npx sanity login   # optional: lets the wizard create your token and CORS origins
+npm run dev
+```
+
+The first `npm run dev` opens a setup form at http://localhost:3333. It checks your Sanity credentials,
+writes `.env.local`, and then deletes itself (`scripts/setup/`, the `predev`/`setup` scripts, and this
+section). After that, the site starts as usual. Commit the deletions.
+
+<!-- setup-wizard:end -->
+### Manual setup
+
 ```bash
 cp .env.example .env.local   # fill in project ID + Viewer token
-npm run typegen              # schema -> src/types/sanity.types.ts
 npm run dev                  # site on :3000, Studio on :3000/studio
 ```
 
 In sanity.io/manage → API → CORS, add `http://localhost:3000` (with credentials) and your production URL.
-Create a page with slug `home` to populate `/`.
+Create a page with slug `home` to populate `/`. After changing schemas or queries, run `npm run typegen`.
 
 ## Architecture
 
