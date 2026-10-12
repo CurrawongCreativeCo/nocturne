@@ -363,3 +363,6 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
   Browsers handle it fine, and the end-to-end tests check that Chrome lands on the destination and
   that the two values never differ. Moving redirects to `next.config.ts` would avoid it but would need
   a redeploy for every redirect editors add, so it's left as is until Next.js fixes it.
+- 404s for unknown URLs are rendered on demand, so Next.js streams their metadata to browsers (the tab
+  title is set by script) and sends crawlers a minimal shell. Both get a 404 status and `noindex`,
+  which is what search engines act on; the end-to-end tests check exactly that.

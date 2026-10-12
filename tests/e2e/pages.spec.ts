@@ -43,7 +43,19 @@ test.describe('pages', () => {
   test('unknown URLs return a 404 page', async ({ page }) => {
     const response = await page.goto('/does-not-exist')
     expect(response?.status()).toBe(404)
-    await expect(page).toHaveTitle('Page not found | Test Co')
+    await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible()
+  })
+
+  test('search engines get a 404 with noindex', async ({ request }) => {
+    // Crawlers get complete HTML rather than streamed metadata; for a 404 that's a minimal
+    // shell, which is fine: what search engines act on is the status and noindex.
+    const response = await request.get('/does-not-exist', {
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+      },
+    })
+    expect(response.status()).toBe(404)
+    expect(await response.text()).toContain('<meta name="robots" content="noindex"/>')
   })
 })
 
