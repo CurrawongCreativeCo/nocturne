@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env*.local
+.env
+*.tsbuildinfo
+next-env.d.ts
+.sanity
+# Intermediate schema dump; sanity.types.ts IS committed so CI typechecks without Sanity access.
+schema.json

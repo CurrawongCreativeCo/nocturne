@@ -1,0 +1,37 @@
+{
+  "name": "sanity-next-starter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "npm run typegen && next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "typegen": "sanity schema extract --path=./schema.json --enforce-required-fields && sanity typegen generate",
+    "typegen:watch": "sanity typegen generate --watch",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@sanity/icons": "^5.2.3",
+    "@sanity/image-url": "^2.1.1",
+    "@sanity/vision": "^6.18.0",
+    "next": "^16.4.0",
+    "next-sanity": "^13.3.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "sanity": "^6.18.0",
+    "server-only": "^0.0.1",
+    "styled-components": "^6.5.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,27 @@
+import { BlockContentIcon } from '@sanity/icons/BlockContent'
+import { defineArrayMember, defineField, defineType } from 'sanity'
+
+import { imageField } from '@/lib/sanity/schema/image-field'
+
+export const hero = defineType({
+  name: 'hero',
+  title: 'Hero',
+  type: 'object',
+  icon: BlockContentIcon,
+  fields: [
+    defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
+    defineField({ name: 'description', type: 'text', rows: 3 }),
+    defineField({
+      name: 'ctas',
+      title: 'Calls to action',
+      type: 'array',
+      of: [defineArrayMember({ type: 'cta' })],
+      validation: (rule) => rule.max(2),
+    }),
+    imageField({ name: 'backgroundImage', requireAlt: false }),
+  ],
+  preview: {
+    select: { title: 'title', media: 'backgroundImage' },
+    prepare: ({ title, media }) => ({ title: title || 'Untitled', subtitle: 'Hero', media }),
+  },
+})
