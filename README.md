@@ -3,9 +3,14 @@
 Next.js 16 (App Router, Cache Components) · next-sanity 13 · Sanity Studio 6 · Tailwind 4 · TypeScript strict.
 
 <!-- setup-wizard:start -->
-### First run
+### Starting a new project
+
+This repo is the clean template. Don't run the setup wizard in it; start each new site from a fresh copy
+(or use GitHub's **Use this template** button):
 
 ```bash
+git clone https://github.com/CurrawongCreativeCo/sanity-starter.git my-new-site
+cd my-new-site
 npm install
 npx sanity login   # optional: lets the wizard create your token and CORS origins
 npm run dev
@@ -13,7 +18,14 @@ npm run dev
 
 The first `npm run dev` opens a setup form at http://localhost:3333. It checks your Sanity credentials,
 writes `.env.local`, and then deletes itself (`scripts/setup/`, the `predev`/`setup` scripts, and this
-section). After that, the site starts as usual. Commit the deletions.
+section). After that, the site starts as usual. Commit the deletions in the new project only; never
+in this template, or future projects lose the wizard.
+
+To make the new project its own repo, point it at a new remote before pushing:
+
+```bash
+git remote set-url origin https://github.com/<you>/my-new-site.git
+```
 
 <!-- setup-wizard:end -->
 ### Manual setup
