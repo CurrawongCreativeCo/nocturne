@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 
-import { siteUrl, studioUrl } from '@/config/env'
+import { studioUrl } from '@/config/env'
+import { siteUrl } from '@/config/site-url'
 
 export default function robots(): MetadataRoute.Robots {
   return {

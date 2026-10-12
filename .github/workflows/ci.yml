@@ -1,4 +1,5 @@
 # Shared quality gate: the pre-commit hook is opt-in, so this is what every push must pass.
+# `check`: types, lint, format, unit tests, generator. `e2e`: the built site in a real browser.
 name: CI
 
 on:
@@ -45,5 +46,44 @@ jobs:
       - name: Next.js route types
         run: npx next typegen
 
-      - name: Typecheck, lint, format
+      - name: Typecheck, lint, format, unit tests
         run: npm run check
+
+      # The generator edits several files at marker comments; prove its output still passes
+      # every check. Runs on the throwaway CI checkout, so nothing is committed.
+      - name: Section generator smoke test
+        run: |
+          npm run new:section ci-smoke-section
+          npx next typegen
+          npm run check
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Production build against a fake Content Lake: pages, metadata, redirects, headers,
+      # keyboard and mobile navigation, and axe accessibility scans.
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

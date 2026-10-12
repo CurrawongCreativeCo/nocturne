@@ -15,13 +15,20 @@ export async function PageView({ slug, ...mode }: { slug: string } & FetchMode) 
     notFound()
   }
 
+  // Every page needs exactly one <h1>. A leading hero provides it; otherwise use the page title,
+  // visually hidden so the design is unchanged.
+  const startsWithHero = page.pageBuilder?.[0]?._type === 'hero'
+
   return (
-    <SectionRenderer
-      documentId={page._id}
-      documentType={page._type}
-      sections={page.pageBuilder}
-      editable={mode.stega}
-    />
+    <>
+      {!startsWithHero && <h1 className="sr-only">{page.title}</h1>}
+      <SectionRenderer
+        documentId={page._id}
+        documentType={page._type}
+        sections={page.pageBuilder}
+        editable={mode.stega}
+      />
+    </>
   )
 }
 

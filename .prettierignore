@@ -9,3 +9,8 @@ package-lock.json
 .next
 out
 public
+
+# Test output
+test-results
+playwright-report
+blob-report

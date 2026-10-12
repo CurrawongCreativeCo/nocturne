@@ -3,9 +3,6 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { imageField } from '@/lib/sanity/schema/image-field'
 
-/** Singleton (fixed `_id: "settings"`), pinned in the Studio sidebar. */
-export const SETTINGS_ID = 'settings'
-
 export const settings = defineType({
   name: 'settings',
   title: 'Site settings',
@@ -39,6 +36,8 @@ export const settings = defineType({
     imageField({
       name: 'logo',
       group: 'general',
+      // The header announces the logo as the site name, so its alt text is never used.
+      requireAlt: false,
       description: 'SVG or transparent PNG. Falls back to the site name.',
     }),
     imageField({

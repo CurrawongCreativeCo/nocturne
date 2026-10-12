@@ -30,7 +30,8 @@ const nextConfig: NextConfig = {
   headers: () =>
     Promise.resolve([
       { source: '/:path*', headers: securityHeaders },
-      { source: '/((?!studio).*)', headers: siteFrameHeaders },
+      // Everything except /studio and /studio/*; a page like /studios still gets the headers.
+      { source: '/((?!studio(?:/|$)).*)', headers: siteFrameHeaders },
     ]),
 
   /**
@@ -52,7 +53,6 @@ const nextConfig: NextConfig = {
      * `next/image` usage pointing at the Sanity CDN.
      */
     remotePatterns: [{ protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/images/**' }],
-    formats: ['image/avif', 'image/webp'],
   },
 
   // Full URLs for Content Lake requests in dev logs — invaluable when debugging cache hits.

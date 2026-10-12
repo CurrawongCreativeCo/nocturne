@@ -24,6 +24,9 @@ The first `npm run dev` opens a setup form at http://localhost:3333. It can crea
 to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
 or future projects lose the wizard.
 
+Working on the template itself? Keep an untracked `.template-dev` file in its checkout (any content;
+it's gitignored). The wizard sees it and never removes itself there, even when `.env.local` works.
+
 To make the new project its own repo, point it at a new remote before pushing:
 
 ```bash
@@ -49,7 +52,8 @@ Open http://localhost:3000/studio:
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
-  `/about`. They only apply to paths with no page, so they can't hide a live page.
+  `/about`. They only apply to paths with no page, so they can't hide a live page. Studio blocks
+  duplicates and loops, and warns about chains and sources a page already uses.
 - **Pages → New** offers templates: _Landing page_ (hero, features, testimonials, call to action) and
   _Content page_ (hero + rich text), or a blank page.
 - Under **Sections**, _Add item_ shows every section with a thumbnail:
@@ -75,22 +79,29 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
 2. **Environment variables** (Production and Preview):
 
-   | Variable                         | Value                                                      |
-   | -------------------------------- | ---------------------------------------------------------- |
-   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                          |
-   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                          |
-   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                          |
-   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash) |
-   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                           |
-   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                          |
+   | Variable                         | Value                                                       |
+   | -------------------------------- | ----------------------------------------------------------- |
+   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                           |
+   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                           |
+   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                           |
+   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)  |
+   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`) |
+   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                            |
+   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                           |
 
 3. **Allow the production origin in Sanity**, or Studio and live updates won't connect:
    `npx sanity cors add https://example.com --credentials` (or sanity.io/manage → API → CORS
    origins, "Allow credentials" checked). Preview deployments on other domains need their own entry.
 4. **Deploy**, then open `https://example.com/studio` and sign in. Studio is part of the site, so
    there is nothing separate to deploy.
-5. **Check:** `/sitemap.xml` and `/robots.txt` list production URLs (if they show localhost,
-   `NEXT_PUBLIC_SITE_URL` is wrong), and editing a page in Presentation updates the live site.
+5. **Check:** `/sitemap.xml` and `/robots.txt` list production URLs, and editing a page in
+   Presentation updates the live site.
+
+Without `NEXT_PUBLIC_SITE_URL`, Vercel deployments fall back to the project's production domain; any
+other production server refuses to start rather than publish canonical URLs pointing at localhost.
+Server errors are logged as one JSON line each (`src/instrumentation.ts`): search Vercel's Logs for
+`request-error`, or the "Reference" code shown on the error page. Forward them to Sentry from there
+if you use it.
 
 Every deploy runs `npm run build`, which regenerates Sanity types from the schema first.
 
@@ -235,16 +246,40 @@ but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 ## Code quality
 
 **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It checks
-that the committed Sanity types match the schema, then runs `npm run check`. **Dependabot** opens
+that the committed Sanity types match the schema, runs `npm run check`, proves the section generator's
+output passes too, and runs the end-to-end suite in a real browser. **Dependabot** opens
 weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
 each release before proposing it.
 
-| Command                | Does                                                  |
-| ---------------------- | ----------------------------------------------------- |
-| `npm run check`        | Everything below, read-only. Run it before pushing.   |
-| `npm run typecheck`    | TypeScript, strict mode                               |
-| `npm run lint`         | ESLint, zero warnings allowed (`lint:fix` to autofix) |
-| `npm run format:check` | Prettier (`format` to apply)                          |
+| Command                | Does                                                                       |
+| ---------------------- | -------------------------------------------------------------------------- |
+| `npm run check`        | Typecheck, lint, format and unit tests, read-only. Run it before pushing.  |
+| `npm run typecheck`    | TypeScript, strict mode                                                    |
+| `npm run lint`         | ESLint, zero warnings allowed (`lint:fix` to autofix)                      |
+| `npm run format:check` | Prettier (`format` to apply)                                               |
+| `npm test`             | Unit tests (Vitest; `test:watch` while working)                            |
+| `npm run test:e2e`     | End-to-end tests (Playwright; first run `npx playwright install chromium`) |
+
+### Tests
+
+- **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching, the live-update
+  dedupe logic, the section generator's naming, and the setup wizard's validation.
+- **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
+  `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
+  Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
+  route, keyboard focus and the skip link, the mobile menu, and runs axe for WCAG 2.2 AA on every page.
+
+Running the end-to-end tests locally:
+
+```bash
+npx playwright install chromium   # once per machine: downloads the test browser (~100 MB)
+npm run test:e2e                   # builds the site, then tests it (a few minutes)
+```
+
+They use ports 3100 and 9999 and don't need `.env.local`. Stop anything else on those ports first.
+CI installs the browser itself.
+
+When you add a section, add an example of it to the fixture dataset so the axe scan covers it.
 
 **ESLint** layers the strictest presets available:
 
@@ -258,9 +293,11 @@ each release before proposing it.
 - `eslint-config-prettier` last, so formatting is left entirely to Prettier
 
 Built in at runtime: a "Skip to content" link (the first Tab stop on every page), a focus ring that
-stays visible on any background (dark inner ring plus white outer ring), and reduced motion for
-visitors who ask for it. Lint can't see rendered output (color contrast, focus order, final heading
-structure). Check those in the browser with Lighthouse or the axe DevTools extension.
+stays visible on any background (a 2px outline with a gap, dark on light sections and white
+on dark ones; tested in the end-to-end suite), and reduced motion for
+visitors who ask for it. Lint can't see rendered output, so the end-to-end suite runs axe on the
+built pages (contrast, names, landmarks, headings). Things no tool judges well, like whether the
+focus order makes sense, still need a quick keyboard pass in the browser.
 
 **Prettier** formats everything and sorts Tailwind classes into the official order. The VS Code
 settings in `.vscode/` format on save and apply ESLint fixes. Install the recommended extensions
@@ -317,3 +354,12 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
   handles failures in the layouts themselves.
 - Structured data (schema.org Organization and WebSite) is generated from Site settings on every
   page, reusing the cached settings query.
+- `npm audit` reports issues in `braces` and `sprintf-js`, which have no fixed release yet. Both run only
+  inside the Sanity CLI and ESLint, at build time, on this project's own files. Patched versions of
+  the other affected packages are pinned with `overrides` in `package.json`; remove an override once
+  the package that pulls it in ships the fix itself.
+- Redirects from Studio send the `Location` header twice, with identical values. That's a known
+  Next.js bug with redirects from cached pages ([vercel/next.js#82117](https://github.com/vercel/next.js/issues/82117)).
+  Browsers handle it fine, and the end-to-end tests check that Chrome lands on the destination and
+  that the two values never differ. Moving redirects to `next.config.ts` would avoid it but would need
+  a redeploy for every redirect editors add, so it's left as is until Next.js fixes it.

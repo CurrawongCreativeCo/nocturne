@@ -24,6 +24,10 @@ export default function PageError({
       <p className="mt-4 text-gray-600">
         This page couldn&apos;t be loaded. Please try again in a moment.
       </p>
+      {error.digest && (
+        // Matches the "digest" in the server logs (src/instrumentation.ts).
+        <p className="mt-2 text-sm text-gray-500">Reference: {error.digest}</p>
+      )}
       <div className="mt-8 flex justify-center gap-4">
         <button
           type="button"

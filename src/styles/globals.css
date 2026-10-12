@@ -4,20 +4,29 @@
   /* --font-inter is set by next/font in app/layout.tsx; swap the font there. */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  /* Brand color: used by `bg-brand`, `text-brand` and the "brand" CTA banner tone. */
+  /*
+   * Brand color: used by `bg-brand`, `text-brand` and the "brand" CTA banner tone. Keep at least
+   * 4.5:1 contrast between the two (and brand on white), e.g. with webaim.org/resources/contrastchecker.
+   */
   --color-brand: oklch(0.55 0.2 264);
   --color-brand-foreground: oklch(0.99 0 0);
 }
 
 @layer base {
   /*
-   * Keyboard focus: a dark inner ring plus a white outer ring (WCAG technique C40), visible on
-   * any background, including brand and dark sections. :focus-visible skips mouse clicks.
+   * Keyboard focus: an outline with a 2px gap, so it never merges into a dark button and can't
+   * be overridden by Tailwind `ring-*`/`shadow-*` utilities (those use box-shadow). Dark by
+   * default; components on dark backgrounds switch it to white with `focus-visible:outline-white`.
+   * :focus-visible skips mouse clicks.
    */
   :focus-visible {
     outline: 2px solid var(--color-gray-950);
-    outline-offset: 0;
-    box-shadow: 0 0 0 4px var(--color-white);
+    outline-offset: 2px;
+  }
+
+  /* Programmatic focus targets (the skip link's <main>) aren't controls: no ring. */
+  [tabindex='-1']:focus {
+    outline: none;
   }
 
   @media (prefers-reduced-motion: reduce) {

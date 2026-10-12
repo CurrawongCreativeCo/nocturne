@@ -12,25 +12,17 @@ import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { toSectionNames } from './section-names.mjs'
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const feature = join(root, 'src/features/pages')
 
 const input = process.argv.slice(2).join(' ').trim()
 if (!input) exit('Usage: npm run new:section <name>   e.g. npm run new:section pricing-table')
 
-// "Pricing table", "pricingTable" and "pricing-table" all become the same names.
-const words = input
-  .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-  .toLowerCase()
-  .split(/[^a-z0-9]+/)
-  .filter(Boolean)
-if (!words.length || !/^[a-z]/.test(words[0]))
-  exit(`"${input}" isn't a usable name. Start with a letter, e.g. "pricing-table".`)
-
-const kebab = words.join('-')
-const typeName = words[0] + words.slice(1).map(capitalize).join('')
-const Component = words.map(capitalize).join('')
-const title = capitalize(words.join(' '))
+const names = toSectionNames(input)
+if (!names) exit(`"${input}" isn't a usable name. Start with a letter, e.g. "pricing-table".`)
+const { kebab, typeName, Component, title } = names
 
 const paths = {
   schema: join(feature, 'schemas/sections', `${kebab}.ts`),
@@ -168,10 +160,6 @@ export function ${Component}({ data }: SectionProps<'${typeName}'>) {
   )
 }
 `
-}
-
-function capitalize(word) {
-  return word.charAt(0).toUpperCase() + word.slice(1)
 }
 
 function escapeXml(text) {

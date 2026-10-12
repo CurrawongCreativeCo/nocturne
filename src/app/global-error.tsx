@@ -4,6 +4,8 @@ import '@/styles/globals.css'
 
 import { useEffect } from 'react'
 
+import { siteLanguage } from '@/config/env'
+
 /**
  * Last-resort boundary for errors in the root or site layout (e.g. site settings failed to
  * load), where the header and footer can't render. Replaces the whole document.
@@ -20,7 +22,7 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <html lang="en">
+    <html lang={siteLanguage}>
       <body className="flex min-h-dvh items-center justify-center bg-white font-sans text-gray-950 antialiased">
         <main className="max-w-xl px-6 text-center">
           <h1 className="text-4xl font-semibold">Something went wrong</h1>

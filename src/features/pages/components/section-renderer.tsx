@@ -56,11 +56,11 @@ export function SectionRenderer({
   const Wrapper = editable ? 'div' : Fragment
   return (
     <Wrapper {...(editable && { 'data-sanity': dataAttr(documentId, documentType, path) })}>
-      {sections.map((section) => {
+      {sections.map((section, index) => {
         // TS can't correlate `section` with `SECTION_COMPONENTS[section._type]` across a
         // union; the registry's mapped type above already guarantees they match.
         const Section = SECTION_COMPONENTS[section._type] as
-          ComponentType<{ data: PageSection }> | undefined
+          ComponentType<{ data: PageSection; isFirst?: boolean }> | undefined
 
         if (!Section) {
           // Reachable when the dataset has a section type newer than this deployment.
@@ -75,10 +75,10 @@ export function SectionRenderer({
             key={section._key}
             data-sanity={dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)}
           >
-            <Section data={section} />
+            <Section data={section} isFirst={index === 0} />
           </div>
         ) : (
-          <Section key={section._key} data={section} />
+          <Section key={section._key} data={section} isFirst={index === 0} />
         )
       })}
     </Wrapper>

@@ -3,7 +3,8 @@ import '@/styles/globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
-import { siteUrl } from '@/config/env'
+import { siteLanguage } from '@/config/env'
+import { siteUrl } from '@/config/site-url'
 
 /** Title, description and share image defaults come from Site settings, in (site)/layout.tsx. */
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-int
 /** Bare document shell shared by the site and the embedded Studio. */
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang={siteLanguage} className={inter.variable}>
       <body className="flex min-h-dvh flex-col bg-white font-sans text-gray-950 antialiased">
         {children}
       </body>

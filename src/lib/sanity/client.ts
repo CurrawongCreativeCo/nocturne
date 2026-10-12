@@ -18,4 +18,10 @@ export const client = createClient({
   perspective: 'published',
   // Lets <VisualEditing /> turn stega-encoded strings into click-to-edit overlays.
   stega: { studioUrl },
+  // Test-only: end-to-end tests point the server at a local fake Content Lake
+  // (tests/e2e/fake-sanity.mjs). Server-side variable, so it never reaches the browser.
+  ...(process.env.SANITY_API_HOST && {
+    apiHost: process.env.SANITY_API_HOST,
+    useProjectHostname: false,
+  }),
 })

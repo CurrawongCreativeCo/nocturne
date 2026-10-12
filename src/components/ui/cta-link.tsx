@@ -3,11 +3,15 @@ import { stegaClean } from 'next-sanity'
 import { SanityLink } from '@/components/ui/sanity-link'
 import type { CtaData } from '@/types/sanity'
 
-/** Button styles per background: `dark` for hero/dark banners, `light` for white or gray sections. */
+/**
+ * Button styles per background: `dark` for hero/dark banners, `light` for white or gray sections.
+ * Dark surfaces also switch the focus ring to white so it stays visible.
+ */
 const variants = {
   dark: {
-    primary: 'bg-white text-gray-950 hover:bg-gray-200',
-    secondary: 'ring-1 ring-inset ring-white/40 text-white hover:bg-white/10',
+    primary: 'bg-white text-gray-950 hover:bg-gray-200 focus-visible:outline-white',
+    secondary:
+      'ring-1 ring-inset ring-white/40 text-white hover:bg-white/10 focus-visible:outline-white',
   },
   light: {
     primary: 'bg-gray-950 text-white hover:bg-gray-800',

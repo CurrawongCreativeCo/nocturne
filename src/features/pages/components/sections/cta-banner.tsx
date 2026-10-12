@@ -7,7 +7,8 @@ import type { SectionProps } from '../../types'
 const tones = {
   brand: {
     section: 'bg-brand text-brand-foreground',
-    text: 'text-brand-foreground/80',
+    // Full strength: 80% opacity measured 3.84:1 on the brand color, below WCAG AA (4.5:1).
+    text: 'text-brand-foreground',
     surface: 'dark',
   },
   dark: { section: 'bg-gray-950 text-white', text: 'text-gray-300', surface: 'dark' },

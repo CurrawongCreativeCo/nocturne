@@ -16,4 +16,9 @@ export type SectionOf<T extends SectionType> = Extract<PageSection, { _type: T }
 /** Props contract every section component implements. */
 export interface SectionProps<T extends SectionType> {
   data: SectionOf<T>
+  /**
+   * First section on the page: the place for the page's <h1> and its above-the-fold image
+   * (preloaded for LCP). Sections further down use <h2> and lazy images.
+   */
+  isFirst?: boolean
 }

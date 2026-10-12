@@ -27,7 +27,13 @@ export const featuresGrid = defineType({
           name: 'featureItem',
           type: 'object',
           fields: [
-            imageField({ name: 'icon', title: 'Icon / image', description: 'SVG or square image' }),
+            imageField({
+              name: 'icon',
+              title: 'Icon / image',
+              // Decorative: the feature title next to it says what it means.
+              requireAlt: false,
+              description: 'SVG or square image. Decorative, so screen readers skip it.',
+            }),
             defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
             defineField({ name: 'text', type: 'text', rows: 3 }),
           ],

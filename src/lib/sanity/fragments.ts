@@ -14,8 +14,7 @@ export const imageFields = /* groq */ `
   hotspot,
   asset->{
     _id,
-    url,
-    metadata { lqip, dimensions { width, height, aspectRatio } }
+    metadata { lqip, dimensions { width, height } }
   }
 `
 

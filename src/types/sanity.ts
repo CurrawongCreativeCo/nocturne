@@ -18,7 +18,6 @@ export interface SanityImageData {
   hotspot?: SanityImageHotspot | null
   asset?: {
     _id: string
-    url: string
     metadata?: {
       lqip?: string | null
       dimensions?: { width: number; height: number } | null

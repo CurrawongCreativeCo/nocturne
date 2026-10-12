@@ -19,10 +19,11 @@ export const dataset = assertValue(
 /** Pin a date; bump deliberately. @see https://www.sanity.io/docs/api-versioning */
 export const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2026-10-01'
 
+/** Language of the site's content, for <html lang>. Screen readers use it to pick pronunciation. */
+export const siteLanguage = process.env.NEXT_PUBLIC_SITE_LANGUAGE || 'en'
+
 /** Where the embedded Studio is mounted. Must match `basePath` in sanity.config.ts. */
 export const studioUrl = '/studio'
-
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 function assertValue<T>(value: T | undefined, errorMessage: string): T {
   if (value === undefined || value === '') throw new Error(errorMessage)

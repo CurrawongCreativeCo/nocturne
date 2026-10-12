@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, ResolvingMetadata } from 'next'
 import { draftMode } from 'next/headers'
 import { Suspense } from 'react'
 
@@ -20,8 +20,11 @@ type Props = PageProps<'/[[...slug]]'>
 
 export const generateStaticParams = getPageStaticParams
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return getPageMetadata(segmentsToSlug((await params).slug))
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  return getPageMetadata(segmentsToSlug((await params).slug), await parent)
 }
 
 export default async function Page({ params }: Props) {

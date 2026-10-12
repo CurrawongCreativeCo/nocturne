@@ -32,7 +32,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       ) : (
         <SiteHeader {...PUBLISHED} />
       )}
-      <main id="main-content" tabIndex={-1} className="flex-1 shadow-none outline-none">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         {children}
       </main>
       {isDraftMode ? (

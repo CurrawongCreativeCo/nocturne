@@ -118,8 +118,8 @@ export default defineConfig([
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
-    // CLI scripts report progress on the console.
-    files: ['scripts/**'],
+    // CLI scripts and test servers report progress on the console.
+    files: ['scripts/**', 'tests/**'],
     rules: { 'no-console': 'off' },
   },
   prettier,

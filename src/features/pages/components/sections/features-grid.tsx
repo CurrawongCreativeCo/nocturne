@@ -29,6 +29,7 @@ export function FeaturesGrid({ data }: SectionProps<'featuresGrid'>) {
           <li key={item._key}>
             <SanityImage
               image={item.icon}
+              alt=""
               width={48}
               height={48}
               className="mb-4 size-12 object-contain"

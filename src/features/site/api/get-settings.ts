@@ -27,12 +27,21 @@ export async function getSiteMetadata(): Promise<Metadata> {
         .url()
     : undefined
 
+  const description = settings?.description ?? undefined
+  const template = { template: `%s | ${title}`, default: title }
+
+  // Next.js copies these Open Graph values into the Twitter tags; it never copies `title` or
+  // `description` into Open Graph, so they're set explicitly. Pages extend this (see getPageMetadata).
   return {
-    title: { template: `%s | ${title}`, default: title },
-    description: settings?.description ?? undefined,
+    title: template,
+    description,
     openGraph: {
+      type: 'website',
       siteName: title,
+      title: template,
+      description,
       ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
     },
+    twitter: { card: 'summary_large_image' },
   }
 }

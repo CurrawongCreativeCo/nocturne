@@ -1,11 +1,12 @@
-import type { Metadata, MetadataRoute } from 'next'
+import type { Metadata, MetadataRoute, ResolvedMetadata } from 'next'
 
-import { siteUrl } from '@/config/env'
 import { slugToPath, slugToSegments } from '@/config/paths'
+import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 import { PAGE_INDEX_QUERY, PAGE_QUERY, REDIRECTS_QUERY } from './queries'
+import { findRedirect } from '../utils/redirects'
 
 /**
  * Same cached fetch in both modes; `mode` (perspective, stega) is part of the cache key.
@@ -33,10 +34,14 @@ export async function getPage({ slug, ...mode }: { slug: string } & FetchMode) {
 /**
  * Always published SEO data: metadata must stay prerenderable, and drafts shouldn't leak into <head>.
  * Reuses the published page entry, so it costs no extra request.
+ *
+ * `parent` is the site-level metadata. A page's `openGraph` replaces the parent's entirely, so the
+ * site name, default share image and description fallback are carried over explicitly.
  */
-export async function getPageMetadata(slug: string): Promise<Metadata> {
+export async function getPageMetadata(slug: string, parent: ResolvedMetadata): Promise<Metadata> {
   const page = await getPage({ slug, ...PUBLISHED })
-  if (!page) return {}
+  // Unknown URLs render the 404 page through this route, so its title is set here.
+  if (!page) return { title: 'Page not found' }
 
   const { seo } = page
   const ogImage = seo?.ogImage?.asset
@@ -47,11 +52,22 @@ export async function getPageMetadata(slug: string): Promise<Metadata> {
         .url()
     : undefined
 
+  const title = seo?.metaTitle || page.title
+  const description = seo?.metaDescription ?? parent.description ?? undefined
+  const path = slugToPath(slug)
+
   return {
-    title: seo?.metaTitle || page.title,
-    description: seo?.metaDescription ?? undefined,
-    alternates: { canonical: slugToPath(slug) },
-    openGraph: ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : undefined,
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: 'website',
+      siteName: parent.openGraph?.siteName,
+      title,
+      description,
+      url: path,
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : parent.openGraph?.images,
+    },
     robots: seo?.noIndex ? { index: false, follow: false } : undefined,
   }
 }
@@ -81,11 +97,6 @@ export async function getSitemap(): Promise<MetadataRoute.Sitemap> {
     }))
 }
 
-/** Lowercase, no trailing slash: "/About-Us/" and "/about-us" are the same redirect source. */
-function normalizePath(path: string): string {
-  return path.toLowerCase().replace(/(.)\/+$/, '$1')
-}
-
 /**
  * Redirect for a path that matched no page, from one cached list of all redirects. Only
  * reached on a miss, so normal page views never read it.
@@ -96,6 +107,5 @@ export async function getRedirect(path: string) {
     ...PUBLISHED,
     tags: [TAGS.redirect],
   })
-  const target = normalizePath(path)
-  return data.find(({ source }) => normalizePath(source) === target) ?? null
+  return findRedirect(data, path)
 }

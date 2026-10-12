@@ -1,8 +1,24 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType, type ValidationContext } from 'sanity'
 
-const PATH = /^\/[^\s?#]*$/
-const URL_OR_PATH = /^(\/[^\s]*|https?:\/\/[^\s]+)$/
+import { apiVersion } from '@/config/env'
+import { HOME_SLUG } from '@/config/paths'
+
+import { normalizePath } from '../utils/redirects'
+
+/** A site path: starts with one "/" (not "//", which browsers treat as another domain). */
+const PATH = /^\/(?!\/)[^\s?#]*$/
+const DESTINATION = /^(\/(?!\/)\S*|https:\/\/\S+)$/
+
+const OTHER_REDIRECTS = '_type == "redirect" && !(_id in [$id, "drafts." + $id])'
+
+function client(context: ValidationContext) {
+  return context.getClient({ apiVersion })
+}
+
+function documentId(context: ValidationContext) {
+  return context.document?._id.replace(/^drafts\./, '') ?? ''
+}
 
 /**
  * Old URL -> new URL. Applied only to paths that don't match a page, so a redirect can never
@@ -20,34 +36,73 @@ export const redirect = defineType({
       type: 'string',
       description:
         'Old path, e.g. "/about-us.html". Matched without regard to case or a trailing slash.',
-      validation: (rule) =>
+      validation: (rule) => [
         rule
           .required()
           .custom((value) =>
             !value || PATH.test(value) ? true : 'Start with "/"; no spaces, "?" or "#"',
           )
-          .custom(async (value, { document, getClient }) => {
+          .custom(async (value, context) => {
             if (!value) return true
-            const id = document?._id.replace(/^drafts\./, '') ?? ''
-            const duplicates = await getClient({ apiVersion: '2026-10-01' }).fetch<number>(
-              'count(*[_type == "redirect" && lower(source) == lower($source) && !(_id in [$id, "drafts." + $id])])',
-              { source: value, id },
+            const duplicates = await client(context).fetch<number>(
+              `count(*[${OTHER_REDIRECTS} && lower(source) == lower($source)])`,
+              { source: value, id: documentId(context) },
             )
             return duplicates === 0 ? true : 'Another redirect already uses this path'
           }),
+        rule
+          .custom(async (value, context) => {
+            if (!value || !PATH.test(value)) return true
+            const slug = normalizePath(value).replace(/^\//, '') || HOME_SLUG
+            const pages = await client(context).fetch<number>(
+              'count(*[_type == "page" && slug.current == $slug])',
+              { slug },
+            )
+            return pages === 0
+              ? true
+              : 'A page already uses this path, so this redirect will never apply'
+          })
+          .warning(),
+      ],
     }),
     defineField({
       name: 'destination',
       title: 'To',
       type: 'string',
       description: 'New path ("/about") or full URL ("https://…").',
-      validation: (rule) =>
-        rule.required().custom((value, { document }) => {
+      validation: (rule) => [
+        rule.required().custom(async (value, context) => {
           if (!value) return true
-          if (!URL_OR_PATH.test(value)) return 'Use a path starting with "/" or a full https:// URL'
-          const source = (document as { source?: string } | undefined)?.source
-          return value === source ? 'Destination must differ from the source' : true
+          if (!DESTINATION.test(value)) {
+            return 'Use a path starting with a single "/" or a full https:// URL'
+          }
+          const source = (context.document as { source?: string } | undefined)?.source
+          if (source && normalizePath(value) === normalizePath(source)) {
+            return 'Destination must differ from the source'
+          }
+          if (!value.startsWith('/') || !source) return true
+          // A redirect whose destination redirects straight back would loop forever.
+          const next = await client(context).fetch<string | null>(
+            `*[${OTHER_REDIRECTS} && lower(source) == lower($destination)][0].destination`,
+            { destination: value, id: documentId(context) },
+          )
+          return next && normalizePath(next) === normalizePath(source)
+            ? `Loop: ${value} already redirects back to ${source}`
+            : true
         }),
+        rule
+          .custom(async (value, context) => {
+            if (!value?.startsWith('/')) return true
+            const next = await client(context).fetch<string | null>(
+              `*[${OTHER_REDIRECTS} && lower(source) == lower($destination)][0].destination`,
+              { destination: value, id: documentId(context) },
+            )
+            return next
+              ? `${value} redirects again to ${next}. Point this one straight at ${next}.`
+              : true
+          })
+          .warning(),
+      ],
     }),
     defineField({
       name: 'permanent',

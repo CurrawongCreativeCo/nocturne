@@ -18,27 +18,12 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { seedDocuments } from './seed.mjs'
+import { DEFAULTS, DEV_PORT, ENV_KEYS, mergeEnv, normalize, parseEnv } from './validate.mjs'
 
 const wizardDir = dirname(fileURLToPath(import.meta.url))
 const root = join(wizardDir, '..', '..')
 const envPath = join(root, '.env.local')
 
-const DEV_PORT = Number(process.env.PORT) || 3000
-const DEFAULTS = {
-  projectName: 'My Site',
-  projectId: '',
-  dataset: 'production',
-  apiVersion: '2026-10-01',
-  siteUrl: `http://localhost:${DEV_PORT}`,
-  token: '',
-}
-const ENV_KEYS = {
-  projectId: 'NEXT_PUBLIC_SANITY_PROJECT_ID',
-  dataset: 'NEXT_PUBLIC_SANITY_DATASET',
-  apiVersion: 'NEXT_PUBLIC_SANITY_API_VERSION',
-  siteUrl: 'NEXT_PUBLIC_SITE_URL',
-  token: 'SANITY_API_READ_TOKEN',
-}
 // Must match HOME_SLUG in src/config/paths.ts.
 const HOME_SLUG = 'home'
 
@@ -74,49 +59,6 @@ startServer()
 
 // ---------------------------------------------------------------------------
 // Validation
-
-function normalize(input, { tokenMode, projectMode }) {
-  const str = (key) => String(input[key] ?? '').trim()
-  const values = {
-    projectName: str('projectName'),
-    projectId: str('projectId').toLowerCase(),
-    dataset: str('dataset') || DEFAULTS.dataset,
-    apiVersion: str('apiVersion') || DEFAULTS.apiVersion,
-    siteUrl: str('siteUrl') || DEFAULTS.siteUrl,
-    token: str('token'),
-  }
-  const errors = {}
-
-  if (projectMode === 'create') {
-    if (!/^[\p{L}\p{N}][\p{L}\p{N} ._'&-]{0,79}$/u.test(values.projectName))
-      errors.projectName = "Use up to 80 letters, numbers, spaces and . _ ' & -"
-  } else if (!values.projectId) errors.projectId = 'Enter your project ID.'
-  else if (!/^[a-z0-9][a-z0-9-]{1,63}$/.test(values.projectId))
-    errors.projectId = 'Project IDs are lowercase letters, numbers and dashes, e.g. "a1b2c3d4".'
-
-  if (!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(values.dataset))
-    errors.dataset = 'Dataset names are lowercase letters, numbers, "_" and "-".'
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(values.apiVersion) || Number.isNaN(Date.parse(values.apiVersion)))
-    errors.apiVersion = 'Use a date in YYYY-MM-DD format.'
-
-  try {
-    const url = new URL(values.siteUrl)
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new Error()
-    values.siteUrl = url.origin
-  } catch {
-    errors.siteUrl = 'Enter a full URL, e.g. http://localhost:3000.'
-  }
-
-  if (tokenMode === 'paste') {
-    if (!values.token) errors.token = 'Paste a token, or let the wizard create one.'
-    else if (!/^[A-Za-z0-9._-]{20,}$/.test(values.token))
-      errors.token =
-        "That doesn't look like a Sanity API token. Copy the whole value shown when you created it."
-  }
-
-  return { values, errors }
-}
 
 // ---------------------------------------------------------------------------
 // Sanity checks and CLI actions
@@ -351,33 +293,21 @@ function cliErrorMessage({ out, err }, prefix) {
 // Files
 
 function readEnvFile() {
-  if (!existsSync(envPath)) return {}
-  const env = {}
-  for (const line of readFileSync(envPath, 'utf8').split('\n')) {
-    const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)
-    if (match) env[match[1]] = match[2].replace(/^(['"])(.*)\1$/, '$2')
-  }
-  return env
+  return existsSync(envPath) ? parseEnv(readFileSync(envPath, 'utf8')) : {}
 }
 
-/** Updates our keys in place and keeps any other lines already in .env.local. */
 function writeEnvFile(values) {
-  const lines = existsSync(envPath)
-    ? readFileSync(envPath, 'utf8').replace(/\n+$/, '').split('\n')
-    : []
-  if (lines.length === 0) {
-    lines.push('# Written by the setup wizard. See .env.example for what each value does.')
-  }
-  for (const [field, key] of Object.entries(ENV_KEYS)) {
-    const line = `${key}="${values[field]}"`
-    const index = lines.findIndex((l) => new RegExp(`^\\s*${key}\\s*=`).test(l))
-    if (index === -1) lines.push(line)
-    else lines[index] = line
-  }
-  writeFileSync(envPath, `${lines.join('\n')}\n`)
+  writeFileSync(envPath, mergeEnv(existsSync(envPath) ? readFileSync(envPath, 'utf8') : '', values))
 }
+
+/**
+ * The template repo's own checkout keeps the wizard: an untracked `.template-dev` file marks it.
+ * Fresh clones never have the file, so for them the wizard removes itself as usual.
+ */
+const isTemplateCheckout = existsSync(join(root, '.template-dev'))
 
 function removeWizard() {
+  if (isTemplateCheckout) return []
   const removed = []
   const pkgPath = join(root, 'package.json')
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
@@ -413,6 +343,10 @@ function removeWizard() {
 }
 
 function reportRemoval(removed) {
+  if (removed.length === 0) {
+    console.log('✓ Template checkout (.template-dev found): the setup wizard was kept.\n')
+    return
+  }
   console.log(`✓ Setup wizard removed (${removed.join(', ')}).`)
   console.log('  Commit these deletions so the wizard is gone from the repo.\n')
 }

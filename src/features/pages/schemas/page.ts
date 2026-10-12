@@ -7,6 +7,8 @@ import { HOME_SLUG, slugToPath } from '@/config/paths'
 import { sectionTypes } from './sections'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/
+/** First path segments taken by app routes: a page there could never be reached. */
+const RESERVED_SEGMENTS = new Set(['studio', 'api', '_next'])
 
 export const page = defineType({
   name: 'page',
@@ -41,13 +43,16 @@ export const page = defineType({
             .replace(/^[-/]+|[-/]+$/g, ''),
       },
       validation: (rule) =>
-        rule
-          .required()
-          .custom((slug) =>
-            !slug?.current || SLUG_PATTERN.test(slug.current)
-              ? true
-              : 'Lowercase letters, numbers, hyphens; "/" separates path segments',
-          ),
+        rule.required().custom((slug) => {
+          if (!slug?.current) return true
+          if (!SLUG_PATTERN.test(slug.current)) {
+            return 'Lowercase letters, numbers, hyphens; "/" separates path segments'
+          }
+          const first = slug.current.split('/')[0] ?? ''
+          return RESERVED_SEGMENTS.has(first)
+            ? `"${first}" is used by the site itself; choose another path`
+            : true
+        }),
     }),
     defineField({
       name: 'pageBuilder',

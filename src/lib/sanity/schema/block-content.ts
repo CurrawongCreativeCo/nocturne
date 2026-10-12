@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { altField } from './image-field'
+
 /**
  * Rich text. Use as `type: 'blockContent'` and query with `portableTextFields`
  * (lib/sanity/fragments.ts), which resolves internal links and image assets.
@@ -34,10 +36,7 @@ export const blockContent = defineType({
     defineArrayMember({
       type: 'image',
       options: { hotspot: true },
-      fields: [
-        defineField({ name: 'alt', title: 'Alternative text', type: 'string' }),
-        defineField({ name: 'caption', type: 'string' }),
-      ],
+      fields: [altField({ required: true }), defineField({ name: 'caption', type: 'string' })],
     }),
   ],
 })

@@ -1,4 +1,5 @@
-import { siteUrl } from '@/config/env'
+import { siteLanguage } from '@/config/env'
+import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
 import { PUBLISHED } from '@/lib/sanity/live'
 
@@ -34,6 +35,7 @@ export async function SiteJsonLd() {
         name: settings.title,
         url,
         ...(settings.description && { description: settings.description }),
+        inLanguage: siteLanguage,
         publisher: { '@id': `${url}#organization` },
       },
     ],

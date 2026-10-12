@@ -12,6 +12,11 @@ export interface LinkData {
   openInNewTab?: boolean | null
 }
 
+/** Tells screen-reader users a link opens a new tab (WCAG G201); sighted users see the tab open. */
+export function NewTabNotice() {
+  return <span className="sr-only"> (opens in a new tab)</span>
+}
+
 /**
  * Renders a Sanity `link` object: <Link> for internal pages, <a> for external URLs.
  * Renders nothing when the link is incomplete (e.g. an unfinished draft).
@@ -37,6 +42,7 @@ export function SanityLink({
         {...(newTab && { target: '_blank' })}
       >
         {children}
+        {newTab && <NewTabNotice />}
       </Link>
     )
   }
@@ -49,6 +55,7 @@ export function SanityLink({
       {...(newTab && { target: '_blank', rel: 'noopener noreferrer' })}
     >
       {children}
+      {newTab && <NewTabNotice />}
     </a>
   )
 }
