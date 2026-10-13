@@ -36,6 +36,7 @@ const features = [
   'search',
   'auth',
   'pricing',
+  // new-feature:register
 ]
 
 const crossFeatureZones = features.map((feature) => ({

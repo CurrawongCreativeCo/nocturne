@@ -34,6 +34,7 @@ import {
 } from './src/features/studio/singletons'
 import { structure } from './src/features/studio/structure'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
+// new-registry:import
 
 export default defineConfig({
   basePath: studioUrl,
@@ -51,6 +52,7 @@ export default defineConfig({
       ...pricingSchemaTypes,
       ...experimentSchemaTypes,
       ...siteSchemaTypes,
+      // new-registry:register
       ...sharedSchemaTypes,
     ],
     templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],

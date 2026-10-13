@@ -15,6 +15,7 @@ import type {
 
 import { SINGLETON_TYPES } from './singletons'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
+// new-singleton:import
 
 const PAGES_QUERY = `*[_type == "page"]{ _id, "slug": slug.current }`
 
@@ -66,6 +67,7 @@ const LISTED_TYPES = new Set([
   'post',
   'author',
   'category',
+  // new-document:listed
 ])
 
 /** Desk structure: singletons pinned at the top, then every other document type. */
@@ -78,6 +80,7 @@ export const structure: StructureResolver = (S, context) =>
         .id('settings')
         .icon(CogIcon)
         .child(S.document().schemaType('settings').documentId('settings').title('Site settings')),
+      // new-singleton:list
       S.divider(),
       pagesTree(S, context),
       S.documentTypeListItem('sharedSection').title('Shared sections'),
@@ -97,6 +100,7 @@ export const structure: StructureResolver = (S, context) =>
         ),
       S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
       S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon),
+      // new-document:list
       S.divider(),
       // Everything else not explicitly listed above.
       ...S.documentTypeListItems().filter((item) => {

@@ -293,6 +293,7 @@ src/
 public/section-previews/           insert-menu thumbnails, one <typeName>.svg per section
     section-gallery/page.tsx       (in src/app) every section type and variant on one page; dev and tests only
 scripts/new-section.mjs            `npm run new:section` scaffolder
+scripts/new-{feature,document,singleton}.mjs   `npm run new:feature|document|singleton` scaffolders (shared code: generator-utils.mjs)
 ```
 
 **Import rules** (`npm run lint` fails on violations):
@@ -818,6 +819,44 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
 `components/section-renderer.tsx`. Until a section is registered in the renderer, `tsc` fails with
 "Property '<name>' is missing".
 
+## Adding a feature, document type or singleton
+
+Three more generators work like `new:section` (same naming rules: `case-study`, `Case study` and `caseStudy` are one name).
+Each checks that every marker comment it needs exists before it writes anything, then runs ESLint
+(`--fix`) and Prettier on the files it touched.
+
+```bash
+npm run new:feature events                      # a feature folder
+npm run new:document events talk                # a document type with title and slug
+npm run new:singleton events events-landing     # a document that exists exactly once
+```
+
+- **`new:feature <name>`** creates `src/features/<name>/{api,components,schemas,types}` (each holds a
+  `.gitkeep` until a real file arrives; there are no barrel files) and adds the name to the `features` list in
+  `eslint.config.mjs`, so the import rules apply to it.
+- **`new:document <feature> <name>`** creates `schemas/<name>.ts` (title and slug) and `api/<name>.ts` (a
+  `defineQuery` query plus a `get<Name>(slug, mode)` fetcher through `cachedSanityFetch`, tagged
+  `TAGS.<typeName>`). It registers the type in the feature's `schemas/index.ts` (creating that list, and adding it to
+  `sanity.config.ts`, when the feature has none), adds the cache tag to `TAGS` in `src/lib/sanity/live.ts`, adds a
+  list entry to the desk structure, and runs `npm run typegen`.
+- **`new:singleton <feature> <name>`** creates the schema, registers it like a document, adds it to
+  `SINGLETON_TYPES` (`src/features/studio/singletons.ts`) and pins it in the desk structure at the fixed document id
+  `<typeName>`. Read it with `*[_id == "<typeName>"][0]`. It generates no query; when you add one, add the tag as above.
+
+Then, for a new document type or singleton:
+
+1. Add fields in the schema and shape the query, then run `npm run typegen` and use the generated types.
+2. Webhook mode: add the type to the Sanity webhook's filter (_Live mode vs. webhook mode_). The generators don't
+   edit the README or your webhook.
+3. A new type has no route. When you add one in `src/app`, add fixture documents in `tests/e2e/fixtures/dataset.mjs`
+   so the axe scan covers it.
+
+The generators insert code at `// new-feature:*`, `// new-schema:*`, `// new-registry:*`, `// new-document:*` and
+`// new-singleton:*` marker comments (in `eslint.config.mjs`, `sanity.config.ts`, each feature's `schemas/index.ts`,
+`src/lib/sanity/live.ts`, and the studio feature's `structure.ts` and `singletons.ts`); keep them in place. A
+generator that can't find one stops without writing and says which. CI runs each generator on a throwaway checkout and
+then `npm run check`.
+
 ## Updating from the template
 
 Releases are git tags (`v1.0.0`, `v1.1.0`, ...) with notes in [CHANGELOG.md](CHANGELOG.md). A project pulls
@@ -869,15 +908,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                                        | Expect                              |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                                               | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                  | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                         | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                              | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                      | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                                              | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                                                                               | Expect                              |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                                                                                                      | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                         | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                     | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                             | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                                                                                                     | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design

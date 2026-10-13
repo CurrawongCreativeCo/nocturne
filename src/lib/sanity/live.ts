@@ -86,6 +86,7 @@ export const TAGS = {
   form: 'form',
   stripePrice: 'stripePrice',
   experiment: 'experiment',
+  // new-document:tag
 } as const
 
 export interface FetchMode {

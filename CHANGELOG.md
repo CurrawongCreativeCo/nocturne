@@ -20,6 +20,10 @@ you start a release.
 
 ### Added
 
+- Generators for features, documents and singletons: `npm run new:feature`, `new:document` and `new:singleton`,
+  built like `new:section` (marker comments, everything checked before writing, then ESLint, Prettier and typegen).
+  They add marker comments to `eslint.config.mjs`, `sanity.config.ts`, each feature's `schemas/index.ts`,
+  `src/lib/sanity/live.ts` and the studio feature's `structure.ts` and `singletons.ts`; keep them when merging.
 - Section gallery and visual regression tests: `/section-gallery` (development and `E2E_GALLERY=1` only; 404
   otherwise) renders every section type and variant from the end-to-end fixtures, and
   `tests/e2e/visual.spec.ts` screenshots each on desktop and mobile against Linux baselines kept in the repo.

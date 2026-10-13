@@ -4,7 +4,10 @@ import type { DocumentActionsResolver, NewDocumentOptionsResolver, Template } fr
  * Document types that exist exactly once, at `_id === type name` (opened from the
  * desk structure). They can't be created, duplicated or deleted from the UI.
  */
-export const SINGLETON_TYPES = new Set(['settings'])
+export const SINGLETON_TYPES = new Set([
+  'settings',
+  // new-singleton:register
+])
 
 const SINGLETON_ACTIONS = new Set(['publish', 'discardChanges', 'restore'])
 
