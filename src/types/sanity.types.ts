@@ -918,6 +918,71 @@ export type SETTINGS_QUERY_RESULT =
     }
   | null
 
+// Source: src/features/studio/content-health/api/query.ts
+// Variable: CONTENT_HEALTH_QUERY
+// Query: {  "pages": *[_type == "page"] {    _id,    title,    "slug": slug.current,    "metaDescription": seo.metaDescription,    pageBuilder  },  "settings": *[_id in ["settings", "drafts.settings"]] {    _id,    headerNav,    headerCta,    footerNav  },  "redirects": *[_type == "redirect"] {    _id,    source,    destination  }}
+export type CONTENT_HEALTH_QUERY_RESULT = {
+  pages: Array<{
+    _id: string
+    title: string
+    slug: string
+    metaDescription: string | null
+    pageBuilder: Array<
+      | ({
+          _key: string
+        } & CtaBanner)
+      | ({
+          _key: string
+        } & Faq)
+      | ({
+          _key: string
+        } & FeaturesGrid)
+      | ({
+          _key: string
+        } & Hero)
+      | ({
+          _key: string
+        } & LogoCloud)
+      | ({
+          _key: string
+        } & MediaText)
+      | ({
+          _key: string
+        } & RichText)
+      | ({
+          _key: string
+        } & Testimonials)
+    > | null
+  }>
+  settings: Array<
+    | {
+        _id: string
+        headerNav: null
+        headerCta: null
+        footerNav: null
+      }
+    | {
+        _id: string
+        headerNav: Array<
+          {
+            _key: string
+          } & NavItem
+        > | null
+        headerCta: Cta | null
+        footerNav: Array<
+          {
+            _key: string
+          } & NavItem
+        > | null
+      }
+  >
+  redirects: Array<{
+    _id: string
+    source: string
+    destination: string
+  }>
+}
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -925,6 +990,7 @@ declare global {
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText\n  }\n': SETTINGS_QUERY_RESULT
+    '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

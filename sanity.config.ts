@@ -16,6 +16,7 @@ import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { pageTemplates } from './src/features/pages/schemas/templates'
 import { siteSchemaTypes } from './src/features/site/schemas'
+import { contentHealth } from './src/features/studio/content-health/plugin'
 import { resolve } from './src/features/studio/presentation'
 import {
   hideSingletonsFromNewMenu,
@@ -44,5 +45,6 @@ export default defineConfig({
       previewUrl: { previewMode: { enable: '/api/draft-mode/enable' } },
     }),
     visionTool({ defaultApiVersion: apiVersion }),
+    contentHealth(),
   ],
 })

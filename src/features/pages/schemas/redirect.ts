@@ -3,8 +3,7 @@ import { defineField, defineType, type ValidationContext } from 'sanity'
 
 import { apiVersion } from '@/config/env'
 import { HOME_SLUG } from '@/config/paths'
-
-import { normalizePath } from '../utils/redirects'
+import { normalizePath } from '@/lib/redirects'
 
 /** A site path: starts with one "/" (not "//", which browsers treat as another domain). */
 const PATH = /^\/(?!\/)[^\s?#]*$/

@@ -2,11 +2,11 @@ import type { Metadata, MetadataRoute, ResolvedMetadata } from 'next'
 
 import { slugToPath, slugToSegments } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
+import { findRedirect } from '@/lib/redirects'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 import { PAGE_INDEX_QUERY, PAGE_QUERY, REDIRECTS_QUERY } from './queries'
-import { findRedirect } from '../utils/redirects'
 
 /**
  * Same cached fetch in both modes; `mode` (perspective, stega) is part of the cache key.

@@ -51,6 +51,7 @@ Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
+- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. They only apply to paths with no page, so they can't hide a live page. Studio blocks
   duplicates and loops, and warns about chains and sources a page already uses.
@@ -134,7 +135,7 @@ src/
       types/                       PageSection, SectionOf<'hero'>, SectionProps
     site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
-    studio/                        desk structure, singletons, Presentation resolvers
+    studio/                        desk structure, singletons, Presentation resolvers, content-health tool
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text
   config/                          env.ts (validated), paths.ts (slug <-> URL)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
