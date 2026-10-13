@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import { segmentsToSlug } from '@/config/paths'
 import { getPageMetadata, getPageStaticParams } from '@/features/pages/api/get-page'
 import { DraftPageView, PageView } from '@/features/pages/components/page-view'
+import { ReturningVisitor } from '@/features/personalization/components/returning-visitor'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 /**
@@ -38,9 +39,17 @@ export default async function Page({ params }: Props) {
     )
   }
 
-  return <PageView slug={segmentsToSlug((await params).slug)} {...PUBLISHED} />
+  return (
+    <PageView
+      slug={segmentsToSlug((await params).slug)}
+      greeting={<ReturningVisitor />}
+      {...PUBLISHED}
+    />
+  )
 }
 
 async function DraftPage({ params }: Pick<Props, 'params'>) {
-  return <DraftPageView slug={segmentsToSlug((await params).slug)} />
+  return (
+    <DraftPageView slug={segmentsToSlug((await params).slug)} greeting={<ReturningVisitor />} />
+  )
 }

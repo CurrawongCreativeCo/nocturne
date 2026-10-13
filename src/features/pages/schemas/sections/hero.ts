@@ -19,6 +19,13 @@ export const hero = defineType({
       validation: (rule) => rule.max(2),
     }),
     imageField({ name: 'backgroundImage', requireAlt: false }),
+    defineField({
+      name: 'showGreeting',
+      title: 'Greet returning visitors',
+      description: 'Shows a short "Welcome back" to people who have visited before.',
+      type: 'boolean',
+      initialValue: false,
+    }),
   ],
   preview: {
     select: { title: 'title', media: 'backgroundImage' },

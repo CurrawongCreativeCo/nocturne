@@ -1,4 +1,5 @@
 import type { StegaBranded } from 'next-sanity'
+import type { ReactNode } from 'react'
 
 import type { PAGE_QUERY_RESULT } from '@/types/sanity.types'
 
@@ -21,4 +22,9 @@ export interface SectionProps<T extends SectionType> {
    * (preloaded for LCP). Sections further down use <h2> and lazy images.
    */
   isFirst?: boolean
+  /**
+   * Request-time content a route passes in (a feature can't import another feature). Render it
+   * inside <Suspense>: it may read cookies, which would otherwise make the page dynamic.
+   */
+  greeting?: ReactNode
 }

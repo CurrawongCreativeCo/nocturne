@@ -72,6 +72,7 @@ export const documents = [
         _type: 'hero',
         title: 'Welcome to Test Co',
         description: 'Hero description.',
+        showGreeting: true,
         ctas: [
           cta('About us', internal('page-about')),
           cta('Learn more', internal('page-about'), 'secondary'),

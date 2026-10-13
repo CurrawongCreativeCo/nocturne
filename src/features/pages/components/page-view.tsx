@@ -1,4 +1,5 @@
 import { notFound, permanentRedirect, redirect } from 'next/navigation'
+import type { ReactNode } from 'react'
 
 import { slugToPath } from '@/config/paths'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
@@ -6,7 +7,13 @@ import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { SectionRenderer } from './section-renderer'
 import { getPage, getRedirect } from '../api/get-page'
 
-export async function PageView({ slug, ...mode }: { slug: string } & FetchMode) {
+interface ViewProps {
+  slug: string
+  /** Request-time content for sections (see `SectionProps.greeting`). */
+  greeting?: ReactNode
+}
+
+export async function PageView({ slug, greeting, ...mode }: ViewProps & FetchMode) {
   const page = await getPage({ slug, ...mode })
   if (!page) {
     // Old URLs from a previous site: redirects are managed in Studio.
@@ -27,13 +34,14 @@ export async function PageView({ slug, ...mode }: { slug: string } & FetchMode) 
         documentType={page._type}
         sections={page.pageBuilder}
         editable={mode.stega}
+        greeting={greeting}
       />
     </>
   )
 }
 
 /** Reads draft-mode cookies, so it must render inside <Suspense>. */
-export async function DraftPageView({ slug }: { slug: string }) {
+export async function DraftPageView({ slug, greeting }: ViewProps) {
   const mode = await getDraftFetchMode()
-  return <PageView slug={slug} {...mode} />
+  return <PageView slug={slug} greeting={greeting} {...mode} />
 }

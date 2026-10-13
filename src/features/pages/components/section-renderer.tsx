@@ -1,4 +1,4 @@
-import { Fragment, type ComponentType } from 'react'
+import { Fragment, type ComponentType, type ReactNode } from 'react'
 
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
@@ -42,6 +42,8 @@ interface Props {
    * shouldn't ship Studio URLs and document paths it never uses.
    */
   editable?: boolean
+  /** Passed to every section; see `SectionProps.greeting`. */
+  greeting?: ReactNode
 }
 
 export function SectionRenderer({
@@ -50,6 +52,7 @@ export function SectionRenderer({
   sections,
   path = 'pageBuilder',
   editable = false,
+  greeting,
 }: Props) {
   if (!sections?.length) return null
 
@@ -60,7 +63,7 @@ export function SectionRenderer({
         // TS can't correlate `section` with `SECTION_COMPONENTS[section._type]` across a
         // union; the registry's mapped type above already guarantees they match.
         const Section = SECTION_COMPONENTS[section._type] as
-          ComponentType<{ data: PageSection; isFirst?: boolean }> | undefined
+          ComponentType<{ data: PageSection; isFirst?: boolean; greeting?: ReactNode }> | undefined
 
         if (!Section) {
           // Reachable when the dataset has a section type newer than this deployment.
@@ -80,10 +83,10 @@ export function SectionRenderer({
                 : dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)
             }
           >
-            <Section data={section} isFirst={index === 0} />
+            <Section data={section} isFirst={index === 0} greeting={greeting} />
           </div>
         ) : (
-          <Section key={section._key} data={section} isFirst={index === 0} />
+          <Section key={section._key} data={section} isFirst={index === 0} greeting={greeting} />
         )
       })}
     </Wrapper>

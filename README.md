@@ -177,6 +177,7 @@ src/
       types/                       PageSection, SectionOf<'hero'>, SectionProps
     site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
+    personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text
@@ -220,6 +221,25 @@ components, config, lib, styles, types   ->   features   ->   app
   each changed query two refetches at most. (next-sanity's default only marks tags stale, so the tab's
   refresh would render the old content and the edit wouldn't appear until a later visit.)
 - Fetch `tags` are document-type tags for webhook mode (see below); live mode uses Sanity's sync tags.
+
+### Personalization inside cached pages
+
+Pages are prerendered, so anything that depends on the visitor (a cookie, a header) must stay out of the
+cache. The rule: **request-time reads go outside `'use cache'`, inside `<Suspense>`.** Cached data still
+comes from `cachedSanityFetch`; only the small dynamic piece renders per request, and the rest of the page
+stays partially prerendered (the build marks the route `◐ Partial Prerender`).
+
+The reference example is a "Welcome back" greeting on the hero:
+
+- `features/personalization/components/returning-visitor.tsx` is an async server component that reads the
+  `visited` cookie with `cookies()`. Returning visitors get the greeting; on a first visit it renders
+  `mark-visited.tsx`, a tiny client component that sets the cookie for next time.
+- Features can't import each other, so the route (`app/(site)/[[...slug]]/page.tsx`) passes
+  `<ReturningVisitor />` down as a `greeting` prop through `PageView` and `SectionRenderer` to the sections.
+  The hero wraps it in `<Suspense fallback={null}>` and renders it only when the editor ticks _Greet returning
+  visitors_ on the hero.
+- To personalize another section, take the same `greeting` prop (or add a similar slot), wrap it in
+  `<Suspense>`, and never call `cookies()`, `headers()` or `draftMode()` inside a cached function.
 
 ### Request budget
 
@@ -334,7 +354,7 @@ each release before proposing it.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), and runs axe for WCAG 2.2 AA on every page.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), and runs axe for WCAG 2.2 AA on every page.
 
 Running the end-to-end tests locally:
 
