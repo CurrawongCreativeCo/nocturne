@@ -62,6 +62,12 @@ export async function getPageMetadata(slug: string, parent: ResolvedMetadata): P
   const title = seo?.metaTitle || page.title
   const description = seo?.metaDescription ?? parent.description ?? undefined
   const path = slugToPath(slug)
+  // One og:image: the page's own, else the site's default, else the generated one (/api/og).
+  const images = ogImage
+    ? [{ url: ogImage, width: 1200, height: 630 }]
+    : parent.openGraph?.images?.length
+      ? parent.openGraph.images
+      : [{ url: generatedOgImagePath(slug), width: 1200, height: 630, alt: title }]
 
   return {
     title,
@@ -73,10 +79,15 @@ export async function getPageMetadata(slug: string, parent: ResolvedMetadata): P
       title,
       description,
       url: path,
-      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : parent.openGraph?.images,
+      images,
     },
     robots: seo?.noIndex ? { index: false, follow: false } : undefined,
   }
+}
+
+/** The generated share image for a page (src/app/api/og). */
+function generatedOgImagePath(slug: string) {
+  return ['/api/og', ...slugToSegments(slug)].join('/')
 }
 
 async function getPageIndex() {

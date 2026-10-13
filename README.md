@@ -52,6 +52,7 @@ Open http://localhost:3000/studio:
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, announcement bar, header menu and button, footer, and default SEO.
 - **Announcement bar:** in Site settings → _Announcement_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
+- **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Site settings), then a generated one: brand-colored, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the color is `brandColorHex` in `src/config/brand.ts` (the renderer can't read `oklch()`, so keep it in step with `--color-brand`).
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
@@ -108,7 +109,7 @@ in `src/config/brand.ts` for the Studio (a unit test fails if the two drift apar
 `NEXT_PUBLIC_STUDIO_TITLE` (the setup wizard fills it in from the site name) and appears in its header beside a
 small mark in the brand color. The font is set
 with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
-the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project.
+the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project. The generated share image has its own copy of the font (Inter Bold, `src/assets/fonts/`), because `next/og` can't use `next/font`.
 
 ## Deploying (Vercel)
 
@@ -167,6 +168,7 @@ src/
     (site)/[[...slug]]/page.tsx    every CMS page, including "/"
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
+    api/og/[[...slug]]/route.tsx     generated share image (PNG) for pages without one
     sitemap.ts                       split into files of 45,000 URLs (generateSitemaps)
   proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG)
   features/
@@ -257,6 +259,7 @@ unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site 
   by `_id`); both carry the `page` tag. Up to 45,000 pages nothing changes: one file, built from
   `PAGE_INDEX_QUERY`, with `/sitemap.xml` rewritten to `/sitemap/0.xml` and listed in `robots.txt`. On a split
   site `/sitemap.xml` still serves the first file only, so submit the files listed in `robots.txt`.
+- **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin`) are answered from the cached page index at no cost.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
@@ -464,6 +467,7 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
   instead of the Next.js optimizer (no optimizer billing). `SanityImage` applies crop/hotspot and LQIP blur.
 - `@sanity/icons` v5: import per icon (`@sanity/icons/Rocket`). The barrel's named exports are typed
   `never` and `tsc` won't flag them, but the bundler will.
+- A generated share image can't be an `opengraph-image` file: Next.js rejects those under an optional catch-all (`[[...slug]]`), so it is a route handler and `getPageMetadata` points `og:image` at it. A CMS page with slug `api/...` would clash with it, as with the other `/api` routes.
 - Page metadata always uses published content, so `<head>` stays prerenderable and drafts don't leak into it.
 - `browserToken` reaches the browser only in draft mode. Use a Viewer-role token.
 - Visual Editing and the "Exit preview" button are lazy-loaded in `draft-mode-tools.tsx`. Importing them

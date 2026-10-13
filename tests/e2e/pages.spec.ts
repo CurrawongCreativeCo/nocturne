@@ -104,3 +104,40 @@ test.describe('metadata', () => {
     expect(data['@graph'][0]).toMatchObject({ name: 'Test Co', url: `${SITE_URL}/` })
   })
 })
+
+test.describe('share images', () => {
+  const ogImages = (page: Page) => page.locator('meta[property="og:image"]')
+
+  test('a page without its own image gets the generated one, served as a PNG', async ({
+    page,
+    request,
+  }) => {
+    await page.goto('/about')
+    await expect(ogImages(page)).toHaveCount(1)
+    const url = (await ogImages(page).getAttribute('content')) ?? ''
+    expect(new URL(url).pathname).toBe('/api/og/about')
+    expect(await page.locator('meta[name="twitter:image"]').getAttribute('content')).toBe(url)
+
+    const response = await request.get(new URL(url).pathname)
+    expect(response.status()).toBe(200)
+    expect(response.headers()['content-type']).toBe('image/png')
+  })
+
+  test('the home page and titles too long for three lines get one as well', async ({
+    page,
+    request,
+  }) => {
+    for (const path of ['/', '/long-title']) {
+      await page.goto(path)
+      const url = (await ogImages(page).getAttribute('content')) ?? ''
+      const response = await request.get(new URL(url).pathname)
+      expect(response.headers()['content-type']).toBe('image/png')
+    }
+  })
+
+  test('a page with its own image emits only that one', async ({ page }) => {
+    await page.goto('/own-image')
+    await expect(ogImages(page)).toHaveCount(1)
+    expect(await ogImages(page).getAttribute('content')).toContain('cdn.sanity.io/images')
+  })
+})

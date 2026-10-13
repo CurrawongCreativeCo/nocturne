@@ -194,6 +194,40 @@ export const documents = [
     ],
   },
   {
+    _id: 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png',
+    _type: 'sanity.imageAsset',
+    url: 'https://cdn.sanity.io/images/test/test/0123456789abcdef0123456789abcdef01234567-1200x630.png',
+  },
+  {
+    // Has its own share image: no generated one may be added next to it.
+    _id: 'page-own-image',
+    _type: 'page',
+    title: 'Own image',
+    slug: { _type: 'slug', current: 'own-image' },
+    seo: {
+      _type: 'seo',
+      ogImage: {
+        _type: 'image',
+        asset: {
+          _type: 'reference',
+          _ref: 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png',
+        },
+      },
+    },
+    pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Page with a share image.'])] }],
+  },
+  {
+    // Too long for the generated share image's three lines.
+    _id: 'page-long-title',
+    _type: 'page',
+    title:
+      'A very long page title that keeps going well past what three lines of a share image can hold, '
+        .repeat(3)
+        .trim(),
+    slug: { _type: 'slug', current: 'long-title' },
+    pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Page with a long title.'])] }],
+  },
+  {
     _id: 'r1',
     _type: 'redirect',
     source: '/About-Us.html',
