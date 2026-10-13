@@ -52,3 +52,20 @@ export const portableTextFields = /* groq */ `
   },
   _type == "image" => { caption, ${imageFields} }
 `
+
+/**
+ * A form as the page needs it to render. Deliberately leaves out `recipientEmail`: pages and their
+ * cached results never carry it. Only the submit action reads it (see features/forms/api/queries.ts).
+ */
+export const formFields = /* groq */ `
+  title,
+  submitLabel,
+  fields[] {
+    _key,
+    label,
+    name,
+    type,
+    required,
+    options
+  }
+`

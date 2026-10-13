@@ -1,4 +1,4 @@
-import { ctaFields, imageFields, portableTextFields } from '@/lib/sanity/fragments'
+import { ctaFields, formFields, imageFields, portableTextFields } from '@/lib/sanity/fragments'
 
 /**
  * One query slice per page-builder section, colocated by name with its schema
@@ -93,6 +93,14 @@ export const ctaBannerFragment = /* groq */ `
   }
 `
 
+export const formSectionFragment = /* groq */ `
+  _type == "formSection" => {
+    title,
+    text,
+    form-> { _id, ${formFields} }
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -105,6 +113,7 @@ const sectionsFragment = /* groq */ `
   ${testimonialsFragment},
   ${faqFragment},
   ${ctaBannerFragment},
+  ${formSectionFragment},
   _type
 `
 

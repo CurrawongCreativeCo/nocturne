@@ -260,6 +260,41 @@ export type Author = {
   bio?: string
 }
 
+export type FormReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'form'
+}
+
+export type FormSection = {
+  _type: 'formSection'
+  title?: string
+  text?: string
+  form: FormReference
+}
+
+export type Form = {
+  _id: string
+  _type: 'form'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title: string
+  fields: Array<{
+    label: string
+    name: string
+    type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'checkbox'
+    required: boolean
+    options?: Array<string>
+    _type: 'formField'
+    _key: string
+  }>
+  submitLabel: string
+  successMessage: string
+  recipientEmail: string
+}
+
 export type CtaBanner = {
   _type: 'ctaBanner'
   title: string
@@ -412,6 +447,9 @@ export type SharedSection = {
     | ({
         _key: string
       } & CtaBanner)
+    | ({
+        _key: string
+      } & FormSection)
   >
 }
 
@@ -455,6 +493,9 @@ export type Page = {
     | ({
         _key: string
       } & CtaBanner)
+    | ({
+        _key: string
+      } & FormSection)
     | ({
         _key: string
       } & SharedSectionReference)
@@ -716,6 +757,9 @@ export type AllSanitySchemaTypes =
   | CategoryReference
   | Post
   | Author
+  | FormReference
+  | FormSection
+  | Form
   | CtaBanner
   | Faq
   | Testimonials
@@ -961,9 +1005,28 @@ export type POST_SITEMAP_QUERY_RESULT = Array<{
   noIndex: boolean | false
 }>
 
+// Source: src/features/forms/api/queries.ts
+// Variable: FORM_QUERY
+// Query: *[_type == "form" && _id == $id][0] {    _id,      title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  },    successMessage,    recipientEmail  }
+export type FORM_QUERY_RESULT = {
+  _id: string
+  title: string
+  submitLabel: string
+  fields: Array<{
+    _key: string
+    label: string
+    name: string
+    type: 'checkbox' | 'email' | 'select' | 'tel' | 'text' | 'textarea'
+    required: boolean
+    options: Array<string> | null
+  }>
+  successMessage: string
+  recipientEmail: string
+} | null
+
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    title,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    pageBuilder[] {   _key,      _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },  _type,  _type == "reference" => @->section[0] {        _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]  }
+// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    title,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    pageBuilder[] {   _key,      _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" => {    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },  _type,  _type == "reference" => @->section[0] {        _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" => {    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]  }
 export type PAGE_QUERY_RESULT = {
   _id: string
   _type: 'page'
@@ -1189,6 +1252,45 @@ export type PAGE_QUERY_RESULT = {
           } | null
         }>
         _type: 'featuresGrid'
+      }
+    | {
+        _key: string
+        _type: 'formSection'
+        title: string | null
+        text: string | null
+        form: {
+          _id: string
+          title: string
+          submitLabel: string
+          fields: Array<{
+            _key: string
+            label: string
+            name: string
+            type: 'checkbox' | 'email' | 'select' | 'tel' | 'text' | 'textarea'
+            required: boolean
+            options: Array<string> | null
+          }>
+        }
+        sharedSectionId: string
+      }
+    | {
+        _key: string
+        title: string | null
+        text: string | null
+        form: {
+          _id: string
+          title: string
+          submitLabel: string
+          fields: Array<{
+            _key: string
+            label: string
+            name: string
+            type: 'checkbox' | 'email' | 'select' | 'tel' | 'text' | 'textarea'
+            required: boolean
+            options: Array<string> | null
+          }>
+        }
+        _type: 'formSection'
       }
     | {
         _key: string
@@ -1788,6 +1890,9 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
         } & FeaturesGrid)
       | ({
           _key: string
+        } & FormSection)
+      | ({
+          _key: string
         } & Hero)
       | ({
           _key: string
@@ -1819,6 +1924,9 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
       | ({
           _key: string
         } & FeaturesGrid)
+      | ({
+          _key: string
+        } & FormSection)
       | ({
           _key: string
         } & Hero)
@@ -1910,7 +2018,8 @@ declare global {
     '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    title,\n    "slug": slug.current,\n    excerpt,\n    publishedAt,\n    mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    author->{ name, bio, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } },\n    categories[]->{ title, "slug": slug.current },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "related": *[\n      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)\n    ] | score(\n      boost(^.categories[0]._ref in categories[]._ref, 1),\n      boost(^.categories[1]._ref in categories[]._ref, 1),\n      boost(^.categories[2]._ref in categories[]._ref, 1),\n      boost(^.categories[3]._ref in categories[]._ref, 1),\n      boost(^.categories[4]._ref in categories[]._ref, 1)\n    ) | order(_score desc, publishedAt desc, _id desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n }\n  }\n': POST_QUERY_RESULT
     '{\n  "posts": *[_type == "post" && defined(slug.current)] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  },\n  "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current }\n}': BLOG_INDEX_QUERY_RESULT
     '\n  *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': POST_SITEMAP_QUERY_RESULT
-    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    title,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    pageBuilder[] { \n  _key,\n  \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n  }\n': PAGE_QUERY_RESULT
+    '\n  *[_type == "form" && _id == $id][0] {\n    _id,\n    \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n,\n    successMessage,\n    recipientEmail\n  }\n': FORM_QUERY_RESULT
+    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    title,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    pageBuilder[] { \n  _key,\n  \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" => {\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" => {\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n  }\n': PAGE_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    title,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  count(*[_type == "page" && defined(slug.current)])\n': PAGE_COUNT_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_SITEMAP_QUERY_RESULT

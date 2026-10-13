@@ -15,6 +15,7 @@ import { structureTool } from 'sanity/structure'
 
 import { apiVersion, dataset, projectId, studioTitle, studioUrl } from './src/config/env'
 import { blogSchemaTypes } from './src/features/blog/schemas'
+import { formSchemaTypes } from './src/features/forms/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { pageTemplates } from './src/features/pages/schemas/templates'
 import { siteSchemaTypes } from './src/features/site/schemas'
@@ -38,7 +39,13 @@ export default defineConfig({
   dataset,
   studio: { components: { logo: StudioLogo } },
   schema: {
-    types: [...pageSchemaTypes, ...blogSchemaTypes, ...siteSchemaTypes, ...sharedSchemaTypes],
+    types: [
+      ...pageSchemaTypes,
+      ...blogSchemaTypes,
+      ...formSchemaTypes,
+      ...siteSchemaTypes,
+      ...sharedSchemaTypes,
+    ],
     templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],
   },
   document: {

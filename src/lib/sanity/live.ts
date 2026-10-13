@@ -56,6 +56,7 @@ export const TAGS = {
   post: 'post',
   author: 'author',
   category: 'category',
+  form: 'form',
 } as const
 
 export interface FetchMode {

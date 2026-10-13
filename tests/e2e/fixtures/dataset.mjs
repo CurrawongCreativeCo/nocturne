@@ -37,6 +37,16 @@ const block = (children, extra = {}) => ({
   ...extra,
 })
 
+const formField = (label, name, type, { required = false, options } = {}) => ({
+  _key: `field-${name}`,
+  _type: 'formField',
+  label,
+  name,
+  type,
+  required,
+  ...(options && { options }),
+})
+
 const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
@@ -251,6 +261,42 @@ export const documents = [
       { _key: 'shared-ref', ...ref('shared-promo') },
       // Points at a missing document: skipped, not an error.
       { _key: key(), ...ref('does-not-exist') },
+    ],
+  },
+  {
+    // Every field type, required and optional, for the form tests.
+    _id: 'form-contact',
+    _type: 'form',
+    title: 'Contact form',
+    submitLabel: 'Send message',
+    successMessage: 'Thanks, Ann! We will reply within two days.',
+    recipientEmail: 'inbox@example.com',
+    fields: [
+      formField('Your name', 'name', 'text', { required: true }),
+      formField('Email address', 'email', 'email', { required: true }),
+      formField('Phone number', 'phone', 'tel'),
+      formField('Topic', 'topic', 'select', {
+        required: true,
+        options: ['Sales', 'Support', 'Something else'],
+      }),
+      formField('Message', 'message', 'textarea', { required: true }),
+      formField('I agree to be contacted', 'consent', 'checkbox', { required: true }),
+      formField('Send me the newsletter', 'newsletter', 'checkbox'),
+    ],
+  },
+  {
+    _id: 'page-contact',
+    _type: 'page',
+    title: 'Contact',
+    slug: { _type: 'slug', current: 'contact' },
+    pageBuilder: [
+      {
+        _key: key(),
+        _type: 'formSection',
+        title: 'Get in touch',
+        text: 'We usually reply within two days.',
+        form: ref('form-contact'),
+      },
     ],
   },
   {

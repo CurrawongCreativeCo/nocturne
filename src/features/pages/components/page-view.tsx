@@ -7,14 +7,17 @@ import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { Breadcrumbs } from './breadcrumbs'
 import { SectionRenderer } from './section-renderer'
 import { getBreadcrumbs, getPage, getRedirect } from '../api/get-page'
+import type { SectionProps, SectionType } from '../types'
 
 interface ViewProps {
   slug: string
   /** Request-time content for sections (see `SectionProps.greeting`). */
   greeting?: ReactNode
+  /** Draws forms in form sections (see `SectionProps.renderForm`). */
+  renderForm?: SectionProps<SectionType>['renderForm']
 }
 
-export async function PageView({ slug, greeting, ...mode }: ViewProps & FetchMode) {
+export async function PageView({ slug, greeting, renderForm, ...mode }: ViewProps & FetchMode) {
   const page = await getPage({ slug, ...mode })
   if (!page) {
     // Old URLs from a previous site: redirects are managed in Studio.
@@ -37,13 +40,14 @@ export async function PageView({ slug, greeting, ...mode }: ViewProps & FetchMod
         sections={page.pageBuilder}
         editable={mode.stega}
         greeting={greeting}
+        renderForm={renderForm}
       />
     </>
   )
 }
 
 /** Reads draft-mode cookies, so it must render inside <Suspense>. */
-export async function DraftPageView({ slug, greeting }: ViewProps) {
+export async function DraftPageView({ slug, greeting, renderForm }: ViewProps) {
   const mode = await getDraftFetchMode()
-  return <PageView slug={slug} greeting={greeting} {...mode} />
+  return <PageView slug={slug} greeting={greeting} renderForm={renderForm} {...mode} />
 }

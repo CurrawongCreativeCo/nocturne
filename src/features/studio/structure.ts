@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
 import { CogIcon } from '@sanity/icons/Cog'
 import { ComposeIcon } from '@sanity/icons/Compose'
+import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { FolderIcon } from '@sanity/icons/Folder'
 import { TagIcon } from '@sanity/icons/Tag'
 import { UserIcon } from '@sanity/icons/User'
@@ -55,7 +56,15 @@ const pagesTree = (S: StructureBuilder, { documentStore }: StructureResolverCont
     )
 
 /** Document types with their own place in the structure below; the catch-all list skips them. */
-const LISTED_TYPES = new Set(['page', 'sharedSection', 'redirect', 'post', 'author', 'category'])
+const LISTED_TYPES = new Set([
+  'page',
+  'sharedSection',
+  'form',
+  'redirect',
+  'post',
+  'author',
+  'category',
+])
 
 /** Desk structure: singletons pinned at the top, then every other document type. */
 export const structure: StructureResolver = (S, context) =>
@@ -70,6 +79,7 @@ export const structure: StructureResolver = (S, context) =>
       S.divider(),
       pagesTree(S, context),
       S.documentTypeListItem('sharedSection').title('Shared sections'),
+      S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon),
       S.listItem()
         .title('Blog')
         .id('blog')

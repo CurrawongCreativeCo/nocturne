@@ -17,4 +17,6 @@ export const APP_ENV = {
   SANITY_API_READ_TOKEN: 'e2e-token',
   SANITY_API_HOST: `http://localhost:${FAKE_SANITY_PORT}`,
   SANITY_REVALIDATE_SECRET: REVALIDATE_SECRET,
+  // Forms: Turnstile and Resend are replaced by mocks (the real services are never called).
+  FORMS_TEST_MODE: '1',
 }

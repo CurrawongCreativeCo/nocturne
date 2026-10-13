@@ -6,6 +6,7 @@ import type { PageSection, SectionProps, SectionType } from '../types'
 import { CtaBanner } from './sections/cta-banner'
 import { Faq } from './sections/faq'
 import { FeaturesGrid } from './sections/features-grid'
+import { FormSection } from './sections/form-section'
 import { Hero } from './sections/hero'
 import { LogoCloud } from './sections/logo-cloud'
 import { MediaText } from './sections/media-text'
@@ -27,6 +28,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   testimonials: Testimonials,
   faq: Faq,
   ctaBanner: CtaBanner,
+  formSection: FormSection,
   // new-section:register
 }
 
@@ -44,6 +46,8 @@ interface Props {
   editable?: boolean
   /** Passed to every section; see `SectionProps.greeting`. */
   greeting?: ReactNode
+  /** Passed to every section; see `SectionProps.renderForm`. */
+  renderForm?: SectionProps<SectionType>['renderForm']
 }
 
 export function SectionRenderer({
@@ -53,6 +57,7 @@ export function SectionRenderer({
   path = 'pageBuilder',
   editable = false,
   greeting,
+  renderForm,
 }: Props) {
   if (!sections?.length) return null
 
@@ -63,7 +68,13 @@ export function SectionRenderer({
         // TS can't correlate `section` with `SECTION_COMPONENTS[section._type]` across a
         // union; the registry's mapped type above already guarantees they match.
         const Section = SECTION_COMPONENTS[section._type] as
-          ComponentType<{ data: PageSection; isFirst?: boolean; greeting?: ReactNode }> | undefined
+          | ComponentType<{
+              data: PageSection
+              isFirst?: boolean
+              greeting?: ReactNode
+              renderForm?: Props['renderForm']
+            }>
+          | undefined
 
         if (!Section) {
           // Reachable when the dataset has a section type newer than this deployment.
@@ -83,10 +94,21 @@ export function SectionRenderer({
                 : dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)
             }
           >
-            <Section data={section} isFirst={index === 0} greeting={greeting} />
+            <Section
+              data={section}
+              isFirst={index === 0}
+              greeting={greeting}
+              renderForm={renderForm}
+            />
           </div>
         ) : (
-          <Section key={section._key} data={section} isFirst={index === 0} greeting={greeting} />
+          <Section
+            key={section._key}
+            data={section}
+            isFirst={index === 0}
+            greeting={greeting}
+            renderForm={renderForm}
+          />
         )
       })}
     </Wrapper>

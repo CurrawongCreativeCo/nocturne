@@ -1,12 +1,18 @@
 import type { Metadata, ResolvingMetadata } from 'next'
 import { draftMode } from 'next/headers'
-import { Suspense } from 'react'
+import { Suspense, type ComponentProps } from 'react'
 
 import { segmentsToSlug } from '@/config/paths'
+import { FormView } from '@/features/forms/components/form-view'
 import { getPageMetadata, getPageStaticParams } from '@/features/pages/api/get-page'
 import { DraftPageView, PageView } from '@/features/pages/components/page-view'
 import { ReturningVisitor } from '@/features/personalization/components/returning-visitor'
 import { PUBLISHED } from '@/lib/sanity/live'
+
+/** Forms are their own feature; this route is where the page builder meets them. */
+const renderForm: ComponentProps<typeof PageView>['renderForm'] = (form, headingId) => (
+  <FormView form={form} headingId={headingId} />
+)
 
 /**
  * Optional catch-all (`[[...slug]]`) so one route serves "/" and every nested path.
@@ -43,6 +49,7 @@ export default async function Page({ params }: Props) {
     <PageView
       slug={segmentsToSlug((await params).slug)}
       greeting={<ReturningVisitor />}
+      renderForm={renderForm}
       {...PUBLISHED}
     />
   )
@@ -50,6 +57,10 @@ export default async function Page({ params }: Props) {
 
 async function DraftPage({ params }: Pick<Props, 'params'>) {
   return (
-    <DraftPageView slug={segmentsToSlug((await params).slug)} greeting={<ReturningVisitor />} />
+    <DraftPageView
+      slug={segmentsToSlug((await params).slug)}
+      greeting={<ReturningVisitor />}
+      renderForm={renderForm}
+    />
   )
 }

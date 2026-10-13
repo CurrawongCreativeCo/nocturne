@@ -76,6 +76,13 @@ Open http://localhost:3000/studio:
   - _RSS:_ `/feed.xml` is an RSS 2.0 feed of the newest 12 posts, with absolute URLs, and blog pages advertise it in their `<head>`. It takes the title and description from Site settings.
   - _Search engines:_ posts get `Article` JSON-LD (author, dates, image, categories; the publisher is the site's Organization). Posts and `/blog` are in the sitemap unless the post's _Hide from search engines_ is ticked; category pages are not.
   - _Bad URLs:_ an unknown post or category gets a real 404. A `?page` past the last page (or not a number) shows the 404 page with `noindex` but answers 200, because the page number can only be read after the response has started streaming.
+- **Forms:** _Forms_ in the sidebar holds forms you build yourself; show one on a page with the _Form_ section (_Add item → Form_, then pick it). One form can sit on many pages. A form has:
+  - _Fields_ (up to 20): a _label_, an internal _name_ (e.g. `email`; a lowercase letter, then letters, numbers and `_`; unique in the form, and best left alone once live), a _type_ (short text, email, phone, long text, drop-down, checkbox), _required_, and for a drop-down its _choices_.
+  - _Button text_, a _success message_ (shown in place of the form after sending) and _Send submissions to_, the address that receives each one. Replying to the email reaches the visitor if the form has an email field they filled in.
+  - _How it behaves:_ every field is checked on the server against the published form, so a visitor can't send a field or a choice the form doesn't have. Problems appear in a summary above the form that takes focus (each item links to its field) and beside each field, and what was typed is kept. Long text allows line breaks and 5,000 characters; other fields are one line of up to 200 (email 254, phone 30). Email addresses are checked for shape only, and phone numbers for 5–15 digits.
+  - _Spam:_ a Cloudflare Turnstile check on every send, plus a limit of 5 messages per IP address per 10 minutes on each server instance (serverless instances count separately, so it slows a spammer down rather than stopping one). The check needs JavaScript. Without it the form still posts and shows errors, but nothing is sent: the visitor is told to turn JavaScript on.
+  - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Use a shared inbox, or make the dataset private. Submissions are emailed, not stored: if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
+  - _Setup:_ it needs four environment variables (see _Forms setup_ below). Until they are set, a form section shows a setup message in development and "isn't available right now" to visitors. Pages read them at build time, so redeploy after changing them.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
   Normally they only apply to paths with no page, so they can't hide a live page. With Edge Config
@@ -97,6 +104,7 @@ Open http://localhost:3000/studio:
 | Testimonials          | Customer quotes with name, role and photo                 |
 | FAQ                   | Questions that expand to answers                          |
 | Call to action banner | A closing prompt in brand, dark or light tone             |
+| Form                  | A contact or enquiry form built under _Forms_ (see below) |
 
 **Shared sections:** use _Shared sections_ in the sidebar for a section that appears unchanged on
 several pages, like a promo banner or a newsletter sign-up. Create one (a title for your own reference,
@@ -136,6 +144,10 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default `Content`) |
    | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                |
    | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                               |
+   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                     |
+   | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                |
+   | `RESEND_API_KEY`                 | only for forms: Resend API key                                  |
+   | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`   |
    | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it     |
    | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id        |
    | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store  |
@@ -191,6 +203,10 @@ src/
     blog/                          posts, authors, categories: index, post page, related posts, RSS builder
       api/                         queries.ts (GROQ), get-posts.ts (lists, post, metadata, sitemap, feed items)
       utils/                       pagination, feed (RSS XML), date formatting
+    forms/                         editor-built forms: schema, the form UI, the submit action
+      api/                         queries.ts (FORM_QUERY), submit-form.ts (server action), rate-limiter.ts
+      components/                  form-view (server; env check), contact-form (client), turnstile-widget
+      utils/                       validate, build-email, resend, turnstile, rate-limit, client-ip, config
     site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
@@ -281,6 +297,8 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **Breadcrumbs** add none: they are built from the cached `PAGE_INDEX_QUERY` (slug and title).
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
+- **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
+  recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
 Keep it that way: fetch through `cachedSanityFetch`, call each query with the same argument shape so
@@ -313,10 +331,20 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category"]` · **Projection:** `{_type}`
+   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category", "form"]` · **Projection:** `{_type}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
+
+### Forms setup
+
+1. **Turnstile:** in the Cloudflare dashboard → Turnstile, add a widget for your domain (and `localhost` for development). Put the site key in `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and the secret key in `TURNSTILE_SECRET_KEY`. Cloudflare's [always-passing test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) work locally.
+2. **Resend:** at resend.com, verify your sending domain, create an API key (`RESEND_API_KEY`) and choose the sender (`FORMS_FROM_EMAIL`, e.g. `Test Co <forms@example.com>`; its domain must be verified).
+3. Add all four to `.env.local` and to the deployment's environment variables, then redeploy (pages bake the check in at build time). `.env.example` lists them.
+
+How a send works (`src/features/forms/api/submit-form.ts`, a server action that also handles a plain HTML POST): read the form's id from the request, **fetch the published form again** (`FORM_QUERY`, the only query that reads `recipientEmail`, tagged `form`), validate each of its fields (`utils/validate.ts`), rate-limit the IP (`x-real-ip`, else the first `x-forwarded-for` entry, so it only means something behind a proxy that sets them itself, as Vercel does), verify the Turnstile token with Cloudflare, then send through Resend's REST API (`utils/resend.ts`, no SDK). Cheap checks come first, so a mistake in a field never spends a token, a rate-limit slot or an email. Failures are logged on the server and shown to the visitor as a general message.
+
+`FORMS_TEST_MODE=1` replaces Turnstile and Resend with mocks that accept everything and send nothing; the end-to-end tests use it (the form then carries a fixed token instead of the widget, and the server accepts only that token). It is ignored when `VERCEL_ENV` is `production`, so it can't switch the spam check off there. To change the email, edit `utils/build-email.ts`: values are HTML-escaped and a subject can't contain line breaks.
 
 ### Edge Config redirects
 
@@ -380,11 +408,11 @@ each release before proposing it.
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
-  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, and the setup wizard's validation.
+  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
 
 Running the end-to-end tests locally:
 

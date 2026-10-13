@@ -14,6 +14,9 @@ export type PageSection = NonNullable<PageData['pageBuilder']>[number]
 export type SectionType = PageSection['_type']
 export type SectionOf<T extends SectionType> = Extract<PageSection, { _type: T }>
 
+/** A form a `formSection` references. */
+export type SectionForm = NonNullable<SectionOf<'formSection'>['form']>
+
 /** Props contract every section component implements. */
 export interface SectionProps<T extends SectionType> {
   data: SectionOf<T>
@@ -27,4 +30,9 @@ export interface SectionProps<T extends SectionType> {
    * inside <Suspense>: it may read cookies, which would otherwise make the page dynamic.
    */
   greeting?: ReactNode
+  /**
+   * Draws a form. Forms are another feature, which this one can't import, so the route supplies
+   * the renderer. Give `headingId` the id of the section's heading to name the form.
+   */
+  renderForm?: (form: SectionForm, headingId?: string) => ReactNode
 }
