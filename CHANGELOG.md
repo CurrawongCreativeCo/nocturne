@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- Content migrations and schema deploy from CI. `migrations/` holds an example `defineMigration` (a field rename,
+  with a unit test) and a README on when a schema change needs a migration, how to dry-run and how to run one.
+  `.github/workflows/sanity.yml` dry-runs every migration against the production dataset on pull requests that touch
+  schemas or migrations (secret `SANITY_MIGRATION_READ_TOKEN`) and runs `sanity schema deploy` on push to `main`
+  (secret `SANITY_DEPLOY_TOKEN`); both skip with a notice when the secret is absent. CI never runs a real migration.
+  New: `migrations/**/*.test.ts` joins the unit tests.
 - Generators for features, documents and singletons: `npm run new:feature`, `new:document` and `new:singleton`,
   built like `new:section` (marker comments, everything checked before writing, then ESLint, Prettier and typegen).
   They add marker comments to `eslint.config.mjs`, `sanity.config.ts`, each feature's `schemas/index.ts`,

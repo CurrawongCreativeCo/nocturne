@@ -1,0 +1,123 @@
+# Keeps the Sanity dataset and its schema in step with the code.
+#  - `migrations`: on pull requests that touch the schema or migrations/, dry-runs every migration
+#    against the production dataset. Dry runs only read; they print what would change.
+#  - `deploy-schema`: on push to main, publishes the schema (`sanity schema deploy`) so tools that
+#    read the deployed schema, such as the Studio's AI features and the MCP server, stay current.
+# CI never runs a real migration: that is a manual command (see migrations/README.md).
+# Both jobs skip with a notice, and succeed, when their secret is absent (forks, new projects).
+name: Sanity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'migrations/**'
+      - 'src/features/*/schemas/**'
+      - 'src/lib/sanity/schema/**'
+      - 'sanity.config.ts'
+      - 'sanity.cli.ts'
+      - '.github/workflows/sanity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  migrations:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: sanity-migrations-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+      NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET || 'production' }}
+      # A Viewer token is enough: dry runs only read.
+      SANITY_AUTH_TOKEN: ${{ secrets.SANITY_MIGRATION_READ_TOKEN }}
+    steps:
+      - name: Check configuration
+        id: gate
+        run: |
+          if [ -z "$SANITY_AUTH_TOKEN" ] || [ -z "$NEXT_PUBLIC_SANITY_PROJECT_ID" ]; then
+            echo "::notice title=Migration dry run skipped::Set the SANITY_MIGRATION_READ_TOKEN secret and the NEXT_PUBLIC_SANITY_PROJECT_ID variable to dry-run migrations against $NEXT_PUBLIC_SANITY_DATASET. Pull requests from forks never receive secrets."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.gate.outputs.enabled == 'true'
+        run: npm ci
+
+      # Dry run is the CLI default; --dry-run states it so nobody "fixes" this step into a real run.
+      - name: Dry-run migrations
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          shopt -s nullglob
+          ids=()
+          for dir in migrations/*/; do ids+=("$(basename "$dir")"); done
+          if [ "${#ids[@]}" -eq 0 ]; then
+            echo "::notice title=No migrations::migrations/ has no migration folders, nothing to dry-run."
+            exit 0
+          fi
+          for id in "${ids[@]}"; do
+            echo "::group::sanity migration run $id (dry run)"
+            npx sanity migration run "$id" --dry-run --no-confirm --no-progress \
+              --project "$NEXT_PUBLIC_SANITY_PROJECT_ID" --dataset "$NEXT_PUBLIC_SANITY_DATASET"
+            echo "::endgroup::"
+          done
+
+  deploy-schema:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Never cancel a deploy half way; a newer push simply waits its turn.
+    concurrency:
+      group: sanity-schema-deploy
+      cancel-in-progress: false
+    env:
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+      NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET || 'production' }}
+      # Deploying writes schema documents to the dataset, so this token needs the Editor role.
+      SANITY_AUTH_TOKEN: ${{ secrets.SANITY_DEPLOY_TOKEN }}
+    steps:
+      - name: Check configuration
+        id: gate
+        run: |
+          if [ -z "$SANITY_AUTH_TOKEN" ] || [ -z "$NEXT_PUBLIC_SANITY_PROJECT_ID" ]; then
+            echo "::notice title=Schema deploy skipped::Set the SANITY_DEPLOY_TOKEN secret and the NEXT_PUBLIC_SANITY_PROJECT_ID variable to deploy the schema from CI."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.gate.outputs.enabled == 'true'
+        run: npm ci
+
+      - name: Deploy schema
+        if: steps.gate.outputs.enabled == 'true'
+        run: npx sanity schema deploy

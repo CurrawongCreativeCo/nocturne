@@ -664,6 +664,22 @@ each release before proposing it.
 | `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)       |
 | `npm run test:lighthouse` | Lighthouse budgets on `/` and `/about` (needs Chrome installed)            |
 
+### Sanity workflow (migrations and schema deploy)
+
+`.github/workflows/sanity.yml` keeps the dataset and its deployed schema in step with the code. Set these in the
+repository's Settings → Secrets and variables → Actions. Each job skips with a notice (and passes) when its
+secret or the project ID is missing, and fork pull requests never receive secrets.
+
+| Name                            | Kind     | Used for                                                                                                                |
+| ------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | variable | Both jobs. `NEXT_PUBLIC_SANITY_DATASET` (variable) is optional and defaults to `production`                             |
+| `SANITY_MIGRATION_READ_TOKEN`   | secret   | **Viewer** token. Pull requests that touch a schema or `migrations/` dry-run every migration                            |
+| `SANITY_DEPLOY_TOKEN`           | secret   | **Editor** token. Every push to `main` runs `sanity schema deploy`, so tools that read the deployed schema stay current |
+
+The dry run only reads and prints what each migration would change; read the log before merging.
+**CI never runs a real migration.** Do that by hand with `npx sanity migration run <id> --no-dry-run`; when a
+schema change needs a migration and how to write one are in [migrations/README.md](migrations/README.md).
+
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
