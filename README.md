@@ -93,6 +93,14 @@ page that uses it updates; clicking it in Presentation opens the shared document
 differ per page, add a normal section instead. Deleting a shared section leaves the pages that still
 reference it without it (they skip the gap rather than error).
 
+**Content releases:** group changes to several documents and publish them together, at once or at a set time.
+
+1. _Create:_ open **Releases** in the Studio toolbar and choose _New release_ (name it, pick _ASAP_, _At time_ or _Undecided_). Then edit any page, shared section or setting and use the document's version menu to add it to the release; the release holds its own copy, so the published page doesn't change.
+2. _Preview:_ in **Presentation**, open the perspective menu and pick the release (or several; the first listed wins). The site then renders the release's content, including documents it doesn't change. This works in draft mode only: Presentation stores the choice in the `sanity-preview-perspective` cookie, which `getDraftFetchMode` reads. The public site always shows published content.
+3. _Schedule:_ in the release, set _At time_ and choose _Schedule_ (or _Publish all_ to go live now). Scheduled releases publish on their own and trigger the usual live update or webhook revalidation.
+
+Releases and scheduled publishing need a paid Sanity plan (Growth or higher); on Free they aren't available, so editors publish documents individually. Check your project's plan for its release limits.
+
 **Branding:** the brand color is `--color-brand` in `src/styles/globals.css`; the font is set
 with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
 the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project.

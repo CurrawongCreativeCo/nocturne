@@ -198,3 +198,27 @@ export const documents = [
     permanent: false,
   },
 ].map((doc) => ({ ...doc, _updatedAt: UPDATED }))
+
+/**
+ * A "release" version of the About page, as the Content Lake stores it: a document with
+ * `_id: versions.<release>.<id>`. Only served when the request's perspective names the release.
+ */
+// Keep in sync with RELEASE_ID in tests/e2e/constants.ts (this file is plain .mjs, run by Node).
+const RELEASE_ID = 'rSummer'
+
+export const releaseVersions = [
+  {
+    _id: `versions.${RELEASE_ID}.page-about`,
+    _type: 'page',
+    title: 'About (Summer release)',
+    slug: { _type: 'slug', current: 'about' },
+    pageBuilder: [
+      {
+        _key: key(),
+        _type: 'richText',
+        body: [block(['Only in the Summer release.'], { style: 'h2' })],
+      },
+    ],
+    _updatedAt: UPDATED,
+  },
+]
