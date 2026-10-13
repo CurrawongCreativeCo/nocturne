@@ -1,0 +1,106 @@
+# Weekly backup of the Sanity dataset (documents and assets) with `sanity dataset export`.
+# Uploads to S3-compatible storage (Cloudflare R2, AWS S3) when its secrets are set; otherwise
+# keeps the file as an Actions artifact for 30 days. Files are named by date. Restoring is
+# documented in the README ("Backups").
+# Skips with a notice, and succeeds, when SANITY_AUTH_TOKEN or the project ID is missing.
+name: Backup
+
+on:
+  schedule:
+    # Sundays 03:00 UTC. GitHub pauses scheduled runs after 60 days without repository activity.
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One backup at a time; a manual run waits for the scheduled one instead of cancelling it.
+concurrency:
+  group: sanity-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+      NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET || 'production' }}
+      # A Viewer token is enough: export only reads.
+      SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+      BACKUP_S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+      BACKUP_S3_ENDPOINT: ${{ secrets.BACKUP_S3_ENDPOINT }}
+      BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+      BACKUP_S3_PREFIX: ${{ vars.BACKUP_S3_PREFIX || 'sanity-backups' }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Check configuration
+        id: gate
+        run: |
+          if [ -z "$SANITY_AUTH_TOKEN" ] || [ -z "$NEXT_PUBLIC_SANITY_PROJECT_ID" ]; then
+            echo "::notice title=Backup skipped::Set the SANITY_AUTH_TOKEN secret (Viewer role) and the NEXT_PUBLIC_SANITY_PROJECT_ID variable to back up the $NEXT_PUBLIC_SANITY_DATASET dataset."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "name=sanity-$NEXT_PUBLIC_SANITY_DATASET-$(date -u +%F).tar.gz" >> "$GITHUB_OUTPUT"
+
+          if [ -n "$BACKUP_S3_BUCKET" ] && [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "s3=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "s3=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Storing as an artifact::No S3 or R2 secrets set (BACKUP_S3_BUCKET, BACKUP_S3_ACCESS_KEY_ID, BACKUP_S3_SECRET_ACCESS_KEY), so the backup is kept as an Actions artifact for 30 days."
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.gate.outputs.enabled == 'true'
+        run: npm ci
+
+      # The CLI reads the project ID from sanity.cli.ts and the token from SANITY_AUTH_TOKEN.
+      - name: Export dataset
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          npx sanity dataset export "$NEXT_PUBLIC_SANITY_DATASET" backup.tar.gz --overwrite
+          # An empty or truncated archive must fail the run, not become a "backup".
+          tar -tzf backup.tar.gz > /dev/null
+          ls -lh backup.tar.gz
+
+      # The AWS CLI ships on GitHub's Ubuntu runners. R2 needs the endpoint and region "auto".
+      - name: Upload to S3-compatible storage
+        if: steps.gate.outputs.enabled == 'true' && steps.gate.outputs.s3 == 'true'
+        env:
+          BACKUP_NAME: ${{ steps.gate.outputs.name }}
+          AWS_DEFAULT_REGION: ${{ vars.BACKUP_S3_REGION || (secrets.BACKUP_S3_ENDPOINT && 'auto') || 'us-east-1' }}
+        run: |
+          args=()
+          if [ -n "$BACKUP_S3_ENDPOINT" ]; then args+=(--endpoint-url "$BACKUP_S3_ENDPOINT"); fi
+          aws s3 cp backup.tar.gz "s3://$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX/$BACKUP_NAME" "${args[@]}"
+          echo "::notice title=Backup uploaded::s3://$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX/$BACKUP_NAME"
+
+      - name: Rename for the artifact
+        if: steps.gate.outputs.enabled == 'true' && steps.gate.outputs.s3 != 'true'
+        env:
+          BACKUP_NAME: ${{ steps.gate.outputs.name }}
+        run: mv backup.tar.gz "$BACKUP_NAME"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.gate.outputs.enabled == 'true' && steps.gate.outputs.s3 != 'true'
+        with:
+          name: ${{ steps.gate.outputs.name }}
+          path: ${{ steps.gate.outputs.name }}
+          if-no-files-found: error
+          # The archive is already compressed.
+          compression-level: 0
+          retention-days: 30

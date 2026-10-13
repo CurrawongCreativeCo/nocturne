@@ -680,6 +680,52 @@ The dry run only reads and prints what each migration would change; read the log
 **CI never runs a real migration.** Do that by hand with `npx sanity migration run <id> --no-dry-run`; when a
 schema change needs a migration and how to write one are in [migrations/README.md](migrations/README.md).
 
+### Backups
+
+`.github/workflows/backup.yml` exports the dataset (documents and assets) every Sunday at 03:00 UTC, and on demand
+from the Actions tab (Backup → Run workflow). Files are named `sanity-<dataset>-<YYYY-MM-DD>.tar.gz`. It skips with
+a notice (and passes) when the token or project ID is missing. GitHub pauses scheduled workflows after 60 days
+without repository activity; a manual run re-enables them.
+
+| Name                                                                         | Kind     | Used for                                                                                                    |
+| ---------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`                                              | variable | Same variable as the Sanity workflow. `NEXT_PUBLIC_SANITY_DATASET` (variable) defaults to `production`      |
+| `SANITY_AUTH_TOKEN`                                                          | secret   | **Viewer** token. Export only reads                                                                         |
+| `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY` | secret   | Optional. All three together switch storage from an Actions artifact to an S3-compatible bucket             |
+| `BACKUP_S3_ENDPOINT`                                                         | secret   | Optional. Needed for Cloudflare R2: `https://<account-id>.r2.cloudflarestorage.com`. Leave empty for AWS S3 |
+| `BACKUP_S3_REGION`, `BACKUP_S3_PREFIX`                                       | variable | Optional. Region defaults to `auto` with an endpoint and `us-east-1` without; prefix to `sanity-backups`    |
+
+Without the bucket secrets the backup is an Actions artifact kept for 30 days: enough for a few weekly restores
+points, not a long-term archive. For longer retention use a bucket and set a lifecycle rule on it (the workflow never
+deletes anything). Give the bucket credentials write access to that bucket only; the backup contains your drafts.
+
+**Restore.** Download the file (artifact: Actions → the run → Artifacts, which downloads as a zip around the
+`.tar.gz`; bucket: your provider's console or `aws s3 cp`). Then, logged in with `npx sanity login` as someone who can write
+to the project:
+
+```bash
+npx sanity dataset import sanity-production-2026-10-11.tar.gz production --replace
+```
+
+`--replace` overwrites documents with the same `_id`; use `--missing` to only add what is gone. Documents created
+after the backup stay, so to return to the exact backup state import into a new dataset instead and point
+`NEXT_PUBLIC_SANITY_DATASET` at it.
+
+**Test a restore** (do this once, and after big schema changes) into a scratch dataset that touches nothing live:
+
+```bash
+npx sanity dataset create restore-test --visibility private
+npx sanity dataset import sanity-production-2026-10-11.tar.gz restore-test
+# Compare document counts (the numbers should match the backup date's content)
+npx sanity documents query 'count(*)' --dataset restore-test
+npx sanity documents query 'count(*)' --dataset production
+# Optional: run the site against it
+NEXT_PUBLIC_SANITY_DATASET=restore-test npm run dev
+npx sanity dataset delete restore-test
+```
+
+Deleting the scratch dataset is permanent, so check the name first.
+
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
