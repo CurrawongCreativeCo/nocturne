@@ -167,6 +167,14 @@ export type Settings = {
   >
   footerText?: string
   allowAiCrawlers?: boolean
+  consent?: {
+    title?: string
+    message?: string
+    privacyLabel?: string
+    privacyLink?: Link
+    analyticsText?: string
+    marketingText?: string
+  }
 }
 
 export type SanityImageCrop = {
@@ -1788,7 +1796,7 @@ export type REDIRECTS_QUERY_RESULT = Array<{
 
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
-// Query: *[_id == "settings"][0] {    title,    description,    logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    ogImage { asset->{ _id } },    announcement { message, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, startsAt, endsAt, dismissible },    headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerText,    "allowAiCrawlers": allowAiCrawlers != false  }
+// Query: *[_id == "settings"][0] {    title,    description,    logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    ogImage { asset->{ _id } },    announcement { message, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, startsAt, endsAt, dismissible },    headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerText,    consent { title, message, privacyLabel, privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, analyticsText, marketingText },    "allowAiCrawlers": allowAiCrawlers != false  }
 export type SETTINGS_QUERY_RESULT =
   | {
       title: null
@@ -1800,6 +1808,7 @@ export type SETTINGS_QUERY_RESULT =
       headerCta: null
       footerNav: null
       footerText: null
+      consent: null
       allowAiCrawlers: true
     }
   | {
@@ -1812,6 +1821,7 @@ export type SETTINGS_QUERY_RESULT =
       headerCta: null
       footerNav: null
       footerText: null
+      consent: null
       allowAiCrawlers: true
     }
   | {
@@ -1824,6 +1834,7 @@ export type SETTINGS_QUERY_RESULT =
       headerCta: null
       footerNav: null
       footerText: null
+      consent: null
       allowAiCrawlers: true
     }
   | {
@@ -1836,6 +1847,7 @@ export type SETTINGS_QUERY_RESULT =
       headerCta: null
       footerNav: null
       footerText: null
+      consent: null
       allowAiCrawlers: true
     }
   | {
@@ -1905,6 +1917,19 @@ export type SETTINGS_QUERY_RESULT =
         }
       }> | null
       footerText: string | null
+      consent: {
+        title: string | null
+        message: string | null
+        privacyLabel: string | null
+        privacyLink: {
+          linkType: 'external' | 'internal'
+          slug: string | null
+          url: string | null
+          openInNewTab: boolean | null
+        } | null
+        analyticsText: string | null
+        marketingText: string | null
+      } | null
       allowAiCrawlers: boolean | true
     }
   | null
@@ -2065,7 +2090,7 @@ declare global {
     '\n  count(*[_type == "page" && defined(slug.current)])\n': PAGE_COUNT_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_SITEMAP_QUERY_RESULT
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
-    '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    announcement { message, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, startsAt, endsAt, dismissible },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText,\n    "allowAiCrawlers": allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
+    '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    announcement { message, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, startsAt, endsAt, dismissible },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText,\n    consent { title, message, privacyLabel, privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, analyticsText, marketingText },\n    "allowAiCrawlers": allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '\n  *[_id == "settings"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }

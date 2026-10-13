@@ -36,7 +36,9 @@ test.describe('announcement bar', () => {
     await expect(bar).toBeHidden()
 
     // The key is the message, so a new message would show again.
-    expect(await page.evaluate(() => Object.keys(localStorage))).toEqual([
+    // (The consent choice shares localStorage; only the announcement's own keys matter here.)
+    const keys = await page.evaluate(() => Object.keys(localStorage))
+    expect(keys.filter((key) => key.startsWith('announcement-dismissed:'))).toEqual([
       `announcement-dismissed:${MESSAGE}`,
     ])
   })

@@ -1,6 +1,10 @@
+import { Analytics } from '@vercel/analytics/next'
 import { draftMode } from 'next/headers'
 import { Suspense } from 'react'
 
+import { hasConsentProviders } from '@/config/analytics'
+import { AnalyticsScripts } from '@/features/consent/components/analytics-scripts'
+import { CookieSettingsButton } from '@/features/consent/components/cookie-settings-button'
 import { DraftModeTools } from '@/features/draft-mode/components/draft-mode-tools'
 import {
   SiteAnnouncement,
@@ -11,6 +15,8 @@ import { SiteHeader, DraftSiteHeader } from '@/features/site/components/site-hea
 import { SiteJsonLd } from '@/features/site/components/site-json-ld'
 import { PUBLISHED, revalidateSecret, SanityLive } from '@/lib/sanity/live'
 import { expireLiveTags } from '@/lib/sanity/live-action'
+
+import { DraftSiteConsent, SiteConsent } from './site-consent'
 
 /** The running A/B test a page was rendered for, exposed on <main> for analytics. */
 export interface ExperimentAttributes {
@@ -31,10 +37,25 @@ export async function SiteShell({
   experiment?: ExperimentAttributes
 }) {
   const { isEnabled: isDraftMode } = await draftMode()
+  const cookieSettings = hasConsentProviders && (
+    <CookieSettingsButton className="cursor-pointer text-sm text-gray-600 hover:text-gray-950" />
+  )
 
   return (
     <>
       <SiteJsonLd />
+      {/*
+        First in the DOM so it is where keyboard focus lands when it opens and where Tab continues
+        from once it closes; it is fixed to the viewport, so it never moves the page.
+      */}
+      {hasConsentProviders &&
+        (isDraftMode ? (
+          <Suspense fallback={null}>
+            <DraftSiteConsent />
+          </Suspense>
+        ) : (
+          <SiteConsent {...PUBLISHED} />
+        ))}
       {/* First focusable element: lets keyboard users jump past the header menu. */}
       <a
         href="#main-content"
@@ -68,10 +89,10 @@ export async function SiteShell({
       </main>
       {isDraftMode ? (
         <Suspense fallback={null}>
-          <DraftSiteFooter />
+          <DraftSiteFooter extra={cookieSettings} />
         </Suspense>
       ) : (
-        <SiteFooter {...PUBLISHED} />
+        <SiteFooter {...PUBLISHED} extra={cookieSettings} />
       )}
       {/*
         Subscribes to Content Lake changes and expires matching cache tags. In webhook mode
@@ -80,7 +101,15 @@ export async function SiteShell({
       {(isDraftMode || !revalidateSecret) && (
         <SanityLive includeDrafts={isDraftMode} action={expireLiveTags} />
       )}
-      {isDraftMode && <DraftModeTools />}
+      {isDraftMode ? (
+        <DraftModeTools />
+      ) : (
+        <>
+          {/* Cookieless, so it needs no consent. Providers needing consent load only after it. */}
+          <Analytics />
+          {hasConsentProviders && <AnalyticsScripts />}
+        </>
+      )}
     </>
   )
 }

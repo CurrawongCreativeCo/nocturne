@@ -20,6 +20,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     headerCta { ${ctaFields} },
     footerNav[] { ${navItemFields} },
     footerText,
+    consent { title, message, privacyLabel, privacyLink { ${linkFields} }, analyticsText, marketingText },
     "allowAiCrawlers": allowAiCrawlers != false
   }
 `)

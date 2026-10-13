@@ -14,6 +14,7 @@ export const settings = defineType({
     { name: 'header', title: 'Header' },
     { name: 'footer', title: 'Footer' },
     { name: 'searchAi', title: 'Search & AI' },
+    { name: 'cookieBanner', title: 'Cookie banner' },
   ],
   fields: [
     defineField({
@@ -129,6 +130,60 @@ export const settings = defineType({
       description:
         'On: AI crawlers (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, CCBot) may read the site, and /llms.txt lists your pages for AI tools. Off: robots.txt asks them to stay away and /llms.txt is removed. Search engines like Google and Bing are not affected. Crawlers choose whether to obey.',
       initialValue: true,
+    }),
+    defineField({
+      name: 'consent',
+      title: 'Cookie banner',
+      type: 'object',
+      group: 'cookieBanner',
+      description:
+        'The text of the cookie banner. It only appears when an analytics provider is set up for the site (see the README). Leave a field empty to use the default wording.',
+      options: { collapsible: false },
+      fields: [
+        defineField({
+          name: 'title',
+          type: 'string',
+          description: 'Default: "Cookies on this site".',
+          validation: (rule) => rule.max(60),
+        }),
+        defineField({
+          name: 'message',
+          type: 'text',
+          rows: 3,
+          description:
+            'Say what the cookies are for in plain words. Default: "We use analytics cookies to see how the site is used. They are off unless you accept."',
+          validation: (rule) => rule.max(300),
+        }),
+        defineField({
+          name: 'privacyLabel',
+          title: 'Privacy policy link text',
+          type: 'string',
+          description: 'Default: "Privacy policy". Only shown when there is a link below.',
+          validation: (rule) => rule.max(40),
+        }),
+        defineField({
+          name: 'privacyLink',
+          title: 'Privacy policy link',
+          type: 'link',
+          description: 'Where visitors read how their data is used. Strongly recommended.',
+        }),
+        defineField({
+          name: 'analyticsText',
+          title: 'Analytics description',
+          type: 'string',
+          description:
+            'Shown beside the Analytics choice. Default: "Helps us understand how the site is used."',
+          validation: (rule) => rule.max(120),
+        }),
+        defineField({
+          name: 'marketingText',
+          title: 'Marketing description',
+          type: 'string',
+          description:
+            'Shown beside the Marketing choice. Default: "Used to measure and personalise advertising."',
+          validation: (rule) => rule.max(120),
+        }),
+      ],
     }),
   ],
   preview: { prepare: () => ({ title: 'Site settings' }) },

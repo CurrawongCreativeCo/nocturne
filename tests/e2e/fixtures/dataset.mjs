@@ -130,6 +130,13 @@ export const documents = [
     headerCta: { _type: 'cta', label: 'Contact', variant: 'primary', link: internal('page-about') },
     footerNav: [navItem('About', 'page-about')],
     footerText: 'Test Co. All rights reserved.',
+    consent: {
+      _type: 'consent',
+      title: 'Your privacy choices',
+      message: 'Test Co uses analytics cookies only if you allow them.',
+      privacyLabel: 'Read the privacy policy',
+      privacyLink: internal('page-about'),
+    },
   },
   {
     // Starts with a hero: the hero provides the page's <h1>.

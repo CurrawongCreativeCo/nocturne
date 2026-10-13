@@ -59,6 +59,7 @@ Open http://localhost:3000/studio:
   - _On:_ `/llms.txt` lists the site name, its default description and every page that isn't hidden from search engines, as Markdown links followed by each page's meta description (a page without one is listed by title only), so AI tools can find your content. Posts follow under a _Blog_ heading, newest first, with the post's meta description or else its summary; posts hidden from search engines are left out.
   - _Off:_ `robots.txt` disallows the whole site for GPTBot, ClaudeBot, Google-Extended, PerplexityBot and CCBot, and `/llms.txt` answers 404. Google, Bing and other search engines are untouched. The list lives in `src/lib/ai-crawlers.ts`.
   - It is a request, not a lock: well-behaved crawlers obey `robots.txt`, others don't. A crawler that has already stored your pages keeps them. Changes appear as soon as the settings are published (webhook mode: after the webhook).
+- **Cookie banner:** in Site settings → _Cookie banner_, edit the banner's title, message, privacy policy link and link text, and the one-line descriptions beside _Analytics_ and _Marketing_. Empty fields use sensible defaults. The banner offers **Accept all**, **Reject all** (equal prominence) and **Choose** (analytics and marketing separately; necessary cookies are always on), and a **Cookie settings** link in the footer reopens it so visitors can change their mind. It only exists when the developer has set up an analytics provider (see _Analytics and cookie consent_); with none, there is nothing to ask and no banner or footer link. Banner text changes appear like any other settings change. In Presentation the banner shows too, but no analytics ever load for editors.
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
   or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
@@ -95,7 +96,7 @@ Open http://localhost:3000/studio:
   5. _End with a winner._ Stop the test, then make the winning content the real thing: copy it into the base page and publish, and delete the variant if you no longer need it.
   - _Timing:_ starting or stopping reaches visitors within about a minute (the site remembers the answer for 60 seconds), plus the usual publish delay (webhook mode: after the webhook).
   - _What visitors see:_ the address never changes. Search engines and link checkers always get control and no cookie. The blog isn't part of tests (only pages are). A test needs `FLAGS_SECRET` (see _Deploying_); without it nothing runs and everyone sees the published content.
-  - _Measuring:_ the `<main>` element carries `data-experiment="<test name>"` and `data-variant="control"` (or the variant ID) on pages in a test, for analytics to read; pages outside a running test have neither attribute. Because the `ab` cookie is functional rather than tracking, check whether your privacy policy and consent banner need to mention it.
+  - _Measuring:_ the `<main>` element carries `data-experiment="<test name>"` and `data-variant="control"` (or the variant ID) on pages in a test, for analytics to read; pages outside a running test have neither attribute. Because the `ab` cookie is functional rather than tracking, check whether your privacy policy and cookie banner text need to mention it.
   - _Previewing a variant:_ draft mode (Presentation) uses Studio's own variant selection, not the `ab` cookie, and is never rewritten.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
@@ -162,6 +163,10 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                |
    | `RESEND_API_KEY`                 | only for forms: Resend API key                                  |
    | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`   |
+   | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | optional: Plausible site domain (see Analytics, below)          |
+   | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                 |
+   | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                       |
+   | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`              |
    | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                              |
    | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test     |
    | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)    |
@@ -208,6 +213,7 @@ src/
     studio/[[...tool]]/page.tsx
     (site)/blog/                     blog index, [slug] (post), category/[slug]
     (site)/site-shell.tsx            header, <main>, footer: shared by (site)/layout and ab/[code]/layout
+    (site)/site-consent.tsx          cookie banner with its text from Site settings
     ab/[code]/[[...slug]]/           pages prerendered per A/B option (proxy rewrites visitors here)
     api/experiments/route.ts         the running experiment as JSON, for proxy.ts
     feed.xml/route.ts                RSS 2.0 feed
@@ -232,6 +238,9 @@ src/
       api/                         queries.ts, get-experiment.ts (running test, code -> option)
       utils/                       assign (weights, cookie), experiment-flag (flags SDK), experiment-source (proxy lookup)
     site/                          Site settings singleton: header, footer, default metadata
+    consent/                       cookie banner, consent store (localStorage), analytics loader
+      components/                  consent-banner, cookie-settings-button, analytics-scripts
+      utils/                       consent-state (parse/serialize), consent-store (client), analytics-snippets
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
@@ -392,6 +401,28 @@ How a send works (`src/features/forms/api/submit-form.ts`, a server action that 
 
 `FORMS_TEST_MODE=1` replaces Turnstile and Resend with mocks that accept everything and send nothing; the end-to-end tests use it (the form then carries a fixed token instead of the widget, and the server accepts only that token). It is ignored when `VERCEL_ENV` is `production`, so it can't switch the spam check off there. To change the email, edit `utils/build-email.ts`: values are HTML-escaped and a subject can't contain line breaks.
 
+### Analytics and cookie consent
+
+Analytics are chosen per project by environment variable, and nothing that sets cookies loads before the visitor says yes.
+
+| Variable                       | Provider                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Plausible: the domain registered in Plausible                                   |
+| `NEXT_PUBLIC_POSTHOG_KEY`      | PostHog: project token (`NEXT_PUBLIC_POSTHOG_HOST` for the EU cloud or a proxy) |
+| `NEXT_PUBLIC_GA_ID`            | Google Analytics 4: measurement ID, loaded with Consent Mode v2                 |
+
+These are public values, baked in at build time: redeploy after changing them. Set any combination.
+
+- **Vercel Analytics** (`@vercel/analytics`) is always on in the public site. It sets no cookies and stores nothing on the visitor's device, so it needs no consent. It does nothing off Vercel.
+- **Before consent:** no request to any provider and no provider `<script>` in the page. **Accept all** (or **Choose** with analytics ticked) mounts the `next/script` tags for each configured provider from `features/consent/components/analytics-scripts.tsx`; the choice is kept in `localStorage` (`consent`: analytics, marketing, version, time) and applies on later visits and in other tabs. **Reject all** keeps everything off and is remembered too. If storage is blocked the choice lasts until the page reloads.
+- **Google Analytics:** the inline script first sets Consent Mode v2 `ad_storage`, `ad_user_data`, `ad_personalization` and `analytics_storage` to `denied`, then updates them to the visitor's choice (the three advertising signals follow _Marketing_), all before `gtag.js` is requested.
+- **Withdrawing:** Cookie settings → change → save. Analytics cookies (`_ga*`, `ph_*`) and PostHog's local storage are removed, and the page reloads, because a loaded script can't be unloaded. Removal also runs on every visit by someone who has refused.
+- **Marketing** is a category in the store and the banner, ready for an ad or pixel provider: read `useConsentState().consent?.marketing` in a client component and gate its `<Script>` the same way. Today it only drives the Google ad signals.
+- **No provider, no banner.** `hasConsentProviders` in `src/config/analytics.ts` is false when none of the three variables is set; the banner, the footer link and the loader are then not rendered at all.
+- **The banner** is a labelled region (`<section aria-labelledby>`), not a dialog: nothing is trapped and the page stays usable. It is fixed to the bottom of the viewport, so showing it never shifts content (no CLS). It sits first in the DOM and takes focus when it opens; Tab continues from there, and after a choice Tab reaches the skip link. A reopened banner returns focus to the footer link, and Escape closes it without changing the choice. The server can't know the choice, so the banner appears after hydration.
+- **Bundle:** the banner and the loader are a few KB; the provider code is third-party and arrives only after consent. PostHog is loaded from its CDN (`array.js`), not bundled.
+- **Your privacy policy** should name the providers you switch on, the `ab` cookie if you run A/B tests, and what a choice stores. This starter can't write that for you, and a banner is not legal advice.
+
 ### IndexNow
 
 Search engines that support [IndexNow](https://www.indexnow.org) (Bing, Yandex and others) hear about a published page right away instead of waiting to crawl it. It runs from the webhook, so it needs webhook mode (above) with the projection `{_type, "slug": slug.current}`.
@@ -463,11 +494,11 @@ each release before proposing it.
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
-  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
+  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, consent parsing and the Google Analytics snippet, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), A/B tests (no running test leaves pages, cookies and attributes untouched; with one running, an `ab` cookie for control and for the variant each get their content and `data-variant`, new visitors are assigned and kept in an option, crawlers and the blog are skipped; the fake Content Lake serves variant documents and the test starts and stops the experiment with a signed webhook), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), A/B tests (no running test leaves pages, cookies and attributes untouched; with one running, an `ab` cookie for control and for the variant each get their content and `data-variant`, new visitors are assigned and kept in an option, crawlers and the blog are skipped; the fake Content Lake serves variant documents and the test starts and stops the experiment with a signed webhook), the cookie banner (first visit with focus in the banner and no shift, Accept all and Reject all identical, no provider request before consent, Accept loading Plausible, PostHog and Google with Consent Mode defaults denied first, Reject staying off and persisting, Choose, reopening from the footer and withdrawing, keyboard use, axe with the banner open and expanded; every other test starts as a visitor who already rejected, so the banner doesn't take focus), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
 
 Running the end-to-end tests locally:
 

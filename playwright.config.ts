@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-import { APP_ENV, APP_PORT, FAKE_SANITY_PORT } from './tests/e2e/constants'
+import { APP_ENV, APP_PORT, FAKE_SANITY_PORT, REJECTED_CONSENT } from './tests/e2e/constants'
 
 const CI = Boolean(process.env.CI)
 
@@ -18,6 +18,17 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${APP_PORT}`,
     trace: 'retain-on-failure',
+    // Visitors who already rejected cookies, so the banner doesn't take focus in every test.
+    // consent.spec.ts starts from a first visit instead.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: `http://localhost:${APP_PORT}`,
+          localStorage: [{ name: 'consent', value: REJECTED_CONSENT }],
+        },
+      ],
+    },
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },

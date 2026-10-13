@@ -1,11 +1,13 @@
 import { cacheLife } from 'next/cache'
+import type { ReactNode } from 'react'
 
 import { SanityLink } from '@/components/ui/sanity-link'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { getSettings } from '../api/get-settings'
 
-export async function SiteFooter(mode: FetchMode) {
+/** `extra` is a slot after the links (the route passes the cookie settings button; features can't import each other). */
+export async function SiteFooter({ extra, ...mode }: FetchMode & { extra?: ReactNode }) {
   const [settings, year] = await Promise.all([getSettings(mode), currentYear()])
   const nav = settings?.footerNav ?? []
 
@@ -15,7 +17,7 @@ export async function SiteFooter(mode: FetchMode) {
         <p className="text-sm text-gray-600">
           © {year} {settings?.footerText ?? settings?.title}
         </p>
-        {nav.length > 0 && (
+        {(nav.length > 0 || extra) && (
           <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
             {nav.map((item) => (
               <SanityLink
@@ -26,6 +28,7 @@ export async function SiteFooter(mode: FetchMode) {
                 {item.label}
               </SanityLink>
             ))}
+            {extra}
           </nav>
         )}
       </div>
@@ -33,8 +36,8 @@ export async function SiteFooter(mode: FetchMode) {
   )
 }
 
-export async function DraftSiteFooter() {
-  return <SiteFooter {...await getDraftFetchMode()} />
+export async function DraftSiteFooter({ extra }: { extra?: ReactNode }) {
+  return <SiteFooter {...await getDraftFetchMode()} extra={extra} />
 }
 
 /** Cached because Cache Components forbids reading the clock during prerender. */

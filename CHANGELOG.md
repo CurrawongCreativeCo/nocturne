@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- Analytics with a consent banner (`src/features/consent`). Plausible, PostHog and Google Analytics 4
+  (Consent Mode v2) load via `next/script` only after the visitor accepts analytics, chosen by
+  `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, `NEXT_PUBLIC_POSTHOG_KEY` (`NEXT_PUBLIC_POSTHOG_HOST`) and
+  `NEXT_PUBLIC_GA_ID`; with none set there is no banner. Accept all / Reject all / Choose, a _Cookie
+  settings_ link in the footer, and banner text in a new Site settings → _Cookie banner_ group
+  (`SETTINGS_QUERY` gained `consent`). `@vercel/analytics` (cookieless) is added to the public site.
+  `SiteFooter` takes an optional `extra` slot. End-to-end tests now start as a visitor who rejected
+  cookies. See the README's _Analytics and cookie consent_.
+
 - A/B tests with Sanity content variants and the Vercel Flags SDK (`flags`). A new _A/B tests_ document
   type (name, running, control traffic, variants with traffic). While one runs, `proxy.ts` assigns each
   visitor a sticky option (cookie `ab`) and rewrites to `/ab/<code>/<path>`, a prerendered copy of the
@@ -41,7 +50,7 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None required. Run `npm install` (adds `flags`) and `npm run typegen`. A/B tests stay off until you set
+None required. Run `npm install` (adds `flags` and `@vercel/analytics`) and `npm run typegen`. Add `'consent'` to the `features` list in `eslint.config.mjs`. Analytics stay off until you set a provider variable. A/B tests stay off until you set
 `FLAGS_SECRET` and start a test. In webhook mode, add `"experiment"` to the webhook's filter. If you
 had a page with the slug `ab`, rename it: that path now belongs to the variant routes. If you
 customized `src/proxy.ts` or `src/app/(site)/layout.tsx`, expect conflicts there.

@@ -4,6 +4,14 @@ export const FAKE_SANITY_PORT = 9999
 export const SITE_URL = 'https://example.com'
 export const REVALIDATE_SECRET = 'e2e-webhook-secret'
 export const INDEXNOW_KEY = 'e2eindexnowkey1234'
+/** The stored consent of a visitor who rejected everything (see src/features/consent/utils/consent-state.ts). */
+export const REJECTED_CONSENT = JSON.stringify({
+  version: 1,
+  necessary: true,
+  analytics: false,
+  marketing: false,
+  savedAt: '2026-01-01T00:00:00.000Z',
+})
 /** Signs the A/B variant codes (the flags package); any 32 random bytes. */
 export const FLAGS_SECRET = 'cHJpdmF0ZS1lMmUtZmxhZ3Mtc2VjcmV0LTMyLWJ5dGVz'
 /** Content release the perspective test previews; Studio puts its id in the perspective cookie. */
@@ -26,4 +34,8 @@ export const APP_ENV = {
   EXPERIMENT_CACHE_SECONDS: '1',
   // Forms: Turnstile and Resend are replaced by mocks (the real services are never called).
   FORMS_TEST_MODE: '1',
+  // Analytics providers: all three on, so the consent banner shows and the consent spec can watch each load.
+  NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
+  NEXT_PUBLIC_POSTHOG_KEY: 'phc_e2e',
+  NEXT_PUBLIC_GA_ID: 'G-E2ETEST',
 }
