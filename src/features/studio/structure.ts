@@ -3,6 +3,7 @@ import { CogIcon } from '@sanity/icons/Cog'
 import { ComposeIcon } from '@sanity/icons/Compose'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { FolderIcon } from '@sanity/icons/Folder'
+import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
 import { TagIcon } from '@sanity/icons/Tag'
 import { UserIcon } from '@sanity/icons/User'
 import { map } from 'rxjs'
@@ -61,6 +62,7 @@ const LISTED_TYPES = new Set([
   'sharedSection',
   'form',
   'redirect',
+  'experiment',
   'post',
   'author',
   'category',
@@ -94,6 +96,7 @@ export const structure: StructureResolver = (S, context) =>
             ]),
         ),
       S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
+      S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon),
       S.divider(),
       // Everything else not explicitly listed above.
       ...S.documentTypeListItems().filter((item) => {

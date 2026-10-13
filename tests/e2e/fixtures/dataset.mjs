@@ -47,6 +47,8 @@ const formField = (label, name, type, { required = false, options } = {}) => ({
   ...(options && { options }),
 })
 
+const abHero = (title) => ({ _key: key(), _type: 'hero', title, description: 'Hero description.' })
+
 const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
@@ -400,6 +402,24 @@ export const documents = [
     destination: 'https://example.com/sale',
     permanent: false,
   },
+  {
+    // The page A/B tests change: the experiment's variant swaps its headline (see `variantDocuments`).
+    _id: 'page-ab-test',
+    _type: 'page',
+    title: 'AB test page',
+    slug: { _type: 'slug', current: 'ab-test' },
+    pageBuilder: [abHero('Control headline')],
+  },
+  {
+    // Stopped by default; tests/e2e/experiments.spec.ts starts it. Variant ids are the keys of
+    // `variantDocuments`.
+    _id: 'experiment-headline',
+    _type: 'experiment',
+    name: 'Headline test',
+    active: false,
+    controlWeight: 50,
+    variants: [{ _key: 'v1', _type: 'experimentVariant', variantId: 'bold', weight: 50 }],
+  },
 ].map((doc) => ({ ...doc, _updatedAt: UPDATED }))
 
 /**
@@ -431,3 +451,23 @@ export const releaseVersions = [
     _updatedAt: UPDATED,
   },
 ]
+
+/** Fields the fake Content Lake applies to the experiment while it runs (tests/e2e/experiments.spec.ts). */
+export const experimentRunning = { active: true }
+
+/**
+ * Content variants, as the Content Lake serves them: a request with `variant=<id>` gets these
+ * documents in place of the base ones with the same `_id`.
+ */
+export const variantDocuments = {
+  bold: [
+    {
+      _id: 'page-ab-test',
+      _type: 'page',
+      title: 'AB test page',
+      slug: { _type: 'slug', current: 'ab-test' },
+      pageBuilder: [abHero('Variant headline')],
+      _updatedAt: UPDATED,
+    },
+  ],
+}

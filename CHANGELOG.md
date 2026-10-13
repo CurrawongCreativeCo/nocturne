@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- A/B tests with Sanity content variants and the Vercel Flags SDK (`flags`). A new _A/B tests_ document
+  type (name, running, control traffic, variants with traffic). While one runs, `proxy.ts` assigns each
+  visitor a sticky option (cookie `ab`) and rewrites to `/ab/<code>/<path>`, a prerendered copy of the
+  page per option, so published pages stay static. `<main>` carries `data-experiment` and
+  `data-variant` for analytics. `ab` is now a reserved page slug. See the README's _A/B tests_.
+
 - `/llms.txt` and an _Allow AI crawlers_ switch (Site settings → _Search & AI_, on by default). When it is
   off, `robots.txt` disallows GPTBot, ClaudeBot, Google-Extended, PerplexityBot and CCBot, and `/llms.txt`
   answers 404. `/llms.txt` lists indexable posts too. `PAGE_INDEX_QUERY` and `BLOG_INDEX_QUERY` now also return titles and descriptions. Run `npm run typegen`
@@ -27,11 +33,18 @@ you start a release.
 
 ### Changed
 
+- The site layout's markup moved to `src/app/(site)/site-shell.tsx` (the layout now wraps it), so the A/B
+  variant layout can reuse it. `src/proxy.ts` now also assigns A/B options; `cachedSanityFetch` sends
+  fetches that name a variant through a client on Sanity's experimental API version.
+
 ### Fixed
 
 ### Breaking changes / migration steps
 
-None.
+None required. Run `npm install` (adds `flags`) and `npm run typegen`. A/B tests stay off until you set
+`FLAGS_SECRET` and start a test. In webhook mode, add `"experiment"` to the webhook's filter. If you
+had a page with the slug `ab`, rename it: that path now belongs to the variant routes. If you
+customized `src/proxy.ts` or `src/app/(site)/layout.tsx`, expect conflicts there.
 
 ## [1.0.0] - 2026-10-13
 

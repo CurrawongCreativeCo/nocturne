@@ -15,6 +15,7 @@ import { structureTool } from 'sanity/structure'
 
 import { apiVersion, dataset, projectId, studioTitle, studioUrl } from './src/config/env'
 import { blogSchemaTypes } from './src/features/blog/schemas'
+import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { pageTemplates } from './src/features/pages/schemas/templates'
@@ -38,11 +39,14 @@ export default defineConfig({
   projectId,
   dataset,
   studio: { components: { logo: StudioLogo } },
+  // Content variants: lets editors create variants of a document, which A/B experiments serve.
+  beta: { variants: { enabled: true } },
   schema: {
     types: [
       ...pageSchemaTypes,
       ...blogSchemaTypes,
       ...formSchemaTypes,
+      ...experimentSchemaTypes,
       ...siteSchemaTypes,
       ...sharedSchemaTypes,
     ],

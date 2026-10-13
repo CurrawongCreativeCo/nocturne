@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { cookies, draftMode } from 'next/headers'
+import { variantsApiVersion } from 'next-sanity'
 import {
   defineLive,
   resolvePerspectiveFromCookies,
@@ -27,13 +28,25 @@ export const { sanityFetch, SanityLive } = defineLive({
 })
 
 /**
+ * Content variants (A/B tests, Presentation previews) are only served by the experimental
+ * API version, so fetches that name a variant go through a client pinned to it. Everything else
+ * keeps the dated `apiVersion`. Only `sanityFetch` is used from this instance.
+ */
+const { sanityFetch: variantFetch } = defineLive({
+  client: client.withConfig({ apiVersion: variantsApiVersion }),
+  serverToken: token,
+  strict: true,
+})
+
+/**
  * The app's single `'use cache'` boundary for Sanity data. `sanityFetch` tags the
  * entry with Content Lake sync tags, and <SanityLive /> expires those tags on change.
  * Always fetch through this; never add your own `'use cache'` around `sanityFetch`.
+ * `variant` is part of the cache key, so each variant is its own entry.
  */
 export const cachedSanityFetch: StrictDefinedFetchType = async (options) => {
   'use cache'
-  return sanityFetch(options)
+  return options.variant ? variantFetch(options) : sanityFetch(options)
 }
 
 /**
@@ -57,6 +70,7 @@ export const TAGS = {
   author: 'author',
   category: 'category',
   form: 'form',
+  experiment: 'experiment',
 } as const
 
 export interface FetchMode {

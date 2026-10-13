@@ -23,7 +23,16 @@ import tseslint from 'typescript-eslint'
  *
  * Add a zone below when you add a feature.
  */
-const features = ['pages', 'site', 'draft-mode', 'studio', 'personalization', 'blog', 'forms']
+const features = [
+  'pages',
+  'site',
+  'draft-mode',
+  'studio',
+  'personalization',
+  'blog',
+  'forms',
+  'experiments',
+]
 
 const crossFeatureZones = features.map((feature) => ({
   target: `./src/features/${feature}`,

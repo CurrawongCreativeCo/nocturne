@@ -87,6 +87,16 @@ Open http://localhost:3000/studio:
   - _Spam:_ a Cloudflare Turnstile check on every send, plus a limit of 5 messages per IP address per 10 minutes on each server instance (serverless instances count separately, so it slows a spammer down rather than stopping one). The check needs JavaScript. Without it the form still posts and shows errors, but nothing is sent: the visitor is told to turn JavaScript on.
   - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Use a shared inbox, or make the dataset private. Submissions are emailed, not stored: if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
   - _Setup:_ it needs four environment variables (see _Forms setup_ below). Until they are set, a form section shows a setup message in development and "isn't available right now" to visitors. Pages read them at build time, so redeploy after changing them.
+- **A/B tests:** _A/B tests_ in the sidebar split visitors between a page as published ("control") and one or more Sanity content variants of it. Content Variants is a Sanity beta feature, switched on in this Studio (`beta.variants` in `sanity.config.ts`).
+  1. _Create the variant._ In Studio, create a _variant definition_ (a name for the audience or idea, e.g. "Bold headline"), then open the page you want to test and create a variant of it for that definition. Edit the variant's content as you would any page, then **publish the variant**: visitors only ever see published variants. Pages you don't vary look the same in every option. Note the definition's ID (the short id such as `Ab12cd34`, not `_.variants.Ab12cd34`).
+  2. _Set up the test._ _A/B tests → New_: a _name_ (also sent to analytics), the variants (each one's _Variant ID_ and _Traffic_), and _Control traffic_. Traffic numbers are relative: control 50 + one variant 50 is an even split; 50, 25, 25 is half, a quarter, a quarter. Up to four variants. Leave _Running_ off and publish.
+  3. _Start._ Tick _Running_ and publish. Each new visitor is placed in an option at random and stays in it for 90 days (a cookie named `ab`). Only one test can run at a time; Studio won't let you start a second.
+  4. _Stop._ Untick _Running_ and publish. Everyone sees the published content again straight away (the old cookie is ignored). Nothing else changes: the variants and the test document stay for reference.
+  5. _End with a winner._ Stop the test, then make the winning content the real thing: copy it into the base page and publish, and delete the variant if you no longer need it.
+  - _Timing:_ starting or stopping reaches visitors within about a minute (the site remembers the answer for 60 seconds), plus the usual publish delay (webhook mode: after the webhook).
+  - _What visitors see:_ the address never changes. Search engines and link checkers always get control and no cookie. The blog isn't part of tests (only pages are). A test needs `FLAGS_SECRET` (see _Deploying_); without it nothing runs and everyone sees the published content.
+  - _Measuring:_ the `<main>` element carries `data-experiment="<test name>"` and `data-variant="control"` (or the variant ID) on pages in a test, for analytics to read; pages outside a running test have neither attribute. Because the `ab` cookie is functional rather than tracking, check whether your privacy policy and consent banner need to mention it.
+  - _Previewing a variant:_ draft mode (Presentation) uses Studio's own variant selection, not the `ab` cookie, and is never rewritten.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
   Normally they only apply to paths with no page, so they can't hide a live page. With Edge Config
@@ -153,6 +163,8 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    | `RESEND_API_KEY`                 | only for forms: Resend API key                                  |
    | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`   |
    | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                              |
+   | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test     |
+   | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)    |
    | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it     |
    | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id        |
    | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store  |
@@ -195,11 +207,14 @@ src/
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
     (site)/blog/                     blog index, [slug] (post), category/[slug]
+    (site)/site-shell.tsx            header, <main>, footer: shared by (site)/layout and ab/[code]/layout
+    ab/[code]/[[...slug]]/           pages prerendered per A/B option (proxy rewrites visitors here)
+    api/experiments/route.ts         the running experiment as JSON, for proxy.ts
     feed.xml/route.ts                RSS 2.0 feed
     api/og/[[...slug]]/route.tsx     generated share image (PNG) for pages without one
     llms.txt/route.ts                /llms.txt for AI tools (404 when AI crawlers are off)
     sitemap.ts                       pages then posts, split into files of 45,000 URLs (generateSitemaps)
-  proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG)
+  proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG); A/B assignment + rewrite
   features/
     pages/                         CMS pages + page builder
       api/                         queries.ts, sections.ts (GROQ), get-page.ts (page, metadata, sitemap)
@@ -213,6 +228,9 @@ src/
       api/                         queries.ts (FORM_QUERY), submit-form.ts (server action), rate-limiter.ts
       components/                  form-view (server; env check), contact-form (client), turnstile-widget
       utils/                       validate, build-email, resend, turnstile, rate-limit, client-ip, config
+    experiments/                   A/B tests: experiment schema, assignment logic, signed variant codes (flags)
+      api/                         queries.ts, get-experiment.ts (running test, code -> option)
+      utils/                       assign (weights, cookie), experiment-flag (flags SDK), experiment-source (proxy lookup)
     site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
@@ -279,6 +297,27 @@ The reference example is a "Welcome back" greeting on the hero:
   visitors_ on the hero.
 - To personalize another section, take the same `greeting` prop (or add a similar slot), wrap it in
   `<Suspense>`, and never call `cookies()`, `headers()` or `draftMode()` inside a cached function.
+
+### A/B tests (how it works)
+
+Editors' side is under _Editing content_. For developers:
+
+```
+visitor ─▶ proxy.ts ─ reads the running experiment (cached /api/experiments, remembered 60 s)
+            │         picks an option by weight, or reads the `ab` cookie
+            │         encodes it with the Flags SDK `serialize` into a signed code
+            └─ rewrites /about ─▶ /ab/<code>/about      (the address bar keeps /about)
+                                    └ app/ab/[code]: decodes the code, fetches with `variant`
+```
+
+- **Precompute pattern.** `generateStaticParams` in `app/ab/[code]/[[...slug]]/page.tsx` renders every page for every option (`generatePermutations`), so each variant is prerendered once and cached like any published page. Published pages stay static; only the proxy runs per request. With no running test the route prerenders one placeholder (Cache Components rejects an empty list) and the proxy never rewrites.
+- **One flag, built per test.** `utils/experiment-flag.ts` declares a single flag (`experiment`) whose options are `control` plus the variant ids of the running test, so the codes always match what editors configured. Codes are signed with `FLAGS_SECRET` (32 random bytes, base64url: `node -e "console.log(crypto.randomBytes(32).toString('base64url'))"`). A forged or stale code renders the published content; if `FLAGS_SECRET` is missing the proxy logs an error and serves the published page.
+- **Variants in the cache.** `cachedSanityFetch` already takes `variant`, which is part of the `'use cache'` key, so each variant is its own entry (tagged `page`, like control). Fetches with a variant use a client pinned to Sanity's experimental API version (`variantsApiVersion`), which Content Variants requires; all other fetches keep `apiVersion`. Unvaried pages, SEO metadata, the header and footer reuse control's cache entries.
+- **One test at a time.** Sanity serves one variant per query, so a page can only be in one test. Studio blocks a second running test; if two somehow run, the oldest wins.
+- **Proxy cost.** The proxy can't query Sanity on every request, so it asks `/api/experiments` (a cached route tagged `experiment`) and remembers the answer for `EXPERIMENT_CACHE_SECONDS` (60) per server instance. A failure means "no test". The rewrite response sends `Vary: Cookie`; if you put another CDN in front that caches HTML, make it vary on the `ab` cookie (Vercel needs nothing).
+- **What is skipped.** Draft mode, crawlers (`isCrawler` in `utils/assign.ts`), the blog, Studio, API routes and static files.
+- **Analytics hook.** `SiteShell` (`app/(site)/site-shell.tsx`) puts `data-experiment` and `data-variant` on `<main>` for pages rendered under `/ab/<code>`. Read them from your analytics script (for example after consent: `document.querySelector('main').dataset.variant`).
+- **Reserved slug.** `ab` joins `blog` and `studio` as a first path segment a page can't use.
 
 ### Request budget
 
@@ -424,11 +463,11 @@ each release before proposing it.
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
-  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the `/llms.txt` builder, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
+  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), A/B tests (no running test leaves pages, cookies and attributes untouched; with one running, an `ab` cookie for control and for the variant each get their content and `data-variant`, new visitors are assigned and kept in an option, crawlers and the blog are skipped; the fake Content Lake serves variant documents and the test starts and stops the experiment with a signed webhook), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
 
 Running the end-to-end tests locally:
 
@@ -576,15 +615,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                               | Expect                              |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                      | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                         | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                     | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                             | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                     | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                           | Expect                              |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                                  | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                     | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                            | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                 | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                         | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                                 | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design

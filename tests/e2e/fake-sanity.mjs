@@ -7,13 +7,22 @@ import { createServer } from 'node:http'
 
 import { evaluate, parse } from 'groq-js'
 
-import { aiCrawlersBlocked, documents, releaseVersions } from './fixtures/dataset.mjs'
+import {
+  aiCrawlersBlocked,
+  documents,
+  experimentRunning,
+  releaseVersions,
+  variantDocuments,
+} from './fixtures/dataset.mjs'
 
 const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
 
 /** Named variants of the settings document the tests switch between; `null` serves the fixture as is. */
 const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked }
 let settingsPatch = null
+
+/** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */
+let experimentPatch = null
 
 const BASE_ID = /^versions.[^.]+./
 
@@ -22,20 +31,26 @@ const BASE_ID = /^versions.[^.]+./
  * and for release perspectives (anything but published/drafts/raw) the matching
  * `versions.<release>.<id>` documents replace the base document with that id.
  */
-function datasetFor(perspective) {
-  const published = settingsPatch
-    ? documents.map((doc) => (doc._id === 'settings' ? { ...doc, ...settingsPatch } : doc))
-    : documents
+function datasetFor(perspective, variant) {
+  const published = documents
+    .map((doc) => (settingsPatch && doc._id === 'settings' ? { ...doc, ...settingsPatch } : doc))
+    .map((doc) =>
+      experimentPatch && doc._type === 'experiment' ? { ...doc, ...experimentPatch } : doc,
+    )
+  // Content variants replace the base documents with the same id, like the real Content Lake.
+  const variantDocs = variant ? (variantDocuments[variant] ?? []) : []
+  const swapped = new Set(variantDocs.map((doc) => doc._id))
+  const withVariant = [...published.filter((doc) => !swapped.has(doc._id)), ...variantDocs]
   const releases = perspective
     .split(',')
     .filter((name) => name && !['published', 'drafts', 'raw'].includes(name))
-  if (releases.length === 0) return published
+  if (releases.length === 0) return withVariant
 
   const versions = releaseVersions
     .filter((doc) => releases.some((release) => doc._id.startsWith(`versions.${release}.`)))
     .map((doc) => ({ ...doc, _id: doc._id.replace(BASE_ID, '') }))
   const overridden = new Set(versions.map((doc) => doc._id))
-  return [...published.filter((doc) => !overridden.has(doc._id)), ...versions]
+  return [...withVariant.filter((doc) => !overridden.has(doc._id)), ...versions]
 }
 
 async function readBody(req) {
@@ -53,6 +68,12 @@ createServer(async (req, res) => {
     res.writeHead(204).end()
     return
   }
+  const experiment = /^\/__fixture\/experiment\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && experiment) {
+    experimentPatch = experiment === 'on' ? experimentRunning : null
+    res.writeHead(204).end()
+    return
+  }
   if (!url.pathname.includes('/data/query/')) {
     res.writeHead(404).end()
     return
@@ -61,6 +82,7 @@ createServer(async (req, res) => {
   let query = url.searchParams.get('query') ?? ''
   let params = {}
   let perspective = url.searchParams.get('perspective') ?? 'published'
+  const contentVariant = url.searchParams.get('variant')
   for (const [name, value] of url.searchParams) {
     if (name.startsWith('$')) params[name.slice(1)] = JSON.parse(value)
   }
@@ -73,7 +95,10 @@ createServer(async (req, res) => {
 
   try {
     const result = await (
-      await evaluate(parse(query, { params }), { dataset: datasetFor(perspective), params })
+      await evaluate(parse(query, { params }), {
+        dataset: datasetFor(perspective, contentVariant),
+        params,
+      })
     ).get()
     res.writeHead(200, { 'content-type': 'application/json' })
     res.end(JSON.stringify({ result, ms: 1, query, syncTags: ['s1:fixture'] }))

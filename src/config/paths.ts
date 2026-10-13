@@ -42,3 +42,10 @@ export function postPath(slug: string): string {
 export function categoryPath(slug: string): string {
   return `${BLOG_PATH}/category/${slug}`
 }
+
+/**
+ * First path segment of the prerendered A/B variant routes. proxy.ts rewrites a page request to
+ * "/ab/<code>/<path>" for visitors in an experiment, so a CMS page can't use it either.
+ */
+export const EXPERIMENT_SEGMENT = 'ab'
+export const EXPERIMENT_PATH = `/${EXPERIMENT_SEGMENT}`
