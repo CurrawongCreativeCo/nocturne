@@ -25,6 +25,7 @@ interface ViewProps {
   renderForm?: SectionProps<SectionType>['renderForm']
   /** Draws the checkout buttons in pricing tables (see `SectionProps.renderCheckout`). */
   renderCheckout?: SectionProps<SectionType>['renderCheckout']
+  renderNewsletter?: SectionProps<SectionType>['renderNewsletter']
   /**
    * Guards members-only pages and sections with the visitor's session. Required, so a route can't
    * forget it: without one, members-only content would have nothing to check against.
@@ -37,6 +38,7 @@ export async function PageView({
   greeting,
   renderForm,
   renderCheckout,
+  renderNewsletter,
   renderMembersGate,
   ...mode
 }: ViewProps & FetchMode) {
@@ -75,6 +77,7 @@ export async function PageView({
                   greeting={greeting}
                   renderForm={renderForm}
                   renderCheckout={renderCheckout}
+                  renderNewsletter={renderNewsletter}
                 />
               )
             },
@@ -96,6 +99,7 @@ export async function PageView({
         greeting={greeting}
         renderForm={renderForm}
         renderCheckout={renderCheckout}
+        renderNewsletter={renderNewsletter}
         // Members-only sections stay stubs here and are filled in behind the gate, one by one.
         gate={
           preview
@@ -124,6 +128,7 @@ interface ContentProps {
   greeting?: ReactNode
   renderForm?: ViewProps['renderForm']
   renderCheckout?: ViewProps['renderCheckout']
+  renderNewsletter?: ViewProps['renderNewsletter']
   gate?: SectionGate
 }
 
@@ -148,6 +153,7 @@ export async function DraftPageView({
   greeting,
   renderForm,
   renderCheckout,
+  renderNewsletter,
   renderMembersGate,
 }: ViewProps) {
   const mode = await getDraftFetchMode()
@@ -157,6 +163,7 @@ export async function DraftPageView({
       greeting={greeting}
       renderForm={renderForm}
       renderCheckout={renderCheckout}
+      renderNewsletter={renderNewsletter}
       renderMembersGate={renderMembersGate}
       {...mode}
     />

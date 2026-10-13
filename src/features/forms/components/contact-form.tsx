@@ -4,7 +4,7 @@ import { useActionState, useEffect, useId, useRef, useState, type ReactNode } fr
 
 import { TurnstileWidget } from './turnstile-widget'
 import { submitForm } from '../api/submit-form'
-import { IDLE_STATE } from '../types'
+import { IDLE_STATE, type FormState } from '../types'
 import { TEST_TURNSTILE_TOKEN } from '../utils/turnstile'
 
 interface Field {
@@ -17,7 +17,14 @@ interface Field {
 }
 
 interface Props {
-  formId: string
+  /** Sent as `_formId` for `submitForm`, which fetches the form by it. Other actions need none. */
+  formId?: string
+  /** The server action behind the form. */
+  action?: (previous: FormState, formData: FormData) => Promise<FormState>
+  /** Shown on success instead of the action's message, for actions that don't know it. */
+  successMessage?: string
+  /** Heading of the summary when the whole submission failed (not a field). */
+  failureTitle?: string
   title: string
   headingId?: string
   submitLabel: string
@@ -33,8 +40,18 @@ const control =
  * page comes back with the errors or the success message; with it, `useActionState` does the same
  * in place and moves focus to the error summary or the success message.
  */
-export function ContactForm({ formId, title, headingId, submitLabel, fields, check }: Props) {
-  const [state, formAction, pending] = useActionState(submitForm, IDLE_STATE)
+export function ContactForm({
+  formId,
+  action = submitForm,
+  successMessage,
+  failureTitle = 'Your message wasn’t sent',
+  title,
+  headingId,
+  submitLabel,
+  fields,
+  check,
+}: Props) {
+  const [state, formAction, pending] = useActionState(action, IDLE_STATE)
   const prefix = useId()
   const formElement = useRef<HTMLFormElement>(null)
   const summary = useRef<HTMLDivElement>(null)
@@ -56,7 +73,7 @@ export function ContactForm({ formId, title, headingId, submitLabel, fields, che
           tabIndex={-1}
           className="rounded-lg border border-green-800 bg-green-50 p-6 text-green-950"
         >
-          <p className="whitespace-pre-line">{state.message}</p>
+          <p className="whitespace-pre-line">{successMessage ?? state.message}</p>
         </div>
       </div>
     )
@@ -79,7 +96,7 @@ export function ContactForm({ formId, title, headingId, submitLabel, fields, che
       }}
       className="grid gap-6"
     >
-      <input type="hidden" name="_formId" value={formId} />
+      {formId && <input type="hidden" name="_formId" value={formId} />}
 
       {state.status === 'error' && (state.message || failed.length > 0) && (
         <div
@@ -90,7 +107,7 @@ export function ContactForm({ formId, title, headingId, submitLabel, fields, che
           className="rounded-lg border-2 border-red-700 bg-red-50 p-5 text-red-950"
         >
           <p id={`${prefix}-summary`} className="text-lg font-semibold">
-            {failed.length > 0 ? 'Please fix the following' : 'Your message wasn’t sent'}
+            {failed.length > 0 ? 'Please fix the following' : failureTitle}
           </p>
           {state.message && <p className="mt-2">{state.message}</p>}
           {failed.length > 0 && (

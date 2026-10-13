@@ -5,6 +5,7 @@ import { Suspense, type ComponentProps } from 'react'
 import { segmentsToSlug } from '@/config/paths'
 import { MembersOnly } from '@/features/auth/components/members-only'
 import { FormView } from '@/features/forms/components/form-view'
+import { NewsletterView } from '@/features/forms/components/newsletter-view'
 import { getPageMetadata, getPageStaticParams } from '@/features/pages/api/get-page'
 import { DraftPageView, PageView } from '@/features/pages/components/page-view'
 import { ReturningVisitor } from '@/features/personalization/components/returning-visitor'
@@ -14,6 +15,11 @@ import { PUBLISHED } from '@/lib/sanity/live'
 /** Forms are their own feature; this route is where the page builder meets them. */
 const renderForm: ComponentProps<typeof PageView>['renderForm'] = (form, headingId) => (
   <FormView form={form} headingId={headingId} />
+)
+
+/** The newsletter signup is a forms feature too. */
+const renderNewsletter: ComponentProps<typeof PageView>['renderNewsletter'] = (request) => (
+  <NewsletterView {...request} />
 )
 
 /** Payments are their own feature too: each pricing table plan gets its checkout button from it. */
@@ -63,6 +69,7 @@ export default async function Page({ params }: Props) {
       greeting={<ReturningVisitor />}
       renderForm={renderForm}
       renderCheckout={renderCheckout}
+      renderNewsletter={renderNewsletter}
       renderMembersGate={renderMembersGate}
       {...PUBLISHED}
     />
@@ -76,6 +83,7 @@ async function DraftPage({ params }: Pick<Props, 'params'>) {
       greeting={<ReturningVisitor />}
       renderForm={renderForm}
       renderCheckout={renderCheckout}
+      renderNewsletter={renderNewsletter}
       renderMembersGate={renderMembersGate}
     />
   )

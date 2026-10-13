@@ -11,6 +11,7 @@ import { FormSection } from './sections/form-section'
 import { Hero } from './sections/hero'
 import { LogoCloud } from './sections/logo-cloud'
 import { MediaText } from './sections/media-text'
+import { NewsletterSignup } from './sections/newsletter-signup'
 import { PricingTable } from './sections/pricing-table'
 import { RichText } from './sections/rich-text'
 import { Testimonials } from './sections/testimonials'
@@ -32,6 +33,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   ctaBanner: CtaBanner,
   formSection: FormSection,
   pricingTable: PricingTable,
+  newsletterSignup: NewsletterSignup,
   // new-section:register
 }
 
@@ -53,6 +55,7 @@ interface Props {
   renderForm?: SectionProps<SectionType>['renderForm']
   /** Passed to every section; see `SectionProps.renderCheckout`. */
   renderCheckout?: SectionProps<SectionType>['renderCheckout']
+  renderNewsletter?: SectionProps<SectionType>['renderNewsletter']
   /**
    * Set on public views: members-only sections arrive as stubs and are rendered here behind the
    * gate. Leave it out where every section holds its content (draft mode, or inside a page that
@@ -70,6 +73,7 @@ export function SectionRenderer({
   greeting,
   renderForm,
   renderCheckout,
+  renderNewsletter,
   gate,
 }: Props) {
   if (!sections?.length) return null
@@ -87,6 +91,7 @@ export function SectionRenderer({
               greeting?: ReactNode
               renderForm?: Props['renderForm']
               renderCheckout?: Props['renderCheckout']
+              renderNewsletter?: Props['renderNewsletter']
             }>
           | undefined
 
@@ -115,6 +120,7 @@ export function SectionRenderer({
                       greeting={greeting}
                       renderForm={renderForm}
                       renderCheckout={renderCheckout}
+                      renderNewsletter={renderNewsletter}
                     />
                   ) : null
                 },
@@ -127,6 +133,7 @@ export function SectionRenderer({
               greeting={greeting}
               renderForm={renderForm}
               renderCheckout={renderCheckout}
+              renderNewsletter={renderNewsletter}
             />
           )
 

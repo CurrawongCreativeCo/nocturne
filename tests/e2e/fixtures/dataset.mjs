@@ -429,6 +429,22 @@ export const documents = [
     ],
   },
   {
+    _id: 'page-newsletter',
+    _type: 'page',
+    title: 'Newsletter',
+    slug: { _type: 'slug', current: 'newsletter' },
+    pageBuilder: [
+      {
+        _key: key(),
+        _type: 'newsletterSignup',
+        title: 'Stay in the loop',
+        text: 'One email a month, no spam.',
+        submitLabel: 'Subscribe',
+        successMessage: 'Thanks! Check your inbox to confirm.',
+      },
+    ],
+  },
+  {
     _id: IMAGE_ASSET_ID,
     _type: 'sanity.imageAsset',
     url: 'https://cdn.sanity.io/images/test/test/0123456789abcdef0123456789abcdef01234567-1200x630.png',

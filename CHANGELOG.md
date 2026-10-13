@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+- Newsletter signup section (`newsletterSignup`, with `src/features/forms`). Heading, text, button label and
+  success message; the form reuses the contact form UI, Turnstile, validation and rate limiting with its own
+  server action (`subscribeNewsletter`). The provider is chosen by `NEWSLETTER_PROVIDER` (`resend`, `loops`
+  or `mailchimp`), one module each behind a shared `NewsletterProvider` interface; Mailchimp uses double
+  opt-in. The answer never depends on whether the address was already subscribed. `PageView`,
+  `SectionRenderer` and `SectionProps` take an optional `renderNewsletter`; `ContactForm` gains optional
+  `action`, `successMessage` and `failureTitle`. New variables: `NEWSLETTER_PROVIDER`, `LOOPS_API_KEY`,
+  `LOOPS_MAILING_LIST_ID`, `MAILCHIMP_API_KEY`, `MAILCHIMP_LIST_ID`, `NEWSLETTER_RESEND_SEGMENT_ID`. See the
+  README's _Newsletter signup_.
+
 - Pricing table backed by Stripe prices (`src/features/pricing`, section `pricingTable`). A signed Stripe
   webhook (`/api/stripe/webhook`) mirrors prices into read-only `stripePrice` documents using a
   server-side `SANITY_WRITE_TOKEN`; editors pick prices by reference, add features per plan and

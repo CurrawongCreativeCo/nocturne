@@ -8,6 +8,7 @@ for (const path of [
   '/about',
   '/shared',
   '/contact',
+  '/newsletter',
   '/pricing',
   '/services/web/design',
   '/does-not-exist',

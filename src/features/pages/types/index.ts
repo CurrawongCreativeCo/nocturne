@@ -63,6 +63,15 @@ export interface CheckoutRequest {
   highlighted: boolean
 }
 
+/** What a newsletter signup section asks the route's signup form to draw. */
+export interface NewsletterRequest {
+  submitLabel: string
+  /** Shown in place of the form after signing up. */
+  successMessage: string
+  /** Id of the section's heading, which names the form for screen readers. */
+  headingId?: string
+}
+
 /** Props contract every section component implements. */
 export interface SectionProps<T extends SectionType> {
   data: SectionOf<T>
@@ -83,4 +92,6 @@ export interface SectionProps<T extends SectionType> {
   renderForm?: (form: SectionForm, headingId?: string) => ReactNode
   /** Draws a plan's checkout button. Payments are another feature, so the route supplies it. */
   renderCheckout?: (request: CheckoutRequest) => ReactNode
+  /** Draws a newsletter signup form. It belongs to the forms feature, so the route supplies it. */
+  renderNewsletter?: (request: NewsletterRequest) => ReactNode
 }

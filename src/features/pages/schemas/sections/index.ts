@@ -5,6 +5,7 @@ import { formSection } from './form-section'
 import { hero } from './hero'
 import { logoCloud } from './logo-cloud'
 import { mediaText } from './media-text'
+import { newsletterSignup } from './newsletter-signup'
 import { pricingTable } from './pricing-table'
 import { richText } from './rich-text'
 import { testimonials } from './testimonials'
@@ -34,5 +35,6 @@ export const sectionTypes = [
   ctaBanner,
   formSection,
   pricingTable,
+  newsletterSignup,
   // new-section:register
 ]

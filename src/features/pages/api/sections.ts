@@ -127,6 +127,15 @@ export const pricingTableFragment = /* groq */ `
   }
 `
 
+export const newsletterSignupFragment = /* groq */ `
+  _type == "newsletterSignup" && (access != "members" || $members) => {
+    title,
+    text,
+    submitLabel,
+    successMessage
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -142,6 +151,7 @@ const sectionsFragment = /* groq */ `
   ${ctaBannerFragment},
   ${formSectionFragment},
   ${pricingTableFragment},
+  ${newsletterSignupFragment},
   _type
 `
 
