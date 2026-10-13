@@ -148,6 +148,7 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                |
    | `RESEND_API_KEY`                 | only for forms: Resend API key                                  |
    | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`   |
+   | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                              |
    | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it     |
    | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id        |
    | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store  |
@@ -331,7 +332,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category", "form"]` · **Projection:** `{_type}`
+   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category", "form"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -345,6 +346,15 @@ To switch a deployment to webhook mode:
 How a send works (`src/features/forms/api/submit-form.ts`, a server action that also handles a plain HTML POST): read the form's id from the request, **fetch the published form again** (`FORM_QUERY`, the only query that reads `recipientEmail`, tagged `form`), validate each of its fields (`utils/validate.ts`), rate-limit the IP (`x-real-ip`, else the first `x-forwarded-for` entry, so it only means something behind a proxy that sets them itself, as Vercel does), verify the Turnstile token with Cloudflare, then send through Resend's REST API (`utils/resend.ts`, no SDK). Cheap checks come first, so a mistake in a field never spends a token, a rate-limit slot or an email. Failures are logged on the server and shown to the visitor as a general message.
 
 `FORMS_TEST_MODE=1` replaces Turnstile and Resend with mocks that accept everything and send nothing; the end-to-end tests use it (the form then carries a fixed token instead of the widget, and the server accepts only that token). It is ignored when `VERCEL_ENV` is `production`, so it can't switch the spam check off there. To change the email, edit `utils/build-email.ts`: values are HTML-escaped and a subject can't contain line breaks.
+
+### IndexNow
+
+Search engines that support [IndexNow](https://www.indexnow.org) (Bing, Yandex and others) hear about a published page right away instead of waiting to crawl it. It runs from the webhook, so it needs webhook mode (above) with the projection `{_type, "slug": slug.current}`.
+
+1. Generate a key: `openssl rand -hex 16` (8–128 letters, digits and dashes).
+2. Set `INDEXNOW_KEY` to it in the deployment's environment variables and redeploy. The site then serves the key at `/<key>.txt`, which is how search engines check the site is yours. Without the variable that URL is a 404 and nothing is sent.
+
+After each valid `page` webhook the route POSTs the page's URL to `api.indexnow.org` once the response has been sent, so a slow or failing IndexNow never delays or fails the webhook (failures are logged with `console.error`). Only pages are sent, not blog posts or other types. Nothing is sent when the site URL is localhost. The URL is the site URL plus the page's slug.
 
 ### Edge Config redirects
 

@@ -55,8 +55,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [{ protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/images/**' }],
   },
 
-  // generateSitemaps serves files at /sitemap/<id>.xml; keep the conventional /sitemap.xml for the first.
-  rewrites: () => Promise.resolve([{ source: '/sitemap.xml', destination: '/sitemap/0.xml' }]),
+  rewrites: () =>
+    Promise.resolve([
+      // generateSitemaps serves files at /sitemap/<id>.xml; keep the conventional /sitemap.xml for the first.
+      { source: '/sitemap.xml', destination: '/sitemap/0.xml' },
+      // IndexNow key file at /<key>.txt (8-128 letters, digits, dashes); the route 404s unless it's INDEXNOW_KEY.
+      { source: '/:key([A-Za-z0-9-]{8,128}).txt', destination: '/api/indexnow/:key' },
+    ]),
 
   // Full URLs for Content Lake requests in dev logs — invaluable when debugging cache hits.
   logging: { fetches: { fullUrl: true } },

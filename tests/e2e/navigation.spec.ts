@@ -1,7 +1,7 @@
 import { expect, test, type APIResponse } from '@playwright/test'
 import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
-import { REVALIDATE_SECRET, SITE_URL } from './constants'
+import { INDEXNOW_KEY, REVALIDATE_SECRET, SITE_URL } from './constants'
 
 test.describe('mobile menu', () => {
   test.skip(({ isMobile }) => !isMobile, 'Mobile only')
@@ -114,6 +114,15 @@ test.describe('HTTP behavior', () => {
     })
     expect(signed.status()).toBe(200)
     expect(await signed.json()).toEqual({ revalidated: true, tag: 'page' })
+  })
+
+  test('the IndexNow key is served as text only at its own path', async ({ request }) => {
+    const file = await request.get(`/${INDEXNOW_KEY}.txt`)
+    expect(file.status()).toBe(200)
+    expect(file.headers()['content-type']).toContain('text/plain')
+    expect(await file.text()).toBe(INDEXNOW_KEY)
+
+    expect((await request.get('/someotherkey12345.txt')).status()).toBe(404)
   })
 
   test('blog documents are webhook-tracked too', async ({ request }) => {
