@@ -32,6 +32,10 @@ updates:
       # Remove this once eslint-config-next supports ESLint 10.
       - dependency-name: 'eslint'
         update-types: ['version-update:semver-major']
+      # typescript-eslint (type-aware lint rules) supports TypeScript below 6.1 only.
+      # Remove once typescript-eslint supports the next TypeScript major.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
