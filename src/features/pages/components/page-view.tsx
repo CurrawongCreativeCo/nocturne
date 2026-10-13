@@ -4,8 +4,9 @@ import type { ReactNode } from 'react'
 import { slugToPath } from '@/config/paths'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
+import { Breadcrumbs } from './breadcrumbs'
 import { SectionRenderer } from './section-renderer'
-import { getPage, getRedirect } from '../api/get-page'
+import { getBreadcrumbs, getPage, getRedirect } from '../api/get-page'
 
 interface ViewProps {
   slug: string
@@ -28,6 +29,7 @@ export async function PageView({ slug, greeting, ...mode }: ViewProps & FetchMod
 
   return (
     <>
+      <Breadcrumbs items={await getBreadcrumbs(slug)} />
       {!startsWithHero && <h1 className="sr-only">{page.title}</h1>}
       <SectionRenderer
         documentId={page._id}

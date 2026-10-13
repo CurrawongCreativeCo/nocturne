@@ -1,3 +1,4 @@
+import { JsonLd } from '@/components/ui/json-ld'
 import { siteLanguage } from '@/config/env'
 import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
@@ -41,11 +42,5 @@ export async function SiteJsonLd() {
     ],
   }
 
-  return (
-    <script
-      type="application/ld+json"
-      // Escaping "<" keeps editor content from closing the script tag.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }}
-    />
-  )
+  return <JsonLd data={data} />
 }

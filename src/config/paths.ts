@@ -21,3 +21,8 @@ export function segmentsToSlug(segments: string[] | undefined): string {
 export function slugToSegments(slug: string): string[] {
   return slug === HOME_SLUG ? [] : slug.split('/')
 }
+
+/** "a/b/c" -> ["a", "a/b", "a/b/c"]: the slug of each page on the way down. "home" -> []. */
+export function slugTrail(slug: string): string[] {
+  return slugToSegments(slug).map((_, i, segments) => segments.slice(0, i + 1).join('/'))
+}

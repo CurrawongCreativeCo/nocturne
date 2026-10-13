@@ -53,6 +53,7 @@ Open http://localhost:3000/studio:
 - **Site settings** (top of the sidebar) holds the site name, logo, announcement bar, header menu and button, footer, and default SEO.
 - **Announcement bar:** in Site settings → _Announcement_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
 - **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Site settings), then a generated one: brand-colored, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the color is `brandColorHex` in `src/config/brand.ts` (the renderer can't read `oklch()`, so keep it in step with `--color-brand`).
+- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from Site settings. All of it goes through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
@@ -183,7 +184,7 @@ src/
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, AI Assist presets
-  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text
+  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld
   config/                          env.ts (validated), paths.ts (slug <-> URL)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
                                    fragments.ts (shared GROQ), schema/ (link, cta, seo, blockContent, imageField)
@@ -247,7 +248,7 @@ The reference example is a "Welcome back" greeting on the hero:
 ### Request budget
 
 Published reads go to Sanity's API CDN without a token, one request per cache miss. There are only three
-queries (shared sections are resolved inside `PAGE_QUERY`, not fetched separately): `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, and the
+queries (shared sections are resolved inside `PAGE_QUERY`, not fetched separately): `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, breadcrumbs, and the
 unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site metadata). So:
 
 - **Build:** one request per page, plus two.
@@ -259,6 +260,7 @@ unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site 
   by `_id`); both carry the `page` tag. Up to 45,000 pages nothing changes: one file, built from
   `PAGE_INDEX_QUERY`, with `/sitemap.xml` rewritten to `/sitemap/0.xml` and listed in `robots.txt`. On a split
   site `/sitemap.xml` still serves the first file only, so submit the files listed in `robots.txt`.
+- **Breadcrumbs** add none: they are built from the cached `PAGE_INDEX_QUERY` (slug and title).
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin`) are answered from the cached page index at no cost.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.

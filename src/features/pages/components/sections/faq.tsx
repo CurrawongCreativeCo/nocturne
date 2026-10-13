@@ -1,3 +1,6 @@
+import { stegaClean, toPlainText } from 'next-sanity'
+
+import { JsonLd } from '@/components/ui/json-ld'
 import { RichText } from '@/components/ui/rich-text'
 
 import type { SectionProps } from '../../types'
@@ -8,6 +11,20 @@ export function Faq({ data }: SectionProps<'faq'>) {
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-24">
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: items.map((item) => ({
+            '@type': 'Question',
+            name: stegaClean(item.question),
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: stegaClean(toPlainText(item.answer)),
+            },
+          })),
+        }}
+      />
       {(title || intro) && (
         <header className="mb-12 text-center">
           {title && (

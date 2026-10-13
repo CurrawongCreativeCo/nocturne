@@ -228,6 +228,21 @@ export const documents = [
     pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Page with a long title.'])] }],
   },
   {
+    _id: 'page-services',
+    _type: 'page',
+    title: 'Services',
+    slug: { _type: 'slug', current: 'services' },
+    pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Our services.'])] }],
+  },
+  {
+    // Nested under "services"; "services/web" has no page, so the trail skips that segment.
+    _id: 'page-web-design',
+    _type: 'page',
+    title: 'Web design',
+    slug: { _type: 'slug', current: 'services/web/design' },
+    pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Web design services.'])] }],
+  },
+  {
     _id: 'r1',
     _type: 'redirect',
     source: '/About-Us.html',

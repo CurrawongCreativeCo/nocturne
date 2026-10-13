@@ -13,6 +13,7 @@ import {
   PAGE_SITEMAP_QUERY,
   REDIRECTS_QUERY,
 } from './queries'
+import { buildBreadcrumbs } from '../utils/breadcrumbs'
 import { sitemapChunkCount, sitemapChunkRange } from '../utils/sitemap-chunks'
 
 /**
@@ -97,6 +98,11 @@ async function getPageIndex() {
     tags: [TAGS.page],
   })
   return data
+}
+
+/** Breadcrumb trail for a nested page, from the cached page index: no extra request. */
+export async function getBreadcrumbs(slug: string) {
+  return buildBreadcrumbs(slug, await getPageIndex())
 }
 
 /** Route params for `generateStaticParams`. */

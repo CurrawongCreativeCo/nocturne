@@ -96,7 +96,7 @@ test.describe('metadata', () => {
 
   test('structured data describes the organization and website', async ({ page }) => {
     await page.goto('/')
-    const json = await page.locator('script[type="application/ld+json"]').textContent()
+    const json = await page.locator('script[type="application/ld+json"]').first().textContent()
     const data = JSON.parse(json ?? '{}') as {
       '@graph': { '@type': string; name: string; url: string }[]
     }
@@ -139,5 +139,52 @@ test.describe('share images', () => {
     await page.goto('/own-image')
     await expect(ogImages(page)).toHaveCount(1)
     expect(await ogImages(page).getAttribute('content')).toContain('cdn.sanity.io/images')
+  })
+})
+
+test.describe('structured data', () => {
+  const jsonLd = (page: Page) =>
+    page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((scripts) =>
+        scripts.map((script) => JSON.parse(script.textContent) as Record<string, unknown>),
+      )
+
+  test('the home page FAQ is valid FAQPage JSON-LD with plain-text answers', async ({ page }) => {
+    await page.goto('/')
+    const faq = (await jsonLd(page)).find((data) => data['@type'] === 'FAQPage')
+    expect(faq).toMatchObject({ '@context': 'https://schema.org' })
+    const entities = faq?.mainEntity as { name: string; acceptedAnswer: { text: string } }[]
+    expect(entities.length).toBeGreaterThan(0)
+    for (const { name, acceptedAnswer } of entities) {
+      expect(name).toBeTruthy()
+      expect(acceptedAnswer.text).toBeTruthy()
+      expect(acceptedAnswer.text).not.toContain('<')
+    }
+  })
+
+  test('a nested page has a BreadcrumbList and a visible breadcrumb nav', async ({ page }) => {
+    await page.goto('/services/web/design')
+    const list = (await jsonLd(page)).find((data) => data['@type'] === 'BreadcrumbList')
+    expect(list?.itemListElement).toEqual([
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Services', item: `${SITE_URL}/services` },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Web design',
+        item: `${SITE_URL}/services/web/design`,
+      },
+    ])
+
+    const nav = page.getByRole('navigation', { name: 'Breadcrumb' })
+    await expect(nav.getByRole('link')).toHaveText(['Home', 'Services'])
+    await expect(nav.locator('[aria-current="page"]')).toHaveText('Web design')
+  })
+
+  test('top-level pages have no breadcrumbs', async ({ page }) => {
+    await page.goto('/about')
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toHaveCount(0)
+    expect((await jsonLd(page)).some((data) => data['@type'] === 'BreadcrumbList')).toBe(false)
   })
 })
