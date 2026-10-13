@@ -4,7 +4,8 @@
  *   npm run new:section pricing-table
  *
  * Creates the schema, GROQ fragment, React component and insert-menu thumbnail,
- * registers each one at the `// new-section:*` markers, then runs typegen.
+ * registers each one at the `// new-section:*` markers, adds a placeholder to the section gallery's
+ * fixture page, then runs typegen.
  * The new section starts with a title and text field; edit the four files to shape it.
  */
 import { spawnSync } from 'node:child_process'
@@ -32,6 +33,7 @@ const paths = {
   renderer: join(feature, 'components/section-renderer.tsx'),
   preview: join(root, 'public/section-previews', `${typeName}.svg`),
   placeholder: join(root, 'public/section-previews/_placeholder.svg'),
+  fixtures: join(root, 'tests/e2e/fixtures/dataset.mjs'),
 }
 
 if (existsSync(paths.schema) || existsSync(paths.component))
@@ -49,6 +51,7 @@ const edits = [
   [paths.fragments, PAGE_BUILDER_TAIL, `  \${${typeName}Fragment},\n`],
   [paths.renderer, '// new-section:import', `import { ${Component} } from './sections/${kebab}'\n`],
   [paths.renderer, '  // new-section:register', `  ${typeName}: ${Component},\n`],
+  [paths.fixtures, '  // new-section:gallery', galleryFixture()],
 ]
 for (const [file, marker] of edits) {
   if (!readFileSync(file, 'utf8').includes(marker)) {
@@ -73,12 +76,19 @@ if (existsSync(paths.placeholder) && !existsSync(paths.preview)) {
 
 console.log(`\n✓ Created the "${title}" section (${typeName}):`)
 for (const file of [paths.schema, paths.component, paths.preview]) console.log(`  + ${rel(file)}`)
-for (const file of [paths.registry, paths.fragments, paths.renderer])
+for (const file of [paths.registry, paths.fragments, paths.renderer, paths.fixtures])
   console.log(`  ~ ${rel(file)}`)
 
 // Match the project's lint and formatting even when the pre-commit hook is off
 // (e.g. imports added at the markers get sorted into place).
-const touched = [paths.schema, paths.registry, paths.fragments, paths.component, paths.renderer]
+const touched = [
+  paths.schema,
+  paths.registry,
+  paths.fragments,
+  paths.component,
+  paths.renderer,
+  paths.fixtures,
+]
 const npx = (args) =>
   spawnSync('npx', args, { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' })
 npx(['eslint', '--fix', '--no-warn-ignored', ...touched])
@@ -108,6 +118,9 @@ Next:
   2. Query them in ${typeName}Fragment (${rel(paths.fragments)}), then run \`npm run typegen\`
   3. Build the UI in ${rel(paths.component)}
   4. Optional: replace the thumbnail at ${rel(paths.preview)}
+  5. Give the "${kebab}" entry in the section gallery real content (${rel(paths.fixtures)}), then
+     add its screenshot baseline: \`npm run test:e2e:update\` on Linux or in Docker (see the
+     README's "Section gallery"). Until then the visual test for "${kebab}" has no baseline and fails.
 
 "${title}" is already in Studio's "Add section" menu.
 `)
@@ -149,6 +162,17 @@ function fragment() {
 `
 }
 
+function galleryFixture() {
+  return `  // Placeholder from \`npm run new:section\`: fill it in, add a variant per look, then refresh baselines.
+  {
+    _key: '${kebab}',
+    _type: '${typeName}',
+    title: '${escapeJs(title)}',
+    text: 'Text.',
+  },
+`
+}
+
 function component() {
   return `import type { SectionProps } from '../../types'
 
@@ -163,6 +187,10 @@ export function ${Component}({ data }: SectionProps<'${typeName}'>) {
   )
 }
 `
+}
+
+function escapeJs(text) {
+  return text.replace(/['\\]/g, '\\$&')
 }
 
 function escapeXml(text) {

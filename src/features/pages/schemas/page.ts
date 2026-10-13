@@ -5,6 +5,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import {
   BLOG_SEGMENT,
   EXPERIMENT_SEGMENT,
+  GALLERY_SEGMENT,
   HOME_SLUG,
   SEARCH_SEGMENT,
   SIGN_IN_SEGMENT,
@@ -24,6 +25,7 @@ const RESERVED_SEGMENTS = new Set([
   '_next',
   BLOG_SEGMENT,
   EXPERIMENT_SEGMENT,
+  GALLERY_SEGMENT,
   SEARCH_SEGMENT,
   SIGN_IN_SEGMENT,
   SIGN_OUT_SEGMENT,

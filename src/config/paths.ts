@@ -59,6 +59,13 @@ export const SEARCH_PATH = `/${SEARCH_SEGMENT}`
 export const SEARCH_API_PATH = '/api/search'
 
 /**
+ * Section gallery: every section type on one page, for visual regression tests. Only served in
+ * development and when E2E_GALLERY=1. A CMS page can't use the first segment.
+ */
+export const GALLERY_SEGMENT = 'section-gallery'
+export const GALLERY_PATH = `/${GALLERY_SEGMENT}`
+
+/**
  * Sign-in and sign-out pages (src/features/auth). A CMS page can't use these first segments, and
  * proxy.ts leaves them out of A/B tests. The Auth.js handlers live under /api/auth.
  */

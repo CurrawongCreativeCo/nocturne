@@ -614,3 +614,158 @@ export const variantDocuments = {
     },
   ],
 }
+
+/**
+ * Every section type and each of its variants, once, on a page of its own: the section gallery
+ * (src/app/section-gallery) renders it and tests/e2e/visual.spec.ts takes one screenshot per
+ * section. A section's `_key` is its id and names its baseline image, so renaming one means
+ * refreshing that baseline (`npm run test:e2e:update`). Last in the file so the keys above stay put.
+ */
+const galleryFeatures = (columns) => ({
+  _key: `features-grid-${columns}-columns`,
+  _type: 'featuresGrid',
+  title: `Features in ${columns} columns`,
+  intro: 'A short introduction above the grid.',
+  columns,
+  items: Array.from({ length: columns * 2 }, (_, i) => ({
+    _key: key(),
+    _type: 'featureItem',
+    title: `Feature ${i + 1}`,
+    text: 'Text.',
+    icon: image(''),
+  })),
+})
+const galleryMediaText = (id, title, extra) => ({
+  _key: `media-text-${id}`,
+  _type: 'mediaText',
+  eyebrow: 'Eyebrow',
+  title,
+  body: [block(['Body text beside the picture, long enough to wrap onto a second line or two.'])],
+  ctas: [cta('Read more', internal('page-about'))],
+  ...extra,
+})
+const galleryBanner = (tone) => ({
+  _key: `cta-banner-${tone}`,
+  _type: 'ctaBanner',
+  title: `Call to action, ${tone} tone`,
+  text: 'Banner text.',
+  tone,
+  ctas: [
+    cta('Get started', internal('page-about')),
+    cta('Learn more', internal('page-about'), 'secondary'),
+  ],
+})
+
+const gallerySections = [
+  {
+    _key: 'hero',
+    _type: 'hero',
+    title: 'Welcome to Test Co',
+    description: 'Hero description.',
+    ctas: [
+      cta('About us', internal('page-about')),
+      cta('Learn more', internal('page-about'), 'secondary'),
+    ],
+    backgroundImage: image(''),
+  },
+  {
+    _key: 'rich-text',
+    _type: 'richText',
+    body: [
+      block(['Rich text heading'], { style: 'h2' }),
+      block(['A paragraph of copy.']),
+      block(['A second paragraph.']),
+    ],
+  },
+  galleryMediaText('image-left', 'Image on the left', {
+    image: image('Picture'),
+    imagePosition: 'left',
+  }),
+  galleryMediaText('image-right', 'Image on the right', {
+    image: image('Picture'),
+    imagePosition: 'right',
+  }),
+  galleryMediaText('no-image', 'Without an image', { imagePosition: 'right' }),
+  galleryFeatures(2),
+  galleryFeatures(3),
+  galleryFeatures(4),
+  {
+    _key: 'logo-cloud',
+    _type: 'logoCloud',
+    title: 'Trusted by',
+    logos: ['Acme', 'Globex', 'Initech'].map((name) => ({
+      _key: key(),
+      name,
+      image: image(name),
+    })),
+  },
+  {
+    _key: 'testimonials',
+    _type: 'testimonials',
+    title: 'Testimonials',
+    items: ['Alex', 'Sam'].map((name) => ({
+      _key: key(),
+      quote: 'Great.',
+      name,
+      role: 'CEO',
+      avatar: image(name),
+    })),
+  },
+  {
+    _key: 'faq',
+    _type: 'faq',
+    title: 'FAQ',
+    intro: 'Answers to common questions.',
+    items: [
+      { _key: key(), question: 'A question?', answer: [block(['An answer.'])] },
+      { _key: key(), question: 'Another question?', answer: [block(['Another answer.'])] },
+    ],
+  },
+  galleryBanner('brand'),
+  galleryBanner('dark'),
+  galleryBanner('light'),
+  {
+    _key: 'form-section',
+    _type: 'formSection',
+    title: 'Get in touch',
+    text: 'We usually reply within two days.',
+    form: ref('form-contact'),
+  },
+  {
+    _key: 'pricing-table',
+    _type: 'pricingTable',
+    title: 'Choose your plan',
+    intro: 'Prices are kept in step with Stripe.',
+    plans: [
+      plan('price_Starter1', { features: ['One project', 'Email support'] }),
+      plan('price_Pro1', {
+        features: ['Unlimited projects', 'Priority support'],
+        highlighted: true,
+      }),
+      plan('price_Team1', { name: 'Team', features: ['Everything in Pro', 'Ten seats'] }),
+    ],
+  },
+  {
+    _key: 'newsletter-signup',
+    _type: 'newsletterSignup',
+    title: 'Stay in the loop',
+    text: 'One email a month, no spam.',
+    submitLabel: 'Subscribe',
+    successMessage: 'Thanks! Check your inbox to confirm.',
+  },
+  // new-section:gallery
+]
+
+/** The gallery sections' ids, in page order: one visual test and one baseline per id. */
+export const galleryIds = gallerySections.map((section) => section._key)
+
+documents.push({
+  _id: 'page-section-gallery',
+  _type: 'page',
+  title: 'Section gallery',
+  slug: { _type: 'slug', current: 'section-gallery' },
+  // The route is not reachable as a normal page; this keeps the document out of the sitemap and search.
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: gallerySections,
+  _updatedAt: UPDATED,
+})

@@ -14,6 +14,11 @@ export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
   forbidOnly: CI,
+  expect: {
+    // Visual regression (visual.spec.ts): frozen animations, hidden caret, CSS-pixel images so
+    // mobile baselines aren't 2.6x larger than they need to be.
+    toHaveScreenshot: { animations: 'disabled', caret: 'hide', scale: 'css' },
+  },
   retries: CI ? 1 : 0,
   reporter: CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
@@ -55,7 +60,8 @@ export default defineConfig({
       port: APP_PORT,
       timeout: 300_000,
       reuseExistingServer: !CI,
-      env: APP_ENV,
+      // E2E_GALLERY switches on /section-gallery, which visual.spec.ts screenshots.
+      env: { ...APP_ENV, E2E_GALLERY: '1' },
     },
   ],
 })

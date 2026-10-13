@@ -20,6 +20,11 @@ you start a release.
 
 ### Added
 
+- Section gallery and visual regression tests: `/section-gallery` (development and `E2E_GALLERY=1` only; 404
+  otherwise) renders every section type and variant from the end-to-end fixtures, and
+  `tests/e2e/visual.spec.ts` screenshots each on desktop and mobile against Linux baselines kept in the repo.
+  `npm run test:e2e:update` refreshes them. `npm run new:section` now adds a placeholder gallery fixture
+  and reminds you to add the baseline. `section-gallery` is a new reserved first slug segment.
 - Optional Sentry error tracking (`@sentry/nextjs`, `src/lib/sentry`). With `SENTRY_DSN` set, server errors
   from `onRequestError` (the JSON log line stays) and browser errors from `error.tsx` and `global-error.tsx`
   are sent to Sentry with the error digest as a `digest` tag; `global-error.tsx` now also shows the
@@ -99,7 +104,9 @@ you start a release.
 None required. Run `npm install` (adds `flags`, `@vercel/analytics` and `next-auth`) and `npm run typegen`. Add `'auth'` to the `features` list in `eslint.config.mjs`. If you had a page with the slug `sign-in` or `sign-out`, rename it. Members-only content stays off until you set `AUTH_SECRET` and a provider and mark something as members-only; if you call `PageView` or `getPage` from your own routes, pass `renderMembersGate` and `members: false`. Add `'consent'` to the `features` list in `eslint.config.mjs`. Analytics stay off until you set a provider variable. A/B tests stay off until you set
 `FLAGS_SECRET` and start a test. In webhook mode, add `"experiment"` to the webhook's filter. If you
 had a page with the slug `ab`, rename it: that path now belongs to the variant routes. If you
-customized `src/proxy.ts` or `src/app/(site)/layout.tsx`, expect conflicts there.
+customized `src/proxy.ts` or `src/app/(site)/layout.tsx`, expect conflicts there. If you had a page with the
+slug `section-gallery`, rename it. Visual tests need Linux baselines: run `npm run test:e2e:update` (Linux or
+Docker) and commit `tests/e2e/visual.spec.ts-snapshots/`; keep your own `gallerySections` entries in the fixtures.
 
 ## [1.0.0] - 2026-10-13
 

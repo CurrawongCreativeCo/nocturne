@@ -21,3 +21,7 @@ blob-report/
 
 # Lighthouse CI output
 .lighthouseci/
+
+# Visual baselines are Linux-only (CI); local macOS/Windows comparisons are not committed.
+tests/e2e/*-snapshots/*-darwin.png
+tests/e2e/*-snapshots/*-win32.png

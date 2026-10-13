@@ -291,6 +291,7 @@ src/
     sanity.types.ts                GENERATED — commit it
     sanity.ts                      shared types: SanityImageData, CtaData, LinkData
 public/section-previews/           insert-menu thumbnails, one <typeName>.svg per section
+    section-gallery/page.tsx       (in src/app) every section type and variant on one page; dev and tests only
 scripts/new-section.mjs            `npm run new:section` scaffolder
 ```
 
@@ -659,6 +660,7 @@ each release before proposing it.
 | `npm run format:check`    | Prettier (`format` to apply)                                               |
 | `npm test`                | Unit tests (Vitest; `test:watch` while working)                            |
 | `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`) |
+| `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)       |
 | `npm run test:lighthouse` | Lighthouse budgets on `/` and `/about` (needs Chrome installed)            |
 
 ### Tests
@@ -681,6 +683,51 @@ They use ports 3100 and 9999 and don't need `.env.local`. Stop anything else on 
 CI installs the browser itself.
 
 When you add a section or a content type, add an example of it to the fixture dataset so the axe scan covers it.
+
+#### Section gallery and visual regression
+
+`/section-gallery` renders every section type on one page, each under a label (`ctaBanner (dark tone)`,
+`mediaText (image left)`, `featuresGrid (4 columns)`…), so a styling change can be checked in one place.
+It is not part of the public site: it answers 404 unless `NODE_ENV` is `development` or `E2E_GALLERY=1`
+(`playwright.config.ts` sets it for the test build), and `section-gallery` is a reserved first slug
+segment, so no CMS page can use it.
+
+The route draws the page with the slug `section-gallery`, which only the fixture dataset has
+(`tests/e2e/fixtures/dataset.mjs`, `gallerySections`). To look at it in development, run the fake Content
+Lake and point the site at it:
+
+```bash
+node tests/e2e/fake-sanity.mjs &              # serves the fixtures on :9999
+SANITY_API_HOST=http://localhost:9999 NEXT_PUBLIC_SANITY_PROJECT_ID=e2etest1 NEXT_PUBLIC_SANITY_DATASET=production \
+  SANITY_API_READ_TOKEN=x npx next dev        # then open http://localhost:3000/section-gallery
+```
+
+`tests/e2e/visual.spec.ts` takes one `toHaveScreenshot` per gallery section on desktop and on mobile, with
+animations frozen, reduced motion on, every image decoded and web fonts loaded first. Sanity CDN images are
+replaced by a fixed gradient, so no screenshot depends on the network. Baselines are committed in
+`tests/e2e/visual.spec.ts-snapshots/`, named `<section id>-<desktop|mobile>-linux.png`. A section's id is the
+`_key` of its entry in `gallerySections`.
+
+- **Baselines are Linux-only**: text renders slightly differently on every operating system. The visual tests
+  skip themselves on macOS and Windows (`E2E_VISUAL_ANY_OS=1` compares anyway, against baselines you must
+  not commit). CI runs on Linux, so it checks them.
+- **Refreshing** after an intended design change: `npm run test:e2e:update` on Linux, or from any system in
+  Docker (use the image tag that matches `@playwright/test` in `package.json`). CI's runner is the reference:
+  if a Docker-made baseline differs from CI by a few pixels (system fonts), use the workflow below instead.
+
+  ```bash
+  docker run --rm --ipc=host -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.64.0-noble \
+    sh -c "npm ci && npm run test:e2e:update"
+  ```
+
+  Without Docker, run the **Update visual baselines** workflow (Actions tab) and download its
+  `visual-baselines` artifact into `tests/e2e/visual.spec.ts-snapshots/`. Review the images before committing:
+  a baseline is a promise that this is how the section should look.
+
+- **A failed run** leaves the expected, actual and diff images in `test-results/` (CI uploads them).
+- **Adding a section or a variant:** `npm run new:section` adds a placeholder gallery entry; give it real
+  content, add one entry per look (as for the banner tones), refresh the baselines and commit them. The
+  spec fails when a section type with a thumbnail in `public/section-previews/` has no gallery entry.
 
 The A/B test spec starts a site-wide experiment, which rewrites every page request while it runs. It is its own Playwright project (`experiments`) that waits for `desktop` and `mobile` to finish, so no other test ever sees an experiment running. Any new spec that changes site-wide state (settings variants, experiments) should do the same, or restore the state before other specs can run.
 
@@ -754,13 +801,17 @@ tooling: `npm run check` (or CI) is the shared gate.
 npm run new:section pricing-table
 ```
 
-This creates the schema, GROQ fragment, component and thumbnail, registers each one, and runs typegen.
+This creates the schema, GROQ fragment, component and thumbnail, registers each one, adds a placeholder
+to the section gallery's fixtures, and runs typegen.
 The section is immediately in Studio's _Add item_ menu with a title and text field. Then:
 
 1. Add fields in `src/features/pages/schemas/sections/pricing-table.ts`
 2. Query them in `pricingTableFragment` (`src/features/pages/api/sections.ts`) and run `npm run typegen`
 3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx`, typed from the query
 4. Optionally replace `public/section-previews/pricingTable.svg`
+5. Give the placeholder entry the generator added to the section gallery (`gallerySections` in
+   `tests/e2e/fixtures/dataset.mjs`) real content, one entry per variant, then add the screenshot baselines
+   with `npm run test:e2e:update` (see _Section gallery and visual regression_).
 
 The generator inserts code at the `// new-section:*` marker comments; keep them in place. To add a section
 by hand, follow the same steps and register it in `schemas/sections/index.ts`, `pageBuilderFragment` and

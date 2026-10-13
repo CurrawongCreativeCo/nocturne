@@ -92,5 +92,6 @@ jobs:
           name: test-reports
           path: |
             playwright-report
+            test-results
             .lighthouseci
           retention-days: 7
