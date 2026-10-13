@@ -49,3 +49,11 @@ export function categoryPath(slug: string): string {
  */
 export const EXPERIMENT_SEGMENT = 'ab'
 export const EXPERIMENT_PATH = `/${EXPERIMENT_SEGMENT}`
+
+/**
+ * Site search. `/search?q=` is the results page, `/api/search?q=` the JSON the quick search dialog
+ * reads. A CMS page can't use the first segment (the page route would never be reached).
+ */
+export const SEARCH_SEGMENT = 'search'
+export const SEARCH_PATH = `/${SEARCH_SEGMENT}`
+export const SEARCH_API_PATH = '/api/search'

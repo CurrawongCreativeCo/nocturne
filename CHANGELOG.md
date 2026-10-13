@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- Site search (`src/features/search`): a `/search?q=` page (a plain GET form that works without
+  JavaScript, results announced in a live region) and a quick search dialog opened from a new header
+  link or Ctrl/Cmd+K, backed by `/api/search`. One `SEARCH_QUERY` over page titles, meta descriptions
+  and rich-text / image + text bodies, cached per query text for a few minutes through the new
+  `shortLivedSanityFetch` in `lib/sanity/live.ts`. `SiteHeader` and `DraftSiteHeader` take a `search`
+  slot; `search` is now a reserved first slug segment. See the README's _Site search_.
 - Analytics with a consent banner (`src/features/consent`). Plausible, PostHog and Google Analytics 4
   (Consent Mode v2) load via `next/script` only after the visitor accepts analytics, chosen by
   `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`, `NEXT_PUBLIC_POSTHOG_KEY` (`NEXT_PUBLIC_POSTHOG_HOST`) and

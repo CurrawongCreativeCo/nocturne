@@ -6,6 +6,7 @@ import { hasConsentProviders } from '@/config/analytics'
 import { AnalyticsScripts } from '@/features/consent/components/analytics-scripts'
 import { CookieSettingsButton } from '@/features/consent/components/cookie-settings-button'
 import { DraftModeTools } from '@/features/draft-mode/components/draft-mode-tools'
+import { QuickSearch } from '@/features/search/components/quick-search'
 import {
   SiteAnnouncement,
   DraftSiteAnnouncement,
@@ -37,6 +38,7 @@ export async function SiteShell({
   experiment?: ExperimentAttributes
 }) {
   const { isEnabled: isDraftMode } = await draftMode()
+  const search = <QuickSearch />
   const cookieSettings = hasConsentProviders && (
     <CookieSettingsButton className="cursor-pointer text-sm text-gray-600 hover:text-gray-950" />
   )
@@ -73,10 +75,10 @@ export async function SiteShell({
       )}
       {isDraftMode ? (
         <Suspense fallback={null}>
-          <DraftSiteHeader />
+          <DraftSiteHeader search={search} />
         </Suspense>
       ) : (
-        <SiteHeader {...PUBLISHED} />
+        <SiteHeader {...PUBLISHED} search={search} />
       )}
       <main
         id="main-content"

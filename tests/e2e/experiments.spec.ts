@@ -148,6 +148,13 @@ test.describe('experiment running', () => {
     expect(response.headers()['set-cookie']).toBeUndefined()
   })
 
+  test('search is not part of the experiment', async ({ request }) => {
+    const response = await request.get('/search?q=design')
+    expect(response.status()).toBe(200)
+    expect(response.headers()['set-cookie']).toBeUndefined()
+    expect(await response.text()).toContain('Web design')
+  })
+
   test('the variant page has no WCAG 2.2 AA violations', async ({ page, context }) => {
     await context.addCookies([
       { name: 'ab', value: 'experiment-headline.bold', url: 'http://localhost:3100' },

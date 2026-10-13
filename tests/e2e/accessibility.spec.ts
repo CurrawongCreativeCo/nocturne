@@ -14,6 +14,8 @@ for (const path of [
   '/blog?page=2',
   '/blog/category/news',
   '/blog/welcome-to-the-blog',
+  '/search',
+  '/search?q=design',
 ]) {
   test(`no WCAG 2.2 AA violations on ${path}`, async ({ page }) => {
     await page.goto(path)

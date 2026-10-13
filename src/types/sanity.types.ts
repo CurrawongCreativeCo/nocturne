@@ -1794,6 +1794,16 @@ export type REDIRECTS_QUERY_RESULT = Array<{
   permanent: boolean | true
 }>
 
+// Source: src/features/search/api/queries.ts
+// Variable: SEARCH_QUERY
+// Query: *[    _type == "page" && defined(slug.current) && seo.noIndex != true &&    (title match $q || seo.metaDescription match $q || pt::text(pageBuilder[].body) match $q)  ] | score(title match $q) | order(_score desc, title asc) [0...20] {    title,    "slug": slug.current,    "description": seo.metaDescription,    "text": coalesce(pt::text(pageBuilder[].body), "")  }
+export type SEARCH_QUERY_RESULT = Array<{
+  title: string
+  slug: string
+  description: string | null
+  text: string
+}>
+
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
 // Query: *[_id == "settings"][0] {    title,    description,    logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    ogImage { asset->{ _id } },    announcement { message, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, startsAt, endsAt, dismissible },    headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerText,    consent { title, message, privacyLabel, privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, analyticsText, marketingText },    "allowAiCrawlers": allowAiCrawlers != false  }
@@ -2090,6 +2100,7 @@ declare global {
     '\n  count(*[_type == "page" && defined(slug.current)])\n': PAGE_COUNT_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_SITEMAP_QUERY_RESULT
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
+    '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    (title match $q || seo.metaDescription match $q || pt::text(pageBuilder[].body) match $q)\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[].body), "")\n  }\n': SEARCH_QUERY_RESULT
     '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    announcement { message, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, startsAt, endsAt, dismissible },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText,\n    consent { title, message, privacyLabel, privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, analyticsText, marketingText },\n    "allowAiCrawlers": allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '\n  *[_id == "settings"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT

@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { cacheLife } from 'next/cache'
 import { cookies, draftMode } from 'next/headers'
 import { variantsApiVersion } from 'next-sanity'
 import {
@@ -47,6 +48,19 @@ const { sanityFetch: variantFetch } = defineLive({
 export const cachedSanityFetch: StrictDefinedFetchType = async (options) => {
   'use cache'
   return options.variant ? variantFetch(options) : sanityFetch(options)
+}
+
+/**
+ * A second boundary for results that content tags can't keep fresh, because a document that
+ * *starts* matching (a new page, a reworded paragraph) isn't in the cached result and so never
+ * expires it. Site search is the user: entries are keyed by the query text, so they also expire
+ * after minutes instead of living "forever" (arbitrary queries would otherwise pile up). The tags
+ * still expire an entry earlier when a page in its results changes.
+ */
+export const shortLivedSanityFetch: StrictDefinedFetchType = async (options) => {
+  'use cache'
+  cacheLife({ stale: 30, revalidate: 60, expire: 300 })
+  return sanityFetch(options)
 }
 
 /**
