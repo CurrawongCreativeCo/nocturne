@@ -24,6 +24,12 @@ const wizardDir = dirname(fileURLToPath(import.meta.url))
 const root = join(wizardDir, '..', '..')
 const envPath = join(root, '.env.local')
 
+/**
+ * The template repo's own checkout keeps the wizard: an untracked `.template-dev` file marks it.
+ * Fresh clones never have the file, so for them the wizard removes itself as usual.
+ */
+const isTemplateCheckout = existsSync(join(root, '.template-dev'))
+
 // Must match HOME_SLUG in src/config/paths.ts.
 const HOME_SLUG = 'home'
 
@@ -299,12 +305,6 @@ function readEnvFile() {
 function writeEnvFile(values) {
   writeFileSync(envPath, mergeEnv(existsSync(envPath) ? readFileSync(envPath, 'utf8') : '', values))
 }
-
-/**
- * The template repo's own checkout keeps the wizard: an untracked `.template-dev` file marks it.
- * Fresh clones never have the file, so for them the wizard removes itself as usual.
- */
-const isTemplateCheckout = existsSync(join(root, '.template-dev'))
 
 function removeWizard() {
   if (isTemplateCheckout) return []
