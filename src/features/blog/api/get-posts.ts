@@ -187,6 +187,11 @@ export async function getListMetadata(
   }
 }
 
+/** Published posts search engines may index, newest first, from the cached blog index: no extra request. */
+export async function getIndexablePosts() {
+  return (await getBlogIndex()).posts.filter(({ noIndex }) => !noIndex)
+}
+
 /** Route params for `generateStaticParams`. */
 export async function getPostStaticParams() {
   const { posts } = await getBlogIndex()

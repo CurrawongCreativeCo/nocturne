@@ -77,8 +77,10 @@ export const POST_QUERY = defineQuery(/* groq */ `
 
 /** Slugs for static params and for telling real URLs from probes; also the sitemap of a small blog. */
 export const BLOG_INDEX_QUERY = defineQuery(/* groq */ `{
-  "posts": *[_type == "post" && defined(slug.current)] {
+  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc) {
     "slug": slug.current,
+    title,
+    "description": coalesce(seo.metaDescription, excerpt),
     _updatedAt,
     "noIndex": seo.noIndex == true
   },

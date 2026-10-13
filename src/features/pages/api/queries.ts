@@ -29,6 +29,7 @@ export const PAGE_INDEX_QUERY = defineQuery(/* groq */ `
   *[_type == "page" && defined(slug.current)] {
     "slug": slug.current,
     title,
+    "description": seo.metaDescription,
     _updatedAt,
     "noIndex": seo.noIndex == true
   }

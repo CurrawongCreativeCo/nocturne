@@ -13,6 +13,7 @@ export const settings = defineType({
     { name: 'announcement', title: 'Announcement' },
     { name: 'header', title: 'Header' },
     { name: 'footer', title: 'Footer' },
+    { name: 'searchAi', title: 'Search & AI' },
   ],
   fields: [
     defineField({
@@ -119,6 +120,15 @@ export const settings = defineType({
       group: 'footer',
       description:
         'e.g. "Acme Ltd. All rights reserved." Shown after "© <current year>". Defaults to the site name.',
+    }),
+    defineField({
+      name: 'allowAiCrawlers',
+      title: 'Allow AI crawlers',
+      type: 'boolean',
+      group: 'searchAi',
+      description:
+        'On: AI crawlers (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, CCBot) may read the site, and /llms.txt lists your pages for AI tools. Off: robots.txt asks them to stay away and /llms.txt is removed. Search engines like Google and Bing are not affected. Crawlers choose whether to obey.',
+      initialValue: true,
     }),
   ],
   preview: { prepare: () => ({ title: 'Site settings' }) },

@@ -99,6 +99,11 @@ async function getPageIndex() {
   return data
 }
 
+/** Published pages search engines may index, from the cached page index: no extra request. */
+export async function getIndexablePages() {
+  return (await getPageIndex()).filter(({ noIndex }) => !noIndex)
+}
+
 /** Breadcrumb trail for a nested page, from the cached page index: no extra request. */
 export async function getBreadcrumbs(slug: string) {
   return buildBreadcrumbs(slug, await getPageIndex())

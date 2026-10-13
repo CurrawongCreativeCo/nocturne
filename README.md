@@ -55,6 +55,10 @@ Open http://localhost:3000/studio:
 - **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Site settings), then a generated one: brand-colored, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the color is `brandColorHex` in `src/config/brand.ts` (the renderer can't read `oklch()`, so keep it in step with `--color-brand`).
 - **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from Site settings. All of it goes through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
+- **AI crawlers and `/llms.txt`:** in Site settings → _Search & AI_, _Allow AI crawlers_ (on by default) decides how the site treats AI tools.
+  - _On:_ `/llms.txt` lists the site name, its default description and every page that isn't hidden from search engines, as Markdown links followed by each page's meta description (a page without one is listed by title only), so AI tools can find your content. Posts follow under a _Blog_ heading, newest first, with the post's meta description or else its summary; posts hidden from search engines are left out.
+  - _Off:_ `robots.txt` disallows the whole site for GPTBot, ClaudeBot, Google-Extended, PerplexityBot and CCBot, and `/llms.txt` answers 404. Google, Bing and other search engines are untouched. The list lives in `src/lib/ai-crawlers.ts`.
+  - It is a request, not a lock: well-behaved crawlers obey `robots.txt`, others don't. A crawler that has already stored your pages keeps them. Changes appear as soon as the settings are published (webhook mode: after the webhook).
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
   or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
@@ -193,6 +197,7 @@ src/
     (site)/blog/                     blog index, [slug] (post), category/[slug]
     feed.xml/route.ts                RSS 2.0 feed
     api/og/[[...slug]]/route.tsx     generated share image (PNG) for pages without one
+    llms.txt/route.ts                /llms.txt for AI tools (404 when AI crawlers are off)
     sitemap.ts                       pages then posts, split into files of 45,000 URLs (generateSitemaps)
   proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG)
   features/
@@ -295,6 +300,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
   one file, with `/sitemap.xml` rewritten to `/sitemap/0.xml` and listed in `robots.txt`. On a split
   site `/sitemap.xml` still serves the first file only, so submit the files listed in `robots.txt`.
 - **The RSS feed** adds none: `/feed.xml` is page 1 of the blog (the same cache entry as `/blog`) plus the cached settings.
+- **`/llms.txt` and `robots.txt`** add none: the page list is the cached `PAGE_INDEX_QUERY` and `BLOG_INDEX_QUERY` (which also carry titles and descriptions) and the switch comes with the cached `SETTINGS_QUERY`. `/llms.txt` renders per request (`connection()`), because a prerendered route that starts answering 404 would keep serving its old copy; each hit only reads those cache entries.
 - **Breadcrumbs** add none: they are built from the cached `PAGE_INDEX_QUERY` (slug and title).
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
@@ -418,11 +424,11 @@ each release before proposing it.
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
-  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
+  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the `/llms.txt` builder, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
 
 Running the end-to-end tests locally:
 

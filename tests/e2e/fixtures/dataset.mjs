@@ -339,7 +339,17 @@ export const documents = [
     _type: 'page',
     title: 'Services',
     slug: { _type: 'slug', current: 'services' },
+    seo: { _type: 'seo', metaDescription: 'What we do for clients.' },
     pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Our services.'])] }],
+  },
+  {
+    // Hidden from search engines, so it is left out of the sitemap and /llms.txt.
+    _id: 'page-private',
+    _type: 'page',
+    title: 'Private',
+    slug: { _type: 'slug', current: 'private' },
+    seo: { _type: 'seo', metaDescription: 'Not for search.', noIndex: true },
+    pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Not listed anywhere.'])] }],
   },
   {
     // Nested under "services"; "services/web" has no page, so the trail skips that segment.
@@ -391,6 +401,12 @@ export const documents = [
     permanent: false,
   },
 ].map((doc) => ({ ...doc, _updatedAt: UPDATED }))
+
+/**
+ * Field changes the fake Content Lake can apply to the published Site settings while it runs
+ * (tests/e2e/ai-crawlers.spec.ts): the fixture above allows AI crawlers, this one switches them off.
+ */
+export const aiCrawlersBlocked = { allowAiCrawlers: false }
 
 /**
  * A "release" version of the About page, as the Content Lake stores it: a document with

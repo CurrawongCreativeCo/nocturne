@@ -7,9 +7,13 @@ import { createServer } from 'node:http'
 
 import { evaluate, parse } from 'groq-js'
 
-import { documents, releaseVersions } from './fixtures/dataset.mjs'
+import { aiCrawlersBlocked, documents, releaseVersions } from './fixtures/dataset.mjs'
 
 const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
+
+/** Named variants of the settings document the tests switch between; `null` serves the fixture as is. */
+const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked }
+let settingsPatch = null
 
 const BASE_ID = /^versions.[^.]+./
 
@@ -19,16 +23,19 @@ const BASE_ID = /^versions.[^.]+./
  * `versions.<release>.<id>` documents replace the base document with that id.
  */
 function datasetFor(perspective) {
+  const published = settingsPatch
+    ? documents.map((doc) => (doc._id === 'settings' ? { ...doc, ...settingsPatch } : doc))
+    : documents
   const releases = perspective
     .split(',')
     .filter((name) => name && !['published', 'drafts', 'raw'].includes(name))
-  if (releases.length === 0) return documents
+  if (releases.length === 0) return published
 
   const versions = releaseVersions
     .filter((doc) => releases.some((release) => doc._id.startsWith(`versions.${release}.`)))
     .map((doc) => ({ ...doc, _id: doc._id.replace(BASE_ID, '') }))
   const overridden = new Set(versions.map((doc) => doc._id))
-  return [...documents.filter((doc) => !overridden.has(doc._id)), ...versions]
+  return [...published.filter((doc) => !overridden.has(doc._id)), ...versions]
 }
 
 async function readBody(req) {
@@ -39,6 +46,13 @@ async function readBody(req) {
 
 createServer(async (req, res) => {
   const url = new URL(req.url ?? '/', 'http://localhost')
+  // Test control: POST /__fixture/settings/<variant> picks which settings the lake serves.
+  const variant = /^\/__fixture\/settings\/(\w+)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && variant && variant in SETTINGS_VARIANTS) {
+    settingsPatch = SETTINGS_VARIANTS[variant]
+    res.writeHead(204).end()
+    return
+  }
   if (!url.pathname.includes('/data/query/')) {
     res.writeHead(404).end()
     return

@@ -19,6 +19,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     headerNav[] { ${navItemFields} },
     headerCta { ${ctaFields} },
     footerNav[] { ${navItemFields} },
-    footerText
+    footerText,
+    "allowAiCrawlers": allowAiCrawlers != false
   }
 `)
