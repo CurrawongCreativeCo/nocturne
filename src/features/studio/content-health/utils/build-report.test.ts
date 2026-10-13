@@ -14,7 +14,13 @@ const cta = (id: string) => ({ _type: 'cta', label: 'Go', link: link(id) })
 // Loosely typed on purpose: the page builder's generated type is far larger than the test needs.
 const data = {
   pages: [
-    { _id: 'home', title: 'Home', slug: 'home', metaDescription: 'Welcome', pageBuilder: [] },
+    {
+      _id: 'home',
+      title: 'Home',
+      slug: 'home',
+      metaDescription: 'Welcome',
+      pageBuilder: [{ _type: 'reference', _key: 'k1', _ref: 'promo' }],
+    },
     {
       _id: 'about',
       title: 'About',
@@ -47,6 +53,19 @@ const data = {
       pageBuilder: [],
     },
   ],
+  sharedSections: [
+    // Used by the home page: its link and image count.
+    {
+      _id: 'promo',
+      title: 'Promo',
+      section: [
+        { _type: 'ctaBanner', ctas: [cta('contact')] },
+        { _type: 'mediaText', image: { asset: { _ref: 'img' } } },
+      ],
+    },
+    // Used by no page: invisible to visitors, so its link to Lonely doesn't count.
+    { _id: 'unused', title: 'Unused', section: [{ _type: 'ctaBanner', ctas: [cta('lonely')] }] },
+  ],
   settings: [
     { _id: 'settings', headerNav: [{ link: link('home') }], headerCta: null, footerNav: null },
   ],
@@ -66,6 +85,13 @@ describe('buildReport', () => {
   it('lists documents linking to a page with no published version', () => {
     expect(groups['broken-links']?.map(({ id, detail }) => [id, detail])).toEqual([
       ['about', 'Links to Contact, which has no published version'],
+      ['promo', 'Links to Contact, which has no published version'],
+    ])
+  })
+
+  it('lists shared sections with images that have no alt text', () => {
+    expect(groups['alt-text']?.map(({ id, type, detail }) => [id, type, detail])).toEqual([
+      ['promo', 'sharedSection', '1 image: Image + text image'],
     ])
   })
 

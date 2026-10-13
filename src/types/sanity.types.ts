@@ -296,6 +296,48 @@ export type Redirect = {
   permanent?: boolean
 }
 
+export type SharedSection = {
+  _id: string
+  _type: 'sharedSection'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title: string
+  section: Array<
+    | ({
+        _key: string
+      } & Hero)
+    | ({
+        _key: string
+      } & RichText)
+    | ({
+        _key: string
+      } & MediaText)
+    | ({
+        _key: string
+      } & FeaturesGrid)
+    | ({
+        _key: string
+      } & LogoCloud)
+    | ({
+        _key: string
+      } & Testimonials)
+    | ({
+        _key: string
+      } & Faq)
+    | ({
+        _key: string
+      } & CtaBanner)
+  >
+}
+
+export type SharedSectionReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'sharedSection'
+}
+
 export type Page = {
   _id: string
   _type: 'page'
@@ -329,6 +371,9 @@ export type Page = {
     | ({
         _key: string
       } & CtaBanner)
+    | ({
+        _key: string
+      } & SharedSectionReference)
   >
   seo?: Seo
 }
@@ -459,6 +504,8 @@ export type AllSanitySchemaTypes =
   | RichText
   | Hero
   | Redirect
+  | SharedSection
+  | SharedSectionReference
   | Page
   | Slug
   | SanityImagePaletteSwatch
@@ -472,7 +519,7 @@ export type AllSanitySchemaTypes =
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    title,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    pageBuilder[] {     _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },  _key,  _type }  }
+// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    title,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    pageBuilder[] {   _key,      _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },  _type,  _type == "reference" => @->section[0] {        _type == "hero" => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }  },    _type == "richText" => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]  }
 export type PAGE_QUERY_RESULT = {
   _id: string
   _type: 'page'
@@ -499,6 +546,8 @@ export type PAGE_QUERY_RESULT = {
   } | null
   pageBuilder: Array<
     | {
+        _key: string
+        _type: 'ctaBanner'
         title: string
         text: string | null
         ctas: Array<{
@@ -513,10 +562,29 @@ export type PAGE_QUERY_RESULT = {
           }
         }> | null
         tone: 'brand' | 'dark' | 'light'
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        title: string
+        text: string | null
+        ctas: Array<{
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
+          link: {
+            linkType: 'external' | 'internal'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+          }
+        }> | null
+        tone: 'brand' | 'dark' | 'light'
         _type: 'ctaBanner'
       }
     | {
+        _key: string
+        _type: 'faq'
         title: string | null
         intro: string | null
         items: Array<{
@@ -567,10 +635,65 @@ export type PAGE_QUERY_RESULT = {
               }
           >
         }>
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        title: string | null
+        intro: string | null
+        items: Array<{
+          _key: string
+          question: string
+          answer: Array<
+            | {
+                children?: Array<{
+                  marks?: Array<string>
+                  text?: string
+                  _type: 'span'
+                  _key: string
+                }>
+                style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+                listItem?: 'bullet' | 'number'
+                markDefs: Array<{
+                  _key: string
+                  _type: 'link'
+                  linkType: 'external' | 'internal'
+                  internal?: PageReference
+                  url: string | null
+                  openInNewTab: boolean | null
+                  slug: string | null
+                }> | null
+                level?: number
+                _type: 'block'
+                _key: string
+              }
+            | {
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+                media?: unknown
+                hotspot: SanityImageHotspot | null
+                crop: SanityImageCrop | null
+                alt: string | null
+                caption: string | null
+                _type: 'image'
+                _key: string
+                markDefs: null
+              }
+          >
+        }>
         _type: 'faq'
       }
     | {
+        _key: string
+        _type: 'featuresGrid'
         title: string | null
         intro: string | null
         columns: 2 | 3 | 4
@@ -594,10 +717,38 @@ export type PAGE_QUERY_RESULT = {
             } | null
           } | null
         }>
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        title: string | null
+        intro: string | null
+        columns: 2 | 3 | 4
+        items: Array<{
+          _key: string
+          title: string
+          text: string | null
+          icon: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+        }>
         _type: 'featuresGrid'
       }
     | {
+        _key: string
+        _type: 'hero'
         title: string
         description: string | null
         ctas: Array<{
@@ -626,10 +777,43 @@ export type PAGE_QUERY_RESULT = {
             } | null
           } | null
         } | null
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        title: string
+        description: string | null
+        ctas: Array<{
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
+          link: {
+            linkType: 'external' | 'internal'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+          }
+        }> | null
+        backgroundImage: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        } | null
         _type: 'hero'
       }
     | {
+        _key: string
+        _type: 'logoCloud'
         title: string | null
         logos: Array<{
           _key: string
@@ -651,10 +835,36 @@ export type PAGE_QUERY_RESULT = {
             } | null
           }
         }>
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        title: string | null
+        logos: Array<{
+          _key: string
+          name: string
+          url: string | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          }
+        }>
         _type: 'logoCloud'
       }
     | {
+        _key: string
+        _type: 'mediaText'
         eyebrow: string | null
         title: string
         body: Array<
@@ -728,10 +938,88 @@ export type PAGE_QUERY_RESULT = {
           } | null
         } | null
         imagePosition: 'left' | 'right'
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        eyebrow: string | null
+        title: string
+        body: Array<
+          | {
+              children?: Array<{
+                marks?: Array<string>
+                text?: string
+                _type: 'span'
+                _key: string
+              }>
+              style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+              listItem?: 'bullet' | 'number'
+              markDefs: Array<{
+                _key: string
+                _type: 'link'
+                linkType: 'external' | 'internal'
+                internal?: PageReference
+                url: string | null
+                openInNewTab: boolean | null
+                slug: string | null
+              }> | null
+              level?: number
+              _type: 'block'
+              _key: string
+            }
+          | {
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+              media?: unknown
+              hotspot: SanityImageHotspot | null
+              crop: SanityImageCrop | null
+              alt: string | null
+              caption: string | null
+              _type: 'image'
+              _key: string
+              markDefs: null
+            }
+        > | null
+        ctas: Array<{
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
+          link: {
+            linkType: 'external' | 'internal'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+          }
+        }> | null
+        image: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        } | null
+        imagePosition: 'left' | 'right'
         _type: 'mediaText'
       }
     | {
+        _key: string
+        _type: 'richText'
         body: Array<
           | {
               children?: Array<{
@@ -776,10 +1064,59 @@ export type PAGE_QUERY_RESULT = {
               markDefs: null
             }
         >
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        body: Array<
+          | {
+              children?: Array<{
+                marks?: Array<string>
+                text?: string
+                _type: 'span'
+                _key: string
+              }>
+              style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+              listItem?: 'bullet' | 'number'
+              markDefs: Array<{
+                _key: string
+                _type: 'link'
+                linkType: 'external' | 'internal'
+                internal?: PageReference
+                url: string | null
+                openInNewTab: boolean | null
+                slug: string | null
+              }> | null
+              level?: number
+              _type: 'block'
+              _key: string
+            }
+          | {
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+              media?: unknown
+              hotspot: SanityImageHotspot | null
+              crop: SanityImageCrop | null
+              alt: string | null
+              caption: string | null
+              _type: 'image'
+              _key: string
+              markDefs: null
+            }
+        >
         _type: 'richText'
       }
     | {
+        _key: string
+        _type: 'testimonials'
         title: string | null
         items: Array<{
           _key: string
@@ -802,7 +1139,32 @@ export type PAGE_QUERY_RESULT = {
             } | null
           } | null
         }>
+        sharedSectionId: string
+      }
+    | {
         _key: string
+        title: string | null
+        items: Array<{
+          _key: string
+          quote: string
+          name: string
+          role: string | null
+          avatar: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+        }>
         _type: 'testimonials'
       }
   > | null
@@ -920,7 +1282,7 @@ export type SETTINGS_QUERY_RESULT =
 
 // Source: src/features/studio/content-health/api/query.ts
 // Variable: CONTENT_HEALTH_QUERY
-// Query: {  "pages": *[_type == "page"] {    _id,    title,    "slug": slug.current,    "metaDescription": seo.metaDescription,    pageBuilder  },  "settings": *[_id in ["settings", "drafts.settings"]] {    _id,    headerNav,    headerCta,    footerNav  },  "redirects": *[_type == "redirect"] {    _id,    source,    destination  }}
+// Query: {  "pages": *[_type == "page"] {    _id,    title,    "slug": slug.current,    "metaDescription": seo.metaDescription,    pageBuilder  },  "sharedSections": *[_type == "sharedSection"] {    _id,    title,    section  },  "settings": *[_id in ["settings", "drafts.settings"]] {    _id,    headerNav,    headerCta,    footerNav  },  "redirects": *[_type == "redirect"] {    _id,    source,    destination  }}
 export type CONTENT_HEALTH_QUERY_RESULT = {
   pages: Array<{
     _id: string
@@ -951,8 +1313,41 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
         } & RichText)
       | ({
           _key: string
+        } & SharedSectionReference)
+      | ({
+          _key: string
         } & Testimonials)
     > | null
+  }>
+  sharedSections: Array<{
+    _id: string
+    title: string
+    section: Array<
+      | ({
+          _key: string
+        } & CtaBanner)
+      | ({
+          _key: string
+        } & Faq)
+      | ({
+          _key: string
+        } & FeaturesGrid)
+      | ({
+          _key: string
+        } & Hero)
+      | ({
+          _key: string
+        } & LogoCloud)
+      | ({
+          _key: string
+        } & MediaText)
+      | ({
+          _key: string
+        } & RichText)
+      | ({
+          _key: string
+        } & Testimonials)
+    >
   }>
   settings: Array<
     | {
@@ -1019,11 +1414,11 @@ export type SEO_PREVIEW_SETTINGS_QUERY_RESULT =
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    title,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    pageBuilder[] { \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _key,\n  _type\n }\n  }\n': PAGE_QUERY_RESULT
+    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    title,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    pageBuilder[] { \n  _key,\n  \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n  }\n': PAGE_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText\n  }\n': SETTINGS_QUERY_RESULT
-    '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
+    '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '\n  *[_id == "settings"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }
 }

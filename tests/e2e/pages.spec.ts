@@ -40,6 +40,14 @@ test.describe('pages', () => {
     await expect(section).not.toHaveClass(/grid-cols-2/)
   })
 
+  test('a referenced shared section renders as a normal section', async ({ page }) => {
+    await page.goto('/shared')
+    await expect(page.locator('h1')).toHaveText('Shared')
+    await expect(page.getByRole('heading', { name: 'Shared promo banner', level: 2 })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'See the promo' })).toBeVisible()
+    await expect(page.locator('main section')).toHaveCount(2)
+  })
+
   test('unknown URLs return a 404 page', async ({ page }) => {
     const response = await page.goto('/does-not-exist')
     expect(response?.status()).toBe(404)

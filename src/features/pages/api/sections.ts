@@ -94,11 +94,8 @@ export const ctaBannerFragment = /* groq */ `
 
 // new-section:fragment
 
-/**
- * Spread into `pageBuilder[]{ ... }`. Register new section fragments here.
- * `_key` and `_type` stay last so new fragments can be added above them.
- */
-export const pageBuilderFragment = /* groq */ `
+/** Every section's projection. Register new section fragments here, above `_type`. */
+const sectionsFragment = /* groq */ `
   ${heroFragment},
   ${richTextFragment},
   ${mediaTextFragment},
@@ -107,6 +104,21 @@ export const pageBuilderFragment = /* groq */ `
   ${testimonialsFragment},
   ${faqFragment},
   ${ctaBannerFragment},
-  _key,
   _type
+`
+
+/**
+ * Spread into `pageBuilder[]{ ... }`. A reference to a `sharedSection` is replaced by the section it
+ * holds, so the renderer only ever sees normal sections. The result keeps the reference's `_key`
+ * (unique within the page) and gains `sharedSectionId`, the document Visual Editing should open.
+ * It comes last because it overrides `_key` and `_type`; an unresolvable reference yields null.
+ */
+export const pageBuilderFragment = /* groq */ `
+  _key,
+  ${sectionsFragment},
+  _type == "reference" => @->section[0] {
+    ${sectionsFragment},
+    "_key": ^._key,
+    "sharedSectionId": ^._ref
+  }
 `

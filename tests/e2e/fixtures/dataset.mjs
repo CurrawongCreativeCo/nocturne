@@ -152,6 +152,38 @@ export const documents = [
     ],
   },
   {
+    _id: 'shared-promo',
+    _type: 'sharedSection',
+    title: 'Promo banner',
+    section: [
+      {
+        _key: key(),
+        _type: 'ctaBanner',
+        title: 'Shared promo banner',
+        text: 'Edited once, shown on every page that uses it.',
+        tone: 'dark',
+        ctas: [cta('See the promo', internal('page-about'))],
+      },
+    ],
+  },
+  {
+    // Reaches a section through a reference; it has no hero, so the title is the hidden <h1>.
+    _id: 'page-shared',
+    _type: 'page',
+    title: 'Shared',
+    slug: { _type: 'slug', current: 'shared' },
+    pageBuilder: [
+      {
+        _key: key(),
+        _type: 'richText',
+        body: [block(['Content before the shared section.'])],
+      },
+      { _key: 'shared-ref', ...ref('shared-promo') },
+      // Points at a missing document: skipped, not an error.
+      { _key: key(), ...ref('does-not-exist') },
+    ],
+  },
+  {
     _id: 'r1',
     _type: 'redirect',
     source: '/About-Us.html',

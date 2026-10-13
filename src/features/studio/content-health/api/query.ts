@@ -13,6 +13,11 @@ export const CONTENT_HEALTH_QUERY = defineQuery(/* groq */ `{
     "metaDescription": seo.metaDescription,
     pageBuilder
   },
+  "sharedSections": *[_type == "sharedSection"] {
+    _id,
+    title,
+    section
+  },
   "settings": *[_id in ["settings", "drafts.settings"]] {
     _id,
     headerNav,

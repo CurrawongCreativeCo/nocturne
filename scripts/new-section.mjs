@@ -41,7 +41,7 @@ if (readFileSync(paths.registry, 'utf8').match(new RegExp(`\\b${typeName}\\b`)))
 }
 
 // Check every insertion point before writing anything, so a failure leaves no half-made section.
-const PAGE_BUILDER_TAIL = '  _key,\n  _type\n`'
+const PAGE_BUILDER_TAIL = '  _type\n`\n'
 const edits = [
   [paths.registry, '// new-section:import', `import { ${typeName} } from './${kebab}'\n`],
   [paths.registry, '  // new-section:register', `  ${typeName},\n`],

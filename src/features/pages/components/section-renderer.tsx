@@ -70,10 +70,15 @@ export function SectionRenderer({
           return null
         }
 
+        // A shared section's overlay opens the shared document, since that is what an edit changes.
         return editable ? (
           <div
             key={section._key}
-            data-sanity={dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)}
+            data-sanity={
+              'sharedSectionId' in section
+                ? dataAttr(section.sharedSectionId, 'sharedSection', 'section')
+                : dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)
+            }
           >
             <Section data={section} isFirst={index === 0} />
           </div>

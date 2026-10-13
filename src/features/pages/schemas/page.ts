@@ -59,7 +59,15 @@ export const page = defineType({
       title: 'Sections',
       type: 'array',
       group: 'content',
-      of: sectionTypes.map(({ name }) => defineArrayMember({ type: name })),
+      of: [
+        ...sectionTypes.map(({ name }) => defineArrayMember({ type: name })),
+        // The shared section's own preview supplies the title and section type.
+        defineArrayMember({
+          type: 'reference',
+          title: 'Shared section',
+          to: [{ type: 'sharedSection' }],
+        }),
+      ],
       options: {
         insertMenu: {
           // Thumbnails live in public/section-previews/<typeName>.svg.

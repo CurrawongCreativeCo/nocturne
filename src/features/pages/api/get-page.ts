@@ -26,7 +26,7 @@ export async function getPage({ slug, ...mode }: { slug: string } & FetchMode) {
     query: PAGE_QUERY,
     params: { slug },
     ...mode,
-    tags: [TAGS.page],
+    tags: [TAGS.page, TAGS.sharedSection],
   })
   return data
 }

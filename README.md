@@ -52,7 +52,7 @@ Open http://localhost:3000/studio:
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
-- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it.
+- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. They only apply to paths with no page, so they can't hide a live page. Studio blocks
   duplicates and loops, and warns about chains and sources a page already uses.
@@ -70,6 +70,13 @@ Open http://localhost:3000/studio:
 | Testimonials          | Customer quotes with name, role and photo                 |
 | FAQ                   | Questions that expand to answers                          |
 | Call to action banner | A closing prompt in brand, dark or light tone             |
+
+**Shared sections:** use _Shared sections_ in the sidebar for a section that appears unchanged on
+several pages, like a promo banner or a newsletter sign-up. Create one (a title for your own reference,
+plus the section), then on a page choose _Add item → Shared section_ and pick it. Edit it once and every
+page that uses it updates; clicking it in Presentation opens the shared document. If the wording needs to
+differ per page, add a normal section instead. Deleting a shared section leaves the pages that still
+reference it without it (they skip the gap rather than error).
 
 **Branding:** the brand color is `--color-brand` in `src/styles/globals.css`; the font is set
 with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
@@ -132,7 +139,7 @@ src/
     pages/                         CMS pages + page builder
       api/                         queries.ts, sections.ts (GROQ), get-page.ts (page, metadata, sitemap)
       components/                  page-view, section-renderer, sections/<name>.tsx
-      schemas/                     page.ts, sections/<name>.ts, templates.ts (new-page templates)
+      schemas/                     page.ts, shared-section.ts, sections/<name>.ts, templates.ts (new-page templates)
       types/                       PageSection, SectionOf<'hero'>, SectionProps
     site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
@@ -182,7 +189,7 @@ components, config, lib, styles, types   ->   features   ->   app
 ### Request budget
 
 Published reads go to Sanity's API CDN without a token, one request per cache miss. There are only three
-queries: `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, and the
+queries (shared sections are resolved inside `PAGE_QUERY`, not fetched separately): `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, and the
 unknown-URL check) and `SETTINGS_QUERY` (header, footer, site metadata). So:
 
 - **Build:** one request per page, plus two.
@@ -221,7 +228,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "settings", "redirect"]` · **Projection:** `{_type}`
+   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection"]` · **Projection:** `{_type}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.

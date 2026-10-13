@@ -20,7 +20,7 @@ export const PAGE_QUERY = defineQuery(/* groq */ `
     _type,
     title,
     seo { ${seoFields} },
-    pageBuilder[] { ${pageBuilderFragment} }
+    pageBuilder[] { ${pageBuilderFragment} }[_type != "reference"]
   }
 `)
 

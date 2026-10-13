@@ -56,6 +56,15 @@ export function findBrokenLinkTargets(value: unknown, publishedIds: ReadonlySet<
   return [...new Set(collectLinkTargets(value))].filter((id) => !publishedIds.has(id))
 }
 
+/** Ids of the shared sections referenced in a page builder array. */
+export function collectSharedSectionIds(sections: unknown): string[] {
+  if (!Array.isArray(sections)) return []
+  return sections.filter(isRecord).flatMap((section) => {
+    const ref = section._type === 'reference' ? section._ref : undefined
+    return typeof ref === 'string' ? [ref] : []
+  })
+}
+
 // -- Images -----------------------------------------------------------------------------------
 
 function isMissingAlt(image: unknown): boolean {

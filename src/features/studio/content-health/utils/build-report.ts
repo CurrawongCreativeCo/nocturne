@@ -3,6 +3,7 @@ import type { CONTENT_HEALTH_QUERY_RESULT } from '@/types/sanity.types'
 
 import {
   collectLinkTargets,
+  collectSharedSectionIds,
   findBrokenLinkTargets,
   findImagesWithoutAlt,
   findOrphanPages,
@@ -14,7 +15,7 @@ import {
 export interface HealthItem {
   /** Published document id and type, as the "edit" intent expects them. */
   id: string
-  type: 'page' | 'settings' | 'redirect'
+  type: 'page' | 'sharedSection' | 'settings' | 'redirect'
   title: string
   detail?: string
 }
@@ -36,15 +37,28 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
   const titles = new Map(pages.map(({ id, doc }) => [id, doc.title]))
   const publishedIds = new Set(pages.filter(({ published }) => published).map(({ id }) => id))
 
+  const sharedSections = resolveVersions(data.sharedSections)
+  const publishedPages = pages.filter(({ published }) => published)
+  // Shared sections only reach visitors through a published page that references them.
+  const usedSharedIds = new Set(
+    publishedPages.flatMap(({ doc }) => collectSharedSectionIds(doc.pageBuilder)),
+  )
+
   // Only content the live site shows can link to, or fail to link to, a page.
   const linkSources = [
-    ...pages
-      .filter(({ published }) => published)
+    ...publishedPages.map(({ id, doc }) => ({
+      id,
+      type: 'page' as const,
+      title: doc.title,
+      content: doc.pageBuilder,
+    })),
+    ...sharedSections
+      .filter(({ id, published }) => published && usedSharedIds.has(id))
       .map(({ id, doc }) => ({
         id,
-        type: 'page' as const,
+        type: 'sharedSection' as const,
         title: doc.title,
-        content: doc.pageBuilder,
+        content: doc.section,
       })),
     ...(settings
       ? [
@@ -62,14 +76,28 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     .filter(({ doc }) => !doc.metaDescription?.trim())
     .map(({ id, doc }) => ({ id, type: 'page', title: doc.title, detail: slugToPath(doc.slug) }))
 
-  const noAlt = pages.flatMap(({ id, doc }): HealthItem[] => {
-    const labels = findImagesWithoutAlt(doc.pageBuilder)
+  const imageSources = [
+    ...pages.map(({ id, doc }) => ({
+      id,
+      type: 'page' as const,
+      title: doc.title,
+      sections: doc.pageBuilder,
+    })),
+    ...sharedSections.map(({ id, doc }) => ({
+      id,
+      type: 'sharedSection' as const,
+      title: doc.title,
+      sections: doc.section,
+    })),
+  ]
+  const noAlt = imageSources.flatMap(({ id, type, title, sections }): HealthItem[] => {
+    const labels = findImagesWithoutAlt(sections)
     return labels.length
       ? [
           {
             id,
-            type: 'page',
-            title: doc.title,
+            type,
+            title,
             detail: `${labels.length} ${labels.length === 1 ? 'image' : 'images'}: ${[...new Set(labels)].join(', ')}`,
           },
         ]
@@ -108,9 +136,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     collectLinkTargets(content).map((to) => ({ from: id, to })),
   )
   const orphans = findOrphanPages(
-    pages
-      .filter(({ published }) => published)
-      .map(({ id, doc }) => ({ id, slug: doc.slug, title: doc.title })),
+    publishedPages.map(({ id, doc }) => ({ id, slug: doc.slug, title: doc.title })),
     links,
   ).map(({ id, slug, title }): HealthItem => ({
     id,
