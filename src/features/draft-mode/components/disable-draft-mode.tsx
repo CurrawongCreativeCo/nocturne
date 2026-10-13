@@ -12,11 +12,13 @@ export function DisableDraftMode() {
   return (
     // Plain <a>: <Link> would prefetch the route handler and could exit draft mode on hover.
 
-    <a
-      href={`/api/draft-mode/disable?redirect=${encodeURIComponent(pathname)}`}
-      className="fixed right-4 bottom-4 z-50 rounded-full bg-gray-950 px-4 py-2 text-sm text-white shadow-lg"
-    >
-      Exit preview
-    </a>
+    <aside aria-label="Draft mode">
+      <a
+        href={`/api/draft-mode/disable?redirect=${encodeURIComponent(pathname)}`}
+        className="fixed right-4 bottom-4 z-50 rounded-full bg-gray-950 px-4 py-2 text-sm text-white shadow-lg focus-visible:outline-white"
+      >
+        Exit preview
+      </a>
+    </aside>
   )
 }

@@ -55,6 +55,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [{ protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/images/**' }],
   },
 
+  // generateSitemaps serves files at /sitemap/<id>.xml; keep the conventional /sitemap.xml for the first.
+  rewrites: () => Promise.resolve([{ source: '/sitemap.xml', destination: '/sitemap/0.xml' }]),
+
   // Full URLs for Content Lake requests in dev logs — invaluable when debugging cache hits.
   logging: { fetches: { fullUrl: true } },
 }

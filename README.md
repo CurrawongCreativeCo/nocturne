@@ -167,11 +167,12 @@ src/
     (site)/[[...slug]]/page.tsx    every CMS page, including "/"
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
-    sitemap.ts
+    sitemap.ts                       split into files of 45,000 URLs (generateSitemaps)
   proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG)
   features/
     pages/                         CMS pages + page builder
       api/                         queries.ts, sections.ts (GROQ), get-page.ts (page, metadata, sitemap)
+      utils/                       sitemap-chunks.ts (split math)
       components/                  page-view, section-renderer, sections/<name>.tsx
       schemas/                     page.ts, shared-section.ts, sections/<name>.ts, templates.ts (new-page templates)
       types/                       PageSection, SectionOf<'hero'>, SectionProps
@@ -250,6 +251,12 @@ unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site 
 - **Build:** one request per page, plus two.
 - **Visitors:** zero. Pages are prerendered and every query result is cached until its content changes.
 - **Publishing:** only the cached results containing the changed documents are refetched, once each.
+- **Large sites:** a sitemap file holds at most 45,000 URLs (Google allows 50,000). Past that, `generateSitemaps`
+  splits the sitemap into `/sitemap/0.xml`, `/sitemap/1.xml`, … and `robots.txt` lists every file. Sizing it costs
+  one cheap `count()` query (`PAGE_COUNT_QUERY`), and each file one sliced query (`PAGE_SITEMAP_QUERY`, ordered
+  by `_id`); both carry the `page` tag. Up to 45,000 pages nothing changes: one file, built from
+  `PAGE_INDEX_QUERY`, with `/sitemap.xml` rewritten to `/sitemap/0.xml` and listed in `robots.txt`. On a split
+  site `/sitemap.xml` still serves the first file only, so submit the files listed in `robots.txt`.
 - **Unknown URLs** (typos, bots probing `/wp-admin`) are answered from the cached page index at no cost.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 

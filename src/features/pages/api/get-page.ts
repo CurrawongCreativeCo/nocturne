@@ -6,7 +6,14 @@ import { findRedirect } from '@/lib/redirects'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
-import { PAGE_INDEX_QUERY, PAGE_QUERY, REDIRECTS_QUERY } from './queries'
+import {
+  PAGE_COUNT_QUERY,
+  PAGE_INDEX_QUERY,
+  PAGE_QUERY,
+  PAGE_SITEMAP_QUERY,
+  REDIRECTS_QUERY,
+} from './queries'
+import { sitemapChunkCount, sitemapChunkRange } from '../utils/sitemap-chunks'
 
 /**
  * Same cached fetch in both modes; `mode` (perspective, stega) is part of the cache key.
@@ -88,8 +95,30 @@ export async function getPageStaticParams() {
   return params.some((p) => p.slug.length === 0) ? params : [{ slug: [] }, ...params]
 }
 
-export async function getSitemap(): Promise<MetadataRoute.Sitemap> {
-  return (await getPageIndex())
+/** Number of sitemap files; 1 until the site passes the per-file URL limit. */
+export async function getSitemapCount() {
+  const { data } = await cachedSanityFetch({
+    query: PAGE_COUNT_QUERY,
+    ...PUBLISHED,
+    tags: [TAGS.page],
+  })
+  return sitemapChunkCount(data)
+}
+
+/** Entries for sitemap file `id`. A single-file site reuses the cached page index. */
+export async function getSitemap(id: number): Promise<MetadataRoute.Sitemap> {
+  const pages =
+    (await getSitemapCount()) === 1
+      ? await getPageIndex()
+      : (
+          await cachedSanityFetch({
+            query: PAGE_SITEMAP_QUERY,
+            params: sitemapChunkRange(id),
+            ...PUBLISHED,
+            tags: [TAGS.page],
+          })
+        ).data
+  return pages
     .filter(({ noIndex }) => !noIndex)
     .map(({ slug, _updatedAt }) => ({
       url: new URL(slugToPath(slug), siteUrl).toString(),

@@ -33,6 +33,20 @@ export const PAGE_INDEX_QUERY = defineQuery(/* groq */ `
   }
 `)
 
+/** Cheap count that sizes the sitemap; see `generateSitemaps`. */
+export const PAGE_COUNT_QUERY = defineQuery(/* groq */ `
+  count(*[_type == "page" && defined(slug.current)])
+`)
+
+/** One sitemap file's slice of the page index, only used once the site outgrows a single file. */
+export const PAGE_SITEMAP_QUERY = defineQuery(/* groq */ `
+  *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {
+    "slug": slug.current,
+    _updatedAt,
+    "noIndex": seo.noIndex == true
+  }
+`)
+
 export const REDIRECTS_QUERY = defineQuery(/* groq */ `
   *[_type == "redirect" && defined(source) && defined(destination)] {
     source,
