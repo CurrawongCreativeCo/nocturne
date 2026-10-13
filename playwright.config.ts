@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-import { APP_PORT, FAKE_SANITY_PORT, REVALIDATE_SECRET, SITE_URL } from './tests/e2e/constants'
+import { APP_ENV, APP_PORT, FAKE_SANITY_PORT } from './tests/e2e/constants'
 
 const CI = Boolean(process.env.CI)
 
@@ -35,14 +35,7 @@ export default defineConfig({
       port: APP_PORT,
       timeout: 300_000,
       reuseExistingServer: !CI,
-      env: {
-        NEXT_PUBLIC_SANITY_PROJECT_ID: 'e2etest1',
-        NEXT_PUBLIC_SANITY_DATASET: 'production',
-        NEXT_PUBLIC_SITE_URL: SITE_URL,
-        SANITY_API_READ_TOKEN: 'e2e-token',
-        SANITY_API_HOST: `http://localhost:${FAKE_SANITY_PORT}`,
-        SANITY_REVALIDATE_SECRET: REVALIDATE_SECRET,
-      },
+      env: APP_ENV,
     },
   ],
 })

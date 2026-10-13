@@ -22,7 +22,8 @@
     "hooks:off": "git config --unset core.hooksPath",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@sanity/assist": "^6.2.4",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.64.0",
     "@sanity/webhook": "^4.0.4",
     "@tailwindcss/postcss": "^4.3.3",

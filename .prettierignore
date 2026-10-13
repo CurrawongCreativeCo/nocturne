@@ -12,5 +12,6 @@ public
 
 # Test output
 test-results
+.lighthouseci
 playwright-report
 blob-report

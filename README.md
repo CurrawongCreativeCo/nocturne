@@ -313,18 +313,19 @@ but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 
 **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It checks
 that the committed Sanity types match the schema, runs `npm run check`, proves the section generator's
-output passes too, and runs the end-to-end suite in a real browser. **Dependabot** opens
+output passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
 weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
 each release before proposing it.
 
-| Command                | Does                                                                       |
-| ---------------------- | -------------------------------------------------------------------------- |
-| `npm run check`        | Typecheck, lint, format and unit tests, read-only. Run it before pushing.  |
-| `npm run typecheck`    | TypeScript, strict mode                                                    |
-| `npm run lint`         | ESLint, zero warnings allowed (`lint:fix` to autofix)                      |
-| `npm run format:check` | Prettier (`format` to apply)                                               |
-| `npm test`             | Unit tests (Vitest; `test:watch` while working)                            |
-| `npm run test:e2e`     | End-to-end tests (Playwright; first run `npx playwright install chromium`) |
+| Command                   | Does                                                                       |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `npm run check`           | Typecheck, lint, format and unit tests, read-only. Run it before pushing.  |
+| `npm run typecheck`       | TypeScript, strict mode                                                    |
+| `npm run lint`            | ESLint, zero warnings allowed (`lint:fix` to autofix)                      |
+| `npm run format:check`    | Prettier (`format` to apply)                                               |
+| `npm test`                | Unit tests (Vitest; `test:watch` while working)                            |
+| `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`) |
+| `npm run test:lighthouse` | Lighthouse budgets on `/` and `/about` (needs Chrome installed)            |
 
 ### Tests
 
@@ -346,6 +347,36 @@ They use ports 3100 and 9999 and don't need `.env.local`. Stop anything else on 
 CI installs the browser itself.
 
 When you add a section, add an example of it to the fixture dataset so the axe scan covers it.
+
+### Performance budgets
+
+CI fails when a page gets heavier or slower than these. They run against the same production build and fake
+Content Lake as the end-to-end tests.
+
+| Budget                                 | Limit   | Where it lives                                    |
+| -------------------------------------- | ------- | ------------------------------------------------- |
+| JavaScript loaded by `/` (gzipped)     | 200 KB  | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
+| Lighthouse performance (`/`, `/about`) | ≥ 0.9   | `lighthouserc.json`                               |
+| Lighthouse accessibility               | 1       | `lighthouserc.json`                               |
+| Cumulative Layout Shift                | ≤ 0.05  | `lighthouserc.json`                               |
+| Largest Contentful Paint               | ≤ 2.5 s | `lighthouserc.json`                               |
+
+- **JavaScript:** the test fetches `/`, takes every `<script src>` in the HTML, gzips each file from
+  `.next/static` (level 9) and adds them up (1 KB = 1000 bytes). Over budget, it lists every chunk, largest
+  first. The total is about 190 KB today, so a new client-side dependency of even 10 KB trips it. Look first
+  for a client component that can be a server component, or an import that can be lazy-loaded (as
+  `draft-mode-tools.tsx` does).
+- **Lighthouse:** `npm run test:lighthouse` (CI runs `npx lhci autorun`) starts the fake Content Lake and
+  `next start` through `scripts/e2e-server.mjs`, which shares its env with `playwright.config.ts` via
+  `tests/e2e/constants.ts`, then runs three Lighthouse passes per page and judges the median. It builds the
+  site only if `.next` is missing, so delete `.next` after changing code. It uses applied (`devtools`)
+  throttling: Lighthouse's default simulated model reports `/about` about 20 ms over the LCP limit while
+  Chrome actually paints it in about 130 ms. It needs Chrome installed (CI's runner has it). Reports go to
+  `.lighthouseci/`.
+- **Raising a budget** is a decision, not a fix for a red build. First find what grew (the chunk list, or the
+  failing audit in the Lighthouse report) and try to shrink it. If the cost is worth it, change the limit in
+  the file above in the same pull request as the change that needs it, and say why in the description. Don't
+  loosen a budget to land an unrelated change.
 
 **ESLint** layers the strictest presets available:
 
