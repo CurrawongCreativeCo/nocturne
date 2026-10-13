@@ -13,13 +13,13 @@ const env = { ...process.env, ...APP_ENV, FAKE_SANITY_PORT: String(FAKE_SANITY_P
 const shell = process.platform === 'win32'
 
 if (!existsSync('.next/BUILD_ID')) {
-  const build = spawnSync('npx next build', { env, stdio: 'inherit', shell })
+  const build = spawnSync('npx', ['next', 'build'], { env, stdio: 'inherit', shell })
   if (build.status !== 0) process.exit(build.status ?? 1)
 }
 
 const children = [
   spawn('node', ['tests/e2e/fake-sanity.mjs'], { env, stdio: 'inherit' }),
-  spawn(`npx next start -p ${APP_PORT}`, { env, stdio: 'inherit', shell }),
+  spawn('npx', ['next', 'start', '-p', String(APP_PORT)], { env, stdio: 'inherit', shell }),
 ]
 for (const child of children) child.on('exit', (code) => process.exit(code ?? 1))
 for (const signal of ['SIGINT', 'SIGTERM']) {
