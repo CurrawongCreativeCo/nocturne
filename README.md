@@ -519,6 +519,80 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
 `components/section-renderer.tsx`. Until a section is registered in the renderer, `tsc` fails with
 "Property '<name>' is missing".
 
+## Updating from the template
+
+Releases are git tags (`v1.0.0`, `v1.1.0`, ...) with notes in [CHANGELOG.md](CHANGELOG.md). A project pulls
+one in by merging the tag. Read the release's _Breaking changes / migration steps_ first, and step through
+tags one release at a time if you are several behind.
+
+```bash
+git remote add template https://github.com/CurrawongCreativeCo/sanity-starter.git   # once
+git fetch template --tags
+git switch -c update-template-v1.2.0          # do the update on a branch
+git merge v1.2.0                              # first time only, see below: add --allow-unrelated-histories
+# resolve conflicts (next section), then:
+npm install                                   # dependencies usually change
+npm run typegen                               # regenerates src/types/sanity.types.ts
+npx next typegen                              # route types (PageProps); `npm run dev` or `build` also make them
+npm run check
+npm run test:e2e
+```
+
+Commit the merge, open a PR (or push, if you may) and let CI confirm. If it goes badly,
+`git merge --abort` before committing, or delete the branch after.
+
+**First merge.** A project made by cloning this repo shares its history, so a plain `git merge <tag>`
+works. A project made with GitHub's **Use this template** button has unrelated history; add
+`--allow-unrelated-histories` to the first merge only. Every file that differs then conflicts as
+add/add, so start from the tag closest to the day the project was created (`git tag --sort=-creatordate`,
+or `git log template/main --before=<date>`), and merge forward from there. Expect dozens of conflicts the first time. For files you never changed, take the template's version
+(`git checkout --theirs <file>`); handle the rest as below.
+
+### Resolving conflicts
+
+- **Customize files** (below): keep your side for your content and take the template's side for
+  anything structural it changed. Look at the diff of that file between the two tags
+  (`git diff v1.1.0 v1.2.0 -- src/styles/globals.css`) rather than at conflict markers alone.
+- **Core files** (below): take the template's version (`git checkout --theirs <file>`). If you edited
+  one, re-apply your edit on top, then ask whether it should be an option in the template instead.
+- **Setup wizard remnants.** The wizard deletes `scripts/setup/`, its `predev`/`setup` scripts and the
+  README section between the `setup-wizard` markers. Git reports modify/delete conflicts for these;
+  keep them deleted (`git rm -r scripts/setup`) and keep your `package.json` without those scripts.
+- **`package-lock.json`**: take the template's, then run `npm install` to fold in your own packages.
+- **`src/types/sanity.types.ts`** and **`schema.json`** are generated: take either side, then run
+  `npm run typegen`.
+- **`eslint.config.mjs`**: keep your additions to the `features` list.
+- **`tests/e2e/fixtures/dataset.mjs`**: keep your documents and add the template's new ones. Specs
+  assume fixture documents the template added.
+
+### Customize vs core files
+
+The split predicts where merges conflict. Customize files are yours; core files should be identical to
+the template, so they merge cleanly unless you changed them.
+
+| Kind      | Paths                                                                                                                                                                                                                                               | Expect                              |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                      | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                         | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                     | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                             | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                     | Take either side, regenerate        |
+
+Keep customizations out of core files where you can: add a section, a page template or a fixture
+document in a new file or at the marker comments rather than editing shared code. Layout and design
+tweaks to feature components (`src/features/*/components`) conflict like customize files. Where several
+projects keep editing the same core file, see [docs/template-packaging.md](docs/template-packaging.md)
+for when to extract it into a versioned package.
+
+### Cutting a release (template maintainers)
+
+1. Move the _Unreleased_ entries in `CHANGELOG.md` under a new `## [x.y.z] - date` heading, fill in
+   _Breaking changes / migration steps_ (write "None." if there are none), and update the compare links.
+2. Run `npm run check` and `npm run test:e2e`, commit, then `git tag -a vx.y.z -m "vx.y.z"` and
+   `git push origin main vx.y.z`.
+
 ## Notes
 
 - Images go through `next-sanity/image`, which uses Sanity's CDN for resizing and format negotiation
