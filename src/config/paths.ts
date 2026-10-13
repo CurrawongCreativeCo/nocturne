@@ -26,3 +26,19 @@ export function slugToSegments(slug: string): string[] {
 export function slugTrail(slug: string): string[] {
   return slugToSegments(slug).map((_, i, segments) => segments.slice(0, i + 1).join('/'))
 }
+
+/** First path segment of the blog routes. A CMS page can't use it: the blog routes would shadow it. */
+export const BLOG_SEGMENT = 'blog'
+export const BLOG_PATH = `/${BLOG_SEGMENT}`
+/** RSS 2.0 feed of the latest posts. */
+export const FEED_PATH = '/feed.xml'
+
+/** Post slug -> "/blog/<slug>". */
+export function postPath(slug: string): string {
+  return `${BLOG_PATH}/${slug}`
+}
+
+/** Category slug -> "/blog/category/<slug>". */
+export function categoryPath(slug: string): string {
+  return `${BLOG_PATH}/category/${slug}`
+}

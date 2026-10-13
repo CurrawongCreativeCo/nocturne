@@ -38,6 +38,66 @@ const block = (children, extra = {}) => ({
 })
 
 const UPDATED = '2026-10-12T00:00:00Z'
+const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
+const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
+
+// The blog: 14 posts, so the index paginates (12 + 2). The first four have categories, set up so
+// "Welcome to the blog" has three related posts whose score order differs from their date order:
+// the roundup shares two categories but is oldest of the three.
+const blogPost = (
+  id,
+  title,
+  publishedAt,
+  { categories = [], author = 'author-ann', seo } = {},
+) => ({
+  _id: `post-${id}`,
+  _type: 'post',
+  title,
+  slug: { _type: 'slug', current: id },
+  excerpt: `Summary of ${title}.`,
+  mainImage: image(`Picture for ${title}`),
+  publishedAt,
+  author: ref(author),
+  categories: categories.map((category) => ({ _key: key(), ...ref(category) })),
+  body: [block([`Body of ${title}.`])],
+  ...(seo && { seo: { _type: 'seo', ...seo } }),
+})
+
+const blogPosts = [
+  {
+    ...blogPost('welcome-to-the-blog', 'Welcome to the blog', '2026-10-10T09:00:00Z', {
+      categories: ['category-news', 'category-guides'],
+    }),
+    body: [
+      block(['A first heading'], { style: 'h2' }),
+      {
+        ...block([
+          { _key: 'span-a', _type: 'span', text: 'Read ', marks: [] },
+          { _key: 'span-b', _type: 'span', text: 'about us', marks: ['link-about'] },
+          { _key: 'span-c', _type: 'span', text: ' first.', marks: [] },
+        ]),
+        markDefs: [{ _key: 'link-about', ...internal('page-about') }],
+      },
+    ],
+  },
+  blogPost('news-update', 'News update', '2026-10-09T09:00:00Z', { categories: ['category-news'] }),
+  blogPost('how-to-guide', 'How-to guide', '2026-10-08T09:00:00Z', {
+    categories: ['category-guides'],
+  }),
+  blogPost('news-and-guides-roundup', 'News and guides roundup', '2026-10-07T09:00:00Z', {
+    categories: ['category-news', 'category-guides'],
+  }),
+  ...Array.from({ length: 9 }, (_, i) =>
+    blogPost(
+      `archive-post-${i + 1}`,
+      `Archive post ${i + 1}`,
+      `2026-10-0${6 - Math.min(i, 5)}T${String(12 - i).padStart(2, '0')}:00:00Z`,
+      // The last one points at an author that no longer exists: it must render without a byline.
+      i === 8 ? { author: 'author-deleted' } : {},
+    ),
+  ),
+  blogPost('hidden-post', 'Hidden post', '2026-09-01T09:00:00Z', { seo: { noIndex: true } }),
+]
 
 export const documents = [
   {
@@ -194,9 +254,10 @@ export const documents = [
     ],
   },
   {
-    _id: 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png',
+    _id: IMAGE_ASSET_ID,
     _type: 'sanity.imageAsset',
     url: 'https://cdn.sanity.io/images/test/test/0123456789abcdef0123456789abcdef01234567-1200x630.png',
+    metadata: { dimensions: { width: 1200, height: 630 } },
   },
   {
     // Has its own share image: no generated one may be added next to it.
@@ -210,7 +271,7 @@ export const documents = [
         _type: 'image',
         asset: {
           _type: 'reference',
-          _ref: 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png',
+          _ref: IMAGE_ASSET_ID,
         },
       },
     },
@@ -242,6 +303,33 @@ export const documents = [
     slug: { _type: 'slug', current: 'services/web/design' },
     pageBuilder: [{ _key: key(), _type: 'richText', body: [block(['Web design services.'])] }],
   },
+  {
+    _id: 'author-ann',
+    _type: 'author',
+    name: 'Ann Author',
+    image: image(''),
+    bio: 'Ann writes about testing.',
+  },
+  {
+    _id: 'category-news',
+    _type: 'category',
+    title: 'News',
+    slug: { _type: 'slug', current: 'news' },
+  },
+  {
+    _id: 'category-guides',
+    _type: 'category',
+    title: 'Guides',
+    slug: { _type: 'slug', current: 'guides' },
+  },
+  {
+    // No posts: it must not appear in the category filter.
+    _id: 'category-empty',
+    _type: 'category',
+    title: 'Empty',
+    slug: { _type: 'slug', current: 'empty' },
+  },
+  ...blogPosts,
   {
     _id: 'r1',
     _type: 'redirect',

@@ -68,6 +68,14 @@ Open http://localhost:3000/studio:
   - _Meta description:_ in a page's SEO group, open the sparkle (AI Assist) menu on "Meta description" and
     run **Write meta description**. It summarizes the page title and sections in one sentence under 155
     characters. Review before publishing.
+- **Blog:** _Blog_ in the sidebar holds _Posts_, _Authors_ and _Categories_. A post needs a title, slug, summary, main image (with alt text), published date, author and body; give it at least one category, because related posts are chosen by shared categories. The slug becomes `/blog/<slug>`, so `blog` is reserved and a page can't use it. Details:
+  - _Index:_ `/blog` shows 12 posts per page, newest first by _Published at_, with Previous / Next links (`?page=2`) and a filter of the categories that have a post. `/blog/category/<slug>` lists one category the same way. Page 1 has no `?page`, and every page is its own canonical URL.
+  - _Summary_ is the card text, the RSS description and the search description unless the post's SEO group sets one. The main image is the share image unless the SEO group has its own; there is no generated image for blog URLs, so set a default in Site settings if you want one on `/blog`.
+  - _Related posts:_ up to three other posts that share a category, the most shared categories first (counting the post's first five), then newest. A post whose categories nobody else uses shows none.
+  - _Going live:_ a post is public once published; _Published at_ only sets the order and the date shown, so a future date doesn't hide it. Use a content release to schedule one. Studio only warns before deleting an author that posts still use; those posts keep working and just lose the byline.
+  - _RSS:_ `/feed.xml` is an RSS 2.0 feed of the newest 12 posts, with absolute URLs, and blog pages advertise it in their `<head>`. It takes the title and description from Site settings.
+  - _Search engines:_ posts get `Article` JSON-LD (author, dates, image, categories; the publisher is the site's Organization). Posts and `/blog` are in the sitemap unless the post's _Hide from search engines_ is ticked; category pages are not.
+  - _Bad URLs:_ an unknown post or category gets a real 404. A `?page` past the last page (or not a number) shows the 404 page with `noindex` but answers 200, because the page number can only be read after the response has started streaming.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
   Normally they only apply to paths with no page, so they can't hide a live page. With Edge Config
@@ -169,16 +177,20 @@ src/
     (site)/[[...slug]]/page.tsx    every CMS page, including "/"
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
+    (site)/blog/                     blog index, [slug] (post), category/[slug]
+    feed.xml/route.ts                RSS 2.0 feed
     api/og/[[...slug]]/route.tsx     generated share image (PNG) for pages without one
-    sitemap.ts                       split into files of 45,000 URLs (generateSitemaps)
+    sitemap.ts                       pages then posts, split into files of 45,000 URLs (generateSitemaps)
   proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG)
   features/
     pages/                         CMS pages + page builder
       api/                         queries.ts, sections.ts (GROQ), get-page.ts (page, metadata, sitemap)
-      utils/                       sitemap-chunks.ts (split math)
       components/                  page-view, section-renderer, sections/<name>.tsx
       schemas/                     page.ts, shared-section.ts, sections/<name>.ts, templates.ts (new-page templates)
       types/                       PageSection, SectionOf<'hero'>, SectionProps
+    blog/                          posts, authors, categories: index, post page, related posts, RSS builder
+      api/                         queries.ts (GROQ), get-posts.ts (lists, post, metadata, sitemap, feed items)
+      utils/                       pagination, feed (RSS XML), date formatting
     site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
@@ -186,6 +198,7 @@ src/
                                    AI settings tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld
   config/                          env.ts (validated), paths.ts (slug <-> URL)
+  lib/sitemap-chunks.ts            sitemap split math (shared by pages and posts)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
                                    fragments.ts (shared GROQ), schema/ (link, cta, seo, blockContent, imageField)
   styles/globals.css               Tailwind theme, including the brand color
@@ -247,22 +260,27 @@ The reference example is a "Welcome back" greeting on the hero:
 
 ### Request budget
 
-Published reads go to Sanity's API CDN without a token, one request per cache miss. There are only three
+Published reads go to Sanity's API CDN without a token, one request per cache miss. There are only a handful of
 queries (shared sections are resolved inside `PAGE_QUERY`, not fetched separately): `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, breadcrumbs, and the
-unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site metadata). So:
+unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site metadata). The blog adds three:
+`POSTS_QUERY` (one page of posts, for the index, a category, the RSS feed and the post count), `POST_QUERY` (a post, its metadata and its
+three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static params, the unknown-URL check and a small blog's sitemap). So:
 
-- **Build:** one request per page, plus two.
+- **Build:** one request per page and per post, plus one per category, plus a few shared ones.
 - **Visitors:** zero. Pages are prerendered and every query result is cached until its content changes.
 - **Publishing:** only the cached results containing the changed documents are refetched, once each.
-- **Large sites:** a sitemap file holds at most 45,000 URLs (Google allows 50,000). Past that, `generateSitemaps`
-  splits the sitemap into `/sitemap/0.xml`, `/sitemap/1.xml`, … and `robots.txt` lists every file. Sizing it costs
-  one cheap `count()` query (`PAGE_COUNT_QUERY`), and each file one sliced query (`PAGE_SITEMAP_QUERY`, ordered
-  by `_id`); both carry the `page` tag. Up to 45,000 pages nothing changes: one file, built from
-  `PAGE_INDEX_QUERY`, with `/sitemap.xml` rewritten to `/sitemap/0.xml` and listed in `robots.txt`. On a split
+- **Large sites:** a sitemap file holds at most 45,000 URLs (Google allows 50,000). The files cover all pages, then
+  all posts, in that order. Past one file, `generateSitemaps` splits the sitemap into `/sitemap/0.xml`,
+  `/sitemap/1.xml`, … and `robots.txt` lists every file. Sizing it costs one cheap `count()` query for pages
+  (`PAGE_COUNT_QUERY`) and none for posts (the total comes with `POSTS_QUERY`), and each file one sliced query per type
+  (`PAGE_SITEMAP_QUERY`, `POST_SITEMAP_QUERY`, ordered by `_id`). Whenever a file holds all the pages (or all the posts) the file is
+  built from the cached `PAGE_INDEX_QUERY` / `BLOG_INDEX_QUERY` instead, so up to 45,000 URLs nothing extra is fetched:
+  one file, with `/sitemap.xml` rewritten to `/sitemap/0.xml` and listed in `robots.txt`. On a split
   site `/sitemap.xml` still serves the first file only, so submit the files listed in `robots.txt`.
+- **The RSS feed** adds none: `/feed.xml` is page 1 of the blog (the same cache entry as `/blog`) plus the cached settings.
 - **Breadcrumbs** add none: they are built from the cached `PAGE_INDEX_QUERY` (slug and title).
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
-- **Unknown URLs** (typos, bots probing `/wp-admin`) are answered from the cached page index at no cost.
+- **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
 Keep it that way: fetch through `cachedSanityFetch`, call each query with the same argument shape so
@@ -295,7 +313,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection"]` · **Projection:** `{_type}`
+   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category"]` · **Projection:** `{_type}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -362,11 +380,11 @@ each release before proposing it.
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
-  dedupe logic, the section generator's naming, and the setup wizard's validation.
+  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), and runs axe for WCAG 2.2 AA on every page.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
 
 Running the end-to-end tests locally:
 
@@ -378,7 +396,7 @@ npm run test:e2e                   # builds the site, then tests it (a few minut
 They use ports 3100 and 9999 and don't need `.env.local`. Stop anything else on those ports first.
 CI installs the browser itself.
 
-When you add a section, add an example of it to the fixture dataset so the axe scan covers it.
+When you add a section or a content type, add an example of it to the fixture dataset so the axe scan covers it.
 
 ### Performance budgets
 

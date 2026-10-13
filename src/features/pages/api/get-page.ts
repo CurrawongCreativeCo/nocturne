@@ -14,7 +14,6 @@ import {
   REDIRECTS_QUERY,
 } from './queries'
 import { buildBreadcrumbs } from '../utils/breadcrumbs'
-import { sitemapChunkCount, sitemapChunkRange } from '../utils/sitemap-chunks'
 
 /**
  * Same cached fetch in both modes; `mode` (perspective, stega) is part of the cache key.
@@ -112,25 +111,33 @@ export async function getPageStaticParams() {
   return params.some((p) => p.slug.length === 0) ? params : [{ slug: [] }, ...params]
 }
 
-/** Number of sitemap files; 1 until the site passes the per-file URL limit. */
-export async function getSitemapCount() {
+/** Number of published pages, for sizing the sitemap (see `generateSitemaps`). */
+export async function getPageCount() {
   const { data } = await cachedSanityFetch({
     query: PAGE_COUNT_QUERY,
     ...PUBLISHED,
     tags: [TAGS.page],
   })
-  return sitemapChunkCount(data)
+  return data
 }
 
-/** Entries for sitemap file `id`. A single-file site reuses the cached page index. */
-export async function getSitemap(id: number): Promise<MetadataRoute.Sitemap> {
+/**
+ * Sitemap entries for pages `start` up to (not including) `end`. A site whose pages fit one
+ * sitemap file reuses the cached page index; a larger one reads just its slice.
+ */
+export async function getPageSitemap(range: {
+  start: number
+  end: number
+}): Promise<MetadataRoute.Sitemap> {
+  if (range.start >= range.end) return []
+
   const pages =
-    (await getSitemapCount()) === 1
+    range.start === 0 && range.end >= (await getPageCount())
       ? await getPageIndex()
       : (
           await cachedSanityFetch({
             query: PAGE_SITEMAP_QUERY,
-            params: sitemapChunkRange(id),
+            params: range,
             ...PUBLISHED,
             tags: [TAGS.page],
           })

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { HOME_SLUG, segmentsToSlug, slugToPath, slugToSegments } from './paths'
+import {
+  BLOG_PATH,
+  categoryPath,
+  HOME_SLUG,
+  postPath,
+  segmentsToSlug,
+  slugToPath,
+  slugToSegments,
+} from './paths'
 
 describe('slug <-> URL mapping', () => {
   it('maps the home slug to "/"', () => {
@@ -26,5 +34,13 @@ describe('slug <-> URL mapping', () => {
     for (const slug of [HOME_SLUG, 'about', 'a/b/c']) {
       expect(segmentsToSlug(slugToSegments(slug))).toBe(slug)
     }
+  })
+})
+
+describe('blog paths', () => {
+  it('puts posts and categories under /blog', () => {
+    expect(BLOG_PATH).toBe('/blog')
+    expect(postPath('hello-world')).toBe('/blog/hello-world')
+    expect(categoryPath('news')).toBe('/blog/category/news')
   })
 })

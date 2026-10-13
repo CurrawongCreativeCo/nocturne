@@ -53,6 +53,9 @@ export const TAGS = {
   settings: 'settings',
   redirect: 'redirect',
   sharedSection: 'sharedSection',
+  post: 'post',
+  author: 'author',
+  category: 'category',
 } as const
 
 export interface FetchMode {

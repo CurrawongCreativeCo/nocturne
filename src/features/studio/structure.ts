@@ -1,6 +1,9 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
 import { CogIcon } from '@sanity/icons/Cog'
+import { ComposeIcon } from '@sanity/icons/Compose'
 import { FolderIcon } from '@sanity/icons/Folder'
+import { TagIcon } from '@sanity/icons/Tag'
+import { UserIcon } from '@sanity/icons/User'
 import { map } from 'rxjs'
 import type {
   StructureBuilder,
@@ -51,6 +54,9 @@ const pagesTree = (S: StructureBuilder, { documentStore }: StructureResolverCont
       ),
     )
 
+/** Document types with their own place in the structure below; the catch-all list skips them. */
+const LISTED_TYPES = new Set(['page', 'sharedSection', 'redirect', 'post', 'author', 'category'])
+
 /** Desk structure: singletons pinned at the top, then every other document type. */
 export const structure: StructureResolver = (S, context) =>
   S.list()
@@ -64,13 +70,24 @@ export const structure: StructureResolver = (S, context) =>
       S.divider(),
       pagesTree(S, context),
       S.documentTypeListItem('sharedSection').title('Shared sections'),
+      S.listItem()
+        .title('Blog')
+        .id('blog')
+        .icon(ComposeIcon)
+        .child(
+          S.list()
+            .title('Blog')
+            .items([
+              S.documentTypeListItem('post').title('Posts').icon(ComposeIcon),
+              S.documentTypeListItem('author').title('Authors').icon(UserIcon),
+              S.documentTypeListItem('category').title('Categories').icon(TagIcon),
+            ]),
+        ),
       S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
       S.divider(),
       // Everything else not explicitly listed above.
       ...S.documentTypeListItems().filter((item) => {
         const id = item.getId() ?? ''
-        return (
-          id !== 'page' && id !== 'sharedSection' && id !== 'redirect' && !SINGLETON_TYPES.has(id)
-        )
+        return !LISTED_TYPES.has(id) && !SINGLETON_TYPES.has(id)
       }),
     ])

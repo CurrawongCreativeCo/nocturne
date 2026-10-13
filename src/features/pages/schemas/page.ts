@@ -2,13 +2,13 @@ import { DocumentIcon } from '@sanity/icons/Document'
 import { HomeIcon } from '@sanity/icons/Home'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
-import { HOME_SLUG, slugToPath } from '@/config/paths'
+import { BLOG_SEGMENT, HOME_SLUG, slugToPath } from '@/config/paths'
 
 import { sectionTypes } from './sections'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/
 /** First path segments taken by app routes: a page there could never be reached. */
-const RESERVED_SEGMENTS = new Set(['studio', 'api', '_next'])
+const RESERVED_SEGMENTS = new Set(['studio', 'api', '_next', BLOG_SEGMENT])
 
 export const page = defineType({
   name: 'page',

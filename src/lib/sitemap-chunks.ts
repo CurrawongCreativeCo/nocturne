@@ -10,3 +10,20 @@ export function sitemapChunkCount(total: number, size = SITEMAP_CHUNK_SIZE) {
 export function sitemapChunkRange(id: number, size = SITEMAP_CHUNK_SIZE) {
   return { start: id * size, end: (id + 1) * size }
 }
+
+interface Range {
+  start: number
+  end: number
+}
+
+/**
+ * Splits a sitemap file's range over the combined list "all pages, then all posts" into the part
+ * that falls on pages and the part that falls on posts (each relative to its own list). A part
+ * with `start >= end` is empty.
+ */
+export function splitSitemapRange(range: Range, pageTotal: number) {
+  return {
+    pages: { start: Math.min(range.start, pageTotal), end: Math.min(range.end, pageTotal) },
+    posts: { start: Math.max(range.start - pageTotal, 0), end: Math.max(range.end - pageTotal, 0) },
+  }
+}

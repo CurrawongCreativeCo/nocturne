@@ -184,6 +184,82 @@ export type SanityImageHotspot = {
   width: number
 }
 
+export type Category = {
+  _id: string
+  _type: 'category'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title: string
+  slug: Slug
+}
+
+export type Slug = {
+  _type: 'slug'
+  current: string
+  source?: string
+}
+
+export type AuthorReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'author'
+}
+
+export type CategoryReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'category'
+}
+
+export type Post = {
+  _id: string
+  _type: 'post'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title: string
+  slug: Slug
+  excerpt: string
+  mainImage: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  publishedAt: string
+  author: AuthorReference
+  categories?: Array<
+    {
+      _key: string
+    } & CategoryReference
+  >
+  body: BlockContent
+  seo?: Seo
+}
+
+export type Author = {
+  _id: string
+  _type: 'author'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name: string
+  image?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  bio?: string
+}
+
 export type CtaBanner = {
   _type: 'ctaBanner'
   title: string
@@ -384,12 +460,6 @@ export type Page = {
       } & SharedSectionReference)
   >
   seo?: Seo
-}
-
-export type Slug = {
-  _type: 'slug'
-  current: string
-  source?: string
 }
 
 export type SanityAssistInstructionTask = {
@@ -640,6 +710,12 @@ export type AllSanitySchemaTypes =
   | Settings
   | SanityImageCrop
   | SanityImageHotspot
+  | Category
+  | Slug
+  | AuthorReference
+  | CategoryReference
+  | Post
+  | Author
   | CtaBanner
   | Faq
   | Testimonials
@@ -652,7 +728,6 @@ export type AllSanitySchemaTypes =
   | SharedSection
   | SharedSectionReference
   | Page
-  | Slug
   | SanityAssistInstructionTask
   | SanityAssistTaskStatus
   | SanityAssistSchemaTypeAnnotations
@@ -674,6 +749,217 @@ export type AllSanitySchemaTypes =
   | SanityAssetSourceData
   | SanityImageAsset
   | Geopoint
+
+// Source: src/features/blog/api/queries.ts
+// Variable: POSTS_QUERY
+// Query: {  "posts": *[  _type == "post" && defined(slug.current) &&  (!defined($category) || $category in categories[]->slug.current)] | order(publishedAt desc, _id desc) [$start...$end] {   _id,  title,  "slug": slug.current,  excerpt,  publishedAt,  mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  author->{ name },  categories[]->{ title, "slug": slug.current } },  "total": count(*[  _type == "post" && defined(slug.current) &&  (!defined($category) || $category in categories[]->slug.current)]),  "category": *[_type == "category" && defined(slug.current) && slug.current == $category][0] {    title,    "slug": slug.current  },  "categories": *[    _type == "category" && defined(slug.current) && count(*[_type == "post" && references(^._id)]) > 0  ] | order(title asc) { title, "slug": slug.current }}
+export type POSTS_QUERY_RESULT = {
+  posts: Array<{
+    _id: string
+    title: string
+    slug: string
+    excerpt: string
+    publishedAt: string
+    mainImage: {
+      alt: string | null
+      crop: SanityImageCrop | null
+      hotspot: SanityImageHotspot | null
+      asset: {
+        _id: string
+        metadata: {
+          lqip: string | null
+          dimensions: {
+            width: number
+            height: number
+          } | null
+        } | null
+      } | null
+    }
+    author: {
+      name: string
+    }
+    categories: Array<{
+      title: string
+      slug: string
+    }> | null
+  }>
+  total: number
+  category: {
+    title: string
+    slug: string
+  } | null
+  categories: Array<{
+    title: string
+    slug: string
+  }>
+}
+
+// Source: src/features/blog/api/queries.ts
+// Variable: POST_QUERY
+// Query: *[_type == "post" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    title,    "slug": slug.current,    excerpt,    publishedAt,    mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    author->{ name, bio, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    categories[]->{ title, "slug": slug.current },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    "related": *[      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)    ] | score(      boost(^.categories[0]._ref in categories[]._ref, 1),      boost(^.categories[1]._ref in categories[]._ref, 1),      boost(^.categories[2]._ref in categories[]._ref, 1),      boost(^.categories[3]._ref in categories[]._ref, 1),      boost(^.categories[4]._ref in categories[]._ref, 1)    ) | order(_score desc, publishedAt desc, _id desc) [0...3] {   _id,  title,  "slug": slug.current,  excerpt,  publishedAt,  mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  author->{ name },  categories[]->{ title, "slug": slug.current } }  }
+export type POST_QUERY_RESULT = {
+  _id: string
+  _type: 'post'
+  _updatedAt: string
+  title: string
+  slug: string
+  excerpt: string
+  publishedAt: string
+  mainImage: {
+    alt: string | null
+    crop: SanityImageCrop | null
+    hotspot: SanityImageHotspot | null
+    asset: {
+      _id: string
+      metadata: {
+        lqip: string | null
+        dimensions: {
+          width: number
+          height: number
+        } | null
+      } | null
+    } | null
+  }
+  author: {
+    name: string
+    bio: string | null
+    image: {
+      alt: string | null
+      crop: SanityImageCrop | null
+      hotspot: SanityImageHotspot | null
+      asset: {
+        _id: string
+        metadata: {
+          lqip: string | null
+          dimensions: {
+            width: number
+            height: number
+          } | null
+        } | null
+      } | null
+    } | null
+  }
+  categories: Array<{
+    title: string
+    slug: string
+  }> | null
+  body: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>
+          text?: string
+          _type: 'span'
+          _key: string
+        }>
+        style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+        listItem?: 'bullet' | 'number'
+        markDefs: Array<{
+          _key: string
+          _type: 'link'
+          linkType: 'external' | 'internal'
+          internal?: PageReference
+          url: string | null
+          openInNewTab: boolean | null
+          slug: string | null
+        }> | null
+        level?: number
+        _type: 'block'
+        _key: string
+      }
+    | {
+        asset: {
+          _id: string
+          metadata: {
+            lqip: string | null
+            dimensions: {
+              width: number
+              height: number
+            } | null
+          } | null
+        } | null
+        media?: unknown
+        hotspot: SanityImageHotspot | null
+        crop: SanityImageCrop | null
+        alt: string | null
+        caption: string | null
+        _type: 'image'
+        _key: string
+        markDefs: null
+      }
+  >
+  seo: {
+    metaTitle: string | null
+    metaDescription: string | null
+    noIndex: boolean | null
+    ogImage: {
+      alt: string | null
+      crop: SanityImageCrop | null
+      hotspot: SanityImageHotspot | null
+      asset: {
+        _id: string
+        metadata: {
+          lqip: string | null
+          dimensions: {
+            width: number
+            height: number
+          } | null
+        } | null
+      } | null
+    } | null
+  } | null
+  related: Array<{
+    _id: string
+    title: string
+    slug: string
+    excerpt: string
+    publishedAt: string
+    mainImage: {
+      alt: string | null
+      crop: SanityImageCrop | null
+      hotspot: SanityImageHotspot | null
+      asset: {
+        _id: string
+        metadata: {
+          lqip: string | null
+          dimensions: {
+            width: number
+            height: number
+          } | null
+        } | null
+      } | null
+    }
+    author: {
+      name: string
+    }
+    categories: Array<{
+      title: string
+      slug: string
+    }> | null
+  }>
+} | null
+
+// Source: src/features/blog/api/queries.ts
+// Variable: BLOG_INDEX_QUERY
+// Query: {  "posts": *[_type == "post" && defined(slug.current)] {    "slug": slug.current,    _updatedAt,    "noIndex": seo.noIndex == true  },  "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current }}
+export type BLOG_INDEX_QUERY_RESULT = {
+  posts: Array<{
+    slug: string
+    _updatedAt: string
+    noIndex: boolean | false
+  }>
+  categories: Array<{
+    slug: string
+  }>
+}
+
+// Source: src/features/blog/api/queries.ts
+// Variable: POST_SITEMAP_QUERY
+// Query: *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {    "slug": slug.current,    _updatedAt,    "noIndex": seo.noIndex == true  }
+export type POST_SITEMAP_QUERY_RESULT = Array<{
+  slug: string
+  _updatedAt: string
+  noIndex: boolean | false
+}>
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
@@ -1620,6 +1906,10 @@ export type SEO_PREVIEW_SETTINGS_QUERY_RESULT =
 // Query TypeMap
 declare global {
   interface SanityQueries {
+    '{\n  "posts": *[\n  _type == "post" && defined(slug.current) &&\n  (!defined($category) || $category in categories[]->slug.current)\n] | order(publishedAt desc, _id desc) [$start...$end] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n },\n  "total": count(*[\n  _type == "post" && defined(slug.current) &&\n  (!defined($category) || $category in categories[]->slug.current)\n]),\n  "category": *[_type == "category" && defined(slug.current) && slug.current == $category][0] {\n    title,\n    "slug": slug.current\n  },\n  "categories": *[\n    _type == "category" && defined(slug.current) && count(*[_type == "post" && references(^._id)]) > 0\n  ] | order(title asc) { title, "slug": slug.current }\n}': POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    title,\n    "slug": slug.current,\n    excerpt,\n    publishedAt,\n    mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    author->{ name, bio, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } },\n    categories[]->{ title, "slug": slug.current },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "related": *[\n      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)\n    ] | score(\n      boost(^.categories[0]._ref in categories[]._ref, 1),\n      boost(^.categories[1]._ref in categories[]._ref, 1),\n      boost(^.categories[2]._ref in categories[]._ref, 1),\n      boost(^.categories[3]._ref in categories[]._ref, 1),\n      boost(^.categories[4]._ref in categories[]._ref, 1)\n    ) | order(_score desc, publishedAt desc, _id desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n }\n  }\n': POST_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && defined(slug.current)] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  },\n  "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current }\n}': BLOG_INDEX_QUERY_RESULT
+    '\n  *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': POST_SITEMAP_QUERY_RESULT
     '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    title,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    pageBuilder[] { \n  _key,\n  \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  \n  _type == "hero" => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n  }\n': PAGE_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    title,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  count(*[_type == "page" && defined(slug.current)])\n': PAGE_COUNT_QUERY_RESULT
