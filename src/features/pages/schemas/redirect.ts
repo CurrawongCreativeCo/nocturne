@@ -20,8 +20,9 @@ function documentId(context: ValidationContext) {
 }
 
 /**
- * Old URL -> new URL. Applied only to paths that don't match a page, so a redirect can never
- * hide a live page. Typical use: keeping old links working after replacing a site.
+ * Old URL -> new URL. By default applied only to paths that don't match a page, so a redirect
+ * can't hide a live page; with Edge Config redirects (proxy.ts) it runs first and does.
+ * Typical use: keeping old links working after replacing a site.
  */
 export const redirect = defineType({
   name: 'redirect',
@@ -59,7 +60,7 @@ export const redirect = defineType({
             )
             return pages === 0
               ? true
-              : 'A page already uses this path, so this redirect will never apply'
+              : 'A page already uses this path. Without Edge Config redirects the page wins; with them this redirect hides it'
           })
           .warning(),
       ],

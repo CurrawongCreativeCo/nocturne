@@ -102,10 +102,15 @@ export async function getSitemap(): Promise<MetadataRoute.Sitemap> {
  * reached on a miss, so normal page views never read it.
  */
 export async function getRedirect(path: string) {
+  return findRedirect(await getRedirects(), path)
+}
+
+/** All published redirects: PageView's fallback and the Edge Config sync share this one cache entry. */
+export async function getRedirects() {
   const { data } = await cachedSanityFetch({
     query: REDIRECTS_QUERY,
     ...PUBLISHED,
     tags: [TAGS.redirect],
   })
-  return findRedirect(data, path)
+  return data
 }

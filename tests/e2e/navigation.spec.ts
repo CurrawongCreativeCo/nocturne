@@ -115,4 +115,20 @@ test.describe('HTTP behavior', () => {
     expect(signed.status()).toBe(200)
     expect(await signed.json()).toEqual({ revalidated: true, tag: 'page' })
   })
+
+  test('a redirect webhook only expires the cache when Edge Config sync is not configured', async ({
+    request,
+  }) => {
+    test.setTimeout(30_000)
+    const body = JSON.stringify({ _type: 'redirect', _id: 'redirect-promo' })
+    const response = await request.post('/api/revalidate', {
+      data: body,
+      headers: {
+        'content-type': 'application/json',
+        [SIGNATURE_HEADER_NAME]: await encodeSignatureHeader(body, Date.now(), REVALIDATE_SECRET),
+      },
+    })
+    expect(response.status()).toBe(200)
+    expect(await response.json()).toEqual({ revalidated: true, tag: 'redirect' })
+  })
 })

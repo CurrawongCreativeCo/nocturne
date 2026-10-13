@@ -67,8 +67,9 @@ Open http://localhost:3000/studio:
     run **Write meta description**. It summarizes the page title and sections in one sentence under 155
     characters. Review before publishing.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
-  `/about`. They only apply to paths with no page, so they can't hide a live page. Studio blocks
-  duplicates and loops, and warns about chains and sources a page already uses.
+  `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
+  Normally they only apply to paths with no page, so they can't hide a live page. With Edge Config
+  redirects on (see below) they run first, so a redirect from a path that has a page hides that page.
 - **Pages** is a tree: top-level pages first, then a folder per first slug segment that has
   children (`services/web-design` is listed under `services`). _All pages_ at the bottom is the flat
   list for search and bulk work.
@@ -125,6 +126,10 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default `Content`) |
    | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                |
    | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                               |
+   | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it     |
+   | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id        |
+   | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store  |
+   | `VERCEL_TEAM_ID`                 | optional: Edge Config redirects; only for team-owned stores     |
 
 3. **Allow the production origin in Sanity**, or Studio and live updates won't connect:
    `npx sanity cors add https://example.com --credentials` (or sanity.io/manage → API → CORS
@@ -163,6 +168,7 @@ src/
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
     sitemap.ts
+  proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG)
   features/
     pages/                         CMS pages + page builder
       api/                         queries.ts, sections.ts (GROQ), get-page.ts (page, metadata, sitemap)
@@ -262,6 +268,28 @@ To switch a deployment to webhook mode:
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
 
+### Edge Config redirects
+
+By default a redirect is answered by the page route: the request renders, finds no page and redirects.
+With Vercel Edge Config, `src/proxy.ts` answers it before anything renders, from a map of every Studio
+redirect, with a clean single `Location` header. Without `EDGE_CONFIG` the proxy does nothing and the
+page route handles redirects as before, so projects off Vercel or without a store need no setup.
+
+1. In Vercel → Storage, create an **Edge Config** store and connect it to the project. Vercel adds
+   `EDGE_CONFIG` (a read connection string) to the project's environment variables.
+2. Set `EDGE_CONFIG_ID` to the store's id (`ecfg_…`, in its settings), and `VERCEL_API_TOKEN` to a token
+   from vercel.com/account/tokens that can edit it. Add `VERCEL_TEAM_ID` if a team owns the store.
+3. Set up webhook mode (above). The filter already includes `"redirect"`; the sync is part of
+   `/api/revalidate`. Without a webhook nothing writes the map and the page route handles every redirect.
+4. Publish a redirect (or any one, to seed the map for the first time). The webhook rebuilds the whole map
+   from Studio's redirects and writes it as the `redirects` item, keyed by lowercase path without a
+   trailing slash. Publishing or deleting a redirect updates it; changes usually reach the edge within seconds.
+
+If the write fails the route answers 502 and Sanity retries the webhook; the old map keeps serving
+meanwhile. The proxy skips `/studio`, `/api`, `/_next` and static files (`.html`, `.php` and other page-like
+extensions still match). If Edge Config can't be read, it passes the request through to the page route.
+Keep the map within your plan's Edge Config size limit; with thousands of redirects, check it.
+
 Results are tagged by document type (`TAGS` in `lib/sanity/live.ts`). When you add a document type
 that pages query, add it to `TAGS`, to the `tags` of every fetch that reads it, and to the webhook filter.
 
@@ -300,7 +328,7 @@ each release before proposing it.
 
 ### Tests
 
-- **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching, the live-update
+- **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
   dedupe logic, the section generator's naming, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
@@ -396,11 +424,11 @@ by hand, follow the same steps and register it in `schemas/sections/index.ts`, `
   inside the Sanity CLI and ESLint, at build time, on this project's own files. Patched versions of
   the other affected packages are pinned with `overrides` in `package.json`; remove an override once
   the package that pulls it in ships the fix itself.
-- Redirects from Studio send the `Location` header twice, with identical values. That's a known
-  Next.js bug with redirects from cached pages ([vercel/next.js#82117](https://github.com/vercel/next.js/issues/82117)).
-  Browsers handle it fine, and the end-to-end tests check that Chrome lands on the destination and
-  that the two values never differ. Moving redirects to `next.config.ts` would avoid it but would need
-  a redeploy for every redirect editors add, so it's left as is until Next.js fixes it.
+- Without Edge Config redirects, redirects from Studio send the `Location` header twice, with identical
+  values (a known Next.js bug with redirects from cached pages,
+  [vercel/next.js#82117](https://github.com/vercel/next.js/issues/82117)). Browsers handle it fine, and the
+  end-to-end tests check that Chrome lands on the destination and that the two values never differ.
+  Edge Config redirects don't have the problem.
 - 404s for unknown URLs are rendered on demand, so Next.js streams their metadata to browsers (the tab
   title is set by script) and sends crawlers a minimal shell. Both get a 404 status and `noindex`,
   which is what search engines act on; the end-to-end tests check exactly that.

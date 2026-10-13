@@ -11,7 +11,8 @@ import { pageBuilderFragment } from './sections'
  * Kept deliberately few: each distinct query is a separate cache entry and a
  * separate CDN request whenever its content changes. The page and its metadata
  * share PAGE_QUERY; static params and the sitemap share PAGE_INDEX_QUERY; REDIRECTS_QUERY
- * is only read for URLs that match no page.
+ * is only read for URLs that match no page, and when a redirect is published to rebuild the
+ * Edge Config map.
  */
 
 export const PAGE_QUERY = defineQuery(/* groq */ `
