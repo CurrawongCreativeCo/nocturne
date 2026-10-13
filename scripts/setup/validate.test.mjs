@@ -41,6 +41,22 @@ describe('normalize', () => {
     expect(normalize({ projectName: '<script>' }, create).errors.projectName).toBeDefined()
   })
 
+  it('defaults the Studio title to the site name, unless one is given', () => {
+    const create = { tokenMode: 'create', projectMode: 'create' }
+    expect(normalize({ projectName: 'Acme Site' }, create).values.studioTitle).toBe('Acme Site')
+    expect(
+      normalize({ projectName: 'Acme Site', studioTitle: ' Acme CMS ' }, create).values.studioTitle,
+    ).toBe('Acme CMS')
+    expect(normalize(valid, existing).values.studioTitle).toBe('')
+  })
+
+  it('rejects a Studio title that is too long or has line breaks', () => {
+    expect(
+      normalize({ ...valid, studioTitle: 'x'.repeat(81) }, existing).errors.studioTitle,
+    ).toBeDefined()
+    expect(normalize({ ...valid, studioTitle: 'a\nb' }, existing).errors.studioTitle).toBeDefined()
+  })
+
   it('only requires a token when pasting one', () => {
     expect(
       normalize({ projectId: 'abc123de' }, { tokenMode: 'create', projectMode: 'existing' }).errors,
@@ -55,6 +71,7 @@ describe('.env helpers', () => {
     dataset: 'production',
     apiVersion: '2026-10-01',
     siteUrl: 'http://localhost:3000',
+    studioTitle: 'Acme CMS',
     token: 'skSECRET',
   }
 
@@ -67,6 +84,7 @@ describe('.env helpers', () => {
     expect(text.startsWith('# Written by the setup wizard')).toBe(true)
     expect(parseEnv(text)).toMatchObject({
       NEXT_PUBLIC_SANITY_PROJECT_ID: 'abc123de',
+      NEXT_PUBLIC_STUDIO_TITLE: 'Acme CMS',
       SANITY_API_READ_TOKEN: 'skSECRET',
     })
   })

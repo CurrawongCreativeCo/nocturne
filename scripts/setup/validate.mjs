@@ -6,6 +6,7 @@
 export const DEV_PORT = Number(process.env.PORT) || 3000
 export const DEFAULTS = {
   projectName: 'My Site',
+  studioTitle: '',
   projectId: '',
   dataset: 'production',
   apiVersion: '2026-10-01',
@@ -17,13 +18,17 @@ export const ENV_KEYS = {
   dataset: 'NEXT_PUBLIC_SANITY_DATASET',
   apiVersion: 'NEXT_PUBLIC_SANITY_API_VERSION',
   siteUrl: 'NEXT_PUBLIC_SITE_URL',
+  studioTitle: 'NEXT_PUBLIC_STUDIO_TITLE',
   token: 'SANITY_API_READ_TOKEN',
 }
 
 export function normalize(input, { tokenMode, projectMode }) {
   const str = (key) => String(input[key] ?? '').trim()
+  const projectName = str('projectName')
   const values = {
-    projectName: str('projectName'),
+    projectName,
+    // Left blank, the Studio title follows the site name; with neither, the app falls back to "Content".
+    studioTitle: str('studioTitle') || projectName,
     projectId: str('projectId').toLowerCase(),
     dataset: str('dataset') || DEFAULTS.dataset,
     apiVersion: str('apiVersion') || DEFAULTS.apiVersion,
@@ -38,6 +43,9 @@ export function normalize(input, { tokenMode, projectMode }) {
   } else if (!values.projectId) errors.projectId = 'Enter your project ID.'
   else if (!/^[a-z0-9][a-z0-9-]{1,63}$/.test(values.projectId))
     errors.projectId = 'Project IDs are lowercase letters, numbers and dashes, e.g. "a1b2c3d4".'
+
+  if (values.studioTitle.length > 80 || /\p{Cc}/u.test(values.studioTitle))
+    errors.studioTitle = 'Use up to 80 characters, with no line breaks.'
 
   if (!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(values.dataset))
     errors.dataset = 'Dataset names are lowercase letters, numbers, "_" and "-".'

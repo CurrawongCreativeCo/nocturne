@@ -13,12 +13,13 @@ import { defineConfig } from 'sanity'
 import { presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
-import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
+import { apiVersion, dataset, projectId, studioTitle, studioUrl } from './src/config/env'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { pageTemplates } from './src/features/pages/schemas/templates'
 import { siteSchemaTypes } from './src/features/site/schemas'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
+import { StudioLogo } from './src/features/studio/components/studio-logo'
 import { contentHealth } from './src/features/studio/content-health/plugin'
 import { resolve } from './src/features/studio/presentation'
 import {
@@ -31,8 +32,10 @@ import { sharedSchemaTypes } from './src/lib/sanity/schema'
 
 export default defineConfig({
   basePath: studioUrl,
+  title: studioTitle,
   projectId,
   dataset,
+  studio: { components: { logo: StudioLogo } },
   schema: {
     types: [...pageSchemaTypes, ...siteSchemaTypes, ...sharedSchemaTypes],
     templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],

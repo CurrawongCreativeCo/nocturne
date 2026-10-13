@@ -385,6 +385,20 @@
         <details id="advanced">
           <summary>Advanced</summary>
           <div class="field">
+            <label for="studioTitle">Studio title</label>
+            <input
+              type="text"
+              id="studioTitle"
+              name="studioTitle"
+              autocomplete="off"
+              aria-describedby="studioTitle-help studioTitle-error"
+            />
+            <p class="help" id="studioTitle-help">
+              Shown in the Studio header and browser tab. Follows the site name until you change it.
+            </p>
+            <p class="error" id="studioTitle-error"></p>
+          </div>
+          <div class="field">
             <label for="siteUrl">Site URL</label>
             <input
               type="url"
@@ -425,8 +439,18 @@
 
     <script>
       const form = document.getElementById('form')
-      const fields = ['projectName', 'projectId', 'dataset', 'token', 'siteUrl', 'apiVersion']
+      const fields = [
+        'projectName',
+        'studioTitle',
+        'projectId',
+        'dataset',
+        'token',
+        'siteUrl',
+        'apiVersion',
+      ]
       let devPort = 3000
+      // The Studio title mirrors the site name until the user types in it (or .env.local set one).
+      let studioTitleEdited = false
 
       const tokenMode = () => form.tokenMode.value
       const projectMode = () => form.projectMode.value
@@ -450,13 +474,20 @@
           site && site !== local ? `${local} and ${site}` : local
       }
 
+      function syncStudioTitle() {
+        if (!studioTitleEdited) form.studioTitle.value = form.projectName.value
+      }
+
       function showErrors(errors = {}, message = '') {
         const hiddenErrors = []
         for (const name of fields) {
           const el = document.getElementById(`${name}-error`)
           // Errors for fields that aren't visible (e.g. Project ID while creating) go in the banner.
           const visible =
-            form[name].offsetParent !== null || name === 'siteUrl' || name === 'apiVersion'
+            form[name].offsetParent !== null ||
+            name === 'studioTitle' ||
+            name === 'siteUrl' ||
+            name === 'apiVersion'
           if (errors[name] && !visible && name !== 'token') hiddenErrors.push(errors[name])
           if (el) el.textContent = errors[name] ?? ''
           form[name].setAttribute('aria-invalid', errors[name] ? 'true' : 'false')
@@ -464,7 +495,8 @@
         document.getElementById('banner').textContent = [message, ...hiddenErrors]
           .filter(Boolean)
           .join(' ')
-        if (errors.siteUrl || errors.apiVersion) document.getElementById('advanced').open = true
+        if (errors.studioTitle || errors.siteUrl || errors.apiVersion)
+          document.getElementById('advanced').open = true
         const first = fields.find((name) => errors[name])
         if (first && form[first].offsetParent !== null) form[first].focus()
       }
@@ -473,6 +505,8 @@
         const state = await fetch('/api/state').then((r) => r.json())
         devPort = state.devPort
         for (const name of fields) form[name].value = state.values[name] ?? ''
+        studioTitleEdited = Boolean(state.values.studioTitle)
+        syncStudioTitle()
         if (state.values.projectId) form.projectMode.value = 'existing'
         if (state.values.token) form.tokenMode.value = 'paste'
         syncModes()
@@ -491,7 +525,11 @@
       form.addEventListener('change', (e) => {
         if (e.target.name === 'tokenMode' || e.target.name === 'projectMode') syncModes()
       })
-      form.addEventListener('input', syncLinks)
+      form.addEventListener('input', (e) => {
+        if (e.target.name === 'studioTitle') studioTitleEdited = true
+        syncStudioTitle()
+        syncLinks()
+      })
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault()

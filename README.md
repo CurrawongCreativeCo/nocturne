@@ -101,7 +101,10 @@ reference it without it (they skip the gap rather than error).
 
 Releases and scheduled publishing need a paid Sanity plan (Growth or higher); on Free they aren't available, so editors publish documents individually. Check your project's plan for its release limits.
 
-**Branding:** the brand color is `--color-brand` in `src/styles/globals.css`; the font is set
+**Branding:** the brand color is `--color-brand` in `src/styles/globals.css`, repeated as `brandColor`
+in `src/config/brand.ts` for the Studio (a unit test fails if the two drift apart). The Studio's name comes from
+`NEXT_PUBLIC_STUDIO_TITLE` (the setup wizard fills it in from the site name) and appears in its header beside a
+small mark in the brand color. The font is set
 with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
 the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project.
 
@@ -111,15 +114,16 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
 2. **Environment variables** (Production and Preview):
 
-   | Variable                         | Value                                                       |
-   | -------------------------------- | ----------------------------------------------------------- |
-   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                           |
-   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                           |
-   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                           |
-   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)  |
-   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`) |
-   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                            |
-   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                           |
+   | Variable                         | Value                                                           |
+   | -------------------------------- | --------------------------------------------------------------- |
+   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                               |
+   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                               |
+   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                               |
+   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)      |
+   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)     |
+   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default `Content`) |
+   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                |
+   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                               |
 
 3. **Allow the production origin in Sanity**, or Studio and live updates won't connect:
    `npx sanity cors add https://example.com --credentials` (or sanity.io/manage → API → CORS
