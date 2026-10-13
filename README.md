@@ -184,6 +184,7 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                                     |
    | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                                           |
    | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`                                  |
+   | `SENTRY_DSN`                     | optional: turns on Sentry error tracking (see Error tracking, below)                |
    | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                  |
    | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                         |
    | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                        |
@@ -203,8 +204,8 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
 Without `NEXT_PUBLIC_SITE_URL`, Vercel deployments fall back to the project's production domain; any
 other production server refuses to start rather than publish canonical URLs pointing at localhost.
 Server errors are logged as one JSON line each (`src/instrumentation.ts`): search Vercel's Logs for
-`request-error`, or the "Reference" code shown on the error page. Forward them to Sentry from there
-if you use it.
+`request-error`, or the "Reference" code shown on the error page. To also send them to Sentry, see
+[Error tracking](#error-tracking).
 
 Every deploy runs `npm run build`, which regenerates Sanity types from the schema first.
 
@@ -489,6 +490,41 @@ How a send works (`src/features/forms/api/submit-form.ts`, a server action that 
 - The write token lives in `lib/sanity/write-client.ts` (`server-only`). Don't use it anywhere else; anything that can write should be a webhook or action like this one.
 - `STRIPE_API_HOST` points the REST calls at a fake Stripe in the end-to-end tests. It is ignored when `VERCEL_ENV` is `production`.
 - Taxes, coupons, trials, customer portal and fulfilment after payment (reacting to `checkout.session.completed`) are not included; add them in `api/checkout.ts` and a new case in `handle-webhook.ts`.
+
+### Error tracking
+
+Optional [Sentry](https://sentry.io) integration (`@sentry/nextjs`). It does nothing, and adds nothing to
+the browser's JavaScript, until `SENTRY_DSN` is set.
+
+| Variable                       | Purpose                                                                       |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| `SENTRY_DSN`                   | the project's DSN; turns on tracking for the server and the browser           |
+| `SENTRY_TRACES_SAMPLE_RATE`    | optional: share of requests traced, 0 to 1 (default `0.1`)                    |
+| `SENTRY_AUTH_TOKEN`            | optional: uploads source maps during `next build`; set it as a CI/host secret |
+| `SENTRY_ORG`, `SENTRY_PROJECT` | needed with the auth token: your organization and project slugs               |
+
+1. Create a Sentry project (platform: Next.js) and copy its DSN into `SENTRY_DSN` where the site builds
+   and runs (Vercel: Project Settings → Environment Variables). The DSN is public by design, since it
+   can only send events; `next.config.ts` copies it to `NEXT_PUBLIC_SENTRY_DSN` for the browser, so you
+   set one variable. It is read at **build** time, so redeploy after changing it.
+2. For readable stack traces, create an auth token (Sentry → Settings → Auth Tokens, scope
+   `project:releases` and `org:read`) and set `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` in the
+   build environment. With the token set, the build wraps the config in `withSentryConfig`, uploads the
+   source maps and deletes them from the output. Without it the build is unchanged.
+
+What is reported:
+
+- **Server:** every error `onRequestError` receives (`src/instrumentation.ts`), in addition to the JSON log line.
+- **Browser:** errors caught by `src/app/(site)/error.tsx` and `src/app/global-error.tsx`, plus uncaught
+  errors and traces (`src/instrumentation-client.ts`).
+- **Digest:** each event has a `digest` tag, the same code shown as "Reference" on the error page. Search
+  `digest:<code>` in Sentry to find the failure a visitor reports.
+
+The SDK is loaded with a dynamic `import()` behind the build-time `SENTRY_DSN` check. Unset, the code is
+removed from the build; set, it arrives as a separate chunk after the page loads, so it does not count toward the
+home page's JavaScript budget measured by the end-to-end suite. No session replay or user data is collected,
+and Sentry's cookies are not used, so tracking doesn't go through the consent banner. Add `Sentry.replayIntegration()`
+or `Sentry.setUser()` only after checking that against your privacy policy.
 
 ### Analytics and cookie consent
 

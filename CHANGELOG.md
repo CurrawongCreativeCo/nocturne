@@ -20,6 +20,14 @@ you start a release.
 
 ### Added
 
+- Optional Sentry error tracking (`@sentry/nextjs`, `src/lib/sentry`). With `SENTRY_DSN` set, server errors
+  from `onRequestError` (the JSON log line stays) and browser errors from `error.tsx` and `global-error.tsx`
+  are sent to Sentry with the error digest as a `digest` tag; `global-error.tsx` now also shows the
+  "Reference" code. The SDK is loaded lazily and removed from the build when the DSN is unset.
+  `SENTRY_AUTH_TOKEN` (with `SENTRY_ORG`, `SENTRY_PROJECT`) uploads source maps at build time. New
+  variables: `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`.
+  See the README's _Error tracking_.
+
 - Newsletter signup section (`newsletterSignup`, with `src/features/forms`). Heading, text, button label and
   success message; the form reuses the contact form UI, Turnstile, validation and rate limiting with its own
   server action (`subscribeNewsletter`). The provider is chosen by `NEWSLETTER_PROVIDER` (`resend`, `loops`

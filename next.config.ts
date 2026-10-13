@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs/config'
 import type { NextConfig } from 'next'
 import { sanity } from 'next-sanity/live/cache-life'
 
@@ -27,6 +28,12 @@ const siteFrameHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+
+  // One SENTRY_DSN configures the server and the browser (see src/lib/sentry/config.ts).
+  env: {
+    NEXT_PUBLIC_SENTRY_DSN: process.env.SENTRY_DSN ?? '',
+    NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: process.env.SENTRY_TRACES_SAMPLE_RATE ?? '',
+  },
   headers: () =>
     Promise.resolve([
       { source: '/:path*', headers: securityHeaders },
@@ -67,4 +74,19 @@ const nextConfig: NextConfig = {
   logging: { fetches: { fullUrl: true } },
 }
 
-export default nextConfig
+/**
+ * Source maps go to Sentry only when SENTRY_AUTH_TOKEN is set (a CI secret), so local builds and
+ * the end-to-end suite build exactly what they did before Sentry. The maps are deleted from the
+ * build output after upload so they aren't served.
+ */
+export default process.env.SENTRY_AUTH_TOKEN
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      silent: !process.env.CI,
+      telemetry: false,
+      widenClientFileUpload: true,
+      sourcemaps: { deleteSourcemapsAfterUpload: true },
+    })
+  : nextConfig

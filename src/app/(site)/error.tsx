@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect } from 'react'
 
+import { reportClientError } from '@/lib/sentry/client'
+
 /**
  * Shown when a page fails to render (e.g. Sanity is unreachable). The site layout,
  * including the header and footer, stays in place around it.
@@ -16,6 +18,7 @@ export default function PageError({
 }) {
   useEffect(() => {
     console.error(error)
+    reportClientError(error)
   }, [error])
 
   return (

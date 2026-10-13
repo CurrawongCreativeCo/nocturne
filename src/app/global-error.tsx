@@ -5,6 +5,7 @@ import '@/styles/globals.css'
 import { useEffect } from 'react'
 
 import { siteLanguage } from '@/config/env'
+import { reportClientError } from '@/lib/sentry/client'
 
 /**
  * Last-resort boundary for errors in the root or site layout (e.g. site settings failed to
@@ -19,6 +20,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error(error)
+    reportClientError(error)
   }, [error])
 
   return (
@@ -29,6 +31,7 @@ export default function GlobalError({
           <p className="mt-4 text-gray-600">
             The site couldn&apos;t be loaded. Please try again in a moment.
           </p>
+          {error.digest && <p className="mt-2 text-sm text-gray-500">Reference: {error.digest}</p>}
           <button
             type="button"
             onClick={reset}
