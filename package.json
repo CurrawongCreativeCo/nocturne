@@ -25,6 +25,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@sanity/assist": "^6.2.4",
     "@sanity/icons": "^5.2.3",
     "@sanity/image-url": "^2.1.1",
     "@sanity/ui": "^4.4.4",

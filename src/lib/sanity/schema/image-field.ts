@@ -1,4 +1,24 @@
-import { defineField, type ImageDefinition } from 'sanity'
+import { defineField, type ImageDefinition, type ImageOptions } from 'sanity'
+
+import { getAutoAltText } from './auto-alt-text'
+
+/**
+ * Options shared by every image: hotspot, plus Sanity AI Assist writing the alt text from the
+ * picture. Manual by default: an editor picks "Generate image description" on the alt field. The
+ * "AI settings" Studio tool can switch on automatic runs on upload (each run spends AI credits); the
+ * getter is read live by the plugin. Inert where AI Assist isn't available (see README).
+ */
+export const imageOptions = {
+  hotspot: true,
+  aiAssist: {
+    imageDescriptionField: {
+      path: 'alt',
+      get updateOnImageChange() {
+        return getAutoAltText()
+      },
+    },
+  },
+} satisfies ImageOptions
 
 /**
  * Alt text field for any image. With `required`, publishing is blocked while an image is set
@@ -32,7 +52,7 @@ export function imageField(
   const { requireAlt = true, fields = [], ...rest } = overrides
   return defineField({
     type: 'image',
-    options: { hotspot: true },
+    options: imageOptions,
     ...rest,
     fields: [altField({ required: requireAlt }), ...fields],
   })

@@ -7,6 +7,7 @@
  * Like `src/app`, this is a composition root: it may import from any feature,
  * which is how each feature's schema types get registered.
  */
+import { assist } from '@sanity/assist'
 import { visionTool } from '@sanity/vision'
 import { defineConfig } from 'sanity'
 import { presentationTool } from 'sanity/presentation'
@@ -16,6 +17,8 @@ import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { pageTemplates } from './src/features/pages/schemas/templates'
 import { siteSchemaTypes } from './src/features/site/schemas'
+import { aiSettings } from './src/features/studio/ai-settings/plugin'
+import { assistPresets } from './src/features/studio/assist-presets'
 import { contentHealth } from './src/features/studio/content-health/plugin'
 import { resolve } from './src/features/studio/presentation'
 import {
@@ -46,5 +49,7 @@ export default defineConfig({
     }),
     visionTool({ defaultApiVersion: apiVersion }),
     contentHealth(),
+    aiSettings(),
+    assist({ __presets: assistPresets }),
   ],
 })

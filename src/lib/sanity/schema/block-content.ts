@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
-import { altField } from './image-field'
+import { altField, imageOptions } from './image-field'
 
 /**
  * Rich text. Use as `type: 'blockContent'` and query with `portableTextFields`
@@ -35,7 +35,7 @@ export const blockContent = defineType({
     }),
     defineArrayMember({
       type: 'image',
-      options: { hotspot: true },
+      options: imageOptions,
       fields: [altField({ required: true }), defineField({ name: 'caption', type: 'string' })],
     }),
   ],

@@ -53,6 +53,18 @@ Open http://localhost:3000/studio:
 - **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
+- **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
+  or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
+  assist actions just aren't usable, and everything is written by hand. To use it:
+  - _Alt text:_ nothing runs on upload, so no AI credits are spent unless someone asks. With an image
+    set, open the sparkle (AI Assist) menu on "Alternative text" and run **Generate image description**.
+    It always writes in English. Always review it.
+    To have it run on every upload instead, open **AI settings** in the Studio toolbar and switch on
+    _Write alt text automatically_. It's off by default, each run spends credits, and the choice is
+    saved per browser, so each editor decides for themselves (reload open Studio tabs to apply it).
+  - _Meta description:_ in a page's SEO group, open the sparkle (AI Assist) menu on "Meta description" and
+    run **Write meta description**. It summarizes the page title and sections in one sentence under 155
+    characters. Review before publishing.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. They only apply to paths with no page, so they can't hide a live page. Studio blocks
   duplicates and loops, and warns about chains and sources a page already uses.
@@ -146,7 +158,8 @@ src/
       types/                       PageSection, SectionOf<'hero'>, SectionProps
     site/                          Site settings singleton: header, footer, default metadata
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
-    studio/                        desk structure, singletons, Presentation resolvers, content-health tool
+    studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
+                                   AI settings tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text
   config/                          env.ts (validated), paths.ts (slug <-> URL)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
