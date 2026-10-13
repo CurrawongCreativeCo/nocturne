@@ -20,6 +20,18 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+None.
+
+## [1.1.0] - 2026-10-14
+
+### Added
+
 - Content migrations and schema deploy from CI. `migrations/` holds an example `defineMigration` (a field rename,
   with a unit test) and a README on when a schema change needs a migration, how to dry-run and how to run one.
   `.github/workflows/sanity.yml` dry-runs every migration against the production dataset on pull requests that touch
@@ -107,16 +119,21 @@ you start a release.
   variant layout can reuse it. `src/proxy.ts` now also assigns A/B options; `cachedSanityFetch` sends
   fetches that name a variant through a client on Sanity's experimental API version.
 
-### Fixed
-
 ### Breaking changes / migration steps
 
-None required. Run `npm install` (adds `flags`, `@vercel/analytics` and `next-auth`) and `npm run typegen`. Add `'auth'` to the `features` list in `eslint.config.mjs`. If you had a page with the slug `sign-in` or `sign-out`, rename it. Members-only content stays off until you set `AUTH_SECRET` and a provider and mark something as members-only; if you call `PageView` or `getPage` from your own routes, pass `renderMembersGate` and `members: false`. Add `'consent'` to the `features` list in `eslint.config.mjs`. Analytics stay off until you set a provider variable. A/B tests stay off until you set
-`FLAGS_SECRET` and start a test. In webhook mode, add `"experiment"` to the webhook's filter. If you
-had a page with the slug `ab`, rename it: that path now belongs to the variant routes. If you
-customized `src/proxy.ts` or `src/app/(site)/layout.tsx`, expect conflicts there. If you had a page with the
-slug `section-gallery`, rename it. Visual tests need Linux baselines: run `npm run test:e2e:update` (Linux or
-Docker) and commit `tests/e2e/visual.spec.ts-snapshots/`; keep your own `gallerySections` entries in the fixtures.
+None required for the site to keep working; steps for what you use:
+
+- Run `npm install` (adds `flags`, `@vercel/analytics`, `next-auth` and `@sentry/nextjs`), then `npm run typegen`.
+- Add `'auth'` and `'consent'` to the `features` list in `eslint.config.mjs`.
+- Rename any page whose slug is now reserved: `sign-in`, `sign-out`, `ab`, `search` or `section-gallery`.
+- If you call `PageView` or `getPage` from your own routes, pass `renderMembersGate` and `members: false`.
+- In webhook mode, add `"experiment"` and `"stripePrice"` to the webhook's filter.
+- If you customized `src/proxy.ts` or `src/app/(site)/layout.tsx`, expect conflicts there.
+- Visual tests need Linux baselines: run `npm run test:e2e:update` (Linux or Docker) and commit
+  `tests/e2e/visual.spec.ts-snapshots/`. Keep your own `gallerySections` entries in the fixtures.
+- Nothing new is switched on until configured: members-only content needs `AUTH_SECRET` and a provider,
+  analytics needs a provider variable, A/B tests need `FLAGS_SECRET` and a running test, Sentry needs
+  `SENTRY_DSN`, and migrations/schema deploy in CI need their secrets.
 
 ## [1.0.0] - 2026-10-13
 
@@ -157,5 +174,6 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/CurrawongCreativeCo/sanity-starter/releases/tag/v1.0.0

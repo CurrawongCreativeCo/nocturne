@@ -971,7 +971,7 @@ git switch -c update-template-v1.2.0          # do the update on a branch
 git merge v1.2.0                              # first time only, see below: add --allow-unrelated-histories
 # resolve conflicts (next section), then:
 npm install                                   # dependencies usually change
-npm run typegen                               # regenerates src/types/sanity.types.ts
+npm run typegen                               # regenerates src/types/sanity.types.ts (needs .env.local and Node from .nvmrc)
 npx next typegen                              # route types (PageProps); `npm run dev` or `build` also make them
 npm run check
 npm run test:e2e
