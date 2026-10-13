@@ -182,9 +182,32 @@ test.describe('structured data', () => {
     await expect(nav.locator('[aria-current="page"]')).toHaveText('Web design')
   })
 
+  test('an FAQ with no questions adds no FAQPage JSON-LD', async ({ page }) => {
+    await page.goto('/resilience')
+    expect((await jsonLd(page)).some((data) => data['@type'] === 'FAQPage')).toBe(false)
+  })
+
   test('top-level pages have no breadcrumbs', async ({ page }) => {
     await page.goto('/about')
     await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toHaveCount(0)
     expect((await jsonLd(page)).some((data) => data['@type'] === 'BreadcrumbList')).toBe(false)
+  })
+})
+
+test.describe('sections missing data', () => {
+  test('render empty instead of failing the page', async ({ page }) => {
+    const response = await page.goto('/resilience')
+    expect(response?.status()).toBe(200)
+
+    await expect(page.getByText('Resilience lead.')).toBeVisible()
+    await expect(page.getByText('Resilience closing.')).toBeVisible()
+    for (const heading of [
+      'Features with no items',
+      'Testimonials with no items',
+      'FAQ with no items',
+      'Logos with no logos',
+    ]) {
+      await expect(page.getByText(heading)).toBeVisible()
+    }
   })
 })

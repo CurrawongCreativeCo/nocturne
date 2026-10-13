@@ -41,6 +41,26 @@ test.describe('content releases', () => {
     expect(results.violations).toEqual([])
   })
 
+  test('a section that throws is replaced by a notice; the rest of the page renders', async ({
+    context,
+    page,
+  }) => {
+    await context.addCookies([
+      {
+        name: 'sanity-preview-perspective',
+        value: RELEASE_ID,
+        url: `http://localhost:${APP_PORT}`,
+      },
+    ])
+    await page.goto('/resilience')
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'The pricingTable section failed to render.' }),
+    ).toBeVisible()
+    await expect(page.getByText('Pricing that throws')).toHaveCount(0)
+    await expect(page.getByText('Resilience lead.')).toBeVisible()
+    await expect(page.getByText('Resilience closing.')).toBeVisible()
+  })
+
   test('without a release perspective the page shows the base content', async ({ page }) => {
     await page.goto('/about')
     await expect(page.locator('h1')).toHaveText('About')

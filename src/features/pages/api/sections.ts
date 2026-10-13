@@ -11,6 +11,10 @@ import {
  * and component. Each is a conditional projection (`_type == "x" => {...}`);
  * TypeGen turns the set into a discriminated union on `_type`.
  *
+ * Arrays a component maps over are wrapped in `coalesce(…, [])`. TypeGen's required-field typing
+ * says they're always present, but drafts aren't validated (a section an editor just added has no
+ * items yet) and older content may predate a rule, so the query makes the types true.
+ *
  * Members-only sections (`access == "members"`) project only their `_key`, `_type` and `access`
  * unless the query's `$members` parameter is true, so the cached public result never holds their
  * content. Only code that has already checked the visitor's session passes `$members: true`.
@@ -47,38 +51,38 @@ export const featuresGridFragment = /* groq */ `
   _type == "featuresGrid" && (access != "members" || $members) => {
     title,
     intro,
-    columns,
-    items[] {
+    "columns": coalesce(columns, 3),
+    "items": coalesce(items[] {
       _key,
       title,
       text,
       icon { ${imageFields} }
-    }
+    }, [])
   }
 `
 
 export const logoCloudFragment = /* groq */ `
   _type == "logoCloud" && (access != "members" || $members) => {
     title,
-    logos[] {
+    "logos": coalesce(logos[] {
       _key,
       name,
       url,
       image { ${imageFields} }
-    }
+    }, [])
   }
 `
 
 export const testimonialsFragment = /* groq */ `
   _type == "testimonials" && (access != "members" || $members) => {
     title,
-    items[] {
+    "items": coalesce(items[] {
       _key,
       quote,
       name,
       role,
       avatar { ${imageFields} }
-    }
+    }, [])
   }
 `
 
@@ -86,11 +90,11 @@ export const faqFragment = /* groq */ `
   _type == "faq" && (access != "members" || $members) => {
     title,
     intro,
-    items[] {
+    "items": coalesce(items[] {
       _key,
       question,
       answer[] { ${portableTextFields} }
-    }
+    }, [])
   }
 `
 
@@ -116,14 +120,14 @@ export const pricingTableFragment = /* groq */ `
     title,
     intro,
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
-    plans[defined(price->priceId) && price->active == true] {
+    "plans": coalesce(plans[defined(price->priceId) && price->active == true] {
       _key,
       name,
       features,
       highlighted,
       ctaLabel,
       price-> { ${stripePriceFields} }
-    }
+    }, [])
   }
 `
 

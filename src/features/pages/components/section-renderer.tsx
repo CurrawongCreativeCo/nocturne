@@ -4,6 +4,7 @@ import { isMembersOnly } from '@/lib/sanity/access'
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
 import type { PageSection, SectionGate, SectionProps, SectionType } from '../types'
+import { SectionBoundary } from './section-boundary'
 import { CtaBanner } from './sections/cta-banner'
 import { Faq } from './sections/faq'
 import { FeaturesGrid } from './sections/features-grid'
@@ -105,7 +106,7 @@ export function SectionRenderer({
 
         // A locked section is a stub. Its content is fetched only once the gate has seen a session,
         // inside <Suspense> because the gate reads the visitor's cookies.
-        const content =
+        const inner =
           gate && isMembersOnly(section.access) ? (
             <Suspense fallback={null}>
               {gate.render({
@@ -136,6 +137,15 @@ export function SectionRenderer({
               renderNewsletter={renderNewsletter}
             />
           )
+
+        // In draft mode a section that throws (an unfinished draft, a bug) is replaced by a notice
+        // instead of failing the whole preview. Published pages don't ship the boundary: there a
+        // throwing section fails the build's prerender, so it never reaches visitors.
+        const content = editable ? (
+          <SectionBoundary type={section._type}>{inner}</SectionBoundary>
+        ) : (
+          inner
+        )
 
         // A shared section's overlay opens the shared document, since that is what an edit changes.
         return editable ? (

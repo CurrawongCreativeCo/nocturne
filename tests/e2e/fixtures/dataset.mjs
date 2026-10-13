@@ -74,6 +74,17 @@ const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
 
+/** /resilience (tests/e2e/pages.spec.ts): sections with their required arrays missing. */
+const resilienceText = (text) => ({ _key: key(), _type: 'richText', body: [block([text])] })
+const resilienceSections = [
+  resilienceText('Resilience lead.'),
+  { _key: key(), _type: 'featuresGrid', title: 'Features with no items' },
+  { _key: key(), _type: 'testimonials', title: 'Testimonials with no items' },
+  { _key: key(), _type: 'faq', title: 'FAQ with no items' },
+  { _key: key(), _type: 'logoCloud', title: 'Logos with no logos' },
+  resilienceText('Resilience closing.'),
+]
+
 // The blog: 14 posts, so the index paginates (12 + 2). The first four have categories, set up so
 // "Welcome to the blog" has three related posts whose score order differs from their date order:
 // the roundup shares two categories but is oldest of the three.
@@ -357,6 +368,17 @@ export const documents = [
       { _key: key(), _type: 'richText', body: [block(['Public text under the hero.'])] },
     ],
   },
+  // Not a currency code, so formatting it throws (the release version of /resilience uses it).
+  stripePrice('price_Broken1', 'Broken', 900, 'not-a-currency', 'month'),
+  {
+    // Sections missing the arrays they require, as an unvalidated draft or content older than a
+    // rule has them: each renders empty and the sections around them still render.
+    _id: 'page-resilience',
+    _type: 'page',
+    title: 'Resilience',
+    slug: { _type: 'slug', current: 'resilience' },
+    pageBuilder: resilienceSections,
+  },
   stripePrice('price_Starter1', 'Starter', 900, 'usd', 'month'),
   stripePrice('price_Pro1', 'Pro', 2900, 'usd', 'month'),
   // A name that editors override on the plan, a non-dollar currency and a yearly interval.
@@ -590,6 +612,25 @@ export const releaseVersions = [
         _type: 'richText',
         body: [block(['Only in the Summer release.'], { style: 'h2' })],
       },
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // A section that throws while rendering. Only in a release, so it renders at request time in
+    // draft mode: a published page that throws fails the build's prerender instead.
+    _id: `versions.${RELEASE_ID}.page-resilience`,
+    _type: 'page',
+    title: 'Resilience',
+    slug: { _type: 'slug', current: 'resilience' },
+    pageBuilder: [
+      ...resilienceSections.slice(0, -1),
+      {
+        _key: key(),
+        _type: 'pricingTable',
+        title: 'Pricing that throws',
+        plans: [plan('price_Broken1')],
+      },
+      ...resilienceSections.slice(-1),
     ],
     _updatedAt: UPDATED,
   },

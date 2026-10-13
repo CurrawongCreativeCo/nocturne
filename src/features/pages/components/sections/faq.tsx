@@ -11,20 +11,23 @@ export function Faq({ data }: SectionProps<'faq'>) {
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-24">
-      <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          mainEntity: items.map((item) => ({
-            '@type': 'Question',
-            name: stegaClean(item.question),
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: stegaClean(toPlainText(item.answer)),
-            },
-          })),
-        }}
-      />
+      {/* An FAQPage with no questions is invalid structured data; a draft can have none yet. */}
+      {items.length > 0 && (
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: items.map((item) => ({
+              '@type': 'Question',
+              name: stegaClean(item.question),
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: stegaClean(toPlainText(item.answer)),
+              },
+            })),
+          }}
+        />
+      )}
       {(title || intro) && (
         <header className="mb-12 text-center">
           {title && (
