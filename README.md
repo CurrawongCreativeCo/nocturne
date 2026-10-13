@@ -56,6 +56,9 @@ Open http://localhost:3000/studio:
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. They only apply to paths with no page, so they can't hide a live page. Studio blocks
   duplicates and loops, and warns about chains and sources a page already uses.
+- **Pages** is a tree: top-level pages first, then a folder per first slug segment that has
+  children (`services/web-design` is listed under `services`). _All pages_ at the bottom is the flat
+  list for search and bulk work.
 - **Pages → New** offers templates: _Landing page_ (hero, features, testimonials, call to action) and
   _Content page_ (hero + rich text), or a blank page.
 - Under **Sections**, _Add item_ shows every section with a thumbnail:
