@@ -4,6 +4,13 @@ Next.js 16 (App Router, Cache Components) · next-sanity 13 · Sanity Studio 6 �
 
 <!-- setup-wizard:start -->
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCurrawongCreativeCo%2Fsanity-starter&env=NEXT_PUBLIC_SANITY_PROJECT_ID%2CNEXT_PUBLIC_SANITY_DATASET%2CSANITY_API_READ_TOKEN%2CNEXT_PUBLIC_SITE_URL&envDescription=Sanity%20project%20ID%2C%20dataset%2C%20a%20Viewer%20token%2C%20and%20the%20site%27s%20public%20URL&envLink=https%3A%2F%2Fgithub.com%2FCurrawongCreativeCo%2Fsanity-starter%23deploying-vercel&project-name=sanity-next-site&repository-name=sanity-next-site)
+
+**Which path?** Use the button to put a site online fast: it copies this repo to your GitHub account and deploys it
+on Vercel. Follow the [deploy checklist](#deploying-vercel) afterwards (the CORS step is not optional). To work on
+the code, or to have a setup wizard create the Sanity project for you, start locally as below. The button deploys
+the template as-is and does not run the wizard, so create the Sanity project, dataset and token first.
+
 ### Starting a new project
 
 This repo is the clean template. Don't run the setup wizard in it; start each new site from a fresh copy
@@ -156,7 +163,18 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
 
 ## Deploying (Vercel)
 
-1. **Import the repo** at vercel.com/new. Next.js is detected automatically. Node comes from
+This checklist is the single source of truth, for the Deploy button and for importing by hand.
+The button asks for four values up front: the Sanity project ID, dataset and Viewer token (sanity.io/manage → your
+project → API → Tokens), and the site URL (the one Vercel will give you, e.g. `https://my-site.vercel.app`; change it
+when you add a domain). Everything else is optional and can be added later in step 2.
+
+The [Sanity Vercel integration](https://www.sanity.io/docs/developer-guides/vercel-integration) is not used by the
+button. It does provision `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET` and `SANITY_API_READ_TOKEN`
+under the same names (with its default `NEXT_PUBLIC_` prefix), so you can install it on the project instead of typing
+them, but it doesn't set `NEXT_PUBLIC_SITE_URL`, and the button can't require it without a published integration ID.
+It still needs the CORS step below.
+
+1. **Import the repo** at vercel.com/new (or use the Deploy button). Next.js is detected automatically. Node comes from
    `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
 2. **Environment variables** (Production and Preview):
 
@@ -208,6 +226,17 @@ Server errors are logged as one JSON line each (`src/instrumentation.ts`): searc
 [Error tracking](#error-tracking).
 
 Every deploy runs `npm run build`, which regenerates Sanity types from the schema first.
+
+### Cloudflare (not supported yet)
+
+There is no Deploy to Cloudflare button. The OpenNext Cloudflare adapter builds this site (Cache Components
+included) but fails to bundle `src/proxy.ts`: Next 16 runs the proxy on Node only, and OpenNext's Node.js
+middleware support on Cloudflare is experimental ("not officially maintained"). The build stops with
+`Could not resolve "@opentelemetry/api"`. Redirects from Edge Config and A/B tests both run in the proxy, and
+cache revalidation on Workers needs extra R2 and D1 or Durable Object bindings that were never tried here.
+Tested with `@opennextjs/cloudflare` 1.20.10 and Next 16.4. Next's docs say Cloudflare is working on a
+verified adapter on the Adapter API; revisit then. Until it works, deploy on Vercel or any Node.js host
+(`npm run build && npm start`).
 
 ## Architecture
 
