@@ -1,4 +1,6 @@
-# Weekly dependency PRs, grouped so related packages update together.
+# Weekly dependency PRs. Minor and patch updates are grouped so related packages update
+# together; every major update arrives as its own PR so its CI result and changelog can be
+# judged on their own. Merge only when CI is green.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -9,15 +11,27 @@ updates:
     # releases are caught and pulled within days.
     cooldown:
       default-days: 7
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     groups:
       sanity:
         patterns: ['sanity', '@sanity/*', 'next-sanity']
+        update-types: ['minor', 'patch']
       next-react:
         patterns:
           ['next', 'react', 'react-dom', '@types/react', '@types/react-dom', 'eslint-config-next']
+        update-types: ['minor', 'patch']
       tooling:
         dependency-type: development
+        update-types: ['minor', 'patch']
+    ignore:
+      # Types must match the Node major the site runs on (.nvmrc). Bump both together by hand.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+      # ESLint 10 breaks install: eslint-plugin-jsx-a11y, eslint-plugin-react and
+      # eslint-plugin-import (all used by eslint-config-next) only support up to ESLint 9.
+      # Remove this once eslint-config-next supports ESLint 10.
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
