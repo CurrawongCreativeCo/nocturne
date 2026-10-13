@@ -10,6 +10,7 @@ export const settings = defineType({
   icon: CogIcon,
   groups: [
     { name: 'general', title: 'General', default: true },
+    { name: 'announcement', title: 'Announcement' },
     { name: 'header', title: 'Header' },
     { name: 'footer', title: 'Footer' },
   ],
@@ -46,6 +47,55 @@ export const settings = defineType({
       group: 'general',
       requireAlt: false,
       description: '1200×630. Used when a page has no share image of its own.',
+    }),
+    defineField({
+      name: 'announcement',
+      title: 'Announcement bar',
+      type: 'object',
+      group: 'announcement',
+      description:
+        'A one-line banner above the header. Leave the message empty to show nothing. With no dates it shows all the time.',
+      options: { collapsible: false },
+      fields: [
+        defineField({
+          name: 'message',
+          type: 'string',
+          description: 'Up to 120 characters. If you add a link, the whole message is the link.',
+          validation: (rule) => rule.required().max(120),
+        }),
+        defineField({
+          name: 'link',
+          type: 'link',
+          description: 'Optional: where the message leads.',
+        }),
+        defineField({
+          name: 'startsAt',
+          title: 'Show from',
+          type: 'datetime',
+          description: 'Optional. Empty means it is already showing.',
+        }),
+        defineField({
+          name: 'endsAt',
+          title: 'Show until',
+          type: 'datetime',
+          description: 'Optional. The bar disappears after this time; empty means no end.',
+          validation: (rule) =>
+            rule.custom((value, { parent }) => {
+              const startsAt = (parent as { startsAt?: string } | undefined)?.startsAt
+              return value && startsAt && value <= startsAt
+                ? '"Show until" must be after "Show from"'
+                : true
+            }),
+        }),
+        defineField({
+          name: 'dismissible',
+          title: 'Visitors can dismiss it',
+          type: 'boolean',
+          description:
+            'Adds a close button. It stays closed in that browser until the message changes.',
+          initialValue: false,
+        }),
+      ],
     }),
     defineField({
       name: 'headerNav',

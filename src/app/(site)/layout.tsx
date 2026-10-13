@@ -4,6 +4,10 @@ import { Suspense } from 'react'
 
 import { DraftModeTools } from '@/features/draft-mode/components/draft-mode-tools'
 import { getSiteMetadata } from '@/features/site/api/get-settings'
+import {
+  SiteAnnouncement,
+  DraftSiteAnnouncement,
+} from '@/features/site/components/site-announcement'
 import { SiteFooter, DraftSiteFooter } from '@/features/site/components/site-footer'
 import { SiteHeader, DraftSiteHeader } from '@/features/site/components/site-header'
 import { SiteJsonLd } from '@/features/site/components/site-json-ld'
@@ -25,6 +29,14 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       >
         Skip to content
       </a>
+      {/* Always rendered hidden; a client component reveals it inside its date window. */}
+      {isDraftMode ? (
+        <Suspense fallback={null}>
+          <DraftSiteAnnouncement />
+        </Suspense>
+      ) : (
+        <SiteAnnouncement {...PUBLISHED} />
+      )}
       {isDraftMode ? (
         <Suspense fallback={null}>
           <DraftSiteHeader />

@@ -45,6 +45,15 @@ export const documents = [
     _type: 'settings',
     title: 'Test Co',
     description: 'Default description for Test Co.',
+    // Tests move the browser clock around this window (tests/e2e/announcement.spec.ts).
+    announcement: {
+      _type: 'announcement',
+      message: 'Summer sale: 20% off all services',
+      link: internal('page-about'),
+      startsAt: '2026-01-01T00:00:00Z',
+      endsAt: '2100-01-01T00:00:00Z',
+      dismissible: true,
+    },
     headerNav: [navItem('Home', 'page-home'), navItem('About', 'page-about')],
     headerCta: { _type: 'cta', label: 'Contact', variant: 'primary', link: internal('page-about') },
     footerNav: [navItem('About', 'page-about')],

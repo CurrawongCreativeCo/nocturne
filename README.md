@@ -50,7 +50,8 @@ Create a page with slug `home` to populate `/`. After changing schemas or querie
 Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
-- **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
+- **Site settings** (top of the sidebar) holds the site name, logo, announcement bar, header menu and button, footer, and default SEO.
+- **Announcement bar:** in Site settings → _Announcement_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
@@ -218,7 +219,7 @@ components, config, lib, styles, types   ->   features   ->   app
 
 Published reads go to Sanity's API CDN without a token, one request per cache miss. There are only three
 queries (shared sections are resolved inside `PAGE_QUERY`, not fetched separately): `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, and the
-unknown-URL check) and `SETTINGS_QUERY` (header, footer, site metadata). So:
+unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site metadata). So:
 
 - **Build:** one request per page, plus two.
 - **Visitors:** zero. Pages are prerendered and every query result is cached until its content changes.
@@ -304,7 +305,7 @@ each release before proposing it.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, and runs axe for WCAG 2.2 AA on every page.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), and runs axe for WCAG 2.2 AA on every page.
 
 Running the end-to-end tests locally:
 
