@@ -1,6 +1,8 @@
 import { TextIcon } from '@sanity/icons/Text'
 import { defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
+
 export const richText = defineType({
   name: 'richText',
   title: 'Rich text',
@@ -8,6 +10,7 @@ export const richText = defineType({
   icon: TextIcon,
   fields: [
     defineField({ name: 'body', type: 'blockContent', validation: (rule) => rule.required() }),
+    accessField,
   ],
   preview: {
     select: { body: 'body' },

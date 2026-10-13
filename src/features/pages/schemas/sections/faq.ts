@@ -1,6 +1,8 @@
 import { HelpCircleIcon } from '@sanity/icons/HelpCircle'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
+
 export const faq = defineType({
   name: 'faq',
   title: 'FAQ',
@@ -34,6 +36,7 @@ export const faq = defineType({
         }),
       ],
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title', items: 'items' },

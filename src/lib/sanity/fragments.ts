@@ -69,3 +69,16 @@ export const formFields = /* groq */ `
     options
   }
 `
+
+/**
+ * A Stripe price as the pricing table shows it. These documents are written by the Stripe webhook
+ * (features/pricing), never by editors. `productName` is the product's name at Stripe.
+ */
+export const stripePriceFields = /* groq */ `
+  priceId,
+  productName,
+  amount,
+  currency,
+  interval,
+  intervalCount
+`

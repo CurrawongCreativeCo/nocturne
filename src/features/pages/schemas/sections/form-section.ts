@@ -1,6 +1,8 @@
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
+
 export const formSection = defineType({
   name: 'formSection',
   title: 'Form',
@@ -16,6 +18,7 @@ export const formSection = defineType({
       description: 'Create forms under Forms in the sidebar. One form can be used on many pages.',
       validation: (rule) => rule.required(),
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title', form: 'form.title' },

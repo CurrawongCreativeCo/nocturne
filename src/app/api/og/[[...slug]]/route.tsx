@@ -26,7 +26,7 @@ const font = await readFile(join(process.cwd(), 'src/assets/fonts/inter-latin-70
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug?: string[] }> }) {
   const [page, settings] = await Promise.all([
-    getPage({ slug: segmentsToSlug((await params).slug), ...PUBLISHED }),
+    getPage({ slug: segmentsToSlug((await params).slug), members: false, ...PUBLISHED }),
     getSettings(PUBLISHED),
   ])
   if (!page) return new Response('Not found', { status: 404 })

@@ -84,6 +84,7 @@ export const TAGS = {
   author: 'author',
   category: 'category',
   form: 'form',
+  stripePrice: 'stripePrice',
   experiment: 'experiment',
 } as const
 

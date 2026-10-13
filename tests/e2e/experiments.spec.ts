@@ -155,6 +155,14 @@ test.describe('experiment running', () => {
     expect(await response.text()).toContain('Web design')
   })
 
+  test('sign-in and sign-out are not part of the experiment', async ({ request }) => {
+    for (const path of ['/sign-in', '/sign-out']) {
+      const response = await request.get(path)
+      expect(response.status()).toBe(200)
+      expect(response.headers()['set-cookie']).toBeUndefined()
+    }
+  })
+
   test('the variant page has no WCAG 2.2 AA violations', async ({ page, context }) => {
     await context.addCookies([
       { name: 'ab', value: 'experiment-headline.bold', url: 'http://localhost:3100' },

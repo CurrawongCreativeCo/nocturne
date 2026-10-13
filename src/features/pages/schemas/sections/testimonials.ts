@@ -1,6 +1,7 @@
 import { CommentIcon } from '@sanity/icons/Comment'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 export const testimonials = defineType({
@@ -34,6 +35,7 @@ export const testimonials = defineType({
         }),
       ],
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title', items: 'items' },

@@ -19,6 +19,8 @@ import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { pageTemplates } from './src/features/pages/schemas/templates'
+import { pricingSchemaTypes } from './src/features/pricing/schemas'
+import { hidePricesFromNewMenu } from './src/features/pricing/studio'
 import { siteSchemaTypes } from './src/features/site/schemas'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
@@ -46,6 +48,7 @@ export default defineConfig({
       ...pageSchemaTypes,
       ...blogSchemaTypes,
       ...formSchemaTypes,
+      ...pricingSchemaTypes,
       ...experimentSchemaTypes,
       ...siteSchemaTypes,
       ...sharedSchemaTypes,
@@ -54,7 +57,8 @@ export default defineConfig({
   },
   document: {
     actions: singletonDocumentActions,
-    newDocumentOptions: hideSingletonsFromNewMenu,
+    newDocumentOptions: (prev, context) =>
+      hidePricesFromNewMenu(hideSingletonsFromNewMenu(prev, context), context),
   },
   plugins: [
     structureTool({ structure }),

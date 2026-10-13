@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 import { APP_ENV, APP_PORT, FAKE_SANITY_PORT, REJECTED_CONSENT } from './tests/e2e/constants'
 
 const CI = Boolean(process.env.CI)
+const EXPERIMENTS_SPEC = /experiments\.spec\.ts/
 
 /**
  * End-to-end tests: a production build of the site, pointed at a fake Content Lake that serves
@@ -31,8 +32,16 @@ export default defineConfig({
     },
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    { name: 'desktop', testIgnore: EXPERIMENTS_SPEC, use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', testIgnore: EXPERIMENTS_SPEC, use: { ...devices['Pixel 7'] } },
+    {
+      // Starts and stops a site-wide A/B test, which makes the proxy rewrite every page request (a
+      // form POST included). It runs alone, after everything else, so no other test sees it running.
+      name: 'experiments',
+      testMatch: EXPERIMENTS_SPEC,
+      dependencies: ['desktop', 'mobile'],
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
   webServer: [
     {

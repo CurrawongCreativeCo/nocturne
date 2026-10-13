@@ -8,6 +8,7 @@ for (const path of [
   '/about',
   '/shared',
   '/contact',
+  '/pricing',
   '/services/web/design',
   '/does-not-exist',
   '/blog',
@@ -16,6 +17,10 @@ for (const path of [
   '/blog/welcome-to-the-blog',
   '/search',
   '/search?q=design',
+  '/members',
+  '/mixed',
+  '/sign-in',
+  '/sign-out',
 ]) {
   test(`no WCAG 2.2 AA violations on ${path}`, async ({ page }) => {
     await page.goto(path)

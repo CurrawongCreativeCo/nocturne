@@ -1,6 +1,7 @@
 import { ThLargeIcon } from '@sanity/icons/ThLarge'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 export const featuresGrid = defineType({
@@ -41,6 +42,7 @@ export const featuresGrid = defineType({
         }),
       ],
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title', items: 'items' },

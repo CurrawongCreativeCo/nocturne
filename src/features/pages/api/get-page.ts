@@ -3,6 +3,7 @@ import type { Metadata, MetadataRoute, ResolvedMetadata } from 'next'
 import { slugToPath, slugToSegments } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
 import { findRedirect } from '@/lib/redirects'
+import { isMembersOnly } from '@/lib/sanity/access'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
@@ -18,8 +19,16 @@ import { buildBreadcrumbs } from '../utils/breadcrumbs'
 /**
  * Same cached fetch in both modes; `mode` (perspective, stega) is part of the cache key.
  * Always call it with the same argument shape so the page and its metadata hit one entry.
+ *
+ * `members` decides whether members-only content is in the result. It is false for every public
+ * read, so the cached public entry never holds that content. Pass true only after the visitor's
+ * session has been checked (see `MembersOnly`) or in draft mode, where editors preview everything.
  */
-export async function getPage({ slug, ...mode }: { slug: string } & FetchMode) {
+export async function getPage({
+  slug,
+  members,
+  ...mode
+}: { slug: string; members: boolean } & FetchMode) {
   // Unknown URLs (typos, bots probing /wp-admin) are answered from the cached page index
   // instead of costing a request and a cache entry each. Drafts skip this so unpublished
   // pages can still be previewed.
@@ -31,7 +40,7 @@ export async function getPage({ slug, ...mode }: { slug: string } & FetchMode) {
   }
   const { data } = await cachedSanityFetch({
     query: PAGE_QUERY,
-    params: { slug },
+    params: { slug, members },
     ...mode,
     tags: [TAGS.page, TAGS.sharedSection, TAGS.form],
   })
@@ -46,9 +55,13 @@ export async function getPage({ slug, ...mode }: { slug: string } & FetchMode) {
  * site name, default share image and description fallback are carried over explicitly.
  */
 export async function getPageMetadata(slug: string, parent: ResolvedMetadata): Promise<Metadata> {
-  const page = await getPage({ slug, ...PUBLISHED })
+  const page = await getPage({ slug, members: false, ...PUBLISHED })
   // Unknown URLs render the 404 page through this route, so its title is set here.
   if (!page) return { title: 'Page not found' }
+  // Members-only pages keep their summary and share image to themselves and stay out of search.
+  if (isMembersOnly(page.access)) {
+    return { title: page.title, robots: { index: false, follow: false } }
+  }
 
   const { seo } = page
   const ogImage = seo?.ogImage?.asset

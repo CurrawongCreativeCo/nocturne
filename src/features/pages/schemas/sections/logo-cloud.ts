@@ -1,6 +1,7 @@
 import { ImagesIcon } from '@sanity/icons/Images'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 export const logoCloud = defineType({
@@ -32,6 +33,7 @@ export const logoCloud = defineType({
         }),
       ],
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title', logos: 'logos' },

@@ -7,6 +7,7 @@ import { createServer } from 'node:http'
 
 import { evaluate, parse } from 'groq-js'
 
+import { handleStripe } from './fake-stripe.mjs'
 import {
   aiCrawlersBlocked,
   documents,
@@ -23,6 +24,9 @@ let settingsPatch = null
 
 /** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */
 let experimentPatch = null
+
+/** Writes the site made (the Stripe webhook syncing prices), served back by GET /__fixture/mutations. */
+const mutations = []
 
 const BASE_ID = /^versions.[^.]+./
 
@@ -72,6 +76,19 @@ createServer(async (req, res) => {
   if (req.method === 'POST' && experiment) {
     experimentPatch = experiment === 'on' ? experimentRunning : null
     res.writeHead(204).end()
+    return
+  }
+  if (await handleStripe(req, res, url, readBody, `http://localhost:${PORT}`)) return
+  if (req.method === 'GET' && url.pathname === '/__fixture/mutations') {
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify(mutations))
+    return
+  }
+  if (req.method === 'POST' && url.pathname.includes('/data/mutate/')) {
+    const { mutations: sent } = JSON.parse(await readBody(req))
+    mutations.push({ authorization: req.headers.authorization, mutations: sent })
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify({ transactionId: 'fixture', results: [] }))
     return
   }
   if (!url.pathname.includes('/data/query/')) {

@@ -1,13 +1,23 @@
-import { ctaFields, formFields, imageFields, portableTextFields } from '@/lib/sanity/fragments'
+import {
+  ctaFields,
+  formFields,
+  imageFields,
+  portableTextFields,
+  stripePriceFields,
+} from '@/lib/sanity/fragments'
 
 /**
  * One query slice per page-builder section, colocated by name with its schema
  * and component. Each is a conditional projection (`_type == "x" => {...}`);
  * TypeGen turns the set into a discriminated union on `_type`.
+ *
+ * Members-only sections (`access == "members"`) project only their `_key`, `_type` and `access`
+ * unless the query's `$members` parameter is true, so the cached public result never holds their
+ * content. Only code that has already checked the visitor's session passes `$members: true`.
  */
 
 export const heroFragment = /* groq */ `
-  _type == "hero" => {
+  _type == "hero" && (access != "members" || $members) => {
     title,
     description,
     ctas[] { ${ctaFields} },
@@ -17,13 +27,13 @@ export const heroFragment = /* groq */ `
 `
 
 export const richTextFragment = /* groq */ `
-  _type == "richText" => {
+  _type == "richText" && (access != "members" || $members) => {
     body[] { ${portableTextFields} }
   }
 `
 
 export const mediaTextFragment = /* groq */ `
-  _type == "mediaText" => {
+  _type == "mediaText" && (access != "members" || $members) => {
     eyebrow,
     title,
     body[] { ${portableTextFields} },
@@ -34,7 +44,7 @@ export const mediaTextFragment = /* groq */ `
 `
 
 export const featuresGridFragment = /* groq */ `
-  _type == "featuresGrid" => {
+  _type == "featuresGrid" && (access != "members" || $members) => {
     title,
     intro,
     columns,
@@ -48,7 +58,7 @@ export const featuresGridFragment = /* groq */ `
 `
 
 export const logoCloudFragment = /* groq */ `
-  _type == "logoCloud" => {
+  _type == "logoCloud" && (access != "members" || $members) => {
     title,
     logos[] {
       _key,
@@ -60,7 +70,7 @@ export const logoCloudFragment = /* groq */ `
 `
 
 export const testimonialsFragment = /* groq */ `
-  _type == "testimonials" => {
+  _type == "testimonials" && (access != "members" || $members) => {
     title,
     items[] {
       _key,
@@ -73,7 +83,7 @@ export const testimonialsFragment = /* groq */ `
 `
 
 export const faqFragment = /* groq */ `
-  _type == "faq" => {
+  _type == "faq" && (access != "members" || $members) => {
     title,
     intro,
     items[] {
@@ -85,7 +95,7 @@ export const faqFragment = /* groq */ `
 `
 
 export const ctaBannerFragment = /* groq */ `
-  _type == "ctaBanner" => {
+  _type == "ctaBanner" && (access != "members" || $members) => {
     title,
     text,
     ctas[] { ${ctaFields} },
@@ -94,10 +104,26 @@ export const ctaBannerFragment = /* groq */ `
 `
 
 export const formSectionFragment = /* groq */ `
-  _type == "formSection" => {
+  _type == "formSection" && (access != "members" || $members) => {
     title,
     text,
     form-> { _id, ${formFields} }
+  }
+`
+
+export const pricingTableFragment = /* groq */ `
+  _type == "pricingTable" && (access != "members" || $members) => {
+    title,
+    intro,
+    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
+    plans[defined(price->priceId) && price->active == true] {
+      _key,
+      name,
+      features,
+      highlighted,
+      ctaLabel,
+      price-> { ${stripePriceFields} }
+    }
   }
 `
 
@@ -105,6 +131,7 @@ export const formSectionFragment = /* groq */ `
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
 const sectionsFragment = /* groq */ `
+  access,
   ${heroFragment},
   ${richTextFragment},
   ${mediaTextFragment},
@@ -114,6 +141,7 @@ const sectionsFragment = /* groq */ `
   ${faqFragment},
   ${ctaBannerFragment},
   ${formSectionFragment},
+  ${pricingTableFragment},
   _type
 `
 

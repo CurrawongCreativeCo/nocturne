@@ -20,6 +20,28 @@ you start a release.
 
 ### Added
 
+- Pricing table backed by Stripe prices (`src/features/pricing`, section `pricingTable`). A signed Stripe
+  webhook (`/api/stripe/webhook`) mirrors prices into read-only `stripePrice` documents using a
+  server-side `SANITY_WRITE_TOKEN`; editors pick prices by reference, add features per plan and
+  highlight one. Amounts are formatted with `Intl.NumberFormat` (`lib/format-price.ts`). A server action
+  creates a Stripe Checkout Session for the chosen, active price and redirects; success and cancel URLs
+  come from `STRIPE_SUCCESS_URL` / `STRIPE_CANCEL_URL`. New `stripePrice` tag and webhook-filter entry;
+  `PageView`, `SectionRenderer` and `SectionProps` take an optional `renderCheckout`. New variables:
+  `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SANITY_WRITE_TOKEN`. In webhook mode, add `stripePrice`
+  to the Sanity webhook's filter. See the README's _Pricing table_.
+
+- Members-only pages and sections (`src/features/auth`, Auth.js / next-auth v5 with JWT sessions). A new
+  `access` field (`public` | `members`) on pages and on every section, including the `new:section`
+  template. Members-only content is withheld from the cached public `PAGE_QUERY` (new `$members`
+  parameter) and fetched only after a gate (`MembersOnly`, inside `<Suspense>`) has seen a session;
+  anonymous visitors get a sign-in prompt and none of the content. Members-only pages are `noindex` and
+  left out of the sitemap, `/llms.txt` and search (so is the text of members-only sections). New
+  `/sign-in`, `/sign-out` and `/api/auth` routes; `sign-in` and `sign-out` are reserved first slug
+  segments. Providers (GitHub, Google) and the member allow-list (`AUTH_ALLOWED_EMAILS`) come from
+  environment variables. `PageView` now needs a `renderMembersGate` prop and `getPage` a `members`
+  argument. See the README's _Members-only content_. The A/B test spec now runs as its own Playwright
+  project after the others, since a running experiment rewrites requests that other specs make.
+
 - Site search (`src/features/search`): a `/search?q=` page (a plain GET form that works without
   JavaScript, results announced in a live region) and a quick search dialog opened from a new header
   link or Ctrl/Cmd+K, backed by `/api/search`. One `SEARCH_QUERY` over page titles, meta descriptions
@@ -56,7 +78,7 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None required. Run `npm install` (adds `flags` and `@vercel/analytics`) and `npm run typegen`. Add `'consent'` to the `features` list in `eslint.config.mjs`. Analytics stay off until you set a provider variable. A/B tests stay off until you set
+None required. Run `npm install` (adds `flags`, `@vercel/analytics` and `next-auth`) and `npm run typegen`. Add `'auth'` to the `features` list in `eslint.config.mjs`. If you had a page with the slug `sign-in` or `sign-out`, rename it. Members-only content stays off until you set `AUTH_SECRET` and a provider and mark something as members-only; if you call `PageView` or `getPage` from your own routes, pass `renderMembersGate` and `members: false`. Add `'consent'` to the `features` list in `eslint.config.mjs`. Analytics stay off until you set a provider variable. A/B tests stay off until you set
 `FLAGS_SECRET` and start a test. In webhook mode, add `"experiment"` to the webhook's filter. If you
 had a page with the slug `ab`, rename it: that path now belongs to the variant routes. If you
 customized `src/proxy.ts` or `src/app/(site)/layout.tsx`, expect conflicts there.

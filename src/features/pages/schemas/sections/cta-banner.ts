@@ -1,6 +1,8 @@
 import { BulbOutlineIcon } from '@sanity/icons/BulbOutline'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
+
 export const ctaBanner = defineType({
   name: 'ctaBanner',
   title: 'Call to action banner',
@@ -31,6 +33,7 @@ export const ctaBanner = defineType({
       },
       validation: (rule) => rule.required(),
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title' },

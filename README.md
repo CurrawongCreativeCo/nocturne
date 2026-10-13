@@ -60,7 +60,8 @@ Open http://localhost:3000/studio:
   - _Off:_ `robots.txt` disallows the whole site for GPTBot, ClaudeBot, Google-Extended, PerplexityBot and CCBot, and `/llms.txt` answers 404. Google, Bing and other search engines are untouched. The list lives in `src/lib/ai-crawlers.ts`.
   - It is a request, not a lock: well-behaved crawlers obey `robots.txt`, others don't. A crawler that has already stored your pages keeps them. Changes appear as soon as the settings are published (webhook mode: after the webhook).
 - **Cookie banner:** in Site settings → _Cookie banner_, edit the banner's title, message, privacy policy link and link text, and the one-line descriptions beside _Analytics_ and _Marketing_. Empty fields use sensible defaults. The banner offers **Accept all**, **Reject all** (equal prominence) and **Choose** (analytics and marketing separately; necessary cookies are always on), and a **Cookie settings** link in the footer reopens it so visitors can change their mind. It only exists when the developer has set up an analytics provider (see _Analytics and cookie consent_); with none, there is nothing to ask and no banner or footer link. Banner text changes appear like any other settings change. In Presentation the banner shows too, but no analytics ever load for editors.
-- **Search:** visitors search from the magnifier in the header (or Ctrl/Cmd+K) for a quick list, or at `/search?q=…` for the full results page. It looks through page titles, meta descriptions and the text of _Rich text_ and _Image + text_ sections, matching the start of each word ("web des" finds "Web design"), with title matches first and up to 20 results, each with a short excerpt. Pages with _Hide from search engines_ ticked are left out, as is text inside other sections (hero, FAQ, features…) and shared sections. A query is 2–80 characters (longer is cut). New or edited pages appear within a few minutes (webhook mode: right after the webhook, which expires every cached search). `search` is reserved, so a page can't use it as its first slug segment.
+- **Search:** visitors search from the magnifier in the header (or Ctrl/Cmd+K) for a quick list, or at `/search?q=…` for the full results page. It looks through page titles, meta descriptions and the text of _Rich text_ and _Image + text_ sections, matching the start of each word ("web des" finds "Web design"), with title matches first and up to 20 results, each with a short excerpt. Pages with _Hide from search engines_ ticked and members-only pages are left out, as is text inside members-only sections and other sections (hero, FAQ, features…) and shared sections. A query is 2–80 characters (longer is cut). New or edited pages appear within a few minutes (webhook mode: right after the webhook, which expires every cached search). `search` is reserved, so a page can't use it as its first slug segment.
+- **Members-only content:** a page has a _Who can see this page_ field and every section a _Who can see this_ field (_Everyone_ or _Members only (signed in)_; empty means everyone). A members-only page asks visitors to sign in and shows nothing else, is left out of the sitemap, `/llms.txt` and search, and tells search engines not to index it. A members-only section on a public page is replaced by a "Members only" sign-in prompt for visitors who aren't signed in; the rest of the page is unchanged. A shared section is members-only when the section inside it is. The page's title is replaced by "Members only" until the visitor signs in; its URL, and any menu entry an editor adds for it, are not hidden. In Presentation and draft previews editors see everything. Who counts as a member is set by the developer (see _Members-only content_ below). `sign-in` and `sign-out` are reserved first slug segments; link to `/sign-out` (a button link or a footer menu item with a custom URL) wherever members should find it.
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
   or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
@@ -89,6 +90,12 @@ Open http://localhost:3000/studio:
   - _Spam:_ a Cloudflare Turnstile check on every send, plus a limit of 5 messages per IP address per 10 minutes on each server instance (serverless instances count separately, so it slows a spammer down rather than stopping one). The check needs JavaScript. Without it the form still posts and shows errors, but nothing is sent: the visitor is told to turn JavaScript on.
   - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Use a shared inbox, or make the dataset private. Submissions are emailed, not stored: if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
   - _Setup:_ it needs four environment variables (see _Forms setup_ below). Until they are set, a form section shows a setup message in development and "isn't available right now" to visitors. Pages read them at build time, so redeploy after changing them.
+- **Pricing table:** the _Pricing table_ section shows plans taken from Stripe prices, with a checkout button on each. Prices are not typed in: they are created in the Stripe dashboard and copied into _Stripe price_ documents (sidebar) automatically, so an amount can never differ between the site and what Stripe charges. In the section, add up to four _plans_; each one:
+  - picks a _price_ (the list shows the product, amount and interval, and only offers active prices), so the same product can appear as monthly and yearly plans;
+  - may set a _plan name_ (empty uses the product name from Stripe), a list of _features_ (one line each) and _button text_ (default "Get started");
+  - can be _highlighted_: it gets a stronger outline and a "Most popular" label. Only one plan per table can be.
+  - Amounts are formatted for the site's language ($19, €290, ¥50,000) with "per month", "per year", "every 3 months" or "one-time". If a price is archived at Stripe, its plan disappears from the page until it is active again. _Stripe price_ documents are read-only; change the price in Stripe. A change shows on the site within a minute or so (the webhook, then the usual publish delay). Not shown: prices with no fixed amount (tiered, usage-based, pay-what-you-want).
+  - The button sends the visitor to Stripe's hosted Checkout, then back to the site. Where is set by the developer (see _Pricing table_ below). Checkout needs the developer to have set up Stripe; until then the button shows a message instead.
 - **A/B tests:** _A/B tests_ in the sidebar split visitors between a page as published ("control") and one or more Sanity content variants of it. Content Variants is a Sanity beta feature, switched on in this Studio (`beta.variants` in `sanity.config.ts`).
   1. _Create the variant._ In Studio, create a _variant definition_ (a name for the audience or idea, e.g. "Bold headline"), then open the page you want to test and create a variant of it for that definition. Edit the variant's content as you would any page, then **publish the variant**: visitors only ever see published variants. Pages you don't vary look the same in every option. Note the definition's ID (the short id such as `Ab12cd34`, not `_.variants.Ab12cd34`).
   2. _Set up the test._ _A/B tests → New_: a _name_ (also sent to analytics), the variants (each one's _Variant ID_ and _Traffic_), and _Control traffic_. Traffic numbers are relative: control 50 + one variant 50 is an even split; 50, 25, 25 is half, a quarter, a quarter. Up to four variants. Leave _Running_ off and publish.
@@ -121,6 +128,7 @@ Open http://localhost:3000/studio:
 | FAQ                   | Questions that expand to answers                          |
 | Call to action banner | A closing prompt in brand, dark or light tone             |
 | Form                  | A contact or enquiry form built under _Forms_ (see below) |
+| Pricing table         | Plans from Stripe prices, each with a checkout button     |
 
 **Shared sections:** use _Shared sections_ in the sidebar for a section that appears unchanged on
 several pages, like a promo banner or a newsletter sign-up. Create one (a title for your own reference,
@@ -150,31 +158,36 @@ the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per
    `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
 2. **Environment variables** (Production and Preview):
 
-   | Variable                         | Value                                                           |
-   | -------------------------------- | --------------------------------------------------------------- |
-   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                               |
-   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                               |
-   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                               |
-   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)      |
-   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)     |
-   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default `Content`) |
-   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                |
-   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                               |
-   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                     |
-   | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                |
-   | `RESEND_API_KEY`                 | only for forms: Resend API key                                  |
-   | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`   |
-   | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | optional: Plausible site domain (see Analytics, below)          |
-   | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                 |
-   | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                       |
-   | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`              |
-   | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                              |
-   | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test     |
-   | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)    |
-   | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it     |
-   | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id        |
-   | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store  |
-   | `VERCEL_TEAM_ID`                 | optional: Edge Config redirects; only for team-owned stores     |
+   | Variable                         | Value                                                                               |
+   | -------------------------------- | ----------------------------------------------------------------------------------- |
+   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                                                   |
+   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                                                   |
+   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                   |
+   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                          |
+   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                         |
+   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default `Content`)                     |
+   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                    |
+   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                   |
+   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                         |
+   | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                                    |
+   | `RESEND_API_KEY`                 | only for forms: Resend API key                                                      |
+   | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`                       |
+   | `STRIPE_SECRET_KEY`              | only for pricing: Stripe secret or restricted key (see below)                       |
+   | `STRIPE_WEBHOOK_SECRET`          | only for pricing: the webhook endpoint's `whsec_…` signing secret                   |
+   | `SANITY_WRITE_TOKEN`             | only for pricing: Editor token the Stripe webhook writes with                       |
+   | `STRIPE_SUCCESS_URL`             | optional: where buyers land after paying (default `/?checkout=success`)             |
+   | `STRIPE_CANCEL_URL`              | optional: where "back" from Stripe leads (default: the pricing page they came from) |
+   | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | optional: Plausible site domain (see Analytics, below)                              |
+   | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                                     |
+   | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                                           |
+   | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`                                  |
+   | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                  |
+   | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                         |
+   | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                        |
+   | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                         |
+   | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id                            |
+   | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store                      |
+   | `VERCEL_TEAM_ID`                 | optional: Edge Config redirects; only for team-owned stores                         |
 
 3. **Allow the production origin in Sanity**, or Studio and live updates won't connect:
    `npx sanity cors add https://example.com --credentials` (or sanity.io/manage → API → CORS
@@ -222,6 +235,9 @@ src/
     llms.txt/route.ts                /llms.txt for AI tools (404 when AI crawlers are off)
     (site)/search/page.tsx           /search?q= results (dynamic, no static shell)
     api/search/route.ts              JSON for the quick search dialog
+    api/stripe/webhook/route.ts      Stripe webhook: keeps stripePrice documents in step with Stripe
+    api/auth/[...nextauth]/route.ts  Auth.js handlers (OAuth callbacks, session)
+    (site)/sign-in, (site)/sign-out  sign-in and sign-out pages
     sitemap.ts                       pages then posts, split into files of 45,000 URLs (generateSitemaps)
   proxy.ts                         Edge Config redirects (inactive without EDGE_CONFIG); A/B assignment + rewrite
   features/
@@ -245,9 +261,17 @@ src/
       api/                         queries.ts (SEARCH_QUERY), search-pages.ts (cached read + snippets)
       components/                  search-view (server), search-form, quick-search (trigger), quick-search-dialog (lazy)
       utils/                       query (validate, cap, match pattern), snippet
+    auth/                          members-only content: Auth.js sessions, the gate, sign-in and sign-out pages
+      api/                         auth.ts (Auth.js config), get-session.ts, actions.ts (server actions)
+      components/                  members-only (the gate), sign-in-prompt, sign-in-view, sign-out-view
+      utils/                       allowed-members (AUTH_ALLOWED_EMAILS), providers (env), safe-path, messages
     consent/                       cookie banner, consent store (localStorage), analytics loader
       components/                  consent-banner, cookie-settings-button, analytics-scripts
       utils/                       consent-state (parse/serialize), consent-store (client), analytics-snippets
+    pricing/                       Stripe prices: webhook sync, Checkout action, stripePrice schema
+      api/                         handle-webhook.ts, write-prices.ts, checkout.ts (server action), queries.ts
+      components/                  checkout-button (client form)
+      utils/                       stripe-signature, map-stripe (event + price -> document), stripe-api (REST), config
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
@@ -362,6 +386,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
   recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
+- **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
 Keep it that way: fetch through `cachedSanityFetch`, call each query with the same argument shape so
@@ -394,7 +419,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category", "form"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -408,6 +433,40 @@ To switch a deployment to webhook mode:
 How a send works (`src/features/forms/api/submit-form.ts`, a server action that also handles a plain HTML POST): read the form's id from the request, **fetch the published form again** (`FORM_QUERY`, the only query that reads `recipientEmail`, tagged `form`), validate each of its fields (`utils/validate.ts`), rate-limit the IP (`x-real-ip`, else the first `x-forwarded-for` entry, so it only means something behind a proxy that sets them itself, as Vercel does), verify the Turnstile token with Cloudflare, then send through Resend's REST API (`utils/resend.ts`, no SDK). Cheap checks come first, so a mistake in a field never spends a token, a rate-limit slot or an email. Failures are logged on the server and shown to the visitor as a general message.
 
 `FORMS_TEST_MODE=1` replaces Turnstile and Resend with mocks that accept everything and send nothing; the end-to-end tests use it (the form then carries a fixed token instead of the widget, and the server accepts only that token). It is ignored when `VERCEL_ENV` is `production`, so it can't switch the spam check off there. To change the email, edit `utils/build-email.ts`: values are HTML-escaped and a subject can't contain line breaks.
+
+### Pricing table
+
+`src/features/pricing` plus the `pricingTable` section. Stripe is the source of truth for prices; Sanity holds a read-only copy (`stripePrice` documents) so editors can pick prices by reference and pages stay cached. There is no Stripe SDK: the few REST calls use `fetch`, as the forms do for Resend.
+
+**Environment** (all server-side; `.env.example` lists them; none has a `NEXT_PUBLIC_` prefix, and a secret must never get one):
+
+| Variable                | Purpose                                                                                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `STRIPE_SECRET_KEY`     | Reads prices and creates Checkout Sessions. A restricted key works: _Prices: read_, _Products: read_, _Checkout Sessions: write_                                               |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret (`whsec_…`) of the webhook endpoint below. Without it the endpoint answers 503 and nothing is written                                                           |
+| `SANITY_WRITE_TOKEN`    | sanity.io/manage → API → Tokens, **Editor** role. Used only by the webhook, to write `stripePrice` documents. It is separate from the read token, which stays a Viewer         |
+| `STRIPE_SUCCESS_URL`    | Optional. Where Stripe sends the buyer after paying: a path (`/thanks`) or a full `https://` URL. `{CHECKOUT_SESSION_ID}` is filled in by Stripe. Default `/?checkout=success` |
+| `STRIPE_CANCEL_URL`     | Optional. Where "back" leads: a path or full URL. Default: the page the buyer started from (when the browser sends it and it is on this site), else the home page              |
+
+**Setup:**
+
+1. In the Stripe dashboard create products and prices (use test mode first). Prices that are tiered, usage-based or pay-what-you-want are ignored.
+2. Add the three variables above to `.env.local` and the deployment's environment variables, then redeploy.
+3. Dashboard → Developers → Webhooks → _Add endpoint_: URL `https://your-site.com/api/stripe/webhook`, events `price.created`, `price.updated`, `price.deleted`, `product.updated`, `product.deleted`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`. For local work, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints a secret to use.
+4. Create the first prices _after_ the endpoint exists, or backfill: in the dashboard, edit and save each existing price's nickname (or resend its `price.created` event from the webhook's event log). Stripe only sends events for changes made after the endpoint was added.
+5. In Studio, add a _Pricing table_ section and pick the prices. Stripe prices appear under _Stripe price_ in the sidebar.
+6. Webhook mode only: add `stripePrice` to the Sanity webhook's filter (above) so a synced price expires the pages that show it. Live mode needs nothing.
+
+**How the sync works** (`api/handle-webhook.ts`): the route reads the raw body and checks `Stripe-Signature` (HMAC-SHA256 of `timestamp.body` with `STRIPE_WEBHOOK_SECRET`, compared in constant time, rejected when more than 5 minutes old; `utils/stripe-signature.ts`). A bad signature answers 400 and nothing else runs. The event only names a price or product (`utils/map-stripe.ts`, `planEvent`); the handler then asks Stripe for its **current** state (`GET /v1/prices/<id>?expand[]=product`, or a product's prices) and writes it, so a late or out-of-order event can't overwrite newer data. Each price is one document with the id `stripePrice-<price id>`, replaced in full, so a retried event is harmless: product name, price id, amount, currency, interval (empty for one-time), interval count and `active` (false when the price or its product is archived). A deleted price or product is marked inactive, not deleted, because pages may reference it. Events the feature doesn't use answer 200; a failure to reach Stripe or Sanity answers 500 so Stripe retries. `product.updated` re-syncs up to 100 prices of the product.
+
+**Checkout** (`api/checkout.ts`, a server action behind the plan's button; it also works as a plain form post without JavaScript). The browser sends only a price id. The action looks that price up in the published dataset (`CHECKOUT_PRICE_QUERY`), refuses anything that isn't an active `stripePrice` (so editing the form's hidden field can't buy a price the site doesn't sell), picks `subscription` or `payment` from the stored interval, creates the Checkout Session and redirects to Stripe's hosted page. A failure shows a message in place; details are logged on the server. Features can't import each other, so the route (`app/(site)/[[...slug]]/page.tsx`, and the A/B route) passes the button down as `renderCheckout`, like `renderForm`.
+
+**Notes:**
+
+- Amounts are stored as Stripe reports them (smallest currency unit) and formatted in `lib/format-price.ts` with `Intl.NumberFormat` and the site language (`NEXT_PUBLIC_SITE_LANGUAGE`). Zero-decimal currencies (JPY) and the three-decimal ones are divided correctly; ISK and UGX are the two Stripe counts in hundredths. The period wording ("per month") is English.
+- The write token lives in `lib/sanity/write-client.ts` (`server-only`). Don't use it anywhere else; anything that can write should be a webhook or action like this one.
+- `STRIPE_API_HOST` points the REST calls at a fake Stripe in the end-to-end tests. It is ignored when `VERCEL_ENV` is `production`.
+- Taxes, coupons, trials, customer portal and fulfilment after payment (reacting to `checkout.session.completed`) are not included; add them in `api/checkout.ts` and a new case in `handle-webhook.ts`.
 
 ### Analytics and cookie consent
 
@@ -448,6 +507,33 @@ The built-in search is fine for a few hundred pages. For typo tolerance, facets 
 2. **Replace the read.** Only `searchPages` in `features/search/api/search-pages.ts` talks to Sanity. Return the same `SearchResult[]` (`title`, `path`, `snippet`) from the engine's search API (Algolia `search-only` key, or a Typesense search-only key scoped to the collection) and both `/search` and `/api/search` switch over. Keep `parseQuery` in front of it. Cache the call with `shortLivedSanityFetch`'s pattern (a `'use cache'` function with a short `cacheLife`) or drop the cache if the engine is fast enough.
 3. **Without webhook mode** nothing triggers indexing: set it up first (_Live mode vs. webhook mode_), or run the sync from a Sanity Function / scheduled job instead.
 4. Delete `SEARCH_QUERY` and run `npm run typegen` once nothing uses it. Browser-side InstantSearch is not needed: the dialog and page already render from `SearchResult`.
+
+### Members-only content
+
+`src/features/auth` (Auth.js, next-auth v5, stateless JWT sessions: no database) plus an `access` field on pages and sections (`public` or `members`; missing means public).
+
+**Environment** (all server-side; `.env.example` lists them):
+
+| Variable                                | Purpose                                                                                                                                   |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTH_SECRET`                           | Signs the session cookie. Required. `npx auth secret`, or `openssl rand -base64 32`                                                       |
+| `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | Turns on "Continue with GitHub". OAuth callback URL: `<site>/api/auth/callback/github`                                                    |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Turns on "Continue with Google" (callback `<site>/api/auth/callback/google`); an unverified Google address is refused                     |
+| `AUTH_ALLOWED_EMAILS`                   | Who is a member: addresses and whole domains, e.g. `ann@example.com, @example.org`. Empty means anyone who can sign in                    |
+| `AUTH_TRUST_HOST`                       | `true` when not on Vercel (Vercel is detected). `AUTH_URL` is only needed behind a proxy that rewrites the host                           |
+| `AUTH_TEST_MODE`, `AUTH_TEST_PASSWORD`  | End-to-end tests only: adds an email + password form that accepts the password for any address. Ignored when `VERCEL_ENV` is `production` |
+
+Set `AUTH_ALLOWED_EMAILS` unless your provider already limits who can sign in: "any GitHub user" is otherwise a member. It is checked at sign-in and again on every session read, so removing an address ends that session at once. To use another provider (Microsoft, Okta, email links), add it to `providers` in `features/auth/api/auth.ts` and to `utils/providers.ts` (which decides what the sign-in page offers); email links also need an Auth.js adapter. To use Clerk instead, replace `getSession` in `api/get-session.ts` with Clerk's `auth()`, and the sign-in and sign-out pages and `api/auth` route with Clerk's; nothing else in the app knows which library is behind `getSession`.
+
+**How it keeps public pages cached.** Every public read is the same cached `PAGE_QUERY` as before, called with `$members: false`. With that parameter a members-only page returns no sections, and a members-only section returns only its `_key`, `_type` and `access` (see `api/sections.ts`), so the cached entry, the static shell and every anonymous response hold none of it. The route passes `PageView` a `renderMembersGate` (the auth feature's `MembersOnly`, since features can't import each other). The gate renders inside `<Suspense>`, reads the session cookie, and shows either a sign-in prompt or whatever its `content` callback returns. Only that callback calls `getPage({ members: true })`, so members-only content is fetched after the session check and never before. Shared sections and the variants of an A/B test go through the same path. The only other place `members: true` is passed is draft mode, which only a signed-in editor can switch on.
+
+- **Never pass `members: true` from a code path that hasn't checked the session**, and don't put members-only content in a query that anonymous visitors can reach. If you add a query that reads page or section bodies (a feed, a related-pages list), filter `access != "members"` as `SEARCH_QUERY` does.
+- A `members: true` entry is cached on the server under its own key like any other page. It is only reachable through the gate. Under Cache Components the session read is request-time, so the member's copy streams in after the cached shell.
+- **Not hidden:** the page's slug (it is the URL) and any menu or link an editor points at it, with the label they typed. The title is hidden: the page query, the page index (breadcrumbs, the generated share image) and the metadata return "Members only" instead, and the real title comes back only with `members: true`. Members-only pages are `noindex`, with no description or share image.
+- **Page heading:** a members-only section in first place never claims the `<h1>` (it renders as a section, so the sr-only page title stays the `<h1>`). A members-only page's prompt is its `<h1>`; once signed in, the page follows the usual rule.
+- The sign-in page validates `callbackUrl` as a path on this site (`utils/safe-path.ts`), so it can't redirect elsewhere. `/sign-in` and `/sign-out` are `noindex` and are skipped by A/B tests.
+- **Adding a section with `npm run new:section`** includes the `access` field and the gated fragment (`_type == "x" && (access != "members" || $members) => {...}`). If you write a fragment by hand, keep that condition.
+- **Testing:** the end-to-end tests sign in through the test form (`AUTH_TEST_MODE`); see `tests/e2e/members.spec.ts`. The fixtures include a members-only page, a public page with members-only sections (plain and shared) and one whose first section is members-only.
 
 ### IndexNow
 
@@ -520,11 +606,11 @@ each release before proposing it.
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
-  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, consent parsing and the Google Analytics snippet, the rate limiter, the notification email, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
+  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the members allow-list and callback-path checks, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, consent parsing and the Google Analytics snippet, the rate limiter, the notification email, the Stripe webhook signature check, event and price mapping, config and REST calls, price formatting, the Turnstile and Resend calls and the forms environment check, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), A/B tests (no running test leaves pages, cookies and attributes untouched; with one running, an `ab` cookie for control and for the variant each get their content and `data-variant`, new visitors are assigned and kept in an option, crawlers and the blog are skipped; the fake Content Lake serves variant documents and the test starts and stops the experiment with a signed webhook), search (the page with and without JavaScript, title and body matches, hidden pages left out, validation and the length cap, the JSON route, the dialog by pointer and keyboard, debounce, failure states, axe with the dialog open), the cookie banner (first visit with focus in the banner and no shift, Accept all and Reject all identical, no provider request before consent, Accept loading Plausible, PostHog and Google with Consent Mode defaults denied first, Reject staying off and persisting, Choose, reopening from the footer and withdrawing, keyboard use, axe with the banner open and expanded; every other test starts as a visitor who already rejected, so the banner doesn't take focus), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), A/B tests (no running test leaves pages, cookies and attributes untouched; with one running, an `ab` cookie for control and for the variant each get their content and `data-variant`, new visitors are assigned and kept in an option, crawlers and the blog are skipped; the fake Content Lake serves variant documents and the test starts and stops the experiment with a signed webhook), search (the page with and without JavaScript, title and body matches, hidden and members-only pages left out, validation and the length cap, the JSON route, the dialog by pointer and keyboard, debounce, failure states, axe with the dialog open), the cookie banner (first visit with focus in the banner and no shift, Accept all and Reject all identical, no provider request before consent, Accept loading Plausible, PostHog and Google with Consent Mode defaults denied first, Reject staying off and persisting, Choose, reopening from the footer and withdrawing, keyboard use, axe with the banner open and expanded; every other test starts as a visitor who already rejected, so the banner doesn't take focus), members-only content (an anonymous visitor gets the sign-in prompt and none of the content, not even in the HTML; signing in through the test form returns to the page and shows it; refused passwords and addresses; sign-out; members pages left out of the sitemap, `/llms.txt` and search), the pricing table (active plans with Intl-formatted amounts in three currencies, one highlighted plan, distinct button names, archived prices left out), Checkout (a subscription and a one-time price create the right Stripe session and redirect; a tampered price id is refused) and the Stripe webhook (bad, tampered and replayed signatures rejected; unused events acknowledged; a price event upserts a document with the write token; a deleted price is marked inactive; the fake Content Lake also plays Stripe and records writes), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
 
 Running the end-to-end tests locally:
 
@@ -537,6 +623,8 @@ They use ports 3100 and 9999 and don't need `.env.local`. Stop anything else on 
 CI installs the browser itself.
 
 When you add a section or a content type, add an example of it to the fixture dataset so the axe scan covers it.
+
+The A/B test spec starts a site-wide experiment, which rewrites every page request while it runs. It is its own Playwright project (`experiments`) that waits for `desktop` and `mobile` to finish, so no other test ever sees an experiment running. Any new spec that changes site-wide state (settings variants, experiments) should do the same, or restore the state before other specs can run.
 
 ### Performance budgets
 
@@ -672,15 +760,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                           | Expect                              |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                                  | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                     | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                            | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                 | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                         | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                                 | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                        | Expect                              |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                                               | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                  | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                         | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                              | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                      | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                                              | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design

@@ -10,7 +10,7 @@ import { pageBuilderFragment } from './sections'
  *
  * Kept deliberately few: each distinct query is a separate cache entry and a
  * separate CDN request whenever its content changes. The page and its metadata
- * share PAGE_QUERY; static params, the sitemap and breadcrumbs share PAGE_INDEX_QUERY; REDIRECTS_QUERY
+ * share PAGE_QUERY (`$members` stays false for every public read: see `sections.ts`); static params, the sitemap and breadcrumbs share PAGE_INDEX_QUERY; REDIRECTS_QUERY
  * is only read for URLs that match no page, and when a redirect is published to rebuild the
  * Edge Config map.
  */
@@ -19,19 +19,23 @@ export const PAGE_QUERY = defineQuery(/* groq */ `
   *[_type == "page" && slug.current == $slug][0] {
     _id,
     _type,
-    title,
+    "title": select(access == "members" && !$members => "Members only", title),
+    access,
     seo { ${seoFields} },
-    pageBuilder[] { ${pageBuilderFragment} }[_type != "reference"]
+    "pageBuilder": select(
+      access == "members" && !$members => [],
+      pageBuilder[] { ${pageBuilderFragment} }[_type != "reference"]
+    )
   }
 `)
 
 export const PAGE_INDEX_QUERY = defineQuery(/* groq */ `
   *[_type == "page" && defined(slug.current)] {
     "slug": slug.current,
-    title,
+    "title": select(access == "members" => "Members only", title),
     "description": seo.metaDescription,
     _updatedAt,
-    "noIndex": seo.noIndex == true
+    "noIndex": seo.noIndex == true || access == "members"
   }
 `)
 
@@ -45,7 +49,7 @@ export const PAGE_SITEMAP_QUERY = defineQuery(/* groq */ `
   *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {
     "slug": slug.current,
     _updatedAt,
-    "noIndex": seo.noIndex == true
+    "noIndex": seo.noIndex == true || access == "members"
   }
 `)
 

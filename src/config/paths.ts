@@ -57,3 +57,17 @@ export const EXPERIMENT_PATH = `/${EXPERIMENT_SEGMENT}`
 export const SEARCH_SEGMENT = 'search'
 export const SEARCH_PATH = `/${SEARCH_SEGMENT}`
 export const SEARCH_API_PATH = '/api/search'
+
+/**
+ * Sign-in and sign-out pages (src/features/auth). A CMS page can't use these first segments, and
+ * proxy.ts leaves them out of A/B tests. The Auth.js handlers live under /api/auth.
+ */
+export const SIGN_IN_SEGMENT = 'sign-in'
+export const SIGN_OUT_SEGMENT = 'sign-out'
+export const SIGN_IN_PATH = `/${SIGN_IN_SEGMENT}`
+export const SIGN_OUT_PATH = `/${SIGN_OUT_SEGMENT}`
+
+/** Sign-in link that returns the visitor to `returnTo` (a path on this site) afterwards. */
+export function signInPath(returnTo: string): string {
+  return `${SIGN_IN_PATH}?${new URLSearchParams({ callbackUrl: returnTo })}`
+}

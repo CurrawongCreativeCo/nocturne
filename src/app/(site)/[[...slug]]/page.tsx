@@ -3,15 +3,27 @@ import { draftMode } from 'next/headers'
 import { Suspense, type ComponentProps } from 'react'
 
 import { segmentsToSlug } from '@/config/paths'
+import { MembersOnly } from '@/features/auth/components/members-only'
 import { FormView } from '@/features/forms/components/form-view'
 import { getPageMetadata, getPageStaticParams } from '@/features/pages/api/get-page'
 import { DraftPageView, PageView } from '@/features/pages/components/page-view'
 import { ReturningVisitor } from '@/features/personalization/components/returning-visitor'
+import { CheckoutButton } from '@/features/pricing/components/checkout-button'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 /** Forms are their own feature; this route is where the page builder meets them. */
 const renderForm: ComponentProps<typeof PageView>['renderForm'] = (form, headingId) => (
   <FormView form={form} headingId={headingId} />
+)
+
+/** Payments are their own feature too: each pricing table plan gets its checkout button from it. */
+const renderCheckout: ComponentProps<typeof PageView>['renderCheckout'] = (request) => (
+  <CheckoutButton {...request} />
+)
+
+/** Auth is its own feature too: members-only pages and sections check the session through it. */
+const renderMembersGate: ComponentProps<typeof PageView>['renderMembersGate'] = (props) => (
+  <MembersOnly {...props} />
 )
 
 /**
@@ -50,6 +62,8 @@ export default async function Page({ params }: Props) {
       slug={segmentsToSlug((await params).slug)}
       greeting={<ReturningVisitor />}
       renderForm={renderForm}
+      renderCheckout={renderCheckout}
+      renderMembersGate={renderMembersGate}
       {...PUBLISHED}
     />
   )
@@ -61,6 +75,8 @@ async function DraftPage({ params }: Pick<Props, 'params'>) {
       slug={segmentsToSlug((await params).slug)}
       greeting={<ReturningVisitor />}
       renderForm={renderForm}
+      renderCheckout={renderCheckout}
+      renderMembersGate={renderMembersGate}
     />
   )
 }

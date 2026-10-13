@@ -47,6 +47,27 @@ const formField = (label, name, type, { required = false, options } = {}) => ({
   ...(options && { options }),
 })
 
+const stripePrice = (id, productName, amount, currency, interval, extra = {}) => ({
+  _id: `stripePrice-${id}`,
+  _type: 'stripePrice',
+  priceId: id,
+  productId: `prod_${id.slice(6)}`,
+  productName,
+  amount,
+  currency,
+  interval,
+  intervalCount: 1,
+  active: true,
+  ...extra,
+})
+const plan = (priceId, fields = {}) => ({
+  _key: key(),
+  _type: 'plan',
+  price: ref(`stripePrice-${priceId}`),
+  highlighted: false,
+  ...fields,
+})
+
 const abHero = (title) => ({ _key: key(), _type: 'hero', title, description: 'Hero description.' })
 
 const UPDATED = '2026-10-12T00:00:00Z'
@@ -270,6 +291,105 @@ export const documents = [
       { _key: 'shared-ref', ...ref('shared-promo') },
       // Points at a missing document: skipped, not an error.
       { _key: key(), ...ref('does-not-exist') },
+    ],
+  },
+  {
+    // A shared section that is members-only: the page that references it must not carry its text.
+    _id: 'shared-members',
+    _type: 'sharedSection',
+    title: 'Members banner',
+    section: [
+      {
+        _key: key(),
+        _type: 'ctaBanner',
+        access: 'members',
+        title: 'Secret shared banner',
+        text: 'Secret shared banner text.',
+        tone: 'dark',
+        ctas: [cta('Secret shared action', internal('page-about'))],
+      },
+    ],
+  },
+  {
+    // Members-only page: nothing of its sections may reach an anonymous visitor. Starts with a hero.
+    _id: 'page-members',
+    _type: 'page',
+    title: 'Members area',
+    slug: { _type: 'slug', current: 'members' },
+    access: 'members',
+    seo: { _type: 'seo', metaDescription: 'Secret members description.' },
+    pageBuilder: [
+      {
+        _key: key(),
+        _type: 'hero',
+        title: 'Secret members hero',
+        description: 'Secret members hero text.',
+      },
+      { _key: key(), _type: 'richText', body: [block(['Secret members page content.'])] },
+    ],
+  },
+  {
+    // Public page with members-only sections: a plain one and a shared one between public ones.
+    _id: 'page-mixed',
+    _type: 'page',
+    title: 'Mixed access',
+    slug: { _type: 'slug', current: 'mixed' },
+    pageBuilder: [
+      { _key: key(), _type: 'richText', body: [block(['Public intro on the mixed page.'])] },
+      {
+        _key: key(),
+        _type: 'richText',
+        access: 'members',
+        body: [block(['Secret members section content.'])],
+      },
+      { _key: 'members-ref', ...ref('shared-members') },
+      { _key: key(), _type: 'richText', body: [block(['Public outro on the mixed page.'])] },
+    ],
+  },
+  {
+    // The first section is a members-only hero: the page still needs exactly one <h1>.
+    _id: 'page-mixed-hero',
+    _type: 'page',
+    title: 'Members hero page',
+    slug: { _type: 'slug', current: 'mixed-hero' },
+    pageBuilder: [
+      { _key: key(), _type: 'hero', access: 'members', title: 'Secret first hero' },
+      { _key: key(), _type: 'richText', body: [block(['Public text under the hero.'])] },
+    ],
+  },
+  stripePrice('price_Starter1', 'Starter', 900, 'usd', 'month'),
+  stripePrice('price_Pro1', 'Pro', 2900, 'usd', 'month'),
+  // A name that editors override on the plan, a non-dollar currency and a yearly interval.
+  stripePrice('price_Team1', 'Team (yearly)', 29000, 'eur', 'year'),
+  // One-time, in a zero-decimal currency: the amount is whole yen, not hundredths.
+  stripePrice('price_Life1', 'Lifetime', 50000, 'jpy', null),
+  // Archived at Stripe: the plan that references it is left out, and checkout refuses it.
+  stripePrice('price_Old1', 'Retired', 100, 'usd', 'month', { active: false }),
+  {
+    _id: 'page-pricing',
+    _type: 'page',
+    title: 'Pricing',
+    slug: { _type: 'slug', current: 'pricing' },
+    pageBuilder: [
+      {
+        _key: key(),
+        _type: 'pricingTable',
+        title: 'Choose your plan',
+        intro: 'Prices are kept in step with Stripe.',
+        plans: [
+          plan('price_Starter1', {
+            features: ['One project', 'Email support'],
+            ctaLabel: 'Start small',
+          }),
+          plan('price_Pro1', {
+            features: ['Unlimited projects', 'Priority support', 'Custom domains'],
+            highlighted: true,
+          }),
+          plan('price_Team1', { name: 'Team', features: ['Everything in Pro', 'Ten seats'] }),
+          plan('price_Life1', { features: ['Pay once, use forever'] }),
+          plan('price_Old1', { name: 'Retired plan' }),
+        ],
+      },
     ],
   },
   {

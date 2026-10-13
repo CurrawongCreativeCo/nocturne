@@ -1,8 +1,9 @@
-import { Fragment, type ComponentType, type ReactNode } from 'react'
+import { Fragment, Suspense, type ComponentType, type ReactNode } from 'react'
 
+import { isMembersOnly } from '@/lib/sanity/access'
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
-import type { PageSection, SectionProps, SectionType } from '../types'
+import type { PageSection, SectionGate, SectionProps, SectionType } from '../types'
 import { CtaBanner } from './sections/cta-banner'
 import { Faq } from './sections/faq'
 import { FeaturesGrid } from './sections/features-grid'
@@ -10,6 +11,7 @@ import { FormSection } from './sections/form-section'
 import { Hero } from './sections/hero'
 import { LogoCloud } from './sections/logo-cloud'
 import { MediaText } from './sections/media-text'
+import { PricingTable } from './sections/pricing-table'
 import { RichText } from './sections/rich-text'
 import { Testimonials } from './sections/testimonials'
 // new-section:import
@@ -29,6 +31,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   faq: Faq,
   ctaBanner: CtaBanner,
   formSection: FormSection,
+  pricingTable: PricingTable,
   // new-section:register
 }
 
@@ -48,6 +51,14 @@ interface Props {
   greeting?: ReactNode
   /** Passed to every section; see `SectionProps.renderForm`. */
   renderForm?: SectionProps<SectionType>['renderForm']
+  /** Passed to every section; see `SectionProps.renderCheckout`. */
+  renderCheckout?: SectionProps<SectionType>['renderCheckout']
+  /**
+   * Set on public views: members-only sections arrive as stubs and are rendered here behind the
+   * gate. Leave it out where every section holds its content (draft mode, or inside a page that
+   * has already been unlocked).
+   */
+  gate?: SectionGate
 }
 
 export function SectionRenderer({
@@ -58,6 +69,8 @@ export function SectionRenderer({
   editable = false,
   greeting,
   renderForm,
+  renderCheckout,
+  gate,
 }: Props) {
   if (!sections?.length) return null
 
@@ -73,6 +86,7 @@ export function SectionRenderer({
               isFirst?: boolean
               greeting?: ReactNode
               renderForm?: Props['renderForm']
+              renderCheckout?: Props['renderCheckout']
             }>
           | undefined
 
@@ -84,6 +98,38 @@ export function SectionRenderer({
           return null
         }
 
+        // A locked section is a stub. Its content is fetched only once the gate has seen a session,
+        // inside <Suspense> because the gate reads the visitor's cookies.
+        const content =
+          gate && isMembersOnly(section.access) ? (
+            <Suspense fallback={null}>
+              {gate.render({
+                callbackUrl: gate.callbackUrl,
+                headingLevel: 2,
+                content: async () => {
+                  const full = await gate.load(section._key)
+                  // Not the first section of the page, so it never claims the <h1> or the LCP preload.
+                  return full ? (
+                    <Section
+                      data={full}
+                      greeting={greeting}
+                      renderForm={renderForm}
+                      renderCheckout={renderCheckout}
+                    />
+                  ) : null
+                },
+              })}
+            </Suspense>
+          ) : (
+            <Section
+              data={section}
+              isFirst={index === 0}
+              greeting={greeting}
+              renderForm={renderForm}
+              renderCheckout={renderCheckout}
+            />
+          )
+
         // A shared section's overlay opens the shared document, since that is what an edit changes.
         return editable ? (
           <div
@@ -94,21 +140,10 @@ export function SectionRenderer({
                 : dataAttr(documentId, documentType, `${path}[_key=="${section._key}"]`)
             }
           >
-            <Section
-              data={section}
-              isFirst={index === 0}
-              greeting={greeting}
-              renderForm={renderForm}
-            />
+            {content}
           </div>
         ) : (
-          <Section
-            key={section._key}
-            data={section}
-            isFirst={index === 0}
-            greeting={greeting}
-            renderForm={renderForm}
-          />
+          <Fragment key={section._key}>{content}</Fragment>
         )
       })}
     </Wrapper>

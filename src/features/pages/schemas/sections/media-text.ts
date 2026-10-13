@@ -1,6 +1,7 @@
 import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 export const mediaText = defineType({
@@ -27,6 +28,7 @@ export const mediaText = defineType({
       options: { list: ['left', 'right'], layout: 'radio', direction: 'horizontal' },
       validation: (rule) => rule.required(),
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title', media: 'image' },

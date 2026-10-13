@@ -14,6 +14,14 @@ export const REJECTED_CONSENT = JSON.stringify({
 })
 /** Signs the A/B variant codes (the flags package); any 32 random bytes. */
 export const FLAGS_SECRET = 'cHJpdmF0ZS1lMmUtZmxhZ3Mtc2VjcmV0LTMyLWJ5dGVz'
+/** Members-only content: Auth.js signs sessions with this, and the test sign-in form checks the password. */
+export const AUTH_SECRET = 'e2e-auth-secret-not-for-production-use'
+export const MEMBER_EMAIL = 'member@example.com'
+export const MEMBER_PASSWORD = 'e2e-member-password'
+/** Not on the members list (AUTH_ALLOWED_EMAILS below), though the password is right. */
+export const OUTSIDER_EMAIL = 'outsider@elsewhere.test'
+export const STRIPE_WEBHOOK_SECRET = 'whsec_e2e_secret'
+export const SANITY_WRITE_TOKEN = 'e2e-write-token'
 /** Content release the perspective test previews; Studio puts its id in the perspective cookie. */
 export const RELEASE_ID = 'rSummer'
 
@@ -34,6 +42,21 @@ export const APP_ENV = {
   EXPERIMENT_CACHE_SECONDS: '1',
   // Forms: Turnstile and Resend are replaced by mocks (the real services are never called).
   FORMS_TEST_MODE: '1',
+  // Members-only content: sessions are signed with AUTH_SECRET; the password form is test-only.
+  AUTH_SECRET,
+  AUTH_TRUST_HOST: 'true',
+  AUTH_TEST_MODE: '1',
+  AUTH_TEST_PASSWORD: MEMBER_PASSWORD,
+  AUTH_ALLOWED_EMAILS: '@example.com',
+  // Pricing: the Stripe API is the fake one served by fake-sanity.mjs, and the webhook writes through
+  // its mutate endpoint. Return URLs are set to check they are read (cancel would default to the
+  // page the buyer came from).
+  STRIPE_SECRET_KEY: 'sk_test_e2e',
+  STRIPE_WEBHOOK_SECRET,
+  SANITY_WRITE_TOKEN,
+  STRIPE_API_HOST: `http://localhost:${FAKE_SANITY_PORT}/__stripe`,
+  STRIPE_SUCCESS_URL: '/thanks?session_id={CHECKOUT_SESSION_ID}',
+  STRIPE_CANCEL_URL: '/pricing',
   // Analytics providers: all three on, so the consent banner shows and the consent spec can watch each load.
   NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
   NEXT_PUBLIC_POSTHOG_KEY: 'phc_e2e',

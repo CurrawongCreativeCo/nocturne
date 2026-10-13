@@ -1,6 +1,7 @@
 import { BlockContentIcon } from '@sanity/icons/BlockContent'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 export const hero = defineType({
@@ -26,6 +27,7 @@ export const hero = defineType({
       type: 'boolean',
       initialValue: false,
     }),
+    accessField,
   ],
   preview: {
     select: { title: 'title', media: 'backgroundImage' },

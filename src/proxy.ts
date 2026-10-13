@@ -1,7 +1,13 @@
 import { get } from '@vercel/edge-config'
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { BLOG_PATH, EXPERIMENT_PATH, SEARCH_PATH } from '@/config/paths'
+import {
+  BLOG_PATH,
+  EXPERIMENT_PATH,
+  SEARCH_PATH,
+  SIGN_IN_PATH,
+  SIGN_OUT_PATH,
+} from '@/config/paths'
 import {
   chooseOption,
   EXPERIMENT_COOKIE,
@@ -41,9 +47,9 @@ async function redirect(request: NextRequest) {
   return match ? NextResponse.redirect(new URL(match.to, request.url), match.status) : null
 }
 
-/** Only CMS pages have variants; the blog, search and variant routes themselves are left alone. */
+/** Only CMS pages have variants; the blog, search, sign-in and variant routes themselves are left alone. */
 function isPagePath(pathname: string) {
-  return ![BLOG_PATH, EXPERIMENT_PATH, SEARCH_PATH].some(
+  return ![BLOG_PATH, EXPERIMENT_PATH, SEARCH_PATH, SIGN_IN_PATH, SIGN_OUT_PATH].some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   )
 }

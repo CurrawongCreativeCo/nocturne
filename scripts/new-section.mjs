@@ -118,6 +118,8 @@ function schema() {
   return `import { BlockElementIcon } from '@sanity/icons/BlockElement'
 import { defineField, defineType } from 'sanity'
 
+import { accessField } from '@/lib/sanity/schema/access-field'
+
 export const ${typeName} = defineType({
   name: '${typeName}',
   title: '${title}',
@@ -126,6 +128,7 @@ export const ${typeName} = defineType({
   fields: [
     defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
     defineField({ name: 'text', type: 'text', rows: 3 }),
+    accessField,
   ],
   preview: {
     select: { title: 'title' },
@@ -137,7 +140,7 @@ export const ${typeName} = defineType({
 
 function fragment() {
   return `export const ${typeName}Fragment = /* groq */ \`
-  _type == "${typeName}" => {
+  _type == "${typeName}" && (access != "members" || $members) => {
     title,
     text
   }

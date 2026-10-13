@@ -34,6 +34,8 @@ const features = [
   'experiments',
   'consent',
   'search',
+  'auth',
+  'pricing',
 ]
 
 const crossFeatureZones = features.map((feature) => ({

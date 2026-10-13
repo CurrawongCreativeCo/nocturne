@@ -7,8 +7,12 @@ import {
   EXPERIMENT_SEGMENT,
   HOME_SLUG,
   SEARCH_SEGMENT,
+  SIGN_IN_SEGMENT,
+  SIGN_OUT_SEGMENT,
   slugToPath,
 } from '@/config/paths'
+import { ACCESS_MEMBERS } from '@/lib/sanity/access'
+import { accessField } from '@/lib/sanity/schema/access-field'
 
 import { sectionTypes } from './sections'
 
@@ -21,6 +25,8 @@ const RESERVED_SEGMENTS = new Set([
   BLOG_SEGMENT,
   EXPERIMENT_SEGMENT,
   SEARCH_SEGMENT,
+  SIGN_IN_SEGMENT,
+  SIGN_OUT_SEGMENT,
 ])
 
 export const page = defineType({
@@ -68,6 +74,13 @@ export const page = defineType({
         }),
     }),
     defineField({
+      ...accessField,
+      title: 'Who can see this page',
+      description:
+        'Members-only pages ask visitors to sign in first, and are left out of the sitemap, search and llms.txt.',
+      group: 'content',
+    }),
+    defineField({
       name: 'pageBuilder',
       title: 'Sections',
       type: 'array',
@@ -94,10 +107,10 @@ export const page = defineType({
     defineField({ name: 'seo', type: 'seo', group: 'seo' }),
   ],
   preview: {
-    select: { title: 'title', slug: 'slug.current' },
-    prepare: ({ title, slug }: { title?: string; slug?: string }) => ({
+    select: { title: 'title', slug: 'slug.current', access: 'access' },
+    prepare: ({ title, slug, access }: { title?: string; slug?: string; access?: string }) => ({
       title: title || 'Untitled',
-      subtitle: slugToPath(slug),
+      subtitle: `${slugToPath(slug)}${access === ACCESS_MEMBERS ? ' · Members only' : ''}`,
       media: slug === HOME_SLUG ? HomeIcon : DocumentIcon,
     }),
   },
