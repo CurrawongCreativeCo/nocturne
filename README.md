@@ -828,19 +828,29 @@ The A/B test spec starts a site-wide experiment, which rewrites every page reque
 CI fails when a page gets heavier or slower than these. They run against the same production build and fake
 Content Lake as the end-to-end tests.
 
-| Budget                                 | Limit   | Where it lives                                    |
-| -------------------------------------- | ------- | ------------------------------------------------- |
-| JavaScript loaded by `/` (gzipped)     | 200 KB  | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
-| Lighthouse performance (`/`, `/about`) | ≥ 0.9   | `lighthouserc.json`                               |
-| Lighthouse accessibility               | 1       | `lighthouserc.json`                               |
-| Cumulative Layout Shift                | ≤ 0.05  | `lighthouserc.json`                               |
-| Largest Contentful Paint               | ≤ 2.5 s | `lighthouserc.json`                               |
+| Budget                                 | Limit     | Where it lives                                    |
+| -------------------------------------- | --------- | ------------------------------------------------- |
+| JavaScript loaded by `/` (gzipped)     | 200 KB    | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
+| Lighthouse performance (`/`, `/about`) | ≥ 0.9     | `lighthouserc.json`                               |
+| Lighthouse accessibility               | 1         | `lighthouserc.json`                               |
+| Cumulative Layout Shift                | ≤ 0.05    | `lighthouserc.json`                               |
+| Largest Contentful Paint               | ≤ 2.5 s   | `lighthouserc.json`                               |
+| Client memory (30 rounds of browsing)  | see below | `tests/e2e/memory.spec.ts`                        |
 
 - **JavaScript:** the test fetches `/`, takes every `<script src>` in the HTML, gzips each file from
   `.next/static` (level 9) and adds them up (1 KB = 1000 bytes). Over budget, it lists every chunk, largest
   first. The total is about 190 KB today, so a new client-side dependency of even 10 KB trips it. Look first
   for a client component that can be a server component, or an import that can be lazy-loaded (as
   `draft-mode-tools.tsx` does).
+- **Client memory:** in one page session, the test repeats what a visitor does (client navigations, quick
+  search, the mobile menu on mobile, reopening the cookie banner) 10 times to warm up, then 20 more, and
+  compares Chrome's counts after forced garbage collection. Event listeners may grow by at most 10 and DOM nodes
+  by 150, just above the jitter of React briefly keeping the last subtree it removed; a leak grows them every
+  round (one listener per round fails it). The JS heap may grow by 3 MB, a
+  loose limit because Next.js's router cache drifts upward a little (about 0.5 MB today). A failure usually
+  means a client component adds a listener, timer, observer or subscription without removing it in its
+  `useEffect` cleanup; `quick-search-dialog.tsx` shows the pattern. To find it, see which counter grew and take
+  heap snapshots in Chrome DevTools (Memory → compare two snapshots, filter by `Detached`).
 - **Lighthouse:** `npm run test:lighthouse` (CI runs `npx lhci autorun`) starts the fake Content Lake and
   `next start` through `scripts/e2e-server.mjs`, which shares its env with `playwright.config.ts` via
   `tests/e2e/constants.ts`, then runs three Lighthouse passes per page and judges the median. It builds the
