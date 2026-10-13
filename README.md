@@ -51,6 +51,7 @@ Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, header menu and button, footer, and default SEO.
+- **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it.
 - **Redirects** send old URLs (e.g. from a previous site) to new ones: "From" `/about-us.html`, "To"
   `/about`. They only apply to paths with no page, so they can't hide a live page. Studio blocks

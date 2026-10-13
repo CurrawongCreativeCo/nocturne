@@ -1,12 +1,14 @@
 import { defineField, defineType } from 'sanity'
 
 import { imageField } from './image-field'
+import { SeoInput } from './seo-preview/seo-input'
 
 export const seo = defineType({
   name: 'seo',
   title: 'SEO',
   type: 'object',
   options: { collapsible: true, collapsed: false },
+  components: { input: SeoInput },
   fields: [
     defineField({
       name: 'metaTitle',

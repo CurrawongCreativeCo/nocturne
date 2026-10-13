@@ -983,6 +983,39 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
   }>
 }
 
+// Source: src/lib/sanity/schema/seo-preview/query.ts
+// Variable: SEO_PREVIEW_SETTINGS_QUERY
+// Query: *[_id == "settings"][0] { title, description, ogImage }
+export type SEO_PREVIEW_SETTINGS_QUERY_RESULT =
+  | {
+      title: null
+      description: null
+      ogImage: null
+    }
+  | {
+      title: string
+      description: null
+      ogImage: null
+    }
+  | {
+      title: string | null
+      description: string | null
+      ogImage: null
+    }
+  | {
+      title: string
+      description: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+    }
+  | null
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -991,6 +1024,7 @@ declare global {
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
+    '\n  *[_id == "settings"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too
