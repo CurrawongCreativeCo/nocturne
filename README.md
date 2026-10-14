@@ -271,6 +271,7 @@ src/
     llms.txt/route.ts                /llms.txt for AI tools (404 when AI crawlers are off)
     (site)/search/page.tsx           /search?q= results (dynamic, no static shell)
     api/search/route.ts              JSON for the quick search dialog
+    api/site-info/route.ts           template version, configured features, commit, build time (JSON, prerendered)
     api/stripe/webhook/route.ts      Stripe webhook: keeps stripePrice documents in step with Stripe
     api/auth/[...nextauth]/route.ts  Auth.js handlers (OAuth callbacks, session)
     (site)/sign-in, (site)/sign-out  sign-in and sign-out pages
@@ -448,6 +449,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **`/llms.txt` and `robots.txt`** add none: the page list is the cached `PAGE_INDEX_QUERY` and `BLOG_INDEX_QUERY` (which also carry titles and descriptions) and the switch comes with the cached `SETTINGS_QUERY`. `/llms.txt` renders per request (`connection()`), because a prerendered route that starts answering 404 would keep serving its old copy; each hit only reads those cache entries.
 - **Search** adds one query, `SEARCH_QUERY`, per distinct query text, and nothing to a page view: the header trigger is a small client component and the dialog's code downloads on first use. Results are cached for a short time (`shortLivedSanityFetch`: 60 s, then stale for up to 5 min), because a page that starts matching (new or reworded) is not in a cached result and so never expires it; the `page` tag still expires entries sooner. The `/search` page and `/api/search` share one entry per text, and `/api/search` also sends `s-maxage=60` for a CDN. Typing in the dialog waits 250 ms between requests and cancels stale ones.
 - **Breadcrumbs** add none: they are built from the cached `PAGE_INDEX_QUERY` (slug and title).
+- **`/api/site-info`** adds none: it is prerendered and reads only environment variables.
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
@@ -1185,15 +1187,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                 | Expect                              |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`                                                                                                                                                                                                                                                                            | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                           | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                  | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                       | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url,brand}.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                               | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                  | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                              | Expect                              |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`                                                                                                                                                                                                                                                                                                                                         | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                        | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                               | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                    | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url,brand}.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                            | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                               | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design
@@ -1201,12 +1203,53 @@ tweaks to feature components (`src/features/*/components`) conflict like customi
 projects keep editing the same core file, see [docs/template-packaging.md](docs/template-packaging.md)
 for when to extract it into a versioned package.
 
+### Template version and `/api/site-info`
+
+`template-version.json` at the repo root holds `{ "version": "1.2.0", "released": "2026-10-14" }`, the template release this
+site was last brought up to. `src/config/template-version.ts` reads it. It is a core file: when you merge a template tag,
+take the template's copy.
+
+`GET /api/site-info` reports it for the Ops dashboard:
+
+```json
+{
+  "templateVersion": "1.2.0",
+  "features": {
+    "forms": true,
+    "newsletter": false,
+    "pricing": false,
+    "members": true,
+    "analytics": true,
+    "sentry": false
+  },
+  "commit": "9f53519…",
+  "builtAt": "2026-10-14T03:21:09.412Z"
+}
+```
+
+- `features` says whether each feature's environment is complete, using the checks the features themselves use (forms:
+  Turnstile, Resend and the from address; newsletter: also a provider; pricing: `STRIPE_SECRET_KEY`; members: at least one
+  sign-in provider; analytics: at least one provider; sentry: `SENTRY_DSN`). It never contains a key or any other env value.
+- `commit` is `VERCEL_GIT_COMMIT_SHA` (`null` off Vercel); `builtAt` is stamped by `next.config.ts` when the site is built.
+- The response is prerendered and cached, so it costs no Sanity request and reflects the environment of the **last build**:
+  after changing an environment variable, redeploy.
+- A CMS page with a slug starting `api/` would clash with it, as with the other `/api` routes.
+
 ### Cutting a release (template maintainers)
 
-1. Move the _Unreleased_ entries in `CHANGELOG.md` under a new `## [x.y.z] - date` heading, fill in
-   _Breaking changes / migration steps_ (write "None." if there are none), and update the compare links.
-2. Run `npm run check` and `npm run test:e2e`, commit, then `git tag -a vx.y.z -m "vx.y.z"` and
-   `git push origin main vx.y.z`.
+1. Make sure `main` has everything and `npm run check`, `npm run test:e2e` and `npm run test:lighthouse` pass.
+2. Run `npm run release -- 1.2.0` (add `--date YYYY-MM-DD` to override today). It checks the version is greater than
+   `template-version.json`'s, moves the _Unreleased_ entries in `CHANGELOG.md` under a `## [1.2.0] - date` heading (empty
+   subsections are dropped; _Breaking changes / migration steps_ is kept and says "None." when empty), refreshes the
+   compare links and `template-version.json`, and leaves a fresh _Unreleased_ block. Write the migration steps in
+   _Unreleased_ **before** running it.
+3. Review the diff, then `npm run format`, `npm run check` and `npm run test:e2e`.
+4. The script prints the git commands to commit, then tag and push (`git tag -a vx.y.z -m "vx.y.z"`,
+   `git push origin main vx.y.z`). It never runs git or pushes. Never force-push a tag or `main`.
+
+CI runs `npm run check:version` and fails when `template-version.json` doesn't match the latest `CHANGELOG.md` version
+heading (or its date), so a release can't be tagged with one of them forgotten. `scripts/release-utils.test.mjs` tests
+the changelog transformation.
 
 ## Notes
 
