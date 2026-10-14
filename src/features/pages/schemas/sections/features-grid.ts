@@ -3,6 +3,15 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
+import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+
+/** Longest text the design handles. Longer text still publishes, with a warning. */
+const LIMITS = {
+  // text-h2, balanced.
+  title: 70,
+  // text-lead in max-w-measure-narrow: about four lines.
+  intro: 200,
+} as const
 
 export const featuresGrid = defineType({
   name: 'featuresGrid',
@@ -10,8 +19,18 @@ export const featuresGrid = defineType({
   type: 'object',
   icon: ThLargeIcon,
   fields: [
-    defineField({ name: 'title', title: 'Section title', type: 'string' }),
-    defineField({ name: 'intro', type: 'text', rows: 2 }),
+    defineField({
+      name: 'title',
+      title: 'Section title',
+      type: 'string',
+      validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+    }),
+    defineField({
+      name: 'intro',
+      type: 'text',
+      rows: 2,
+      validation: (rule) => lengthWarning(rule, LIMITS.intro, 'Intro text'),
+    }),
     defineField({
       name: 'columns',
       type: 'number',

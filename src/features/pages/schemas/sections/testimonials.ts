@@ -3,6 +3,13 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
+import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+
+/** Longest text the design handles. Longer text still publishes, with a warning. */
+const LIMITS = {
+  // text-h2, balanced over max-w-measure-narrow.
+  title: 60,
+} as const
 
 export const testimonials = defineType({
   name: 'testimonials',
@@ -10,7 +17,12 @@ export const testimonials = defineType({
   type: 'object',
   icon: CommentIcon,
   fields: [
-    defineField({ name: 'title', title: 'Section title', type: 'string' }),
+    defineField({
+      name: 'title',
+      title: 'Section title',
+      type: 'string',
+      validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+    }),
     defineField({
       name: 'items',
       title: 'Testimonials',
@@ -29,7 +41,7 @@ export const testimonials = defineType({
             }),
             defineField({ name: 'name', type: 'string', validation: (rule) => rule.required() }),
             defineField({ name: 'role', type: 'string', description: 'e.g. "CEO, Acme"' }),
-            imageField({ name: 'avatar', requireAlt: false }),
+            imageField({ name: 'avatar', requireAlt: false, aspect: '1:1', minWidth: 800 }),
           ],
           preview: { select: { title: 'name', subtitle: 'quote', media: 'avatar' } },
         }),

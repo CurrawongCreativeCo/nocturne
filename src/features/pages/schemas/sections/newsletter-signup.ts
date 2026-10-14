@@ -2,6 +2,15 @@ import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+
+/** Longest text the design handles. Longer text still publishes, with a warning. */
+const LIMITS = {
+  // text-h2 in max-w-measure-narrow.
+  title: 60,
+  // text-lead in max-w-measure-narrow: about four lines.
+  text: 200,
+} as const
 
 export const newsletterSignup = defineType({
   name: 'newsletterSignup',
@@ -13,9 +22,14 @@ export const newsletterSignup = defineType({
       name: 'title',
       title: 'Heading',
       type: 'string',
-      validation: (rule) => rule.required(),
+      validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
     }),
-    defineField({ name: 'text', type: 'text', rows: 3 }),
+    defineField({
+      name: 'text',
+      type: 'text',
+      rows: 3,
+      validation: (rule) => lengthWarning(rule, LIMITS.text, 'Intro text'),
+    }),
     defineField({
       name: 'submitLabel',
       title: 'Button label',

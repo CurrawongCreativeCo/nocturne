@@ -20,6 +20,14 @@ you start a release.
 
 ### Added
 
+- **Image and text guidance.** `imageField` takes `aspect`, `minWidth`, `orientation` and `preferSvg`: the
+  description gains "Recommended: 2400 × 1600 px, landscape." and Studio warns (never errors) when the
+  uploaded picture is too narrow or more than 15% off the target shape, in plain English. The comparison is
+  the pure, tested `describeImageProblem`. Applied to hero backgrounds (2400 px wide), _Image + text_
+  (1600 px, 4:3), testimonial and author portraits (800 px, square) and logos (SVG preferred). New
+  `lengthWarning` helper warns when section titles and intro text exceed the design (limits in a `LIMITS`
+  constant beside each section schema).
+
 - **CMS brand system.** The Studio now has its own brand, separate from the public design tokens:
   Currawong defaults in `src/config/studio-brand/currawong.ts`, an optional per-site `studio-brand.json`
   (default `{}`) with logo files in `src/assets/brand/client/`, and `resolveStudioBrand` with the
