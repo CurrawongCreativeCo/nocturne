@@ -3,8 +3,8 @@ import { join } from 'node:path'
 
 import { ImageResponse } from 'next/og'
 
-import { brandColorHex } from '@/config/brand'
 import { segmentsToSlug } from '@/config/paths'
+import { ogImage } from '@/config/tokens.generated'
 import { getPage, getPageStaticParams } from '@/features/pages/api/get-page'
 import { OG_TITLE_MAX_LINES, ogTitleFontSize } from '@/features/pages/utils/og-title'
 import { getSettings } from '@/features/site/api/get-settings'
@@ -43,8 +43,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: 80,
-        background: brandColorHex,
-        color: '#fff',
+        background: ogImage.background,
+        color: ogImage.foreground,
         fontFamily: 'Inter',
       }}
     >

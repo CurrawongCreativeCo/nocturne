@@ -4,7 +4,7 @@ import type { SectionProps } from '../../types'
 
 export function RichText({ data }: SectionProps<'richText'>) {
   return (
-    <section className="mx-auto max-w-3xl px-6 py-16 text-lg text-gray-800">
+    <section className="mx-auto max-w-measure px-gutter py-section-compact text-lead text-ink">
       <RichTextBody value={data.body} />
     </section>
   )

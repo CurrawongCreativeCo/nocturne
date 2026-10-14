@@ -16,9 +16,9 @@ export async function SiteHeader({ search, ...mode }: FetchMode & { search?: Rea
   const cta = settings?.headerCta?.link ? settings.headerCta : null
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6">
-        <Link href="/" className="flex items-center text-lg font-semibold">
+    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-6 px-gutter">
+        <Link href="/" className="flex items-center text-lead font-semibold">
           {settings?.logo?.asset ? (
             // Eager, not preloaded: the hero image is the page's LCP and should win the bandwidth.
             <SanityImage
@@ -39,7 +39,7 @@ export async function SiteHeader({ search, ...mode }: FetchMode & { search?: Rea
               <SanityLink
                 key={item._key}
                 link={item.link}
-                className="text-sm font-medium text-gray-700 hover:text-gray-950"
+                className="text-small font-medium text-ink-muted hover:text-ink"
               >
                 {item.label}
               </SanityLink>
@@ -55,7 +55,7 @@ export async function SiteHeader({ search, ...mode }: FetchMode & { search?: Rea
                 <SanityLink
                   key={item._key}
                   link={item.link}
-                  className="rounded-md px-2 py-2 font-medium hover:bg-gray-100"
+                  className="rounded-control px-2 py-2 font-medium hover:bg-surface-alt"
                 >
                   {item.label}
                 </SanityLink>

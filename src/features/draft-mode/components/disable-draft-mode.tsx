@@ -15,7 +15,7 @@ export function DisableDraftMode() {
     <aside aria-label="Draft mode">
       <a
         href={`/api/draft-mode/disable?redirect=${encodeURIComponent(pathname)}`}
-        className="fixed right-4 bottom-4 z-50 rounded-full bg-gray-950 px-4 py-2 text-sm text-white shadow-lg focus-visible:outline-white"
+        className="fixed right-4 bottom-4 z-50 rounded-button bg-surface-inverse px-4 py-2 text-small text-ink-inverse shadow-raised focus-visible:outline-ink-inverse"
       >
         Exit preview
       </a>

@@ -12,16 +12,16 @@ interface Props {
 export function SignInPrompt({ callbackUrl, headingLevel }: Props) {
   const title = 'Members only'
   return (
-    <div className="mx-auto my-12 max-w-3xl rounded-lg border border-gray-200 bg-gray-50 px-6 py-12 text-center">
+    <div className="mx-auto my-12 max-w-measure rounded-control border border-line bg-surface-alt px-gutter py-12 text-center">
       {headingLevel === 1 ? (
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-950">{title}</h1>
+        <h1 className="text-h2 font-semibold text-ink">{title}</h1>
       ) : (
-        <h2 className="text-2xl font-semibold tracking-tight text-gray-950">{title}</h2>
+        <h2 className="text-h3 font-semibold text-ink">{title}</h2>
       )}
-      <p className="mt-3 text-gray-700">Sign in to see this content.</p>
+      <p className="mt-3 text-ink-muted">Sign in to see this content.</p>
       <Link
         href={signInPath(callbackUrl)}
-        className="mt-6 inline-flex items-center justify-center rounded-full bg-gray-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+        className="mt-6 inline-flex items-center justify-center rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse transition-colors hover:bg-surface-inverse/85"
       >
         Sign in
       </Link>

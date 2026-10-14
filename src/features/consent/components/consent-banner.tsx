@@ -19,9 +19,9 @@ const DEFAULTS = {
 
 // Accept and Reject share one style on purpose: neither may look like the "right" answer.
 const BUTTON =
-  'inline-flex min-h-11 items-center justify-center rounded-md px-5 py-2 text-sm font-semibold focus-visible:outline-white'
-const FILLED = `${BUTTON} bg-white text-gray-950 hover:bg-gray-200`
-const OUTLINED = `${BUTTON} border border-white text-white hover:bg-white/10`
+  'inline-flex min-h-11 items-center justify-center rounded-control px-5 py-2 text-small font-semibold focus-visible:outline-ink-inverse'
+const FILLED = `${BUTTON} bg-ink-inverse text-surface-inverse hover:bg-ink-inverse/85`
+const OUTLINED = `${BUTTON} border border-ink-inverse text-ink-inverse hover:bg-ink-inverse/10`
 
 /**
  * The consent banner: a fixed, labelled region (not a modal, so the page stays usable and nothing is
@@ -74,18 +74,18 @@ function Banner({ copy, current }: { copy?: ConsentCopy | null; current: StoredC
       ref={region}
       aria-labelledby="consent-title"
       tabIndex={-1}
-      className="fixed inset-x-0 bottom-0 z-40 max-h-[90dvh] overflow-y-auto border-t border-white/20 bg-gray-950 text-white shadow-2xl"
+      className="fixed inset-x-0 bottom-0 z-40 max-h-[90dvh] overflow-y-auto border-t border-ink-inverse/20 bg-surface-inverse text-ink-inverse shadow-raised"
     >
-      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-3xl">
+      <div className="mx-auto flex max-w-content flex-col gap-5 px-gutter py-5 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-measure">
           <p id="consent-title" className="font-semibold">
             {title}
           </p>
-          <p className="mt-1 text-sm text-gray-300">
+          <p className="mt-1 text-small text-ink-inverse-muted">
             {message}{' '}
             <SanityLink
               link={copy?.privacyLink}
-              className="text-white underline underline-offset-2 hover:no-underline focus-visible:outline-white"
+              className="text-ink-inverse underline underline-offset-2 hover:no-underline focus-visible:outline-ink-inverse"
             >
               {copy?.privacyLabel || DEFAULTS.privacyLabel}
             </SanityLink>
@@ -177,13 +177,13 @@ function Choice({
         disabled={disabled}
         aria-describedby={`${id}-text`}
         onChange={(event) => onChange?.(event.target.checked)}
-        className="mt-1 size-4 accent-white focus-visible:outline-white"
+        className="mt-1 size-4 accent-ink-inverse focus-visible:outline-ink-inverse"
       />
       <div>
         <label htmlFor={id} className="block font-medium">
           {label}
         </label>
-        <p id={`${id}-text`} className="text-sm text-gray-300">
+        <p id={`${id}-text`} className="text-small text-ink-inverse-muted">
           {text}
         </p>
       </div>

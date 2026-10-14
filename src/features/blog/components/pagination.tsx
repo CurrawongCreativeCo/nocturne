@@ -10,7 +10,7 @@ interface Props {
 }
 
 const linkClass =
-  'rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100'
+  'rounded-control border border-line px-4 py-2 text-small font-medium text-ink hover:bg-surface-alt'
 
 export function Pagination({ basePath, page, totalPages }: Props) {
   if (totalPages <= 1) return null
@@ -24,7 +24,7 @@ export function Pagination({ basePath, page, totalPages }: Props) {
           </Link>
         )}
       </div>
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-small text-ink-muted">
         Page {page} of {totalPages}
       </p>
       <div className="text-right">

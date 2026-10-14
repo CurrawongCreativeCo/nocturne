@@ -38,7 +38,7 @@ export function QuickSearch({ className = '' }: { className?: string }) {
         prefetch={false}
         aria-keyshortcuts="Control+K Meta+K"
         aria-haspopup="dialog"
-        className={`flex size-10 items-center justify-center rounded-md hover:bg-gray-100 ${className}`}
+        className={`flex size-10 items-center justify-center rounded-control hover:bg-surface-alt ${className}`}
         onPointerEnter={() => void loadDialog()}
         onFocus={() => void loadDialog()}
         onClick={(event) => {

@@ -15,7 +15,7 @@ export function Hero({ data, isFirst = false, greeting }: SectionProps<'hero'>) 
   const Heading = isFirst ? 'h1' : 'h2'
 
   return (
-    <section className="relative isolate overflow-hidden bg-gray-950 text-white">
+    <section className="relative isolate overflow-hidden bg-surface-inverse text-ink-inverse">
       <SanityImage
         image={backgroundImage}
         fill
@@ -23,14 +23,14 @@ export function Hero({ data, isFirst = false, greeting }: SectionProps<'hero'>) 
         sizes="100vw"
         className="-z-10 object-cover opacity-40"
       />
-      <div className="mx-auto max-w-4xl px-6 py-32 text-center sm:py-48">
-        <Heading className="text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
-          {title}
-        </Heading>
+      <div className="mx-auto max-w-4xl px-gutter py-section-spacious text-center">
+        <Heading className="text-display font-semibold text-balance">{title}</Heading>
         {/* Request-time (cookie) content: the page stays prerendered around this boundary. */}
         {showGreeting && <Suspense fallback={null}>{greeting}</Suspense>}
         {description && (
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-pretty text-gray-300">{description}</p>
+          <p className="mx-auto mt-6 max-w-measure-narrow text-lead text-pretty text-ink-inverse-muted">
+            {description}
+          </p>
         )}
         <CtaGroup ctas={ctas} className="mt-10 justify-center" />
       </div>

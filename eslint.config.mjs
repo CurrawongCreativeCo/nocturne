@@ -142,6 +142,7 @@ export default defineConfig([
     'node_modules/**',
     'next-env.d.ts',
     'src/types/sanity.types.ts',
+    'src/config/tokens.generated.ts',
     'public/**',
   ]),
 ])

@@ -36,20 +36,27 @@ export async function SearchView({
     <>
       <SearchForm defaultValue={parsed.ok ? parsed.q : ''} />
       {/* Always rendered, so the live region exists before its text changes. */}
-      <p role="status" aria-live="polite" aria-atomic="true" className="mt-6 min-h-6 text-gray-700">
+      <p
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="mt-6 min-h-6 text-ink-muted"
+      >
         {status}
       </p>
       {results.length > 0 && (
         <ul className="mt-6 space-y-8">
           {results.map((result) => (
             <li key={result.path}>
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-h4 font-semibold">
                 <Link href={result.path} className="underline-offset-4 hover:underline">
                   {result.title}
                 </Link>
               </h2>
-              <p className="mt-1 text-sm text-gray-600">{result.path}</p>
-              {result.snippet && <p className="mt-2 max-w-prose text-gray-700">{result.snippet}</p>}
+              <p className="mt-1 text-small text-ink-muted">{result.path}</p>
+              {result.snippet && (
+                <p className="mt-2 max-w-prose text-ink-muted">{result.snippet}</p>
+              )}
             </li>
           ))}
         </ul>

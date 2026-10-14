@@ -108,17 +108,17 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
       ref={dialogRef}
       aria-labelledby={`${inputId}-title`}
       onClose={onClose}
-      className="mx-auto mt-[10vh] mb-auto max-h-[80vh] w-[min(40rem,calc(100vw-2rem))] overflow-y-auto rounded-xl bg-white p-0 text-gray-950 shadow-2xl backdrop:bg-gray-950/50"
+      className="mx-auto mt-[10vh] mb-auto max-h-[80vh] w-[min(40rem,calc(100vw-2rem))] overflow-y-auto rounded-card bg-surface p-0 text-ink shadow-raised backdrop:bg-surface-inverse/50"
     >
       <div className="p-5 sm:p-6">
         <div className="flex items-center justify-between gap-4">
-          <h2 id={`${inputId}-title`} className="text-lg font-semibold">
+          <h2 id={`${inputId}-title`} className="text-lead font-semibold">
             Search
           </h2>
           <button
             type="button"
             onClick={() => dialogRef.current?.close()}
-            className="cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            className="cursor-pointer rounded-control px-3 py-1.5 text-small font-medium text-ink-muted hover:bg-surface-alt"
           >
             Close
           </button>
@@ -138,11 +138,11 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
             maxLength={MAX_QUERY_LENGTH}
             autoComplete="off"
             placeholder="Search this site"
-            className="min-w-0 flex-1 rounded-full border border-gray-500 px-5 py-2.5 text-base placeholder:text-gray-600"
+            className="min-w-0 flex-1 rounded-pill border border-line-strong px-5 py-2.5 text-body placeholder:text-ink-muted"
           />
           <button
             type="submit"
-            className="cursor-pointer rounded-full bg-gray-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+            className="cursor-pointer rounded-button bg-surface-inverse px-5 py-2.5 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
           >
             All results
           </button>
@@ -151,22 +151,22 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          className="mt-4 min-h-6 text-sm text-gray-700"
+          className="mt-4 min-h-6 text-small text-ink-muted"
         >
           {status}
         </p>
         {results.length > 0 && (
-          <ul className="mt-2 divide-y divide-gray-200">
+          <ul className="mt-2 divide-y divide-line">
             {results.map((result) => (
               <li key={result.path}>
                 <Link
                   href={result.path}
                   onClick={() => dialogRef.current?.close()}
-                  className="-mx-2 block rounded-md px-2 py-3 hover:bg-gray-100"
+                  className="-mx-2 block rounded-control px-2 py-3 hover:bg-surface-alt"
                 >
                   <span className="block font-semibold">{result.title}</span>
                   {result.snippet && (
-                    <span className="mt-1 block text-sm text-gray-700">{result.snippet}</span>
+                    <span className="mt-1 block text-small text-ink-muted">{result.snippet}</span>
                   )}
                 </Link>
               </li>

@@ -47,11 +47,11 @@ export function SearchForm({ defaultValue = '' }: { defaultValue?: string }) {
         required
         autoComplete="off"
         placeholder="Search this site"
-        className="min-w-0 flex-1 rounded-full border border-gray-500 px-5 py-3 text-base placeholder:text-gray-600"
+        className="min-w-0 flex-1 rounded-pill border border-line-strong px-5 py-3 text-body placeholder:text-ink-muted"
       />
       <button
         type="submit"
-        className="cursor-pointer rounded-full bg-gray-950 px-6 py-3 text-sm font-semibold text-white hover:bg-gray-800"
+        className="cursor-pointer rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
       >
         Search
       </button>

@@ -9,9 +9,9 @@ interface Props {
   current: string | null
 }
 
-const pill = 'rounded-full border px-4 py-1.5 text-sm font-medium'
-const idle = 'border-gray-300 text-gray-900 hover:bg-gray-100'
-const active = 'border-gray-900 bg-gray-900 text-white'
+const pill = 'rounded-pill border px-4 py-1.5 text-small font-medium'
+const idle = 'border-line text-ink hover:bg-surface-alt'
+const active = 'border-ink bg-surface-inverse text-ink-inverse'
 
 /** Filter links: "All" plus each category that has a post. Renders nothing when there are none. */
 export function CategoryNav({ categories, current }: Props) {

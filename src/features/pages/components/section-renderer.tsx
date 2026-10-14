@@ -159,7 +159,7 @@ export function SectionRenderer({
 
 function UnknownSection({ type }: { type: string }) {
   return (
-    <div className="mx-auto my-8 max-w-3xl rounded border border-dashed border-amber-500 bg-amber-50 p-6 text-center text-amber-900">
+    <div className="mx-auto my-8 max-w-measure rounded-sm border border-dashed border-warning bg-warning-surface p-6 text-center text-warning-ink">
       No component registered for section <code>{type}</code>. Add it to{' '}
       <code>section-renderer.tsx</code>.
     </div>

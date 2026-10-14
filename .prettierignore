@@ -1,5 +1,7 @@
 # Generated
 src/types/sanity.types.ts
+src/styles/tokens.generated.css
+src/config/tokens.generated.ts
 schema.json
 next-env.d.ts
 AGENTS.md

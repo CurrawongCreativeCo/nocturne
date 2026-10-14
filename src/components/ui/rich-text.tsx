@@ -11,15 +11,11 @@ import type { SanityImageData } from '@/types/sanity'
 const components: PortableTextComponents = {
   block: {
     normal: ({ children }) => <p className="my-4 leading-relaxed">{children}</p>,
-    h2: ({ children }) => (
-      <h2 className="mt-10 mb-4 text-3xl font-semibold tracking-tight">{children}</h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className="mt-8 mb-3 text-2xl font-semibold tracking-tight">{children}</h3>
-    ),
-    h4: ({ children }) => <h4 className="mt-6 mb-2 text-lg font-semibold">{children}</h4>,
+    h2: ({ children }) => <h2 className="mt-10 mb-4 text-h2 font-semibold">{children}</h2>,
+    h3: ({ children }) => <h3 className="mt-8 mb-3 text-h3 font-semibold">{children}</h3>,
+    h4: ({ children }) => <h4 className="mt-6 mb-2 text-lead font-semibold">{children}</h4>,
     blockquote: ({ children }) => (
-      <blockquote className="my-6 border-l-4 border-brand pl-4 text-lg text-gray-700 italic">
+      <blockquote className="my-6 border-l-4 border-accent pl-4 text-lead text-ink-muted italic">
         {children}
       </blockquote>
     ),
@@ -30,12 +26,14 @@ const components: PortableTextComponents = {
   },
   marks: {
     code: ({ children }) => (
-      <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-sm">{children}</code>
+      <code className="rounded-sm bg-surface-alt px-1.5 py-0.5 font-mono text-small">
+        {children}
+      </code>
     ),
     link: ({ value, children }) => (
       <SanityLink
         link={value as LinkData}
-        className="font-medium text-brand underline underline-offset-2"
+        className="font-medium text-accent underline underline-offset-2"
       >
         {children}
       </SanityLink>
@@ -48,10 +46,10 @@ const components: PortableTextComponents = {
           image={value as SanityImageData}
           width={1200}
           sizes="(min-width: 768px) 768px, 100vw"
-          className="rounded-lg"
+          className="rounded-control"
         />
         {(value as { caption?: string }).caption && (
-          <figcaption className="mt-2 text-sm text-gray-500">
+          <figcaption className="mt-2 text-small text-ink-muted">
             {(value as { caption?: string }).caption}
           </figcaption>
         )}

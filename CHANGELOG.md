@@ -20,12 +20,28 @@ you start a release.
 
 ### Added
 
+- **Design tokens.** `src/styles/tokens.json` is the one file that re-skins a site: semantic colours
+  (`surface`, `ink`, `accent`, `line`, `focus`, status colours), fonts, a fluid type scale, section
+  spacing, widths, radii, shadows and motion. `npm run tokens` (also run by `typegen`, `build` and
+  `dev`) writes `src/styles/tokens.generated.css` (Tailwind 4 `@theme` plus `:root` variables) and
+  `src/config/tokens.generated.ts` (hex and oklch values, motion in seconds). CI fails when the
+  generated files are stale.
+- Tests: generated output matches `tokens.json`; every token pairing reaches WCAG 2.2 AA contrast
+  (`src/lib/contrast.ts`); no component uses a raw palette class (`palette-ok: <reason>` is the escape hatch).
+- README "Design tokens" section.
 - `npm run check:dataset` (`scripts/check-dataset.mjs`) fails when the dataset is public.
 - A test that fails if a client module imports `lib/sanity/token.ts`.
 - README "Dataset privacy" section and a deploy checklist step.
 
 ### Changed
 
+- Every section, shared component, the header, footer, mobile menu, announcement bar, blog, forms, search, auth and
+  consent views use semantic token utilities (`bg-surface`, `text-ink-muted`, `py-section`, `text-h2`, `rounded-card`)
+  instead of Tailwind greys, widths and `py-24`. The defaults reproduce the previous look; see the README for the
+  few places a grey step collapsed into a token.
+- The OG image and the Studio logo read `src/config/tokens.generated.ts`. `src/config/brand.ts` stays as a
+  deprecated alias, `brand.test.ts` is replaced by the token tests, and `--color-brand`, `bg-brand` and
+  `text-brand-foreground` are aliases of `accent` and `accent-ink`.
 - The setup wizard creates datasets as **private**, and server-side published reads send the Viewer token
   (still through the API CDN). The fake Content Lake used by the e2e tests now refuses reads without a token.
 
@@ -33,6 +49,9 @@ you start a release.
 
 ### Breaking changes / migration steps
 
+- **Design tokens:** merge `src/styles/globals.css` (it now imports `tokens.generated.css`; your `--color-brand` moves
+  to `accent` in `src/styles/tokens.json`), run `npm run tokens`, commit the generated files, then replace raw palette
+  classes in your own sections with token utilities (`npm test` lists them). Visual baselines need refreshing.
 - **Existing sites:** after deploying this change, switch the dataset to private (sanity.io/manage → API → Datasets, or
   `npx sanity dataset visibility set <dataset> private`), then run `npm run check:dataset`. Make sure
   `SANITY_API_READ_TOKEN` is set in every environment first. Sanity's Free plan only offers public datasets; check sanity.io/pricing.

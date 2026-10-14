@@ -30,13 +30,13 @@ export function PostCard({ post, headingLevel: Heading = 'h2', preload = false }
         height={450}
         preload={preload}
         sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
-        className="aspect-video w-full rounded-xl object-cover"
+        className="aspect-video w-full rounded-card object-cover"
       />
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-small text-ink-muted">
         <time dateTime={publishedAt}>{formatDate(publishedAt, siteLanguage)}</time>
         {author && <> · {author}</>}
       </p>
-      <Heading className="mt-2 text-xl font-semibold tracking-tight text-balance">
+      <Heading className="mt-2 text-h4 font-semibold text-balance">
         <Link
           href={postPath(stegaClean(post.slug))}
           className="group-hover:underline after:absolute after:inset-0"
@@ -44,7 +44,7 @@ export function PostCard({ post, headingLevel: Heading = 'h2', preload = false }
           {post.title}
         </Link>
       </Heading>
-      <p className="mt-2 text-gray-600">{post.excerpt}</p>
+      <p className="mt-2 text-ink-muted">{post.excerpt}</p>
     </article>
   )
 }

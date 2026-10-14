@@ -1,9 +1,9 @@
 import { Flex, Text } from '@sanity/ui'
 import type { LogoProps } from 'sanity'
 
-import { brandColor, brandForegroundColor } from '@/config/brand'
+import { studioBrand } from '@/config/tokens.generated'
 
-/** The Studio's navbar logo: the site name (the config `title`) beside a small mark in the brand color. */
+/** The Studio's navbar logo: the site name (the config `title`) beside a small mark in the `accent` design token. */
 export function StudioLogo({ title }: LogoProps) {
   return (
     <Flex align="center" gap={2}>
@@ -15,8 +15,8 @@ export function StudioLogo({ title }: LogoProps) {
           width: 24,
           height: 24,
           borderRadius: 6,
-          background: brandColor,
-          color: brandForegroundColor,
+          background: studioBrand.color,
+          color: studioBrand.foreground,
           fontSize: 14,
           fontWeight: 700,
           lineHeight: 1,

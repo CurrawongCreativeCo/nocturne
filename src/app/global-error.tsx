@@ -25,17 +25,19 @@ export default function GlobalError({
 
   return (
     <html lang={siteLanguage}>
-      <body className="flex min-h-dvh items-center justify-center bg-white font-sans text-gray-950 antialiased">
-        <main className="max-w-xl px-6 text-center">
-          <h1 className="text-4xl font-semibold">Something went wrong</h1>
-          <p className="mt-4 text-gray-600">
+      <body className="flex min-h-dvh items-center justify-center bg-surface font-body text-ink antialiased">
+        <main className="max-w-xl px-gutter text-center">
+          <h1 className="text-h1 font-semibold">Something went wrong</h1>
+          <p className="mt-4 text-ink-muted">
             The site couldn&apos;t be loaded. Please try again in a moment.
           </p>
-          {error.digest && <p className="mt-2 text-sm text-gray-500">Reference: {error.digest}</p>}
+          {error.digest && (
+            <p className="mt-2 text-small text-ink-muted">Reference: {error.digest}</p>
+          )}
           <button
             type="button"
             onClick={reset}
-            className="mt-8 rounded-full bg-gray-950 px-6 py-3 text-sm font-semibold text-white hover:bg-gray-800"
+            className="mt-8 rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
           >
             Try again
           </button>

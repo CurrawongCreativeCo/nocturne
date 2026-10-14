@@ -1,27 +1,29 @@
 @import 'tailwindcss';
 
-@theme {
-  /* --font-inter is set by next/font in app/layout.tsx; swap the font there. */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-
-  /*
-   * Brand color: used by `bg-brand`, `text-brand` and the "brand" CTA banner tone. Keep at least
-   * 4.5:1 contrast between the two (and brand on white), e.g. with webaim.org/resources/contrastchecker.
-   */
-  --color-brand: oklch(0.55 0.2 264);
-  --color-brand-foreground: oklch(0.99 0 0);
-}
+/*
+ * Design tokens live in src/styles/tokens.json; `npm run tokens` turns them into this import
+ * (colours, fonts, type scale, spacing, radii, shadows, motion). Edit tokens.json, not the output.
+ * --font-inter is set by next/font in app/layout.tsx; swap the font there.
+ */
+@import './tokens.generated.css';
 
 @layer base {
   /*
    * Keyboard focus: an outline with a 2px gap, so it never merges into a dark button and can't
    * be overridden by Tailwind `ring-*`/`shadow-*` utilities (those use box-shadow). Dark by
-   * default; components on dark backgrounds switch it to white with `focus-visible:outline-white`.
-   * :focus-visible skips mouse clicks.
+   * default (the `focus` token); components on dark backgrounds switch it to the inverse ink with
+   * `focus-visible:outline-ink-inverse`. :focus-visible skips mouse clicks.
    */
   :focus-visible {
-    outline: 2px solid var(--color-gray-950);
+    outline: 2px solid var(--color-focus);
     outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
   }
 
   /* Programmatic focus targets (the skip link's <main>) aren't controls: no ring. */

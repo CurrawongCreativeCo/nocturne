@@ -43,9 +43,9 @@ export default async function SectionGalleryPage() {
 
   if (sections.length === 0) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-24">
-        <h1 className="text-2xl font-semibold">Section gallery</h1>
-        <p className="mt-4 text-gray-700">
+      <main className="mx-auto max-w-measure-narrow px-gutter py-section">
+        <h1 className="text-h3 font-semibold">Section gallery</h1>
+        <p className="mt-4 text-ink-muted">
           The dataset has no page with the slug <code>{GALLERY_SEGMENT}</code>. Point the site at
           the fixture dataset to fill it (see “Section gallery” in the README).
         </p>
@@ -58,7 +58,7 @@ export default async function SectionGalleryPage() {
       {sections.map((section) => (
         // The _key is the section's id: tests/e2e/visual.spec.ts names its baseline after it.
         <div key={section._key} data-gallery-section={section._key}>
-          <p className="bg-gray-900 px-6 py-2 text-sm font-medium text-white">
+          <p className="bg-surface-inverse px-gutter py-2 text-small font-medium text-ink-inverse">
             {sectionLabel(section)}
           </p>
           {/* One renderer per section so each can be captured alone; only the hero reads isFirst. */}

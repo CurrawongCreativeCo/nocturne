@@ -93,10 +93,10 @@ export function AnnouncementBar({
       hidden={!visible}
       // The script may have revealed it before hydration.
       suppressHydrationWarning
-      className="bg-gray-950 text-white"
+      className="bg-surface-inverse text-ink-inverse"
     >
       <script dangerouslySetInnerHTML={{ __html: revealScript(start, end, key, dismissible) }} />
-      <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 px-6 py-2 text-center text-sm">
+      <div className="mx-auto flex max-w-content items-center justify-center gap-3 px-gutter py-2 text-center text-small">
         <p>{children}</p>
         {dismissible && (
           <button
@@ -105,7 +105,7 @@ export function AnnouncementBar({
             onClick={() => {
               dismiss(key)
             }}
-            className="-my-1 -mr-2 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md hover:bg-white/15 focus-visible:outline-white"
+            className="-my-1 -mr-2 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-control hover:bg-ink-inverse/15 focus-visible:outline-ink-inverse"
           >
             <svg
               aria-hidden

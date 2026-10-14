@@ -22,7 +22,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-int
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang={siteLanguage} className={inter.variable}>
-      <body className="flex min-h-dvh flex-col bg-white font-sans text-gray-950 antialiased">
+      <body className="flex min-h-dvh flex-col bg-surface font-body text-ink antialiased">
         {children}
       </body>
     </html>

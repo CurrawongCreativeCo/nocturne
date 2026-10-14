@@ -12,5 +12,5 @@ export async function ReturningVisitor() {
   const returning = (await cookies()).has(VISITED_COOKIE)
   if (!returning) return <MarkVisited />
 
-  return <p className="mt-4 text-sm font-medium text-gray-300">Welcome back!</p>
+  return <p className="mt-4 text-small font-medium text-ink-inverse-muted">Welcome back!</p>
 }
