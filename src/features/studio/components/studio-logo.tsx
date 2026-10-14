@@ -1,9 +1,9 @@
 import { Flex, Text } from '@sanity/ui'
 import { useColorSchemeValue } from 'sanity'
 
-import { brandAssets } from '@/config/studio-brand/assets.generated'
+import { brandAssets, type BrandImage } from '@/config/studio-brand/assets.generated'
 import { studioBrand } from '@/config/studio-brand/client'
-import type { LogoAsset } from '@/config/studio-brand/types'
+import type { LogoAsset, Scheme, StudioBrand } from '@/config/studio-brand/types'
 
 import { BrandMonogram } from './brand-monogram'
 import { fittedWidth, resolveBrandImage } from '../utils/brand-image'
@@ -14,9 +14,19 @@ const LOGO_MAX_WIDTH = 160
 const BACKING_PADDING = 2
 
 /** An image or monogram from the brand, at `height`; the monogram stands in when the image is missing. */
-function BrandAsset({ asset, height, alt }: { asset: LogoAsset; height: number; alt: string }) {
+function BrandAsset({
+  asset,
+  height,
+  alt,
+  assets,
+}: {
+  asset: LogoAsset
+  height: number
+  alt: string
+  assets: Record<string, BrandImage>
+}) {
   if (asset.kind === 'monogram') return <BrandMonogram monogram={asset} size={height} />
-  const image = resolveBrandImage(brandAssets, asset.src)
+  const image = resolveBrandImage(assets, asset.src)
   if (!image) return null
   return (
     // A plain <img>: Studio is a client-only app and these are small static brand files.
@@ -45,12 +55,28 @@ function BrandAsset({ asset, height, alt }: { asset: LogoAsset; height: number; 
  * The brand name is the accessible label either way.
  */
 export function StudioLogo() {
-  const scheme = useColorSchemeValue()
-  const { name, logo, mark, logoSource, logoDrawnFor } = studioBrand
+  return <StudioLogoView brand={studioBrand} scheme={useColorSchemeValue()} />
+}
+
+/**
+ * The logo for a given brand and scheme, with no Studio context needed. StudioLogo is this site's
+ * brand in the active scheme; the brand preview page (/studio-brand-preview) renders other brands
+ * (and their own `assets`) side by side.
+ */
+export function StudioLogoView({
+  brand,
+  scheme,
+  assets = brandAssets,
+}: {
+  brand: StudioBrand
+  scheme: Scheme
+  assets?: Record<string, BrandImage>
+}) {
+  const { name, logo, mark, logoSource, logoDrawnFor } = brand
 
   if (logoSource === 'client' && logo[scheme].kind === 'image') {
     const backing =
-      logoDrawnFor && logoDrawnFor !== scheme ? studioBrand[logoDrawnFor].background : undefined
+      logoDrawnFor && logoDrawnFor !== scheme ? brand[logoDrawnFor].background : undefined
     return (
       <Flex align="center" style={{ height: LOGO_HEIGHT, maxWidth: LOGO_MAX_WIDTH }}>
         <span
@@ -68,6 +94,7 @@ export function StudioLogo() {
             asset={logo[scheme]}
             height={backing ? LOGO_HEIGHT - BACKING_PADDING * 2 : LOGO_HEIGHT}
             alt={name}
+            assets={assets}
           />
         </span>
       </Flex>
@@ -76,7 +103,7 @@ export function StudioLogo() {
 
   return (
     <Flex align="center" gap={2} style={{ height: LOGO_HEIGHT }}>
-      <BrandAsset asset={mark[scheme]} height={LOGO_HEIGHT} alt="" />
+      <BrandAsset asset={mark[scheme]} height={LOGO_HEIGHT} alt="" assets={assets} />
       <Text weight="semibold" style={{ whiteSpace: 'nowrap' }}>
         {name}
       </Text>

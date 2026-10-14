@@ -8,6 +8,7 @@ import {
   SEARCH_PATH,
   SIGN_IN_PATH,
   SIGN_OUT_PATH,
+  STUDIO_BRAND_PREVIEW_PATH,
 } from '@/config/paths'
 import {
   chooseOption,
@@ -48,11 +49,17 @@ async function redirect(request: NextRequest) {
   return match ? NextResponse.redirect(new URL(match.to, request.url), match.status) : null
 }
 
-/** Only CMS pages have variants; the blog, search, gallery, sign-in and variant routes themselves are left alone. */
+/** Only CMS pages have variants; the blog, search, gallery, brand preview, sign-in and variant routes themselves are left alone. */
 function isPagePath(pathname: string) {
-  return ![BLOG_PATH, EXPERIMENT_PATH, GALLERY_PATH, SEARCH_PATH, SIGN_IN_PATH, SIGN_OUT_PATH].some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  )
+  return ![
+    BLOG_PATH,
+    EXPERIMENT_PATH,
+    GALLERY_PATH,
+    SEARCH_PATH,
+    SIGN_IN_PATH,
+    SIGN_OUT_PATH,
+    STUDIO_BRAND_PREVIEW_PATH,
+  ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
 }
 
 /**

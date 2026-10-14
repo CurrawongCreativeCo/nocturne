@@ -905,6 +905,43 @@ Only supported Sanity APIs are used, in four places:
    Run `npm run brand-assets`. In dark mode the logo should sit on a small light background rather than be
    recoloured. Remove the logo line to see the monogram instead.
 
+#### Studio brand preview and its tests
+
+Studio needs a login, so tests can't open it. `/studio-brand-preview` renders Sanity UI under the same theme
+Studio gets, for four brands (Currawong default `{}`; a green and cream client with a sample logo; a partial
+client with a logo and primary only; a client whose yellow primary `#FFD400` is too light for text), each in
+light and dark. Per case it shows the logo, a mock navbar, buttons (default, primary, ghost, disabled), a text
+input, tabs, a selected card, a badge in each tone, a dialog-style panel, and the resolved colours with any
+adjustment the contrast guard made (so the yellow case visibly shows its darkened text and focus colours).
+
+- **Not public.** It answers 404 unless `NODE_ENV` is `development` or `E2E_GALLERY=1` was set when the site was
+  built (the check runs at prerender, so it is a real 404 status). `studio-brand-preview` is a reserved first slug segment
+  (`STUDIO_BRAND_PREVIEW_SEGMENT` in `src/config/paths.ts`), the page is `noindex`, the sitemap lists only CMS pages, and
+  `proxy.ts` leaves it out of A/B tests. Its JavaScript (Sanity UI, and `sanity` for the theme) is that route's own
+  chunk: the home page budget in `tests/e2e/performance.spec.ts` is unchanged.
+- **Same theme as Studio.** `buildStudioTheme` (theme.ts) gives the Studio theme. Studio turns it into what
+  `@sanity/ui`'s `ThemeProvider` takes in `StudioThemeProvider` (not exported): the default `buildTheme()` from
+  `@sanity/ui/theme` with the theme's `v2`, `fonts` and `color` laid over it. `src/features/studio/utils/ui-theme.ts`
+  does the same. Studio then **pins one colour scheme** for a `buildLegacyTheme` theme (light unless the
+  component background is darker than its text) and hides the scheme switch, so the page passes `scheme` itself to
+  show both. That pinning is read from the code in `sanity` 6.18, not seen in a running Studio: confirm it in step 2 of
+  "Check it by hand". If it holds, editors only ever see the light scheme and the dark cases are for brands whose
+  light background is dark.
+- **Tests.** `tests/e2e/studio-brand-preview.spec.ts`: axe (WCAG 2.2 AA) per case and scheme, keyboard focus drawing a
+  visible ring on buttons and the input, the primary button's colour staying near the brand accent (and never
+  Currawong violet `#5F2BD4` for a client), the yellow client's adjusted colours, `noindex` and the sitemap.
+  `tests/e2e/studio-brand-visual.spec.ts`: one screenshot per case and scheme, desktop only, Linux only. Its name
+  contains "visual", so `npm run test:e2e:update` and the **Update visual baselines** workflow refresh it with the
+  section gallery's. Baselines live in `tests/e2e/studio-brand-visual.spec.ts-snapshots/`.
+- **Known contrast gaps.** The legacy theme has one accent and one grey ramp for both schemes, so some labels Sanity
+  UI draws miss 4.5:1: the default button in every case, and the primary button label wherever the shared accent
+  suits the other scheme (for example Currawong in light mode, 2.7:1). `KNOWN_CONTRAST_GAPS` in the spec lists them
+  exactly, and the test fails when a gap appears or is fixed, so the list can only shrink on purpose. Every other axe
+  rule is enforced without exceptions. Closing the gaps means moving off `buildLegacyTheme` (see "How the Studio
+  applies the brand").
+- **Adding a case.** Add it to `brandPreviewCases` in `src/features/studio/brand-preview/cases.ts`, run the spec, add
+  any contrast gap to `KNOWN_CONTRAST_GAPS`, and refresh the baselines.
+
 **Colour helpers.** `src/lib/color/` holds hex <-> OKLCH conversion, WCAG contrast and the lightness
 adjustment. `scripts/build-tokens.mjs` uses the same conversion, so there is one implementation.
 
@@ -1118,7 +1155,8 @@ replaced by a fixed gradient, so no screenshot depends on the network. Baselines
   ```
 
   Without Docker, run the **Update visual baselines** workflow (Actions tab) and download its
-  `visual-baselines` artifact into `tests/e2e/visual.spec.ts-snapshots/`. Review the images before committing:
+  `visual-baselines` artifact into `tests/e2e/` (it holds one `*.spec.ts-snapshots` folder per visual spec: the
+  section gallery's and the Studio brand preview's). Review the images before committing:
   a baseline is a promise that this is how the section should look.
 
 - **A failed run** leaves the expected, actual and diff images in `test-results/` (CI uploads them).
