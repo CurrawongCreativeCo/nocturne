@@ -8,13 +8,16 @@ import { TagIcon } from '@sanity/icons/Tag'
 import { UserIcon } from '@sanity/icons/User'
 import { map } from 'rxjs'
 import type {
+  ListItemBuilder,
   StructureBuilder,
   StructureResolver,
   StructureResolverContext,
 } from 'sanity/structure'
 
+import { currentAudience } from './roles'
 import { SINGLETON_TYPES } from './singletons'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
+import { filterStructureItems } from './utils/structure-access'
 // new-singleton:import
 
 const PAGES_QUERY = `*[_type == "page"]{ _id, "slug": slug.current }`
@@ -70,41 +73,50 @@ const LISTED_TYPES = new Set([
   // new-document:listed
 ])
 
-/** Desk structure: singletons pinned at the top, then every other document type. */
-export const structure: StructureResolver = (S, context) =>
-  S.list()
+/** An item's id, or null for a divider (see filterStructureItems). */
+const idOf = (item: ListItemBuilder | ReturnType<StructureBuilder['divider']>) =>
+  'getId' in item ? item.getId() : null
+
+/**
+ * Desk structure: singletons pinned at the top, then every other document type. Clients see only
+ * the items listed in CLIENT_STRUCTURE_IDS (utils/structure-access.ts).
+ */
+export const structure: StructureResolver = (S, context) => {
+  const items = [
+    S.listItem()
+      .title('Site settings')
+      .id('settings')
+      .icon(CogIcon)
+      .child(S.document().schemaType('settings').documentId('settings').title('Site settings')),
+    // new-singleton:list
+    S.divider(),
+    pagesTree(S, context),
+    S.documentTypeListItem('sharedSection').title('Shared sections'),
+    S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon),
+    S.listItem()
+      .title('Blog')
+      .id('blog')
+      .icon(ComposeIcon)
+      .child(
+        S.list()
+          .title('Blog')
+          .items([
+            S.documentTypeListItem('post').title('Posts').icon(ComposeIcon),
+            S.documentTypeListItem('author').title('Authors').icon(UserIcon),
+            S.documentTypeListItem('category').title('Categories').icon(TagIcon),
+          ]),
+      ),
+    S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
+    S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon),
+    // new-document:list
+    S.divider(),
+    // Everything else not explicitly listed above.
+    ...S.documentTypeListItems().filter((item) => {
+      const id = item.getId() ?? ''
+      return !LISTED_TYPES.has(id) && !SINGLETON_TYPES.has(id)
+    }),
+  ]
+  return S.list()
     .title('Content')
-    .items([
-      S.listItem()
-        .title('Site settings')
-        .id('settings')
-        .icon(CogIcon)
-        .child(S.document().schemaType('settings').documentId('settings').title('Site settings')),
-      // new-singleton:list
-      S.divider(),
-      pagesTree(S, context),
-      S.documentTypeListItem('sharedSection').title('Shared sections'),
-      S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon),
-      S.listItem()
-        .title('Blog')
-        .id('blog')
-        .icon(ComposeIcon)
-        .child(
-          S.list()
-            .title('Blog')
-            .items([
-              S.documentTypeListItem('post').title('Posts').icon(ComposeIcon),
-              S.documentTypeListItem('author').title('Authors').icon(UserIcon),
-              S.documentTypeListItem('category').title('Categories').icon(TagIcon),
-            ]),
-        ),
-      S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
-      S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon),
-      // new-document:list
-      S.divider(),
-      // Everything else not explicitly listed above.
-      ...S.documentTypeListItems().filter((item) => {
-        const id = item.getId() ?? ''
-        return !LISTED_TYPES.has(id) && !SINGLETON_TYPES.has(id)
-      }),
-    ])
+    .items(filterStructureItems(items, currentAudience(context.currentUser), idOf))
+}

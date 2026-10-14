@@ -58,6 +58,7 @@ Create a page with slug `home` to populate `/`. After changing schemas or querie
 Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
+- **Roles:** clients see a simpler Studio than Currawong staff; see [Studio roles and permissions](#studio-roles-and-permissions).
 - **Site settings** (top of the sidebar) holds the site name, logo, announcement bar, header menu and button, footer, and default SEO.
 - **Announcement bar:** in Site settings → _Announcement_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
 - **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Site settings), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
@@ -944,6 +945,71 @@ adjustment the contrast guard made (so the yellow case visibly shows its darkene
 
 **Colour helpers.** `src/lib/color/` holds hex <-> OKLCH conversion, WCAG contrast and the lightness
 adjustment. `scripts/build-tokens.mjs` uses the same conversion, so there is one implementation.
+
+### Studio roles and permissions
+
+The Studio shows a simple view to clients and the full view to Currawong staff. It reads each person's
+Sanity project roles; the logic is in `src/lib/sanity/roles.ts` (re-exported from
+`src/features/studio/roles.ts`) and is unit tested.
+
+**Who is who.** _Agency_ is anyone with the **Administrator** or **Developer** role. Everyone else is a
+_client editor_: **Editor** (can publish) or **Contributor** (drafts only; Viewers and custom roles get the
+client view too). **Clients must hold Editor or Contributor on a Growth plan, never Administrator.** An
+Administrator sees the agency view, can manage members, tokens, CORS and datasets, and can delete the project.
+
+**Two kinds of limit.** Sanity's roles are enforced by Sanity's servers; hiding things in the Studio is a
+convenience. Someone with the Editor role who knows the API can still do what the Studio hides.
+
+| What                                                                              | Agency (Administrator, Developer) | Editor                                                                     | Contributor         | Enforced by                                    |
+| --------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------- | ------------------- | ---------------------------------------------- |
+| Publish, unpublish                                                                | Yes                               | Yes                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
+| Project settings, members, API tokens, CORS, datasets                             | Administrator only                | No                                                                         | No                  | **Sanity**                                     |
+| Edit, create and delete content through the API or Vision                         | Yes                               | Yes (any document)                                                         | Drafts only         | **Sanity**                                     |
+| Studio tools                                                                      | All                               | Presentation (first), Structure                                            | Same as Editor      | Studio                                         |
+| Vision, AI settings, Content health                                               | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
+| Sidebar                                                                           | Everything                        | Site settings, Pages, Blog (Team and Business info when the site has them) | Same as Editor      | Studio                                         |
+| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
+| Site settings groups _Search & AI_, _Cookie banner_                               | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
+| _Who can see this_ (members-only) fields                                          | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
+| SEO _Hide from search engines_                                                    | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
+| A page's slug once it has a value                                                 | Editable                          | Read-only                                                                  | Read-only           | Studio                                         |
+| Sections in the _Add item_ menu                                                   | All                               | Approved list below                                                        | Approved list below | Studio                                         |
+| Delete, Duplicate on pages, posts and singletons                                  | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
+| _New document_ menu                                                               | Everything                        | Page templates, Post, Author, Category                                     | Same as Editor      | Studio                                         |
+| "Agency view" badge and client-view preview                                       | Yes                               | No                                                                         | No                  | Studio                                         |
+
+Because the Studio-only limits can be bypassed, don't rely on them to protect secrets. Form recipient
+addresses, for example, stay readable to any Editor through the API. Real enforcement needs custom roles
+with GROQ filters, which are a separate Sanity plan feature.
+
+**Approved sections.** Clients may add _Rich text_, _Image + text_, _FAQ_, _Call to action banner_ and
+_Testimonials_ (`DEFAULT_CLIENT_SECTIONS` in `src/features/studio/roles.ts`). When the site has a
+`siteProfile` singleton (`_id` `siteProfile`) with a `clientSections` array of section type names, that list
+is used instead; an empty or missing list falls back to the defaults. Sections already on a page stay
+visible and editable whatever the list says. A Sanity array's `of` can't vary by user, so
+`src/features/studio/components/section-insert-filter.tsx` wraps the page-builder input and hands only its
+"Add item" button a copy of the type list with the approved sections; it is registered once for the whole
+Studio as `form.components.input` in `sanity.config.ts`, and finds page-builder arrays by their section types.
+
+**Preview the client view.** Agency staff see an **Agency view** badge above the navbar. **Preview client
+view** switches to what an Editor sees (saved in that browser's `localStorage`, so it stays until you switch
+back) and reloads the Studio, because tools, the sidebar and document actions are chosen when it loads. It
+shows the Editor's view, not the Contributor's, and your real permissions still apply. **Back to agency
+view** undoes it.
+
+**Adding to the client view.**
+
+- A new sidebar item or singleton is agency-only until its id is added to `CLIENT_STRUCTURE_IDS`
+  (`src/features/studio/utils/structure-access.ts`). Ids for Team (`team`) and Business info
+  (`businessInfo`) are already listed and appear once those items exist.
+- Hide a field from clients with `hidden: hiddenFromClients` (`@/lib/sanity/roles`), or lock it once set
+  with `readOnly: lockedForClientsOnceSet`. For a field group use `hidden: hiddenFromClients` on the group.
+  Do this for a section's `sectionStyle` Design group too, once a site has one.
+- New tools are visible to clients unless added to `AGENCY_ONLY_TOOLS` (`utils/tool-access.ts`).
+- Delete and Duplicate are removed on `CLIENT_PROTECTED_TYPES` (`utils/document-access.ts`) and singletons.
+
+Test it by hand with [the manual test script](docs/studio-roles-test-script.md), using a throwaway project
+and three accounts (Administrator, Editor, Contributor).
 
 ### Motion
 

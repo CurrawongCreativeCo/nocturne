@@ -14,6 +14,7 @@ import {
   STUDIO_BRAND_PREVIEW_SEGMENT,
 } from '@/config/paths'
 import { ACCESS_MEMBERS } from '@/lib/sanity/access'
+import { lockedForClientsOnceSet } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 
 import { sectionTypes } from './sections'
@@ -53,6 +54,8 @@ export const page = defineType({
       name: 'slug',
       type: 'slug',
       group: 'content',
+      // Changing a live page's address breaks links and search results: clients set it once.
+      readOnly: lockedForClientsOnceSet,
       description: `Full path without leading slash, e.g. "about" or "services/web-design". Use "${HOME_SLUG}" for the homepage.`,
       options: {
         source: 'title',

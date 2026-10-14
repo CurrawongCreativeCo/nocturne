@@ -1,6 +1,7 @@
 import { CogIcon } from '@sanity/icons/Cog'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { hiddenFromClients } from '@/lib/sanity/roles'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 export const settings = defineType({
@@ -13,8 +14,8 @@ export const settings = defineType({
     { name: 'announcement', title: 'Announcement' },
     { name: 'header', title: 'Header' },
     { name: 'footer', title: 'Footer' },
-    { name: 'searchAi', title: 'Search & AI' },
-    { name: 'cookieBanner', title: 'Cookie banner' },
+    { name: 'searchAi', title: 'Search & AI', hidden: hiddenFromClients },
+    { name: 'cookieBanner', title: 'Cookie banner', hidden: hiddenFromClients },
   ],
   fields: [
     defineField({

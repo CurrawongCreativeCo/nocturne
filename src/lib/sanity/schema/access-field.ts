@@ -1,6 +1,7 @@
 import { defineField } from 'sanity'
 
 import { ACCESS_MEMBERS, ACCESS_PUBLIC } from '../access'
+import { hiddenFromClients } from '../roles'
 
 /**
  * Who may see a page or a page-builder section. A document without the field counts as public, so
@@ -19,5 +20,7 @@ export const accessField = defineField({
       { title: 'Members only (signed in)', value: ACCESS_MEMBERS },
     ],
   },
+  // Members-only is an agency decision: clients don't see the choice.
+  hidden: hiddenFromClients,
   initialValue: ACCESS_PUBLIC,
 })
