@@ -66,6 +66,14 @@ export const GALLERY_SEGMENT = 'section-gallery'
 export const GALLERY_PATH = `/${GALLERY_SEGMENT}`
 
 /**
+ * Studio brand preview: Sanity UI under each CMS brand theme, for accessibility and visual tests
+ * (Studio itself needs a login). Served on the same terms as the section gallery. A CMS page can't
+ * use the first segment.
+ */
+export const STUDIO_BRAND_PREVIEW_SEGMENT = 'studio-brand-preview'
+export const STUDIO_BRAND_PREVIEW_PATH = `/${STUDIO_BRAND_PREVIEW_SEGMENT}`
+
+/**
  * Sign-in and sign-out pages (src/features/auth). A CMS page can't use these first segments, and
  * proxy.ts leaves them out of A/B tests. The Auth.js handlers live under /api/auth.
  */

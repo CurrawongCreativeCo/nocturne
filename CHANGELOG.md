@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- **Studio brand preview and tests.** `/studio-brand-preview` (development and `E2E_GALLERY=1` only; `noindex`,
+  reserved slug, not in the sitemap) renders Sanity UI under the Studio theme for four brands in light and dark.
+  Playwright runs axe, keyboard focus, brand-accent and Linux screenshot checks against it
+  (`studio-brand-preview.spec.ts`, `studio-brand-visual.spec.ts`). `StudioLogoView` renders a logo for any brand and
+  scheme, `StudioLogo` is unchanged for Studio. Known colour-contrast gaps in the legacy theme are listed in the spec
+  and the README. The **Update visual baselines** workflow now uploads every `*.spec.ts-snapshots` folder.
 - **CMS brand system.** The Studio now has its own brand, separate from the public design tokens:
   Currawong defaults in `src/config/studio-brand/currawong.ts`, an optional per-site `studio-brand.json`
   (default `{}`) with logo files in `src/assets/brand/client/`, and `resolveStudioBrand` with the

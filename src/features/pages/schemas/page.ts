@@ -11,6 +11,7 @@ import {
   SIGN_IN_SEGMENT,
   SIGN_OUT_SEGMENT,
   slugToPath,
+  STUDIO_BRAND_PREVIEW_SEGMENT,
 } from '@/config/paths'
 import { ACCESS_MEMBERS } from '@/lib/sanity/access'
 import { accessField } from '@/lib/sanity/schema/access-field'
@@ -29,6 +30,7 @@ const RESERVED_SEGMENTS = new Set([
   SEARCH_SEGMENT,
   SIGN_IN_SEGMENT,
   SIGN_OUT_SEGMENT,
+  STUDIO_BRAND_PREVIEW_SEGMENT,
 ])
 
 export const page = defineType({
