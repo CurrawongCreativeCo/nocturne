@@ -314,6 +314,7 @@ src/
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld
+  components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
   config/                          env.ts (validated), paths.ts (slug <-> URL),
                                    tokens.generated.ts (GENERATED: token values for the OG image and Studio)
   lib/sitemap-chunks.ts            sitemap split math (shared by pages and posts)
@@ -767,6 +768,60 @@ its text from `ogImage` in `tokens.generated.ts`. The Studio's logo mark
 `studioBrand`. Changing the tokens changes both after `npm run tokens`; the OG font file stays separate
 (see _Editing content_).
 
+### Motion
+
+Animation uses [Motion](https://motion.dev) (the `motion` package, React API) in its lightest form: a
+`LazyMotion` provider and the `m` component, with the `domMax` feature bundle (drag and layout animations)
+downloaded after first render. It lives in `src/components/motion/`:
+
+| File                  | Role                                                                                                                                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `motion-provider.tsx` | `MotionConfig reducedMotion="user"` + `LazyMotion strict`. Mounted in `SiteShell`, so it wraps the public site and `/ab/*`, never `/studio`.                                                                       |
+| `features.ts`         | Re-exports `domMax`; imported lazily by the provider.                                                                                                                                                              |
+| `motion-elements.tsx` | `MotionDiv`, `MotionSection`, `MotionArticle`, `MotionUl`, `MotionLi`, `MotionSpan`, `MotionP`, `MotionFigure` (all `m.*`).                                                                                        |
+| `presets.ts`          | Variants `fadeIn`, `fadeUp`, `scaleIn`, `staggerContainer`, `staggerItem` and the prop helpers `revealOnLoad`, `revealInView`, `revealChild`. Durations, easing and distance come from the `motion` design tokens. |
+
+**Rules**
+
+- Use `m` from `motion/react-m` (or the wrappers). Never import the `motion` component from `motion/react`, and never
+  use `framer-motion`; ESLint (`no-restricted-imports`) fails on both. `motion.div` bundles every feature up front
+  and throws inside the provider's `strict` mode. `LazyMotion`, `MotionConfig`, `AnimatePresence`, `useScroll`,
+  `useTransform`, `useMotionValue`, `useSpring`, `useInView` and `useReducedMotion` are fine.
+- Animate `transform` and `opacity` only.
+- **Readable without JavaScript.** Anything that starts hidden carries `data-reveal` (the `reveal*` helpers add it).
+  `globals.css` forces `[data-reveal]` to opacity 1 and no transform under `@media (scripting: none)` and under
+  `prefers-reduced-motion: reduce`, which is also why visitors who ask for less motion see no fade at all. Never start the
+  `<h1>`, the first image or any LCP element hidden.
+- Clean up every listener, observer and timer in client code (the memory test).
+- The end-to-end tests run with reduced motion by default so axe and screenshots never see an element mid-fade;
+  `tests/e2e/motion.spec.ts` turns animation back on to check the reveal.
+
+**Adding a motion element to a server component**
+
+```tsx
+import { MotionDiv } from '@/components/motion/motion-elements'
+import { fadeUp, revealInView } from '@/components/motion/presets'
+
+;<MotionDiv {...revealInView(fadeUp)} className="...">
+  …
+</MotionDiv>
+```
+
+Props must be serialisable (`initial`, `animate`, `whileInView`, `viewport`, `transition`, `variants`). Function props
+such as `onDragEnd` cannot cross the server/client boundary: write a small client component that imports
+`* as m from 'motion/react-m'` itself. For a staggered group, put `revealOnLoad(staggerContainer)` on the parent and
+`revealChild()` on each child. The first hero fades up its description and buttons this way.
+
+**Measured sizes** (motion 14.2.0, Turbopack production build, gzip level 9, 1 KB = 1000 bytes)
+
+| Part                                                        | Size    |
+| ----------------------------------------------------------- | ------- |
+| Added to the home page's initial scripts (LazyMotion + `m`) | 16.5 KB |
+| `domMax` chunk, loaded after first render (not in the HTML) | 33.9 KB |
+
+The ~5 KB usually quoted for LazyMotion + `m` holds for esbuild (5.7 KB here), but Turbopack keeps much more of the
+core. That is why the home page JavaScript budget went from 200 KB to 220 KB (see _Performance budgets_).
+
 ### Type flow
 
 ```
@@ -940,7 +995,7 @@ Content Lake as the end-to-end tests.
 
 | Budget                                 | Limit                     | Where it lives                                    |
 | -------------------------------------- | ------------------------- | ------------------------------------------------- |
-| JavaScript loaded by `/` (gzipped)     | 200 KB                    | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
+| JavaScript loaded by `/` (gzipped)     | 220 KB                    | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
 | Lighthouse performance (`/`, `/about`) | ≥ 0.9                     | `lighthouserc.json`                               |
 | Lighthouse accessibility               | 1                         | `lighthouserc.json`                               |
 | Cumulative Layout Shift                | ≤ 0.05                    | `lighthouserc.json`                               |
@@ -949,7 +1004,7 @@ Content Lake as the end-to-end tests.
 
 - **JavaScript:** the test fetches `/`, takes every `<script src>` in the HTML, gzips each file from
   `.next/static` (level 9) and adds them up (1 KB = 1000 bytes). Over budget, it lists every chunk, largest
-  first. The total is about 190 KB today, so a new client-side dependency of even 10 KB trips it. Look first
+  first. The total is about 216 KB today (200 KB before Motion, which adds 16.5 KB), so a new client-side dependency of even 5 KB trips it. Look first
   for a client component that can be a server component, or an import that can be lazy-loaded (as
   `draft-mode-tools.tsx` does).
 - **Client memory:** in one page session, the test repeats what a visitor does (client navigations, quick

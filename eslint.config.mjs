@@ -87,6 +87,26 @@ export default defineConfig([
       'react/self-closing-comp': 'error',
       'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
 
+      // Motion: only the lightweight API, inside the shared LazyMotion provider (strict mode).
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'framer-motion',
+              message: "Use the 'motion' package: `m` from 'motion/react-m' or MotionDiv.",
+            },
+            {
+              name: 'motion/react',
+              importNames: ['motion'],
+              message:
+                "`motion.div` pulls in every feature and throws inside LazyMotion strict: use `import * as m from 'motion/react-m'` or MotionDiv from '@/components/motion/motion-elements'.",
+            },
+          ],
+          patterns: [{ group: ['framer-motion/*'], message: "Use the 'motion' package." }],
+        },
+      ],
+
       // Imports: external, then @/ aliases, then relative; alphabetized, one blank line between groups.
       'import/no-duplicates': ['error', { 'prefer-inline': true }],
       'import/no-cycle': 'error',

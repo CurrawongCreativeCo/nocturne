@@ -24,6 +24,9 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${APP_PORT}`,
     trace: 'retain-on-failure',
+    // Reveal animations (src/components/motion) render in their final state, so axe and the
+    // screenshots never catch an element mid-fade. motion.spec.ts turns animation back on.
+    reducedMotion: 'reduce',
     // Visitors who already rejected cookies, so the banner doesn't take focus in every test.
     // consent.spec.ts starts from a first visit instead.
     storageState: {

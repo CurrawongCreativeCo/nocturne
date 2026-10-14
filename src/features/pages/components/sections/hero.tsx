@@ -1,5 +1,7 @@
 import { Suspense } from 'react'
 
+import { MotionDiv, MotionP } from '@/components/motion/motion-elements'
+import { revealChild, revealOnLoad, staggerContainer } from '@/components/motion/presets'
 import { CtaGroup } from '@/components/ui/cta-link'
 import { SanityImage } from '@/components/ui/sanity-image'
 
@@ -27,12 +29,20 @@ export function Hero({ data, isFirst = false, greeting }: SectionProps<'hero'>) 
         <Heading className="text-display font-semibold text-balance">{title}</Heading>
         {/* Request-time (cookie) content: the page stays prerendered around this boundary. */}
         {showGreeting && <Suspense fallback={null}>{greeting}</Suspense>}
-        {description && (
-          <p className="mx-auto mt-6 max-w-measure-narrow text-lead text-pretty text-ink-inverse-muted">
-            {description}
-          </p>
-        )}
-        <CtaGroup ctas={ctas} className="mt-10 justify-center" />
+        {/* Not the h1 or the image: they are the LCP candidates and must paint without waiting for JS. */}
+        <MotionDiv {...revealOnLoad(staggerContainer)}>
+          {description && (
+            <MotionP
+              {...revealChild()}
+              className="mx-auto mt-6 max-w-measure-narrow text-lead text-pretty text-ink-inverse-muted"
+            >
+              {description}
+            </MotionP>
+          )}
+          <MotionDiv {...revealChild()}>
+            <CtaGroup ctas={ctas} className="mt-10 justify-center" />
+          </MotionDiv>
+        </MotionDiv>
       </div>
     </section>
   )
