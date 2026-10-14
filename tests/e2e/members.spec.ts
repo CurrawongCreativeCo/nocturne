@@ -3,6 +3,8 @@ import { expect, test, type Page } from '@playwright/test'
 
 import { MEMBER_EMAIL, MEMBER_PASSWORD, OUTSIDER_EMAIL, SITE_URL } from './constants'
 
+// Headings and text are looked up inside #main-content: under load React can leave its hidden streaming
+// segment (<div hidden id="S:n">) in the DOM beside the revealed copy, and strict locators match both.
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
 /** Everything the fixtures keep behind the members gate (see tests/e2e/fixtures/dataset.mjs). */
@@ -76,8 +78,12 @@ test.describe('anonymous visitor', () => {
     page,
   }) => {
     await page.goto('/mixed')
-    await expect(page.getByText('Public intro on the mixed page.')).toBeVisible()
-    await expect(page.getByText('Public outro on the mixed page.')).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Public intro on the mixed page.'),
+    ).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Public outro on the mixed page.'),
+    ).toBeVisible()
     // One prompt for the plain section, one for the shared section.
     await expect(page.getByRole('heading', { level: 2, name: 'Members only' })).toHaveCount(2)
     await expect(h1(page)).toHaveCount(1)
@@ -93,7 +99,9 @@ test.describe('anonymous visitor', () => {
   }) => {
     await page.goto('/mixed-hero')
     await expect(h1(page)).toHaveText('Members hero page')
-    await expect(page.getByText('Public text under the hero.')).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Public text under the hero.'),
+    ).toBeVisible()
     expect(await rawHtml(page, '/mixed-hero')).not.toContain('Secret first hero')
   })
 
@@ -128,7 +136,9 @@ test.describe('signing in', () => {
 
     await fillSignIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await expect(page).toHaveURL('/members')
-    await expect(page.getByText('Secret members page content.')).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Secret members page content.'),
+    ).toBeVisible()
     // The members-only hero provides the page's single <h1>.
     await expect(h1(page)).toHaveCount(1)
     await expect(h1(page)).toHaveText('Secret members hero')
@@ -136,14 +146,22 @@ test.describe('signing in', () => {
 
     // The session lasts: a reload still shows the content.
     await page.reload()
-    await expect(page.getByText('Secret members page content.')).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Secret members page content.'),
+    ).toBeVisible()
   })
 
   test('shows members-only sections in place on a public page', async ({ page }) => {
     await signIn(page, '/mixed')
-    await expect(page.getByText('Secret members section content.')).toBeVisible()
-    await expect(page.getByText('Secret shared banner text.')).toBeVisible()
-    await expect(page.getByText('Public intro on the mixed page.')).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Secret members section content.'),
+    ).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Secret shared banner text.'),
+    ).toBeVisible()
+    await expect(
+      page.locator('#main-content').getByText('Public intro on the mixed page.'),
+    ).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Members only' })).toHaveCount(0)
     await expectNoViolations(page)
   })
