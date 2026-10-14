@@ -1,3 +1,5 @@
+import { stegaClean } from 'next-sanity'
+
 import type { PageSection } from '../types'
 
 /**
@@ -5,8 +7,20 @@ import type { PageSection } from '../types'
  * (banner tone, image side, grid columns), so every variant is told apart on the page.
  */
 export function sectionLabel(section: PageSection): string {
-  const variant = variantOf(section)
-  return variant ? `${section._type} (${variant})` : section._type
+  const variants = [variantOf(section), ...styleVariants(section)].filter(Boolean)
+  return variants.length > 0 ? `${section._type} (${variants.join(', ')})` : section._type
+}
+
+/** The shared Design options an editor changed, e.g. "inverse section", "compact spacing". */
+function styleVariants(section: PageSection): string[] {
+  if (!('style' in section) || !section.style) return []
+  const { tone, spacing, width, align } = stegaClean(section.style)
+  return [
+    tone && `${tone} section`,
+    spacing && spacing !== 'default' && `${spacing} spacing`,
+    width && width !== 'default' && `${width} width`,
+    align && `${align} aligned`,
+  ].filter((variant): variant is string => Boolean(variant))
 }
 
 function variantOf(section: PageSection): string | undefined {

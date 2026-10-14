@@ -49,6 +49,16 @@ export type Avatar = {
   _type: 'image'
 }
 
+export type SectionStyle = {
+  _type: 'sectionStyle'
+  tone?: 'surface' | 'alt' | 'inverse' | 'accent'
+  spacing?: 'compact' | 'default' | 'spacious'
+  width?: 'narrow' | 'default' | 'wide' | 'full'
+  align?: 'start' | 'center'
+  anchorId?: string
+  motion?: 'none' | 'reveal' | 'stagger' | 'parallax'
+}
+
 export type BlockContent = Array<
   | {
       children?: Array<{
@@ -293,6 +303,7 @@ export type NewsletterSignup = {
   submitLabel: string
   successMessage: string
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type StripePriceReference = {
@@ -316,6 +327,7 @@ export type PricingTable = {
     _key: string
   }>
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type FormReference = {
@@ -331,6 +343,7 @@ export type FormSection = {
   text?: string
   form: FormReference
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type Form = {
@@ -365,6 +378,7 @@ export type CtaBanner = {
   >
   tone: 'brand' | 'dark' | 'light'
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type Faq = {
@@ -378,6 +392,7 @@ export type Faq = {
     _key: string
   }>
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type Testimonials = {
@@ -392,6 +407,7 @@ export type Testimonials = {
     _key: string
   }>
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type LogoCloud = {
@@ -405,6 +421,7 @@ export type LogoCloud = {
     _key: string
   }>
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type FeaturesGrid = {
@@ -420,6 +437,7 @@ export type FeaturesGrid = {
     _key: string
   }>
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type MediaText = {
@@ -442,12 +460,14 @@ export type MediaText = {
   }
   imagePosition: 'left' | 'right'
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type RichText = {
   _type: 'richText'
   body: BlockContent
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type Hero = {
@@ -469,6 +489,7 @@ export type Hero = {
   }
   showGreeting?: boolean
   access?: 'public' | 'members'
+  style?: SectionStyle
 }
 
 export type Redirect = {
@@ -838,6 +859,7 @@ export type AllSanitySchemaTypes =
   | Icon
   | LogoImage
   | Avatar
+  | SectionStyle
   | BlockContent
   | Seo
   | Cta
@@ -1142,7 +1164,7 @@ export type FORM_QUERY_RESULT = {
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    "title": select(access == "members" && !$members => "Members only", title),    access,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    "pageBuilder": select(      access == "members" && !$members => [],      pageBuilder[] {   _key,    access,    _type == "hero" && (access != "members" || $members) => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    title,    text,    submitLabel,    successMessage  },  _type,  _type == "reference" => @->section[0] {      access,    _type == "hero" && (access != "members" || $members) => {    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    title,    text,    submitLabel,    successMessage  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]    )  }
+// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    "title": select(access == "members" && !$members => "Members only", title),    access,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    "pageBuilder": select(      access == "members" && !$members => [],      pageBuilder[] {   _key,    access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    submitLabel,    successMessage  },  _type,  _type == "reference" => @->section[0] {      access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    submitLabel,    successMessage  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]    )  }
 export type PAGE_QUERY_RESULT = {
   _id: string
   _type: 'page'
@@ -1175,6 +1197,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'ctaBanner'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string
             text: string | null
             ctas: Array<{
@@ -1194,6 +1224,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string
             text: string | null
             ctas: Array<{
@@ -1225,6 +1263,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'faq'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             intro: string | null
             items: Array<{
@@ -1280,6 +1326,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             intro: string | null
             items: Array<{
@@ -1347,6 +1401,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'featuresGrid'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             intro: string | null
             columns: 2 | 3 | 4
@@ -1375,6 +1437,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             intro: string | null
             columns: 2 | 3 | 4
@@ -1415,6 +1485,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'formSection'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             text: string | null
             form: {
@@ -1435,6 +1513,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             text: string | null
             form: {
@@ -1467,6 +1553,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'hero'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string
             description: string | null
             ctas: Array<{
@@ -1501,6 +1595,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string
             description: string | null
             ctas: Array<{
@@ -1547,6 +1649,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'logoCloud'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             logos: Array<{
               _key: string
@@ -1573,6 +1683,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             logos: Array<{
               _key: string
@@ -1611,6 +1729,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'mediaText'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             eyebrow: string | null
             title: string
             body: Array<
@@ -1689,6 +1815,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             eyebrow: string | null
             title: string
             body: Array<
@@ -1779,6 +1913,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'newsletterSignup'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string
             text: string | null
             submitLabel: string
@@ -1794,6 +1936,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string
             text: string | null
             submitLabel: string
@@ -1809,6 +1959,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'pricingTable'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             intro: string | null
             plans: Array<{
@@ -1831,6 +1989,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             intro: string | null
             plans: Array<{
@@ -1865,6 +2031,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'richText'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             body: Array<
               | {
                   children?: Array<{
@@ -1914,6 +2088,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             body: Array<
               | {
                   children?: Array<{
@@ -1975,6 +2157,14 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'testimonials'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             items: Array<{
               _key: string
@@ -2002,6 +2192,14 @@ export type PAGE_QUERY_RESULT = {
         | {
             _key: string
             access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+            } | null
             title: string | null
             items: Array<{
               _key: string
@@ -2396,7 +2594,7 @@ declare global {
     '\n  *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': POST_SITEMAP_QUERY_RESULT
     '\n  *[_type == "experiment" && active == true] | order(_createdAt asc)[0] {\n    _id,\n    name,\n    "controlWeight": coalesce(controlWeight, 0),\n    "variants": coalesce(variants[defined(variantId)] { "id": variantId, "weight": coalesce(weight, 0) }, [])\n  }\n': ACTIVE_EXPERIMENT_QUERY_RESULT
     '\n  *[_type == "form" && _id == $id][0] {\n    _id,\n    \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n,\n    successMessage,\n    recipientEmail\n  }\n': FORM_QUERY_RESULT
-    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    "title": select(access == "members" && !$members => "Members only", title),\n    access,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "pageBuilder": select(\n      access == "members" && !$members => [],\n      pageBuilder[] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n    )\n  }\n': PAGE_QUERY_RESULT
+    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    "title": select(access == "members" && !$members => "Members only", title),\n    access,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "pageBuilder": select(\n      access == "members" && !$members => [],\n      pageBuilder[] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n    )\n  }\n': PAGE_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    "title": select(access == "members" => "Members only", title),\n    "description": seo.metaDescription,\n    _updatedAt,\n    "noIndex": seo.noIndex == true || access == "members"\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  count(*[_type == "page" && defined(slug.current)])\n': PAGE_COUNT_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true || access == "members"\n  }\n': PAGE_SITEMAP_QUERY_RESULT

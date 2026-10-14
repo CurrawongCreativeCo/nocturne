@@ -4,6 +4,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -18,51 +19,55 @@ export const featuresGrid = defineType({
   title: 'Features grid',
   type: 'object',
   icon: ThLargeIcon,
-  fields: [
-    defineField({
-      name: 'title',
-      title: 'Section title',
-      type: 'string',
-      validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
-    }),
-    defineField({
-      name: 'intro',
-      type: 'text',
-      rows: 2,
-      validation: (rule) => lengthWarning(rule, LIMITS.intro, 'Intro text'),
-    }),
-    defineField({
-      name: 'columns',
-      type: 'number',
-      initialValue: 3,
-      options: { list: [2, 3, 4], layout: 'radio', direction: 'horizontal' },
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: 'items',
-      type: 'array',
-      validation: (rule) => rule.required().min(1),
-      of: [
-        defineArrayMember({
-          name: 'featureItem',
-          type: 'object',
-          fields: [
-            imageField({
-              name: 'icon',
-              title: 'Icon / image',
-              // Decorative: the feature title next to it says what it means.
-              requireAlt: false,
-              description: 'SVG or square image. Decorative, so screen readers skip it.',
-            }),
-            defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
-            defineField({ name: 'text', type: 'text', rows: 3 }),
-          ],
-          preview: { select: { title: 'title', subtitle: 'text', media: 'icon' } },
-        }),
-      ],
-    }),
-    accessField,
-  ],
+  groups: sectionGroups,
+  fields: sectionFields(
+    [
+      defineField({
+        name: 'title',
+        title: 'Section title',
+        type: 'string',
+        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+      }),
+      defineField({
+        name: 'intro',
+        type: 'text',
+        rows: 2,
+        validation: (rule) => lengthWarning(rule, LIMITS.intro, 'Intro text'),
+      }),
+      defineField({
+        name: 'columns',
+        type: 'number',
+        initialValue: 3,
+        options: { list: [2, 3, 4], layout: 'radio', direction: 'horizontal' },
+        validation: (rule) => rule.required(),
+      }),
+      defineField({
+        name: 'items',
+        type: 'array',
+        validation: (rule) => rule.required().min(1),
+        of: [
+          defineArrayMember({
+            name: 'featureItem',
+            type: 'object',
+            fields: [
+              imageField({
+                name: 'icon',
+                title: 'Icon / image',
+                // Decorative: the feature title next to it says what it means.
+                requireAlt: false,
+                description: 'SVG or square image. Decorative, so screen readers skip it.',
+              }),
+              defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
+              defineField({ name: 'text', type: 'text', rows: 3 }),
+            ],
+            preview: { select: { title: 'title', subtitle: 'text', media: 'icon' } },
+          }),
+        ],
+      }),
+      accessField,
+    ],
+    { align: 'center' },
+  ),
   preview: {
     select: { title: 'title', items: 'items' },
     prepare: ({ title, items }: { title?: string; items?: unknown[] }) => ({

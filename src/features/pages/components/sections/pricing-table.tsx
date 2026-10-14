@@ -1,12 +1,16 @@
 import { stegaClean } from 'next-sanity'
 import { useId } from 'react'
 
+import { SectionFrame } from '@/components/ui/section-frame'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { siteLanguage } from '@/config/env'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 
 import type { SectionProps } from '../../types'
 
 const DEFAULT_CTA_LABEL = 'Get started'
+
+const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'center' }
 
 // Full class names so Tailwind's scanner sees them.
 const columnClasses = {
@@ -20,20 +24,23 @@ const columnClasses = {
  * Plans from Stripe prices. Amounts are formatted with Intl for the site's language. The checkout
  * button comes from the route (`renderCheckout`), since payments are a feature of their own.
  */
-export function PricingTable({ data, renderCheckout }: SectionProps<'pricingTable'>) {
+export function PricingTable({ data, isFirst, renderCheckout }: SectionProps<'pricingTable'>) {
   const { title, intro, plans } = data
   const headingId = useId()
+  const { block, text } = sectionTraits(data.style, DEFAULTS)
 
   if (plans.length === 0) return null
   const count = Math.min(plans.length, 4) as keyof typeof columnClasses
 
   return (
-    <section
+    <SectionFrame
+      style={data.style}
+      defaults={DEFAULTS}
+      isFirst={isFirst}
       aria-labelledby={title ? headingId : undefined}
-      className="mx-auto max-w-content px-gutter py-section"
     >
       {(title || intro) && (
-        <header className="mx-auto mb-16 max-w-measure-narrow text-center">
+        <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
           {title && (
             <h2 id={headingId} className="text-h2 font-semibold text-balance">
               {title}
@@ -60,7 +67,7 @@ export function PricingTable({ data, renderCheckout }: SectionProps<'pricingTabl
               <div className="flex items-center justify-between gap-4">
                 <h3 className="text-lead font-semibold">{name}</h3>
                 {plan.highlighted && (
-                  <p className="rounded-pill bg-surface-inverse px-3 py-1 text-xs font-semibold text-ink-inverse">
+                  <p className="rounded-pill bg-ink px-3 py-1 text-xs font-semibold text-surface">
                     Most popular
                   </p>
                 )}
@@ -108,6 +115,6 @@ export function PricingTable({ data, renderCheckout }: SectionProps<'pricingTabl
           )
         })}
       </ul>
-    </section>
+    </SectionFrame>
   )
 }

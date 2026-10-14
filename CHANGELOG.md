@@ -20,11 +20,30 @@ you start a release.
 
 ### Added
 
+- **Section style:** every page-builder section has a **Design** field group with one shared `style` object
+  (`sectionStyle`): tone (surface, soft, dark, accent), spacing, width, alignment, an anchor id (unique per page, checked
+  by the page's Sections field) and an animation preset (none, fade up, staggered, parallax). A new `SectionFrame`
+  (`src/components/ui/section-frame.tsx`) renders each section's `<section>` from it; the style-to-class mapping is the
+  unit-tested `resolveSectionStyle`. Tones recolour children through CSS variables generated into
+  `tokens.generated.css`, and the focus outline switches to the light ink on the dark tones. `npm run new:section` writes
+  the Design group, the `sectionStyleFields` fragment and a `SectionFrame` into new sections. The section gallery shows
+  every tone and spacing on two sections. See the README's "Section style".
+
 ### Changed
+
+- The sections' markup moved into `SectionFrame`: the `<section>` now wraps a content container `<div>`, and the
+  Testimonials band, Hero and CTA banner take their colours from the tone mechanism (the banner's own tone now colours its
+  card through `data-tone`). The plan badge in the pricing table uses `bg-ink text-surface`. An empty style renders as before.
 
 ### Fixed
 
 ### Breaking changes / migration steps
+
+None required for content: sections without a style look as they did. Run `npm run typegen` after merging. If a project
+has its own sections, wrap them in `SectionFrame`, add `style { ${sectionStyleFields} }` to their fragments and use
+`sectionFields([...])` in their schemas (see the README's "Section style"); until then they keep working but have no
+Design tab. Visual baselines gain the new `*-style-*` gallery entries: refresh them with the "Update visual baselines"
+workflow.
 
 ## [1.3.0] - 2026-10-14
 

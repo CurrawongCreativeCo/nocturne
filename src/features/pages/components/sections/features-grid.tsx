@@ -1,4 +1,6 @@
 import { SanityImage } from '@/components/ui/sanity-image'
+import { SectionFrame } from '@/components/ui/section-frame'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
 import type { SectionProps } from '../../types'
 
@@ -9,13 +11,16 @@ const columnClasses = {
   4: 'sm:grid-cols-2 lg:grid-cols-4',
 } as const
 
-export function FeaturesGrid({ data }: SectionProps<'featuresGrid'>) {
+const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'center' }
+
+export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
   const { title, intro, columns, items } = data
+  const { block, text } = sectionTraits(data.style, DEFAULTS)
 
   return (
-    <section className="mx-auto max-w-content px-gutter py-section">
+    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       {(title || intro) && (
-        <header className="mx-auto mb-16 max-w-measure-narrow text-center">
+        <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
           {title && <h2 className="text-h2 font-semibold text-balance">{title}</h2>}
           {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
         </header>
@@ -35,6 +40,6 @@ export function FeaturesGrid({ data }: SectionProps<'featuresGrid'>) {
           </li>
         ))}
       </ul>
-    </section>
+    </SectionFrame>
   )
 }

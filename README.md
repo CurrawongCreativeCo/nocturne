@@ -75,6 +75,16 @@ Open http://localhost:3000/studio:
 - **Cookie banner:** in Site settings → _Cookie banner_, edit the banner's title, message, privacy policy link and link text, and the one-line descriptions beside _Analytics_ and _Marketing_. Empty fields use sensible defaults. The banner offers **Accept all**, **Reject all** (equal prominence) and **Choose** (analytics and marketing separately; necessary cookies are always on), and a **Cookie settings** link in the footer reopens it so visitors can change their mind. It only exists when the developer has set up an analytics provider (see _Analytics and cookie consent_); with none, there is nothing to ask and no banner or footer link. Banner text changes appear like any other settings change. In Presentation the banner shows too, but no analytics ever load for editors.
 - **Search:** visitors search from the magnifier in the header (or Ctrl/Cmd+K) for a quick list, or at `/search?q=…` for the full results page. It looks through page titles, meta descriptions and the text of _Rich text_ and _Image + text_ sections, matching the start of each word ("web des" finds "Web design"), with title matches first and up to 20 results, each with a short excerpt. Pages with _Hide from search engines_ ticked and members-only pages are left out, as is text inside members-only sections and other sections (hero, FAQ, features…) and shared sections. A query is 2–80 characters (longer is cut). New or edited pages appear within a few minutes (webhook mode: right after the webhook, which expires every cached search). `search` is reserved, so a page can't use it as its first slug segment.
 - **Members-only content:** a page has a _Who can see this page_ field and every section a _Who can see this_ field (_Everyone_ or _Members only (signed in)_; empty means everyone). A members-only page asks visitors to sign in and shows nothing else, is left out of the sitemap, `/llms.txt` and search, and tells search engines not to index it. A members-only section on a public page is replaced by a "Members only" sign-in prompt for visitors who aren't signed in; the rest of the page is unchanged. A shared section is members-only when the section inside it is. The page's title is replaced by "Members only" until the visitor signs in; its URL, and any menu entry an editor adds for it, are not hidden. In Presentation and draft previews editors see everything. Who counts as a member is set by the developer (see _Members-only content_ below). `sign-in` and `sign-out` are reserved first slug segments; link to `/sign-out` (a button link or a footer menu item with a custom URL) wherever members should find it.
+- **Section design:** every section has a **Design** tab next to **Content** (agency use: it is for Currawong staff, and hiding it from clients arrives with the client mode task). It sets, for that one section:
+  - _Tone_: _Surface_ (the page colour), _Soft_ (a light grey band), _Dark_ or _Accent_. The text, buttons, cards and focus outlines inside follow the tone, so every combination keeps the contrast the design guarantees.
+  - _Space above and below_: _Compact_, _Default_ or _Spacious_. _Default_ is the section's usual spacing (a hero is more spacious than a rich text block), not one fixed size.
+  - _Content width_: _Narrow_, _Default_ (the section's usual width), _Wide_ or _Full width_ (edge to edge, no side margins).
+  - _Alignment_: _Start_ or _Centre_, for the headings, intro text and buttons.
+  - _Anchor_: a short name such as `pricing`, so a link to `/#pricing` (or `/about#pricing`) jumps to the section. Lowercase letters, numbers and hyphens, starting with a letter. Each anchor can be used once per page; Studio flags a repeat on the second section. Use it in a button's custom URL or a menu item.
+  - _Animation_: _None_, _Fade up_ (plays once as the section scrolls into view), _Staggered_ (its parts appear one after another) or _Parallax_ (still the same as _None_ for now). The first section on a page never animates, so the heading and main image appear immediately, and visitors who ask for less motion or have JavaScript off see everything at once.
+
+  A section with nothing set in the Design tab looks exactly as it did before this existed. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design tone colours the band around it.
+
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **Image and text guidance:** image fields say what suits their spot ("Recommended: 2400 × 1600 px, landscape.") and show a yellow warning, never an error, when an uploaded picture is narrower than that or a different shape by more than 15%, for example "This image is 1200 × 1800 (portrait). This spot looks best with a landscape image at least 2400 px wide." You can still publish; the warning is a nudge to swap the picture. SVGs are never checked. Section titles and intro text warn the same way when they run past what the design handles (a hero title over 80 characters, other headings over 60–70, intro text over 200). Current targets: hero background 2400 px wide, landscape; _Image + text_ 1600 px at 4:3; testimonial and author portraits 800 px square; logos 400–600 px wide if not SVG (SVG preferred).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
@@ -1096,6 +1106,66 @@ such as `onDragEnd` cannot cross the server/client boundary: write a small clien
 The ~5 KB usually quoted for LazyMotion + `m` holds for esbuild (5.7 KB here), but Turbopack keeps much more of the
 core. That is why the home page JavaScript budget went from 200 KB to 220 KB (see _Performance budgets_).
 
+### Section style
+
+Every page-builder section carries one shared `style` object (type `sectionStyle`,
+`src/lib/sanity/schema/section-style.ts`), edited in the section's **Design** field group (agency-only by
+convention for now; the client mode task hides it from clients). Sections list their own fields and
+`sectionFields([...], initial)` puts them in the Content group and adds `style` in Design.
+
+| Field      | Values                                     | What it does                                                                                  |
+| ---------- | ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `tone`     | `surface` · `alt` · `inverse` · `accent`   | `data-tone` on the `<section>`; recolours everything inside (see below).                      |
+| `spacing`  | `compact` · `default` · `spacious`         | `py-section-compact` / the section's usual / `py-section-spacious`.                           |
+| `width`    | `narrow` · `default` · `wide` · `full`     | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters. |
+| `align`    | `start` · `center`                         | Alignment classes for the parts the section aligns (headings, intro, buttons).                |
+| `anchorId` | slug-like string                           | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).  |
+| `motion`   | `none` · `reveal` · `stagger` · `parallax` | Scroll-in animation through the wrappers in `src/components/motion`.                          |
+
+**Rendering.** A section component renders inside `SectionFrame` (`src/components/ui/section-frame.tsx`, a server
+component) instead of its own `<section>` and padding, and passes its content as children:
+
+```tsx
+const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'center' }
+
+export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
+  const { block, text } = sectionTraits(data.style, DEFAULTS) // alignment classes for headings
+  return (
+    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
+      <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>…</header>
+    </SectionFrame>
+  )
+}
+```
+
+`SectionFrame` renders `<section id data-tone class>` around a container `<div>` that holds the width. The style-to-class
+mapping is `resolveSectionStyle` in `src/components/ui/section-style.ts` (pure, unit tested). Keep the headings and the
+`isFirst` / `<h1>` rule in the section; pass `isFirst` to the frame so the first section never waits for an animation
+(it holds the LCP candidates).
+
+**Empty style means "as before".** `DEFAULTS` is how that kind of section looks with no style: unset fields, and
+_Default_ spacing and width, fall back to it, so existing content needs no migration. Keep it equal to the
+`initial` argument of `sectionFields` in the section's schema (what a newly added section starts with), and to the
+fixture in the gallery. Motion is the exception: it is `none` when unset, and new sections start at `reveal`.
+
+**Tones** are defined in the token CSS (`scripts/build-tokens.mjs` writes them into `src/styles/tokens.generated.css`).
+`[data-tone='inverse']` and `[data-tone='accent']` redefine `--color-surface`, `--color-ink`, `--color-ink-muted`,
+`--color-line`, `--color-accent` and `--color-focus`; `[data-tone='alt']` only paints the soft background. So section
+markup written with `bg-surface`, `text-ink`, `text-ink-muted`, `border-line` and `text-accent` is already right on every
+tone: never hard-code a palette class in a section. On the dark tones `--color-focus` becomes the light ink, which is what
+the global `:focus-visible` rule draws. Buttons are drawn for a background through `CtaGroup`'s `surface`: pass
+`ctaSurfaceFor(tone)` (dark tones get the light buttons). Any element can carry `data-tone` too: the CTA banner's card does.
+
+**Motion presets.** `reveal` wraps the container in `MotionDiv` with `revealInView(fadeUp)`; `stagger` wraps each direct
+child of the frame in a `revealChild()` item under a `staggerContainer`, so give a section sensible top-level parts
+(a header, a list); `parallax` renders still until the parallax task. All of it keeps content visible without
+JavaScript and with reduced motion (see _Motion_).
+
+**Tests.** `section-style.test.ts` covers the mapping; `tests/e2e/section-style.spec.ts` checks tones (axe on every tone for
+two sections), the focus colour, spacing, anchors and motion; the gallery has an entry per tone and spacing for the features
+grid and the image + text section (ids `features-grid-style-<tone>`, `media-text-style-compact`, …), and a narrow, centred
+rich text.
+
 ### Type flow
 
 ```
@@ -1404,11 +1474,14 @@ npm run new:section pricing-table
 
 This creates the schema, GROQ fragment, component and thumbnail, registers each one, adds a placeholder
 to the section gallery's fixtures, and runs typegen.
-The section is immediately in Studio's _Add item_ menu with a title and text field. Then:
+The section is immediately in Studio's _Add item_ menu with a title and text field, a **Design** tab (the shared
+`style`, see [Section style](#section-style)) and a `SectionFrame` in its component. Then:
 
 1. Add fields in `src/features/pages/schemas/sections/pricing-table.ts`
 2. Query them in `pricingTableFragment` (`src/features/pages/api/sections.ts`) and run `npm run typegen`
-3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx`, typed from the query, and style it with the
+3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx`, typed from the query, inside its
+   `SectionFrame` (keep `style { ${sectionStyleFields} }` in the fragment, and keep `DEFAULTS` equal to the schema's
+   initial style), and style it with the
    [design tokens](#design-tokens) (`bg-surface-alt`, `text-ink-muted`, `py-section`, `text-h2`): a raw colour class fails the
    `no-raw-palette` test
 4. Optionally replace `public/section-previews/pricingTable.svg`

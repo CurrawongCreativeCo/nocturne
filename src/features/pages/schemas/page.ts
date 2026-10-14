@@ -18,6 +18,7 @@ import { lockedForClientsOnceSet } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 
 import { sectionTypes } from './sections'
+import { findDuplicateAnchors } from '../utils/section-anchors'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/
 /** First path segments taken by app routes: a page there could never be reached. */
@@ -101,6 +102,19 @@ export const page = defineType({
           to: [{ type: 'sharedSection' }],
         }),
       ],
+      // An anchor is the section's `id`, so it can be used once per page.
+      validation: (rule) =>
+        rule.custom((sections) => {
+          const duplicates = findDuplicateAnchors(
+            sections as Parameters<typeof findDuplicateAnchors>[0],
+          )
+          return duplicates.length === 0
+            ? true
+            : duplicates.map(({ key, anchorId }) => ({
+                message: `The anchor "${anchorId}" is used by another section on this page`,
+                path: [{ _key: key }, 'style', 'anchorId'],
+              }))
+        }),
       options: {
         insertMenu: {
           // Thumbnails live in public/section-previews/<typeName>.svg.

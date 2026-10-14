@@ -329,6 +329,44 @@ export const documents = [
     ],
   },
   {
+    // Sections with a motion preset and an anchor (tests/e2e/section-style.spec.ts). noIndex keeps it
+    // out of the sitemap and search.
+    _id: 'page-style-motion',
+    _type: 'page',
+    title: 'Section style motion',
+    slug: { _type: 'slug', current: 'style-motion' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'motion-first',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', motion: 'reveal', anchorId: 'first' },
+        body: [block(['First section, never animated'], { style: 'h2' })],
+      },
+      {
+        _key: 'motion-reveal',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', motion: 'reveal', anchorId: 'reveal' },
+        body: [block(['Revealed'], { style: 'h2' }), block(['Fades up once in view.'])],
+      },
+      {
+        _key: 'motion-stagger',
+        _type: 'featuresGrid',
+        style: { _type: 'sectionStyle', motion: 'stagger', anchorId: 'stagger' },
+        title: 'Staggered',
+        intro: 'Each part follows the one before.',
+        columns: 2,
+        items: [1, 2].map((i) => ({ _key: key(), title: `Feature ${i}`, text: 'Text.' })),
+      },
+      {
+        _key: 'motion-parallax',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', motion: 'parallax', tone: 'inverse' },
+        body: [block(['Parallax is static for now'], { style: 'h2' })],
+      },
+    ],
+  },
+  {
     // Public page with members-only sections: a plain one and a shared one between public ones.
     _id: 'page-mixed',
     _type: 'page',
@@ -656,6 +694,19 @@ const galleryBanner = (tone) => ({
   ],
 })
 
+/** A gallery section with Design options set: one entry per tone and spacing (see "Section style" in the README). */
+const styled = (id, section, style) => ({
+  ...section,
+  _key: id,
+  style: { _type: 'sectionStyle', ...style },
+})
+const TONES = ['surface', 'alt', 'inverse', 'accent']
+const SPACINGS = ['compact', 'spacious']
+const styledVariants = (id, section) => [
+  ...TONES.map((tone) => styled(`${id}-${tone}`, section, { tone, anchorId: `${id}-${tone}` })),
+  ...SPACINGS.map((spacing) => styled(`${id}-${spacing}`, section, { spacing })),
+]
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -753,6 +804,25 @@ const gallerySections = [
     submitLabel: 'Subscribe',
     successMessage: 'Thanks! Check your inbox to confirm.',
   },
+  ...styledVariants('features-grid-style', galleryFeatures(3)),
+  ...styledVariants(
+    'media-text-style',
+    galleryMediaText('style', 'Design options', {
+      image: image('Picture'),
+      imagePosition: 'right',
+    }),
+  ),
+  styled(
+    'rich-text-style-narrow',
+    {
+      _type: 'richText',
+      body: [
+        block(['Narrow and centred'], { style: 'h2' }),
+        block(['A paragraph of copy in a narrower column, centred.']),
+      ],
+    },
+    { width: 'narrow', align: 'center' },
+  ),
   // new-section:gallery
 ]
 

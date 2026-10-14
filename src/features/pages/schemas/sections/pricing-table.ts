@@ -4,6 +4,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
 
 interface PlanValue {
   highlighted?: boolean
@@ -22,118 +23,123 @@ export const pricingTable = defineType({
   title: 'Pricing table',
   type: 'object',
   icon: CreditCardIcon,
-  fields: [
-    defineField({
-      name: 'title',
-      title: 'Section title',
-      type: 'string',
-      validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
-    }),
-    defineField({
-      name: 'intro',
-      type: 'text',
-      rows: 2,
-      validation: (rule) => lengthWarning(rule, LIMITS.intro, 'Intro text'),
-    }),
-    defineField({
-      name: 'plans',
-      type: 'array',
-      description:
-        'One card per plan, in this order. Prices come from Stripe: add or change them in the Stripe dashboard and they appear here after the webhook runs.',
-      validation: (rule) =>
-        rule
-          .required()
-          .min(1)
-          .max(4)
-          .custom((plans?: PlanValue[]) =>
-            (plans ?? []).filter((plan) => plan.highlighted).length > 1
-              ? 'Highlight at most one plan.'
-              : true,
-          ),
-      of: [
-        defineArrayMember({
-          name: 'plan',
-          type: 'object',
-          fields: [
-            defineField({
-              name: 'price',
-              type: 'reference',
-              to: [{ type: 'stripePrice' }],
-              // Archived prices can't be bought, so they aren't offered.
-              options: { filter: 'active == true' },
-              description: 'The Stripe price this plan sells. Visitors check out with it.',
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: 'name',
-              title: 'Plan name',
-              type: 'string',
-              description: 'Leave empty to use the product name from Stripe.',
-            }),
-            defineField({
-              name: 'features',
-              type: 'array',
-              of: [defineArrayMember({ type: 'string' })],
-              description: 'What this plan includes, one line each.',
-            }),
-            defineField({
-              name: 'highlighted',
-              title: 'Highlight this plan',
-              type: 'boolean',
-              description: 'Marks it “Most popular” with a stronger outline. Only one plan can be.',
-              initialValue: false,
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: 'ctaLabel',
-              title: 'Button text',
-              type: 'string',
-              description: 'Defaults to “Get started”.',
-            }),
-          ],
-          preview: {
-            select: {
-              name: 'name',
-              productName: 'price.productName',
-              amount: 'price.amount',
-              currency: 'price.currency',
-              interval: 'price.interval',
-              intervalCount: 'price.intervalCount',
-              highlighted: 'highlighted',
+  groups: sectionGroups,
+  fields: sectionFields(
+    [
+      defineField({
+        name: 'title',
+        title: 'Section title',
+        type: 'string',
+        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+      }),
+      defineField({
+        name: 'intro',
+        type: 'text',
+        rows: 2,
+        validation: (rule) => lengthWarning(rule, LIMITS.intro, 'Intro text'),
+      }),
+      defineField({
+        name: 'plans',
+        type: 'array',
+        description:
+          'One card per plan, in this order. Prices come from Stripe: add or change them in the Stripe dashboard and they appear here after the webhook runs.',
+        validation: (rule) =>
+          rule
+            .required()
+            .min(1)
+            .max(4)
+            .custom((plans?: PlanValue[]) =>
+              (plans ?? []).filter((plan) => plan.highlighted).length > 1
+                ? 'Highlight at most one plan.'
+                : true,
+            ),
+        of: [
+          defineArrayMember({
+            name: 'plan',
+            type: 'object',
+            fields: [
+              defineField({
+                name: 'price',
+                type: 'reference',
+                to: [{ type: 'stripePrice' }],
+                // Archived prices can't be bought, so they aren't offered.
+                options: { filter: 'active == true' },
+                description: 'The Stripe price this plan sells. Visitors check out with it.',
+                validation: (rule) => rule.required(),
+              }),
+              defineField({
+                name: 'name',
+                title: 'Plan name',
+                type: 'string',
+                description: 'Leave empty to use the product name from Stripe.',
+              }),
+              defineField({
+                name: 'features',
+                type: 'array',
+                of: [defineArrayMember({ type: 'string' })],
+                description: 'What this plan includes, one line each.',
+              }),
+              defineField({
+                name: 'highlighted',
+                title: 'Highlight this plan',
+                type: 'boolean',
+                description:
+                  'Marks it “Most popular” with a stronger outline. Only one plan can be.',
+                initialValue: false,
+                validation: (rule) => rule.required(),
+              }),
+              defineField({
+                name: 'ctaLabel',
+                title: 'Button text',
+                type: 'string',
+                description: 'Defaults to “Get started”.',
+              }),
+            ],
+            preview: {
+              select: {
+                name: 'name',
+                productName: 'price.productName',
+                amount: 'price.amount',
+                currency: 'price.currency',
+                interval: 'price.interval',
+                intervalCount: 'price.intervalCount',
+                highlighted: 'highlighted',
+              },
+              prepare: ({
+                name,
+                productName,
+                amount,
+                currency,
+                interval,
+                intervalCount,
+                highlighted,
+              }: {
+                name?: string
+                productName?: string
+                amount?: number
+                currency?: string
+                interval?: string
+                intervalCount?: number
+                highlighted?: boolean
+              }) => ({
+                title: name || productName || 'Choose a price',
+                subtitle: [
+                  amount !== undefined && currency
+                    ? `${formatPrice({ amount, currency })} ${formatInterval(interval, intervalCount)}`.trim()
+                    : '',
+                  highlighted ? 'highlighted' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · '),
+              }),
             },
-            prepare: ({
-              name,
-              productName,
-              amount,
-              currency,
-              interval,
-              intervalCount,
-              highlighted,
-            }: {
-              name?: string
-              productName?: string
-              amount?: number
-              currency?: string
-              interval?: string
-              intervalCount?: number
-              highlighted?: boolean
-            }) => ({
-              title: name || productName || 'Choose a price',
-              subtitle: [
-                amount !== undefined && currency
-                  ? `${formatPrice({ amount, currency })} ${formatInterval(interval, intervalCount)}`.trim()
-                  : '',
-                highlighted ? 'highlighted' : '',
-              ]
-                .filter(Boolean)
-                .join(' · '),
-            }),
-          },
-        }),
-      ],
-    }),
-    accessField,
-  ],
+          }),
+        ],
+      }),
+      accessField,
+    ],
+    { align: 'center' },
+  ),
   preview: {
     select: { title: 'title', plans: 'plans' },
     prepare: ({ title, plans }: { title?: string; plans?: unknown[] }) => ({

@@ -2,15 +2,20 @@ import { stegaClean, toPlainText } from 'next-sanity'
 
 import { JsonLd } from '@/components/ui/json-ld'
 import { RichText } from '@/components/ui/rich-text'
+import { SectionFrame } from '@/components/ui/section-frame'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
 import type { SectionProps } from '../../types'
 
+const DEFAULTS: SectionDefaults = { container: 'max-w-measure', align: 'center' }
+
 /** Native <details> accordion: accessible and works without JavaScript. */
-export function Faq({ data }: SectionProps<'faq'>) {
+export function Faq({ data, isFirst }: SectionProps<'faq'>) {
   const { title, intro, items } = data
+  const { text } = sectionTraits(data.style, DEFAULTS)
 
   return (
-    <section className="mx-auto max-w-measure px-gutter py-section">
+    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -26,7 +31,7 @@ export function Faq({ data }: SectionProps<'faq'>) {
         }}
       />
       {(title || intro) && (
-        <header className="mb-12 text-center">
+        <header className={`mb-12 ${text}`}>
           {title && <h2 className="text-h2 font-semibold text-balance">{title}</h2>}
           {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
         </header>
@@ -47,6 +52,6 @@ export function Faq({ data }: SectionProps<'faq'>) {
           </details>
         ))}
       </div>
-    </section>
+    </SectionFrame>
   )
 }

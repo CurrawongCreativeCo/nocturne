@@ -1,41 +1,47 @@
 import { stegaClean } from 'next-sanity'
 
 import { CtaGroup } from '@/components/ui/cta-link'
+import { SectionFrame } from '@/components/ui/section-frame'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
 import type { SectionProps } from '../../types'
 
-const tones = {
-  brand: {
-    section: 'bg-accent text-accent-ink',
-    // Full strength: 80% opacity measured 3.84:1 on the brand color, below WCAG AA (4.5:1).
-    text: 'text-accent-ink',
-    surface: 'dark',
-  },
-  dark: {
-    section: 'bg-surface-inverse text-ink-inverse',
-    text: 'text-ink-inverse-muted',
-    surface: 'dark',
-  },
-  light: { section: 'bg-surface-alt text-ink', text: 'text-ink-muted', surface: 'light' },
+const DEFAULTS: SectionDefaults = {
+  spacing: 'compact',
+  container: 'max-w-5xl',
+  align: 'center',
+}
+
+/**
+ * The banner's own `tone` colours the card; the section around it is coloured by the shared style.
+ * The card is a `data-tone` element of its own, so it recolours its text and buttons like a section.
+ * (Brand text stays at full strength: 80% opacity measured 3.84:1 on the brand colour, below AA.)
+ */
+const cards = {
+  brand: { tone: 'accent', surface: 'dark' },
+  dark: { tone: 'inverse', surface: 'dark' },
+  light: { tone: 'alt', surface: 'light' },
 } as const
 
-export function CtaBanner({ data }: SectionProps<'ctaBanner'>) {
+export function CtaBanner({ data, isFirst }: SectionProps<'ctaBanner'>) {
   const { title, text, ctas } = data
-  const tone = tones[stegaClean(data.tone)]
+  const card = cards[stegaClean(data.tone)]
+  const { block, text: textAlign, justify } = sectionTraits(data.style, DEFAULTS)
 
   return (
-    <section className="px-gutter py-section-compact">
+    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       <div
-        className={`mx-auto max-w-5xl rounded-panel px-8 py-section-compact text-center sm:px-16 ${tone.section}`}
+        data-tone={card.tone}
+        className={`rounded-panel px-8 py-section-compact text-ink sm:px-16 ${textAlign}`}
       >
         <h2 className="text-h2 font-semibold text-balance">{title}</h2>
         {text && (
-          <p className={`mx-auto mt-4 max-w-measure-narrow text-lead text-pretty ${tone.text}`}>
+          <p className={`mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`}>
             {text}
           </p>
         )}
-        <CtaGroup ctas={ctas} surface={tone.surface} className="mt-8 justify-center" />
+        <CtaGroup ctas={ctas} surface={card.surface} className={`mt-8 ${justify}`} />
       </div>
-    </section>
+    </SectionFrame>
   )
 }
