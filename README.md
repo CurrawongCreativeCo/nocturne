@@ -31,6 +31,10 @@ with a **private** dataset (or connect an existing one; make that private too, s
 to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
 or future projects lose the wizard.
 
+The CMS (Studio) uses Currawong Creative's branding with no setup: `studio-brand.json` ships as an empty
+brand. The wizard only sets the Studio title from the site name. To brand the CMS for the client, see
+[CMS branding](#cms-branding); otherwise leave it as Currawong's, on purpose.
+
 Working on the template itself? Keep an untracked `.template-dev` file in its checkout (any content;
 it's gitignored). The wizard sees it and never removes itself there, even when `.env.local` works.
 
@@ -223,6 +227,9 @@ It still needs the CORS step below.
    exposes members-only content and form recipient addresses to anyone who knows the project ID.
 6. **Check:** `/sitemap.xml` and `/robots.txt` list production URLs, and editing a page in
    Presentation updates the live site.
+7. **Confirm the CMS brand:** open `/studio`. Either it carries the client's name, logo and colours
+   (`studio-brand.json`, see [CMS branding](#cms-branding)), or you have decided to leave it as Currawong
+   Creative's. `npm run check:studio-brand` prints what it resolves to.
 
 Without `NEXT_PUBLIC_SITE_URL`, Vercel deployments fall back to the project's production domain; any
 other production server refuses to start rather than publish canonical URLs pointing at localhost.
@@ -816,6 +823,11 @@ takes its place, because violet on ink is 2.5:1); amber is a fill with ink text,
 (light mode's amber text is `#7e5c1f`); lilac is a surface and always has a border. A unit test checks
 every role pair in both schemes.
 
+**New projects need no setup.** The template ships `studio-brand.json` with only a `$schema` line and
+`src/assets/brand/client/` holding just a README, so Studio shows Currawong Creative's branding from the
+first `npm run dev`. The setup wizard asks nothing about it; it sets `NEXT_PUBLIC_STUDIO_TITLE` from the
+site name, which names the Studio only while `name` is unset in `studio-brand.json`.
+
 **Brand a client's CMS.**
 
 1. Put logo files in `src/assets/brand/client/` (SVG, PNG, WebP, JPEG or AVIF).
@@ -835,6 +847,11 @@ every role pair in both schemes.
 
    Colours are six-digit hex. Logo paths must be inside `src/assets/brand/client/`. If you give only
    one of `onLight` and `onDark`, it is used for both.
+
+   Keep the `"$schema": "./studio-brand.schema.json"` line at the top: VS Code then autocompletes and
+   validates the file (`studio-brand.schema.json` describes the same fields as the check script, and
+   Currawong's Ops dashboard will use it too). The line is ignored by the site and doesn't count as
+   branding.
 
 3. Run `npm run check:studio-brand`. It prints the resolved name, logos and both palettes with each
    contrast ratio, lists warnings, and fails on a bad value or a missing file. CI runs it too.
@@ -1436,15 +1453,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Expect                              |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`, `studio-brand.json`, `src/assets/brand/client/`                                                                                                                                                                                                                                                                                                                | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                                                | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                                                       | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                                            | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/config/studio-brand/**`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                    | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                       | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Expect                              |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`, `studio-brand.json` (with `studio-brand.schema.json` kept as shipped), `src/assets/brand/client/`                                                                                                                                                                                                                                                                                                                               | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                                                                                                                 | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                                                                                                                        | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                                                                                                             | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/config/studio-brand/**`, `src/assets/brand/currawong/**`, `src/features/studio/theme.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                                                                                     | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                                                                                        | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design
