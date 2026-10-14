@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.3.0] - 2026-10-14
+
+### Added
+
 - **Launch check and screenshot sweep.** `npm run launch:check -- <url>` checks a deployed site before go-live: HTTPS
   and redirects (HTTP, www and apex), the security headers, `/studio`, a real 404, canonical URLs, `robots.txt` and the
   sitemap (every URL returns 200, capped at 200), unique titles and descriptions, one `h1` per page, `noindex`
@@ -89,6 +99,9 @@ you start a release.
 
 ### Fixed
 
+- Blog and members e2e tests look up headings and text inside `#main-content`, which removes an intermittent
+  strict-mode failure on CI (React can leave a hidden streaming segment next to the revealed copy). Tests only.
+
 ### Breaking changes / migration steps
 
 - **Add `studio-brand.json`** (`{ "$schema": "./studio-brand.schema.json" }`, or `{}`) at the repo root, with
@@ -101,6 +114,18 @@ you start a release.
 - The Studio logo mark is now Currawong violet (or the client's primary) instead of the public accent.
   For a site created before this release that wants the old look, set `colors.primary` in `studio-brand.json`
   to the `accent` hex from `src/styles/tokens.json`.
+- **Studio roles (Sanity role change).** The Studio is now role-aware and merges through `sanity.config.ts` (it
+  registers the publish and delete actions and the role-aware structure, tools and insert menu). Give agency staff
+  Administrator or Developer, and give every client user **Editor or Contributor, never Administrator**, or they
+  keep the full Studio. Optionally add `siteProfile.clientSections` to limit the page builder's _Add item_ menu. Walk
+  through `docs/studio-roles-test-script.md` once per site.
+- **Tooling.** Node 22.18 or newer is needed (`scripts/build-tokens.mjs` uses Node's TypeScript stripping). Merge
+  the new `package.json` scripts, run `npm install` and `npm run typegen`, then commit the regenerated
+  `src/config/studio-brand/assets.generated.ts` and `src/types/sanity.types.ts`. Merge the new
+  `check:studio-brand` step in `.github/workflows/ci.yml`.
+- **Visual baselines** change (new Studio brand preview snapshots): run the _Update visual baselines_ workflow
+  and commit the images from every `*.spec.ts-snapshots` folder.
+- No new required env vars. `PSI_API_KEY` is optional, for the PageSpeed step of `npm run launch:check`.
 
 ## [1.2.0] - 2026-10-14
 
@@ -310,7 +335,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/CurrawongCreativeCo/sanity-starter/releases/tag/v1.0.0
