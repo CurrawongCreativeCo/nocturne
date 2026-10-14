@@ -38,6 +38,9 @@ jobs:
       - name: Template version matches the changelog
         run: npm run check:version
 
+      - name: CMS brand (studio-brand.json) is valid
+        run: npm run check:studio-brand
+
       - name: Generated design tokens are committed and current
         run: |
           npm run tokens

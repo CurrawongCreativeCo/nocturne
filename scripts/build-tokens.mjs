@@ -2,6 +2,8 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { hexToRgb, oklchToRgb as oklchToRgbChannels } from '../src/lib/color/oklch.ts'
+
 /**
  * Design tokens: src/styles/tokens.json -> src/styles/tokens.generated.css (a Tailwind 4 @theme
  * block plus :root variables) and src/config/tokens.generated.ts (values needed outside CSS).
@@ -59,34 +61,17 @@ export const requiredMotion = [
   'reveal-distance',
 ]
 
-/** "#rrggbb" -> [r, g, b] (0-255). */
-export function hexToRgb(hex) {
-  return [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16))
-}
+export { hexToRgb }
 
 /** "oklch(0.55 0.2 264)" (or "55% 0.2 264") -> sRGB [r, g, b] (0-255, unrounded, clamped). */
 export function oklchToRgb(value) {
   const match = /^oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*\)$/.exec(value)
   if (!match) throw new Error(`Not a plain oklch() colour: ${value}`)
-  const lightness = Number(match[1]) / (match[2] ? 100 : 1)
-  const chroma = Number(match[3])
-  const hue = (Number(match[4]) * Math.PI) / 180
-  const a = chroma * Math.cos(hue)
-  const b = chroma * Math.sin(hue)
-
-  const l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3
-  const m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3
-  const s = (lightness - 0.0894841775 * a - 1.291485548 * b) ** 3
-  const linear = [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ]
-  return linear.map((channel) => {
-    const clamped = Math.min(1, Math.max(0, channel))
-    const encoded = clamped <= 0.0031308 ? 12.92 * clamped : 1.055 * clamped ** (1 / 2.4) - 0.055
-    return encoded * 255
-  })
+  return oklchToRgbChannels(
+    Number(match[1]) / (match[2] ? 100 : 1),
+    Number(match[3]),
+    Number(match[4]),
+  )
 }
 
 /** How far a hex fallback may drift from its oklch value (per channel, out of 255). */
@@ -247,10 +232,6 @@ export function buildTs(tokens) {
       revealDistance: parseLengthPx(motion['reveal-distance']),
     },
     ogImage: { background: tokens.color.accent.hex, foreground: tokens.color['accent-ink'].hex },
-    studioBrand: {
-      color: tokens.color.accent.oklch,
-      foreground: tokens.color['accent-ink'].oklch,
-    },
   }
 
   const docs = {
@@ -260,7 +241,6 @@ export function buildTs(tokens) {
     motion:
       'Motion tokens for JavaScript: durations in seconds, easings as cubic-bezier points, distance in px.',
     ogImage: 'Colours for the generated share image (src/app/api/og): hex, as next/og needs.',
-    studioBrand: "Colours for the embedded Studio's chrome (its logo mark): oklch.",
   }
 
   const out = [`// ${banner('src/styles/tokens.json')}`, '']
