@@ -1,5 +1,6 @@
 import { defineField, defineType } from 'sanity'
 
+import { hiddenFromClients } from '../roles'
 import { imageField } from './image-field'
 import { SeoInput } from './seo-preview/seo-input'
 
@@ -32,6 +33,7 @@ export const seo = defineType({
       name: 'noIndex',
       title: 'Hide from search engines',
       type: 'boolean',
+      hidden: hiddenFromClients,
       initialValue: false,
     }),
   ],

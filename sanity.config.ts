@@ -19,25 +19,46 @@ import { blogSchemaTypes } from './src/features/blog/schemas'
 import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
+import { sectionTypes } from './src/features/pages/schemas/sections'
 import { pageTemplates } from './src/features/pages/schemas/templates'
 import { pricingSchemaTypes } from './src/features/pricing/schemas'
 import { hidePricesFromNewMenu } from './src/features/pricing/studio'
 import { siteSchemaTypes } from './src/features/site/schemas'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
+import { RoleNavbar } from './src/features/studio/components/role-navbar'
+import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
 import { StudioIcon } from './src/features/studio/components/studio-icon'
 import { StudioLogo } from './src/features/studio/components/studio-logo'
 import { contentHealth } from './src/features/studio/content-health/plugin'
 import { resolve } from './src/features/studio/presentation'
+import { currentAudience } from './src/features/studio/roles'
 import {
   hideSingletonsFromNewMenu,
+  SINGLETON_TYPES,
   singletonDocumentActions,
   withoutSingletonTemplates,
 } from './src/features/studio/singletons'
 import { structure } from './src/features/studio/structure'
 import { buildStudioTheme } from './src/features/studio/theme'
+import {
+  CLIENT_PROTECTED_TYPES,
+  filterDocumentActions,
+  filterNewDocumentOptions,
+} from './src/features/studio/utils/document-access'
+import { filterTools } from './src/features/studio/utils/tool-access'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
 // new-registry:import
+
+/** Templates and types clients may create from "New document": page templates, posts and their authors and categories. */
+const CLIENT_NEW_DOCUMENT_IDS = new Set([
+  ...pageTemplates.map(({ id }) => id),
+  'post',
+  'author',
+  'category',
+])
+const PROTECTED_TYPES = new Set<string>(CLIENT_PROTECTED_TYPES)
+const RoleAwareInput = createRoleAwareInput(new Set(sectionTypes.map(({ name }) => name)))
 
 export default defineConfig({
   basePath: studioUrl,
@@ -50,7 +71,9 @@ export default defineConfig({
   theme: buildStudioTheme(studioBrand),
   projectId,
   dataset,
-  studio: { components: { logo: StudioLogo } },
+  studio: { components: { logo: StudioLogo, navbar: RoleNavbar } },
+  // Clients only get the approved sections in the page builder's insert menu.
+  form: { components: { input: RoleAwareInput } },
   // Content variants: lets editors create variants of a document, which A/B experiments serve.
   beta: { variants: { enabled: true } },
   schema: {
@@ -67,10 +90,23 @@ export default defineConfig({
     templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],
   },
   document: {
-    actions: singletonDocumentActions,
+    actions: (prev, context) =>
+      filterDocumentActions(
+        singletonDocumentActions(prev, context),
+        currentAudience(context.currentUser),
+        PROTECTED_TYPES.has(context.schemaType) || SINGLETON_TYPES.has(context.schemaType),
+      ),
     newDocumentOptions: (prev, context) =>
-      hidePricesFromNewMenu(hideSingletonsFromNewMenu(prev, context), context),
+      context.creationContext.type === 'document'
+        ? prev
+        : filterNewDocumentOptions(
+            hidePricesFromNewMenu(hideSingletonsFromNewMenu(prev, context), context),
+            currentAudience(context.currentUser),
+            CLIENT_NEW_DOCUMENT_IDS,
+          ),
   },
+  // Vision, AI settings and Content health are agency-only; clients open on Presentation.
+  tools: (prev, context) => filterTools(prev, currentAudience(context.currentUser)),
   plugins: [
     structureTool({ structure }),
     presentationTool({

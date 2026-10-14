@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+- **Role-aware Studio.** Agency staff (Administrator, Developer) keep the full Studio; Editors and Contributors get
+  a simpler, safer one. Clients lose Vision, AI settings and Content health, and see Presentation first; the sidebar
+  shows only Site settings, Pages, Blog (and Team and Business info when present); the members-only `access`
+  fields, SEO _Hide from search engines_ and the _Search & AI_ and _Cookie banner_ settings groups are hidden; a
+  page's slug locks once set; Delete and Duplicate are removed on pages, posts and singletons; Contributors lose
+  Publish; _New document_ offers only the page templates, posts, authors and categories; and the page builder's
+  _Add item_ menu lists only approved sections (a default list, or `siteProfile.clientSections` when it exists).
+  Staff get an **Agency view** badge and a switch to preview the client view. These are Studio conveniences: the
+  README's _Studio roles and permissions_ matrix says what Sanity itself enforces. Adds
+  `docs/studio-roles-test-script.md`. Clients must hold Editor or Contributor, never Administrator.
 - **Image and text guidance.** `imageField` takes `aspect`, `minWidth`, `orientation` and `preferSvg`: the
   description gains "Recommended: 2400 × 1600 px, landscape." and Studio warns (never errors) when the
   uploaded picture is too narrow or more than 15% off the target shape, in plain English. The comparison is
