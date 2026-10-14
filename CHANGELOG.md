@@ -20,11 +20,33 @@ you start a release.
 
 ### Added
 
+- **CMS brand system.** The Studio now has its own brand, separate from the public design tokens:
+  Currawong defaults in `src/config/studio-brand/currawong.ts`, an optional per-site `studio-brand.json`
+  (default `{}`) with logo files in `src/assets/brand/client/`, and `resolveStudioBrand` with the
+  precedence rules (client wins; identity falls back field by field; colours as a whole set; client
+  colours used for text, focus and selected states are lifted to WCAG contrast with a warning). New
+  `npm run check:studio-brand`, run by CI. See the README's _CMS branding_. The Studio UI itself is
+  unchanged for now.
+- `src/lib/color/`: hex <-> OKLCH conversion, WCAG contrast and lightness adjustment.
+
 ### Changed
+
+- `src/lib/contrast.ts` moved to `src/lib/color/contrast.ts`.
+- `scripts/build-tokens.mjs` shares its colour conversion with `src/lib/color/oklch.ts` (it now needs
+  Node's TypeScript stripping, on by default from Node 22.18).
+- The Studio logo mark takes its colours from the CMS brand, not the public `accent` token.
 
 ### Fixed
 
 ### Breaking changes / migration steps
+
+- **Add `studio-brand.json`** (`{}`) at the repo root, and merge the new `tsconfig.json` option
+  `allowImportingTsExtensions`.
+- **Removed `src/config/brand.ts`** (the deprecated `brandColor`, `brandColorHex` and
+  `brandForegroundColor`) and the `studioBrand` export of `tokens.generated.ts`. Use `colorHex` and
+  `colorOklch` for public colours; use `src/config/studio-brand/client.ts` for Studio colours. Run
+  `npm run tokens`.
+- The Studio logo mark is now Currawong violet (or the client's primary) instead of the public accent.
 
 ## [1.2.0] - 2026-10-14
 

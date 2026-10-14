@@ -75,9 +75,3 @@ export const ogImage = {
   "background": "#3266e4",
   "foreground": "#fcfcfc"
 } as const
-
-/** Colours for the embedded Studio's chrome (its logo mark): oklch. */
-export const studioBrand = {
-  "color": "oklch(0.55 0.2 264)",
-  "foreground": "oklch(0.99 0 0)"
-} as const

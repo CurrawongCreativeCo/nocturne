@@ -3,9 +3,9 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { contrastRatio } from '@/lib/contrast'
+import { contrastRatio } from '@/lib/color/contrast'
 
-import { colorHex, colorOklch, motion, ogImage, studioBrand } from './tokens.generated'
+import { colorHex, colorOklch, motion, ogImage } from './tokens.generated'
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
 
@@ -28,9 +28,8 @@ describe('generated design tokens', () => {
     expect(css).toContain('--color-brand-foreground: var(--color-accent-ink);')
   })
 
-  it('give the OG image and the Studio the accent colours', () => {
+  it('give the OG image the accent colours', () => {
     expect(ogImage).toEqual({ background: colorHex.accent, foreground: colorHex.accentInk })
-    expect(studioBrand).toEqual({ color: colorOklch.accent, foreground: colorOklch.accentInk })
   })
 
   it('expose motion durations in seconds', () => {

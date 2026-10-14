@@ -158,7 +158,7 @@ Releases and scheduled publishing need a paid Sanity plan (Growth or higher); on
 **Branding:** colours, type, spacing and radii are the design tokens in `src/styles/tokens.json` (see
 [Design tokens](#design-tokens)); the brand colour is the `accent` token. The Studio's name comes from
 `NEXT_PUBLIC_STUDIO_TITLE` (the setup wizard fills it in from the site name) and appears in its header beside a
-small mark in the accent colour. The font is set
+small mark in the CMS brand colour (see [CMS branding](#cms-branding)). The font is set
 with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
 the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project. The generated share image has its own copy of the font (Inter Bold, `src/assets/fonts/`), because `next/og` can't use `next/font`.
 
@@ -317,7 +317,9 @@ src/
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
   config/                          env.ts (validated), paths.ts (slug <-> URL),
-                                   tokens.generated.ts (GENERATED: token values for the OG image and Studio)
+                                   tokens.generated.ts (GENERATED: token values for the OG image)
+  config/studio-brand/             CMS brand: currawong.ts (defaults), resolve.ts, validate.ts, client.ts, types.ts
+  lib/color/                       hex <-> OKLCH, WCAG contrast, lightness adjustment (shared with build-tokens)
   lib/sitemap-chunks.ts            sitemap split math (shared by pages and posts)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
                                    fragments.ts (shared GROQ), schema/ (link, cta, seo, blockContent, imageField)
@@ -327,6 +329,8 @@ src/
   types/
     sanity.types.ts                GENERATED — commit it
     sanity.ts                      shared types: SanityImageData, CtaData, LinkData
+studio-brand.json                  this site's CMS brand ({} = Currawong's); see CMS branding
+scripts/check-studio-brand.mjs     `npm run check:studio-brand`: prints the resolved CMS brand and warnings
 public/section-previews/           insert-menu thumbnails, one <typeName>.svg per section
     section-gallery/page.tsx       (in src/app) every section type and variant on one page; dev and tests only
 scripts/new-section.mjs            `npm run new:section` scaffolder
@@ -696,12 +700,12 @@ Every colour, font, type size, space, radius, shadow and motion value the site u
 token**, so a client site is re-skinned by editing one file. Components never name a raw colour; they say
 what a thing _is_ (`bg-surface`, `text-ink-muted`, `border-line`, `rounded-card`, `py-section`).
 
-| File                              | Role                                                                                                                                                                                                                 |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/styles/tokens.json`          | **Source of truth. You edit this.** A project-owned Customize file.                                                                                                                                                  |
-| `scripts/build-tokens.mjs`        | The dependency-free generator (`npm run tokens`). It validates `tokens.json`, then writes the two files below. `npm run typegen`, `npm run build` and `npm run dev` run it for you.                                  |
-| `src/styles/tokens.generated.css` | Generated. A Tailwind 4 `@theme` block (the utilities below) plus `:root` variables for motion. Imported by `globals.css`.                                                                                           |
-| `src/config/tokens.generated.ts`  | Generated. Typed values needed outside CSS: `colorHex`/`colorOklch`, `ogImage` (hex, for the share image), `studioBrand` (the Studio logo mark) and `motion` (durations in seconds, easings, reveal distance in px). |
+| File                              | Role                                                                                                                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/styles/tokens.json`          | **Source of truth. You edit this.** A project-owned Customize file.                                                                                                                 |
+| `scripts/build-tokens.mjs`        | The dependency-free generator (`npm run tokens`). It validates `tokens.json`, then writes the two files below. `npm run typegen`, `npm run build` and `npm run dev` run it for you. |
+| `src/styles/tokens.generated.css` | Generated. A Tailwind 4 `@theme` block (the utilities below) plus `:root` variables for motion. Imported by `globals.css`.                                                          |
+| `src/config/tokens.generated.ts`  | Generated. Typed values needed outside CSS: `colorHex`/`colorOklch`, `ogImage` (hex, for the share image) and `motion` (durations in seconds, easings, reveal distance in px).      |
 
 Commit the generated files. CI runs `npm run tokens` and fails if they differ from what is committed,
 the same check as `src/types/sanity.types.ts`.
@@ -747,7 +751,7 @@ markup used a grey step with no token of its own, it now uses the nearest one (`
 `gray-300` borders are `line`, `gray-400` and `gray-500` borders are `line-strong`), and hover states are the
 same colour at 85% (`hover:bg-surface-inverse/85`).
 
-**Contrast test.** `src/config/tokens.test.ts` computes the WCAG contrast ratio (`src/lib/contrast.ts`)
+**Contrast test.** `src/config/tokens.test.ts` computes the WCAG contrast ratio (`src/lib/color/contrast.ts`)
 over the hex values and requires 4.5:1 for `ink` on `surface`, `ink-muted` on `surface`, `ink-inverse` on
 `surface-inverse` and `accent-ink` on `accent`, and for the other pairings the components use
 (`ink-muted` on `surface-alt`, `ink-inverse-muted` and `accent` as text, the status colours). The `focus`
@@ -760,15 +764,85 @@ the line above.
 
 **Older code.** `--color-brand` and `--color-brand-foreground` stay as aliases of `accent` and
 `accent-ink`, so `bg-brand`, `text-brand` and `text-brand-foreground` in custom code keep working
-(`src/config/brand.ts` likewise, marked deprecated). Move to the semantic names when you next touch the
+. Move to the semantic names when you next touch the
 file.
 
-**The share image and the Studio.** Neither can read CSS variables. The generated share image
+**The share image.** It can't read CSS variables. The generated share image
 (`src/app/api/og/[[...slug]]/route.tsx`) takes the `accent` hex as its background and `accent-ink` hex as
-its text from `ogImage` in `tokens.generated.ts`. The Studio's logo mark
-(`src/features/studio/components/studio-logo.tsx`) takes the `accent` and `accent-ink` oklch values from
-`studioBrand`. Changing the tokens changes both after `npm run tokens`; the OG font file stays separate
-(see _Editing content_).
+its text from `ogImage` in `tokens.generated.ts`. Changing the tokens changes it after `npm run tokens`;
+the OG font file stays separate (see _Editing content_). The Studio is not tied to the tokens: it has its
+own brand (see [CMS branding](#cms-branding)).
+
+### CMS branding
+
+The Studio (the CMS editors log in to) has its own brand. It is deliberately separate from the public
+site's design, so a client can have a bright website and a calm, readable CMS, or the other way round.
+Four systems exist; only the first three live in this repo:
+
+| System                   | Where                                                                    | Controls                                      |
+| ------------------------ | ------------------------------------------------------------------------ | --------------------------------------------- |
+| Public site tokens       | `src/styles/tokens.json`                                                 | The website. Never the Studio.                |
+| Client CMS brand         | `studio-brand.json` and `src/assets/brand/client/`                       | This site's Studio, when it sets anything.    |
+| Currawong default        | `src/config/studio-brand/currawong.ts` and `src/assets/brand/currawong/` | The Studio's gaps, or all of it when `{}`.    |
+| Ops dashboard (separate) | Currawong's Ops app, reading and writing `studio-brand.json`             | Edits a client's brand without touching code. |
+
+`studio-brand.json` is plain JSON (not TypeScript) so the Ops dashboard can read and write it. The
+Studio's colours are never derived from `tokens.json`. Nothing in the Studio imports
+`tokens.generated.ts` for branding. The theme itself is built in `src/features/studio/theme.ts`; this
+section covers the brand data it is built from.
+
+**Precedence.** Client branding always wins; Currawong defaults only fill gaps.
+
+- **Identity falls back field by field.** Logo: the client's logo; otherwise a monogram (the first
+  letter of the name) in the client's primary colour, if the client set any colour; otherwise the
+  Currawong logo. Compact mark: the client's mark, then their logo, then the monogram, then Currawong's
+  mark. Name: `name` in `studio-brand.json`, then `NEXT_PUBLIC_STUDIO_TITLE`, then "Currawong Creative".
+- **Colours fall back as a whole set, never field by field.** Set any colour and the whole palette comes
+  from the client: their secondary if given, otherwise one derived from their primary (same hue,
+  lightness moved), with neutrals from Sanity's defaults tinted lightly toward the client's hue. A
+  Currawong colour is used only when the client sets no colour at all. A lone `secondary` stands in for
+  the missing primary the same way.
+- **Accessibility guard.** Where a client colour is used as text, a focus ring or a selected state, its
+  OKLCH lightness is adjusted (hue and chroma kept) until it reaches 4.5:1 (text) or 3:1 (non-text UI)
+  against that scheme's background, in light and dark separately. Fills and logos keep the exact value.
+  Every adjustment is recorded as a warning, so a client who picks `#ffd400` is told why their Studio
+  links are a darker gold.
+
+**Currawong's defaults** use ink `#101013`, paper `#f4efe6`, violet `#5f2bd4`, amber `#eca72a` and lilac
+`#e9deef` under fixed rules: violet text and focus only on paper (in dark mode the lighter `#9f80e5`
+takes its place, because violet on ink is 2.5:1); amber is a fill with ink text, or text on ink only
+(light mode's amber text is `#7e5c1f`); lilac is a surface and always has a border. A unit test checks
+every role pair in both schemes.
+
+**Brand a client's CMS.**
+
+1. Put logo files in `src/assets/brand/client/` (SVG, PNG, WebP, JPEG or AVIF).
+2. Edit `studio-brand.json` at the repo root. Every field is optional:
+
+   ```json
+   {
+     "name": "Acme Plumbing",
+     "logo": {
+       "onLight": "src/assets/brand/client/logo.svg",
+       "onDark": "src/assets/brand/client/logo-on-dark.svg",
+       "mark": "src/assets/brand/client/mark.svg"
+     },
+     "colors": { "primary": "#1a73e8", "secondary": "#e8a317" }
+   }
+   ```
+
+   Colours are six-digit hex. Logo paths must be inside `src/assets/brand/client/`. If you give only
+   one of `onLight` and `onDark`, it is used for both.
+
+3. Run `npm run check:studio-brand`. It prints the resolved name, logos and both palettes with each
+   contrast ratio, lists warnings, and fails on a bad value or a missing file. CI runs it too.
+
+**Match the CMS to their website on purpose.** Nothing links the two, so copy the hex values from
+`src/styles/tokens.json` (the `accent` token's `hex`) into `colors.primary` in `studio-brand.json`.
+They stay in step only when someone changes both.
+
+**Colour helpers.** `src/lib/color/` holds hex <-> OKLCH conversion, WCAG contrast and the lightness
+adjustment. `scripts/build-tokens.mjs` uses the same conversion, so there is one implementation.
 
 ### Motion
 
@@ -1187,15 +1261,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                              | Expect                              |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`                                                                                                                                                                                                                                                                                                                                         | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                        | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                               | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                    | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url,brand}.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                            | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                               | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Expect                              |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`, `studio-brand.json`, `src/assets/brand/client/`                                                                                                                                                                                                                                                                                                                | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                                                | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                                                       | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                                            | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/config/studio-brand/**`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                    | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                       | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design

@@ -16,6 +16,7 @@
     "setup": "node scripts/setup/index.mjs",
     "check:dataset": "node scripts/check-dataset.mjs",
     "check:version": "node scripts/check-version.mjs",
+    "check:studio-brand": "node scripts/check-studio-brand.mjs",
     "release": "node scripts/release.mjs",
     "new:section": "node scripts/new-section.mjs",
     "new:feature": "node scripts/new-feature.mjs",
