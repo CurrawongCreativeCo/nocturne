@@ -599,6 +599,10 @@
             (result.seed.ok
               ? ['ok', 'Added starter content: Home and About pages, Site settings']
               : ['warn', `Starter content not added. ${escapeHtml(result.seed.message)}`]),
+          [
+            'ok',
+            'The CMS uses Currawong Creative branding. To brand it for the client, edit <code>studio-brand.json</code> (see README, CMS branding).',
+          ],
           result.removed.length
             ? ['ok', 'Removed the setup wizard. Commit the deleted files.']
             : ['ok', 'Template checkout: the setup wizard was kept.'],

@@ -51,6 +51,8 @@ export const CONTRAST_RULES: readonly ContrastRule[] = [
 
 /** The shape of studio-brand.json at the repo root. Every field is optional; `{}` means Currawong. */
 export interface StudioBrandFile {
+  /** Editor hint only (autocomplete and validation); never read by the resolver. */
+  $schema?: string
   name?: string
   logo?: {
     /** Path inside src/assets/brand/client/, for a light background. */

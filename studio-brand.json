@@ -1,1 +1,3 @@
-{}
+{
+  "$schema": "./studio-brand.schema.json"
+}

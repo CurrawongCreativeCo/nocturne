@@ -396,6 +396,9 @@ function startServer(port = 3333, attemptsLeft = 10) {
         res.on('finish', () => {
           console.log('✓ Connected to Sanity and wrote .env.local.')
           reportRemoval(outcome.removed)
+          console.log(
+            'The CMS uses Currawong Creative branding. To brand it for the client, edit studio-brand.json (see README, CMS branding).\n',
+          )
           server.close()
           process.exit(0)
         })

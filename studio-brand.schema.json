@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "studio-brand.schema.json",
+  "title": "Currawong CMS brand",
+  "description": "A site's Studio (CMS) brand. Every field is optional; leave them all out to keep Currawong Creative's branding. Client settings win over Currawong's defaults.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Points the editor at this schema for autocomplete and validation. Ignored by the site."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "The name shown in the Studio header and tab. Falls back to NEXT_PUBLIC_STUDIO_TITLE, then \"Currawong Creative\".",
+      "examples": ["Acme Plumbing"]
+    },
+    "logo": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Logo files from src/assets/brand/client/. Give only one of onLight and onDark and it is used for both. Run `npm run brand-assets` after adding files.",
+      "properties": {
+        "onLight": {
+          "$ref": "#/definitions/logoPath",
+          "description": "Logo for a light background."
+        },
+        "onDark": {
+          "$ref": "#/definitions/logoPath",
+          "description": "Logo for a dark background."
+        },
+        "mark": {
+          "$ref": "#/definitions/logoPath",
+          "description": "A compact square mark for small spaces, such as the workspace icon."
+        }
+      }
+    },
+    "colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Setting any colour switches the whole Studio palette to the client's. Colours used as text or focus rings are lightened or darkened to meet WCAG contrast; `npm run check:studio-brand` lists each change.",
+      "properties": {
+        "primary": {
+          "$ref": "#/definitions/hex",
+          "description": "The main accent colour. To match the public site, copy the accent hex from src/styles/tokens.json."
+        },
+        "secondary": {
+          "$ref": "#/definitions/hex",
+          "description": "A second colour for highlights. Derived from primary when left out."
+        }
+      }
+    }
+  },
+  "definitions": {
+    "hex": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "examples": ["#1a73e8"]
+    },
+    "logoPath": {
+      "type": "string",
+      "pattern": "^src/assets/brand/client/[^\\\\]+\\.([sS][vV][gG]|[pP][nN][gG]|[wW][eE][bB][pP]|[jJ][pP][eE]?[gG]|[aA][vV][iI][fF])$",
+      "examples": ["src/assets/brand/client/logo.svg"]
+    }
+  }
+}

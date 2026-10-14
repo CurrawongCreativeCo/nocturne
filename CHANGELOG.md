@@ -48,6 +48,12 @@ you start a release.
   `typegen`; commit it).
 - `src/lib/color/`: hex <-> OKLCH conversion, WCAG contrast and lightness adjustment.
 
+- **CMS branding works with no setup.** `studio-brand.json` ships with only a `$schema` line (still Currawong's
+  branding), `studio-brand.schema.json` gives VS Code autocompletion and validation (the Ops dashboard will use
+  it too), and `src/assets/brand/client/` has a README saying which logo files go there. The setup wizard asks
+  nothing new; its final screen and terminal output say how to brand the CMS for a client. `$schema` is
+  accepted by `npm run check:studio-brand`.
+
 ### Changed
 
 - `src/lib/contrast.ts` moved to `src/lib/color/contrast.ts`.
@@ -59,13 +65,16 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-- **Add `studio-brand.json`** (`{}`) at the repo root, and merge the new `tsconfig.json` option
+- **Add `studio-brand.json`** (`{ "$schema": "./studio-brand.schema.json" }`, or `{}`) at the repo root, with
+  `studio-brand.schema.json` beside it, and merge the new `tsconfig.json` option
   `allowImportingTsExtensions`.
 - **Removed `src/config/brand.ts`** (the deprecated `brandColor`, `brandColorHex` and
   `brandForegroundColor`) and the `studioBrand` export of `tokens.generated.ts`. Use `colorHex` and
   `colorOklch` for public colours; use `src/config/studio-brand/client.ts` for Studio colours. Run
   `npm run tokens`.
 - The Studio logo mark is now Currawong violet (or the client's primary) instead of the public accent.
+  For a site created before this release that wants the old look, set `colors.primary` in `studio-brand.json`
+  to the `accent` hex from `src/styles/tokens.json`.
 
 ## [1.2.0] - 2026-10-14
 

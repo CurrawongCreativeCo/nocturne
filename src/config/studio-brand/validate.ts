@@ -5,7 +5,7 @@ export const CLIENT_ASSET_DIR = 'src/assets/brand/client/'
 
 const HEX = /^#[0-9a-fA-F]{6}$/
 const LOGO_EXTENSION = /\.(svg|png|webp|jpe?g|avif)$/i
-const TOP_LEVEL_KEYS = ['name', 'logo', 'colors']
+const TOP_LEVEL_KEYS = ['$schema', 'name', 'logo', 'colors']
 const LOGO_KEYS = ['onLight', 'onDark', 'mark']
 const COLOR_KEYS = ['primary', 'secondary']
 
@@ -50,6 +50,10 @@ export function validateStudioBrand(
     }
   }
   const errors = unknownKeys(value, TOP_LEVEL_KEYS, '')
+
+  if (value.$schema !== undefined && typeof value.$schema !== 'string') {
+    errors.push('$schema must be a string (the path to studio-brand.schema.json)')
+  }
 
   if (value.name !== undefined && (typeof value.name !== 'string' || value.name.trim() === '')) {
     errors.push('name must be a non-empty string')
