@@ -24,6 +24,8 @@ import { pageTemplates } from './src/features/pages/schemas/templates'
 import { pricingSchemaTypes } from './src/features/pricing/schemas'
 import { hidePricesFromNewMenu } from './src/features/pricing/studio'
 import { siteSchemaTypes } from './src/features/site/schemas'
+import { confirmDeletePageActions } from './src/features/studio/actions/confirm-delete-page'
+import { confirmPublishActions } from './src/features/studio/actions/confirm-publish'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
 import { RoleNavbar } from './src/features/studio/components/role-navbar'
@@ -92,7 +94,10 @@ export default defineConfig({
   document: {
     actions: (prev, context) =>
       filterDocumentActions(
-        singletonDocumentActions(prev, context),
+        confirmDeletePageActions(
+          confirmPublishActions(singletonDocumentActions(prev, context), context),
+          context,
+        ),
         currentAudience(context.currentUser),
         PROTECTED_TYPES.has(context.schemaType) || SINGLETON_TYPES.has(context.schemaType),
       ),
