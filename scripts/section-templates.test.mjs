@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { toSectionNames } from './section-names.mjs'
+import { parseSectionArgs, toSectionNames } from './section-names.mjs'
 import {
   componentTemplate,
+  dispatcherTemplate,
   fragmentTemplate,
   galleryTemplate,
   schemaTemplate,
+  variantComponentTemplate,
 } from './section-templates.mjs'
 
 const names = toSectionNames('pricing-table')
@@ -36,5 +38,51 @@ describe('new section templates', () => {
 
   it('escape the title in the gallery fixture', () => {
     expect(galleryTemplate({ ...names, title: "Tom's" })).toContain("title: 'Tom\\'s'")
+  })
+
+  it('add no variant field to a plain section', () => {
+    expect(schemaTemplate(names)).not.toContain('variant')
+    expect(fragmentTemplate(names)).not.toContain('variant')
+    expect(galleryTemplate(names)).toContain("_key: 'pricing-table'")
+  })
+})
+
+describe('new section templates with variants', () => {
+  const { variants } = parseSectionArgs(['pricing-table', '--variants', 'cards,full-bleed'])
+
+  it('add the variant field, its list and the subtitle to the schema', () => {
+    const schema = schemaTemplate(names, variants)
+    expect(schema).toContain('export const PRICING_TABLE_VARIANTS = [')
+    expect(schema).toContain("{ value: 'cards', title: 'Cards' },")
+    expect(schema).toContain("{ value: 'full-bleed', title: 'Full bleed' },")
+    expect(schema).toContain('variantField(PRICING_TABLE_VARIANTS)')
+    expect(schema).toContain("variantSubtitle('Pricing table', PRICING_TABLE_VARIANTS, variant)")
+  })
+
+  it('project the variant in the fragment', () => {
+    expect(fragmentTemplate(names, variants)).toContain('variant,')
+  })
+
+  it('write one gallery entry per variant', () => {
+    const gallery = galleryTemplate(names, variants)
+    expect(gallery).toContain("_key: 'pricing-table-cards'")
+    expect(gallery).toContain("variant: 'full-bleed'")
+  })
+
+  it('write a dispatcher that falls back to the first variant', () => {
+    const dispatcher = dispatcherTemplate(names, variants)
+    expect(dispatcher).toContain('export function PricingTable(')
+    expect(dispatcher).toContain('stegaClean(props.data.variant)')
+    expect(dispatcher).toContain("case 'full-bleed':")
+    expect(dispatcher).toContain('return <PricingTableFullBleed {...props} />')
+    expect(dispatcher).toContain('default:\n      return <PricingTableCards {...props} />')
+    expect(dispatcher).toContain("from './full-bleed'")
+  })
+
+  it('name each variant component after its section and put it a folder deeper', () => {
+    const component = variantComponentTemplate(names, variants[1])
+    expect(component).toContain('export function PricingTableFullBleed(')
+    expect(component).toContain("from '../../../types'")
+    expect(component).toContain('<SectionFrame')
   })
 })

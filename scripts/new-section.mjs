@@ -8,25 +8,36 @@
  * fixture page, then runs typegen.
  * The new section starts with a title and text field plus the shared Design options (`style`);
  * edit the four files to shape it.
+ *
+ *   npm run new:section pricing-table -- --variants cards,table,compact
+ *
+ * With `--variants` (two to four, the first being the default) the component becomes a folder: a
+ * dispatcher (`index.tsx`) and one component per variant, and the schema gets the `variant` field.
  */
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { toSectionNames } from './section-names.mjs'
+import { parseSectionArgs, toSectionNames } from './section-names.mjs'
 import {
   componentTemplate,
+  dispatcherTemplate,
   fragmentTemplate,
   galleryTemplate,
   schemaTemplate,
+  variantComponentTemplate,
 } from './section-templates.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const feature = join(root, 'src/features/pages')
 
-const input = process.argv.slice(2).join(' ').trim()
-if (!input) exit('Usage: npm run new:section <name>   e.g. npm run new:section pricing-table')
+const USAGE =
+  'Usage: npm run new:section <name> [-- --variants a,b,c]   e.g. npm run new:section pricing-table'
+const parsed = parseSectionArgs(process.argv.slice(2))
+if (parsed.error) exit(parsed.error)
+const { input, variants } = parsed
+if (!input) exit(USAGE)
 
 const names = toSectionNames(input)
 if (!names) exit(`"${input}" isn't a usable name. Start with a letter, e.g. "pricing-table".`)
@@ -36,14 +47,20 @@ const paths = {
   schema: join(feature, 'schemas/sections', `${kebab}.ts`),
   registry: join(feature, 'schemas/sections/index.ts'),
   fragments: join(feature, 'api/sections.ts'),
-  component: join(feature, 'components/sections', `${kebab}.tsx`),
+  // A section with variants is a folder; the renderer's './sections/<kebab>' import finds its index.tsx.
+  component: join(feature, 'components/sections', variants.length ? kebab : `${kebab}.tsx`),
   renderer: join(feature, 'components/section-renderer.tsx'),
   preview: join(root, 'public/section-previews', `${typeName}.svg`),
   placeholder: join(root, 'public/section-previews/_placeholder.svg'),
   fixtures: join(root, 'tests/e2e/fixtures/dataset.mjs'),
 }
 
-if (existsSync(paths.schema) || existsSync(paths.component))
+if (
+  existsSync(paths.schema) ||
+  existsSync(paths.component) ||
+  existsSync(`${paths.component}.tsx`) ||
+  existsSync(join(feature, 'components/sections', kebab, 'index.tsx'))
+)
   exit(`A section called "${kebab}" already exists.`)
 if (readFileSync(paths.registry, 'utf8').match(new RegExp(`\\b${typeName}\\b`))) {
   exit(`"${typeName}" is already registered in ${rel(paths.registry)}.`)
@@ -54,11 +71,11 @@ const PAGE_BUILDER_TAIL = '  _type\n`\n'
 const edits = [
   [paths.registry, '// new-section:import', `import { ${typeName} } from './${kebab}'\n`],
   [paths.registry, '  // new-section:register', `  ${typeName},\n`],
-  [paths.fragments, '// new-section:fragment', fragmentTemplate(names)],
+  [paths.fragments, '// new-section:fragment', fragmentTemplate(names, variants)],
   [paths.fragments, PAGE_BUILDER_TAIL, `  \${${typeName}Fragment},\n`],
   [paths.renderer, '// new-section:import', `import { ${Component} } from './sections/${kebab}'\n`],
   [paths.renderer, '  // new-section:register', `  ${typeName}: ${Component},\n`],
-  [paths.fixtures, '  // new-section:gallery', galleryTemplate(names)],
+  [paths.fixtures, '  // new-section:gallery', galleryTemplate(names, variants)],
 ]
 for (const [file, marker] of edits) {
   if (!readFileSync(file, 'utf8').includes(marker)) {
@@ -68,8 +85,20 @@ for (const [file, marker] of edits) {
   }
 }
 
-writeFileSync(paths.schema, schemaTemplate(names))
-writeFileSync(paths.component, componentTemplate(names))
+// Everything written for the section's component: one file, or a folder of variants.
+const componentFiles = variants.length
+  ? [
+      [join(paths.component, 'index.tsx'), dispatcherTemplate(names, variants)],
+      ...variants.map((variant) => [
+        join(paths.component, `${variant.kebab}.tsx`),
+        variantComponentTemplate(names, variant),
+      ]),
+    ]
+  : [[paths.component, componentTemplate(names)]]
+
+writeFileSync(paths.schema, schemaTemplate(names, variants))
+if (variants.length) mkdirSync(paths.component)
+for (const [file, content] of componentFiles) writeFileSync(file, content)
 for (const [file, marker, text] of edits) {
   writeFileSync(file, readFileSync(file, 'utf8').replace(marker, `${text}${marker}`))
 }
@@ -82,7 +111,8 @@ if (existsSync(paths.placeholder) && !existsSync(paths.preview)) {
 }
 
 console.log(`\n✓ Created the "${title}" section (${typeName}):`)
-for (const file of [paths.schema, paths.component, paths.preview]) console.log(`  + ${rel(file)}`)
+for (const file of [paths.schema, ...componentFiles.map(([file]) => file), paths.preview])
+  console.log(`  + ${rel(file)}`)
 for (const file of [paths.registry, paths.fragments, paths.renderer, paths.fixtures])
   console.log(`  ~ ${rel(file)}`)
 
@@ -92,7 +122,7 @@ const touched = [
   paths.schema,
   paths.registry,
   paths.fragments,
-  paths.component,
+  ...componentFiles.map(([file]) => file),
   paths.renderer,
   paths.fixtures,
 ]
@@ -123,7 +153,7 @@ console.log(`
 Next:
   1. Add fields in ${rel(paths.schema)}
   2. Query them in ${typeName}Fragment (${rel(paths.fragments)}), then run \`npm run typegen\`
-  3. Build the UI in ${rel(paths.component)}
+  3. Build the UI in ${variants.length ? `${rel(paths.component)}/ (one file per variant)` : rel(paths.component)}
   4. Optional: replace the thumbnail at ${rel(paths.preview)}
   5. Give the "${kebab}" entry in the section gallery real content (${rel(paths.fixtures)}), then
      add its screenshot baseline: \`npm run test:e2e:update\` on Linux or in Docker (see the
