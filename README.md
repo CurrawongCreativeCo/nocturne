@@ -854,14 +854,14 @@ The A/B test spec starts a site-wide experiment, which rewrites every page reque
 CI fails when a page gets heavier or slower than these. They run against the same production build and fake
 Content Lake as the end-to-end tests.
 
-| Budget                                 | Limit     | Where it lives                                    |
-| -------------------------------------- | --------- | ------------------------------------------------- |
-| JavaScript loaded by `/` (gzipped)     | 200 KB    | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
-| Lighthouse performance (`/`, `/about`) | ≥ 0.9     | `lighthouserc.json`                               |
-| Lighthouse accessibility               | 1         | `lighthouserc.json`                               |
-| Cumulative Layout Shift                | ≤ 0.05    | `lighthouserc.json`                               |
-| Largest Contentful Paint               | ≤ 2.5 s   | `lighthouserc.json`                               |
-| Client memory (30 rounds of browsing)  | see below | `tests/e2e/memory.spec.ts`                        |
+| Budget                                 | Limit                     | Where it lives                                    |
+| -------------------------------------- | ------------------------- | ------------------------------------------------- |
+| JavaScript loaded by `/` (gzipped)     | 200 KB                    | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
+| Lighthouse performance (`/`, `/about`) | ≥ 0.9                     | `lighthouserc.json`                               |
+| Lighthouse accessibility               | 1                         | `lighthouserc.json`                               |
+| Cumulative Layout Shift                | ≤ 0.05                    | `lighthouserc.json`                               |
+| Largest Contentful Paint               | ≤ 2.5 s (`/about`: ≤ 3 s) | `lighthouserc.json`                               |
+| Client memory (30 rounds of browsing)  | see below                 | `tests/e2e/memory.spec.ts`                        |
 
 - **JavaScript:** the test fetches `/`, takes every `<script src>` in the HTML, gzips each file from
   `.next/static` (level 9) and adds them up (1 KB = 1000 bytes). Over budget, it lists every chunk, largest
@@ -884,6 +884,15 @@ Content Lake as the end-to-end tests.
   throttling: Lighthouse's default simulated model reports `/about` about 20 ms over the LCP limit while
   Chrome actually paints it in about 130 ms. It needs Chrome installed (CI's runner has it). Reports go to
   `.lighthouseci/`.
+- **Why `/about` has a looser LCP limit:** on a first visit (which is what Lighthouse always sees) the
+  largest element on `/about` is the cookie banner's text. The server can't know the visitor's consent
+  choice, so the banner only renders after hydration, about 2.8 s under Lighthouse's throttling. `/` passes
+  at 2.5 s because its hero heading is larger and paints first. **To tighten it back to 2.5 s:** server-render
+  the banner markup `hidden` and reveal it before first paint with a small inline script that reads the
+  `consent` key in localStorage (the approach `announcement-bar.tsx` uses), then keep the focus and
+  keyboard behaviour in `consent-banner.tsx` working once React takes over. That changes the banner's
+  accessibility behaviour and probably the visual snapshots, so it needs its own pull request. Then set
+  both URLs in `lighthouserc.json` back to 2500.
 - **Raising a budget** is a decision, not a fix for a red build. First find what grew (the chunk list, or the
   failing audit in the Lighthouse report) and try to shrink it. If the cost is worth it, change the limit in
   the file above in the same pull request as the change that needs it, and say why in the description. Don't
