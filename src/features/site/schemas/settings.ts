@@ -42,6 +42,8 @@ export const settings = defineType({
       // The header announces the logo as the site name, so its alt text is never used.
       requireAlt: false,
       description: 'SVG or transparent PNG. Falls back to the site name.',
+      preferSvg: true,
+      minWidth: 600,
     }),
     imageField({
       name: 'ogImage',

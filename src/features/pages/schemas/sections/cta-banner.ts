@@ -2,6 +2,15 @@ import { BulbOutlineIcon } from '@sanity/icons/BulbOutline'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+
+/** Longest text the design handles. Longer text still publishes, with a warning. */
+const LIMITS = {
+  // text-h2, balanced over max-w-5xl.
+  title: 70,
+  // text-lead in max-w-measure-narrow: about three lines.
+  text: 160,
+} as const
 
 export const ctaBanner = defineType({
   name: 'ctaBanner',
@@ -9,8 +18,17 @@ export const ctaBanner = defineType({
   type: 'object',
   icon: BulbOutlineIcon,
   fields: [
-    defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
-    defineField({ name: 'text', type: 'text', rows: 2 }),
+    defineField({
+      name: 'title',
+      type: 'string',
+      validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+    }),
+    defineField({
+      name: 'text',
+      type: 'text',
+      rows: 2,
+      validation: (rule) => lengthWarning(rule, LIMITS.text, 'Intro text'),
+    }),
     defineField({
       name: 'ctas',
       title: 'Calls to action',

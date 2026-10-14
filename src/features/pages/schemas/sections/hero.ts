@@ -3,6 +3,15 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
+import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+
+/** Longest text the design handles. Longer text still publishes, with a warning. */
+const LIMITS = {
+  // text-display, balanced over max-w-4xl: about three lines on a phone.
+  title: 80,
+  // text-lead in max-w-measure-narrow: about four lines.
+  description: 200,
+} as const
 
 export const hero = defineType({
   name: 'hero',
@@ -10,8 +19,17 @@ export const hero = defineType({
   type: 'object',
   icon: BlockContentIcon,
   fields: [
-    defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
-    defineField({ name: 'description', type: 'text', rows: 3 }),
+    defineField({
+      name: 'title',
+      type: 'string',
+      validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+    }),
+    defineField({
+      name: 'description',
+      type: 'text',
+      rows: 3,
+      validation: (rule) => lengthWarning(rule, LIMITS.description, 'Intro text'),
+    }),
     defineField({
       name: 'ctas',
       title: 'Calls to action',
@@ -19,7 +37,13 @@ export const hero = defineType({
       of: [defineArrayMember({ type: 'cta' })],
       validation: (rule) => rule.max(2),
     }),
-    imageField({ name: 'backgroundImage', requireAlt: false }),
+    // Full-bleed and cropped to fit, so any landscape picture works; width is what keeps it sharp.
+    imageField({
+      name: 'backgroundImage',
+      requireAlt: false,
+      minWidth: 2400,
+      orientation: 'landscape',
+    }),
     defineField({
       name: 'showGreeting',
       title: 'Greet returning visitors',

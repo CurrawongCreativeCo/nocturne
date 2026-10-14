@@ -20,6 +20,13 @@ you start a release.
 
 ### Added
 
+- **Image and text guidance.** `imageField` takes `aspect`, `minWidth`, `orientation` and `preferSvg`: the
+  description gains "Recommended: 2400 × 1600 px, landscape." and Studio warns (never errors) when the
+  uploaded picture is too narrow or more than 15% off the target shape, in plain English. The comparison is
+  the pure, tested `describeImageProblem`. Applied to hero backgrounds (2400 px wide), _Image + text_
+  (1600 px, 4:3), testimonial and author portraits (800 px, square) and logos (SVG preferred). New
+  `lengthWarning` helper warns when section titles and intro text exceed the design (limits in a `LIMITS`
+  constant beside each section schema).
 - **Studio brand preview and tests.** `/studio-brand-preview` (development and `E2E_GALLERY=1` only; `noindex`,
   reserved slug, not in the sitemap) renders Sanity UI under the Studio theme for four brands in light and dark.
   Playwright runs axe, keyboard focus, brand-accent and Linux screenshot checks against it
