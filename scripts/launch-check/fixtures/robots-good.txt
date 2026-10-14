@@ -1,0 +1,9 @@
+User-Agent: *
+Allow: /
+Disallow: /studio
+Disallow: /api/
+
+User-Agent: GPTBot
+Disallow: /
+
+Sitemap: https://bondiplumbing.com.au/sitemap.xml

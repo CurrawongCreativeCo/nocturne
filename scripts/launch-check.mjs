@@ -1,0 +1,295 @@
+/**
+ * Checks whether a deployed site is ready to go live: `npm run launch:check -- https://example.com`.
+ * Each check is a pure function in scripts/launch-check/*.mjs (unit-tested against saved HTML and
+ * header fixtures); this file only fetches, hands the data to them and prints the table.
+ *
+ * Prints a table of pass, warning and fail lines with how to fix each, and exits 1 on any failure.
+ * `--json` prints the same results as JSON for the future Ops dashboard. Dependency-free. Reads
+ * .env.local (and the environment) for the Sanity and PageSpeed values; nothing is ever printed from it.
+ */
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { parseEnv } from './check-dataset.mjs'
+import { normaliseSiteUrl, parseArgs } from './launch-check/args.mjs'
+import { discoverPages, onOrigin } from './launch-check/discover.mjs'
+import { getIconLinks } from './launch-check/html.mjs'
+import {
+  checkHomePage,
+  checkHttpRedirect,
+  checkNotFound,
+  checkSecurityHeaders,
+  checkStudio,
+  checkWwwApex,
+  wwwCounterpart,
+} from './launch-check/http.mjs'
+import {
+  checkLocalhostLinks,
+  checkPlaceholderIcons,
+  checkTemplateCopy,
+} from './launch-check/leftovers.mjs'
+import { followRedirects, request } from './launch-check/net.mjs'
+import { mapLimit } from './launch-check/pool.mjs'
+import { evaluatePsi, psiEndpoint } from './launch-check/psi.mjs'
+import { fail, formatSummary, formatTable, summarise } from './launch-check/result.mjs'
+import {
+  checkCorsOrigin,
+  checkDatasetPrivate,
+  checkRevalidateWebhook,
+} from './launch-check/sanity.mjs'
+import {
+  checkSitemapEntries,
+  checkCanonicals,
+  checkIndexable,
+  checkOgImages,
+  checkRobots,
+  checkSingleH1,
+  checkSitemapStatuses,
+  checkUniqueMetadata,
+  collectOgImages,
+} from './launch-check/seo.mjs'
+
+const noop = () => undefined
+const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const NOT_FOUND_PATH = '/launch-check-this-page-should-not-exist'
+const HELP = `Usage: npm run launch:check -- <url> [--json] [--max-urls=N]
+
+Checks a deployed site before launch: HTTP and headers, SEO, template leftovers, 404s and Sanity.
+Exit code 1 means at least one check failed. --json prints machine-readable results.
+Set PSI_API_KEY (environment or .env.local) to add PageSpeed Insights scores.`
+
+/** Only the values the checks read; .env.local first, the environment on top. */
+function loadEnv() {
+  const path = join(root, '.env.local')
+  const file = existsSync(path) ? parseEnv(readFileSync(path, 'utf8')) : {}
+  const env = {}
+  for (const key of [
+    'NEXT_PUBLIC_SANITY_PROJECT_ID',
+    'NEXT_PUBLIC_SANITY_DATASET',
+    'SANITY_API_READ_TOKEN',
+    'PSI_API_KEY',
+  ]) {
+    env[key] = process.env[key] || file[key] || ''
+  }
+  return env
+}
+
+function readIfExists(relative) {
+  const path = join(root, relative)
+  return existsSync(path) ? readFileSync(path, 'utf8') : undefined
+}
+
+const isHtml = (response) =>
+  response.status === 200 && /html/i.test(response.contentType) && response.text !== ''
+
+export async function runLaunchChecks({ origin, env, maxUrls, log = noop }) {
+  const results = []
+  const notes = []
+  const host = new URL(origin).hostname
+
+  log('Fetching the home page…')
+  const home = await followRedirects(`${origin}/`)
+  results.push(...checkHomePage({ ...home, origin }))
+  if (home.final.error) return { results, notes }
+  const siteOrigin = new URL(home.final.url).origin
+
+  log('Checking redirects, headers, Studio and 404s…')
+  const counterpart = wwwCounterpart(host)
+  const [httpVariant, otherVariant, studio, notFound, robots, webhook] = await Promise.all([
+    new URL(origin).protocol === 'https:'
+      ? followRedirects(`http://${new URL(origin).host}/`)
+      : Promise.resolve(null),
+    counterpart ? followRedirects(`https://${counterpart}/`) : Promise.resolve(null),
+    followRedirects(`${siteOrigin}/studio`),
+    request(`${siteOrigin}${NOT_FOUND_PATH}`),
+    request(`${siteOrigin}/robots.txt`, { follow: true }),
+    request(`${siteOrigin}/api/revalidate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{"_type":"page"}',
+    }),
+  ])
+  if (httpVariant)
+    results.push(
+      ...checkHttpRedirect({ httpChain: httpVariant.chain, httpFinal: httpVariant.final }),
+    )
+  if (otherVariant) {
+    results.push(...checkWwwApex({ siteHost: host, site: home, other: otherVariant }))
+  }
+  results.push(...checkSecurityHeaders({ headers: home.final.headers }))
+  results.push(...checkStudio({ final: studio.final }))
+  results.push(...checkNotFound({ response: notFound, path: NOT_FOUND_PATH }))
+
+  log('Reading robots.txt and the sitemap…')
+  results.push(...checkRobots({ status: robots.status, text: robots.text, origin: siteOrigin }))
+  const sitemap = await discoverPages({
+    origin: siteOrigin,
+    robotsText: robots.text,
+    request,
+    cap: maxUrls,
+  })
+  results.push(...checkSitemapEntries({ ...sitemap, origin: siteOrigin }))
+
+  // The home page is always checked, even when the sitemap omits it.
+  const homeHref = new URL(`${siteOrigin}/`).href
+  const targets = [
+    ...new Set([homeHref, ...sitemap.urls.map((url) => new URL(onOrigin(url, siteOrigin)).href)]),
+  ]
+  log(`Fetching ${targets.length} page${targets.length === 1 ? '' : 's'}…`)
+  const fetched = await mapLimit(targets, 6, (url) =>
+    url === homeHref && isHtml(home.final) ? Promise.resolve(home.final) : request(url),
+  )
+  results.push(
+    ...checkSitemapStatuses({
+      statuses: fetched
+        .map((response, index) => ({
+          url: targets[index],
+          status: response.status,
+          redirectedTo: response.headers.location,
+          error: response.error,
+        }))
+        // The home page may be listed with or without a slash; only sitemap URLs are judged.
+        .filter(
+          (entry) =>
+            entry.url === homeHref ||
+            sitemap.urls.some((url) => new URL(onOrigin(url, siteOrigin)).href === entry.url),
+        ),
+    }),
+  )
+  const pages = fetched
+    .map((response, index) => ({ response, url: targets[index] }))
+    .filter(({ response }) => isHtml(response))
+    .map(({ response, url }) => ({ url, html: response.text, headers: response.headers }))
+
+  results.push(...checkCanonicals({ pages, origin: siteOrigin }))
+  results.push(...checkUniqueMetadata({ pages }))
+  results.push(...checkSingleH1({ pages }))
+  results.push(
+    ...checkIndexable({
+      pages,
+      homeUrl: homeHref,
+      headerValues: Object.fromEntries(
+        pages.map((page) => [page.url, page.headers['x-robots-tag'] ?? '']),
+      ),
+    }),
+  )
+
+  log('Checking share images and icons…')
+  const { images, missing } = collectOgImages(pages)
+  const imageUrls = [...images.keys()].slice(0, 25)
+  const imageResults = await mapLimit(imageUrls, 6, (url) => request(url, { follow: true }))
+  results.push(
+    ...checkOgImages({
+      fetched: imageResults.map((response, index) => ({
+        url: imageUrls[index],
+        status: response.status,
+        contentType: response.contentType,
+        error: response.error,
+      })),
+      missing,
+      total: pages.length,
+    }),
+  )
+  const homePage = pages.find((page) => page.url === homeHref)
+  const iconHrefs = [...new Set(getIconLinks(homePage?.html ?? '').map((icon) => icon.href))].slice(
+    0,
+    5,
+  )
+  const icons = await mapLimit(iconHrefs, 5, async (href) => {
+    const response = await request(new URL(href, siteOrigin).toString(), { follow: true })
+    return { href, status: response.status, contentType: response.contentType, body: response.text }
+  })
+  results.push(
+    ...checkPlaceholderIcons({ icons, appleIconSource: readIfExists('src/app/apple-icon.tsx') }),
+  )
+  results.push(...checkTemplateCopy({ pages }))
+  results.push(...checkLocalhostLinks({ pages }))
+
+  log('Checking Sanity…')
+  results.push(...(await checkDatasetPrivate({ env })))
+  results.push(...(await checkCorsOrigin({ origin: siteOrigin, env })))
+  results.push(...checkRevalidateWebhook({ response: webhook }))
+
+  if (env.PSI_API_KEY) {
+    log('Asking PageSpeed Insights (this takes a minute)…')
+    for (const strategy of ['mobile', 'desktop']) {
+      let status = 0
+      let body = null
+      try {
+        const response = await fetch(psiEndpoint(home.final.url, strategy, env.PSI_API_KEY), {
+          signal: AbortSignal.timeout(120_000),
+        })
+        status = response.status
+        body = await response.json()
+      } catch {
+        // evaluatePsi reports "didn't return scores".
+      }
+      results.push(...evaluatePsi({ strategy, status, body }))
+    }
+  } else {
+    notes.push('PageSpeed Insights skipped: set PSI_API_KEY to include it.')
+  }
+  return { results, notes }
+}
+
+async function main() {
+  let options
+  let origin
+  try {
+    options = parseArgs(process.argv.slice(2))
+    if (!options.help) origin = normaliseSiteUrl(options.url)
+  } catch (error) {
+    console.error(`${error instanceof Error ? error.message : String(error)}\n\n${HELP}`)
+    process.exit(2)
+  }
+  if (options.help) {
+    console.log(HELP)
+    return
+  }
+
+  const log = options.json ? noop : (message) => console.error(`… ${message}`)
+  let outcome
+  try {
+    outcome = await runLaunchChecks({ origin, env: loadEnv(), maxUrls: options.maxUrls, log })
+  } catch (error) {
+    outcome = {
+      results: [
+        fail(
+          'Run',
+          'run-crashed',
+          'The checks stopped early',
+          error instanceof Error ? error.message : String(error),
+          'Run it again; if it repeats, report it with this message.',
+        ),
+      ],
+      notes: [],
+    }
+  }
+  const summary = summarise(outcome.results)
+  if (options.json) {
+    console.log(
+      JSON.stringify(
+        {
+          url: origin,
+          checkedAt: new Date().toISOString(),
+          summary,
+          results: outcome.results,
+          notes: outcome.notes,
+        },
+        null,
+        2,
+      ),
+    )
+  } else {
+    const colour = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR
+    console.log(`\nLaunch check for ${origin}\n`)
+    console.log(formatTable(outcome.results, { colour }))
+    for (const note of outcome.notes) console.log(`\n${note}`)
+    console.log(`\n${formatSummary(summary)}`)
+    if (!summary.ok) console.log('Fix the failures above, deploy, and run it again.')
+  }
+  if (!summary.ok) process.exitCode = 1
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) await main()

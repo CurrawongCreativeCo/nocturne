@@ -241,6 +241,10 @@ It still needs the CORS step below.
    (`studio-brand.json`, see [CMS branding](#cms-branding)), or you have decided to leave it as Currawong
    Creative's. `npm run check:studio-brand` prints what it resolves to.
 
+8. **Run the launch check** once the real domain is attached: `npm run launch:check -- https://example.com`. See
+   [Launch check](#launch-check). Fix every failure, read every warning, and hand the `launch:screens` folder to the
+   designer.
+
 Without `NEXT_PUBLIC_SITE_URL`, Vercel deployments fall back to the project's production domain; any
 other production server refuses to start rather than publish canonical URLs pointing at localhost.
 Server errors are logged as one JSON line each (`src/instrumentation.ts`): search Vercel's Logs for
@@ -1193,7 +1197,7 @@ Deleting the scratch dataset is permanent, so check the name first.
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code): design token generation, the WCAG contrast of every token pairing and the no-raw-palette guardrail, slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
-  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the members allow-list and callback-path checks, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, consent parsing and the Google Analytics snippet, the rate limiter, the notification email, the Stripe webhook signature check, event and price mapping, config and REST calls, price formatting, the Turnstile and Resend calls and the forms environment check, the newsletter provider modules (Resend, Loops, Mailchimp, with `fetch` mocked) and their environment check, and the setup wizard's validation.
+  dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the members allow-list and callback-path checks, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, consent parsing and the Google Analytics snippet, the rate limiter, the notification email, the Stripe webhook signature check, event and price mapping, config and REST calls, price formatting, the Turnstile and Resend calls and the forms environment check, the newsletter provider modules (Resend, Loops, Mailchimp, with `fetch` mocked) and their environment check, the setup wizard's validation and the launch check's pure checks (against saved pages and headers).
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
@@ -1258,6 +1262,56 @@ replaced by a fixed gradient, so no screenshot depends on the network. Baselines
   spec fails when a section type with a thumbnail in `public/section-previews/` has no gallery entry.
 
 The A/B test spec starts a site-wide experiment, which rewrites every page request while it runs. It is its own Playwright project (`experiments`) that waits for `desktop` and `mobile` to finish, so no other test ever sees an experiment running. Any new spec that changes site-wide state (settings variants, experiments) should do the same, or restore the state before other specs can run.
+
+### Launch check
+
+`npm run launch:check -- https://example.com` asks a **deployed** site whether it is ready to go live. It is
+dependency-free, makes only ordinary page requests plus the Sanity lookups below, and never changes anything. Run it
+against the production domain, not a preview, because it compares the site with its own address.
+
+It prints one line per check (pass, warning or fail) with what to do about anything that isn't a pass, then exits `1`
+if any check failed. Warnings never fail the run; read them anyway. `--json` prints the same results as JSON (for the
+future Ops dashboard), and `--max-urls=N` lowers the page cap.
+
+| Area      | Checks                                                                                                                                                                                                                                                                              |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP      | Home page is 200 over HTTPS; `http://` redirects to HTTPS (permanently); `www` and the bare domain end on the same address; the security headers from `next.config.ts` are present; `/studio` responds                                                                              |
+| SEO       | Canonical URLs use the production domain (not `localhost` or `*.vercel.app`); `robots.txt` allows crawling and lists the sitemap; every sitemap URL returns 200; titles and meta descriptions are unique; each page has one `h1`; no page is `noindex`; `og:image` returns an image |
+| Leftovers | The favicon isn't the template's placeholder (`src/app/icon.svg`); no "A clear headline about what you offer", "Replace:" or "lorem" in visible text; no links to localhost                                                                                                         |
+| 404       | An unknown URL returns 404                                                                                                                                                                                                                                                          |
+| Sanity    | The dataset is private (the same check as `npm run check:dataset`); the production origin is in CORS; `/api/revalidate` answers an unsigned POST with 401 (or 404 when webhook mode is off)                                                                                         |
+| Speed     | Optional: PageSpeed Insights scores for mobile and desktop (at least 90 for performance, accessibility and SEO) when `PSI_API_KEY` is set                                                                                                                                           |
+
+- **Pages checked.** The home page plus every URL in the sitemap, capped at 200 (it says when it caps). Sitemap URLs on
+  a different host are reported, then checked at the same path on the site you passed, so a wrong `NEXT_PUBLIC_SITE_URL`
+  can't send the check to `localhost`.
+- **Sanity values.** The dataset and CORS checks read `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET` and
+  `SANITY_API_READ_TOKEN` from `.env.local` or the environment, and the PageSpeed check reads `PSI_API_KEY`. None are
+  printed. Without them the dataset check is a warning that says to run it with them set.
+- **CORS is often a reminder.** Sanity only lets a token that can manage the project read the CORS list, and the
+  Viewer token the site holds cannot. In that case the check is a warning with the exact `npx sanity cors add` command
+  and where to look (sanity.io/manage → API → CORS origins). With a token that can read it, it fails when the origin is
+  missing or lacks _Allow credentials_.
+- **The apple-touch icon** is rendered to a PNG, so it can't be compared with the template's. The check warns when
+  `src/app/apple-icon.tsx` still contains its "Placeholder" comment: update it to match the new logo and delete the comment.
+- **Not covered.** Content and design quality, forms actually delivering email, analytics, and Stripe in live mode. Test
+  those by hand.
+
+For developers: each check is a pure function in `scripts/launch-check/*.mjs` (`http`, `seo`, `leftovers`, `sanity`,
+`psi`) that takes already-fetched data and returns result lines; `scripts/launch-check.mjs` does the fetching and the
+printing. Unit tests run them against the saved pages, headers, `robots.txt` and sitemaps in
+`scripts/launch-check/fixtures/` and never touch a real site. `http.test.mjs` fails if `next.config.ts` and the header
+list drift apart; `leftovers.test.mjs` fails if the placeholder icon copy drifts from `src/app/icon.svg`. To add a
+check, write the function and its test, then call it from `runLaunchChecks`.
+
+#### Screenshot sweep
+
+`npm run launch:screens -- https://example.com` photographs every sitemap URL (and the home page) at 375, 768, 1280 and
+1920 px wide into `launch-screens/<date>/` (gitignored), one full-page PNG per page and width, named like
+`about-375.png` (`home-…` for `/`). Send the folder to the designer. It uses the Playwright browser from the end-to-end
+tests (`npx playwright install chromium` once per machine) with reduced motion on, so scroll-in animations show their
+final state; the cookie banner appears as a first-time visitor sees it. `--max-urls=N` limits pages (default 200, so up
+to 800 images).
 
 ### Performance budgets
 
