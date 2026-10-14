@@ -2,6 +2,8 @@ import { expect, test, type Page } from '@playwright/test'
 
 import { SITE_URL } from './constants'
 
+// Headings and text are looked up inside #main-content: under load React can leave its hidden streaming
+// segment (<div hidden id="S:n">) in the DOM beside the revealed copy, and strict locators match both.
 const jsonLd = (page: Page) =>
   page
     .locator('script[type="application/ld+json"]')
@@ -14,7 +16,7 @@ const cards = (page: Page) => page.locator('main article')
 test.describe('blog index', () => {
   test('lists the newest 12 posts under a single <h1>', async ({ page }) => {
     await page.goto('/blog')
-    await expect(page.locator('h1')).toHaveText('Blog')
+    await expect(page.locator('#main-content h1')).toHaveText('Blog')
     await expect(cards(page)).toHaveCount(12)
     await expect(cards(page).first().getByRole('heading', { level: 2 })).toHaveText(
       'Welcome to the blog',
@@ -33,7 +35,7 @@ test.describe('blog index', () => {
 
     await page.getByRole('link', { name: 'Next' }).click()
     await expect(page).toHaveURL('/blog?page=2')
-    await expect(page.locator('h1')).toHaveText('Blog')
+    await expect(page.locator('#main-content h1')).toHaveText('Blog')
     await expect(page.getByRole('navigation', { name: 'Pagination' })).toContainText('Page 2 of 2')
     await expect(cards(page)).toHaveCount(2)
     const second = await cards(page).getByRole('heading').allTextContents()
@@ -92,7 +94,7 @@ test.describe('blog index', () => {
 test.describe('blog category', () => {
   test('lists only its posts, newest first, under its title', async ({ page }) => {
     await page.goto('/blog/category/news')
-    await expect(page.locator('h1')).toHaveText('News')
+    await expect(page.locator('#main-content h1')).toHaveText('News')
     await expect(cards(page).getByRole('heading')).toHaveText([
       'Welcome to the blog',
       'News update',
@@ -115,8 +117,10 @@ test.describe('blog category', () => {
 
   test('a category with no posts shows an empty state, not a 404', async ({ page }) => {
     await page.goto('/blog/category/empty')
-    await expect(page.locator('h1')).toHaveText('Empty')
-    await expect(page.getByText('No posts in this category yet.')).toBeVisible()
+    await expect(page.locator('#main-content h1')).toHaveText('Empty')
+    await expect(
+      page.locator('#main-content').getByText('No posts in this category yet.'),
+    ).toBeVisible()
   })
 })
 
@@ -125,15 +129,17 @@ test.describe('blog post', () => {
 
   test('renders the article with exactly one <h1>', async ({ page }) => {
     await page.goto(path)
-    await expect(page.locator('h1')).toHaveCount(1)
-    await expect(page.locator('h1')).toHaveText('Welcome to the blog')
-    await expect(page.getByText('Summary of Welcome to the blog.')).toBeVisible()
+    await expect(page.locator('#main-content h1')).toHaveCount(1)
+    await expect(page.locator('#main-content h1')).toHaveText('Welcome to the blog')
+    await expect(
+      page.locator('#main-content').getByText('Summary of Welcome to the blog.'),
+    ).toBeVisible()
     await expect(page.locator('article > header time')).toHaveAttribute(
       'datetime',
       '2026-10-10T09:00:00Z',
     )
     await expect(page.locator('article > header')).toContainText('By Ann Author')
-    await expect(page.getByText('Ann writes about testing.')).toBeVisible()
+    await expect(page.locator('#main-content').getByText('Ann writes about testing.')).toBeVisible()
     await expect(page.getByRole('heading', { level: 2, name: 'A first heading' })).toBeVisible()
     // Rich text links to CMS pages resolve to their URL.
     await expect(page.getByRole('link', { name: 'about us' })).toHaveAttribute('href', '/about')
@@ -158,7 +164,7 @@ test.describe('blog post', () => {
 
   test('a post without related posts has no related section', async ({ page }) => {
     await page.goto('/blog/archive-post-1')
-    await expect(page.locator('h1')).toHaveText('Archive post 1')
+    await expect(page.locator('#main-content h1')).toHaveText('Archive post 1')
     await expect(page.getByRole('region', { name: 'Related posts' })).toHaveCount(0)
   })
 
@@ -199,7 +205,7 @@ test.describe('blog post', () => {
   test('a post with no author left still renders, without a byline', async ({ page }) => {
     const response = await page.goto('/blog/archive-post-9')
     expect(response?.status()).toBe(200)
-    await expect(page.locator('h1')).toHaveText('Archive post 9')
+    await expect(page.locator('#main-content h1')).toHaveText('Archive post 9')
     await expect(page.getByText(/By /)).toHaveCount(0)
   })
 

@@ -33,6 +33,8 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SENTRY_DSN: process.env.SENTRY_DSN ?? '',
     NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: process.env.SENTRY_TRACES_SAMPLE_RATE ?? '',
+    // Inlined into server code at build; /api/site-info reports it. Not a NEXT_PUBLIC_ name: browsers don't need it.
+    BUILT_AT: new Date().toISOString(),
   },
   headers: () =>
     Promise.resolve([

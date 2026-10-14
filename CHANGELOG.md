@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.2.0] - 2026-10-14
+
+### Added
+
 - **Design tokens.** `src/styles/tokens.json` is the one file that re-skins a site: semantic colours
   (`surface`, `ink`, `accent`, `line`, `focus`, status colours), fonts, a fluid type scale, section
   spacing, widths, radii, shadows and motion. `npm run tokens` (also run by `typegen`, `build` and
@@ -37,6 +47,15 @@ you start a release.
 - `npm run check:dataset` (`scripts/check-dataset.mjs`) fails when the dataset is public.
 - A test that fails if a client module imports `lib/sanity/token.ts`.
 - README "Dataset privacy" section and a deploy checklist step.
+- **Version endpoint.** `GET /api/site-info` returns `{ templateVersion, features, commit, builtAt }` for the Ops
+  dashboard: which optional features are configured (`forms`, `newsletter`, `pricing`, `members`, `analytics`,
+  `sentry`, from the same env checks the features use), `VERCEL_GIT_COMMIT_SHA` and the build time. Booleans and
+  public identifiers only, never an env value. It is prerendered, so it reports the environment of the last build.
+- `template-version.json` (a core file) stamps the template release a site was last updated to;
+  `src/config/template-version.ts` reads it. `next.config.ts` adds a `BUILT_AT` build-time value.
+- Release tooling: `npm run release -- x.y.z` moves the _Unreleased_ entries into a dated section, updates the compare
+  links and `template-version.json`, and prints the git commands to commit, tag and push (it never runs git).
+  `npm run check:version` fails when `template-version.json` and the latest changelog heading disagree; CI runs it.
 
 ### Changed
 
@@ -49,8 +68,11 @@ you start a release.
   `text-brand-foreground` are aliases of `accent` and `accent-ink`.
 - The setup wizard creates datasets as **private**, and server-side published reads send the Viewer token
   (still through the API CDN). The fake Content Lake used by the e2e tests now refuses reads without a token.
-
-### Fixed
+- **Lighthouse: `/about` may take up to 3000 ms to paint its largest element (was 2500 ms); `/` stays at 2500 ms.**
+  Performance, accessibility and CLS limits are the same for both pages (`lighthouserc.json` now asserts per URL).
+  Reason: on a first visit, which is all Lighthouse sees, the largest element on `/about` is the cookie banner's text,
+  and the banner only renders after hydration (about 2.8 s under Lighthouse's throttling). The README's _Why `/about`
+  has a looser LCP limit_ explains how to tighten it again.
 
 ### Breaking changes / migration steps
 
@@ -60,6 +82,8 @@ you start a release.
 - **Existing sites:** after deploying this change, switch the dataset to private (sanity.io/manage → API → Datasets, or
   `npx sanity dataset visibility set <dataset> private`), then run `npm run check:dataset`. Make sure
   `SANITY_API_READ_TOKEN` is set in every environment first. Sanity's Free plan only offers public datasets; check sanity.io/pricing.
+- After merging, run `npm install` (adds `motion`) and `npm run typegen`, and commit the regenerated `src/types/sanity.types.ts`.
+  `template-version.json` is a core file: take the template's version.
 
 ## [1.1.0] - 2026-10-14
 
@@ -207,6 +231,7 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/CurrawongCreativeCo/sanity-starter/releases/tag/v1.0.0

@@ -35,6 +35,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Template version matches the changelog
+        run: npm run check:version
+
       - name: Generated design tokens are committed and current
         run: |
           npm run tokens
