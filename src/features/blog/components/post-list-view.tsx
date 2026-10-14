@@ -27,13 +27,11 @@ export async function PostListView({ category, page, ...mode }: ViewProps & Fetc
   const basePath = category === null ? BLOG_PATH : categoryPath(category)
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-        {list.category?.title ?? 'Blog'}
-      </h1>
+    <div className="mx-auto max-w-6xl px-gutter py-section-compact">
+      <h1 className="text-h1 font-semibold text-balance">{list.category?.title ?? 'Blog'}</h1>
       <CategoryNav categories={list.categories} current={category} />
       {list.posts.length === 0 ? (
-        <p className="mt-12 text-lg text-gray-600">
+        <p className="mt-12 text-lead text-ink-muted">
           {category === null ? 'No posts yet.' : 'No posts in this category yet.'}
         </p>
       ) : (

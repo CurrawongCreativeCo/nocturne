@@ -40,7 +40,7 @@ export async function SiteShell({
   const { isEnabled: isDraftMode } = await draftMode()
   const search = <QuickSearch />
   const cookieSettings = hasConsentProviders && (
-    <CookieSettingsButton className="cursor-pointer text-sm text-gray-600 hover:text-gray-950" />
+    <CookieSettingsButton className="cursor-pointer text-small text-ink-muted hover:text-ink" />
   )
 
   return (
@@ -61,7 +61,7 @@ export async function SiteShell({
       {/* First focusable element: lets keyboard users jump past the header menu. */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-control focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold"
       >
         Skip to content
       </a>

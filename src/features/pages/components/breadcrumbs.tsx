@@ -23,19 +23,22 @@ export function Breadcrumbs({ items }: { items: Breadcrumb[] }) {
           })),
         }}
       />
-      <nav aria-label="Breadcrumb" className="mx-auto max-w-5xl px-6 pt-6 text-sm text-gray-600">
+      <nav
+        aria-label="Breadcrumb"
+        className="mx-auto max-w-5xl px-gutter pt-6 text-small text-ink-muted"
+      >
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {items.map(({ name, path }, i) => {
             const isLast = i === items.length - 1
             return (
               <li key={path} className="flex items-center gap-x-2">
                 {isLast ? (
-                  <span aria-current="page" className="font-medium text-gray-900">
+                  <span aria-current="page" className="font-medium text-ink">
                     {name}
                   </span>
                 ) : (
                   <>
-                    <Link href={path} className="underline underline-offset-2 hover:text-gray-900">
+                    <Link href={path} className="underline underline-offset-2 hover:text-ink">
                       {name}
                     </Link>
                     <span aria-hidden>/</span>

@@ -4,18 +4,19 @@ import { SanityLink } from '@/components/ui/sanity-link'
 import type { CtaData } from '@/types/sanity'
 
 /**
- * Button styles per background: `dark` for hero/dark banners, `light` for white or gray sections.
- * Dark surfaces also switch the focus ring to white so it stays visible.
+ * Button styles per background: `dark` for hero/dark banners, `light` for surface or surface-alt sections.
+ * Dark surfaces also switch the focus ring to the inverse ink so it stays visible.
  */
 const variants = {
   dark: {
-    primary: 'bg-white text-gray-950 hover:bg-gray-200 focus-visible:outline-white',
+    primary:
+      'bg-ink-inverse text-surface-inverse hover:bg-ink-inverse/85 focus-visible:outline-ink-inverse',
     secondary:
-      'ring-1 ring-inset ring-white/40 text-white hover:bg-white/10 focus-visible:outline-white',
+      'ring-1 ring-inset ring-ink-inverse/40 text-ink-inverse hover:bg-ink-inverse/10 focus-visible:outline-ink-inverse',
   },
   light: {
-    primary: 'bg-gray-950 text-white hover:bg-gray-800',
-    secondary: 'ring-1 ring-inset ring-gray-300 text-gray-950 hover:bg-gray-100',
+    primary: 'bg-surface-inverse text-ink-inverse hover:bg-surface-inverse/85',
+    secondary: 'ring-1 ring-inset ring-line text-ink hover:bg-surface-alt',
   },
 } as const
 
@@ -33,7 +34,7 @@ export function CtaLink({ cta, surface = 'dark', size = 'md', className = '' }: 
   return (
     <SanityLink
       link={cta.link}
-      className={`inline-flex items-center justify-center rounded-full text-sm font-semibold transition-colors ${sizes[size]} ${variants[surface][stegaClean(cta.variant)]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-button text-small font-semibold transition-colors ${sizes[size]} ${variants[surface][stegaClean(cta.variant)]} ${className}`}
     >
       {cta.label}
     </SanityLink>

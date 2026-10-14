@@ -28,10 +28,10 @@ export function CheckoutButton({ priceId, label, planName, highlighted }: Props)
       <button
         type="submit"
         disabled={pending}
-        className={`inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${
+        className={`inline-flex w-full items-center justify-center rounded-button px-6 py-3 text-small font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${
           highlighted
-            ? 'bg-gray-950 text-white hover:bg-gray-800'
-            : 'text-gray-950 ring-1 ring-gray-300 ring-inset hover:bg-gray-100'
+            ? 'bg-surface-inverse text-ink-inverse hover:bg-surface-inverse/85'
+            : 'text-ink ring-1 ring-line ring-inset hover:bg-surface-alt'
         }`}
       >
         {pending ? (
@@ -44,7 +44,7 @@ export function CheckoutButton({ priceId, label, planName, highlighted }: Props)
         )}
       </button>
       {state.status === 'error' && (
-        <p role="alert" className="mt-3 text-sm text-red-700">
+        <p role="alert" className="mt-3 text-small text-danger">
           {state.message}
         </p>
       )}

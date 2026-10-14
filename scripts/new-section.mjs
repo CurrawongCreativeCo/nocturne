@@ -180,9 +180,9 @@ export function ${Component}({ data }: SectionProps<'${typeName}'>) {
   const { title, text } = data
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24">
-      <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h2>
-      {text && <p className="mt-4 max-w-2xl text-lg text-pretty text-gray-600">{text}</p>}
+    <section className="mx-auto max-w-content px-gutter py-section">
+      <h2 className="text-h2 font-semibold text-balance">{title}</h2>
+      {text && <p className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted">{text}</p>}
     </section>
   )
 }

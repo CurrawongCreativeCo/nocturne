@@ -22,13 +22,13 @@ export function FormView({ form, headingId }: Props) {
     if (process.env.NODE_ENV === 'production') {
       console.error(`Forms are not configured. Missing: ${config.missing.join(', ')}`)
       return (
-        <p role="status" className="rounded-lg bg-gray-100 p-6 text-gray-700">
+        <p role="status" className="rounded-control bg-surface-alt p-6 text-ink-muted">
           This form isn’t available right now. Please try again later.
         </p>
       )
     }
     return (
-      <div className="rounded-lg border border-dashed border-amber-500 bg-amber-50 p-6 text-amber-900">
+      <div className="rounded-control border border-dashed border-warning bg-warning-surface p-6 text-warning-ink">
         <p className="font-semibold">This form can’t send yet.</p>
         <p className="mt-2">
           Set <code>{config.missing.join(', ')}</code> in <code>.env.local</code> and restart the

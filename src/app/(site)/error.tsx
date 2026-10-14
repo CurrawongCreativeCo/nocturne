@@ -22,26 +22,26 @@ export default function PageError({
   }, [error])
 
   return (
-    <section className="mx-auto max-w-xl px-6 py-32 text-center">
-      <h1 className="text-4xl font-semibold">Something went wrong</h1>
-      <p className="mt-4 text-gray-600">
+    <section className="mx-auto max-w-xl px-gutter py-section-spacious text-center">
+      <h1 className="text-h1 font-semibold">Something went wrong</h1>
+      <p className="mt-4 text-ink-muted">
         This page couldn&apos;t be loaded. Please try again in a moment.
       </p>
       {error.digest && (
         // Matches the "digest" in the server logs (src/instrumentation.ts).
-        <p className="mt-2 text-sm text-gray-500">Reference: {error.digest}</p>
+        <p className="mt-2 text-small text-ink-muted">Reference: {error.digest}</p>
       )}
       <div className="mt-8 flex justify-center gap-4">
         <button
           type="button"
           onClick={reset}
-          className="rounded-full bg-gray-950 px-6 py-3 text-sm font-semibold text-white hover:bg-gray-800"
+          className="rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
         >
           Try again
         </button>
         <Link
           href="/"
-          className="rounded-full px-6 py-3 text-sm font-semibold ring-1 ring-gray-300 ring-inset hover:bg-gray-100"
+          className="rounded-button px-6 py-3 text-small font-semibold ring-1 ring-line ring-inset hover:bg-surface-alt"
         >
           Go home
         </Link>

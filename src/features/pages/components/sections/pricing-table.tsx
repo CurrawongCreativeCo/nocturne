@@ -13,7 +13,7 @@ const columnClasses = {
   1: 'max-w-md',
   2: 'max-w-4xl sm:grid-cols-2',
   3: 'max-w-6xl sm:grid-cols-2 lg:grid-cols-3',
-  4: 'max-w-7xl sm:grid-cols-2 lg:grid-cols-4',
+  4: 'max-w-content sm:grid-cols-2 lg:grid-cols-4',
 } as const
 
 /**
@@ -30,19 +30,16 @@ export function PricingTable({ data, renderCheckout }: SectionProps<'pricingTabl
   return (
     <section
       aria-labelledby={title ? headingId : undefined}
-      className="mx-auto max-w-7xl px-6 py-24"
+      className="mx-auto max-w-content px-gutter py-section"
     >
       {(title || intro) && (
-        <header className="mx-auto mb-16 max-w-2xl text-center">
+        <header className="mx-auto mb-16 max-w-measure-narrow text-center">
           {title && (
-            <h2
-              id={headingId}
-              className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
-            >
+            <h2 id={headingId} className="text-h2 font-semibold text-balance">
               {title}
             </h2>
           )}
-          {intro && <p className="mt-4 text-lg text-pretty text-gray-600">{intro}</p>}
+          {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
         </header>
       )}
       <ul className={`mx-auto grid grid-cols-1 items-stretch gap-8 ${columnClasses[count]}`}>
@@ -56,16 +53,14 @@ export function PricingTable({ data, renderCheckout }: SectionProps<'pricingTabl
           return (
             <li
               key={plan._key}
-              className={`flex flex-col rounded-2xl bg-white p-8 ${
-                plan.highlighted
-                  ? 'ring-2 ring-gray-950 ring-inset'
-                  : 'ring-1 ring-gray-200 ring-inset'
+              className={`flex flex-col rounded-card bg-surface p-8 ${
+                plan.highlighted ? 'ring-2 ring-ink ring-inset' : 'ring-1 ring-line ring-inset'
               }`}
             >
               <div className="flex items-center justify-between gap-4">
-                <h3 className="text-lg font-semibold">{name}</h3>
+                <h3 className="text-lead font-semibold">{name}</h3>
                 {plan.highlighted && (
-                  <p className="rounded-full bg-gray-950 px-3 py-1 text-xs font-semibold text-white">
+                  <p className="rounded-pill bg-surface-inverse px-3 py-1 text-xs font-semibold text-ink-inverse">
                     Most popular
                   </p>
                 )}
@@ -74,10 +69,10 @@ export function PricingTable({ data, renderCheckout }: SectionProps<'pricingTabl
                 <span className="text-4xl font-semibold tracking-tight">
                   {formatPrice({ amount, currency: stegaClean(currency), locale: siteLanguage })}
                 </span>
-                <span className="text-sm text-gray-600">{period}</span>
+                <span className="text-small text-ink-muted">{period}</span>
               </p>
               {plan.features?.length ? (
-                <ul className="mt-8 flex-1 space-y-3 text-sm text-gray-700">
+                <ul className="mt-8 flex-1 space-y-3 text-small text-ink-muted">
                   {plan.features.map((feature, index) => (
                     // Plain strings have no key of their own; the list is fixed per render.
                     // eslint-disable-next-line react/no-array-index-key
@@ -86,7 +81,7 @@ export function PricingTable({ data, renderCheckout }: SectionProps<'pricingTabl
                         aria-hidden="true"
                         viewBox="0 0 20 20"
                         fill="currentColor"
-                        className="mt-0.5 size-4 shrink-0 text-gray-950"
+                        className="mt-0.5 size-4 shrink-0 text-ink"
                       >
                         <path
                           fillRule="evenodd"

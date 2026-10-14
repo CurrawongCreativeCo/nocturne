@@ -46,7 +46,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
 
   return (
     <details ref={ref} className="group md:hidden">
-      <summary className="flex size-10 cursor-pointer list-none items-center justify-center rounded-md hover:bg-gray-100 [&::-webkit-details-marker]:hidden">
+      <summary className="flex size-10 cursor-pointer list-none items-center justify-center rounded-control hover:bg-surface-alt [&::-webkit-details-marker]:hidden">
         <span className="sr-only">Menu</span>
         <svg
           aria-hidden
@@ -62,7 +62,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
       </summary>
       <nav
         aria-label="Mobile"
-        className="absolute inset-x-0 top-16 flex flex-col gap-1 border-b border-gray-200 bg-white px-6 py-4 shadow-lg"
+        className="absolute inset-x-0 top-16 flex flex-col gap-1 border-b border-line bg-surface px-gutter py-4 shadow-raised"
       >
         {children}
       </nav>

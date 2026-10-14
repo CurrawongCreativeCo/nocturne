@@ -23,8 +23,8 @@ export const instant = false
 export default async function SearchPage({ searchParams }: PageProps<'/search'>) {
   const { q } = await searchParams
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
-      <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">Search</h1>
+    <div className="mx-auto max-w-4xl px-gutter py-section-compact">
+      <h1 className="text-h1 font-semibold text-balance">Search</h1>
       <SearchView rawQuery={q} {...await getDraftFetchMode()} />
     </div>
   )

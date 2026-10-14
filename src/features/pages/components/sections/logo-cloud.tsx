@@ -9,8 +9,8 @@ export function LogoCloud({ data }: SectionProps<'logoCloud'>) {
   const { title, logos } = data
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
-      {title && <h2 className="text-center text-sm font-semibold text-gray-600">{title}</h2>}
+    <section className="mx-auto max-w-content px-gutter py-section-compact">
+      {title && <h2 className="text-center text-small font-semibold text-ink-muted">{title}</h2>}
       <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
         {logos.map((logo) => {
           const img = (

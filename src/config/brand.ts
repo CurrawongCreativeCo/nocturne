@@ -1,14 +1,14 @@
-/**
- * The brand color for places CSS variables can't reach (the embedded Studio's chrome).
- * Must match `--color-brand` in src/styles/globals.css; brand.test.ts checks that it does.
- */
-export const brandColor = 'oklch(0.55 0.2 264)'
+import { colorHex, colorOklch, studioBrand } from './tokens.generated'
 
 /**
- * `brandColor` as hex, for the generated share image: its renderer can't parse oklch().
- * Keep it the same color if you change the brand (white text on it needs 4.5:1 contrast).
+ * @deprecated The design tokens replace this file: edit src/styles/tokens.json and read
+ * `src/config/tokens.generated.ts` (`colorHex`, `colorOklch`, `studioBrand`). These aliases only
+ * keep older custom code compiling; they follow the `accent` and `accent-ink` tokens.
  */
-export const brandColorHex = '#3266e4'
+export const brandColor = colorOklch.accent
 
-/** Text color to put on top of `brandColor`; matches `--color-brand-foreground`. */
-export const brandForegroundColor = 'oklch(0.99 0 0)'
+/** @deprecated Use `colorHex.accent` from `@/config/tokens.generated`. */
+export const brandColorHex = colorHex.accent
+
+/** @deprecated Use `studioBrand.foreground` from `@/config/tokens.generated`. */
+export const brandForegroundColor = studioBrand.foreground

@@ -35,6 +35,14 @@ jobs:
 
       - run: npm ci
 
+      - name: Generated design tokens are committed and current
+        run: |
+          npm run tokens
+          git diff --exit-code src/styles/tokens.generated.css src/config/tokens.generated.ts || {
+            echo "::error::The generated design token files are stale. Run 'npm run tokens' and commit them."
+            exit 1
+          }
+
       - name: Generated Sanity types are committed and current
         run: |
           npm run typegen

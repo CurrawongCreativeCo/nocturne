@@ -51,7 +51,7 @@ a stable surface:
 
 ## What stays in each project
 
-Everything editors or designers shape: `styles/globals.css` and brand constants, section schemas and
+Everything editors or designers shape: `styles/tokens.json` (the design tokens) and `styles/globals.css`, section schemas and
 components, page and blog **layouts**, the e2e fixtures, `app/` routes (thin compositions), the
 `sanity.config.ts` composition root, `next.config.ts`, `.env`, and the content.
 

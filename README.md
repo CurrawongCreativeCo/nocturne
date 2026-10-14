@@ -60,7 +60,7 @@ Open http://localhost:3000/studio:
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Site settings** (top of the sidebar) holds the site name, logo, announcement bar, header menu and button, footer, and default SEO.
 - **Announcement bar:** in Site settings → _Announcement_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
-- **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Site settings), then a generated one: brand-colored, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the color is `brandColorHex` in `src/config/brand.ts` (the renderer can't read `oklch()`, so keep it in step with `--color-brand`).
+- **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Site settings), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
 - **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from Site settings. All of it goes through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **AI crawlers and `/llms.txt`:** in Site settings → _Search & AI_, _Allow AI crawlers_ (on by default) decides how the site treats AI tools.
@@ -155,10 +155,10 @@ reference it without it (they skip the gap rather than error).
 
 Releases and scheduled publishing need a paid Sanity plan (Growth or higher); on Free they aren't available, so editors publish documents individually. Check your project's plan for its release limits.
 
-**Branding:** the brand color is `--color-brand` in `src/styles/globals.css`, repeated as `brandColor`
-in `src/config/brand.ts` for the Studio (a unit test fails if the two drift apart). The Studio's name comes from
+**Branding:** colours, type, spacing and radii are the design tokens in `src/styles/tokens.json` (see
+[Design tokens](#design-tokens)); the brand colour is the `accent` token. The Studio's name comes from
 `NEXT_PUBLIC_STUDIO_TITLE` (the setup wizard fills it in from the site name) and appears in its header beside a
-small mark in the brand color. The font is set
+small mark in the accent colour. The font is set
 with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
 the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project. The generated share image has its own copy of the font (Inter Bold, `src/assets/fonts/`), because `next/og` can't use `next/font`.
 
@@ -314,11 +314,14 @@ src/
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld
-  config/                          env.ts (validated), paths.ts (slug <-> URL)
+  config/                          env.ts (validated), paths.ts (slug <-> URL),
+                                   tokens.generated.ts (GENERATED: token values for the OG image and Studio)
   lib/sitemap-chunks.ts            sitemap split math (shared by pages and posts)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
                                    fragments.ts (shared GROQ), schema/ (link, cta, seo, blockContent, imageField)
-  styles/globals.css               Tailwind theme, including the brand color
+  styles/tokens.json               design tokens: the one file to edit to re-skin a site
+  styles/tokens.generated.css      GENERATED from tokens.json — commit it (Tailwind @theme + :root variables)
+  styles/globals.css               Tailwind entry, base styles and focus ring; imports the tokens
   types/
     sanity.types.ts                GENERATED — commit it
     sanity.ts                      shared types: SanityImageData, CtaData, LinkData
@@ -684,6 +687,86 @@ Keep the map within your plan's Edge Config size limit; with thousands of redire
 Results are tagged by document type (`TAGS` in `lib/sanity/live.ts`). When you add a document type
 that pages query, add it to `TAGS`, to the `tags` of every fetch that reads it, and to the webhook filter.
 
+### Design tokens
+
+Every colour, font, type size, space, radius, shadow and motion value the site uses is a **semantic
+token**, so a client site is re-skinned by editing one file. Components never name a raw colour; they say
+what a thing _is_ (`bg-surface`, `text-ink-muted`, `border-line`, `rounded-card`, `py-section`).
+
+| File                              | Role                                                                                                                                                                                                                 |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/styles/tokens.json`          | **Source of truth. You edit this.** A project-owned Customize file.                                                                                                                                                  |
+| `scripts/build-tokens.mjs`        | The dependency-free generator (`npm run tokens`). It validates `tokens.json`, then writes the two files below. `npm run typegen`, `npm run build` and `npm run dev` run it for you.                                  |
+| `src/styles/tokens.generated.css` | Generated. A Tailwind 4 `@theme` block (the utilities below) plus `:root` variables for motion. Imported by `globals.css`.                                                                                           |
+| `src/config/tokens.generated.ts`  | Generated. Typed values needed outside CSS: `colorHex`/`colorOklch`, `ogImage` (hex, for the share image), `studioBrand` (the Studio logo mark) and `motion` (durations in seconds, easings, reveal distance in px). |
+
+Commit the generated files. CI runs `npm run tokens` and fails if they differ from what is committed,
+the same check as `src/types/sanity.types.ts`.
+
+**Tokens and the utilities they give you**
+
+| Group    | Tokens (`tokens.json`)                                                                                                                                      | Utilities                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `color`  | `surface`, `surface-alt`, `surface-inverse`, `ink`, `ink-muted`, `ink-inverse`, `ink-inverse-muted`, `accent`, `accent-ink`, `line`, `line-strong`, `focus` | `bg-surface`, `text-ink-muted`, `border-line`, `ring-line`, `bg-accent text-accent-ink`, `outline-focus` |
+| `color`  | status colours: `danger`, `danger-surface`, `danger-ink`, and the same three for `success` and `warning`                                                    | `border-danger bg-danger-surface text-danger-ink`                                                        |
+| `font`   | `display` (defaults to the body font), `body`, `mono`                                                                                                       | `font-display`, `font-body`, `font-mono` (every `h1`–`h4` uses the display font)                         |
+| `type`   | `display`, `h1`, `h2`, `h3`, `h4`, `lead`, `body`, `small`: a fluid `clamp()` size, line height and letter spacing each                                     | `text-display`, `text-h1`, `text-h2`, `text-lead`, `text-small`...                                       |
+| `space`  | `section-y-compact`, `section-y`, `section-y-spacious`, `gutter`, `measure`, plus `measure-narrow` and `content` (widths)                                   | `py-section-compact`, `py-section`, `py-section-spacious`, `px-gutter`, `max-w-measure`, `max-w-content` |
+| `radius` | `sm`, `control` (inputs, small buttons), `card`, `panel` (banners), `button`, `pill`                                                                        | `rounded-sm`, `rounded-control`, `rounded-card`, `rounded-panel`, `rounded-button`, `rounded-pill`       |
+| `shadow` | `card`, `raised`                                                                                                                                            | `shadow-card`, `shadow-raised`                                                                           |
+| `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`                                                                  | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS        |
+
+Each colour has an `oklch` value (what the CSS uses) and a `hex` fallback, because `next/og` cannot
+parse `oklch()`. The generator checks that the two agree (within 2/255 per channel), so a stale hex is an
+error, not a silent mismatch. Type sizes such as `h4`, `lead`, `body` and `small` are written as
+`clamp(1.25rem, 1.25rem, 1.25rem)` (the same size at every width); set the minimum and maximum apart to
+make them fluid. Spacing and width tokens map to Tailwind's `--spacing-*` and `--container-*`
+namespaces (`section-y` becomes `py-section`).
+
+**Re-skinning a client site**
+
+1. Edit `src/styles/tokens.json`: change `accent` and `accent-ink` first, then the surfaces and inks, the
+   fonts (`display` can be a second family; load it with `next/font` in `src/app/layout.tsx` and
+   reference its CSS variable), and the radii and spacing for a squarer or airier look.
+2. Run `npm run tokens`. It prints what is wrong with the file (a missing token, a hex that does not
+   match its oklch value, a type size that is not a `clamp()`).
+3. Run `npm test`. The contrast test fails when a pairing drops below WCAG 2.2 AA, and tells you which.
+4. Look at `/section-gallery` (see _Section gallery_ below) and refresh the visual baselines.
+
+Need a value the tokens do not cover? Add it to `tokens.json` and to the `required*` lists at the top of
+`scripts/build-tokens.mjs` (so the generator rejects a file that lacks it), rather than hard-coding it in a
+component.
+
+**Defaults.** The shipped values reproduce the earlier look: `surface` is white, `ink` and `surface-inverse` are
+Tailwind's `gray-950`, `ink-muted` `gray-600`, `line` `gray-200` and `accent` the old blue. Where the old
+markup used a grey step with no token of its own, it now uses the nearest one (`gray-50` and `gray-100` are both
+`surface-alt`, `gray-700` and `gray-500` text is `ink-muted`, `gray-800` and `gray-900` text is `ink`,
+`gray-300` borders are `line`, `gray-400` and `gray-500` borders are `line-strong`), and hover states are the
+same colour at 85% (`hover:bg-surface-inverse/85`).
+
+**Contrast test.** `src/config/tokens.test.ts` computes the WCAG contrast ratio (`src/lib/contrast.ts`)
+over the hex values and requires 4.5:1 for `ink` on `surface`, `ink-muted` on `surface`, `ink-inverse` on
+`surface-inverse` and `accent-ink` on `accent`, and for the other pairings the components use
+(`ink-muted` on `surface-alt`, `ink-inverse-muted` and `accent` as text, the status colours). The `focus`
+colour needs 3:1 against `surface`. When you add a pairing to a component, add it to that list.
+
+**No raw palette classes.** `src/config/no-raw-palette.test.ts` scans `src/**/*.ts(x)` and fails on
+Tailwind palette classes (`text-gray-600`, `bg-white`, `border-blue-500/50`, `bg-[#fff]`...). For a rare
+exception, such as a third-party logo colour, put `palette-ok: <reason>` in a comment on the same line or
+the line above.
+
+**Older code.** `--color-brand` and `--color-brand-foreground` stay as aliases of `accent` and
+`accent-ink`, so `bg-brand`, `text-brand` and `text-brand-foreground` in custom code keep working
+(`src/config/brand.ts` likewise, marked deprecated). Move to the semantic names when you next touch the
+file.
+
+**The share image and the Studio.** Neither can read CSS variables. The generated share image
+(`src/app/api/og/[[...slug]]/route.tsx`) takes the `accent` hex as its background and `accent-ink` hex as
+its text from `ogImage` in `tokens.generated.ts`. The Studio's logo mark
+(`src/features/studio/components/studio-logo.tsx`) takes the `accent` and `accent-ink` oklch values from
+`studioBrand`. Changing the tokens changes both after `npm run tokens`; the OG font file stays separate
+(see _Editing content_).
+
 ### Type flow
 
 ```
@@ -703,7 +786,7 @@ but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 ## Code quality
 
 **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It checks
-that the committed Sanity types match the schema, runs `npm run check`, proves the section generator's
+that the committed Sanity types and design token files are current, runs `npm run check`, proves the section generator's
 output passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
 weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
 each release before proposing it.
@@ -711,6 +794,7 @@ each release before proposing it.
 | Command                   | Does                                                                       |
 | ------------------------- | -------------------------------------------------------------------------- |
 | `npm run check`           | Typecheck, lint, format and unit tests, read-only. Run it before pushing.  |
+| `npm run tokens`          | Regenerate the design token CSS and TypeScript from `tokens.json`          |
 | `npm run typecheck`       | TypeScript, strict mode                                                    |
 | `npm run lint`            | ESLint, zero warnings allowed (`lint:fix` to autofix)                      |
 | `npm run format:check`    | Prettier (`format` to apply)                                               |
@@ -783,7 +867,7 @@ Deleting the scratch dataset is permanent, so check the name first.
 
 ### Tests
 
-- **Unit** (`*.test.ts` next to the code): slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
+- **Unit** (`*.test.ts` next to the code): design token generation, the WCAG contrast of every token pairing and the no-raw-palette guardrail, slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
   dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the members allow-list and callback-path checks, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, consent parsing and the Google Analytics snippet, the rate limiter, the notification email, the Stripe webhook signature check, event and price mapping, config and REST calls, price formatting, the Turnstile and Resend calls and the forms environment check, the newsletter provider modules (Resend, Loops, Mailchimp, with `fetch` mocked) and their environment check, and the setup wizard's validation.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
@@ -944,7 +1028,9 @@ The section is immediately in Studio's _Add item_ menu with a title and text fie
 
 1. Add fields in `src/features/pages/schemas/sections/pricing-table.ts`
 2. Query them in `pricingTableFragment` (`src/features/pages/api/sections.ts`) and run `npm run typegen`
-3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx`, typed from the query
+3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx`, typed from the query, and style it with the
+   [design tokens](#design-tokens) (`bg-surface-alt`, `text-ink-muted`, `py-section`, `text-h2`): a raw colour class fails the
+   `no-raw-palette` test
 4. Optionally replace `public/section-previews/pricingTable.svg`
 5. Give the placeholder entry the generator added to the section gallery (`gallerySections` in
    `tests/e2e/fixtures/dataset.mjs`) real content, one entry per variant, then add the screenshot baselines
@@ -1044,15 +1130,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                                                                                               | Expect                              |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/globals.css`, `src/config/brand.ts` (brand colors)                                                                                                                                                                                                                                                                      | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                         | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                     | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                             | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `package-lock.json`                                                                                                                                                                                                                                                                     | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                 | Expect                              |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`                                                                                                                                                                                                                                                                            | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                           | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                  | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                       | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url,brand}.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server}.mjs`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                               | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                  | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design

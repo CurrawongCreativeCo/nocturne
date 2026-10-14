@@ -33,7 +33,7 @@ interface Props {
 }
 
 const control =
-  'block w-full rounded-lg border bg-white px-4 py-3 text-base text-gray-950 aria-invalid:border-2 aria-invalid:border-red-700'
+  'block w-full rounded-control border bg-surface px-4 py-3 text-body text-ink aria-invalid:border-2 aria-invalid:border-danger'
 
 /**
  * Native inputs posting to a server action. Without JavaScript the browser POSTs the form and the
@@ -71,7 +71,7 @@ export function ContactForm({
           ref={success}
           role="status"
           tabIndex={-1}
-          className="rounded-lg border border-green-800 bg-green-50 p-6 text-green-950"
+          className="rounded-control border border-success bg-success-surface p-6 text-success-ink"
         >
           <p className="whitespace-pre-line">{successMessage ?? state.message}</p>
         </div>
@@ -104,9 +104,9 @@ export function ContactForm({
           role="alert"
           tabIndex={-1}
           aria-labelledby={`${prefix}-summary`}
-          className="rounded-lg border-2 border-red-700 bg-red-50 p-5 text-red-950"
+          className="rounded-control border-2 border-danger bg-danger-surface p-5 text-danger-ink"
         >
-          <p id={`${prefix}-summary`} className="text-lg font-semibold">
+          <p id={`${prefix}-summary`} className="text-lead font-semibold">
             {failed.length > 0 ? 'Please fix the following' : failureTitle}
           </p>
           {state.message && <p className="mt-2">{state.message}</p>}
@@ -152,7 +152,7 @@ export function ContactForm({
                 {...shared}
                 rows={5}
                 defaultValue={value}
-                className={`${control} border-gray-500`}
+                className={`${control} border-line-strong`}
               />
             )
             break
@@ -164,7 +164,7 @@ export function ContactForm({
                 key={value}
                 {...shared}
                 defaultValue={value}
-                className={`${control} border-gray-500`}
+                className={`${control} border-line-strong`}
               >
                 <option value="">Choose an option</option>
                 {field.options.map((option) => (
@@ -181,7 +181,7 @@ export function ContactForm({
                 {...shared}
                 type="checkbox"
                 defaultChecked={value === 'on'}
-                className="mt-1 size-5 shrink-0 accent-gray-950"
+                className="mt-1 size-5 shrink-0 accent-ink"
               />
             )
             break
@@ -194,7 +194,7 @@ export function ContactForm({
                 autoComplete={
                   field.type === 'email' ? 'email' : field.type === 'tel' ? 'tel' : undefined
                 }
-                className={`${control} border-gray-500`}
+                className={`${control} border-line-strong`}
               />
             )
         }
@@ -202,7 +202,7 @@ export function ContactForm({
         const label = (
           <label htmlFor={id} className={field.type === 'checkbox' ? '' : 'mb-2 block font-medium'}>
             {field.label}
-            {!field.required && <span className="font-normal text-gray-600"> (optional)</span>}
+            {!field.required && <span className="font-normal text-ink-muted"> (optional)</span>}
           </label>
         )
 
@@ -220,7 +220,7 @@ export function ContactForm({
               </>
             )}
             {error && (
-              <p id={`${id}-error`} className="mt-2 font-medium text-red-700">
+              <p id={`${id}-error`} className="mt-2 font-medium text-danger">
                 <span className="sr-only">Error: </span>
                 {error}
               </p>
@@ -236,7 +236,7 @@ export function ContactForm({
             resetKey={state.status === 'error' ? state : undefined}
           />
           <noscript>
-            <p className="mt-2 text-gray-700">
+            <p className="mt-2 text-ink-muted">
               JavaScript is needed to check that you’re not a robot before this form can be sent.
             </p>
           </noscript>
@@ -252,7 +252,7 @@ export function ContactForm({
           onClick={(event) => {
             if (pending) event.preventDefault()
           }}
-          className="inline-flex items-center justify-center rounded-full bg-gray-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 aria-disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse transition-colors hover:bg-surface-inverse/85 aria-disabled:opacity-60"
         >
           {submitLabel}
         </button>

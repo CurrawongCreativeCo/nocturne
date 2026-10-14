@@ -13,18 +13,15 @@ export function FormSection({ data, renderForm }: SectionProps<'formSection'>) {
   if (!form) return null
 
   return (
-    <section className="mx-auto max-w-2xl px-6 py-24">
+    <section className="mx-auto max-w-measure-narrow px-gutter py-section">
       {(title || text) && (
         <header className="mb-10">
           {title && (
-            <h2
-              id={headingId}
-              className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
-            >
+            <h2 id={headingId} className="text-h2 font-semibold text-balance">
               {title}
             </h2>
           )}
-          {text && <p className="mt-4 text-lg text-pretty text-gray-600">{text}</p>}
+          {text && <p className="mt-4 text-lead text-pretty text-ink-muted">{text}</p>}
         </header>
       )}
       {renderForm?.(form, title ? headingId : undefined)}
