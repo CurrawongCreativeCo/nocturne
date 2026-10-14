@@ -2,6 +2,7 @@
 src/types/sanity.types.ts
 src/styles/tokens.generated.css
 src/config/tokens.generated.ts
+src/config/studio-brand/assets.generated.ts
 schema.json
 next-env.d.ts
 AGENTS.md

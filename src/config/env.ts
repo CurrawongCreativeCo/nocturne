@@ -22,9 +22,6 @@ export const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2026-10
 /** Language of the site's content, for <html lang>. Screen readers use it to pick pronunciation. */
 export const siteLanguage = process.env.NEXT_PUBLIC_SITE_LANGUAGE || 'en'
 
-/** Name shown in the Studio's header and browser tab. */
-export const studioTitle = process.env.NEXT_PUBLIC_STUDIO_TITLE || 'Content'
-
 /** Where the embedded Studio is mounted. Must match `basePath` in sanity.config.ts. */
 export const studioUrl = '/studio'
 

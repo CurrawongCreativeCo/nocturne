@@ -157,8 +157,8 @@ Releases and scheduled publishing need a paid Sanity plan (Growth or higher); on
 
 **Branding:** colours, type, spacing and radii are the design tokens in `src/styles/tokens.json` (see
 [Design tokens](#design-tokens)); the brand colour is the `accent` token. The Studio's name comes from
-`NEXT_PUBLIC_STUDIO_TITLE` (the setup wizard fills it in from the site name) and appears in its header beside a
-small mark in the CMS brand colour (see [CMS branding](#cms-branding)). The font is set
+`studio-brand.json`, else `NEXT_PUBLIC_STUDIO_TITLE` (the setup wizard fills it in from the site name), and
+appears in its header beside the CMS brand's logo or mark (see [CMS branding](#cms-branding)). The font is set
 with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
 the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project. The generated share image has its own copy of the font (Inter Bold, `src/assets/fonts/`), because `next/og` can't use `next/font`.
 
@@ -186,7 +186,7 @@ It still needs the CORS step below.
    | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                   |
    | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                          |
    | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                         |
-   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default `Content`)                     |
+   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Currawong Creative)           |
    | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                    |
    | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                   |
    | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                         |
@@ -789,7 +789,7 @@ Four systems exist; only the first three live in this repo:
 `studio-brand.json` is plain JSON (not TypeScript) so the Ops dashboard can read and write it. The
 Studio's colours are never derived from `tokens.json`. Nothing in the Studio imports
 `tokens.generated.ts` for branding. The theme itself is built in `src/features/studio/theme.ts`; this
-section covers the brand data it is built from.
+section covers the brand data it is built from, then [how it is applied](#how-the-studio-applies-the-brand).
 
 **Precedence.** Client branding always wins; Currawong defaults only fill gaps.
 
@@ -840,6 +840,69 @@ every role pair in both schemes.
 **Match the CMS to their website on purpose.** Nothing links the two, so copy the hex values from
 `src/styles/tokens.json` (the `accent` token's `hex`) into `colors.primary` in `studio-brand.json`.
 They stay in step only when someone changes both.
+
+#### How the Studio applies the brand
+
+Only supported Sanity APIs are used, in four places:
+
+| What                      | Where                                               | Source of truth                        |
+| ------------------------- | --------------------------------------------------- | -------------------------------------- |
+| Theme (colours)           | `src/features/studio/theme.ts` -> `theme` in config | The resolved light and dark roles      |
+| Navbar logo               | `src/features/studio/components/studio-logo.tsx`    | `logo` (client) or `mark` + name       |
+| Workspace icon (the mark) | `src/features/studio/components/studio-icon.tsx`    | `mark`, light or dark by colour scheme |
+| Workspace title           | `title` in `sanity.config.ts`                       | The resolved name                      |
+
+- **Theme.** Sanity 6.18 marks both `buildLegacyTheme` and the `theme` option as deprecated ("will be removed
+  in upcoming major version"), so `theme.ts` is the only file that touches them. If a future Sanity removes
+  `buildLegacyTheme`, `buildStudioTheme` returns `undefined`, Studio uses its default theme, and the logo,
+  icon and name keep the brand. When upgrading Sanity, check that comment block in `theme.ts` first.
+- **What the theme sets.** Light mode: background and text (`--component-bg`, `--component-text-color`,
+  `--white`, `--black`) and the grey the neutral tints come from (`--gray-base`). Dark mode: background and
+  text, through `--main-navigation-color` and its inverted value (Sanity builds its dark scheme from these;
+  the real navbar is an ordinary card in the current scheme, so it is paper in light mode and ink in dark).
+  Accent (`--brand-primary`, `--default-button-primary-color`) and focus ring (`--focus-color`) are single
+  values shared by both modes. Success, warning and danger colours, and the font, stay Sanity's.
+- **The shared accent.** The legacy theme cannot give light and dark mode different accents. It uses the
+  dark-scheme accent (`#9f80e5` for Currawong) because violet on ink is only 2.5:1. The cost: in light mode
+  `#9f80e5` is 2.7:1 on paper, so a solid primary button's label (Sanity picks paper) is low contrast there.
+  The focus ring is lifted just enough to reach 3:1 on both backgrounds (`#9878dd` for Currawong).
+  A client colour the guard has already made contrast-safe for dark mode carries the same trade-off.
+- **Logo.** A client logo file is shown alone, the on-light or on-dark variant to match the colour scheme.
+  If a client supplies only one file, it is never recoloured: on the other scheme it sits on a small
+  background in the colour it was drawn for. With no logo file, the navbar shows a mark (the client's
+  monogram, or Currawong's mark) beside the name. The box is 24px high and up to 160px wide, so it
+  doesn't shift the navbar; the name is the accessible label.
+- **Sign-in screen.** It shows the workspace icon and title, so it follows the mark and the resolved name.
+  (It does not use the navbar logo.)
+- **Images.** `studio-brand.json` holds paths as text, which a bundler can't follow, so
+  `scripts/build-studio-brand-assets.mjs` imports every image in `src/assets/brand/` into
+  `src/config/studio-brand/assets.generated.ts`. Run `npm run brand-assets` after adding or renaming a logo
+  file (`npm run dev` and `npm run typegen` do it for you) and commit the result; a unit test fails when it
+  is stale. Sanity's own build turns those imports into URLs, so no extra dependencies are needed.
+- **No CSS overrides.** Never target Sanity UI's class names or `data-ui` attributes. A unit test scans
+  `src/features/studio` for such selectors, stylesheets and global styles.
+
+**Check it by hand** (any change to the brand or theme):
+
+1. `npm run dev`, open `/studio` and sign in. Do this once with `studio-brand.json` as `{}` (Currawong), once
+   with the sample client brand below.
+2. In each, switch the Studio's appearance (user menu, Appearance: Light, Dark and System).
+3. Look at: the navbar logo (right variant, no jump as it loads, name not cut off); the browser tab title;
+   a primary button (Publish) and its hover; keyboard focus rings on a field and a button; a selected tool
+   in the navbar; a warning and a danger state (these should still be amber and red).
+4. Sign out (or open a private window) to see the sign-in screen: the mark and the name.
+5. Sample client brand, with a wide on-light logo as `src/assets/brand/client/logo.svg` and no on-dark file:
+
+   ```json
+   {
+     "name": "Acme Plumbing",
+     "logo": { "onLight": "src/assets/brand/client/logo.svg" },
+     "colors": { "primary": "#1a73e8", "secondary": "#e8a317" }
+   }
+   ```
+
+   Run `npm run brand-assets`. In dark mode the logo should sit on a small light background rather than be
+   recoloured. Remove the logo line to see the monogram instead.
 
 **Colour helpers.** `src/lib/color/` holds hex <-> OKLCH conversion, WCAG contrast and the lightness
 adjustment. `scripts/build-tokens.mjs` uses the same conversion, so there is one implementation.

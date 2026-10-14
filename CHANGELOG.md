@@ -25,8 +25,14 @@ you start a release.
   (default `{}`) with logo files in `src/assets/brand/client/`, and `resolveStudioBrand` with the
   precedence rules (client wins; identity falls back field by field; colours as a whole set; client
   colours used for text, focus and selected states are lifted to WCAG contrast with a warning). New
-  `npm run check:studio-brand`, run by CI. See the README's _CMS branding_. The Studio UI itself is
-  unchanged for now.
+  `npm run check:studio-brand`, run by CI. See the README's _CMS branding_.
+- **Branded Studio.** The resolved CMS brand now themes Studio: a theme adapter
+  (`src/features/studio/theme.ts`, the only file using the deprecated `buildLegacyTheme`; it falls back to
+  Sanity's default theme if a future major removes it), a navbar logo with light and dark variants, the
+  workspace icon (also on the sign-in screen) and the workspace title. Sanity's fonts and success, warning and
+  danger colours are unchanged. A unit test fails on CSS aimed at Sanity UI internals. New
+  `npm run brand-assets` generates `src/config/studio-brand/assets.generated.ts` (run by `predev` and
+  `typegen`; commit it).
 - `src/lib/color/`: hex <-> OKLCH conversion, WCAG contrast and lightness adjustment.
 
 ### Changed
@@ -85,6 +91,9 @@ you start a release.
   consent views use semantic token utilities (`bg-surface`, `text-ink-muted`, `py-section`, `text-h2`, `rounded-card`)
   instead of Tailwind greys, widths and `py-24`. The defaults reproduce the previous look; see the README for the
   few places a grey step collapsed into a token.
+- The Studio's name is now the CMS brand's: `studio-brand.json`, else `NEXT_PUBLIC_STUDIO_TITLE`, else
+  "Currawong Creative" (it was "Content" when the variable was unset). The Studio logo no longer reads the
+  public accent.
 - The OG image and the Studio logo read `src/config/tokens.generated.ts`. `src/config/brand.ts` stays as a
   deprecated alias, `brand.test.ts` is replaced by the token tests, and `--color-brand`, `bg-brand` and
   `text-brand-foreground` are aliases of `accent` and `accent-ink`.

@@ -194,6 +194,14 @@ export function resolveStudioBrand(
         dark: clientLogoDark ?? monogram('dark') ?? defaults.mark.dark,
       }
 
+  const logoSource = clientLogoLight ? 'client' : colours ? 'monogram' : 'currawong'
+  const logoDrawnFor: Scheme | null =
+    logoFiles.onLight && !logoFiles.onDark
+      ? 'light'
+      : logoFiles.onDark && !logoFiles.onLight
+        ? 'dark'
+        : null
+
   const source = clientName || hasColours || clientLogoLight || clientMark ? 'client' : 'currawong'
-  return { source, name, logo, mark, light, dark, warnings }
+  return { source, name, logo, mark, logoSource, logoDrawnFor, light, dark, warnings }
 }

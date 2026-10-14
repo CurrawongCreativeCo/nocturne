@@ -13,7 +13,8 @@ import { defineConfig } from 'sanity'
 import { presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
-import { apiVersion, dataset, projectId, studioTitle, studioUrl } from './src/config/env'
+import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
+import { studioBrand } from './src/config/studio-brand/client'
 import { blogSchemaTypes } from './src/features/blog/schemas'
 import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
@@ -24,6 +25,7 @@ import { hidePricesFromNewMenu } from './src/features/pricing/studio'
 import { siteSchemaTypes } from './src/features/site/schemas'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
+import { StudioIcon } from './src/features/studio/components/studio-icon'
 import { StudioLogo } from './src/features/studio/components/studio-logo'
 import { contentHealth } from './src/features/studio/content-health/plugin'
 import { resolve } from './src/features/studio/presentation'
@@ -33,12 +35,19 @@ import {
   withoutSingletonTemplates,
 } from './src/features/studio/singletons'
 import { structure } from './src/features/studio/structure'
+import { buildStudioTheme } from './src/features/studio/theme'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
 // new-registry:import
 
 export default defineConfig({
   basePath: studioUrl,
-  title: studioTitle,
+  // The CMS brand's name (studio-brand.json, else NEXT_PUBLIC_STUDIO_TITLE, else Currawong's): the tab
+  // title and the sign-in screen's heading.
+  title: studioBrand.name,
+  // The mark: shown on the sign-in screen and in the workspace menu.
+  icon: StudioIcon,
+  // Undefined (Studio's default theme) if a future Sanity major removes the legacy theme builder.
+  theme: buildStudioTheme(studioBrand),
   projectId,
   dataset,
   studio: { components: { logo: StudioLogo } },

@@ -163,6 +163,7 @@ export default defineConfig([
     'next-env.d.ts',
     'src/types/sanity.types.ts',
     'src/config/tokens.generated.ts',
+    'src/config/studio-brand/assets.generated.ts',
     'public/**',
   ]),
 ])
