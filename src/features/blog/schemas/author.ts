@@ -10,7 +10,7 @@ export const author = defineType({
   icon: UserIcon,
   fields: [
     defineField({ name: 'name', type: 'string', validation: (rule) => rule.required() }),
-    imageField({ name: 'image', title: 'Photo', requireAlt: false }),
+    imageField({ name: 'image', title: 'Photo', requireAlt: false, aspect: '1:1', minWidth: 800 }),
     defineField({
       name: 'bio',
       type: 'text',

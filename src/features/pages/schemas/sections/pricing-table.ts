@@ -3,10 +3,19 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 
 interface PlanValue {
   highlighted?: boolean
 }
+
+/** Longest text the design handles. Longer text still publishes, with a warning. */
+const LIMITS = {
+  // text-h2, balanced.
+  title: 70,
+  // text-lead in max-w-measure-narrow: about four lines.
+  intro: 200,
+} as const
 
 export const pricingTable = defineType({
   name: 'pricingTable',
@@ -14,8 +23,18 @@ export const pricingTable = defineType({
   type: 'object',
   icon: CreditCardIcon,
   fields: [
-    defineField({ name: 'title', title: 'Section title', type: 'string' }),
-    defineField({ name: 'intro', type: 'text', rows: 2 }),
+    defineField({
+      name: 'title',
+      title: 'Section title',
+      type: 'string',
+      validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+    }),
+    defineField({
+      name: 'intro',
+      type: 'text',
+      rows: 2,
+      validation: (rule) => lengthWarning(rule, LIMITS.intro, 'Intro text'),
+    }),
     defineField({
       name: 'plans',
       type: 'array',
