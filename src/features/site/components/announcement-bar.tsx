@@ -38,9 +38,29 @@ function dismiss(message: string) {
 }
 
 /**
+ * Reveals the bar before the first paint, so showing it doesn't shift the page when React hydrates.
+ * Same rules as `isInWindow` and `isDismissed` above; hydration then takes over.
+ */
+function revealScript(
+  start: string | null | undefined,
+  end: string | null | undefined,
+  key: string,
+  dismissible: boolean,
+) {
+  // `<` escaped so a message can't close the script tag.
+  const args = JSON.stringify([start ?? null, end ?? null, storageKey(key), dismissible]).replace(
+    /</g,
+    '\\u003c',
+  )
+  return `(function(a){var n=Date.now(),s=a[0]?Date.parse(a[0]):NaN,e=a[1]?Date.parse(a[1]):NaN;if(n<s||n>=e)return;try{if(a[3]&&localStorage.getItem(a[2])==='1')return}catch(x){}document.currentScript.parentElement.hidden=false})(${args})`
+}
+
+/**
  * The announcement bar. Pages are cached, so the server can't know whether the bar is due:
  * it always renders the markup `hidden` (taking no space), and the browser reveals it once
- * the visitor's clock is inside the window and they haven't dismissed this message.
+ * the visitor's clock is inside the window and they haven't dismissed this message. An inline
+ * script does that before first paint (React would only do it after hydration, shifting the
+ * page); the state from useSyncExternalStore then agrees with it.
  * `children` is the message, already wrapped in its link when there is one.
  */
 export function AnnouncementBar({
@@ -68,7 +88,14 @@ export function AnnouncementBar({
   const visible = useSyncExternalStore(subscribe, getSnapshot, () => false)
 
   return (
-    <section aria-label="Announcement" hidden={!visible} className="bg-gray-950 text-white">
+    <section
+      aria-label="Announcement"
+      hidden={!visible}
+      // The script may have revealed it before hydration.
+      suppressHydrationWarning
+      className="bg-gray-950 text-white"
+    >
+      <script dangerouslySetInnerHTML={{ __html: revealScript(start, end, key, dismissible) }} />
       <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 px-6 py-2 text-center text-sm">
         <p>{children}</p>
         {dismissible && (
