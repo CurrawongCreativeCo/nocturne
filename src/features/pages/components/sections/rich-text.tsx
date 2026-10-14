@@ -1,11 +1,26 @@
 import { RichText as RichTextBody } from '@/components/ui/rich-text'
+import { SectionFrame } from '@/components/ui/section-frame'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
 import type { SectionProps } from '../../types'
 
-export function RichText({ data }: SectionProps<'richText'>) {
+const DEFAULTS: SectionDefaults = {
+  spacing: 'compact',
+  container: 'max-w-measure',
+  align: 'start',
+}
+
+export function RichText({ data, isFirst }: SectionProps<'richText'>) {
+  const { text } = sectionTraits(data.style, DEFAULTS)
+
   return (
-    <section className="mx-auto max-w-measure px-gutter py-section-compact text-lead text-ink">
+    <SectionFrame
+      style={data.style}
+      defaults={DEFAULTS}
+      isFirst={isFirst}
+      containerClassName={`text-lead text-ink ${text}`}
+    >
       <RichTextBody value={data.body} />
-    </section>
+    </SectionFrame>
   )
 }

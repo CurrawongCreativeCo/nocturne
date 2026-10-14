@@ -32,6 +32,25 @@ describe('sectionLabel', () => {
     ).toBe('mediaText (no image)')
   })
 
+  it('adds the Design options an editor set, joined to the other variants', () => {
+    expect(
+      sectionLabel(
+        section({ _key: 'a', _type: 'faq', style: { tone: 'inverse', spacing: 'compact' } }),
+      ),
+    ).toBe('faq (inverse section, compact spacing)')
+    expect(
+      sectionLabel(
+        section({
+          _key: 'a',
+          _type: 'featuresGrid',
+          columns: 3,
+          style: { tone: 'alt', spacing: 'default', width: 'narrow', align: null },
+        }),
+      ),
+    ).toBe('featuresGrid (3 columns, alt section, narrow width)')
+    expect(sectionLabel(section({ _key: 'a', _type: 'faq', style: null }))).toBe('faq')
+  })
+
   it('is just the type for a stub with no fields', () => {
     expect(sectionLabel(section({ _key: 'a', _type: 'ctaBanner', access: 'members' }))).toBe(
       'ctaBanner',

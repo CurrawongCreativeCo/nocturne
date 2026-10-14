@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -17,42 +18,46 @@ export const ctaBanner = defineType({
   title: 'Call to action banner',
   type: 'object',
   icon: BulbOutlineIcon,
-  fields: [
-    defineField({
-      name: 'title',
-      type: 'string',
-      validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
-    }),
-    defineField({
-      name: 'text',
-      type: 'text',
-      rows: 2,
-      validation: (rule) => lengthWarning(rule, LIMITS.text, 'Intro text'),
-    }),
-    defineField({
-      name: 'ctas',
-      title: 'Calls to action',
-      type: 'array',
-      of: [defineArrayMember({ type: 'cta' })],
-      validation: (rule) => rule.max(2),
-    }),
-    defineField({
-      name: 'tone',
-      type: 'string',
-      initialValue: 'brand',
-      options: {
-        list: [
-          { title: 'Brand', value: 'brand' },
-          { title: 'Dark', value: 'dark' },
-          { title: 'Light', value: 'light' },
-        ],
-        layout: 'radio',
-        direction: 'horizontal',
-      },
-      validation: (rule) => rule.required(),
-    }),
-    accessField,
-  ],
+  groups: sectionGroups,
+  fields: sectionFields(
+    [
+      defineField({
+        name: 'title',
+        type: 'string',
+        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+      }),
+      defineField({
+        name: 'text',
+        type: 'text',
+        rows: 2,
+        validation: (rule) => lengthWarning(rule, LIMITS.text, 'Intro text'),
+      }),
+      defineField({
+        name: 'ctas',
+        title: 'Calls to action',
+        type: 'array',
+        of: [defineArrayMember({ type: 'cta' })],
+        validation: (rule) => rule.max(2),
+      }),
+      defineField({
+        name: 'tone',
+        type: 'string',
+        initialValue: 'brand',
+        options: {
+          list: [
+            { title: 'Brand', value: 'brand' },
+            { title: 'Dark', value: 'dark' },
+            { title: 'Light', value: 'light' },
+          ],
+          layout: 'radio',
+          direction: 'horizontal',
+        },
+        validation: (rule) => rule.required(),
+      }),
+      accessField,
+    ],
+    { spacing: 'compact', align: 'center' },
+  ),
   preview: {
     select: { title: 'title' },
     prepare: ({ title }: { title?: string }) => ({

@@ -4,6 +4,7 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -18,36 +19,40 @@ export const mediaText = defineType({
   title: 'Image + text',
   type: 'object',
   icon: SplitHorizontalIcon,
-  fields: [
-    defineField({
-      name: 'eyebrow',
-      type: 'string',
-      description: 'Small label above the title.',
-      validation: (rule) => lengthWarning(rule, LIMITS.eyebrow, 'Labels'),
-    }),
-    defineField({
-      name: 'title',
-      type: 'string',
-      validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
-    }),
-    defineField({ name: 'body', type: 'blockContent' }),
-    defineField({
-      name: 'ctas',
-      title: 'Calls to action',
-      type: 'array',
-      of: [defineArrayMember({ type: 'cta' })],
-      validation: (rule) => rule.max(2),
-    }),
-    imageField({ name: 'image', aspect: '4:3', minWidth: 1600 }),
-    defineField({
-      name: 'imagePosition',
-      type: 'string',
-      initialValue: 'right',
-      options: { list: ['left', 'right'], layout: 'radio', direction: 'horizontal' },
-      validation: (rule) => rule.required(),
-    }),
-    accessField,
-  ],
+  groups: sectionGroups,
+  fields: sectionFields(
+    [
+      defineField({
+        name: 'eyebrow',
+        type: 'string',
+        description: 'Small label above the title.',
+        validation: (rule) => lengthWarning(rule, LIMITS.eyebrow, 'Labels'),
+      }),
+      defineField({
+        name: 'title',
+        type: 'string',
+        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+      }),
+      defineField({ name: 'body', type: 'blockContent' }),
+      defineField({
+        name: 'ctas',
+        title: 'Calls to action',
+        type: 'array',
+        of: [defineArrayMember({ type: 'cta' })],
+        validation: (rule) => rule.max(2),
+      }),
+      imageField({ name: 'image', aspect: '4:3', minWidth: 1600 }),
+      defineField({
+        name: 'imagePosition',
+        type: 'string',
+        initialValue: 'right',
+        options: { list: ['left', 'right'], layout: 'radio', direction: 'horizontal' },
+        validation: (rule) => rule.required(),
+      }),
+      accessField,
+    ],
+    { align: 'start' },
+  ),
   preview: {
     select: { title: 'title', media: 'image' },
     prepare: ({ title, media }: { title?: string; media?: PreviewValue['media'] }) => ({

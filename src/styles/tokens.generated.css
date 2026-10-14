@@ -84,3 +84,40 @@
   --duration-slow: 600ms;
   --reveal-distance: 24px;
 }
+
+:root {
+  --tone-accent: var(--color-accent);
+}
+
+@layer base {
+  [data-tone='alt'] {
+    background-color: var(--color-surface-alt);
+  }
+
+  [data-tone='inverse'] {
+    --color-surface: var(--color-surface-inverse);
+    --color-surface-alt: color-mix(in oklab, var(--color-surface-inverse) 88%, var(--color-ink-inverse));
+    --color-ink: var(--color-ink-inverse);
+    --color-ink-muted: var(--color-ink-inverse-muted);
+    --color-line: color-mix(in oklab, var(--color-ink-inverse) 20%, transparent);
+    --color-line-strong: var(--color-ink-inverse-muted);
+    --color-accent: color-mix(in oklab, var(--tone-accent) 55%, var(--color-ink-inverse));
+    --color-focus: var(--color-ink-inverse);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  [data-tone='accent'] {
+    --color-surface: var(--tone-accent);
+    --color-surface-alt: color-mix(in oklab, var(--color-accent-ink) 12%, var(--tone-accent));
+    --color-ink: var(--color-accent-ink);
+    --color-ink-muted: var(--color-accent-ink);
+    --color-line: color-mix(in oklab, var(--color-accent-ink) 35%, transparent);
+    --color-line-strong: var(--color-accent-ink);
+    --color-accent: var(--color-accent-ink);
+    --color-accent-ink: var(--tone-accent);
+    --color-focus: var(--color-ink-inverse);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+}

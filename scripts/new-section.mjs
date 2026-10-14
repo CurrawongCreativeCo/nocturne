@@ -6,7 +6,8 @@
  * Creates the schema, GROQ fragment, React component and insert-menu thumbnail,
  * registers each one at the `// new-section:*` markers, adds a placeholder to the section gallery's
  * fixture page, then runs typegen.
- * The new section starts with a title and text field; edit the four files to shape it.
+ * The new section starts with a title and text field plus the shared Design options (`style`);
+ * edit the four files to shape it.
  */
 import { spawnSync } from 'node:child_process'
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -14,6 +15,12 @@ import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { toSectionNames } from './section-names.mjs'
+import {
+  componentTemplate,
+  fragmentTemplate,
+  galleryTemplate,
+  schemaTemplate,
+} from './section-templates.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const feature = join(root, 'src/features/pages')
@@ -47,11 +54,11 @@ const PAGE_BUILDER_TAIL = '  _type\n`\n'
 const edits = [
   [paths.registry, '// new-section:import', `import { ${typeName} } from './${kebab}'\n`],
   [paths.registry, '  // new-section:register', `  ${typeName},\n`],
-  [paths.fragments, '// new-section:fragment', fragment()],
+  [paths.fragments, '// new-section:fragment', fragmentTemplate(names)],
   [paths.fragments, PAGE_BUILDER_TAIL, `  \${${typeName}Fragment},\n`],
   [paths.renderer, '// new-section:import', `import { ${Component} } from './sections/${kebab}'\n`],
   [paths.renderer, '  // new-section:register', `  ${typeName}: ${Component},\n`],
-  [paths.fixtures, '  // new-section:gallery', galleryFixture()],
+  [paths.fixtures, '  // new-section:gallery', galleryTemplate(names)],
 ]
 for (const [file, marker] of edits) {
   if (!readFileSync(file, 'utf8').includes(marker)) {
@@ -61,8 +68,8 @@ for (const [file, marker] of edits) {
   }
 }
 
-writeFileSync(paths.schema, schema())
-writeFileSync(paths.component, component())
+writeFileSync(paths.schema, schemaTemplate(names))
+writeFileSync(paths.component, componentTemplate(names))
 for (const [file, marker, text] of edits) {
   writeFileSync(file, readFileSync(file, 'utf8').replace(marker, `${text}${marker}`))
 }
@@ -126,72 +133,6 @@ Next:
 `)
 
 // ---------------------------------------------------------------------------
-
-function schema() {
-  return `import { BlockElementIcon } from '@sanity/icons/BlockElement'
-import { defineField, defineType } from 'sanity'
-
-import { accessField } from '@/lib/sanity/schema/access-field'
-
-export const ${typeName} = defineType({
-  name: '${typeName}',
-  title: '${title}',
-  type: 'object',
-  icon: BlockElementIcon,
-  fields: [
-    defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
-    defineField({ name: 'text', type: 'text', rows: 3 }),
-    accessField,
-  ],
-  preview: {
-    select: { title: 'title' },
-    prepare: ({ title }: { title?: string }) => ({ title: title || 'Untitled', subtitle: '${title}' }),
-  },
-})
-`
-}
-
-function fragment() {
-  return `export const ${typeName}Fragment = /* groq */ \`
-  _type == "${typeName}" && (access != "members" || $members) => {
-    title,
-    text
-  }
-\`
-
-`
-}
-
-function galleryFixture() {
-  return `  // Placeholder from \`npm run new:section\`: fill it in, add a variant per look, then refresh baselines.
-  {
-    _key: '${kebab}',
-    _type: '${typeName}',
-    title: '${escapeJs(title)}',
-    text: 'Text.',
-  },
-`
-}
-
-function component() {
-  return `import type { SectionProps } from '../../types'
-
-export function ${Component}({ data }: SectionProps<'${typeName}'>) {
-  const { title, text } = data
-
-  return (
-    <section className="mx-auto max-w-content px-gutter py-section">
-      <h2 className="text-h2 font-semibold text-balance">{title}</h2>
-      {text && <p className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted">{text}</p>}
-    </section>
-  )
-}
-`
-}
-
-function escapeJs(text) {
-  return text.replace(/['\\]/g, '\\$&')
-}
 
 function escapeXml(text) {
   return text.replace(

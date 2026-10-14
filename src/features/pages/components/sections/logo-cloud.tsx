@@ -2,16 +2,25 @@ import { stegaClean } from 'next-sanity'
 
 import { SanityImage } from '@/components/ui/sanity-image'
 import { NewTabNotice } from '@/components/ui/sanity-link'
+import { SectionFrame } from '@/components/ui/section-frame'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
 import type { SectionProps } from '../../types'
 
-export function LogoCloud({ data }: SectionProps<'logoCloud'>) {
+const DEFAULTS: SectionDefaults = {
+  spacing: 'compact',
+  container: 'max-w-content',
+  align: 'center',
+}
+
+export function LogoCloud({ data, isFirst }: SectionProps<'logoCloud'>) {
   const { title, logos } = data
+  const { text, justify } = sectionTraits(data.style, DEFAULTS)
 
   return (
-    <section className="mx-auto max-w-content px-gutter py-section-compact">
-      {title && <h2 className="text-center text-small font-semibold text-ink-muted">{title}</h2>}
-      <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
+    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
+      {title && <h2 className={`text-small font-semibold text-ink-muted ${text}`}>{title}</h2>}
+      <ul className={`mt-8 flex flex-wrap items-center gap-x-12 gap-y-8 ${justify}`}>
         {logos.map((logo) => {
           const img = (
             <SanityImage
@@ -40,6 +49,6 @@ export function LogoCloud({ data }: SectionProps<'logoCloud'>) {
           )
         })}
       </ul>
-    </section>
+    </SectionFrame>
   )
 }

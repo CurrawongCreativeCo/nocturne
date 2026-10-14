@@ -3,6 +3,7 @@ import {
   formFields,
   imageFields,
   portableTextFields,
+  sectionStyleFields,
   stripePriceFields,
 } from '@/lib/sanity/fragments'
 
@@ -18,6 +19,7 @@ import {
 
 export const heroFragment = /* groq */ `
   _type == "hero" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     description,
     ctas[] { ${ctaFields} },
@@ -28,12 +30,14 @@ export const heroFragment = /* groq */ `
 
 export const richTextFragment = /* groq */ `
   _type == "richText" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     body[] { ${portableTextFields} }
   }
 `
 
 export const mediaTextFragment = /* groq */ `
   _type == "mediaText" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     eyebrow,
     title,
     body[] { ${portableTextFields} },
@@ -45,6 +49,7 @@ export const mediaTextFragment = /* groq */ `
 
 export const featuresGridFragment = /* groq */ `
   _type == "featuresGrid" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     intro,
     columns,
@@ -59,6 +64,7 @@ export const featuresGridFragment = /* groq */ `
 
 export const logoCloudFragment = /* groq */ `
   _type == "logoCloud" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     logos[] {
       _key,
@@ -71,6 +77,7 @@ export const logoCloudFragment = /* groq */ `
 
 export const testimonialsFragment = /* groq */ `
   _type == "testimonials" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     items[] {
       _key,
@@ -84,6 +91,7 @@ export const testimonialsFragment = /* groq */ `
 
 export const faqFragment = /* groq */ `
   _type == "faq" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     intro,
     items[] {
@@ -96,6 +104,7 @@ export const faqFragment = /* groq */ `
 
 export const ctaBannerFragment = /* groq */ `
   _type == "ctaBanner" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     text,
     ctas[] { ${ctaFields} },
@@ -105,6 +114,7 @@ export const ctaBannerFragment = /* groq */ `
 
 export const formSectionFragment = /* groq */ `
   _type == "formSection" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     text,
     form-> { _id, ${formFields} }
@@ -113,6 +123,7 @@ export const formSectionFragment = /* groq */ `
 
 export const pricingTableFragment = /* groq */ `
   _type == "pricingTable" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     intro,
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
@@ -129,6 +140,7 @@ export const pricingTableFragment = /* groq */ `
 
 export const newsletterSignupFragment = /* groq */ `
   _type == "newsletterSignup" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
     title,
     text,
     submitLabel,

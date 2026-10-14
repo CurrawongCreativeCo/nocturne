@@ -33,6 +33,19 @@ export const ctaFields = /* groq */ `
   link { ${linkFields} }
 `
 
+/**
+ * A section's shared layout and style options (schema: lib/sanity/schema/section-style.ts). Every
+ * section fragment projects it as `style { ${sectionStyleFields} }`; SectionFrame reads it.
+ */
+export const sectionStyleFields = /* groq */ `
+  tone,
+  spacing,
+  width,
+  align,
+  anchorId,
+  motion
+`
+
 export const seoFields = /* groq */ `
   metaTitle,
   metaDescription,
