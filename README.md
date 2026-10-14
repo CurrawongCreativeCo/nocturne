@@ -125,6 +125,16 @@ Open http://localhost:3000/studio:
   `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
   Normally they only apply to paths with no page, so they can't hide a live page. With Edge Config
   redirects on (see below) they run first, so a redirect from a path that has a page hides that page.
+- **Publishing safely:** Publish on a page or post first asks "Publish changes to `https://example.com/about`?" (the site's
+  public address plus the page's path), with **Publish** and **Cancel**. If the page is already live and you changed its
+  slug, the dialog also says "The address will change from /about to /about-us" and offers a ticked-by-default
+  **Redirect /about to /about-us (permanent)**. Publishing then creates the redirect already published, so the old link keeps
+  working. It is skipped (with the reason in the dialog) when a redirect from the old address already exists or would loop;
+  it only warns when other redirects already point at the old address, since they now take an extra step. If the redirect
+  can't be saved after publishing, a message says so and you add it under **Redirects**. Posts work the same way with
+  `/blog/<slug>`. Clients can't change a slug once set, so this mostly serves agency staff. **Delete** on a page (agency
+  staff only) lists the menus (header, header button, footer) and the pages and shared sections that link to it, so you
+  can fix them before they show a broken link, then asks you to confirm. Other document types keep Sanity's own actions.
 - **Pages** is a tree: top-level pages first, then a folder per first slug segment that has
   children (`services/web-design` is listed under `services`). _All pages_ at the bottom is the flat
   list for search and bulk work.

@@ -20,6 +20,13 @@ you start a release.
 
 ### Added
 
+- **Safer publishing.** Publish on pages and posts now confirms "Publish changes to <full URL>?" and, when a live
+  page's slug changed, offers (ticked by default) to publish a permanent redirect from the old address. It follows the
+  redirect document's rules (no duplicate source, no loop; chains only noted). Delete on pages lists the menus, pages and
+  shared sections that link to the page, reusing the Content health link detection. The logic is pure and tested
+  (`utils/publish-redirect.ts`, `utils/incoming-links.ts`); the actions are `actions/confirm-publish.tsx` and
+  `actions/confirm-delete-page.tsx`, registered in `sanity.config.ts` beside `singletonDocumentActions`. Wrapping Sanity's
+  own Publish keeps validation and the roles' action filtering working.
 - **Role-aware Studio.** Agency staff (Administrator, Developer) keep the full Studio; Editors and Contributors get
   a simpler, safer one. Clients lose Vision, AI settings and Content health, and see Presentation first; the sidebar
   shows only Site settings, Pages, Blog (and Team and Business info when present); the members-only `access`
