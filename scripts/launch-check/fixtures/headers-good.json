@@ -1,0 +1,9 @@
+{
+  "strict-transport-security": "max-age=63072000; includeSubDomains",
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
+  "x-frame-options": "SAMEORIGIN",
+  "content-security-policy": "frame-ancestors 'self'",
+  "content-type": "text/html; charset=utf-8"
+}

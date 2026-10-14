@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- **Launch check and screenshot sweep.** `npm run launch:check -- <url>` checks a deployed site before go-live: HTTPS
+  and redirects (HTTP, www and apex), the security headers, `/studio`, a real 404, canonical URLs, `robots.txt` and the
+  sitemap (every URL returns 200, capped at 200), unique titles and descriptions, one `h1` per page, `noindex`
+  leftovers, `og:image`, the placeholder favicon, template copy and localhost links, the Sanity dataset privacy and
+  CORS (a manual reminder when the token can't read the list), the unsigned-webhook 401, and optional PageSpeed
+  Insights (`PSI_API_KEY`). It prints pass, warning and fail lines with a fix for each, exits 1 on any failure and
+  takes `--json`. `npm run launch:screens -- <url>` saves 375, 768, 1280 and 1920 px screenshots of every sitemap URL
+  into `launch-screens/<date>/` (gitignored). Each check is a pure, unit-tested function in `scripts/launch-check/`.
+  New step 8 in the README's deploy checklist and a _Launch check_ section.
 - **Role-aware Studio.** Agency staff (Administrator, Developer) keep the full Studio; Editors and Contributors get
   a simpler, safer one. Clients lose Vision, AI settings and Content health, and see Presentation first; the sidebar
   shows only Site settings, Pages, Blog (and Team and Business info when present); the members-only `access`
