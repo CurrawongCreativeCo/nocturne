@@ -4,8 +4,11 @@ import { gzipSync } from 'node:zlib'
 
 import { expect, test } from '@playwright/test'
 
-/** Gzipped JavaScript the home page may load, in KB (1 KB = 1000 bytes). See README "Performance budgets". */
-const JS_BUDGET_KB = 200
+/**
+ * Gzipped JavaScript the home page may load, in KB (1 KB = 1000 bytes). See README "Performance budgets".
+ * Raised from 200 to 220 for Motion (LazyMotion + m adds 16.5 KB under Turbopack; see README "Motion").
+ */
+const JS_BUDGET_KB = 220
 
 const STATIC_PREFIX = '/_next/static/'
 

@@ -31,6 +31,18 @@
     outline: none;
   }
 
+  /*
+   * [data-reveal] elements (Motion reveals, see README "Motion") start hidden in the HTML. Show
+   * them in their final state without JavaScript, and at once for visitors who ask for less motion
+   * (this also keeps the visual-regression screenshots stable). !important beats Motion's inline styles.
+   */
+  @media (scripting: none), (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     ::before,

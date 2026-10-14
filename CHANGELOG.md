@@ -29,6 +29,11 @@ you start a release.
 - Tests: generated output matches `tokens.json`; every token pairing reaches WCAG 2.2 AA contrast
   (`src/lib/contrast.ts`); no component uses a raw palette class (`palette-ok: <reason>` is the escape hatch).
 - README "Design tokens" section.
+- **Motion.** `motion` (pinned) with `LazyMotion` + `m` and the `domMax` bundle loaded after first render
+  (`src/components/motion/`: provider in `SiteShell`, `MotionDiv` and friends for server components, shared presets built
+  on the motion tokens). ESLint bans `framer-motion` and the `motion` component from `motion/react`. `[data-reveal]`
+  elements show without JavaScript and under reduced motion. The first hero fades up its description and buttons.
+  The home page JavaScript budget (`JS_BUDGET_KB`) rises from 200 to 220 KB to pay for it. README "Motion" section, `motion.spec.ts`, and the e2e suite now runs with reduced motion by default.
 - `npm run check:dataset` (`scripts/check-dataset.mjs`) fails when the dataset is public.
 - A test that fails if a client module imports `lib/sanity/token.ts`.
 - README "Dataset privacy" section and a deploy checklist step.

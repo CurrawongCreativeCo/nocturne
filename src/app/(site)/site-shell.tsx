@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { draftMode } from 'next/headers'
 import { Suspense } from 'react'
 
+import { MotionProvider } from '@/components/motion/motion-provider'
 import { hasConsentProviders } from '@/config/analytics'
 import { AnalyticsScripts } from '@/features/consent/components/analytics-scripts'
 import { CookieSettingsButton } from '@/features/consent/components/cookie-settings-button'
@@ -43,8 +44,9 @@ export async function SiteShell({
     <CookieSettingsButton className="cursor-pointer text-small text-ink-muted hover:text-ink" />
   )
 
+  // MotionProvider wraps the public site only (Studio has its own root); SiteShell also serves /ab.
   return (
-    <>
+    <MotionProvider>
       <SiteJsonLd />
       {/*
         First in the DOM so it is where keyboard focus lands when it opens and where Tab continues
@@ -112,6 +114,6 @@ export async function SiteShell({
           {hasConsentProviders && <AnalyticsScripts />}
         </>
       )}
-    </>
+    </MotionProvider>
   )
 }
