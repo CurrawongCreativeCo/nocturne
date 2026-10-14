@@ -26,6 +26,8 @@ describe('resolveStudioBrand: precedence matrix', () => {
       name: 'Currawong Creative',
       logo: currawongBrand.logo,
       mark: currawongBrand.mark,
+      logoSource: 'currawong',
+      logoDrawnFor: null,
       light: currawongBrand.light,
       dark: currawongBrand.dark,
       warnings: [],
@@ -62,6 +64,24 @@ describe('resolveStudioBrand: precedence matrix', () => {
     expect(brand.logo.light).toEqual({ kind: 'image', src: CLIENT_DARK_LOGO })
     expect(brand.logo.dark).toEqual({ kind: 'image', src: CLIENT_DARK_LOGO })
     expect(brand.mark.light).toEqual({ kind: 'image', src: CLIENT_DARK_LOGO })
+  })
+
+  it('records where the logo came from and which scheme a lone file was drawn for', () => {
+    expect(resolve({})).toMatchObject({ logoSource: 'currawong', logoDrawnFor: null })
+    expect(resolve({ colors: { primary: '#1a73e8' } })).toMatchObject({
+      logoSource: 'monogram',
+      logoDrawnFor: null,
+    })
+    expect(resolve({ logo: { onLight: CLIENT_LOGO, onDark: CLIENT_DARK_LOGO } })).toMatchObject({
+      logoSource: 'client',
+      logoDrawnFor: null,
+    })
+    expect(resolve({ logo: { onLight: CLIENT_LOGO } }).logoDrawnFor).toBe('light')
+    expect(resolve({ logo: { onDark: CLIENT_DARK_LOGO } }).logoDrawnFor).toBe('dark')
+    // A mark alone is not a logo.
+    expect(resolve({ logo: { mark: 'src/assets/brand/client/mark.svg' } }).logoSource).toBe(
+      'currawong',
+    )
   })
 
   it('a client mark is used for both schemes', () => {

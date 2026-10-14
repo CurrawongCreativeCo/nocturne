@@ -108,6 +108,10 @@ export interface StudioBrand {
   name: string
   logo: LogoVariants
   mark: LogoVariants
+  /** Where `logo` came from: the client's file, a monogram from their colours, or Currawong's. */
+  logoSource: 'client' | 'monogram' | 'currawong'
+  /** When the client supplied only one logo file, the scheme it was drawn for; else null. */
+  logoDrawnFor: Scheme | null
   light: StudioBrandRoles
   dark: StudioBrandRoles
   warnings: StudioBrandWarning[]
