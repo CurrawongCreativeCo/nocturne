@@ -1,7 +1,8 @@
 /**
  * Minimal fake Content Lake for end-to-end tests: answers GROQ queries from the fixture
  * dataset using groq-js, Sanity's own query engine. The site under test points at it via
- * SANITY_API_HOST (see playwright.config.ts).
+ * SANITY_API_HOST (see playwright.config.ts). It behaves like a private dataset: queries need a
+ * Bearer token (any value).
  */
 import { createServer } from 'node:http'
 
@@ -93,6 +94,13 @@ createServer(async (req, res) => {
   }
   if (!url.pathname.includes('/data/query/')) {
     res.writeHead(404).end()
+    return
+  }
+
+  // Like a private dataset: reads without a token are refused, so a missed path fails the tests.
+  if (!/^Bearer \S+$/.test(req.headers.authorization ?? '')) {
+    res.writeHead(401, { 'content-type': 'application/json' })
+    res.end(JSON.stringify({ error: { description: 'Session not found', type: 'corsOrigin' } }))
     return
   }
 

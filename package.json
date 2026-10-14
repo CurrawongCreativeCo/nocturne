@@ -13,6 +13,7 @@
     "lint": "eslint . --max-warnings 0",
     "predev": "node scripts/setup/index.mjs",
     "setup": "node scripts/setup/index.mjs",
+    "check:dataset": "node scripts/check-dataset.mjs",
     "new:section": "node scripts/new-section.mjs",
     "new:feature": "node scripts/new-feature.mjs",
     "new:document": "node scripts/new-document.mjs",

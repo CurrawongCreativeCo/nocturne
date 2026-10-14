@@ -271,8 +271,10 @@
             <div>
               <strong>Create a new Sanity project</strong
               ><span
-                >Uses your Sanity CLI login. Run <code>npx sanity login</code> in a terminal
-                first.</span
+                >Uses your Sanity CLI login. Run <code>npx sanity login</code> in a terminal first.
+                The dataset is created <b>private</b>, so members-only content and form addresses
+                can't be read from the public API. Sanity's Free plan only offers public datasets,
+                so creating the project may need a paid plan.</span
               >
             </div>
           </label>
@@ -295,7 +297,8 @@
               Shown under your project name at
               <a href="https://www.sanity.io/manage" target="_blank" rel="noopener"
                 >sanity.io/manage</a
-              >. No project yet? Create one there first.
+              >. No project yet? Create one there first. The site reads with the token below, so
+              make the dataset private (see the README's Dataset privacy section).
             </p>
             <p class="error" id="projectId-error"></p>
           </div>

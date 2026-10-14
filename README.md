@@ -25,7 +25,7 @@ npm run dev
 ```
 
 The first `npm run dev` opens a setup form at http://localhost:3333. It can create a new Sanity project
-(or connect an existing one), create a Viewer token, allow the site in CORS, and import starter content
+with a **private** dataset (or connect an existing one; make that private too, see [Dataset privacy](#dataset-privacy)), create a Viewer token, allow the site in CORS, and import starter content
 (Home and About pages, Site settings with a menu and footer). It writes `.env.local`, deletes itself
 (`scripts/setup/`, the `predev`/`setup` scripts, and this section), then starts the site and links you
 to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
@@ -50,6 +50,7 @@ npm run dev                  # site on :3000, Studio on :3000/studio
 ```
 
 In sanity.io/manage → API → CORS, add `http://localhost:3000` (with credentials) and your production URL.
+Make the dataset private (see [Dataset privacy](#dataset-privacy)) and run `npm run check:dataset`.
 Create a page with slug `home` to populate `/`. After changing schemas or queries, run `npm run typegen`.
 
 ## Editing content
@@ -95,7 +96,7 @@ Open http://localhost:3000/studio:
   - _Button text_, a _success message_ (shown in place of the form after sending) and _Send submissions to_, the address that receives each one. Replying to the email reaches the visitor if the form has an email field they filled in.
   - _How it behaves:_ every field is checked on the server against the published form, so a visitor can't send a field or a choice the form doesn't have. Problems appear in a summary above the form that takes focus (each item links to its field) and beside each field, and what was typed is kept. Long text allows line breaks and 5,000 characters; other fields are one line of up to 200 (email 254, phone 30). Email addresses are checked for shape only, and phone numbers for 5–15 digits.
   - _Spam:_ a Cloudflare Turnstile check on every send, plus a limit of 5 messages per IP address per 10 minutes on each server instance (serverless instances count separately, so it slows a spammer down rather than stopping one). The check needs JavaScript. Without it the form still posts and shows errors, but nothing is sent: the visitor is told to turn JavaScript on.
-  - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Use a shared inbox, or make the dataset private. Submissions are emailed, not stored: if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
+  - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Datasets are private by default (see [Dataset privacy](#dataset-privacy)), so only the site's Viewer token and project members can read it; a shared inbox is still the safer choice. Submissions are emailed, not stored: if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
   - _Setup:_ it needs four environment variables (see _Forms setup_ below). Until they are set, a form section shows a setup message in development and "isn't available right now" to visitors. Pages read them at build time, so redeploy after changing them.
 - **Newsletter signup:** the _Newsletter signup_ section (_Add item → Newsletter signup_) is a heading, a line of text and an email box with a button. Set the _Heading_, _Text_, _Button label_ and _Success message_. The visitor sees the success message whether or not the address was already subscribed, so don't word it as "you are now subscribed"; if your provider emails a confirmation link (Mailchimp always does, Loops can), say "check your inbox to confirm". It sits in the page like any section and can be used on many pages (or as a shared section). The developer chooses the email service (see _Newsletter signup_ below); until then the section shows a setup message in development and "isn't available right now" to visitors. It has the same spam check and rate limit as forms (5 attempts per IP address per 10 minutes). Signups are not stored on the site: they go straight to the email service.
 - **Pricing table:** the _Pricing table_ section shows plans taken from Stripe prices, with a checkout button on each. Prices are not typed in: they are created in the Stripe dashboard and copied into _Stripe price_ documents (sidebar) automatically, so an amount can never differ between the site and what Stripe charges. In the section, add up to four _plans_; each one:
@@ -216,7 +217,9 @@ It still needs the CORS step below.
    origins, "Allow credentials" checked). Preview deployments on other domains need their own entry.
 4. **Deploy**, then open `https://example.com/studio` and sign in. Studio is part of the site, so
    there is nothing separate to deploy.
-5. **Check:** `/sitemap.xml` and `/robots.txt` list production URLs, and editing a page in
+5. **Check the dataset is private:** `npm run check:dataset` (see [Dataset privacy](#dataset-privacy)). A public dataset
+   exposes members-only content and form recipient addresses to anyone who knows the project ID.
+6. **Check:** `/sitemap.xml` and `/robots.txt` list production URLs, and editing a page in
    Presentation updates the live site.
 
 Without `NEXT_PUBLIC_SITE_URL`, Vercel deployments fall back to the project's production domain; any
@@ -355,6 +358,29 @@ components, config, lib, styles, types   ->   features   ->   app
   refresh would render the old content and the edit wouldn't appear until a later visit.)
 - Fetch `tags` are document-type tags for webhook mode (see below); live mode uses Sanity's sync tags.
 
+### Dataset privacy
+
+Datasets are **private**. The site hides members-only sections in its own GROQ, but the project ID is public, so on a
+public dataset anyone could query the Content Lake directly (`*[access == "members"]`, or a form's `recipientEmail`).
+On a private dataset those requests need a token, and only the Viewer token the site holds (and your Sanity project members) has one.
+
+- **How the site reads.** `lib/sanity/client.ts` sets `token` on the one client, so every server read, published or
+  draft, sends `SANITY_API_READ_TOKEN`. `defineLive` only adds its `serverToken` for drafts and stega, so published reads
+  need it on the client. Reads still use the API CDN (`useCdn: true`), which serves private datasets when a token is
+  sent, so the [request budget](#request-budget) is unchanged and visitors still cause zero Sanity requests. Pages, blog,
+  settings, the share image, sitemap, `robots.txt`, `/llms.txt`, search, forms (`FORM_QUERY`) and pricing
+  (`CHECKOUT_PRICE_QUERY`) all go through `cachedSanityFetch` or `shortLivedSanityFetch`, so they all use it.
+- **The token stays on the server.** `lib/sanity/token.ts` imports `server-only`. The browser gets a token only as
+  `browserToken`, when `<SanityLive includeDrafts />` renders in draft mode. `src/lib/sanity/token-import-guard.test.ts`
+  fails `npm test` if any `'use client'` module imports `token.ts`, directly or through other modules.
+- **Plan.** Sanity's Free plan offers only public datasets, so members-only content and forms with recipient addresses
+  need a paid plan (check sanity.io/pricing). On the Free plan, keep only content that is fine to publish in the dataset.
+- **Switch an existing project to private:** sanity.io/manage → your project → API → Datasets → set the dataset to
+  _Private_, or run `npx sanity dataset visibility set <dataset> private`. Deploy this version first, because a private
+  dataset refuses reads without a token. Previews and Studio are unaffected (editors are signed in).
+- **Check it:** `npm run check:dataset` reads `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET` and
+  `SANITY_API_READ_TOKEN` from `.env.local`, asks the Sanity API for the dataset's visibility and exits non-zero if it is public.
+
 ### Personalization inside cached pages
 
 Pages are prerendered, so anything that depends on the visitor (a cookie, a header) must stay out of the
@@ -397,7 +423,7 @@ visitor ─▶ proxy.ts ─ reads the running experiment (cached /api/experiment
 
 ### Request budget
 
-Published reads go to Sanity's API CDN without a token, one request per cache miss. There are only a handful of
+Published reads go to Sanity's API CDN with the Viewer token (see [Dataset privacy](#dataset-privacy); the CDN still serves them, so the budget is the same), one request per cache miss. There are only a handful of
 queries (shared sections are resolved inside `PAGE_QUERY`, not fetched separately): `PAGE_QUERY` (a page and its metadata), `PAGE_INDEX_QUERY` (static params, sitemap, breadcrumbs, and the
 unknown-URL check) and `SETTINGS_QUERY` (announcement bar, header, footer, site metadata). The blog adds three:
 `POSTS_QUERY` (one page of posts, for the index, a category, the RSS feed and the post count), `POST_QUERY` (a post, its metadata and its

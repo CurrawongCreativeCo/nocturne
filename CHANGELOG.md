@@ -20,13 +20,22 @@ you start a release.
 
 ### Added
 
+- `npm run check:dataset` (`scripts/check-dataset.mjs`) fails when the dataset is public.
+- A test that fails if a client module imports `lib/sanity/token.ts`.
+- README "Dataset privacy" section and a deploy checklist step.
+
 ### Changed
+
+- The setup wizard creates datasets as **private**, and server-side published reads send the Viewer token
+  (still through the API CDN). The fake Content Lake used by the e2e tests now refuses reads without a token.
 
 ### Fixed
 
 ### Breaking changes / migration steps
 
-None.
+- **Existing sites:** after deploying this change, switch the dataset to private (sanity.io/manage → API → Datasets, or
+  `npx sanity dataset visibility set <dataset> private`), then run `npm run check:dataset`. Make sure
+  `SANITY_API_READ_TOKEN` is set in every environment first. Sanity's Free plan only offers public datasets; check sanity.io/pricing.
 
 ## [1.1.0] - 2026-10-14
 

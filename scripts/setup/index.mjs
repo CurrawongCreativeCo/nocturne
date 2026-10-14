@@ -150,7 +150,7 @@ async function createProject({ projectName, dataset }) {
       '--dataset',
       dataset,
       '--dataset-visibility',
-      'public',
+      'private',
       '--json',
       '--yes',
     ],
