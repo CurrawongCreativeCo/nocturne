@@ -73,12 +73,18 @@ describe('sectionTraits', () => {
     expect(sectionTraits({ align: 'center' })).toEqual({
       tone: 'surface',
       align: 'center',
+      motion: 'none',
       block: 'mx-auto',
       text: 'text-center',
       justify: 'justify-center',
     })
     expect(sectionTraits({}, { align: 'center' }).text).toBe('text-center')
     expect(sectionTraits({ align: 'start' }, { align: 'center' }).text).toBe('')
+  })
+
+  it('reports the motion preset, so a section can draw its own parallax picture', () => {
+    expect(sectionTraits({ motion: 'parallax' }).motion).toBe('parallax')
+    expect(sectionTraits({}).motion).toBe('none')
   })
 })
 

@@ -90,7 +90,7 @@ export const sectionStyle = defineType({
       name: 'motion',
       title: 'Animation',
       description:
-        'How the section appears as it scrolls into view. Not used on the first section of a page, and skipped for visitors who ask for less motion.',
+        "How the section appears as it scrolls into view. Fade up and staggered are not used on the first section of a page. Parallax moves a hero's background picture, or a picture beside text, slightly as the page scrolls. All are skipped for visitors who ask for less motion.",
       type: 'string',
       initialValue: 'reveal',
       options: radio(SECTION_MOTIONS, {

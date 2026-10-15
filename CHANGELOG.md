@@ -20,6 +20,13 @@ you start a release.
 
 ### Added
 
+- **Parallax:** a lightweight `Parallax` primitive (`src/components/motion/parallax.tsx`, Motion's `useScroll` and
+  `useTransform`) and `ParallaxImage` for pictures. The _Parallax_ animation preset now works: the hero overlay and
+  full-bleed backgrounds move behind their text, and `SectionFrame` has a `media` slot that the image + text section
+  uses. Transform only, no scroll listener of our own, no layout shift, and never moved or scaled for visitors who
+  ask for less motion. New `/parallax` fixture page and `tests/e2e/parallax.spec.ts`. The scroll code is a separate 6.6 KB gzipped chunk loaded only by pages that use it (the home page grows
+  by 0.4 KB). See the README's "Motion".
+
 - **Section variants:** a section can have several layouts that share one data contract. A `variant` radio field in
   the Design group (`variantField`) picks the layout; a folder holds a dispatcher (`index.tsx`, unknown values fall
   back to the first variant) and one component per variant. The hero has four: `overlay` (the previous look, still

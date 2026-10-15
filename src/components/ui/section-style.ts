@@ -108,13 +108,13 @@ const ALIGN_CLASSES = {
   center: { block: 'mx-auto', text: 'text-center', justify: 'justify-center' },
 } as const
 
-/** What a section's own markup needs from its style: its tone (for buttons) and alignment classes. */
+/** What a section's own markup needs from its style: its tone (for buttons), alignment classes and motion preset. */
 export function sectionTraits(
   style: SectionStyleInput | null | undefined,
   defaults: SectionDefaults = {},
 ) {
-  const { align, tone } = resolveSectionStyle(style, defaults)
-  return { tone, align, ...ALIGN_CLASSES[align] }
+  const { align, tone, motion } = resolveSectionStyle(style, defaults)
+  return { tone, align, motion, ...ALIGN_CLASSES[align] }
 }
 
 /** Buttons are drawn for a dark or a light background; the dark tones need the dark set. */

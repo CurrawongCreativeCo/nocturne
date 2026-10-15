@@ -262,6 +262,76 @@ export const documents = [
     ],
   },
   {
+    // The first section is a hero with a parallax picture, followed by enough text to scroll (parallax.spec.ts).
+    _id: 'page-parallax',
+    _type: 'page',
+    title: 'Parallax',
+    slug: { _type: 'slug', current: 'parallax' },
+    seo: { _type: 'seo', metaDescription: 'A page that starts with a parallax hero.' },
+    pageBuilder: [
+      {
+        _key: 'parallax-hero',
+        _type: 'hero',
+        title: 'Parallax hero',
+        description: 'The picture behind this hero moves as the page scrolls.',
+        backgroundImage: image(''),
+        style: { _type: 'sectionStyle', motion: 'parallax' },
+      },
+      {
+        _key: 'parallax-text-1',
+        _type: 'richText',
+        body: [
+          block(['Parallax text 1'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        // Not the first section: it moves while it crosses the screen (from `viewport`).
+        _key: 'parallax-hero-later',
+        _type: 'hero',
+        variant: 'full-bleed',
+        title: 'Later parallax hero',
+        description: 'A hero further down the page.',
+        backgroundImage: image(''),
+        style: { _type: 'sectionStyle', motion: 'parallax' },
+      },
+      {
+        _key: 'parallax-text-2',
+        _type: 'richText',
+        body: [
+          block(['Parallax text 2'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        // The parallax preset moves a media section's picture.
+        _key: 'parallax-media',
+        _type: 'mediaText',
+        title: 'Parallax picture',
+        body: [block(['Body text beside the picture.'])],
+        image: image('Picture'),
+        imagePosition: 'right',
+        style: { _type: 'sectionStyle', motion: 'parallax' },
+      },
+      {
+        _key: 'parallax-text-3',
+        _type: 'richText',
+        body: [
+          block(['Parallax text 3'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        _key: 'parallax-text-4',
+        _type: 'richText',
+        body: [
+          block(['Parallax text 4'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+    ],
+  },
+  {
     _id: 'shared-promo',
     _type: 'sharedSection',
     title: 'Promo banner',
@@ -745,6 +815,15 @@ const gallerySections = [
     secondaryImage: image(''),
   }),
   galleryHero('full-bleed', { variant: 'full-bleed' }),
+  // Parallax backgrounds (README, "Motion"). The visual tests emulate reduced motion, so these show the still picture.
+  styled('hero-parallax', galleryHero('parallax', { variant: 'overlay' }), { motion: 'parallax' }),
+  styled(
+    'hero-full-bleed-parallax',
+    galleryHero('full-bleed-parallax', { variant: 'full-bleed' }),
+    {
+      motion: 'parallax',
+    },
+  ),
   {
     _key: 'rich-text',
     _type: 'richText',
@@ -837,6 +916,14 @@ const gallerySections = [
       image: image('Picture'),
       imagePosition: 'right',
     }),
+  ),
+  styled(
+    'media-text-parallax',
+    galleryMediaText('parallax', 'Parallax picture', {
+      image: image('Picture'),
+      imagePosition: 'right',
+    }),
+    { motion: 'parallax' },
   ),
   styled(
     'rich-text-style-narrow',
