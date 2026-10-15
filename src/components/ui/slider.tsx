@@ -13,12 +13,14 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useImperativeHandle,
   useRef,
   useState,
   type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
+  type Ref,
 } from 'react'
 
 import { snapIndex, stopCount, trackOffset } from './slider-snap'
@@ -26,6 +28,12 @@ import { snapIndex, stopCount, trackOffset } from './slider-snap'
 type Breakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl'
 /** Slides in view at each Tailwind breakpoint; a missing one keeps the smaller one's count. */
 export type SliderPerView = Partial<Record<Breakpoint, number>>
+
+/** What a parent can do to a slider it renders (the lightbox's own arrow keys). */
+export interface SliderHandle {
+  previous: () => void
+  next: () => void
+}
 
 interface Props {
   /** Names the carousel for screen readers, e.g. "Customer testimonials". */
@@ -38,6 +46,18 @@ interface Props {
    * visible Pause button, and never runs for visitors who ask for less motion.
    */
   autoplay?: number
+  /** The slide to start on. Read once, when the slider first measures itself. */
+  initialIndex?: number
+  /** Called with the current position at the start and after every move. Keep it stable. */
+  onIndexChange?: (index: number) => void
+  /** The row of "Go to slide n" dots between the arrows. On by default; off for long runs. */
+  dots?: boolean
+  /**
+   * Locks a drag to the axis it starts on, so a parent that drags vertically (a lightbox swiped
+   * down to close) isn't also dragging this one sideways. Off by default.
+   */
+  directionLock?: boolean
+  ref?: Ref<SliderHandle>
   className?: string
   /** One child per slide. */
   children: ReactNode
@@ -118,11 +138,17 @@ export function Slider({
   perView = DEFAULT_PER_VIEW,
   gap = false,
   autoplay,
+  initialIndex,
+  onIndexChange,
+  dots = true,
+  directionLock = false,
+  ref,
   className = '',
   children,
 }: Props) {
   const slides = Children.toArray(children)
   const count = slides.length
+  const startRef = useRef(initialIndex)
 
   const viewportRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -136,13 +162,15 @@ export function Slider({
 
   // Null until the first client measurement: the server HTML and the hydration render are the scroll fallback.
   const [metrics, setMetrics] = useState<Metrics | null>(null)
-  const [index, setIndex] = useState(0)
+  const [index, setIndex] = useState(() =>
+    Math.min(Math.max(initialIndex ?? 0, 0), Math.max(count - 1, 0)),
+  )
   const [announcement, setAnnouncement] = useState('')
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
   const [playing, setPlaying] = useState(true)
 
-  const indexRef = useRef(0)
+  const indexRef = useRef(index)
   const metricsRef = useRef<Metrics | null>(null)
   const draggedRef = useRef(false)
   const draggingRef = useRef(false)
@@ -194,7 +222,10 @@ export function Slider({
 
       // First measurement: carry over wherever the scroll fallback was scrolled to.
       if (metricsRef.current === null) {
-        const start = Math.min(Math.round(viewport.scrollLeft / step), next.stops - 1)
+        const start = Math.min(
+          startRef.current ?? Math.round(viewport.scrollLeft / step),
+          next.stops - 1,
+        )
         viewport.scrollLeft = 0
         indexRef.current = start
         setIndex(start)
@@ -224,6 +255,23 @@ export function Slider({
       animation.current?.stop()
     },
     [],
+  )
+
+  useEffect(() => {
+    onIndexChange?.(index)
+  }, [index, onIndexChange])
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      previous: () => {
+        moveTo(indexRef.current - 1, true)
+      },
+      next: () => {
+        moveTo(indexRef.current + 1, true)
+      },
+    }),
+    [moveTo],
   )
 
   // Automatic sliding: one timer per resting slide, so any move (a button, a drag) restarts the wait.
@@ -317,6 +365,7 @@ export function Slider({
           style={{ x, touchAction: ready ? 'pan-y' : undefined }}
           drag={ready && stops > 1 ? 'x' : false}
           dragConstraints={{ left: -(metrics?.maxScroll ?? 0), right: 0 }}
+          dragDirectionLock={directionLock}
           dragElastic={0.18}
           dragMomentum={false}
           onPointerDownCapture={() => {
@@ -364,25 +413,27 @@ export function Slider({
             >
               <Chevron direction="left" />
             </button>
-            <div className="flex items-center">
-              {Array.from({ length: stops }, (_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`Go to slide ${i + 1}`}
-                  aria-current={i === index ? 'true' : undefined}
-                  className="grid size-6 place-items-center"
-                  onClick={() => {
-                    moveTo(i, true)
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`size-2.5 rounded-pill ring-1 ring-ink ${i === index ? 'bg-ink' : ''}`}
-                  />
-                </button>
-              ))}
-            </div>
+            {dots && (
+              <div className="flex items-center">
+                {Array.from({ length: stops }, (_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Go to slide ${i + 1}`}
+                    aria-current={i === index ? 'true' : undefined}
+                    className="grid size-6 place-items-center"
+                    onClick={() => {
+                      moveTo(i, true)
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`size-2.5 rounded-pill ring-1 ring-ink ${i === index ? 'bg-ink' : ''}`}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
             <button
               ref={nextRef}
               type="button"

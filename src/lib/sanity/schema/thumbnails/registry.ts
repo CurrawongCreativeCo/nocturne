@@ -17,6 +17,11 @@ import {
   EdgeWaveThumbnail,
 } from './edge-thumbnails'
 import {
+  GalleryGridThumbnail,
+  GalleryMasonryThumbnail,
+  GallerySliderThumbnail,
+} from './gallery-thumbnails'
+import {
   HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
   HeroFullBleedThumbnail,
@@ -55,6 +60,11 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
     split: HeroSplitThumbnail,
     editorial: HeroEditorialThumbnail,
     'full-bleed': HeroFullBleedThumbnail,
+  },
+  gallery: {
+    grid: GalleryGridThumbnail,
+    masonry: GalleryMasonryThumbnail,
+    slider: GallerySliderThumbnail,
   },
   stats: {
     inline: StatsInlineThumbnail,

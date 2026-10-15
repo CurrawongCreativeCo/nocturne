@@ -164,19 +164,20 @@ Open http://localhost:3000/studio:
   _Content page_ (hero + rich text), or a blank page.
 - Under **Sections**, _Add item_ shows every section with a thumbnail:
 
-| Section               | Use it for                                                |
-| --------------------- | --------------------------------------------------------- |
-| Hero                  | Page headline, intro, up to two buttons, background image |
-| Rich text             | Long-form copy: headings, lists, links, inline images     |
-| Image + text          | A picture beside a short story, image on either side      |
-| Features grid         | 2–4 columns of benefits with icons                        |
-| Logo strip            | Client or partner logos                                   |
-| Testimonials          | Customer quotes with name, role and photo                 |
-| FAQ                   | Questions that expand to answers                          |
-| Call to action banner | A closing prompt in brand, dark or light tone             |
-| Form                  | A contact or enquiry form built under _Forms_ (see below) |
-| Pricing table         | Plans from Stripe prices, each with a checkout button     |
-| Newsletter signup     | An email box that adds visitors to your mailing list      |
+| Section               | Use it for                                                               |
+| --------------------- | ------------------------------------------------------------------------ |
+| Hero                  | Page headline, intro, up to two buttons, background image                |
+| Rich text             | Long-form copy: headings, lists, links, inline images                    |
+| Image + text          | A picture beside a short story, image on either side                     |
+| Features grid         | 2–4 columns of benefits with icons                                       |
+| Logo strip            | Client or partner logos                                                  |
+| Testimonials          | Customer quotes with name, role and photo                                |
+| FAQ                   | Questions that expand to answers                                         |
+| Call to action banner | A closing prompt in brand, dark or light tone                            |
+| Form                  | A contact or enquiry form built under _Forms_ (see below)                |
+| Pricing table         | Plans from Stripe prices, each with a checkout button                    |
+| Newsletter signup     | An email box that adds visitors to your mailing list                     |
+| Gallery               | Up to 60 pictures in a grid, masonry or slider, each opening full screen |
 
 **Shared sections:** use _Shared sections_ in the sidebar for a section that appears unchanged on
 several pages, like a promo banner or a newsletter sign-up. Create one (a title for your own reference,
@@ -1463,12 +1464,17 @@ for the reason given under _Parallax_ above.
 </LazySlider>
 ```
 
-| Prop       | What it does                                                                                                                 |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `label`    | Names the carousel for screen readers (required).                                                                            |
-| `perView`  | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count. |
-| `gap`      | Space (1.5 rem) between slides.                                                                                              |
-| `autoplay` | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                  |
+| Prop            | What it does                                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `label`         | Names the carousel for screen readers (required).                                                                            |
+| `perView`       | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count. |
+| `gap`           | Space (1.5 rem) between slides.                                                                                              |
+| `autoplay`      | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                  |
+| `initialIndex`  | The slide to start on, read once when the slider first measures itself (the lightbox opens on the picture clicked).          |
+| `onIndexChange` | Called with the position at the start and after every move. Pass a stable function.                                          |
+| `dots`          | The "Go to slide n" dots. On by default; the lightbox turns them off because a gallery can have 60 pictures.                 |
+| `directionLock` | Locks a drag to the axis it starts on, for a slider inside something that drags the other way (the lightbox).                |
+| `ref`           | A `SliderHandle` with `previous()` and `next()`, for a parent that handles keys itself.                                      |
 
 - **How it moves.** The track is an `m.div` with `drag="x"` and a motion value for `x`. On release `snapIndex`
   (`slider-snap.ts`, pure and unit tested) picks the slide from the drag distance plus a short projection of the
@@ -1501,6 +1507,47 @@ for the reason given under _Parallax_ above.
 - **Tests.** `slider-snap.test.ts` (unit); `tests/e2e/slider.spec.ts` on the `/slider` fixture page (buttons, dots, keys,
   `inert`, `touch-action`, mouse drag, click suppression, spring and reduced motion, no JavaScript, CLS, axe). The gallery
   has `testimonials-slider` and `testimonials-slider-inverse`.
+
+### Gallery
+
+The **Gallery** section (`src/features/pages/components/sections/gallery/`) shows up to 60 pictures and opens each one full
+screen. Editors: _Add section → Gallery_, add the pictures (each needs alt text; a caption is optional and appears under
+the picture when it is opened), and pick a **Layout**: _Grid_ (equal tiles, the default), _Masonry_ (pictures keep their own
+shape, packed into columns) or _Slider_ (a row to swipe or step through). Agencies set **Columns** (2–4, on the Design tab;
+narrower screens show fewer). Clients cannot see the Layout or Columns. Pictures over the 4:3, 1600 px recommendation only
+get a warning; more than 60 is an error (a page of that many is slow, and reads better as a blog post).
+
+- **Layouts.** Grid and masonry are CSS only (a grid of 4:3 tiles; CSS `columns` for masonry). Masonry fills each column
+  top to bottom, so the tab order is still the editor's order, which the eye reads down each column. The slider layout is
+  the shared `Slider` (via `LazySlider`) with 1, 2 and then _Columns_ pictures in view.
+- **Images.** `SanityImage` with `sizes` that match the layout, LQIP blur and `loading="lazy"`; only the first row of a
+  gallery that opens the page loads eagerly.
+- **Thumbnails are buttons** named "Open image 3 of 12: <alt text>" (`aria-haspopup="dialog"`); the picture inside has an
+  empty `alt` so it is not read twice.
+- **The lightbox** (`lightbox.tsx`) is a native modal `<dialog>`, so the browser traps focus, makes the page behind it
+  inert, closes on Escape and returns focus. It holds the shared `Slider` at full size (Previous and Next buttons, Left and
+  Right arrow keys, drag), a counter ("3 of 12") and each picture's caption in its `<figcaption>`. Arrow keys also work
+  while focus is on the Close button (the dialog hands them to the slider through its `ref`). Dragging down closes it:
+  the panel is an `m.div` with `drag="y"` and `shouldDismiss` (`src/components/ui/swipe-dismiss.ts`, pure and unit
+  tested) decides, a flick or a drag past a quarter of the height closes, anything less springs back. The slider is
+  `directionLock`ed so a sideways drag changes picture and a downward one closes. Focus goes back to the thumbnail that
+  opened it (also set by hand, because Safari does not focus a button on click).
+- **Loaded on first open.** `lightbox-provider.tsx` is the only gallery code in the page's scripts: it holds the open
+  state and imports the lightbox with `next/dynamic` (`ssr: false`, which has to sit in a client file), so the dialog, the
+  Slider and Motion's spring arrive when a picture is first clicked. The thumbnails stay server components; the provider
+  takes them as `children`.
+- **Full-size images only nearby.** The lightbox renders the picture for the current slide and the one either side; the
+  rest are empty placeholders until they are close, so opening a 60-picture gallery downloads three pictures, not 60.
+- **Reduced motion.** The thumbnails' hover zoom is `motion-safe:`, the slider moves instantly, the dialog does not animate,
+  and the page behind is not scrolled while it is open. The swipe is a drag the visitor makes themselves, so it still works.
+- **Needs the `MotionProvider`** for the swipe and the drag (the public site has it; `/section-gallery` does not, so
+  there the layouts show and the buttons and keys work). The Slider's `ref`/`dots`/`directionLock` props are the only
+  change to the shared component; each is off or unchanged by default.
+- **Tests.** `swipe-dismiss.test.ts` (unit); `tests/e2e/gallery.spec.ts` on the `/gallery` fixture page (button names, the
+  lightbox code only downloading on open, opening, keyboard navigation, Escape, focus return, three images at a time,
+  swipe down and spring back, reduced motion, axe with the lightbox open). The section gallery has `gallery-grid`,
+  `gallery-grid-four`, `gallery-masonry` and `gallery-slider`; their screenshot baselines need the **Update visual
+  baselines** workflow (macOS skips visual tests).
 
 ### Cursors and interaction feedback
 
@@ -1940,13 +1987,13 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
-| Kind            | Files                                                                        | Shown for                                                           |
-| --------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx` | each section's `variant` (the hero, Stats and Testimonials layouts) |
-| Hero presets    | `hero-thumbnails.tsx`                                                        | the six presets, and the Split proportions and shapes               |
-| Animations      | `animation-thumbnails.tsx`                                                   | the Animation field: none, fade up, staggered, parallax             |
-| Tones           | `tone-thumbnails.tsx`                                                        | the Tone field: live swatches, not pictures                         |
-| Insert menu     | `public/section-previews/<typeName>.svg`                                     | the "Add item" menu in the page builder (static files)              |
+| Kind            | Files                                                                                                  | Shown for                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts) |
+| Hero presets    | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                        |
+| Animations      | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, staggered, parallax                      |
+| Tones           | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                  |
+| Insert menu     | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                       |
 
 `registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 

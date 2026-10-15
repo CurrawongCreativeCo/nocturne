@@ -170,6 +170,17 @@ export const statsFragment = /* groq */ `
   }
 `
 
+export const galleryFragment = /* groq */ `
+  _type == "gallery" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    title,
+    intro,
+    columns,
+    images[] { _key, caption, ${imageFields} }
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -187,6 +198,7 @@ const sectionsFragment = /* groq */ `
   ${pricingTableFragment},
   ${newsletterSignupFragment},
   ${statsFragment},
+  ${galleryFragment},
   _type
 `
 

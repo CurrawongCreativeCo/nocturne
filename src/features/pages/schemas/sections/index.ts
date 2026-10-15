@@ -2,6 +2,7 @@ import { ctaBanner } from './cta-banner'
 import { faq } from './faq'
 import { featuresGrid } from './features-grid'
 import { formSection } from './form-section'
+import { gallery } from './gallery'
 import { hero } from './hero'
 import { logoCloud } from './logo-cloud'
 import { mediaText } from './media-text'
@@ -38,5 +39,6 @@ export const sectionTypes = [
   pricingTable,
   newsletterSignup,
   stats,
+  gallery,
   // new-section:register
 ]

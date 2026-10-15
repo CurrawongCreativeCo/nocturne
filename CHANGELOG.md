@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+- **Gallery section (Studio and site):** up to 60 pictures (required alt text, optional caption) in a **Grid**, **Masonry**
+  or **Slider** layout, with **Columns** (2–4) on the Design tab. Grid and masonry are CSS only; the slider is the shared
+  `Slider`. Each thumbnail is a button ("Open image 3 of 12: …") that opens a full-screen native `<dialog>` lightbox with the
+  Slider at full size, a counter, the caption, Previous and Next, arrow keys, Escape and swipe down to close, and focus
+  returning to the picture that opened it. The lightbox is downloaded on first open (`next/dynamic`), so the page's initial
+  JavaScript does not grow, and only the current and neighbouring full-size pictures load. New `shouldDismiss`
+  (`src/components/ui/swipe-dismiss.ts`) decides whether a drag closes a panel, ready for a drawer to reuse. `Slider` gains
+  optional `initialIndex`, `onIndexChange`, `dots`, `directionLock` and `ref` props (defaults unchanged). Visual baselines
+  for `gallery-grid`, `gallery-grid-four`, `gallery-masonry` and `gallery-slider` need the **Update visual baselines**
+  workflow.
 - **Start here Studio tool:** the first screen a client sees (`src/features/studio/start-here/`), listed first for client
   roles and also available to staff. It greets the person by first name and names the site, shows shortcut cards driven
   by the site profile (Edit your website, Write a blog post, Update the team, Business info and opening hours, Help),

@@ -14,6 +14,7 @@ import { CtaBanner } from './sections/cta-banner'
 import { Faq } from './sections/faq'
 import { FeaturesGrid } from './sections/features-grid'
 import { FormSection } from './sections/form-section'
+import { Gallery } from './sections/gallery'
 import { Hero } from './sections/hero'
 import { LogoCloud } from './sections/logo-cloud'
 import { MediaText } from './sections/media-text'
@@ -42,6 +43,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   pricingTable: PricingTable,
   newsletterSignup: NewsletterSignup,
   stats: Stats,
+  gallery: Gallery,
   // new-section:register
 }
 
