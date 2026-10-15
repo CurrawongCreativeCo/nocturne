@@ -188,6 +188,75 @@ test.describe('Studio brand preview', () => {
     }
   })
 
+  test.describe('Preset picker thumbnails', () => {
+    const gallery = (page: Page, scheme: (typeof SCHEMES)[number]) =>
+      page.locator(`[data-thumbnail-scheme="${scheme}"]`)
+    const cell = (page: Page, scheme: (typeof SCHEMES)[number], key: string) =>
+      gallery(page, scheme).locator(`[data-thumbnail-key="${key}"]`)
+
+    for (const scheme of SCHEMES) {
+      test(`shows every kind of thumbnail, ${scheme}`, async ({ page }) => {
+        const scope = gallery(page, scheme)
+        for (const group of ['layouts', 'animations', 'tones', 'insert-menu']) {
+          await expect(scope.locator(`[data-thumbnail-group="${group}"]`)).toBeVisible()
+        }
+        await expect(cell(page, scheme, 'hero.full-bleed')).toBeVisible()
+        await expect(cell(page, scheme, 'motion.parallax')).toBeVisible()
+        await expect(cell(page, scheme, 'tone.accent')).toBeVisible()
+        await expect(cell(page, scheme, 'section.hero')).toBeVisible()
+        // Every drawing is 4:3 and at least the 160 px the picker's cards give it.
+        for (const box of await scope.locator('[data-thumbnail-key] [data-thumbnail]').all()) {
+          const { width, height } = (await box.boundingBox()) ?? { width: 0, height: 0 }
+          expect(width).toBeGreaterThanOrEqual(150)
+          expect(width / height).toBeCloseTo(4 / 3, 1)
+        }
+      })
+
+      test(`no WCAG 2.2 AA violations, ${scheme} (colour contrast aside)`, async ({ page }) => {
+        const { violations } = await new AxeBuilder({ page })
+          .include(`[data-thumbnail-scheme="${scheme}"]`)
+          .withTags(WCAG)
+          .disableRules('color-contrast')
+          .analyze()
+        expect(
+          violations.map(
+            ({ id, nodes }) => `${id}: ${nodes.map((n) => n.target.join(' ')).join(', ')}`,
+          ),
+        ).toEqual([])
+      })
+    }
+
+    test('wireframes follow the Studio scheme; tones show the site tokens in both', async ({
+      page,
+    }) => {
+      const background = (scheme: (typeof SCHEMES)[number], key: string) =>
+        cell(page, scheme, key)
+          .locator('svg rect')
+          .first()
+          .evaluate((element) => getComputedStyle(element).fill)
+      expect(await background('light', 'hero.split')).not.toBe(
+        await background('dark', 'hero.split'),
+      )
+      // Surface is white and Dark is near-black (tokens.json), whichever scheme the Studio is in.
+      expect(await background('light', 'tone.surface')).toBe(
+        await background('dark', 'tone.surface'),
+      )
+      expect(await background('dark', 'tone.inverse')).not.toBe(
+        await background('dark', 'tone.surface'),
+      )
+    })
+
+    test('animations loop, and stand still for visitors who ask for less motion', async ({
+      page,
+    }) => {
+      const loops = () => cell(page, 'light', 'motion.reveal').locator('animate, animateTransform')
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await expect(loops()).not.toHaveCount(0)
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await expect(loops()).toHaveCount(0)
+    })
+  })
+
   test('has one h1', async ({ page }) => {
     await expect(page.locator('h1')).toHaveCount(1)
   })
