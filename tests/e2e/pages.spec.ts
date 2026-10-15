@@ -94,13 +94,13 @@ test.describe('metadata', () => {
     )
   })
 
-  test('structured data describes the organization and website', async ({ page }) => {
+  test('structured data describes the business and website', async ({ page }) => {
     await page.goto('/')
     const json = await page.locator('script[type="application/ld+json"]').first().textContent()
     const data = JSON.parse(json ?? '{}') as {
       '@graph': { '@type': string; name: string; url: string }[]
     }
-    expect(data['@graph'].map((node) => node['@type'])).toEqual(['Organization', 'WebSite'])
+    expect(data['@graph'].map((node) => node['@type'])).toEqual(['ProfessionalService', 'WebSite'])
     expect(data['@graph'][0]).toMatchObject({ name: 'Test Co', url: `${SITE_URL}/` })
   })
 })

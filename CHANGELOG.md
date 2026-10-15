@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+- **Business info (Studio and site):** a new `businessInfo` singleton (sidebar → _Business info_, visible to clients)
+  for Australian businesses: trading and legal name, ABN (ATO checksum, grouped as `12 345 678 901`), phone and public
+  email, address (state, 4-digit postcode), time zone, opening hours (days, opens and closes with closes-after-opens
+  checking), public holidays and special days, service areas, social profiles, and (agency only, under _Advanced_)
+  the schema.org business type, map coordinates and price range. It is folded into `SETTINGS_QUERY` (no extra request).
+  The footer gains a band with the address, ABN, a `tel:` link that also shows the number, the email and the grouped
+  hours ("Mon–Fri 8:00 am – 5:30 pm") from a shared server-rendered `OpeningHours`, with a small client-only
+  `OpenNowBadge` that uses the document's time zone. `SiteJsonLd` emits the chosen LocalBusiness subtype with
+  `PostalAddress` (`AU`), `telephone`, `geo`, `openingHoursSpecification`, `sameAs` and `priceRange`, built by a unit-tested
+  pure function. Nothing changes until the document is created. See the README's _Business info_.
 - **Slider and a Testimonials slider layout (Studio and site):** an accessible touch slider (`Slider`, with
   `LazySlider` for server components) on Motion's drag: swipe or drag with elastic ends, a spring to the nearest slide
   chosen from distance and velocity (`snapIndex`, unit tested), Previous and Next, "Go to slide n" buttons and the arrow
@@ -212,6 +222,11 @@ you start a release.
 ### Fixed
 
 ### Breaking changes / migration steps
+
+**Business info:** run `npm run typegen` after merging (`business` is new in `SETTINGS_QUERY`), add `businessInfo` to the
+webhook filter's `_type` list (README, "Live mode vs. webhook mode") so a change shows without a redeploy, and create
+the document in Studio when you want it used. No migration. The e2e fixture gains a `businessInfo` document, so the
+visual baselines need the "Update visual baselines" workflow.
 
 **Highlighted heading words:** the hero gains a `heading` field next to its old `title` string, and the code reads
 `heading` first, so deploying needs no migration and existing heroes look the same. Run

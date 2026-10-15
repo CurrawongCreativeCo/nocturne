@@ -127,4 +127,39 @@ describe('SETTINGS_QUERY', () => {
     })
     expect(await run([design])).toMatchObject({ design: { primary: '#0b3d91' } })
   })
+
+  it('folds in the business info, and leaves it null when there is none', async () => {
+    expect(await run(singletons)).toMatchObject({ business: null })
+    const business = {
+      _id: 'businessInfo',
+      _type: 'businessInfo',
+      tradingName: 'Acme Plumbing',
+      abn: '51 824 753 556',
+      address: { suburb: 'Newtown', state: 'NSW', postcode: '2042', country: 'Australia' },
+      timeZone: 'Australia/Sydney',
+      openingHours: [{ _key: 'a', days: ['mon', 'tue'], opens: '08:00', closes: '17:00' }],
+      socialLinks: [{ _key: 'b', platform: 'facebook', url: 'https://facebook.com/acme' }],
+      _updatedAt: 'not selected',
+    }
+    const result = (await run([...singletons, business])) as { business: object }
+    expect(result.business).toEqual({
+      tradingName: 'Acme Plumbing',
+      legalName: null,
+      abn: '51 824 753 556',
+      phone: null,
+      publicEmail: null,
+      address: { street: null, suburb: 'Newtown', state: 'NSW', postcode: '2042' },
+      timeZone: 'Australia/Sydney',
+      businessType: null,
+      businessTypeOther: null,
+      geo: null,
+      openingHours: [
+        { _key: 'a', days: ['mon', 'tue'], opens: '08:00', closes: '17:00', closed: null },
+      ],
+      specialHours: null,
+      serviceAreas: null,
+      socialLinks: [{ _key: 'b', platform: 'facebook', url: 'https://facebook.com/acme' }],
+      priceRange: null,
+    })
+  })
 })

@@ -170,6 +170,64 @@ export const documents = [
     footerText: 'Test Co. All rights reserved.',
   },
   {
+    // Footer details, hours and LocalBusiness structured data (tests/e2e/business-info.spec.ts).
+    _id: 'businessInfo',
+    _type: 'businessInfo',
+    tradingName: 'Test Co',
+    legalName: 'Test Co Pty Ltd',
+    businessType: 'ProfessionalService',
+    abn: '51 824 753 556',
+    phone: '(02) 9876 5432',
+    publicEmail: 'hello@example.com',
+    address: {
+      street: '1 King Street',
+      suburb: 'Newtown',
+      state: 'NSW',
+      postcode: '2042',
+      country: 'Australia',
+    },
+    timeZone: 'Australia/Sydney',
+    geo: { lat: -33.8978, lng: 151.1788 },
+    openingHours: [
+      {
+        _key: 'weekdays',
+        _type: 'hoursRow',
+        days: ['mon', 'tue', 'wed', 'thu', 'fri'],
+        opens: '08:00',
+        closes: '17:30',
+      },
+      { _key: 'saturday', _type: 'hoursRow', days: ['sat'], opens: '09:00', closes: '13:00' },
+      { _key: 'sunday', _type: 'hoursRow', days: ['sun'], closed: true },
+    ],
+    specialHours: [
+      // Long past: must not appear anywhere. The far-future day always shows.
+      {
+        _key: 'past',
+        _type: 'specialDay',
+        date: '2020-01-26',
+        closed: true,
+        note: 'Australia Day',
+      },
+      {
+        _key: 'future',
+        _type: 'specialDay',
+        date: '2099-12-25',
+        closed: true,
+        note: 'Christmas Day',
+      },
+    ],
+    serviceAreas: ['Inner West', 'Newcastle'],
+    socialLinks: [
+      {
+        _key: 'fb',
+        _type: 'socialLink',
+        platform: 'facebook',
+        url: 'https://www.facebook.com/testco',
+      },
+    ],
+    priceRange: '$$',
+  },
+  {
     // Tests move the browser clock around this window (tests/e2e/announcement.spec.ts).
     _id: 'announcement',
     _type: 'announcement',

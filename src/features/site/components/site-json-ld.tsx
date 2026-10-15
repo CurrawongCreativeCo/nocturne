@@ -1,14 +1,18 @@
 import { JsonLd } from '@/components/ui/json-ld'
 import { siteLanguage } from '@/config/env'
 import { siteUrl } from '@/config/site-url'
+import { DEFAULT_TIME_ZONE } from '@/lib/opening-hours'
 import { urlFor } from '@/lib/sanity/image'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 import { getSettings } from '../api/get-settings'
+import { getToday } from '../api/get-today'
+import { buildLocalBusinessJsonLd } from '../utils/business-json-ld'
 
 /**
  * schema.org Organization + WebSite, built from Site settings, so search engines show the
- * right name and logo. Reuses the cached published settings entry: no extra request.
+ * right name and logo. With Business info filled in, the Organization becomes the chosen
+ * LocalBusiness subtype (address, phone, hours...). Reuses the cached published settings entry: no extra request.
  */
 export async function SiteJsonLd() {
   const settings = await getSettings(PUBLISHED)
@@ -20,16 +24,27 @@ export async function SiteJsonLd() {
         .width(512)
         .url()
     : undefined
-  const data = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
+  const organizationId = `${url}#organization`
+  const { business } = settings
+  const organization = business
+    ? buildLocalBusinessJsonLd(business, {
+        url,
+        id: organizationId,
+        name: settings.title ?? '',
+        logo,
+        today: await getToday(business.timeZone ?? DEFAULT_TIME_ZONE),
+      })
+    : {
         '@type': 'Organization',
-        '@id': `${url}#organization`,
+        '@id': organizationId,
         name: settings.title,
         url,
         ...(logo && { logo }),
-      },
+      }
+  const data = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organization,
       {
         '@type': 'WebSite',
         '@id': `${url}#website`,
@@ -37,7 +52,7 @@ export async function SiteJsonLd() {
         url,
         ...(settings.description && { description: settings.description }),
         inLanguage: siteLanguage,
-        publisher: { '@id': `${url}#organization` },
+        publisher: { '@id': organizationId },
       },
     ],
   }

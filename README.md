@@ -67,6 +67,7 @@ Open http://localhost:3000/studio:
   - **Start here** (client): a short guide to the first things to do. It appears once that screen exists.
   - **Pages** (client): every page on the site, as a tree of folders, with an _All pages_ list underneath.
   - **Blog** (client): _Posts_ are the articles, _Authors_ are the people credited on them, and _Categories_ group posts so visitors can filter.
+  - **Business info** (client): your trading name, ABN, phone, email, address and opening hours, written once and used in the footer and in search engines' business listings. See [Business info](#business-info).
   - **Reusable content:** _Shared sections_ are sections you write once and place on many pages, and _Forms_ are the contact and newsletter forms (including where their messages go).
   - **Website settings** (client, except _Cookie banner_) holds the things that appear on every page:
     - _Identity & search_ (client) is the site name, description, logo, default share image and browser icon, plus (agency only, under _Advanced_) whether AI crawlers may read the site.
@@ -77,7 +78,7 @@ Open http://localhost:3000/studio:
   - **Advanced:** _Redirects_ send old addresses to new ones, _A/B tests_ run headline experiments, _Stripe prices_ are the synced pricing plans, and anything the site adds later lands here too.
 - **Announcement bar:** in Website settings → _Announcement bar_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
 - **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Website settings → _Identity & search_), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
-- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Identity & search_. All of it goes through `src/components/ui/json-ld.tsx`.
+- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Identity & search_; once [Business info](#business-info) exists, the Organization becomes the matching LocalBusiness type with the address, phone and hours. All of it goes through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **AI crawlers and `/llms.txt`:** in Website settings → _Identity & search_ → _Advanced_ (agency only), _Allow AI crawlers_ (on by default) decides how the site treats AI tools.
   - _On:_ `/llms.txt` lists the site name, its default description and every page that isn't hidden from search engines, as Markdown links followed by each page's meta description (a page without one is listed by title only), so AI tools can find your content. Posts follow under a _Blog_ heading, newest first, with the post's meta description or else its summary; posts hidden from search engines are left out.
@@ -240,6 +241,85 @@ Changes go live with the usual live update or webhook revalidation.
   shows the CDN's real output, and the launch check fetches each icon and fails if it isn't a PNG of the size its
   URL asks for. Check both on the first site that uses an SVG icon.
 
+### Business info
+
+The business's details, entered once: the footer, the contact details and the LocalBusiness structured data
+(what search engines show in business results) all read the same singleton, `businessInfo`. It is set up for
+Australian businesses: ABN, state, 4-digit postcode, Australian phone numbers, Australian time zones, en-AU times
+("8:00 am") and dates ("Fri 25 Dec").
+
+**For editors.** Open _Business info_ in the sidebar. Only the trading name is required; anything left empty is simply
+not shown or published.
+
+- **Trading name, legal name, ABN.** The ABN is checked with the ATO's checksum (a typo is caught before publishing)
+  and grouped as you type: `12 345 678 901`. The footer shows it as "ABN 12 345 678 901".
+- **Phone and public email.** The phone accepts `(02) 9876 5432`, `0412 345 678`, `+61 2 9876 5432`, `1300 123 456` and
+  `13 12 34`. In the footer the number is both shown as text and a tap-to-call link. Use an email you are happy to
+  publish: it is on the site for everyone, including spam robots.
+- **Address.** Street (optional: leave it empty for a mobile or home-based business), suburb, state and a 4-digit
+  postcode. The country is always Australia. Pick the **Time zone** where you trade (Sydney by default; Queensland is
+  Brisbane because it has no daylight saving, Perth for WA). It decides when the "Open now" badge says you are open.
+- **Opening hours.** One row per set of days with the same hours: tick the days, then type the times in 24-hour form
+  (`08:00`, `17:30`). _Closes_ must be after _Opens_ (a business open past midnight can't be entered as one row; close
+  at `23:59`, or leave the late hours out). Days with no row show as closed, and a row can be ticked _Closed on these
+  days_. Two rows for the same day make a split shift (a lunch break). The footer groups identical days, for example
+  "Mon–Fri 8:00 am – 5:30 pm", "Sat 9:00 am – 1:00 pm", "Sun Closed".
+- **Public holidays and special days.** A date that is either closed all day or has its own hours, with an optional
+  note ("Christmas Day"). The next three show in the footer and in the "Open now" badge; days that have passed drop out
+  on their own (within about an hour), so there is nothing to tidy up.
+- **Service areas, social profiles.** Suburbs or regions you serve, and links to your profiles (https only). Search
+  engines use both; the footer does not show them.
+- **Advanced** (agency only): the **business type** (the schema.org type search engines see: Local business, Professional
+  service, Medical business, Dentist, Legal service, Restaurant, Store, Home and construction, Health and beauty, or
+  _Other_ with a schema.org type typed in, such as `Optician`), **map coordinates** and **price range** (`$` to `$$$$`).
+  The defaults (Local business, no coordinates, no price range) are fine for most sites.
+
+**What appears where.** The footer shows a Business info band above the footer links, with the name, address and
+ABN, the phone and email, and the hours with an "Open now · closes 5:30 pm" or "Closed now" badge. It only shows what
+is filled in, and nothing at all until the document exists. The badge is worked out in the visitor's browser (see below),
+so it appears a moment after the page loads and the hours list is the complete information without JavaScript. In
+Presentation the document's locations are _Home_ and the footer.
+
+**For developers.**
+
+- **Schema and registration.** `src/features/site/schemas/business-info.ts`, made by `npm run new:singleton site business-info`
+  and listed in `SINGLETON_TYPES`, so it can't be created, duplicated or deleted. The desk item sits at the top level
+  (clients see it: `businessInfo` is in `CLIENT_STRUCTURE_IDS`). The ABN field uses `AbnInput` (groups digits as you
+  type) and `isValidAbn` (`utils/abn.ts`, unit tested). Phones go through `parseAuPhone` (`utils/phone.ts`), which gives
+  the `tel:` link and the international form for structured data.
+- **Data.** It is a `business` sub-projection of `SETTINGS_QUERY` (`*[_id == "businessInfo"][0] { … }`), so it costs no
+  extra request. `getSettings` includes the `businessInfo` tag, the tag is in `TAGS` (`src/lib/sanity/live.ts`) and in the
+  webhook filter above. Run `npm run typegen` after changing the schema or projection.
+- **Shared hours logic.** `src/lib/opening-hours.ts` is pure and unit tested: `groupOpeningHours` (grouping, closed days,
+  en-AU times, split shifts), `upcomingSpecialHours`, `weeklyRanges` (for structured data) and `openStatusAt` (open
+  or not at an instant, in an IANA time zone, with special days replacing the regular hours). It never reads the clock;
+  callers pass `now`. `OpeningHours` (`src/components/ui/opening-hours.tsx`) is a server-rendered description list for
+  any section or page, not just the footer.
+- **Open now, and why it is a client component.** `OpenNowBadge` (`src/components/ui/open-now-badge.tsx`) reads the
+  clock, which Cache Components forbids in cached or prerendered output, and the server's "now" would not be the
+  visitor's anyway. It subscribes to the current minute with `useSyncExternalStore` (server snapshot `null`, so it renders
+  an empty placeholder of the same height and nothing shifts), re-checks every 30 seconds and clears its timer on unmount.
+  It uses the document's `timeZone`, so a Perth business shows "open" in Perth time for a visitor in Sydney. It costs
+  well under 1 KB gzipped. Only render it when there are hours (the footer does).
+- **Dates on the server.** Hiding passed special days needs today's date, so `getToday(timeZone)`
+  (`src/features/site/api/get-today.ts`) is a small `'use cache'` function with `cacheLife('hours')`, like the footer's
+  year. A passed day can therefore linger for up to about an hour.
+- **Structured data.** `SiteJsonLd` swaps the plain Organization for `buildLocalBusinessJsonLd`
+  (`utils/business-json-ld.ts`, unit tested), keeping the same `@id` (`<site>/#organization`) so the WebSite's
+  `publisher` still points at it. It emits the chosen type, `name`, `legalName`, `telephone` (`+61…`), `email`,
+  `PostalAddress` (`addressCountry: "AU"`), `GeoCoordinates`, `openingHoursSpecification` (regular days, then dated
+  entries for upcoming special days, closed days as `00:00`–`00:00`), `areaServed`, `sameAs` and `priceRange`. Empty
+  values are never emitted. _Other_ falls back to `LocalBusiness` unless the typed name is a single capitalised word.
+  Check the result with Google's Rich Results Test after launch.
+- **Draft mode.** The footer cleans the data with `stegaClean` before reading times, days and phone numbers, because the
+  invisible click-to-edit characters would break them; the footer's business text is therefore not click-to-edit in
+  Presentation. Edit it from the _Business info_ document.
+- **Tests.** Unit: `abn`, `phone`, `business-json-ld`, `opening-hours` and the `SETTINGS_QUERY` projection. End to end
+  (`tests/e2e/business-info.spec.ts`): the footer's address, tel and mailto links and grouped hours, upcoming and passed
+  special days, the badge in two time zones' worth of clock settings, the JSON-LD shape and axe. The fixture
+  (`businessInfo` in `tests/e2e/fixtures/dataset.mjs`) puts a band in every page's footer, so the visual baselines need
+  refreshing with the **Update visual baselines** workflow.
+
 ## Deploying (Vercel)
 
 This checklist is the single source of truth, for the Deploy button and for importing by hand.
@@ -379,7 +459,7 @@ src/
     experiments/                   A/B tests: experiment schema, assignment logic, signed variant codes (flags)
       api/                         queries.ts, get-experiment.ts (running test, code -> option)
       utils/                       assign (weights, cookie), experiment-flag (flags SDK), experiment-source (proxy lookup)
-    site/                          site settings singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings): header, footer, default metadata, brand colours
+    site/                          site settings singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings, businessInfo): header, footer, default metadata, brand colours, business details and hours
     search/                        site search: GROQ query, results page view, quick search dialog
       api/                         queries.ts (SEARCH_QUERY), search-pages.ts (cached read + snippets)
       components/                  search-view (server), search-form, quick-search (trigger), quick-search-dialog (lazy)
@@ -576,7 +656,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
