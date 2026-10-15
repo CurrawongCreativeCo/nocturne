@@ -194,3 +194,122 @@
     }
   }
 }
+
+/*
+ * Section dividers (README, "Section dividers"). A section with a bottom edge sits in
+ * [data-section-edge-frame]; its background is cut to the shape with a mask (--edge-mask, set by
+ * SectionFrame) and the section below is pulled up under the cut by the edge's height
+ * (SectionRenderer sets --edge-above on it), then pads its top by the same amount so its content
+ * stays where it would be without the edge. These rules are not in a layer on purpose: they must
+ * beat the py-section utilities. Heights come from the edge tokens (--edge-height-*) or, for a
+ * custom height, the three --edge-custom-* values switched here at the breakpoints.
+ */
+[data-edge-custom] {
+  --edge-h: var(--edge-custom-base);
+}
+
+[data-edge-above-custom] {
+  --edge-above: var(--edge-custom-base);
+}
+
+@media (width >= 48rem) {
+  [data-edge-custom] {
+    --edge-h: var(--edge-custom-md);
+  }
+
+  [data-edge-above-custom] {
+    --edge-above: var(--edge-custom-md);
+  }
+}
+
+@media (width >= 64rem) {
+  [data-edge-custom] {
+    --edge-h: var(--edge-custom-lg);
+  }
+
+  [data-edge-above-custom] {
+    --edge-above: var(--edge-custom-lg);
+  }
+}
+
+/* Lifted above the sections after it; the renderer lowers --edge-z for each later one. */
+[data-section-edge-frame] {
+  z-index: var(--edge-z, 1);
+}
+
+[data-section-edge-frame] > section[data-spacing='compact'] {
+  padding-bottom: calc(var(--spacing-section-compact) + var(--edge-h));
+}
+
+[data-section-edge-frame] > section[data-spacing='default'] {
+  padding-bottom: calc(var(--spacing-section) + var(--edge-h));
+}
+
+[data-section-edge-frame] > section[data-spacing='spacious'] {
+  padding-bottom: calc(var(--spacing-section-spacious) + var(--edge-h));
+}
+
+[data-edge-above] {
+  margin-top: calc(var(--edge-above) * -1);
+}
+
+/* A section that rendered nothing must not pull the next one up under the edge. */
+[data-edge-above]:empty {
+  margin-top: 0;
+}
+
+[data-edge-above] section[data-spacing='compact'] {
+  padding-top: calc(var(--spacing-section-compact) + var(--edge-above));
+}
+
+[data-edge-above] section[data-spacing='default'] {
+  padding-top: calc(var(--spacing-section) + var(--edge-above));
+}
+
+[data-edge-above] section[data-spacing='spacious'] {
+  padding-top: calc(var(--spacing-section-spacious) + var(--edge-above));
+}
+
+/* The sticky header's room (scroll-mt-24) plus the edge, so a link lands with the whole cut in view. */
+[data-edge-above] section[id] {
+  scroll-margin-top: calc(6rem + var(--edge-above));
+}
+
+/* The footer takes the last section's edge like a section: a band of its colour under the cut. */
+[data-edge-backdrop] {
+  height: var(--edge-above);
+  margin-top: calc(var(--edge-above) * -1);
+  background-color: var(--color-surface-alt);
+}
+
+main:has([data-edge-backdrop]) ~ footer {
+  border-top-color: transparent;
+}
+
+@supports (mask-image: none) or (-webkit-mask-image: none) {
+  /*
+   * The solid layer covers everything above the band (plus 1px, so the two layers never leave a
+   * hairline between them); the picture layer cuts the band to the shape.
+   */
+  [data-section-edge-frame] > section {
+    -webkit-mask-image: linear-gradient(#000, #000), var(--edge-mask);
+    mask-image: linear-gradient(#000, #000), var(--edge-mask);
+    -webkit-mask-size:
+      100% calc(100% - var(--edge-h) + 1px),
+      100% var(--edge-h);
+    mask-size:
+      100% calc(100% - var(--edge-h) + 1px),
+      100% var(--edge-h);
+    -webkit-mask-position: top, bottom;
+    mask-position: top, bottom;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+}
+
+/* Without mask support the edge stays straight, so its line and back wave have nothing to follow. */
+@supports not ((mask-image: none) or (-webkit-mask-image: none)) {
+  [data-section-edge-frame] > svg {
+    display: none;
+  }
+}

@@ -56,4 +56,11 @@ describe('sectionLabel', () => {
       'ctaBanner',
     )
   })
+
+  it('adds a bottom edge, but not a straight one', () => {
+    const edge = (value: string) =>
+      section({ _key: 'a', _type: 'richText', style: { edge: value } })
+    expect(sectionLabel(edge('wave'))).toBe('richText (wave edge)')
+    expect(sectionLabel(edge('none'))).toBe('richText')
+  })
 })

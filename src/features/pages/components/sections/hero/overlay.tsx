@@ -5,6 +5,7 @@ import { sectionTraits, type SectionDefaults } from '@/components/ui/section-sty
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
 import { HeroText } from './hero-text'
+import { HeroSlot } from './slots'
 import type { SectionProps } from '../../../types'
 
 // The default layout: the hero's original look. It animates its own content on load, so the
@@ -18,7 +19,7 @@ const DEFAULTS: SectionDefaults = {
 
 /** The image sits behind the text under a scrim (the image is dimmed, the tone's colour shows through). */
 export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
-  const { tone, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
+  const { tone, align, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame
@@ -55,6 +56,14 @@ export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'h
         tone={tone}
         block={block}
         justify={justify}
+        slot={
+          <HeroSlot
+            data={data}
+            placement="below-buttons"
+            centred={align === 'center'}
+            animate={!isFirst && motion !== 'none'}
+          />
+        }
       />
     </SectionFrame>
   )

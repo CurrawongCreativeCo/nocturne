@@ -50,6 +50,11 @@ declare module 'sanity' {
      * always shown, so a choice left over from another layout stays visible rather than vanishing.
      */
     visibleOptions?: (context: PresetOptionsContext) => readonly string[]
+    /**
+     * The option the site uses while nothing is stored, so the picker can show it as chosen
+     * (an overlay left unset follows the background). Nothing is written until the editor picks.
+     */
+    defaultValue?: (context: PresetOptionsContext) => string | undefined
   }
   interface ObjectOptions {
     /** Presets shown in a bar above the object's fields (features/studio/components/preset-picker). */
@@ -71,6 +76,7 @@ interface PresetFieldConfig {
   /** Replaces the default (`required`) validation. */
   validation?: ValidationBuilder<StringRule, string>
   visibleOptions?: (context: PresetOptionsContext) => readonly string[]
+  defaultValue?: (context: PresetOptionsContext) => string | undefined
 }
 
 /**
@@ -91,6 +97,7 @@ export function presetField({
   hidden,
   validation,
   visibleOptions,
+  defaultValue,
 }: PresetFieldConfig) {
   return defineField({
     name,
@@ -107,6 +114,7 @@ export function presetField({
       list: options.map((option) => ({ ...option })),
       layout: 'radio',
       visibleOptions,
+      defaultValue,
     },
     validation: validation ?? (required ? (rule) => rule.required() : undefined),
   })

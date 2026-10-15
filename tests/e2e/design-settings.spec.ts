@@ -86,7 +86,10 @@ test.describe('with nothing set', () => {
   test('renders no override and the primary button is tokens.json’s', async ({ page, request }) => {
     await usePalette(request, 'off')
     await expect.poll(buttonBackground(page)).toBe(DEFAULT_CTA)
-    await expect(page.locator('style[data-href="design-settings"]')).toHaveCount(0)
+    // The fixture's design settings hold gradients but no colours, so only gradients are emitted.
+    const style = await page.locator('style[data-href="design-settings"]').textContent()
+    expect(style).toContain('--gradient-forest-dusk')
+    expect(style).not.toContain('--color-')
   })
 })
 

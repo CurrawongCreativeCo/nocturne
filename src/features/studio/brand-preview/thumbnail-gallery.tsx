@@ -4,6 +4,7 @@ import { Card, Stack, Text } from '@sanity/ui'
 
 import {
   animationThumbnails,
+  edgeThumbnails,
   heroImageShapeThumbnails,
   heroPresetThumbnails,
   heroProportionThumbnails,
@@ -78,6 +79,16 @@ function groups(sections: readonly SectionPreview[]): Group[] {
       note: 'Live swatches from the site’s design tokens, so they do not change with the Studio scheme.',
       items: Object.entries(toneThumbnails).map(([value, thumbnail]) => ({
         key: `tone.${value}`,
+        title: value,
+        thumbnail,
+      })),
+    },
+    {
+      id: 'edges',
+      title: 'Bottom edges',
+      note: 'Drawn from the same paths the site cuts sections with, in the site’s colours.',
+      items: Object.entries(edgeThumbnails).map(([value, thumbnail]) => ({
+        key: `edge.${value}`,
         title: value,
         thumbnail,
       })),

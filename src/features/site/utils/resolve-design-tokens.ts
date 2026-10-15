@@ -1,17 +1,12 @@
 import { colorHex } from '@/config/tokens.generated'
 import { adjustLightnessForContrast, contrastRatio } from '@/lib/color/contrast'
+import { brandGradients, type GradientInput } from '@/lib/color/gradients'
 import { HEX_PATTERN, hexToOklch, oklchToHex } from '@/lib/color/oklch'
 
 /** The generated token colours, camelCase hex (what `colorHex` in tokens.generated.ts holds). */
 export type BaseColours = Readonly<Record<keyof typeof colorHex, string>>
 
 export const DEFAULT_BASE: BaseColours = colorHex
-
-export interface GradientInput {
-  name?: string | null
-  angle?: number | null
-  stops?: readonly (string | null)[] | null
-}
 
 /** Studio "Design settings" values as stored (and as the settings query returns them). */
 export interface DesignOverrides {
@@ -89,14 +84,6 @@ const lightnessOf = (hex: string) => hexToOklch(hex).l
 /** Moves a colour's lightness by `delta`, never past black or white. */
 const shift = (hex: string, delta: number) =>
   withLightness(hex, Math.min(1, Math.max(0, lightnessOf(hex) + delta)))
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 32)
-}
 
 const CSS_VARIABLES: Readonly<Record<keyof typeof colorHex, string>> = Object.fromEntries(
   Object.keys(colorHex).map((key) => [
@@ -328,31 +315,18 @@ export function resolveDesignTokens(
 
   // 6. Gradients.
   const vars: Record<string, string> = {}
-  const used = new Set<string>()
-  ;(input.gradients ?? []).forEach((gradient, index) => {
-    const stops = (gradient?.stops ?? []).map(clean)
-    const valid = stops.filter((stop): stop is string => stop !== undefined)
-    if (!gradient || valid.length < 2 || valid.length > 3 || valid.length !== stops.length) return
-    const base = slugify(gradient.name ?? '') || `gradient-${index + 1}`
-    let slug = base
-    for (let n = 2; used.has(slug); n++) slug = `${base}-${n}`
-    used.add(slug)
-    const degrees = gradient.angle
-    const angle =
-      typeof degrees === 'number' && Number.isFinite(degrees)
-        ? Math.round(((degrees % 360) + 360) % 360)
-        : 135
-    vars[`--gradient-${slug}`] = `linear-gradient(${angle}deg, ${valid.join(', ')})`
-    valid.forEach((stop, stopIndex) => {
+  for (const gradient of brandGradients(input.gradients)) {
+    vars[`--gradient-${gradient.slug}`] = gradient.css
+    gradient.stops.forEach((stop, stopIndex) => {
       const ratio = contrastRatio(stop, colours.surface)
       if (ratio < UI_RATIO) {
         warnings.push({
           field: 'gradients',
-          message: `Gradient "${gradient.name || slug}", stop ${stopIndex + 1} (${stop}) has only ${ratio.toFixed(1)}:1 against the background, so gradient text in it may be hard to read (aim for ${UI_RATIO}:1 or more).`,
+          message: `Gradient "${gradient.name}", stop ${stopIndex + 1} (${stop}) has only ${ratio.toFixed(1)}:1 against the background, so gradient text in it may be hard to read (aim for ${UI_RATIO}:1 or more).`,
         })
       }
     })
-  })
+  }
 
   // 7. Only what differs from tokens.json is emitted.
   for (const key of Object.keys(colours) as (keyof typeof colorHex)[]) {

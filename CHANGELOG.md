@@ -20,6 +20,71 @@ you start a release.
 
 ### Added
 
+- **Business info (Studio and site):** a new `businessInfo` singleton (sidebar → _Business info_, visible to clients)
+  for Australian businesses: trading and legal name, ABN (ATO checksum, grouped as `12 345 678 901`), phone and public
+  email, address (state, 4-digit postcode), time zone, opening hours (days, opens and closes with closes-after-opens
+  checking), public holidays and special days, service areas, social profiles, and (agency only, under _Advanced_)
+  the schema.org business type, map coordinates and price range. It is folded into `SETTINGS_QUERY` (no extra request).
+  The footer gains a band with the address, ABN, a `tel:` link that also shows the number, the email and the grouped
+  hours ("Mon–Fri 8:00 am – 5:30 pm") from a shared server-rendered `OpeningHours`, with a small client-only
+  `OpenNowBadge` that uses the document's time zone. `SiteJsonLd` emits the chosen LocalBusiness subtype with
+  `PostalAddress` (`AU`), `telephone`, `geo`, `openingHoursSpecification`, `sameAs` and `priceRange`, built by a unit-tested
+  pure function. Nothing changes until the document is created. See the README's _Business info_.
+- **Slider and a Testimonials slider layout (Studio and site):** an accessible touch slider (`Slider`, with
+  `LazySlider` for server components) on Motion's drag: swipe or drag with elastic ends, a spring to the nearest slide
+  chosen from distance and velocity (`snapIndex`, unit tested), Previous and Next, "Go to slide n" buttons and the arrow
+  keys, `inert` slides out of view, carousel/slide ARIA with a polite "Slide n of N" announcement, and
+  `touch-action: pan-y` so phones still scroll the page. Without JavaScript it is a horizontal scroll-snap list; it
+  shifts nothing when the script takes over; reduced motion jumps instantly. Optional autoplay (off, not in the CMS)
+  pauses on hover and focus and has a Pause button. The Testimonials section gains a **Layout** picker (_Grid_, the
+  default and unchanged, and _Slider_ showing one, two or three quotes at a time). Existing content is unchanged and
+  needs no migration; run `npm run typegen` after merging. The slider's spring costs about 22 KB gzipped if imported
+  eagerly, so server components must import `LazySlider`; the home page stays at 217.3 KB (budget 220 KB). Visual
+  baselines for `testimonials-slider` and `testimonials-slider-inverse` need the **Update visual baselines** workflow.
+- **Hero supporting content (Studio and site):** the hero gains one approved slot, **Extra content under the heading**,
+  holding a **Statistics bar**, **Badges** (one to three short labels with an optional icon) or **Logos** (up to six,
+  greyscale by default), chosen from pictures in the insert menu. Full background and Split place it under the buttons,
+  Editorial beside the text (under the small picture) and Image with panel inside the panel; it takes the hero's tone and
+  joins the entrance after the buttons, and sits still under reduced motion. Agency staff add or remove it; clients edit
+  what is in it, and see the field only once it has content. A new slot type is one schema object, one component and one
+  line in `components/sections/hero/slots.tsx` (README, _Adding a hero slot_). `StatsBar` now sizes by its own width
+  (container queries) so it suits any column, and its dividers are cut by an `overflow-hidden` box instead of
+  first/odd rules. New shared types `badgeRow` and `logoRow`, GROQ `heroSupportingFields`, and the `fadeUpAfter` motion
+  preset. The field is optional, so existing content is unchanged and needs no migration. Run `npm run typegen` after
+  merging. Visual baselines for the new gallery entries (`hero-slot-*`) need the **Update visual baselines** workflow.
+- **Statistics (Studio and site):** a **Stats** section (layouts _Inline_ and _Cards_; title, intro and one to six
+  figures) and a compact **statistics bar** component for the hero's upcoming statistics slot. Each figure is a number
+  with a label and optional prefix, suffix and decimal places, formatted on the server with `Intl.NumberFormat('en-AU')`,
+  so the real figure is in the HTML without JavaScript and under reduced motion. Unless the section's Animation is _None_,
+  the figures count up from 0 once when scrolled into view (a small `CountUp` island loaded only on pages that use it, so
+  the home page budget is unchanged; the counting text is `aria-hidden` with a visually hidden final value, and
+  `tabular-nums` with a fixed width prevents layout shift). The bar has thin dividers, takes the surrounding tone and wraps
+  two by two on phones. New shared types `statItem` and `statsBar`, GROQ fragments `statItemFields` / `statsBarFields`, and
+  a gallery page at `/section-gallery/stats-bar`. Existing content is unchanged and needs no migration. Run
+  `npm run typegen` after merging. Visual baselines for the new gallery entries (`stats-*`) need the **Update visual
+  baselines** workflow.
+- **Section dividers (Studio and site):** a section can end in a shape: **Diagonal, Wave, Curve, Arch or Layered wave**,
+  chosen from pictures under _Bottom edge_ in the Design tab (agency only). The section below shows through the cut,
+  whether it is a flat tone, a gradient or a picture, and moves up to meet it, with its spacing adjusted automatically.
+  Options: **Edge height** (Small, Medium, Large; smaller on phones), **Flip**, an **Accent line** in a brand colour and,
+  for the layered wave, its **back wave colour**; a collapsed area has **Invert** and a **custom height** per screen size.
+  Options that do nothing for the chosen shape are hidden and ignored. The edge belongs to the upper section, so it moves
+  with it and a shared section carries its own. The shapes live in `src/components/ui/section-edges.ts` and are cut with
+  `mask-image` (with the `-webkit-` prefix); browsers without mask support show a straight edge. The footer takes the
+  last section's edge. New optional fields `style.edge`, `edgeHeight`, `edgeFlip`, `edgeAccent`, `edgeLayer`, `edgeInvert`
+  and `edgeHeightMobile`/`Tablet`/`Desktop`; new optional `edge` group in `tokens.json` (defaults apply when it is missing).
+  Existing content is unchanged and needs no migration. Run `npm run typegen` after merging. Visual baselines for the new
+  gallery entries (`edge-*`) need the **Update visual baselines** workflow.
+- **Section backgrounds (Studio and site):** beyond its tone, a section can have a **brand gradient** (picked from the
+  gradients in Design settings) and a **background image** with an **overlay** (None, Light, Medium, Strong), all in the
+  Design tab's _Background_ area. The gradient picker appears only when Design settings has gradients; the image is not
+  offered for the hero, which has its own. An image on a dark tone starts at Medium, others at Light. `SectionFrame`
+  draws the layers (gradient, picture, overlay) in an absolutely positioned, `aria-hidden` wrapper, so nothing shifts;
+  the picture is lazy unless the section is first. Studio warns when body or secondary text may fall below 4.5:1 on the
+  chosen overlay or gradient. New fields `style.gradient`, `style.image` and `style.overlay` are optional, so existing
+  content is unchanged and needs no migration. Gradient slugs now come from `src/lib/color/gradients.ts`, shared by the
+  design tokens and the Studio. See the README's _Section backgrounds_. Visual baselines for the new gallery entries
+  (`features-grid-gradient-*`, `media-text-background-*`) need adding with the "Update visual baselines" workflow.
 - **Hero presets (Studio and site):** a hero is chosen as a design. The Content tab opens with six pictures (_Full
   background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with
   panel_), each setting the layout, image side and background in one click, with _Full background image_ (dark) the
@@ -157,6 +222,11 @@ you start a release.
 ### Fixed
 
 ### Breaking changes / migration steps
+
+**Business info:** run `npm run typegen` after merging (`business` is new in `SETTINGS_QUERY`), add `businessInfo` to the
+webhook filter's `_type` list (README, "Live mode vs. webhook mode") so a change shows without a redeploy, and create
+the document in Studio when you want it used. No migration. The e2e fixture gains a `businessInfo` document, so the
+visual baselines need the "Update visual baselines" workflow.
 
 **Highlighted heading words:** the hero gains a `heading` field next to its old `title` string, and the code reads
 `heading` first, so deploying needs no migration and existing heroes look the same. Run

@@ -67,6 +67,7 @@ Open http://localhost:3000/studio:
   - **Start here** (client): a short guide to the first things to do. It appears once that screen exists.
   - **Pages** (client): every page on the site, as a tree of folders, with an _All pages_ list underneath.
   - **Blog** (client): _Posts_ are the articles, _Authors_ are the people credited on them, and _Categories_ group posts so visitors can filter.
+  - **Business info** (client): your trading name, ABN, phone, email, address and opening hours, written once and used in the footer and in search engines' business listings. See [Business info](#business-info).
   - **Reusable content:** _Shared sections_ are sections you write once and place on many pages, and _Forms_ are the contact and newsletter forms (including where their messages go).
   - **Website settings** (client, except _Cookie banner_) holds the things that appear on every page:
     - _Identity & search_ (client) is the site name, description, logo, default share image and browser icon, plus (agency only, under _Advanced_) whether AI crawlers may read the site.
@@ -77,7 +78,7 @@ Open http://localhost:3000/studio:
   - **Advanced:** _Redirects_ send old addresses to new ones, _A/B tests_ run headline experiments, _Stripe prices_ are the synced pricing plans, and anything the site adds later lands here too.
 - **Announcement bar:** in Website settings → _Announcement bar_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
 - **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Website settings → _Identity & search_), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
-- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Identity & search_. All of it goes through `src/components/ui/json-ld.tsx`.
+- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Identity & search_; once [Business info](#business-info) exists, the Organization becomes the matching LocalBusiness type with the address, phone and hours. All of it goes through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **AI crawlers and `/llms.txt`:** in Website settings → _Identity & search_ → _Advanced_ (agency only), _Allow AI crawlers_ (on by default) decides how the site treats AI tools.
   - _On:_ `/llms.txt` lists the site name, its default description and every page that isn't hidden from search engines, as Markdown links followed by each page's meta description (a page without one is listed by title only), so AI tools can find your content. Posts follow under a _Blog_ heading, newest first, with the post's meta description or else its summary; posts hidden from search engines are left out.
@@ -240,6 +241,85 @@ Changes go live with the usual live update or webhook revalidation.
   shows the CDN's real output, and the launch check fetches each icon and fails if it isn't a PNG of the size its
   URL asks for. Check both on the first site that uses an SVG icon.
 
+### Business info
+
+The business's details, entered once: the footer, the contact details and the LocalBusiness structured data
+(what search engines show in business results) all read the same singleton, `businessInfo`. It is set up for
+Australian businesses: ABN, state, 4-digit postcode, Australian phone numbers, Australian time zones, en-AU times
+("8:00 am") and dates ("Fri 25 Dec").
+
+**For editors.** Open _Business info_ in the sidebar. Only the trading name is required; anything left empty is simply
+not shown or published.
+
+- **Trading name, legal name, ABN.** The ABN is checked with the ATO's checksum (a typo is caught before publishing)
+  and grouped as you type: `12 345 678 901`. The footer shows it as "ABN 12 345 678 901".
+- **Phone and public email.** The phone accepts `(02) 9876 5432`, `0412 345 678`, `+61 2 9876 5432`, `1300 123 456` and
+  `13 12 34`. In the footer the number is both shown as text and a tap-to-call link. Use an email you are happy to
+  publish: it is on the site for everyone, including spam robots.
+- **Address.** Street (optional: leave it empty for a mobile or home-based business), suburb, state and a 4-digit
+  postcode. The country is always Australia. Pick the **Time zone** where you trade (Sydney by default; Queensland is
+  Brisbane because it has no daylight saving, Perth for WA). It decides when the "Open now" badge says you are open.
+- **Opening hours.** One row per set of days with the same hours: tick the days, then type the times in 24-hour form
+  (`08:00`, `17:30`). _Closes_ must be after _Opens_ (a business open past midnight can't be entered as one row; close
+  at `23:59`, or leave the late hours out). Days with no row show as closed, and a row can be ticked _Closed on these
+  days_. Two rows for the same day make a split shift (a lunch break). The footer groups identical days, for example
+  "Mon–Fri 8:00 am – 5:30 pm", "Sat 9:00 am – 1:00 pm", "Sun Closed".
+- **Public holidays and special days.** A date that is either closed all day or has its own hours, with an optional
+  note ("Christmas Day"). The next three show in the footer and in the "Open now" badge; days that have passed drop out
+  on their own (within about an hour), so there is nothing to tidy up.
+- **Service areas, social profiles.** Suburbs or regions you serve, and links to your profiles (https only). Search
+  engines use both; the footer does not show them.
+- **Advanced** (agency only): the **business type** (the schema.org type search engines see: Local business, Professional
+  service, Medical business, Dentist, Legal service, Restaurant, Store, Home and construction, Health and beauty, or
+  _Other_ with a schema.org type typed in, such as `Optician`), **map coordinates** and **price range** (`$` to `$$$$`).
+  The defaults (Local business, no coordinates, no price range) are fine for most sites.
+
+**What appears where.** The footer shows a Business info band above the footer links, with the name, address and
+ABN, the phone and email, and the hours with an "Open now · closes 5:30 pm" or "Closed now" badge. It only shows what
+is filled in, and nothing at all until the document exists. The badge is worked out in the visitor's browser (see below),
+so it appears a moment after the page loads and the hours list is the complete information without JavaScript. In
+Presentation the document's locations are _Home_ and the footer.
+
+**For developers.**
+
+- **Schema and registration.** `src/features/site/schemas/business-info.ts`, made by `npm run new:singleton site business-info`
+  and listed in `SINGLETON_TYPES`, so it can't be created, duplicated or deleted. The desk item sits at the top level
+  (clients see it: `businessInfo` is in `CLIENT_STRUCTURE_IDS`). The ABN field uses `AbnInput` (groups digits as you
+  type) and `isValidAbn` (`utils/abn.ts`, unit tested). Phones go through `parseAuPhone` (`utils/phone.ts`), which gives
+  the `tel:` link and the international form for structured data.
+- **Data.** It is a `business` sub-projection of `SETTINGS_QUERY` (`*[_id == "businessInfo"][0] { … }`), so it costs no
+  extra request. `getSettings` includes the `businessInfo` tag, the tag is in `TAGS` (`src/lib/sanity/live.ts`) and in the
+  webhook filter above. Run `npm run typegen` after changing the schema or projection.
+- **Shared hours logic.** `src/lib/opening-hours.ts` is pure and unit tested: `groupOpeningHours` (grouping, closed days,
+  en-AU times, split shifts), `upcomingSpecialHours`, `weeklyRanges` (for structured data) and `openStatusAt` (open
+  or not at an instant, in an IANA time zone, with special days replacing the regular hours). It never reads the clock;
+  callers pass `now`. `OpeningHours` (`src/components/ui/opening-hours.tsx`) is a server-rendered description list for
+  any section or page, not just the footer.
+- **Open now, and why it is a client component.** `OpenNowBadge` (`src/components/ui/open-now-badge.tsx`) reads the
+  clock, which Cache Components forbids in cached or prerendered output, and the server's "now" would not be the
+  visitor's anyway. It subscribes to the current minute with `useSyncExternalStore` (server snapshot `null`, so it renders
+  an empty placeholder of the same height and nothing shifts), re-checks every 30 seconds and clears its timer on unmount.
+  It uses the document's `timeZone`, so a Perth business shows "open" in Perth time for a visitor in Sydney. It costs
+  well under 1 KB gzipped. Only render it when there are hours (the footer does).
+- **Dates on the server.** Hiding passed special days needs today's date, so `getToday(timeZone)`
+  (`src/features/site/api/get-today.ts`) is a small `'use cache'` function with `cacheLife('hours')`, like the footer's
+  year. A passed day can therefore linger for up to about an hour.
+- **Structured data.** `SiteJsonLd` swaps the plain Organization for `buildLocalBusinessJsonLd`
+  (`utils/business-json-ld.ts`, unit tested), keeping the same `@id` (`<site>/#organization`) so the WebSite's
+  `publisher` still points at it. It emits the chosen type, `name`, `legalName`, `telephone` (`+61…`), `email`,
+  `PostalAddress` (`addressCountry: "AU"`), `GeoCoordinates`, `openingHoursSpecification` (regular days, then dated
+  entries for upcoming special days, closed days as `00:00`–`00:00`), `areaServed`, `sameAs` and `priceRange`. Empty
+  values are never emitted. _Other_ falls back to `LocalBusiness` unless the typed name is a single capitalised word.
+  Check the result with Google's Rich Results Test after launch.
+- **Draft mode.** The footer cleans the data with `stegaClean` before reading times, days and phone numbers, because the
+  invisible click-to-edit characters would break them; the footer's business text is therefore not click-to-edit in
+  Presentation. Edit it from the _Business info_ document.
+- **Tests.** Unit: `abn`, `phone`, `business-json-ld`, `opening-hours` and the `SETTINGS_QUERY` projection. End to end
+  (`tests/e2e/business-info.spec.ts`): the footer's address, tel and mailto links and grouped hours, upcoming and passed
+  special days, the badge in two time zones' worth of clock settings, the JSON-LD shape and axe. The fixture
+  (`businessInfo` in `tests/e2e/fixtures/dataset.mjs`) puts a band in every page's footer, so the visual baselines need
+  refreshing with the **Update visual baselines** workflow.
+
 ## Deploying (Vercel)
 
 This checklist is the single source of truth, for the Deploy button and for importing by hand.
@@ -379,7 +459,7 @@ src/
     experiments/                   A/B tests: experiment schema, assignment logic, signed variant codes (flags)
       api/                         queries.ts, get-experiment.ts (running test, code -> option)
       utils/                       assign (weights, cookie), experiment-flag (flags SDK), experiment-source (proxy lookup)
-    site/                          site settings singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings): header, footer, default metadata, brand colours
+    site/                          site settings singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings, businessInfo): header, footer, default metadata, brand colours, business details and hours
     search/                        site search: GROQ query, results page view, quick search dialog
       api/                         queries.ts (SEARCH_QUERY), search-pages.ts (cached read + snippets)
       components/                  search-view (server), search-form, quick-search (trigger), quick-search-dialog (lazy)
@@ -399,7 +479,7 @@ src/
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, AI Assist presets
-  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld
+  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, slider (+ slider-lazy, slider-snap)
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
   config/                          env.ts (validated), paths.ts (slug <-> URL),
                                    tokens.generated.ts (GENERATED: token values for the OG image)
@@ -576,7 +656,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1254,6 +1334,58 @@ such as `onDragEnd` cannot cross the server/client boundary: write a small clien
 The ~5 KB usually quoted for LazyMotion + `m` holds for esbuild (5.7 KB here), but Turbopack keeps much more of the
 core. That is why the home page JavaScript budget went from 200 KB to 220 KB (see _Performance budgets_).
 
+### Slider
+
+`Slider` (`src/components/ui/slider.tsx`, client) is an accessible touch carousel on Motion's drag. The Testimonials
+section uses it for its **Slider** layout (Layout picker: _Grid_ or _Slider_; the grid is the default, so existing content
+is unchanged). Server components import `LazySlider` (`slider-lazy.tsx`, `next/dynamic` in a client file), never `Slider`,
+for the reason given under _Parallax_ above.
+
+```tsx
+<LazySlider label="Customer testimonials" perView={{ base: 1, md: 2, lg: 3 }} gap>
+  {slides}
+</LazySlider>
+```
+
+| Prop       | What it does                                                                                                                 |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `label`    | Names the carousel for screen readers (required).                                                                            |
+| `perView`  | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count. |
+| `gap`      | Space (1.5 rem) between slides.                                                                                              |
+| `autoplay` | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                  |
+
+- **How it moves.** The track is an `m.div` with `drag="x"` and a motion value for `x`. On release `snapIndex`
+  (`slider-snap.ts`, pure and unit tested) picks the slide from the drag distance plus a short projection of the
+  velocity (a flick moves at least one slide; a fast one can pass several), and `animate(x, …)` springs to it. Ends
+  have elastic resistance (`dragElastic`, `dragConstraints` from a `ResizeObserver` that is disconnected on unmount).
+  A drag of more than 5 px swallows the click that follows, so it never opens a link inside a slide.
+  `touch-action: pan-y` keeps vertical page scrolling working on phones.
+- **Without JavaScript** the slides are a horizontal CSS scroll-snap list (focusable, so the keyboard can scroll it).
+  Slide widths come from the same CSS in both modes, the scrollbar is hidden in both, and the controls' space is reserved
+  in the server HTML, so the script taking over shifts nothing (CLS 0). The server HTML and the hydration render are the
+  scroll list; the next layout effect measures and switches to the drag track.
+- **Controls.** Previous and Next (disabled at the ends; focus moves to the other button rather than being lost), one
+  "Go to slide n" button per resting position, and Left/Right arrow keys while focus is inside. Slides out of view are
+  `inert`, so Tab never lands on hidden content.
+- **ARIA.** The `<section>` has `aria-roledescription="carousel"` and the label; each slide is `role="group"` with
+  `aria-roledescription="slide"` and `aria-label="n of N"`; a polite live region says "Slide n of N" after a button or
+  key, never while dragging or sliding by itself.
+- **Reduced motion.** The move is a zero-length animation: instant, no spring. (Not `x.jump`: after a drag, Motion's own
+  release, which it applies a frame late for these visitors, would land after it.)
+- **Autoplay.** If a developer passes `autoplay`, it pauses on hover and focus, shows a visible Pause/Play button
+  (WCAG 2.2.2) and never runs under reduced motion. Nothing in the CMS turns it on; it has no end-to-end test yet.
+- **Needs the `MotionProvider`** for dragging (the public site has it; `/section-gallery` does not, so there it shows the
+  layout and the buttons). The buttons, keys and spring use the standalone `animate`, so they work even in the moments
+  before the `domMax` chunk, which drag needs, has downloaded.
+- **Size** (motion 14.2.0, Turbopack, gzip level 9): the standalone `animate` pulls Motion's animation engine into the
+  slider's own chunk. Imported directly, the slider added **22.2 KB** to the home page's scripts (217.2 → 239.4 KB, over
+  the 220 KB budget), because the engine moved out of the lazily loaded `domMax` chunk. Behind `LazySlider` the home page
+  is **217.3 KB** (+0.1 KB for the wrapper) and the budget is unchanged; a page with a slider loads about 12.6 KB gzipped
+  more than the home page (227.6 vs 215.0 KB, all scripts after idle).
+- **Tests.** `slider-snap.test.ts` (unit); `tests/e2e/slider.spec.ts` on the `/slider` fixture page (buttons, dots, keys,
+  `inert`, `touch-action`, mouse drag, click suppression, spring and reduced motion, no JavaScript, CLS, axe). The gallery
+  has `testimonials-slider` and `testimonials-slider-inverse`.
+
 ### Cursors and interaction feedback
 
 Cursors come from `src/styles/globals.css` (`@layer base`, "Cursors"), not from component classes, because Tailwind 4's
@@ -1329,14 +1461,18 @@ combined with `hiddenFromClients`) and the fieldset vanishes when none of them a
 with `joinSubtitle` / `variantSubtitle` ("Hero · Split · Dark"). The rules are unit tested per section and layout
 (`section-form.test.ts`, `sections/section-form.test.ts`, `sections/section-fields.test.ts`).
 
-| Field      | Values                                     | What it does                                                                                  |
-| ---------- | ------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `tone`     | `surface` · `alt` · `inverse` · `accent`   | `data-tone` on the `<section>`; recolours everything inside (see below).                      |
-| `spacing`  | `compact` · `default` · `spacious`         | `py-section-compact` / the section's usual / `py-section-spacious`.                           |
-| `width`    | `narrow` · `default` · `wide` · `full`     | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters. |
-| `align`    | `start` · `center`                         | Alignment classes for the parts the section aligns (headings, intro, buttons).                |
-| `anchorId` | slug-like string                           | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).  |
-| `motion`   | `none` · `reveal` · `stagger` · `parallax` | Scroll-in animation through the wrappers in `src/components/motion`.                          |
+| Field      | Values                                                      | What it does                                                                                              |
+| ---------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `tone`     | `surface` · `alt` · `inverse` · `accent`                    | `data-tone` on the `<section>`; recolours everything inside (see below).                                  |
+| `spacing`  | `compact` · `default` · `spacious`                          | `py-section-compact` / the section's usual / `py-section-spacious`.                                       |
+| `width`    | `narrow` · `default` · `wide` · `full`                      | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters.             |
+| `align`    | `start` · `center`                                          | Alignment classes for the parts the section aligns (headings, intro, buttons).                            |
+| `gradient` | slug of a brand gradient                                    | A gradient layer behind the content (see _Section backgrounds_ below).                                    |
+| `image`    | image with hotspot                                          | A picture layer behind the content (see _Section backgrounds_); not offered for the hero.                 |
+| `overlay`  | `none` · `light` · `medium` · `strong`                      | How strongly the tone's colour covers the picture.                                                        |
+| `edge`     | `none` · `diagonal` · `wave` · `curve` · `arch` · `layered` | The shape of the section's bottom edge (see _Section dividers_ below); `edge*` siblings hold its options. |
+| `anchorId` | slug-like string                                            | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).              |
+| `motion`   | `none` · `reveal` · `stagger` · `parallax`                  | Scroll-in animation through the wrappers in `src/components/motion`.                                      |
 
 **Rendering.** A section component renders inside `SectionFrame` (`src/components/ui/section-frame.tsx`, a server
 component) instead of its own `<section>` and padding, and passes its content as children:
@@ -1383,6 +1519,130 @@ two sections), the focus colour, spacing, anchors and motion; the gallery has an
 grid and the image + text section (ids `features-grid-style-<tone>`, `media-text-style-compact`, …), and a narrow, centred
 rich text.
 
+### Section backgrounds
+
+Beyond its tone, a section can have a **brand gradient** and a **background image**, both in the Design tab under
+_Background_ (agency only). Editors choose; nothing is configured by default, so a section keeps its tone.
+
+- **Tone** (as before): Surface, Soft, Dark, Accent, as swatches. It sets the text colours, so text always follows the
+  tone, not the picture.
+- **Gradient** (optional): a list of swatches, one per gradient in Studio → Design → Brand colours → Gradients. It is
+  stored as the gradient's slug (`forest-dusk`) and drawn as `var(--gradient-forest-dusk)`, the variable the site
+  already defines, so a re-skin changes it everywhere. The field disappears while there are no gradients. If a gradient
+  is renamed or removed, the section shows no gradient and the picker marks it _Not in Design settings_.
+- **Background image** (optional): an image with a hotspot, which keeps the subject in view as the section crops it. It
+  is decoration, so it needs no alt text (the page gives it an empty one). **Overlay** appears once there is a picture:
+  None, Light, Medium or Strong (45%, 70% and 88% of the tone's background colour laid over the picture). An unset
+  overlay is **Medium on the dark tones (Dark, Accent) and Light on the others**; the picker shows that default as chosen
+  and nothing is stored until the editor picks.
+- **Not for the hero.** The hero has its own Image, so its Design tab offers the gradient but not the background image
+  (`hasOwnBackgroundImage` in its section rules).
+
+**Rendering.** `SectionFrame` draws `SectionBackground` (`src/components/ui/section-background.tsx`, a server component)
+first inside the `<section>`: a wrapper that is `absolute inset-0 -z-10 aria-hidden`, holding the gradient layer, the
+picture (`SanityImage` with `fill`, `object-cover`, the hotspot as `object-position`) and the overlay, in that order.
+Everything is absolutely positioned, so it takes no space and cannot shift the layout (CLS stays at 0 for it). The
+picture is lazy unless the section is the first on the page, where it is preloaded because it may be the LCP. The
+hero's own background goes above these layers. The style-to-layers mapping (`gradient`, `image`, `overlay`) is
+`resolveSectionStyle` (unit tested); only a slug matching `GRADIENT_SLUG_PATTERN` ever reaches a style attribute.
+
+**Contrast warnings in Studio.** `backgroundContrastProblem` (`src/lib/color/background-contrast.ts`) checks that body
+text and secondary text reach **4.5:1** and shows a warning (never a block) on the Background image or Gradient field.
+A picture is unknown, so it is measured at its worst: the overlay laid over a pure black and a pure white area. A
+gradient is measured at each of its colours. Notes for agencies:
+
+- _None_ always warns: a photo can be any colour. _Medium_ passes on Dark; on Surface and Soft it passes for body text but
+  warns for secondary text; _Strong_ passes on Surface, Soft and Dark.
+- _Accent_ with a picture warns at every strength, because its white-on-brand text has little contrast to spare before
+  any picture. Prefer Dark for pictures.
+- The check uses the colours in `tokens.json`, as the heading emphasis check does, not custom brand colours from Design
+  settings; check those with the warnings on the Brand colours document.
+- When both are set the picture covers the gradient, so only the picture is checked.
+
+**Keeping the Studio list in step with the page.** `brandGradients` (`src/lib/color/gradients.ts`) decides which gradients
+are usable and their slugs; `resolveDesignTokens` writes the CSS variables from it and the Studio picker lists from it,
+so they cannot disagree. The Studio reads the _published_ Design settings (the site draws what is published), shared for
+three seconds between the fields of a form (`fetchBrandGradients`).
+
+**Tests.** `section-style.test.ts`, `background-contrast.test.ts`, `gradients.test.ts`, `section-background.test.ts` and the
+hero rule in `sections/section-form.test.ts` cover the logic; `tests/e2e/section-background.spec.ts` checks the layers on
+the `style-background` fixture page (position, `aria-hidden`, empty alt, lazy and first-section loading, a removed gradient,
+server rendering) and runs axe over the gallery entries `features-grid-gradient-*` and `media-text-background-*` (one per
+overlay, plus the unset defaults on a light and a dark tone). The fixture's `designSettings` holds two gradients and no
+colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
+the real guard for pictures is the Studio warning and the overlay values above.
+
+### Section dividers
+
+A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch or a layered wave. The
+section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
+meet it, so the colours and spacing come out right without anything to configure.
+
+**For editors** (Design tab, agency only). Under _Bottom edge_ pick a picture: None (the default, a straight edge),
+Diagonal, Wave, Curve, Arch or Layered wave. Then, as they apply to the shape:
+
+- **Edge height**: Small, Medium or Large. Smaller on phones.
+- **Flip**: mirror the shape left to right (Diagonal, Wave and Layered wave; Curve and Arch are symmetrical, so it is not offered).
+- **Accent line**: none, or a thin line along the edge in Primary, Secondary or Highlight.
+- **Back wave colour** (Layered wave only): Secondary or Highlight, drawn behind the front wave and partly see-through.
+- **More edge options** (collapsed): **Invert** (the shape bulges into the next section instead; not offered for Diagonal,
+  where it is the same as Flip) and a **custom height** for phones, tablets (from 768 px) and desktops (from 1024 px), in
+  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium.
+
+The edge belongs to the **upper** section: one owner per boundary, it moves with its section when reordered, and a shared
+section carries its own edge wherever it is used. To change a boundary, edit the section above it.
+
+**How it is drawn.**
+
+- _The shapes_ are defined once in `src/components/ui/section-edges.ts` as paths in a 0 to 1 box
+  (`viewBox="0 0 1 1"`, `preserveAspectRatio="none"`, so they stretch to any width and height). A shape is the line where
+  the section ends; Flip mirrors x, Invert mirrors y. Wave and Layered wave are generated from a sine so they stay smooth;
+  the others are written by hand. Everything is unit tested (`section-edges.test.ts`): the paths stay inside the box,
+  run the full width, and Flip and Invert each change a wave.
+- _The cut_: `SectionFrame` wraps a section that has an edge in `[data-section-edge-frame]` (lifted with a `z-index` that `SectionRenderer` lowers
+  for each later section, so every cut sits above whatever follows it) and sets `--edge-mask`, an SVG data URI of the shape. `globals.css` applies it to the
+  `<section>` as `mask-image` (and `-webkit-mask-image`) in two layers: a solid one for everything above the bottom band,
+  and the shape for the band, so **only the bottom band is cut and the content area is never masked**. The section adds the
+  edge's height to its bottom padding (`--edge-h`), so its content stays out of the band. Nothing samples colours.
+- _The section below_: `SectionRenderer` (`section-renderer.tsx`) puts `data-edge-above` and `--edge-above` (the same height)
+  on the element that wraps the next section. `globals.css` pulls it up by that height (negative `margin-top`) and adds the
+  same amount to its top padding, so its content lands exactly where it would without the edge. In draft mode the editable
+  `<div data-sanity>` wrapper carries the attributes, so Presentation shows the same result. A section that renders nothing
+  does not pull the next one up (`:empty`).
+- _Heights_ are tokens, `edge` in `src/styles/tokens.json` (`small`, `medium`, `large`; fluid `clamp()` values, smaller on
+  phones), written to `--edge-height-*`. The group is optional in a client's `tokens.json` (defaults in
+  `scripts/build-tokens.mjs`). A custom height sets three variables switched at the breakpoints (`data-edge-custom`).
+- _Accent line and back wave_ are decorative SVGs (`aria-hidden`, `pointer-events: none`) in the frame: the back wave under
+  the section, so it shows only through the cut, and the line over it as a stroke with `vector-effect: non-scaling-stroke`,
+  so it keeps its width however the shape stretches.
+- Browsers **without mask support** show a straight edge: the section is still taller by the edge's height and the next one
+  still meets it, only the cut is missing, and the SVGs are hidden (`@supports not`).
+
+**Edge cases.**
+
+| Case                             | What happens                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| First section                    | Works like any other; the hero's LCP picture is still preloaded.                                                                                                                                                                                                                                                                                              |
+| Last section                     | The footer takes the edge like a section would: `SectionRenderer` adds a band of the footer's colour (`bg-surface-alt`) under the cut (`[data-edge-backdrop]`) and hides the footer's top border. If a project changes the footer's background, change `[data-edge-backdrop]` in `globals.css` to match.                                                      |
+| Members-only sections            | A locked section is a stub with no style, so it has no edge and nothing is pulled up under it; the cut above it shows the page colour. Once unlocked, its own edge draws, but the section after it is not pulled up, because the public page does not know the edge until sign-in. In preview (draft mode) every section is complete, so edges work normally. |
+| A/B variants and shared sections | Both go through the same `SectionRenderer`; a shared section's edge comes with its `style`.                                                                                                                                                                                                                                                                   |
+| Anchors                          | The section below an edge has `scroll-margin-top: 6rem + the edge's height`, so a `#link` lands with the whole cut in view.                                                                                                                                                                                                                                   |
+| Reordering                       | Neighbours are worked out at render time, so moving a section moves its edge with it.                                                                                                                                                                                                                                                                         |
+
+**Adding a shape.** Add the line to `LINES` in `section-edges.ts` (a path in the 0 to 1 box that runs from one side to the
+other), the value to `SECTION_EDGES` and its title in `section-style-options.ts`, a picker entry in
+`section-style.ts` and a thumbnail in `thumbnails/edge-thumbnails.tsx` and the registry (a test fails until all agree), then
+add a gallery pair to `tests/e2e/fixtures/dataset.mjs` and run `npm run typegen`.
+
+**Tests.** Unit: `section-edges.test.ts` (paths, heights, spacing variables), `section-style.test.ts` (`resolveEdge`: options that do
+nothing for a shape are ignored), `section-style.test.ts` in the schema folder (which options show for which shape). End to
+end: `tests/e2e/section-edges.spec.ts` runs axe over every gallery pair, checks by bounding box on phone and desktop widths
+that the section below is pulled up by exactly the edge's height while its content is neither covered nor moved, the
+mask and its `-webkit-` twin, the layered wave's layers, heights and breakpoints, and the `/edges` fixture page (followers,
+members stub, shared section, anchor margin, footer band, layout shift). Gallery pairs are `edge-*` entries (the section
+below has a key ending `--below` and is drawn in the same frame); their visual baselines are Linux-only, so run the
+**Update visual baselines** workflow after changing a shape or the CSS.
+
 ### Highlighting words in a heading
 
 Editors select words in a heading and choose how they stand out. The hero's _Title_ is the first heading to use it;
@@ -1427,6 +1687,55 @@ npx sanity migration run hero-title-to-heading-text --no-dry-run    # asks befor
 
 It converts each hero's `title` into one block in `heading` (pages, shared sections, drafts and release versions), keeps
 `title`, and is safe to run twice. Publish the migrated drafts afterwards. Delete the folder once every dataset has run it.
+
+### Statistics
+
+A row of headline figures ("12,500+ projects delivered"), as a section of its own and as a compact bar for the hero.
+Both read the same two shared types, `statItem` and `statsBar` (`src/lib/sanity/schema/stats.ts`).
+
+**For editors.** Add a **Stats** section. It starts with three example figures (replace them) and looks finished as it
+is. Each figure has a **value** (type `12500`, not `12,500`: the site adds the commas), a **label** and, under _Number
+format_, an optional **prefix** (`$`), **suffix** (`+`, `%`, `m`) and **decimal places** (0 to 3; `4.9` needs 1). A
+section holds one to six figures; Studio warns when text is too long, and never blocks publishing. The agency-only
+**Layout** is _Inline_ (big figures side by side on the page) or _Cards_ (one card each). The figures count up from 0 the
+first time they scroll into view; set the Design tab's **Animation** to _None_ and they are plain text. A **statistics
+bar** is two to four figures and an optional caption; the hero shows one in its supporting slot (_Hero supporting
+content_).
+
+**For developers.**
+
+- **Schema:** `statItem` is `value`, `label` and (in a collapsed _Number format_ fieldset) `prefix`, `suffix`, `decimals`;
+  `statsBar` is `items` (2 to 4) and `caption`. Reuse them in any schema with `type: 'statItem'` or `'statsBar'`, and in
+  GROQ with `statItemFields` / `statsBarFields` (`src/lib/sanity/fragments.ts`), so a hero folds them into its existing
+  query: `statsBar { ${statsBarFields} }`. No extra request.
+- **The figure is formatted on the server.** `formatStat` (`src/lib/stats/format-stat.ts`, unit tested) uses
+  `Intl.NumberFormat('en-AU')` with exactly `decimals` places, then adds prefix and suffix. The result is in the HTML, so
+  it is right for search engines, with JavaScript off and under reduced motion. Pass a figure through `cleanFigure` before
+  formatting a stega-encoded value (draft mode); `StatFigure` does.
+- **`StatFigure`** (`src/components/ui/stat-figure.tsx`, server) renders one figure. Not animated, it is plain text.
+  Animated, the counting text is `aria-hidden` and a visually hidden span holds the final value, so a screen reader hears
+  it once, not "0, 3, 41". It is `tabular-nums` with a `min-width` of the final text's width in `ch`, so the box is the same
+  size from the first frame to the last and the count shifts nothing (CLS stays 0).
+- **`CountUp`** (`src/components/motion/count-up.tsx`) is the island: `useInView` (once), then `useSpring` (1.6 s, no
+  overshoot; Motion's spring takes milliseconds) into `useTransform`, written straight to the text node, with no React
+  render per frame. It never counts under `prefers-reduced-motion`, and ends by writing the server's text exactly. Server
+  components import `count-up-lazy.tsx` (`next/dynamic` in a client file, like `LazyParallax`), so its code is a separate
+  chunk that only a page rendering an animated figure downloads. A page without statistics pays nothing, so the home page
+  budget is unchanged.
+- **When it counts:** Animation _Reveal_ or _Stagger_ (the section starts on _Reveal_). _None_ means no count-up, and so
+  does being the page's first section (`SectionFrame` never animates the first section either).
+- **`StatsBar`** (`src/components/ui/stats-bar.tsx`) is the hero-slot component: no section frame, no colours of its own
+  (text, muted text and dividers come from the surrounding tone, so it reads on a dark or a light hero). Its columns follow
+  its own width (container queries), not the screen's: three figures sit in a row from about 32 rem across, four from about
+  42 rem, and narrower than that they wrap two to a row, which is what lets one bar suit a full-width hero, a text panel and
+  a narrow column. Every figure has a thin divider before it and the row is pulled one gutter to the left inside an
+  `overflow-hidden` box, so the first figure of each row loses its divider however the row wraps. Pass `animate` only when
+  the hosting section's Animation is not _None_, and `centred` under a centred heading. `/section-gallery/stats-bar` shows it
+  on all four tones (404 outside development and the end-to-end run).
+- **Tests:** unit tests for the formatter and `StatFigure`; `tests/e2e/stats.spec.ts` checks the final values in the
+  server HTML, axe on both layouts and the bar, the divider and 2×2 layout, a real count-up (and that its box never changes
+  size), reduced motion, no JavaScript and Animation _None_. The gallery has `stats-inline`, `stats-cards` and
+  `stats-cards-six` (dark, no animation); the `/stats` fixture page holds an animated and a still section below the fold.
 
 ### Type flow
 
@@ -1515,13 +1824,13 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
-| Kind            | Files                                    | Shown for                                               |
-| --------------- | ---------------------------------------- | ------------------------------------------------------- |
-| Section layouts | `hero-thumbnails.tsx`                    | each section's `variant` (today the four hero layouts)  |
-| Hero presets    | `hero-thumbnails.tsx`                    | the six presets, and the Split proportions and shapes   |
-| Animations      | `animation-thumbnails.tsx`               | the Animation field: none, fade up, staggered, parallax |
-| Tones           | `tone-thumbnails.tsx`                    | the Tone field: live swatches, not pictures             |
-| Insert menu     | `public/section-previews/<typeName>.svg` | the "Add item" menu in the page builder (static files)  |
+| Kind            | Files                                                                        | Shown for                                                           |
+| --------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx` | each section's `variant` (the hero, Stats and Testimonials layouts) |
+| Hero presets    | `hero-thumbnails.tsx`                                                        | the six presets, and the Split proportions and shapes               |
+| Animations      | `animation-thumbnails.tsx`                                                   | the Animation field: none, fade up, staggered, parallax             |
+| Tones           | `tone-thumbnails.tsx`                                                        | the Tone field: live swatches, not pictures                         |
+| Insert menu     | `public/section-previews/<typeName>.svg`                                     | the "Add item" menu in the page builder (static files)              |
 
 `registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 
@@ -1952,6 +2261,69 @@ The gallery has an entry for each preset that is not a layout of its own and for
 `object-position` in the browser. LCP for each preset used as the first section follows from that: the picture or the
 heading is server-rendered, never lazy, and the picture's frame has a fixed ratio so it causes no layout shift. A
 Lighthouse run per preset has not been done; `npm run test:lighthouse` still measures the home page.
+
+### Hero supporting content
+
+The hero has one approved slot, **Extra content under the heading** (Content tab), for something that backs the
+heading up: a **Statistics bar** (two to four figures, see _Statistics_), **Badges** (one to three short labels, each with
+an optional icon: tick, star, shield, clock, heart, lightning bolt, leaf or award) or **Logos** (one to six, in grey by
+default; the _Greyscale_ switch keeps their colours instead). Nothing is added by default, so a hero looks the same
+until an agency adds one.
+
+**For editors.** Open the hero's Content tab, choose _Add item_ under _Extra content under the heading_ and pick one of the
+three pictures. Add the figures, labels or logos and publish. It sits where the layout puts it, and the spacing, widths and
+wrapping at every screen size are automatic. Clients see the slot only when it has something in it, and can change that
+content; adding it and taking it out are for the agency. The slot holds one item: remove it to choose another type.
+
+| Layout           | Where the slot sits                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| Full background  | Under the buttons (centred when the text is)                                            |
+| Split            | Under the buttons, in the text column                                                   |
+| Editorial        | In a column beside the text from `lg` up (under the small picture); below it on a phone |
+| Image with panel | Inside the panel, under the buttons                                                     |
+
+The slot takes the hero's tone, so it reads on a dark or a light hero. Greyscale logos stay dark grey, so on a dark
+hero use white or transparent-background logos, or turn _Greyscale_ off.
+
+**Animation.** The slot joins the hero's entrance as the next item after the buttons (beside the text in Editorial it
+fades up on its own, timed to start after them). Figures count up only when the hero is not the first section and its
+Animation is not _None_. Under `prefers-reduced-motion`, and without JavaScript, the slot is simply there.
+
+**Studio rules.** The array is `supporting` with `options.slot: true`, which the Studio-wide input
+(`src/features/studio/components/slot-input.tsx`) reads: _Add item_ disappears once the slot is full, duplicating is
+off, and for clients adding and removing are off too (the field is hidden from them while empty). The rules are
+`slotDisabledActions` in `src/lib/sanity/schema/slot-actions.ts` (unit tested). They use Sanity's `disableActions`, so
+they are about the form, not permissions: for a hard guarantee use a document-level role rule. The insert-menu pictures are
+`public/hero-slot-previews/<type>.svg`.
+
+#### Adding a hero slot
+
+A new slot type is one schema object, one component and one registry line:
+
+1. **Schema.** Create the type as a shared object (`src/lib/sanity/schema/<name>.ts`, registered in `index.ts`; see
+   `badge-row.ts` for a small one) and add `defineArrayMember({ type: '<name>' })` to the hero's `supporting` array
+   (`src/features/pages/schemas/sections/hero.ts`). Add `public/hero-slot-previews/<name>.svg` for the insert menu.
+2. **GROQ.** Add a fields fragment to `src/lib/sanity/fragments.ts` and a `_type == "<name>" => { ... }` line to
+   `heroSupportingFields`. Run `npm run typegen` (with the fake project from `tests/e2e/constants.ts`, never your `.env`).
+3. **Component.** Make a compact component in `src/components/ui/` with no section frame and no colours of its own (use
+   `text-ink`, `text-ink-muted`, `border-line`, `text-accent-text`), and size it to the room it is given (container
+   queries, as `StatsBar` does), because any layout can host it. Take a `centred` prop if it has an alignment.
+4. **Registry.** Add the type to `SLOTS` in `src/features/pages/components/sections/hero/slots.tsx`. TypeScript fails
+   until you do, because `SLOTS` is keyed by every `_type` the generated query can return.
+
+Nothing else changes: the layouts do not know which types exist. Where the slot sits is a separate table,
+`HERO_SLOT_PLACEMENT` in `src/features/pages/utils/hero-slot.ts` (unit tested against `HERO_VARIANTS`), which a new
+**layout** extends. Each layout renders `<HeroSlot placement="...">` for the spot it has, and the slot appears only if the
+map agrees. Add a fixture and a gallery entry for the new type in `tests/e2e/fixtures/dataset.mjs` (`SLOT_TYPES` and
+`slotItem`, which put every type in every hero preset) and refresh the visual baselines. Reuse this pattern in another
+section only when there is a real need: free nesting was rejected because it gives awkward layouts and complex rendering,
+and a fixed optional field per feature makes the schema grow with every release.
+
+**Tests.** Unit: the placement map, the slot actions, the badge icons. End to end (`tests/e2e/hero-slot.spec.ts`): every
+slot type in every hero preset passes axe and fits at 375, 768 and 1280 px; placement (under the buttons, inside the
+panel, beside the text, below it on a phone); the server HTML holds the figures; and the slot on a real page (`/hero-slot`)
+fades in, is there at once under reduced motion and without JavaScript. The visual baselines for `hero-slot-*` are
+Linux-only: refresh them with the **Update visual baselines** workflow.
 
 ## Adding a feature, document type or singleton
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   allowsAlignment,
+  allowsBackgroundImage,
   allowsParallax,
   alignmentHidden,
   staleAlignmentMessage,
@@ -41,6 +42,18 @@ describe('hero layouts', () => {
     [undefined, true],
   ])('%s: alignment is offered: %s', (variant, offered) => {
     expect(allowsAlignment(heroWith(variant))).toBe(offered)
+  })
+
+  it.each([...HERO_VARIANTS.map(({ value }) => value), undefined])(
+    '%s: the shared background image is not offered, the hero has its own',
+    (variant) => {
+      expect(allowsBackgroundImage(heroWith(variant))).toBe(false)
+    },
+  )
+
+  it('leaves the background image to every other section', () => {
+    expect(allowsBackgroundImage({ _type: 'featuresGrid' })).toBe(true)
+    expect(allowsBackgroundImage({ _type: 'ctaBanner' })).toBe(true)
   })
 
   it('has a rule for every layout in the schema', () => {

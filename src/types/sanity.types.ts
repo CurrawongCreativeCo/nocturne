@@ -22,6 +22,15 @@ export type SanityImageAssetReference = {
   [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
 }
 
+export type LogoImage = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "image.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
+
 export type Icon = {
   asset?: SanityImageAssetReference
   media?: unknown // Unable to locate the referenced type "icon.media" in schema
@@ -31,7 +40,7 @@ export type Icon = {
   _type: 'image'
 }
 
-export type LogoImage = {
+export type LogosLogoImage = {
   asset?: SanityImageAssetReference
   media?: unknown // Unable to locate the referenced type "logo.image.media" in schema
   hotspot?: SanityImageHotspot
@@ -49,10 +58,69 @@ export type Avatar = {
   _type: 'image'
 }
 
+export type LogoRow = {
+  _type: 'logoRow'
+  logos: Array<{
+    name: string
+    image: LogoImage
+    _type: 'logo'
+    _key: string
+  }>
+  greyscale?: boolean
+}
+
+export type BadgeRow = {
+  _type: 'badgeRow'
+  badges: Array<{
+    label: string
+    icon?: 'check' | 'star' | 'shield' | 'clock' | 'heart' | 'bolt' | 'leaf' | 'award'
+    _type: 'badge'
+    _key: string
+  }>
+}
+
+export type StatsBar = {
+  _type: 'statsBar'
+  items: Array<
+    {
+      _key: string
+    } & StatItem
+  >
+  caption?: string
+}
+
+export type StatItem = {
+  _type: 'statItem'
+  value: number
+  label: string
+  prefix?: string
+  suffix?: string
+  decimals?: number
+}
+
 export type SectionStyle = {
   _type: 'sectionStyle'
   tone?: 'surface' | 'alt' | 'inverse' | 'accent'
+  gradient?: string
+  image?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  overlay?: 'none' | 'light' | 'medium' | 'strong'
   motion?: 'none' | 'reveal' | 'stagger' | 'parallax'
+  edge?: 'none' | 'diagonal' | 'wave' | 'curve' | 'arch' | 'layered'
+  edgeHeight?: 'small' | 'medium' | 'large'
+  edgeFlip?: boolean
+  edgeAccent?: 'none' | 'accent' | 'accent-2' | 'highlight'
+  edgeLayer?: 'accent-2' | 'highlight'
+  edgeInvert?: boolean
+  edgeHeightMobile?: number
+  edgeHeightTablet?: number
+  edgeHeightDesktop?: number
   spacing?: 'compact' | 'default' | 'spacious'
   width?: 'narrow' | 'default' | 'wide' | 'full'
   align?: 'start' | 'center'
@@ -145,6 +213,84 @@ export type Link = {
   internal?: PageReference
   url?: string
   openInNewTab?: boolean
+}
+
+export type BusinessInfo = {
+  _id: string
+  _type: 'businessInfo'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  tradingName: string
+  legalName?: string
+  abn?: string
+  phone?: string
+  publicEmail?: string
+  address?: {
+    street?: string
+    suburb?: string
+    state?: 'NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT'
+    postcode?: string
+    country?: string
+  }
+  timeZone:
+    | 'Australia/Sydney'
+    | 'Australia/Melbourne'
+    | 'Australia/Brisbane'
+    | 'Australia/Adelaide'
+    | 'Australia/Darwin'
+    | 'Australia/Perth'
+    | 'Australia/Hobart'
+  openingHours?: Array<{
+    days: Array<string>
+    closed?: boolean
+    opens?: string
+    closes?: string
+    _type: 'hoursRow'
+    _key: string
+  }>
+  specialHours?: Array<{
+    date: string
+    closed?: boolean
+    opens?: string
+    closes?: string
+    note?: string
+    _type: 'specialDay'
+    _key: string
+  }>
+  serviceAreas?: Array<string>
+  socialLinks?: Array<{
+    platform:
+      | 'facebook'
+      | 'instagram'
+      | 'linkedin'
+      | 'x'
+      | 'youtube'
+      | 'tiktok'
+      | 'pinterest'
+      | 'google'
+      | 'other'
+    url: string
+    _type: 'socialLink'
+    _key: string
+  }>
+  businessType?:
+    | 'LocalBusiness'
+    | 'ProfessionalService'
+    | 'MedicalBusiness'
+    | 'Dentist'
+    | 'LegalService'
+    | 'Restaurant'
+    | 'Store'
+    | 'HomeAndConstructionBusiness'
+    | 'HealthAndBeautyBusiness'
+    | 'Other'
+  businessTypeOther?: string
+  geo?: {
+    lat?: number
+    lng?: number
+  }
+  priceRange?: '$' | '$$' | '$$$' | '$$$$'
 }
 
 export type DesignSettings = {
@@ -374,6 +520,20 @@ export type Author = {
   bio?: string
 }
 
+export type Stats = {
+  _type: 'stats'
+  variant: 'inline' | 'cards'
+  title?: string
+  intro?: string
+  items: Array<
+    {
+      _key: string
+    } & StatItem
+  >
+  access?: 'public' | 'members'
+  style?: SectionStyle
+}
+
 export type NewsletterSignup = {
   _type: 'newsletterSignup'
   title: string
@@ -475,6 +635,7 @@ export type Faq = {
 
 export type Testimonials = {
   _type: 'testimonials'
+  variant: 'grid' | 'slider'
   title?: string
   items: Array<{
     quote: string
@@ -493,7 +654,7 @@ export type LogoCloud = {
   title?: string
   logos: Array<{
     name: string
-    image: LogoImage
+    image: LogosLogoImage
     url?: string
     _type: 'logo'
     _key: string
@@ -577,6 +738,17 @@ export type Hero = {
     alt?: string
     _type: 'image'
   }
+  supporting?: Array<
+    | ({
+        _key: string
+      } & StatsBar)
+    | ({
+        _key: string
+      } & BadgeRow)
+    | ({
+        _key: string
+      } & LogoRow)
+  >
   showGreeting?: boolean
   access?: 'public' | 'members'
   style?: SectionStyle
@@ -636,6 +808,9 @@ export type SharedSection = {
     | ({
         _key: string
       } & NewsletterSignup)
+    | ({
+        _key: string
+      } & Stats)
   >
 }
 
@@ -689,6 +864,9 @@ export type Page = {
     | ({
         _key: string
       } & NewsletterSignup)
+    | ({
+        _key: string
+      } & Stats)
     | ({
         _key: string
       } & SharedSectionReference)
@@ -948,9 +1126,14 @@ export type Geopoint = {
 
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
-  | Icon
   | LogoImage
+  | Icon
+  | LogosLogoImage
   | Avatar
+  | LogoRow
+  | BadgeRow
+  | StatsBar
+  | StatItem
   | SectionStyle
   | HeadingText
   | BlockContent
@@ -958,6 +1141,7 @@ export type AllSanitySchemaTypes =
   | Cta
   | PageReference
   | Link
+  | BusinessInfo
   | DesignSettings
   | CookieBanner
   | Announcement
@@ -973,6 +1157,7 @@ export type AllSanitySchemaTypes =
   | CategoryReference
   | Post
   | Author
+  | Stats
   | NewsletterSignup
   | StripePriceReference
   | PricingTable
@@ -1261,7 +1446,7 @@ export type FORM_QUERY_RESULT = {
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    "title": select(access == "members" && !$members => "Members only", title),    access,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    "pageBuilder": select(      access == "members" && !$members => [],      pageBuilder[] {   _key,    access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    submitLabel,    successMessage  },  _type,  _type == "reference" => @->section[0] {      access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion },    title,    text,    submitLabel,    successMessage  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]    )  }
+// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    "title": select(access == "members" && !$members => "Members only", title),    access,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    "pageBuilder": select(      access == "members" && !$members => [],      pageBuilder[] {   _key,    access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } } } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },  _type,  _type == "reference" => @->section[0] {      access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } } } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]    )  }
 export type PAGE_QUERY_RESULT = {
   _id: string
   _type: 'page'
@@ -1301,6 +1486,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string
             text: string | null
@@ -1328,6 +1539,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string
             text: string | null
@@ -1367,6 +1604,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             intro: string | null
@@ -1430,6 +1693,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             intro: string | null
@@ -1505,6 +1794,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             intro: string | null
@@ -1541,6 +1856,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             intro: string | null
@@ -1589,6 +1930,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             text: string | null
@@ -1617,6 +1984,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             text: string | null
@@ -1657,6 +2050,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             variant: 'editorial' | 'full-bleed' | 'overlay' | 'split'
             eyebrow: string | null
@@ -1708,6 +2127,63 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
             } | null
+            supporting: Array<
+              | {
+                  _key: string
+                  _type: 'badgeRow'
+                  badges: Array<{
+                    _key: string
+                    label: string
+                    icon:
+                      | 'award'
+                      | 'bolt'
+                      | 'check'
+                      | 'clock'
+                      | 'heart'
+                      | 'leaf'
+                      | 'shield'
+                      | 'star'
+                      | null
+                  }>
+                }
+              | {
+                  _key: string
+                  _type: 'logoRow'
+                  greyscale: boolean | null
+                  logos: Array<{
+                    _key: string
+                    name: string
+                    image: {
+                      alt: string | null
+                      crop: SanityImageCrop | null
+                      hotspot: SanityImageHotspot | null
+                      asset: {
+                        _id: string
+                        metadata: {
+                          lqip: string | null
+                          dimensions: {
+                            width: number
+                            height: number
+                          } | null
+                        } | null
+                      } | null
+                    }
+                  }>
+                }
+              | {
+                  _key: string
+                  _type: 'statsBar'
+                  items: Array<{
+                    _key: string
+                    value: number
+                    decimals: number | null
+                    prefix: string | null
+                    suffix: string | null
+                    label: string
+                  }>
+                  caption: string | null
+                }
+            > | null
             showGreeting: boolean | null
             sharedSectionId: string
           }
@@ -1721,6 +2197,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             variant: 'editorial' | 'full-bleed' | 'overlay' | 'split'
             eyebrow: string | null
@@ -1772,6 +2274,63 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
             } | null
+            supporting: Array<
+              | {
+                  _key: string
+                  _type: 'badgeRow'
+                  badges: Array<{
+                    _key: string
+                    label: string
+                    icon:
+                      | 'award'
+                      | 'bolt'
+                      | 'check'
+                      | 'clock'
+                      | 'heart'
+                      | 'leaf'
+                      | 'shield'
+                      | 'star'
+                      | null
+                  }>
+                }
+              | {
+                  _key: string
+                  _type: 'logoRow'
+                  greyscale: boolean | null
+                  logos: Array<{
+                    _key: string
+                    name: string
+                    image: {
+                      alt: string | null
+                      crop: SanityImageCrop | null
+                      hotspot: SanityImageHotspot | null
+                      asset: {
+                        _id: string
+                        metadata: {
+                          lqip: string | null
+                          dimensions: {
+                            width: number
+                            height: number
+                          } | null
+                        } | null
+                      } | null
+                    }
+                  }>
+                }
+              | {
+                  _key: string
+                  _type: 'statsBar'
+                  items: Array<{
+                    _key: string
+                    value: number
+                    decimals: number | null
+                    prefix: string | null
+                    suffix: string | null
+                    label: string
+                  }>
+                  caption: string | null
+                }
+            > | null
             showGreeting: boolean | null
             _type: 'hero'
           }
@@ -1797,6 +2356,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             logos: Array<{
@@ -1831,6 +2416,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             logos: Array<{
@@ -1877,6 +2488,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             eyebrow: string | null
             title: string
@@ -1963,6 +2600,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             eyebrow: string | null
             title: string
@@ -2061,6 +2724,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string
             text: string | null
@@ -2084,6 +2773,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string
             text: string | null
@@ -2107,6 +2822,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             intro: string | null
@@ -2137,6 +2878,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             title: string | null
             intro: string | null
@@ -2179,6 +2946,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             body: Array<
               | {
@@ -2236,6 +3029,32 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
             body: Array<
               | {
@@ -2293,6 +3112,118 @@ export type PAGE_QUERY_RESULT = {
             _key: string
             access: 'members' | 'public' | null
             _type: 'richText'
+          }
+        | {
+            _key: string
+            access: 'members' | 'public' | null
+            _type: 'stats'
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
+            } | null
+            variant: 'cards' | 'inline'
+            title: string | null
+            intro: string | null
+            items: Array<{
+              _key: string
+              value: number
+              decimals: number | null
+              prefix: string | null
+              suffix: string | null
+              label: string
+            }>
+            sharedSectionId: string
+          }
+        | {
+            _key: string
+            access: 'members' | 'public' | null
+            style: {
+              tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+              spacing: 'compact' | 'default' | 'spacious' | null
+              width: 'default' | 'full' | 'narrow' | 'wide' | null
+              align: 'center' | 'start' | null
+              anchorId: string | null
+              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
+            } | null
+            variant: 'cards' | 'inline'
+            title: string | null
+            intro: string | null
+            items: Array<{
+              _key: string
+              value: number
+              decimals: number | null
+              prefix: string | null
+              suffix: string | null
+              label: string
+            }>
+            _type: 'stats'
+          }
+        | {
+            _key: string
+            access: 'members' | 'public' | null
+            _type: 'stats'
+            sharedSectionId: string
+          }
+        | {
+            _key: string
+            access: 'members' | 'public' | null
+            _type: 'stats'
           }
         | {
             _key: string
@@ -2305,7 +3236,34 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
+            variant: 'grid' | 'slider'
             title: string | null
             items: Array<{
               _key: string
@@ -2340,7 +3298,34 @@ export type PAGE_QUERY_RESULT = {
               align: 'center' | 'start' | null
               anchorId: string | null
               motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              gradient: string | null
+              overlay: 'light' | 'medium' | 'none' | 'strong' | null
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              } | null
+              edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+              edgeHeight: 'large' | 'medium' | 'small' | null
+              edgeFlip: boolean | null
+              edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+              edgeLayer: 'accent-2' | 'highlight' | null
+              edgeInvert: boolean | null
+              edgeHeightMobile: number | null
+              edgeHeightTablet: number | null
+              edgeHeightDesktop: number | null
             } | null
+            variant: 'grid' | 'slider'
             title: string | null
             items: Array<{
               _key: string
@@ -2434,7 +3419,7 @@ export type SEARCH_QUERY_RESULT = Array<{
 
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
-// Query: *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {      title,      description,      logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },      ogImage { asset->{ _id } },      // Only when the editor chose their own icon: the default icon needs no data.      "browserIcon": select(        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {          "image": browserIcon.image { asset, crop, hotspot },          "padding": coalesce(browserIcon.padding, "none"),          "background": coalesce(browserIcon.background, "transparent")        }      ),      allowAiCrawlers    },    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {      headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerText    },    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {      message,      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      startsAt,      endsAt,      dismissible    },    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {      title,      message,      privacyLabel,      privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      analyticsText,      marketingText    },    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).    "design": *[_id == "designSettings"][0] {      appearance,      primary,      secondary,      highlight,      surface,      surfaceAlt,      surfaceInverse,      ink,      inkMuted,      line,      gradients[] { name, angle, stops }    }  } {    "title": identity.title,    "description": identity.description,    "logo": identity.logo,    "ogImage": identity.ogImage,    "browserIcon": identity.browserIcon,    "announcement": announcement,    "headerNav": navigation.headerNav,    "headerCta": navigation.headerCta,    "footerNav": navigation.footerNav,    "footerText": navigation.footerText,    "consent": consent,    "design": design,    "allowAiCrawlers": identity.allowAiCrawlers != false  }
+// Query: *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {      title,      description,      logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },      ogImage { asset->{ _id } },      // Only when the editor chose their own icon: the default icon needs no data.      "browserIcon": select(        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {          "image": browserIcon.image { asset, crop, hotspot },          "padding": coalesce(browserIcon.padding, "none"),          "background": coalesce(browserIcon.background, "transparent")        }      ),      allowAiCrawlers    },    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {      headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerText    },    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {      message,      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      startsAt,      endsAt,      dismissible    },    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {      title,      message,      privacyLabel,      privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      analyticsText,      marketingText    },    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).    "design": *[_id == "designSettings"][0] {      appearance,      primary,      secondary,      highlight,      surface,      surfaceAlt,      surfaceInverse,      ink,      inkMuted,      line,      gradients[] { name, angle, stops }    },    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).    "business": *[_id == "businessInfo"][0] {      tradingName,      legalName,      abn,      phone,      publicEmail,      address { street, suburb, state, postcode },      timeZone,      businessType,      businessTypeOther,      geo { lat, lng },      openingHours[] { _key, days, opens, closes, closed },      specialHours[] { _key, date, closed, opens, closes, note },      serviceAreas,      socialLinks[] { _key, platform, url },      priceRange    }  } {    "title": identity.title,    "description": identity.description,    "logo": identity.logo,    "ogImage": identity.ogImage,    "browserIcon": identity.browserIcon,    "announcement": announcement,    "headerNav": navigation.headerNav,    "headerCta": navigation.headerCta,    "footerNav": navigation.footerNav,    "footerText": navigation.footerText,    "consent": consent,    "design": design,    "business": business,    "allowAiCrawlers": identity.allowAiCrawlers != false  }
 export type SETTINGS_QUERY_RESULT = {
   title: null | string
   description: null | string
@@ -2606,6 +3591,94 @@ export type SETTINGS_QUERY_RESULT = {
         }> | null
       }
     | null
+  business:
+    | {
+        tradingName: null
+        legalName: null
+        abn: null
+        phone: null
+        publicEmail: null
+        address: null
+        timeZone: null
+        businessType: null
+        businessTypeOther: null
+        geo: null
+        openingHours: null
+        specialHours: null
+        serviceAreas: null
+        socialLinks: null
+        priceRange: null
+      }
+    | {
+        tradingName: string
+        legalName: string | null
+        abn: string | null
+        phone: string | null
+        publicEmail: string | null
+        address: {
+          street: string | null
+          suburb: string | null
+          state: 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA' | null
+          postcode: string | null
+        } | null
+        timeZone:
+          | 'Australia/Adelaide'
+          | 'Australia/Brisbane'
+          | 'Australia/Darwin'
+          | 'Australia/Hobart'
+          | 'Australia/Melbourne'
+          | 'Australia/Perth'
+          | 'Australia/Sydney'
+        businessType:
+          | 'Dentist'
+          | 'HealthAndBeautyBusiness'
+          | 'HomeAndConstructionBusiness'
+          | 'LegalService'
+          | 'LocalBusiness'
+          | 'MedicalBusiness'
+          | 'Other'
+          | 'ProfessionalService'
+          | 'Restaurant'
+          | 'Store'
+          | null
+        businessTypeOther: string | null
+        geo: {
+          lat: number | null
+          lng: number | null
+        } | null
+        openingHours: Array<{
+          _key: string
+          days: Array<string>
+          opens: string | null
+          closes: string | null
+          closed: boolean | null
+        }> | null
+        specialHours: Array<{
+          _key: string
+          date: string
+          closed: boolean | null
+          opens: string | null
+          closes: string | null
+          note: string | null
+        }> | null
+        serviceAreas: Array<string> | null
+        socialLinks: Array<{
+          _key: string
+          platform:
+            | 'facebook'
+            | 'google'
+            | 'instagram'
+            | 'linkedin'
+            | 'other'
+            | 'pinterest'
+            | 'tiktok'
+            | 'x'
+            | 'youtube'
+          url: string
+        }> | null
+        priceRange: '$' | '$$' | '$$$' | '$$$$' | null
+      }
+    | null
   allowAiCrawlers: boolean | true
 } | null
 
@@ -2654,6 +3727,9 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
         } & SharedSectionReference)
       | ({
           _key: string
+        } & Stats)
+      | ({
+          _key: string
         } & Testimonials)
     > | null
   }>
@@ -2691,6 +3767,9 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
       | ({
           _key: string
         } & RichText)
+      | ({
+          _key: string
+        } & Stats)
       | ({
           _key: string
         } & Testimonials)
@@ -2772,14 +3851,14 @@ declare global {
     '\n  *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': POST_SITEMAP_QUERY_RESULT
     '\n  *[_type == "experiment" && active == true] | order(_createdAt asc)[0] {\n    _id,\n    name,\n    "controlWeight": coalesce(controlWeight, 0),\n    "variants": coalesce(variants[defined(variantId)] { "id": variantId, "weight": coalesce(weight, 0) }, [])\n  }\n': ACTIVE_EXPERIMENT_QUERY_RESULT
     '\n  *[_type == "form" && _id == $id][0] {\n    _id,\n    \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n,\n    successMessage,\n    recipientEmail\n  }\n': FORM_QUERY_RESULT
-    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    "title": select(access == "members" && !$members => "Members only", title),\n    access,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "pageBuilder": select(\n      access == "members" && !$members => [],\n      pageBuilder[] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n    )\n  }\n': PAGE_QUERY_RESULT
+    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    "title": select(access == "members" && !$members => "Members only", title),\n    access,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "pageBuilder": select(\n      access == "members" && !$members => [],\n      pageBuilder[] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } }\n }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } }\n }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n    )\n  }\n': PAGE_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    "title": select(access == "members" => "Members only", title),\n    "description": seo.metaDescription,\n    _updatedAt,\n    "noIndex": seo.noIndex == true || access == "members"\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  count(*[_type == "page" && defined(slug.current)])\n': PAGE_COUNT_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true || access == "members"\n  }\n': PAGE_SITEMAP_QUERY_RESULT
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_type == "stripePrice" && priceId == $priceId && active == true][0] {\n    priceId,\n    interval\n  }\n': CHECKOUT_PRICE_QUERY_RESULT
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
-    '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerText\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "consent": consent,\n    "design": design,\n    "allowAiCrawlers": identity.allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
+    '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerText\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    },\n    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).\n    "business": *[_id == "businessInfo"][0] {\n      tradingName,\n      legalName,\n      abn,\n      phone,\n      publicEmail,\n      address { street, suburb, state, postcode },\n      timeZone,\n      businessType,\n      businessTypeOther,\n      geo { lat, lng },\n      openingHours[] { _key, days, opens, closes, closed },\n      specialHours[] { _key, date, closed, opens, closes, note },\n      serviceAreas,\n      socialLinks[] { _key, platform, url },\n      priceRange\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "consent": consent,\n    "design": design,\n    "business": business,\n    "allowAiCrawlers": identity.allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '\n  *[_id == "siteIdentity"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }

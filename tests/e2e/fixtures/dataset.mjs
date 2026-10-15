@@ -170,6 +170,64 @@ export const documents = [
     footerText: 'Test Co. All rights reserved.',
   },
   {
+    // Footer details, hours and LocalBusiness structured data (tests/e2e/business-info.spec.ts).
+    _id: 'businessInfo',
+    _type: 'businessInfo',
+    tradingName: 'Test Co',
+    legalName: 'Test Co Pty Ltd',
+    businessType: 'ProfessionalService',
+    abn: '51 824 753 556',
+    phone: '(02) 9876 5432',
+    publicEmail: 'hello@example.com',
+    address: {
+      street: '1 King Street',
+      suburb: 'Newtown',
+      state: 'NSW',
+      postcode: '2042',
+      country: 'Australia',
+    },
+    timeZone: 'Australia/Sydney',
+    geo: { lat: -33.8978, lng: 151.1788 },
+    openingHours: [
+      {
+        _key: 'weekdays',
+        _type: 'hoursRow',
+        days: ['mon', 'tue', 'wed', 'thu', 'fri'],
+        opens: '08:00',
+        closes: '17:30',
+      },
+      { _key: 'saturday', _type: 'hoursRow', days: ['sat'], opens: '09:00', closes: '13:00' },
+      { _key: 'sunday', _type: 'hoursRow', days: ['sun'], closed: true },
+    ],
+    specialHours: [
+      // Long past: must not appear anywhere. The far-future day always shows.
+      {
+        _key: 'past',
+        _type: 'specialDay',
+        date: '2020-01-26',
+        closed: true,
+        note: 'Australia Day',
+      },
+      {
+        _key: 'future',
+        _type: 'specialDay',
+        date: '2099-12-25',
+        closed: true,
+        note: 'Christmas Day',
+      },
+    ],
+    serviceAreas: ['Inner West', 'Newcastle'],
+    socialLinks: [
+      {
+        _key: 'fb',
+        _type: 'socialLink',
+        platform: 'facebook',
+        url: 'https://www.facebook.com/testco',
+      },
+    ],
+    priceRange: '$$',
+  },
+  {
     // Tests move the browser clock around this window (tests/e2e/announcement.spec.ts).
     _id: 'announcement',
     _type: 'announcement',
@@ -699,6 +757,79 @@ export const documents = [
     controlWeight: 50,
     variants: [{ _key: 'v1', _type: 'experimentVariant', variantId: 'bold', weight: 50 }],
   },
+  {
+    // Brand gradients only, so sections can pick one (README, "Section backgrounds"); no colour is
+    // set, so the design is tokens.json's. The `designSettingsVariants` below replace this document.
+    _id: 'designSettings',
+    _type: 'designSettings',
+    gradients: [
+      { _key: 'g1', name: 'Forest dusk', angle: 135, stops: ['#0b3d2e', '#1b2a3b'] },
+      { _key: 'g2', name: 'Morning mist', angle: 180, stops: ['#f0f9ff', '#e0f2fe'] },
+    ],
+  },
+  {
+    // Sections with a gradient and a picture, to test layers, lazy loading and the first section
+    // (tests/e2e/section-background.spec.ts). noIndex keeps it out of the sitemap and search.
+    _id: 'page-style-background',
+    _type: 'page',
+    title: 'Section backgrounds',
+    slug: { _type: 'slug', current: 'style-background' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'bg-first',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'inverse',
+          anchorId: 'bg-first',
+          image: image(''),
+          overlay: 'medium',
+        },
+        body: [block(['Picture on the first section'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-second',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'surface',
+          anchorId: 'bg-second',
+          image: image(''),
+          overlay: 'strong',
+        },
+        body: [block(['Picture further down'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-gradient',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'inverse',
+          anchorId: 'bg-gradient',
+          gradient: 'forest-dusk',
+        },
+        body: [block(['A brand gradient'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-removed',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'alt',
+          anchorId: 'bg-removed',
+          gradient: 'no-longer-defined',
+        },
+        body: [block(['A gradient that left Design settings'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-none',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', tone: 'accent', anchorId: 'bg-none' },
+        body: [block(['No picture, no gradient'], { style: 'h2' })],
+      },
+    ],
+  },
 ].map((doc) => ({ ...doc, _updatedAt: UPDATED }))
 
 /**
@@ -868,6 +999,122 @@ const galleryHero = (id, extra) => ({
   backgroundImage: image(''),
   ...extra,
 })
+
+/**
+ * Two sections for the gallery, one above the other: the upper has a bottom edge. The second key ends
+ * in `--below`, which the gallery page reads as "render this in the same frame as the one before".
+ */
+const edgeText = (id, title) => ({
+  _key: id,
+  _type: 'richText',
+  body: [block([title], { style: 'h2' }), block(['A paragraph of copy under the heading.'])],
+})
+const edgePair = (id, upper, below) => [
+  styled(`edge-${id}`, edgeText(`edge-${id}`, 'Above the edge'), upper),
+  styled(`edge-${id}--below`, edgeText(`edge-${id}--below`, 'Below the edge'), below),
+]
+
+/** Four figures that exercise the number format: grouping, decimals, a prefix and a suffix. */
+/** Six distinct quotes (names Person 1 to 6), so a test can tell which slide is in view. */
+const sliderQuotes = (id) =>
+  Array.from({ length: 6 }, (_, n) => ({
+    _key: `${id}-${n + 1}`,
+    _type: 'testimonial',
+    quote: `Quote number ${n + 1} from a happy customer.`,
+    name: `Person ${n + 1}`,
+    role: 'CEO',
+    avatar: image(`${id}-${n + 1}`),
+  }))
+
+const statItems = (key) => [
+  {
+    _key: `${key}-projects`,
+    _type: 'statItem',
+    value: 12500,
+    decimals: 0,
+    suffix: '+',
+    label: 'Projects delivered',
+  },
+  {
+    _key: `${key}-rating`,
+    _type: 'statItem',
+    value: 4.9,
+    decimals: 1,
+    suffix: '/5',
+    label: 'Average rating',
+  },
+  {
+    _key: `${key}-revenue`,
+    _type: 'statItem',
+    value: 1.2,
+    decimals: 1,
+    prefix: '$',
+    suffix: 'm',
+    label: 'Raised for clients',
+  },
+  { _key: `${key}-years`, _type: 'statItem', value: 12, label: 'Years in business' },
+]
+
+/**
+ * The hero's supporting slot (README, "Adding a hero slot"): each slot type in each hero preset, so the
+ * layout, the placement and the tone are all seen. The stats bar is three figures, the badges three
+ * labels (two with icons) and the logos six, the most the slot holds.
+ */
+const SLOT_TYPES = ['stats', 'badges', 'logos']
+const slotItem = (type, id) => {
+  const _key = `${id}-slot`
+  if (type === 'stats') return { _key, _type: 'statsBar', items: statItems(id).slice(0, 3) }
+  if (type === 'badges') {
+    return {
+      _key,
+      _type: 'badgeRow',
+      badges: [
+        { _key: `${id}-b1`, _type: 'badge', label: 'Locally owned', icon: 'heart' },
+        { _key: `${id}-b2`, _type: 'badge', label: 'Free delivery', icon: 'check' },
+        { _key: `${id}-b3`, _type: 'badge', label: 'Five-year warranty' },
+      ],
+    }
+  }
+  return {
+    _key,
+    _type: 'logoRow',
+    greyscale: true,
+    logos: ['Acme', 'Globex', 'Initech', 'Umbrella', 'Hooli', 'Stark'].map((name) => ({
+      _key: `${id}-${name}`,
+      _type: 'logo',
+      name,
+      image: image(''),
+    })),
+  }
+}
+/** The six hero presets (HERO_PRESETS), as the fields they set, plus what each needs to look right. */
+const SLOT_PRESETS = {
+  'full-background': { extra: { variant: 'overlay' } },
+  'split-right': { extra: { variant: 'split', imagePosition: 'right' } },
+  'split-left': { extra: { variant: 'split', imagePosition: 'left' } },
+  'centred-text': {
+    extra: { variant: 'overlay', backgroundImage: undefined },
+    style: { tone: 'surface' },
+  },
+  editorial: { extra: { variant: 'editorial', backgroundImage: undefined } },
+  'image-with-panel': { extra: { variant: 'full-bleed' } },
+}
+const heroSlotGallery = SLOT_TYPES.flatMap((type) =>
+  Object.entries(SLOT_PRESETS).map(([preset, { extra, style }]) => {
+    const id = `slot-${type}-${preset}`
+    const hero = galleryHero(id, { ...extra, supporting: [slotItem(type, id)] })
+    return style ? styled(hero._key, hero, style) : hero
+  }),
+)
+// Beside the text in Editorial, with the small picture too: the slot sits under it.
+heroSlotGallery.push(
+  galleryHero('slot-stats-editorial-inset', {
+    variant: 'editorial',
+    backgroundImage: undefined,
+    secondaryImage: image(''),
+    supporting: [slotItem('stats', 'slot-stats-editorial-inset')],
+  }),
+)
 
 const gallerySections = [
   {
@@ -1062,11 +1309,237 @@ const gallerySections = [
     },
     { width: 'narrow', align: 'center' },
   ),
+  // Section backgrounds (README, "Section backgrounds"): brand gradients, and a picture with each overlay.
+  styled('features-grid-gradient-inverse', galleryFeatures(3), {
+    tone: 'inverse',
+    gradient: 'forest-dusk',
+  }),
+  styled('features-grid-gradient-surface', galleryFeatures(3), {
+    tone: 'surface',
+    gradient: 'morning-mist',
+  }),
+  ...['none', 'light', 'medium', 'strong'].map((overlay) =>
+    styled(
+      `media-text-background-${overlay}`,
+      galleryMediaText(`background-${overlay}`, `Picture behind, ${overlay} overlay`, {
+        image: image('Picture'),
+        imagePosition: 'right',
+      }),
+      { tone: 'inverse', image: image(''), overlay },
+    ),
+  ),
+  styled(
+    'media-text-background-surface-default',
+    galleryMediaText('background-surface-default', 'Picture behind, light background', {
+      image: image('Picture'),
+      imagePosition: 'right',
+    }),
+    { tone: 'surface', image: image('') },
+  ),
+  styled(
+    'media-text-background-inverse-default',
+    galleryMediaText('background-inverse-default', 'Picture behind, dark background', {
+      image: image('Picture'),
+      imagePosition: 'right',
+    }),
+    { tone: 'inverse', image: image('') },
+  ),
+  // Section dividers (README, "Section dividers"): each entry is the upper section, followed by the
+  // one below it (key ending `--below`), which the gallery renders in the same frame.
+  ...edgePair('wave-flat', { tone: 'inverse', edge: 'wave' }, { tone: 'alt' }),
+  ...edgePair(
+    'wave-gradient-image',
+    { tone: 'inverse', gradient: 'forest-dusk', edge: 'wave' },
+    { tone: 'inverse', image: image(''), overlay: 'medium' },
+  ),
+  ...edgePair(
+    'layered-accent-line',
+    { tone: 'inverse', edge: 'layered', edgeAccent: 'highlight' },
+    { tone: 'surface' },
+  ),
+  ...edgePair('diagonal', { tone: 'accent', edge: 'diagonal' }, { tone: 'surface' }),
+  ...edgePair('curve', { tone: 'alt', edge: 'curve', edgeAccent: 'accent' }, { tone: 'inverse' }),
+  ...edgePair('arch', { tone: 'inverse', edge: 'arch' }, { tone: 'surface' }),
+  ...edgePair(
+    'wave-large-flip',
+    { tone: 'accent', edge: 'wave', edgeHeight: 'large', edgeFlip: true },
+    { tone: 'surface' },
+  ),
+  ...edgePair(
+    'curve-invert',
+    { tone: 'inverse', edge: 'curve', edgeInvert: true },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'wave-custom-heights',
+    { tone: 'inverse', edge: 'wave', edgeHeightMobile: 24, edgeHeightDesktop: 140 },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'wave-spacious-compact',
+    { tone: 'inverse', edge: 'wave', edgeHeight: 'small', spacing: 'spacious' },
+    { tone: 'alt', spacing: 'compact' },
+  ),
+  // Stats (README, "Statistics"): both layouts with the default three figures and the formatting
+  // options (grouping, decimals, prefix, suffix), then a dark six-figure grid with animation off.
+  {
+    _key: 'stats-inline',
+    _type: 'stats',
+    variant: 'inline',
+    title: 'Numbers we are proud of',
+    intro: 'A few figures from the last twelve years.',
+    items: statItems('stats-inline'),
+  },
+  {
+    _key: 'stats-cards',
+    _type: 'stats',
+    variant: 'cards',
+    title: 'Results that speak for themselves',
+    items: statItems('stats-cards'),
+  },
+  {
+    _key: 'stats-cards-six',
+    _type: 'stats',
+    variant: 'cards',
+    style: { _type: 'sectionStyle', tone: 'inverse', motion: 'none' },
+    title: 'Six figures, no animation',
+    items: [...statItems('stats-cards-six'), ...statItems('stats-cards-six-more')].slice(0, 6),
+  },
+  // Testimonials slider (README, "Slider"): six quotes, so it has several stops at every width.
+  // The gallery has no MotionProvider, so it shows the layout only; tests/e2e/slider.spec.ts
+  // drives the real thing on the /slider page.
+  {
+    _key: 'testimonials-slider',
+    _type: 'testimonials',
+    variant: 'slider',
+    title: 'Kind words',
+    items: sliderQuotes('testimonials-slider'),
+  },
+  {
+    _key: 'testimonials-slider-inverse',
+    _type: 'testimonials',
+    variant: 'slider',
+    style: { _type: 'sectionStyle', tone: 'inverse' },
+    title: 'Kind words on dark',
+    items: sliderQuotes('testimonials-slider-inverse').slice(0, 4),
+  },
+  ...heroSlotGallery,
   // new-section:gallery
 ]
 
-/** The gallery sections' ids, in page order: one visual test and one baseline per id. */
-export const galleryIds = gallerySections.map((section) => section._key)
+/**
+ * The gallery sections' ids, in page order: one visual test and one baseline per id. A `--below`
+ * section is drawn in the frame of the one before it (see edgePair), so it has no entry of its own.
+ */
+export const galleryIds = gallerySections
+  .map((section) => section._key)
+  .filter((id) => !id.endsWith('--below'))
+
+/**
+ * Statistics on a real page (tests/e2e/stats.spec.ts): a hero first, then a Stats section that counts
+ * up (Reveal) and one with Animation None, each below the fold. Their figures are distinct and
+ * formatted, so the HTML can be checked for them.
+ */
+/**
+ * A real page whose hero carries a statistics slot (tests/e2e/hero-slot.spec.ts), for what the section
+ * gallery cannot show: the slot joining the hero's stagger (the gallery has no MotionProvider), and
+ * reduced motion.
+ */
+documents.push({
+  _id: 'page-hero-slot',
+  _type: 'page',
+  title: 'Hero slot',
+  slug: { _type: 'slug', current: 'hero-slot' },
+  seo: { _type: 'seo', metaDescription: 'A page whose hero has a statistics bar.' },
+  pageBuilder: [
+    {
+      _key: 'hero-slot-page-hero',
+      _type: 'hero',
+      variant: 'split',
+      title: 'Hero with figures',
+      description: 'Hero description.',
+      ctas: [cta('About us', internal('page-about'))],
+      supporting: [slotItem('stats', 'hero-slot-page')],
+    },
+  ],
+})
+
+/** The testimonials slider on a real page (tests/e2e/slider.spec.ts): a MotionProvider, so it drags. */
+documents.push({
+  _id: 'page-slider',
+  _type: 'page',
+  title: 'Slider',
+  slug: { _type: 'slug', current: 'slider' },
+  seo: { _type: 'seo', metaDescription: 'A page with a testimonials slider.' },
+  pageBuilder: [
+    { _key: 'slider-hero', _type: 'hero', title: 'Slider', description: 'Hero description.' },
+    {
+      _key: 'slider-testimonials',
+      _type: 'testimonials',
+      variant: 'slider',
+      title: 'Kind words',
+      items: sliderQuotes('slider-page'),
+    },
+  ],
+})
+
+documents.push({
+  _id: 'page-stats',
+  _type: 'page',
+  title: 'Statistics',
+  slug: { _type: 'slug', current: 'stats' },
+  seo: { _type: 'seo', metaDescription: 'A page with animated statistics.' },
+  pageBuilder: [
+    { _key: 'stats-hero', _type: 'hero', title: 'Statistics', description: 'Hero description.' },
+    {
+      _key: 'stats-filler',
+      _type: 'richText',
+      body: [
+        block(['Filler'], { style: 'h2' }),
+        block(['A paragraph of copy so the figures start below the fold. '.repeat(30)]),
+      ],
+    },
+    {
+      _key: 'stats-animated',
+      _type: 'stats',
+      title: 'Animated figures',
+      style: { _type: 'sectionStyle', motion: 'reveal' },
+      items: [
+        { _key: 'a-big', _type: 'statItem', value: 12500, suffix: '+', label: 'Counted up' },
+        { _key: 'a-rate', _type: 'statItem', value: 4.9, decimals: 1, label: 'With a decimal' },
+        {
+          _key: 'a-money',
+          _type: 'statItem',
+          value: 1.2,
+          decimals: 1,
+          prefix: '$',
+          suffix: 'm',
+          label: 'With a symbol',
+        },
+      ],
+    },
+    {
+      _key: 'stats-filler-2',
+      _type: 'richText',
+      body: [
+        block(['More filler'], { style: 'h2' }),
+        block(['A paragraph of copy so the next figures start below the fold. '.repeat(30)]),
+      ],
+    },
+    {
+      _key: 'stats-still',
+      _type: 'stats',
+      variant: 'cards',
+      title: 'Still figures',
+      style: { _type: 'sectionStyle', motion: 'none' },
+      items: [
+        { _key: 's-big', _type: 'statItem', value: 98000, label: 'Never animated' },
+        { _key: 's-two', _type: 'statItem', value: 7, label: 'Plain text' },
+      ],
+    },
+  ],
+  _updatedAt: UPDATED,
+})
 
 /**
  * Highlighted heading words (tests/e2e/heading-text.spec.ts): the hero's `heading` wins over a stale
@@ -1116,3 +1589,68 @@ documents.push({
   pageBuilder: gallerySections,
   _updatedAt: UPDATED,
 })
+
+/**
+ * Section dividers on a real page, with the site's footer under it (tests/e2e/section-edges.spec.ts):
+ * an edge above a flat section, an edge above a picture, an edge above a members-only section, an
+ * edge on a shared section and an edge on the last section, which the footer takes.
+ */
+const edgeSection = (id, title, style) => ({
+  _key: id,
+  _type: 'richText',
+  style: { _type: 'sectionStyle', anchorId: id, ...style },
+  body: [block([title], { style: 'h2' }), block(['A paragraph of copy under the heading.'])],
+})
+documents.push(
+  {
+    _id: 'shared-edge',
+    _type: 'sharedSection',
+    title: 'Shared section with an edge',
+    section: [
+      {
+        ...edgeSection('shared-edge-section', 'Shared, with a diagonal', {
+          tone: 'accent',
+          edge: 'diagonal',
+        }),
+      },
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    _id: 'page-edges',
+    _type: 'page',
+    title: 'Section dividers',
+    slug: { _type: 'slug', current: 'edges' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('edge-first', 'First, with a wave', { tone: 'inverse', edge: 'wave' }),
+      edgeSection('edge-second', 'Second, with a layered wave', {
+        tone: 'alt',
+        edge: 'layered',
+        edgeAccent: 'accent',
+        edgeHeight: 'large',
+      }),
+      edgeSection('edge-third', 'Third, over a picture', {
+        tone: 'surface',
+        image: image(''),
+        overlay: 'strong',
+        edge: 'arch',
+      }),
+      {
+        ...edgeSection('edge-members', 'Secret members section', {
+          tone: 'inverse',
+          edge: 'curve',
+        }),
+        access: 'members',
+      },
+      { _key: 'edge-shared', ...ref('shared-edge') },
+      edgeSection('edge-after-shared', 'After the shared section', { tone: 'surface' }),
+      edgeSection('edge-last', 'Last, with a curve', {
+        tone: 'inverse',
+        edge: 'curve',
+        edgeHeight: 'medium',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+)

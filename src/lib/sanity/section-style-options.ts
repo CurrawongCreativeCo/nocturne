@@ -17,6 +17,84 @@ export const SECTION_TONE_TITLES: Record<(typeof SECTION_TONES)[number], string>
   accent: 'Accent',
 }
 
+/** How strongly the tone's colour covers a background image, so the text on it stays readable. */
+export const SECTION_OVERLAYS = ['none', 'light', 'medium', 'strong'] as const
+
+export const SECTION_OVERLAY_TITLES: Record<(typeof SECTION_OVERLAYS)[number], string> = {
+  none: 'None',
+  light: 'Light',
+  medium: 'Medium',
+  strong: 'Strong',
+}
+
+/** The opacity of the tone-coloured layer over the image: what the page draws and the contrast check measures. */
+export const SECTION_OVERLAY_OPACITY: Record<(typeof SECTION_OVERLAYS)[number], number> = {
+  none: 0,
+  light: 0.45,
+  medium: 0.7,
+  strong: 0.88,
+}
+
+/**
+ * The overlay an image gets when none is chosen: Medium on the dark tones, where a bright photo
+ * would swallow the light text, and Light on the others.
+ */
+export function defaultOverlayFor(tone: string | null | undefined): 'light' | 'medium' {
+  return tone === 'inverse' || tone === 'accent' ? 'medium' : 'light'
+}
+
+/**
+ * The shape of a section's bottom edge (README, "Section dividers"). The upper section owns the
+ * edge: its background is cut to the shape and the section below shows through the cut.
+ */
+export const SECTION_EDGES = ['none', 'diagonal', 'wave', 'curve', 'arch', 'layered'] as const
+export type SectionEdge = (typeof SECTION_EDGES)[number]
+
+export const SECTION_EDGE_TITLES: Record<SectionEdge, string> = {
+  none: 'None',
+  diagonal: 'Diagonal',
+  wave: 'Wave',
+  curve: 'Curve',
+  arch: 'Arch',
+  layered: 'Layered wave',
+}
+
+/** Heights are tokens (`edge` in tokens.json), smaller on phones; "custom" is the Advanced override. */
+export const SECTION_EDGE_HEIGHTS = ['small', 'medium', 'large'] as const
+export const SECTION_EDGE_HEIGHT_TITLES: Record<(typeof SECTION_EDGE_HEIGHTS)[number], string> = {
+  small: 'Small',
+  medium: 'Medium',
+  large: 'Large',
+}
+
+/** The brand colour of the thin accent line that follows the edge. */
+export const SECTION_EDGE_ACCENTS = ['none', 'accent', 'accent-2', 'highlight'] as const
+export const SECTION_EDGE_ACCENT_TITLES: Record<(typeof SECTION_EDGE_ACCENTS)[number], string> = {
+  none: 'None',
+  accent: 'Primary',
+  'accent-2': 'Secondary',
+  highlight: 'Highlight',
+}
+
+/** The colour of the back wave of a layered wave. */
+export const SECTION_EDGE_LAYERS = ['accent-2', 'highlight'] as const
+export const SECTION_EDGE_LAYER_TITLES: Record<(typeof SECTION_EDGE_LAYERS)[number], string> = {
+  'accent-2': 'Secondary',
+  highlight: 'Highlight',
+}
+
+/** The custom height range, in px, the Advanced fields accept. */
+export const EDGE_CUSTOM_MIN = 16
+export const EDGE_CUSTOM_MAX = 320
+
+/** Curve and Arch are symmetrical, so mirroring them would change nothing: Flip is not offered. */
+export const edgeAllowsFlip = (edge: string | null | undefined) =>
+  edge === 'diagonal' || edge === 'wave' || edge === 'layered'
+
+/** A diagonal turned upside down is the same line mirrored, so only the curved shapes offer Invert. */
+export const edgeAllowsInvert = (edge: string | null | undefined) =>
+  edge === 'wave' || edge === 'curve' || edge === 'arch' || edge === 'layered'
+
 /** Ids the site itself uses (the skip link's target), so an anchor can't collide with them. */
 export const RESERVED_ANCHORS: readonly string[] = ['main-content']
 

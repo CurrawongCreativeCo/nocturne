@@ -13,6 +13,7 @@ import {
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
 import { HeroText } from './hero-text'
+import { HeroSlot } from './slots'
 import type { SectionProps } from '../../../types'
 
 /**
@@ -32,7 +33,7 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
     container: hasImage ? 'max-w-content' : 'max-w-measure',
     align: 'start',
   }
-  const { tone, block, text, justify } = sectionTraits(data.style, defaults)
+  const { tone, align, block, text, justify, motion } = sectionTraits(data.style, defaults)
 
   return (
     <SectionFrame
@@ -51,6 +52,14 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
           block={block}
           justify={justify}
           headingClassName="text-h1 font-semibold text-balance"
+          slot={
+            <HeroSlot
+              data={data}
+              placement="below-buttons"
+              centred={align === 'center'}
+              animate={!isFirst && motion !== 'none'}
+            />
+          }
         />
       </div>
       <SanityImage

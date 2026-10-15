@@ -66,6 +66,11 @@ export const resolve: PresentationPluginOptions['resolve'] = {
       tone: 'positive',
       locations: [{ title: 'Home', href: '/' }],
     }),
+    businessInfo: defineLocations({
+      message: 'Shown in the footer on every page, and in the business details search engines read',
+      tone: 'positive',
+      locations: [{ title: 'Home', href: '/' }],
+    }),
     post: defineLocations({
       select: { title: 'title', slug: 'slug.current' },
       resolve: (doc: { title?: string; slug?: string } | null) => ({

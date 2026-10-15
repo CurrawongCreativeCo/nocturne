@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 
-import type { SECTION_MOTIONS, SECTION_TONES } from '../../section-style-options'
+import type { SECTION_EDGES, SECTION_MOTIONS, SECTION_TONES } from '../../section-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
 import {
   MotionNoneThumbnail,
@@ -8,6 +8,14 @@ import {
   MotionRevealThumbnail,
   MotionStaggerThumbnail,
 } from './animation-thumbnails'
+import {
+  EdgeArchThumbnail,
+  EdgeCurveThumbnail,
+  EdgeDiagonalThumbnail,
+  EdgeLayeredThumbnail,
+  EdgeNoneThumbnail,
+  EdgeWaveThumbnail,
+} from './edge-thumbnails'
 import {
   HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
@@ -23,6 +31,8 @@ import {
   HeroSplitLeftThumbnail,
   HeroSplitThumbnail,
 } from './hero-thumbnails'
+import { StatsCardsThumbnail, StatsInlineThumbnail } from './stats-thumbnails'
+import { TestimonialsGridThumbnail, TestimonialsSliderThumbnail } from './testimonials-thumbnails'
 import {
   ToneAccentThumbnail,
   ToneAltThumbnail,
@@ -45,6 +55,14 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
     split: HeroSplitThumbnail,
     editorial: HeroEditorialThumbnail,
     'full-bleed': HeroFullBleedThumbnail,
+  },
+  stats: {
+    inline: StatsInlineThumbnail,
+    cards: StatsCardsThumbnail,
+  },
+  testimonials: {
+    grid: TestimonialsGridThumbnail,
+    slider: TestimonialsSliderThumbnail,
   },
 }
 
@@ -84,4 +102,13 @@ export const toneThumbnails: Record<(typeof SECTION_TONES)[number], Thumbnail> =
   alt: ToneAltThumbnail,
   inverse: ToneInverseThumbnail,
   accent: ToneAccentThumbnail,
+}
+
+export const edgeThumbnails: Record<(typeof SECTION_EDGES)[number], Thumbnail> = {
+  none: EdgeNoneThumbnail,
+  diagonal: EdgeDiagonalThumbnail,
+  wave: EdgeWaveThumbnail,
+  curve: EdgeCurveThumbnail,
+  arch: EdgeArchThumbnail,
+  layered: EdgeLayeredThumbnail,
 }

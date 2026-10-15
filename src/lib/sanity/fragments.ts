@@ -33,6 +33,45 @@ export const ctaFields = /* groq */ `
   link { ${linkFields} }
 `
 
+/** One `statItem` (schema: lib/sanity/schema/stats.ts), for the Stats section and the hero's statistics bar. */
+export const statItemFields = /* groq */ `
+  _key,
+  value,
+  decimals,
+  prefix,
+  suffix,
+  label
+`
+
+/** A `statsBar`: project it as `statsBar { ${statsBarFields} }`. */
+export const statsBarFields = /* groq */ `
+  items[] { ${statItemFields} },
+  caption
+`
+
+/** A `badgeRow` (schema: lib/sanity/schema/badge-row.ts): project it as `badgeRow { ${badgeRowFields} }`. */
+export const badgeRowFields = /* groq */ `
+  badges[] { _key, label, icon }
+`
+
+/** A `logoRow` (schema: lib/sanity/schema/logo-row.ts): project it as `logoRow { ${logoRowFields} }`. */
+export const logoRowFields = /* groq */ `
+  greyscale,
+  logos[] { _key, name, image { ${imageFields} } }
+`
+
+/**
+ * The hero's supporting slot: the one item of `supporting[]`, whichever approved type it is. A new
+ * slot type adds its conditional projection here (README, "Adding a hero slot").
+ */
+export const heroSupportingFields = /* groq */ `
+  _key,
+  _type,
+  _type == "statsBar" => { ${statsBarFields} },
+  _type == "badgeRow" => { ${badgeRowFields} },
+  _type == "logoRow" => { ${logoRowFields} }
+`
+
 /**
  * A section's shared layout and style options (schema: lib/sanity/schema/section-style.ts). Every
  * section fragment projects it as `style { ${sectionStyleFields} }`; SectionFrame reads it.
@@ -43,7 +82,19 @@ export const sectionStyleFields = /* groq */ `
   width,
   align,
   anchorId,
-  motion
+  motion,
+  gradient,
+  overlay,
+  image { ${imageFields} },
+  edge,
+  edgeHeight,
+  edgeFlip,
+  edgeAccent,
+  edgeLayer,
+  edgeInvert,
+  edgeHeightMobile,
+  edgeHeightTablet,
+  edgeHeightDesktop
 `
 
 export const seoFields = /* groq */ `

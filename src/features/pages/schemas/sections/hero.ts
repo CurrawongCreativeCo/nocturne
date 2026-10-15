@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 
 import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
 import { headingPlainText } from '@/lib/sanity/heading-text'
+import { isClientView } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -256,6 +257,34 @@ export const hero = defineType({
         aspect: '1:1',
         minWidth: 800,
       }),
+      // One approved slot for supporting content under the heading (README, "Adding a hero slot"). The
+      // agency adds or removes it; clients edit what is in it. A new type is one schema object, one
+      // component and one entry in components/sections/hero/slots.tsx.
+      defineField({
+        name: 'supporting',
+        title: 'Extra content under the heading',
+        description: 'A statistics bar, a row of badges or a row of logos. One at most.',
+        type: 'array',
+        of: [
+          defineArrayMember({ type: 'statsBar' }),
+          defineArrayMember({ type: 'badgeRow' }),
+          defineArrayMember({ type: 'logoRow' }),
+        ],
+        // A client cannot add one, so an empty slot would be a field with nothing to do.
+        hidden: ({ currentUser, value }) =>
+          isClientView(currentUser) && !(value as unknown[] | undefined)?.length,
+        validation: (rule) => rule.max(1),
+        options: {
+          slot: true,
+          insertMenu: {
+            // Thumbnails live in public/hero-slot-previews/<typeName>.svg.
+            views: [
+              { name: 'grid', previewImageUrl: (type) => `/hero-slot-previews/${type}.svg` },
+              { name: 'list' },
+            ],
+          },
+        },
+      }),
       defineField({
         name: 'showGreeting',
         title: 'Greet returning visitors',
@@ -297,6 +326,8 @@ export const hero = defineType({
         hasPicture: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
         // Split and Editorial lay their text out themselves.
         fixesAlignment: (section) => ['split', 'editorial'].includes(layoutOf(section)),
+        // The hero has its own Image, so the shared Background image is not offered.
+        hasOwnBackgroundImage: () => true,
       },
     },
   ),

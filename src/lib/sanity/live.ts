@@ -82,6 +82,7 @@ export const TAGS = {
   announcement: 'announcement',
   cookieBanner: 'cookieBanner',
   designSettings: 'designSettings',
+  businessInfo: 'businessInfo',
   redirect: 'redirect',
   sharedSection: 'sharedSection',
   post: 'post',

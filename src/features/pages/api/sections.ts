@@ -1,9 +1,11 @@
 import {
   ctaFields,
   formFields,
+  heroSupportingFields,
   imageFields,
   portableTextFields,
   sectionStyleFields,
+  statItemFields,
   stripePriceFields,
 } from '@/lib/sanity/fragments'
 
@@ -32,6 +34,7 @@ export const heroFragment = /* groq */ `
     proportion,
     imageShape,
     secondaryImage { ${imageFields} },
+    supporting[] { ${heroSupportingFields} },
     showGreeting
   }
 `
@@ -86,6 +89,7 @@ export const logoCloudFragment = /* groq */ `
 export const testimonialsFragment = /* groq */ `
   _type == "testimonials" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
+    variant,
     title,
     items[] {
       _key,
@@ -156,6 +160,16 @@ export const newsletterSignupFragment = /* groq */ `
   }
 `
 
+export const statsFragment = /* groq */ `
+  _type == "stats" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    title,
+    intro,
+    items[] { ${statItemFields} }
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -172,6 +186,7 @@ const sectionsFragment = /* groq */ `
   ${formSectionFragment},
   ${pricingTableFragment},
   ${newsletterSignupFragment},
+  ${statsFragment},
   _type
 `
 
