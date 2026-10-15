@@ -42,7 +42,11 @@ const BASE_ID = /^versions.[^.]+./
  * `versions.<release>.<id>` documents replace the base document with that id.
  */
 function datasetFor(perspective, variant) {
-  const published = [...documents, ...(designPatch ? [designPatch] : [])]
+  // A served palette replaces the fixture's own designSettings (gradients only), like a real edit.
+  const published = [
+    ...(designPatch ? documents.filter((doc) => doc._id !== designPatch._id) : documents),
+    ...(designPatch ? [designPatch] : []),
+  ]
     .map((doc) =>
       settingsPatch && doc._id === 'siteIdentity' ? { ...doc, ...settingsPatch } : doc,
     )

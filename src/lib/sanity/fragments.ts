@@ -43,7 +43,10 @@ export const sectionStyleFields = /* groq */ `
   width,
   align,
   anchorId,
-  motion
+  motion,
+  gradient,
+  overlay,
+  image { ${imageFields} }
 `
 
 export const seoFields = /* groq */ `

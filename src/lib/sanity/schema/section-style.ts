@@ -6,18 +6,26 @@ import {
   type FieldDefinition,
 } from 'sanity'
 
+import { backgroundContrastProblem } from '@/lib/color/background-contrast'
+
 import { hiddenFromClients } from '../roles'
 import {
   ANCHOR_PATTERN,
   RESERVED_ANCHORS,
   SECTION_ALIGNS,
+  SECTION_OVERLAY_TITLES,
+  defaultOverlayFor,
   SECTION_SPACINGS,
   SECTION_TONE_TITLES,
   SECTION_WIDTHS,
 } from '../section-style-options'
+import { fetchBrandGradients } from './brand-gradients'
+import { imageField } from './image-field'
 import { presetField } from './preset-field'
 import {
   alignmentHidden,
+  backgroundImageHidden,
+  overlayHidden,
   registerSectionRules,
   sectionAtStylePath,
   staleAlignmentMessage,
@@ -31,6 +39,12 @@ import {
   MotionRevealThumbnail,
   MotionStaggerThumbnail,
 } from './thumbnails/animation-thumbnails'
+import {
+  OverlayLightThumbnail,
+  OverlayMediumThumbnail,
+  OverlayNoneThumbnail,
+  OverlayStrongThumbnail,
+} from './thumbnails/overlay-thumbnails'
 import {
   ToneAccentThumbnail,
   ToneAltThumbnail,
@@ -57,6 +71,10 @@ declare module 'sanity' {
   interface ObjectOptions {
     /** Show the object's fields without its own title and frame (the Studio field is in features/studio/components/frameless-field). */
     frameless?: boolean
+  }
+  interface StringOptions {
+    /** The field holds the slug of a brand gradient: the Studio draws the picker (features/studio/components/gradient-picker). */
+    gradientPicker?: boolean
   }
 }
 
@@ -107,6 +125,98 @@ export const sectionStyle = defineType({
         },
       ],
       initialValue: 'surface',
+    }),
+    defineField({
+      name: 'gradient',
+      title: 'Gradient',
+      description:
+        'A brand gradient behind the content, from Design settings. The background above still sets the text colours. A picture, if you add one, covers it.',
+      type: 'string',
+      // The picker is hidden altogether while Design settings has no gradients.
+      options: { gradientPicker: true },
+      validation: (rule) =>
+        rule
+          .custom(async (value, { getClient, parent }) => {
+            const style = parent as { tone?: string; image?: { asset?: unknown } } | undefined
+            if (!value || style?.image?.asset) return true
+            const gradients = await fetchBrandGradients(getClient({ apiVersion: '2025-01-01' }))
+            const chosen = gradients.find((gradient) => gradient.slug === value)
+            if (!chosen) {
+              return 'This gradient is no longer in Design settings, so the section shows no gradient. Choose another, or clear it.'
+            }
+            return (
+              backgroundContrastProblem({
+                tone: style?.tone,
+                hasImage: false,
+                gradientStops: chosen.stops,
+              })?.message ?? true
+            )
+          })
+          .warning(),
+    }),
+    imageField({
+      name: 'image',
+      title: 'Background image',
+      description:
+        'A picture behind the content, cropped to fill the section; the hotspot you set keeps the subject in view. The picture is decoration, so it needs no alt text.',
+      requireAlt: false,
+      minWidth: 2000,
+      orientation: 'landscape',
+      // The hero has its own Image.
+      hidden: backgroundImageHidden,
+      validation: (rule) =>
+        rule
+          .custom((value, { parent }) => {
+            const style = parent as { tone?: string; overlay?: string } | undefined
+            if (!(value as { asset?: unknown } | undefined)?.asset) return true
+            return (
+              backgroundContrastProblem({
+                tone: style?.tone,
+                hasImage: true,
+                overlay: style?.overlay,
+              })?.message ?? true
+            )
+          })
+          .warning(),
+    }),
+    presetField({
+      name: 'overlay',
+      title: 'Overlay',
+      description:
+        'Lays the background colour over the picture so the text stays readable. Dark backgrounds start at Medium, the others at Light.',
+      required: false,
+      options: [
+        {
+          value: 'none',
+          title: SECTION_OVERLAY_TITLES.none,
+          description: 'The picture as it is.',
+          thumbnail: OverlayNoneThumbnail,
+        },
+        {
+          value: 'light',
+          title: SECTION_OVERLAY_TITLES.light,
+          description: 'A gentle tint.',
+          thumbnail: OverlayLightThumbnail,
+        },
+        {
+          value: 'medium',
+          title: SECTION_OVERLAY_TITLES.medium,
+          description: 'Calms most pictures.',
+          thumbnail: OverlayMediumThumbnail,
+        },
+        {
+          value: 'strong',
+          title: SECTION_OVERLAY_TITLES.strong,
+          description: 'The picture is a texture.',
+          thumbnail: OverlayStrongThumbnail,
+        },
+      ],
+      // Only with a picture, and never on a layout that has its own.
+      hidden: overlayHidden,
+      defaultValue: ({ document, path }) =>
+        defaultOverlayFor(
+          (sectionAtStylePath(document, path)?.style as { tone?: string } | undefined)?.tone,
+        ),
     }),
     presetField({
       name: 'motion',
