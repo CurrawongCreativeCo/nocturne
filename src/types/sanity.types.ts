@@ -3804,6 +3804,305 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
   }>
 }
 
+// Source: src/features/studio/start-here/api/query.ts
+// Variable: START_HERE_QUERY
+// Query: {  "recent": *[!(_type match "system.**") && !(_type match "sanity.**") && !(_type match "assist.**")]    | order(_updatedAt desc)[0...60] {      _id,      _type,      _updatedAt,      "title": coalesce(title, name)    },  "drafts": *[_id in path("drafts.**") && !(_type match "sanity.**") && !(_type match "assist.**")]    | order(_updatedAt asc)[0...200] {      _id,      _type,      _updatedAt,      "title": coalesce(title, name)    },  "pages": *[_type == "page"] {    _id,    title,    pageBuilder  },  "sharedSections": *[_type == "sharedSection"] {    _id,    title,    section  },  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {    _id,    headerNav,    headerCta,    footerNav  }}
+export type START_HERE_QUERY_RESULT = {
+  recent: Array<
+    | {
+        _id: string
+        _type: 'announcement'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'author'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'businessInfo'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'category'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'cookieBanner'
+        _updatedAt: string
+        title: string | null
+      }
+    | {
+        _id: string
+        _type: 'designSettings'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'experiment'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'form'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'page'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'post'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'redirect'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'sharedSection'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'siteIdentity'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'siteNavigation'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'stripePrice'
+        _updatedAt: string
+        title: null
+      }
+  >
+  drafts: Array<
+    | {
+        _id: string
+        _type: 'announcement'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'author'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'businessInfo'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'category'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'cookieBanner'
+        _updatedAt: string
+        title: string | null
+      }
+    | {
+        _id: string
+        _type: 'designSettings'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'experiment'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'form'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'page'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'post'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'redirect'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'sharedSection'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'siteIdentity'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'siteNavigation'
+        _updatedAt: string
+        title: null
+      }
+    | {
+        _id: string
+        _type: 'stripePrice'
+        _updatedAt: string
+        title: null
+      }
+  >
+  pages: Array<{
+    _id: string
+    title: string
+    pageBuilder: Array<
+      | ({
+          _key: string
+        } & CtaBanner)
+      | ({
+          _key: string
+        } & Faq)
+      | ({
+          _key: string
+        } & FeaturesGrid)
+      | ({
+          _key: string
+        } & FormSection)
+      | ({
+          _key: string
+        } & Hero)
+      | ({
+          _key: string
+        } & LogoCloud)
+      | ({
+          _key: string
+        } & MediaText)
+      | ({
+          _key: string
+        } & NewsletterSignup)
+      | ({
+          _key: string
+        } & PricingTable)
+      | ({
+          _key: string
+        } & RichText)
+      | ({
+          _key: string
+        } & SharedSectionReference)
+      | ({
+          _key: string
+        } & Stats)
+      | ({
+          _key: string
+        } & Testimonials)
+    > | null
+  }>
+  sharedSections: Array<{
+    _id: string
+    title: string
+    section: Array<
+      | ({
+          _key: string
+        } & CtaBanner)
+      | ({
+          _key: string
+        } & Faq)
+      | ({
+          _key: string
+        } & FeaturesGrid)
+      | ({
+          _key: string
+        } & FormSection)
+      | ({
+          _key: string
+        } & Hero)
+      | ({
+          _key: string
+        } & LogoCloud)
+      | ({
+          _key: string
+        } & MediaText)
+      | ({
+          _key: string
+        } & NewsletterSignup)
+      | ({
+          _key: string
+        } & PricingTable)
+      | ({
+          _key: string
+        } & RichText)
+      | ({
+          _key: string
+        } & Stats)
+      | ({
+          _key: string
+        } & Testimonials)
+    >
+  }>
+  navigation: Array<
+    | {
+        _id: string
+        headerNav: null
+        headerCta: null
+        footerNav: null
+      }
+    | {
+        _id: string
+        headerNav: Array<
+          {
+            _key: string
+          } & NavItem
+        > | null
+        headerCta: Cta | null
+        footerNav: Array<
+          {
+            _key: string
+          } & NavItem
+        > | null
+      }
+  >
+}
+
 // Source: src/lib/sanity/schema/seo-preview/query.ts
 // Variable: SEO_PREVIEW_SETTINGS_QUERY
 // Query: *[_id == "siteIdentity"][0] { title, description, ogImage }
@@ -3860,6 +4159,7 @@ declare global {
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
     '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerText\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    },\n    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).\n    "business": *[_id == "businessInfo"][0] {\n      tradingName,\n      legalName,\n      abn,\n      phone,\n      publicEmail,\n      address { street, suburb, state, postcode },\n      timeZone,\n      businessType,\n      businessTypeOther,\n      geo { lat, lng },\n      openingHours[] { _key, days, opens, closes, closed },\n      specialHours[] { _key, date, closed, opens, closes, note },\n      serviceAreas,\n      socialLinks[] { _key, platform, url },\n      priceRange\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "consent": consent,\n    "design": design,\n    "business": business,\n    "allowAiCrawlers": identity.allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
+    '{\n  "recent": *[!(_type match "system.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt desc)[0...60] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "drafts": *[_id in path("drafts.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt asc)[0...200] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  }\n}': START_HERE_QUERY_RESULT
     '\n  *[_id == "siteIdentity"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }
 }

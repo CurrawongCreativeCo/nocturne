@@ -43,6 +43,7 @@ import {
   singletonDocumentActions,
   withoutSingletonTemplates,
 } from './src/features/studio/singletons'
+import { startHere } from './src/features/studio/start-here/plugin'
 import { structure } from './src/features/studio/structure'
 import { buildStudioTheme } from './src/features/studio/theme'
 import {
@@ -120,7 +121,7 @@ export default defineConfig({
             CLIENT_NEW_DOCUMENT_IDS,
           ),
   },
-  // Vision, AI settings and Content health are agency-only; clients open on Presentation.
+  // Vision, AI settings and Content health are agency-only; clients open on Start here, then Presentation.
   tools: (prev, context) => filterTools(prev, currentAudience(context.currentUser)),
   plugins: [
     structureTool({ structure }),
@@ -129,6 +130,7 @@ export default defineConfig({
       previewUrl: { previewMode: { enable: '/api/draft-mode/enable' } },
     }),
     visionTool({ defaultApiVersion: apiVersion }),
+    startHere(),
     contentHealth(),
     aiSettings(),
     assist({ __presets: assistPresets }),

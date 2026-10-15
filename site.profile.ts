@@ -23,6 +23,7 @@ export const siteProfileInput = defineSiteProfile({
   clientSections: [],
   help: {
     // guideUrl: 'https://example.com/guide',
+    // supportEmail: 'support@example.com', // shown under "Ask Currawong" in Start here
     // videos: { 'edit-a-page': 'https://example.com/videos/edit-a-page' },
   },
 })

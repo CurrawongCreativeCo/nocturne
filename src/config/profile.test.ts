@@ -29,6 +29,7 @@ describe('validateSiteProfile', () => {
           help: {
             guideUrl: 'https://example.com/guide',
             videos: { 'edit-a-page': 'https://x.test/v' },
+            supportEmail: 'help@example.com',
           },
         },
         { sectionNames: ['richText', 'faq', 'hero'] },
@@ -94,6 +95,19 @@ describe('validateSiteProfile', () => {
       'help.guideUrl must be an https URL.',
       'help.videos.edit-a-page must be an https URL.',
     ])
+  })
+})
+
+describe('help.supportEmail', () => {
+  it('must be an email address', () => {
+    expect(validateSiteProfile({ ...valid, help: { supportEmail: 'not an email' } })).toEqual([
+      'help.supportEmail must be an email address.',
+    ])
+  })
+
+  it('is kept by resolveSiteProfile', () => {
+    const { help } = resolveSiteProfile({ ...valid, help: { supportEmail: 'help@example.com' } })
+    expect(help.supportEmail).toBe('help@example.com')
   })
 })
 
