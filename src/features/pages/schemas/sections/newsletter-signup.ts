@@ -3,7 +3,8 @@ import { defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -19,6 +20,7 @@ export const newsletterSignup = defineType({
   type: 'object',
   icon: EnvelopeIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -54,10 +56,10 @@ export const newsletterSignup = defineType({
     { align: 'start' },
   ),
   preview: {
-    select: { title: 'title' },
-    prepare: ({ title }: { title?: string }) => ({
+    select: { title: 'title', tone: 'style.tone' },
+    prepare: ({ title, tone }: { title?: string; tone?: string }) => ({
       title: title || 'Untitled',
-      subtitle: 'Newsletter signup',
+      subtitle: joinSubtitle('Newsletter signup', toneTitle(tone)),
     }),
   },
 })

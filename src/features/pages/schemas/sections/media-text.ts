@@ -4,7 +4,8 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -20,6 +21,7 @@ export const mediaText = defineType({
   type: 'object',
   icon: SplitHorizontalIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -52,12 +54,22 @@ export const mediaText = defineType({
       accessField,
     ],
     { align: 'start' },
+    // The picture is always there, so Parallax always has something to move.
+    { rules: { type: 'mediaText', hasPicture: () => true } },
   ),
   preview: {
-    select: { title: 'title', media: 'image' },
-    prepare: ({ title, media }: { title?: string; media?: PreviewValue['media'] }) => ({
+    select: { title: 'title', media: 'image', tone: 'style.tone' },
+    prepare: ({
+      title,
+      media,
+      tone,
+    }: {
+      title?: string
+      media?: PreviewValue['media']
+      tone?: string
+    }) => ({
       title: title || 'Untitled',
-      subtitle: 'Image + text',
+      subtitle: joinSubtitle('Image + text', toneTitle(tone)),
       media,
     }),
   },

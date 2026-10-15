@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { normalisePresetOptions, normalisePresets } from './options'
+import { filterVisibleOptions, normalisePresetOptions, normalisePresets } from './options'
 
 describe('normalisePresetOptions', () => {
   it('keeps value, title, description and thumbnail', () => {
@@ -57,5 +57,27 @@ describe('normalisePresets', () => {
     ])
     expect(presets).toHaveLength(1)
     expect(presets[0]).toMatchObject({ value: 'a', set: { variant: 'split', 'style.tone': 'alt' } })
+  })
+})
+
+describe('filterVisibleOptions', () => {
+  const options = normalisePresetOptions(['none', 'reveal', 'parallax'])
+
+  it('offers everything when the field names no subset', () => {
+    expect(filterVisibleOptions(options, undefined, 'none')).toEqual(options)
+  })
+
+  it('offers only the named values', () => {
+    expect(filterVisibleOptions(options, ['none', 'reveal'], 'none').map((o) => o.value)).toEqual([
+      'none',
+      'reveal',
+    ])
+  })
+
+  it('keeps the stored value even when it is no longer offered', () => {
+    expect(filterVisibleOptions(options, ['none'], 'parallax').map((o) => o.value)).toEqual([
+      'none',
+      'parallax',
+    ])
   })
 })

@@ -1,7 +1,7 @@
-import { set, unset, type StringInputProps } from 'sanity'
+import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 
 import { assignRef } from './assign-ref'
-import { normalisePresetOptions } from './options'
+import { filterVisibleOptions, normalisePresetOptions } from './options'
 import { PickerView } from './picker-view'
 
 /**
@@ -9,13 +9,19 @@ import { PickerView } from './picker-view'
  * src/lib/sanity/schema/preset-field.ts). Replaces the radio list; the stored value is the same.
  */
 export function PresetPickerInput(props: StringInputProps) {
-  const { schemaType, value, onChange, readOnly, elementProps } = props
-  const options = normalisePresetOptions(schemaType.options?.list)
+  const { schemaType, value, onChange, readOnly, elementProps, path } = props
+  const document = useFormValue([])
+  const current = typeof value === 'string' ? value : null
+  const options = filterVisibleOptions(
+    normalisePresetOptions(schemaType.options?.list),
+    schemaType.options?.visibleOptions?.({ document, path }),
+    current,
+  )
 
   return (
     <PickerView
       options={options}
-      value={typeof value === 'string' ? value : null}
+      value={current}
       label={schemaType.title ?? schemaType.name}
       readOnly={readOnly}
       id={elementProps.id}

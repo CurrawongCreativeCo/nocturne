@@ -4,7 +4,8 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 interface PlanValue {
   highlighted?: boolean
@@ -24,6 +25,7 @@ export const pricingTable = defineType({
   type: 'object',
   icon: CreditCardIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -141,10 +143,10 @@ export const pricingTable = defineType({
     { align: 'center' },
   ),
   preview: {
-    select: { title: 'title', plans: 'plans' },
-    prepare: ({ title, plans }: { title?: string; plans?: unknown[] }) => ({
+    select: { title: 'title', plans: 'plans', tone: 'style.tone' },
+    prepare: ({ title, plans, tone }: { title?: string; plans?: unknown[]; tone?: string }) => ({
       title: title || 'Pricing table',
-      subtitle: `Pricing table · ${plans?.length ?? 0} plans`,
+      subtitle: joinSubtitle('Pricing table', `${plans?.length ?? 0} plans`, toneTitle(tone)),
     }),
   },
 })

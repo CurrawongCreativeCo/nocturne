@@ -16,9 +16,11 @@ describe('new section templates', () => {
   it('give the schema a Design group and the shared style field', () => {
     const schema = schemaTemplate(names)
     expect(schema).toContain('groups: sectionGroups')
+    expect(schema).toContain('fieldsets: sectionFieldsets')
     expect(schema).toContain('fields: sectionFields(')
     expect(schema).toContain("name: 'pricingTable'")
-    expect(schema).toContain("subtitle: 'Pricing table'")
+    expect(schema).toContain("joinSubtitle('Pricing table', toneTitle(tone))")
+    expect(schema).toContain("tone: 'style.tone'")
   })
 
   it('project the shared style in the GROQ fragment, keeping the members-only condition', () => {
@@ -41,7 +43,7 @@ describe('new section templates', () => {
   })
 
   it('add no variant field to a plain section', () => {
-    expect(schemaTemplate(names)).not.toContain('variant')
+    expect(schemaTemplate(names)).not.toContain('variantField')
     expect(fragmentTemplate(names)).not.toContain('variant')
     expect(galleryTemplate(names)).toContain("_key: 'pricing-table'")
   })
@@ -56,7 +58,9 @@ describe('new section templates with variants', () => {
     expect(schema).toContain("{ value: 'cards', title: 'Cards' },")
     expect(schema).toContain("{ value: 'full-bleed', title: 'Full bleed' },")
     expect(schema).toContain('variantField(PRICING_TABLE_VARIANTS)')
-    expect(schema).toContain("variantSubtitle('Pricing table', PRICING_TABLE_VARIANTS, variant)")
+    expect(schema).toContain(
+      "variantSubtitle('Pricing table', PRICING_TABLE_VARIANTS, variant, tone)",
+    )
   })
 
   it('project the variant in the fragment', () => {

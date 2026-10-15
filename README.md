@@ -86,15 +86,14 @@ Open http://localhost:3000/studio:
 - **Cookie banner:** in Website settings → _Cookie banner_ (agency only), edit the banner's title, message, privacy policy link and link text, and the one-line descriptions beside _Analytics_ and _Marketing_. Empty fields use sensible defaults. The banner offers **Accept all**, **Reject all** (equal prominence) and **Choose** (analytics and marketing separately; necessary cookies are always on), and a **Cookie settings** link in the footer reopens it so visitors can change their mind. It only exists when the developer has set up an analytics provider (see _Analytics and cookie consent_); with none, there is nothing to ask and no banner or footer link. Banner text changes appear like any other settings change. In Presentation the banner shows too, but no analytics ever load for editors.
 - **Search:** visitors search from the magnifier in the header (or Ctrl/Cmd+K) for a quick list, or at `/search?q=…` for the full results page. It looks through page titles, meta descriptions and the text of _Rich text_ and _Image + text_ sections, matching the start of each word ("web des" finds "Web design"), with title matches first and up to 20 results, each with a short excerpt. Pages with _Hide from search engines_ ticked and members-only pages are left out, as is text inside members-only sections and other sections (hero, FAQ, features…) and shared sections. A query is 2–80 characters (longer is cut). New or edited pages appear within a few minutes (webhook mode: right after the webhook, which expires every cached search). `search` is reserved, so a page can't use it as its first slug segment.
 - **Members-only content:** a page has a _Who can see this page_ field and every section a _Who can see this_ field (_Everyone_ or _Members only (signed in)_; empty means everyone). A members-only page asks visitors to sign in and shows nothing else, is left out of the sitemap, `/llms.txt` and search, and tells search engines not to index it. A members-only section on a public page is replaced by a "Members only" sign-in prompt for visitors who aren't signed in; the rest of the page is unchanged. A shared section is members-only when the section inside it is. The page's title is replaced by "Members only" until the visitor signs in; its URL, and any menu entry an editor adds for it, are not hidden. In Presentation and draft previews editors see everything. Who counts as a member is set by the developer (see _Members-only content_ below). `sign-in` and `sign-out` are reserved first slug segments; link to `/sign-out` (a button link or a footer menu item with a custom URL) wherever members should find it.
-- **Section design:** every section has a **Design** tab next to **Content** (agency use: it is for Currawong staff, and hiding it from clients arrives with the client mode task). It sets, for that one section:
-  - _Tone_: _Surface_ (the page colour), _Soft_ (a light grey band), _Dark_ or _Accent_. The text, buttons, cards and focus outlines inside follow the tone, so every combination keeps the contrast the design guarantees.
-  - _Space above and below_: _Compact_, _Default_ or _Spacious_. _Default_ is the section's usual spacing (a hero is more spacious than a rich text block), not one fixed size.
-  - _Content width_: _Narrow_, _Default_ (the section's usual width), _Wide_ or _Full width_ (edge to edge, no side margins).
-  - _Alignment_: _Start_ or _Centre_, for the headings, intro text and buttons.
-  - _Anchor_: a short name such as `pricing`, so a link to `/#pricing` (or `/about#pricing`) jumps to the section. Lowercase letters, numbers and hyphens, starting with a letter. Each anchor can be used once per page; Studio flags a repeat on the second section. Use it in a button's custom URL or a menu item.
-  - _Animation_: _None_, _Fade up_ (plays once as the section scrolls into view), _Staggered_ (its parts appear one after another) or _Parallax_ (a hero's background picture, or the picture beside the text in an image + text section, drifts a little as the page scrolls; other sections stay still). The first section on a page never fades or staggers, so the heading and main image appear immediately; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still.
+- **Section forms:** a section's form has three levels, so the common choices are pictures and the rare ones stay out of the way. Agency staff only: clients see just the **Content** tab (see _Studio roles and permissions_; this is the Studio view, not a lock).
+  - **Content tab.** The **Layout** picker comes first (sections with more than one layout, such as the hero), because the layout decides which fields matter. Then the content, showing only what the chosen layout uses: the hero's _Image side_ appears for _Split_ only, its _Small picture_ for _Editorial_ only, and _Image_ for every layout but _Editorial_. A field that is hidden keeps whatever was typed in it, so switching layout back brings it back.
+  - **Design tab.** _Background_ (_Surface_, _Soft_, _Dark_, _Accent_) is a row of swatches drawn with the site's real colours. _Animation_ (_None_, _Fade up_, _Staggered_, _Parallax_) is a picture picker; _Fade up_ plays once as the section scrolls into view, _Staggered_ shows its parts one after another, and _Parallax_ drifts a picture as the page scrolls. The first section on a page never fades or staggers, so its heading and main image appear immediately; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still.
+    - _Parallax_ is only offered where a section has a picture to move: the hero's _Overlay_ and _Full bleed_ layouts, and _Image + text_. If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
+    - **More layout options** (collapsed): _Space above and below_ (_Compact_, _Default_ or _Spacious_; _Default_ is the section's usual spacing), _Content width_ (_Narrow_, _Default_, _Wide_, or _Full width_ edge to edge), _Alignment_ (_Start_ or _Centre_ for headings, intro text and buttons) and _Anchor_ (a short name such as `pricing`, so a link to `/#pricing` jumps to the section; lowercase letters, numbers and hyphens, each once per page). _Alignment_ is left out on layouts that set their own (the hero's _Split_ and _Editorial_); a value left over from another layout stays visible with a warning, and **Reset value** in the field's menu clears it.
+  - **Advanced** (collapsed, in the Design tab): extra controls for the few sections that have them. It does not appear when the chosen layout has none.
 
-  A section with nothing set in the Design tab looks exactly as it did before this existed. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design tone colours the band around it.
+  Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Dark".
 
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **Image and text guidance:** image fields say what suits their spot ("Recommended: 2400 × 1600 px, landscape.") and show a yellow warning, never an error, when an uploaded picture is narrower than that or a different shape by more than 15%, for example "This image is 1200 × 1800 (portrait). This spot looks best with a landscape image at least 2400 px wide." You can still publish; the warning is a nudge to swap the picture. SVGs are never checked. Section titles and intro text warn the same way when they run past what the design handles (a hero title over 80 characters, other headings over 60–70, intro text over 200). Current targets: hero background 2400 px wide, landscape; _Image + text_ 1600 px at 4:3; testimonial and author portraits 800 px square; logos 400–600 px wide if not SVG (SVG preferred).
@@ -1054,23 +1053,24 @@ Administrator sees the agency view, can manage members, tokens, CORS and dataset
 **Two kinds of limit.** Sanity's roles are enforced by Sanity's servers; hiding things in the Studio is a
 convenience. Someone with the Editor role who knows the API can still do what the Studio hides.
 
-| What                                                                              | Agency (Administrator, Developer) | Editor                                                                                                                                     | Contributor         | Enforced by                                    |
-| --------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- | ---------------------------------------------- |
-| Publish, unpublish                                                                | Yes                               | Yes                                                                                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
-| Project settings, members, API tokens, CORS, datasets                             | Administrator only                | No                                                                                                                                         | No                  | **Sanity**                                     |
-| Edit, create and delete content through the API or Vision                         | Yes                               | Yes (any document)                                                                                                                         | Drafts only         | **Sanity**                                     |
-| Studio tools                                                                      | All                               | Presentation (first), Structure                                                                                                            | Same as Editor      | Studio                                         |
-| Vision, AI settings, Content health                                               | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| Sidebar                                                                           | Everything                        | Start here, Pages, Blog, Website settings (Identity & search, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
-| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| Cookie banner, and _Allow AI crawlers_ in Identity & search                       | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| _Who can see this_ (members-only) fields                                          | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| SEO _Hide from search engines_                                                    | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| A page's slug once it has a value                                                 | Editable                          | Read-only                                                                                                                                  | Read-only           | Studio                                         |
-| Sections in the _Add item_ menu                                                   | All                               | Approved list below                                                                                                                        | Approved list below | Studio                                         |
-| Delete, Duplicate on pages, posts and singletons                                  | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| _New document_ menu                                                               | Everything                        | Page templates, Post, Author, Category                                                                                                     | Same as Editor      | Studio                                         |
-| "Agency view" badge and client-view preview                                       | Yes                               | No                                                                                                                                         | No                  | Studio                                         |
+| What                                                                                                            | Agency (Administrator, Developer) | Editor                                                                                                                                     | Contributor         | Enforced by                                    |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- | ---------------------------------------------- |
+| Publish, unpublish                                                                                              | Yes                               | Yes                                                                                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
+| Project settings, members, API tokens, CORS, datasets                                                           | Administrator only                | No                                                                                                                                         | No                  | **Sanity**                                     |
+| Edit, create and delete content through the API or Vision                                                       | Yes                               | Yes (any document)                                                                                                                         | Drafts only         | **Sanity**                                     |
+| Studio tools                                                                                                    | All                               | Presentation (first), Structure                                                                                                            | Same as Editor      | Studio                                         |
+| Vision, AI settings, Content health                                                                             | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| Sidebar                                                                                                         | Everything                        | Start here, Pages, Blog, Website settings (Identity & search, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
+| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections                               | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| Cookie banner, and _Allow AI crawlers_ in Identity & search                                                     | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| _Who can see this_ (members-only) fields                                                                        | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| Section **Layout** picker, **Design** tab (background, animation, more layout options) and **Advanced** options | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| SEO _Hide from search engines_                                                                                  | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| A page's slug once it has a value                                                                               | Editable                          | Read-only                                                                                                                                  | Read-only           | Studio                                         |
+| Sections in the _Add item_ menu                                                                                 | All                               | Approved list below                                                                                                                        | Approved list below | Studio                                         |
+| Delete, Duplicate on pages, posts and singletons                                                                | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| _New document_ menu                                                                                             | Everything                        | Page templates, Post, Author, Category                                                                                                     | Same as Editor      | Studio                                         |
+| "Agency view" badge and client-view preview                                                                     | Yes                               | No                                                                                                                                         | No                  | Studio                                         |
 
 Because the Studio-only limits can be bypassed, don't rely on them to protect secrets. Form recipient
 addresses, for example, stay readable to any Editor through the API. Real enforcement needs custom roles
@@ -1098,7 +1098,7 @@ view** undoes it.
   (`businessInfo`) are already listed and appear once those items exist.
 - Hide a field from clients with `hidden: hiddenFromClients` (`@/lib/sanity/roles`), or lock it once set
   with `readOnly: lockedForClientsOnceSet`. For a field group use `hidden: hiddenFromClients` on the group.
-  Do this for a section's `sectionStyle` Design group too, once a site has one.
+  A section's **Design** group, `style` field, **Layout** picker and Advanced fields already use it (`sectionFields` in `src/lib/sanity/schema/section-style.ts`), so every section, and the ones `npm run new:section` writes, hide them from clients without any extra code.
 - New tools are visible to clients unless added to `AGENCY_ONLY_TOOLS` (`utils/tool-access.ts`).
 - Delete and Duplicate are removed on `CLIENT_PROTECTED_TYPES` (`utils/document-access.ts`) and singletons.
 
@@ -1241,9 +1241,39 @@ to a prerendered route.
 ### Section style
 
 Every page-builder section carries one shared `style` object (type `sectionStyle`,
-`src/lib/sanity/schema/section-style.ts`), edited in the section's **Design** field group (agency-only by
-convention for now; the client mode task hides it from clients). Sections list their own fields and
-`sectionFields([...], initial)` puts them in the Content group and adds `style` in Design.
+`src/lib/sanity/schema/section-style.ts`), edited in the section's **Design** field group, which is hidden from
+clients (UI only: see _Studio roles and permissions_). Sections list their own fields and
+`sectionFields([...], initial, { rules, advanced })` puts them in the Content group (the `variant` layout picker
+first), adds `style` in Design and puts any `advanced` fields in a collapsed Advanced fieldset. A section type also
+passes `groups: sectionGroups` and `fieldsets: sectionFieldsets`.
+
+**How the form is laid out.** `style` is drawn without a box of its own (`options.frameless` on `sectionStyle`, honoured
+by `FramelessAwareField`, the Studio-wide `form.components.field` in `sanity.config.ts`), and keeps its stored shape.
+`tone` ("Background") and `motion` ("Animation") are `presetField` pickers with thumbnails
+(`section-thumbnails.tsx`; the swatches are drawn from `src/styles/tokens.json`, so they follow the palette).
+`spacing`, `width`, `align` and `anchorId` sit in one collapsed `layoutOptions` fieldset.
+
+**Which options suit which layout.** The shared type can't see its section, so its `hidden` callbacks and validation
+find the section from the field's path (`sectionAtStylePath`, `src/lib/sanity/schema/section-form.ts`) and ask the
+rules the section registered through `sectionFields`' `rules` option, keyed by its `_type`:
+
+```ts
+sectionFields(content, initial, {
+  rules: {
+    type: 'hero',
+    hasPicture: (section) => ['overlay', 'full-bleed'].includes(section.variant ?? 'overlay'), // Parallax
+    fixesAlignment: (section) => ['split', 'editorial'].includes(section.variant ?? 'overlay'), // no Alignment
+  },
+})
+```
+
+A section with no `rules` has no picture (so no Parallax) and offers everything else. Parallax is withheld with the
+picker's `visibleOptions` (the stored value is always shown), Alignment with `hidden`, and both warn when a value
+from a previous layout is left behind. For fields that depend on the chosen layout, hide them with the layout
+(`hidden: ({ parent }) => parent?.variant !== 'split'`). `advanced` fields are agency-only (their own `hidden` is
+combined with `hiddenFromClients`) and the fieldset vanishes when none of them apply. Previews read as a sentence
+with `joinSubtitle` / `variantSubtitle` ("Hero · Split · Dark"). The rules are unit tested per section and layout
+(`section-form.test.ts`, `sections/section-form.test.ts`, `sections/section-fields.test.ts`).
 
 | Field      | Values                                     | What it does                                                                                  |
 | ---------- | ------------------------------------------ | --------------------------------------------------------------------------------------------- |
@@ -1364,6 +1394,8 @@ presetField({
 ```
 
 The stored value is the same string as a radio list, so existing content needs no migration. The options also live in `options.list`, so a Studio without the input still shows a plain radio list. A `thumbnail` is either a URL or static file path, or an inline React component that receives `{ scheme, selected }` and can follow light and dark (draw with `currentColor`). An option with no thumbnail shows its first letter.
+
+**Conditional options.** `presetField` also takes `hidden`, `fieldset`, `validation` and `visibleOptions`, a function from `{ document, path }` to the values to offer now (the section's Animation withholds Parallax where there is no picture). The stored value is always shown, so a choice that no longer fits stays visible rather than silently changing. The shared section design also uses `options.frameless` on an object type to drop the box Studio draws around a nested object (see _Section style_).
 
 **Preset mode.** Give an object type (a section) `options: presetsOption([...])` and the Studio shows a preset bar above its normal form. Each preset is `{ value, title, description?, thumbnail?, set }`, where `set` maps field paths to values and dots reach into objects:
 
@@ -1719,10 +1751,11 @@ A section can have several layouts that share one data contract: the same fields
 hero has four (`overlay`, `split`, `editorial`, `full-bleed`). Use a variant when editors should pick the
 look per use and every layout reads the same fields; use a new section when the content differs.
 
-- **The field.** `variant` is a radio list in the **Design** group (`variantField`,
-  `src/lib/sanity/schema/section-variant.ts`). The first variant is the default and reproduces the section's
+- **The field.** `variant` is the **Layout** picker, first in the **Content** tab and agency-only (`variantField`,
+  `src/lib/sanity/schema/section-variant.ts`). Give each variant a `description` and a `thumbnail` (an inline SVG
+  component like `hero-thumbnails.tsx`, or a static file); without one the card shows only the title. The first variant is the default and reproduces the section's
   original look, so content saved before variants existed renders as it always did. The Studio list subtitle
-  shows the choice (`variantSubtitle`: "Hero · Split").
+  shows the choice and the background (`variantSubtitle`: "Hero · Split · Dark").
 - **The folder.** `components/sections/hero/` holds `index.tsx` (the dispatcher, a `switch` on
   `stegaClean(data.variant)` whose `default` is the first variant, so an unknown value falls back safely) and one
   component per variant. `section-renderer.tsx` still imports `./sections/hero`. Shared markup (the hero's
@@ -1730,7 +1763,8 @@ look per use and every layout reads the same fields; use a new section when the 
   `SectionFrame` and styles with tokens only, and the first section's heading is the `<h1>` and its image is
   preloaded (`isFirst`). Keep the LCP element (the image or the heading) in the server-rendered HTML in each layout.
 - **Fields a variant needs.** Add them to the schema (hide them unless their variant is chosen, as `imagePosition`
-  and `secondaryImage` are on the hero) and to the fragment, then run `npm run typegen`. The hero's `backgroundImage`
+  and `secondaryImage` are on the hero, and `backgroundImage` is for Editorial, which has no big picture), keep them in
+  the Content tab, and say in the section's `rules` whether the variant has a picture (Parallax) or fixes its alignment and to the fragment, then run `npm run typegen`. The hero's `backgroundImage`
   is the one picture all variants share (behind the text, beside it, or full bleed).
 - **The rule: at most four variants per section.** More means two sections, or the layout is a one-off. A bespoke
   layout for one client belongs in that client's repo (a new component and variant there), never in the template.
@@ -1745,7 +1779,7 @@ npm run new:section pricing-table -- --variants cards,table,compact
 
 `--variants` takes two to four names (the first is the default). The generator makes
 `components/sections/pricing-table/` with `index.tsx` and one `<variant>.tsx` per name instead of a single file,
-adds the `variant` field (with a `PRICING_TABLE_VARIANTS` list), projects it in the fragment, and writes one gallery
+adds the `variant` field (with a `PRICING_TABLE_VARIANTS` list; add descriptions and thumbnails), projects it in the fragment, and writes one gallery
 placeholder per variant. Fill in each layout and give each gallery entry real content.
 
 The generator inserts code at the `// new-section:*` marker comments; keep them in place. To add a section

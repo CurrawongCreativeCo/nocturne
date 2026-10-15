@@ -3,7 +3,8 @@ import { defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -19,6 +20,7 @@ export const formSection = defineType({
   type: 'object',
   icon: EnvelopeIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -46,10 +48,10 @@ export const formSection = defineType({
     { align: 'start' },
   ),
   preview: {
-    select: { title: 'title', form: 'form.title' },
-    prepare: ({ title, form }: { title?: string; form?: string }) => ({
+    select: { title: 'title', form: 'form.title', tone: 'style.tone' },
+    prepare: ({ title, form, tone }: { title?: string; form?: string; tone?: string }) => ({
       title: title || form || 'Form',
-      subtitle: form ? `Form · ${form}` : 'Form · none chosen',
+      subtitle: joinSubtitle('Form', form ?? 'none chosen', toneTitle(tone)),
     }),
   },
 })
