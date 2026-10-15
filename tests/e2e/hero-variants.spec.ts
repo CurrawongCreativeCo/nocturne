@@ -15,7 +15,14 @@ const PLACEHOLDER_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" 
 
 const heroIds = galleryIds.filter((id: string) => id.startsWith('hero-'))
 // The first image is the LCP candidate; these layouts have one in the gallery.
-const withImage = ['hero-overlay', 'hero-split-right', 'hero-split-left', 'hero-full-bleed']
+const withImage = [
+  'hero-overlay',
+  'hero-split-right',
+  'hero-split-left',
+  'hero-full-bleed',
+  'hero-parallax',
+  'hero-full-bleed-parallax',
+]
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://cdn.sanity.io/**', (route) =>

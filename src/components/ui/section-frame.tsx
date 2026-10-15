@@ -1,9 +1,13 @@
-import { Children, type ReactNode } from 'react'
+import { Children, Fragment, type ReactNode } from 'react'
 
 import { MotionDiv } from '@/components/motion/motion-elements'
+import { LazyParallax } from '@/components/motion/parallax-lazy'
 import { fadeUp, revealChild, revealInView, staggerContainer } from '@/components/motion/presets'
 
 import { resolveSectionStyle, type SectionDefaults, type SectionStyleInput } from './section-style'
+
+/** Gentle: the picture drifts a few percent of its height, not enough to pull the eye from the text. */
+const MEDIA_PARALLAX_SPEED = 0.15
 
 interface Props {
   /** The section's `style` as the query returns it. */
@@ -18,6 +22,11 @@ interface Props {
   className?: string
   /** Drawn behind the content, directly inside the <section> (a hero's background image). */
   background?: ReactNode
+  /**
+   * The section's picture, when it has one beside its text: rendered after `children`. With the
+   * `parallax` preset it drifts gently as the page scrolls; other presets treat it like any child.
+   */
+  media?: ReactNode
   'aria-labelledby'?: string
   children: ReactNode
 }
@@ -28,8 +37,8 @@ interface Props {
  * preset, all from the section's shared `style`. A section supplies only its content.
  *
  * Motion plays once when the content scrolls into view. `reveal` fades the container up, `stagger`
- * fades its direct children up one after another, `parallax` is still static (it arrives with the
- * parallax task). Content stays visible without JavaScript (globals.css, `[data-reveal]`).
+ * fades its direct children up one after another, `parallax` gives the `media` slot a gentle
+ * Parallax (a section with no media stays still; a hero draws its own, see ParallaxImage). Content stays visible without JavaScript (globals.css, `[data-reveal]`).
  */
 export function SectionFrame({
   style,
@@ -38,12 +47,25 @@ export function SectionFrame({
   containerClassName = '',
   className = '',
   background,
+  media,
   'aria-labelledby': labelledBy,
   children,
 }: Props) {
   const resolved = resolveSectionStyle(style, defaults)
   const motion = isFirst ? 'none' : resolved.motion
   const containerClass = `${resolved.containerClass} ${containerClassName}`.trim()
+  const mediaNode =
+    media && motion === 'parallax' ? (
+      <LazyParallax speed={MEDIA_PARALLAX_SPEED}>{media}</LazyParallax>
+    ) : (
+      media
+    )
+  const content = (
+    <>
+      {children}
+      {mediaNode}
+    </>
+  )
 
   return (
     <section
@@ -55,16 +77,17 @@ export function SectionFrame({
       {background}
       {motion === 'reveal' ? (
         <MotionDiv {...revealInView(fadeUp)} className={containerClass}>
-          {children}
+          {content}
         </MotionDiv>
       ) : motion === 'stagger' ? (
         <MotionDiv {...revealInView(staggerContainer)} className={containerClass}>
-          {Children.map(children, (child) => (
-            <MotionDiv {...revealChild()}>{child}</MotionDiv>
-          ))}
+          {Children.map(
+            [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
+            (child) => (child ? <MotionDiv {...revealChild()}>{child}</MotionDiv> : null),
+          )}
         </MotionDiv>
       ) : (
-        <div className={containerClass}>{children}</div>
+        <div className={containerClass}>{content}</div>
       )}
     </section>
   )

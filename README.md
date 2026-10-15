@@ -81,7 +81,7 @@ Open http://localhost:3000/studio:
   - _Content width_: _Narrow_, _Default_ (the section's usual width), _Wide_ or _Full width_ (edge to edge, no side margins).
   - _Alignment_: _Start_ or _Centre_, for the headings, intro text and buttons.
   - _Anchor_: a short name such as `pricing`, so a link to `/#pricing` (or `/about#pricing`) jumps to the section. Lowercase letters, numbers and hyphens, starting with a letter. Each anchor can be used once per page; Studio flags a repeat on the second section. Use it in a button's custom URL or a menu item.
-  - _Animation_: _None_, _Fade up_ (plays once as the section scrolls into view), _Staggered_ (its parts appear one after another) or _Parallax_ (still the same as _None_ for now). The first section on a page never animates, so the heading and main image appear immediately, and visitors who ask for less motion or have JavaScript off see everything at once.
+  - _Animation_: _None_, _Fade up_ (plays once as the section scrolls into view), _Staggered_ (its parts appear one after another) or _Parallax_ (a hero's background picture, or the picture beside the text in an image + text section, drifts a little as the page scrolls; other sections stay still). The first section on a page never fades or staggers, so the heading and main image appear immediately; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still.
 
   A section with nothing set in the Design tab looks exactly as it did before this existed. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design tone colours the band around it.
 
@@ -1063,6 +1063,9 @@ downloaded after first render. It lives in `src/components/motion/`:
 | `motion-provider.tsx` | `MotionConfig reducedMotion="user"` + `LazyMotion strict`. Mounted in `SiteShell`, so it wraps the public site and `/ab/*`, never `/studio`.                                                                       |
 | `features.ts`         | Re-exports `domMax`; imported lazily by the provider.                                                                                                                                                              |
 | `motion-elements.tsx` | `MotionDiv`, `MotionSection`, `MotionArticle`, `MotionUl`, `MotionLi`, `MotionSpan`, `MotionP`, `MotionFigure` (all `m.*`).                                                                                        |
+| `parallax.tsx`        | `Parallax` (client): moves its children vertically as they scroll through the viewport. See _Parallax_ below.                                                                                                      |
+| `parallax-lazy.tsx`   | `LazyParallax`: `Parallax` behind `next/dynamic`. Server components import this one, so the scroll code is downloaded only by pages that render a parallax section.                                                |
+| `parallax-image.tsx`  | `ParallaxImage` (server): a `SanityImage` in a clipping frame, inside a `Parallax`, scaled so no edge shows. Used by the hero backgrounds.                                                                         |
 | `presets.ts`          | Variants `fadeIn`, `fadeUp`, `scaleIn`, `staggerContainer`, `staggerItem` and the prop helpers `revealOnLoad`, `revealInView`, `revealChild`. Durations, easing and distance come from the `motion` design tokens. |
 
 **Rules**
@@ -1079,6 +1082,42 @@ downloaded after first render. It lives in `src/components/motion/`:
 - Clean up every listener, observer and timer in client code (the memory test).
 - The end-to-end tests run with reduced motion by default so axe and screenshots never see an element mid-fade;
   `tests/e2e/motion.spec.ts` turns animation back on to check the reveal.
+
+**Parallax**
+
+`Parallax` moves its content up or down as the element crosses the screen, and `ParallaxImage` does the same for a Sanity
+picture behind a hero. Editors switch it on with a section's **Design → Animation → Parallax**; developers use it directly:
+
+```tsx
+<ParallaxImage image={data.backgroundImage} sizes="100vw" speed={0.25} className="object-cover" />
+<Parallax speed={0.15}>{picture}</Parallax>
+```
+
+- **When to use it.** A large picture behind text (a hero) or one picture beside text. Not for text, forms, tables or
+  anything a visitor has to read while it moves, and not on every section: one or two on a page. The hero overlay and
+  full-bleed layouts and the image + text section support it; `SectionFrame` has a `media` slot for a new section's picture.
+- **Speed** is -1 to 1. Positive drifts with the scroll but slower, like a distant background; negative moves faster than
+  the page, like a foreground. **0.1 to 0.15** is gentle (picture beside text; the preset uses 0.15), **0.25** suits a
+  hero (the default for `ParallaxImage`), **0.4** is clearly visible, and above **0.5** it gets dramatic and the picture
+  must be scaled up a lot. The picture travels `speed` times 20% of its own height at `md` and up, and 10% below it.
+- **No gaps.** `ParallaxImage` scales its picture by exactly twice the travel (CSS, from the speed), so an edge never shows.
+  Use a picture with spare room at the edges for high speeds; the extra scale crops it.
+- **`from`.** `viewport` (default) moves from one end of its range to the other as the element crosses the screen and rests
+  in the middle. A first section is already on screen at scroll 0, so it uses `from="top"`: it rests unshifted at the top of
+  the page and moves as it scrolls away. The heroes choose this themselves.
+- **Reduced motion and no JavaScript.** The picture is never moved and never scaled for visitors who ask for less motion
+  (`useReducedMotion`, plus the scale is behind `prefers-reduced-motion: no-preference`), nor without JavaScript.
+- **How it stays cheap.** Transform only (a `translateY` of a percentage of the element's own height, so nothing is
+  measured and there is no resize observer); `will-change: transform` only while the element is on screen; no scroll
+  listener of ours (`useScroll`, which uses the browser's scroll timeline where it has one). The server HTML and the
+  hydration render carry no transform; it is attached right after, and first painted when the scroll position changes, so
+  nothing jumps (CLS stays at 0).
+- **Import `LazyParallax`, not `Parallax`, from a server component.** A client component a server component imports is
+  added to every page that imports that server component, and `SectionFrame` is on every page. `LazyParallax`
+  (`parallax-lazy.tsx`) is the same component behind `next/dynamic`: server-rendered as usual, with its 6.6 KB gzipped
+  chunk fetched only on pages that have a parallax section. `ParallaxImage` and `SectionFrame` already do this.
+- It needs the `MotionProvider` (the public site has it; `/section-gallery` and Studio do not), so the section gallery
+  shows parallax sections still. `tests/e2e/parallax.spec.ts` covers movement on the `/parallax` fixture page.
 
 **Adding a motion element to a server component**
 
@@ -1098,10 +1137,12 @@ such as `onDragEnd` cannot cross the server/client boundary: write a small clien
 
 **Measured sizes** (motion 14.2.0, Turbopack production build, gzip level 9, 1 KB = 1000 bytes)
 
-| Part                                                        | Size    |
-| ----------------------------------------------------------- | ------- |
-| Added to the home page's initial scripts (LazyMotion + `m`) | 16.5 KB |
-| `domMax` chunk, loaded after first render (not in the HTML) | 33.9 KB |
+| Part                                                                            | Size    |
+| ------------------------------------------------------------------------------- | ------- |
+| Added to the home page's initial scripts (LazyMotion + `m`)                     | 16.5 KB |
+| `domMax` chunk, loaded after first render (not in the HTML)                     | 33.9 KB |
+| Parallax: `LazyParallax` wrapper added to the home page's initial scripts       | 0.4 KB  |
+| Parallax chunk (`useScroll` and friends), only on pages with a parallax section | 6.6 KB  |
 
 The ~5 KB usually quoted for LazyMotion + `m` holds for esbuild (5.7 KB here), but Turbopack keeps much more of the
 core. That is why the home page JavaScript budget went from 200 KB to 220 KB (see _Performance budgets_).
@@ -1158,7 +1199,8 @@ the global `:focus-visible` rule draws. Buttons are drawn for a background throu
 
 **Motion presets.** `reveal` wraps the container in `MotionDiv` with `revealInView(fadeUp)`; `stagger` wraps each direct
 child of the frame in a `revealChild()` item under a `staggerContainer`, so give a section sensible top-level parts
-(a header, a list); `parallax` renders still until the parallax task. All of it keeps content visible without
+(a header, a list); `parallax` gives the frame's `media` slot a gentle `Parallax` (a section that doesn't pass `media` stays still; the hero
+backgrounds draw their own `ParallaxImage`, see _Motion_). All of it keeps content visible without
 JavaScript and with reduced motion (see _Motion_).
 
 **Tests.** `section-style.test.ts` covers the mapping; `tests/e2e/section-style.spec.ts` checks tones (axe on every tone for

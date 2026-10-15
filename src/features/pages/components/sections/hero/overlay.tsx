@@ -1,3 +1,4 @@
+import { ParallaxImage } from '@/components/motion/parallax-image'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -16,7 +17,7 @@ const DEFAULTS: SectionDefaults = {
 
 /** The image sits behind the text under a scrim (the image is dimmed, the tone's colour shows through). */
 export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
-  const { tone, block, text, justify } = sectionTraits(data.style, DEFAULTS)
+  const { tone, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame
@@ -26,13 +27,23 @@ export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'h
       className="overflow-hidden"
       containerClassName={text}
       background={
-        <SanityImage
-          image={data.backgroundImage}
-          fill
-          preload={isFirst}
-          sizes="100vw"
-          className="-z-10 object-cover opacity-40"
-        />
+        motion === 'parallax' ? (
+          <ParallaxImage
+            image={data.backgroundImage}
+            preload={isFirst}
+            sizes="100vw"
+            from={isFirst ? 'top' : 'viewport'}
+            className="object-cover opacity-40"
+          />
+        ) : (
+          <SanityImage
+            image={data.backgroundImage}
+            fill
+            preload={isFirst}
+            sizes="100vw"
+            className="-z-10 object-cover opacity-40"
+          />
+        )
       }
     >
       <HeroText

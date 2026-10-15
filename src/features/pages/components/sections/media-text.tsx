@@ -25,6 +25,14 @@ export function MediaText({ data, isFirst }: SectionProps<'mediaText'>) {
       defaults={defaults}
       isFirst={isFirst}
       // Swap the columns on wide screens by order, so the text stays first in the reading order.
+      media={
+        <SanityImage
+          image={image}
+          width={1200}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="w-full rounded-card object-cover"
+        />
+      }
       containerClassName={`grid items-center gap-12 lg:gap-16 ${hasImage ? 'lg:grid-cols-2' : ''} ${imageFirst ? 'lg:[&>:first-child]:order-2 lg:[&>:last-child]:order-1' : ''}`}
     >
       <div className={text}>
@@ -35,12 +43,6 @@ export function MediaText({ data, isFirst }: SectionProps<'mediaText'>) {
         <RichText value={body} className="mt-4 text-lead text-ink-muted" />
         <CtaGroup ctas={ctas} surface={ctaSurfaceFor(tone)} className={`mt-8 ${justify}`} />
       </div>
-      <SanityImage
-        image={image}
-        width={1200}
-        sizes="(min-width: 1024px) 50vw, 100vw"
-        className="w-full rounded-card object-cover"
-      />
     </SectionFrame>
   )
 }

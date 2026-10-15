@@ -1,3 +1,4 @@
+import { ParallaxImage } from '@/components/motion/parallax-image'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -17,7 +18,7 @@ const DEFAULTS: SectionDefaults = {
  * left. The panel takes the tone's colours, so its text keeps its contrast over any picture.
  */
 export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
-  const { tone, block, text, justify } = sectionTraits(data.style, DEFAULTS)
+  const { tone, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame
@@ -26,13 +27,23 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
       isFirst={isFirst}
       className="flex min-h-[28rem] items-end overflow-hidden lg:min-h-[40rem]"
       background={
-        <SanityImage
-          image={data.backgroundImage}
-          fill
-          preload={isFirst}
-          sizes="100vw"
-          className="-z-10 object-cover"
-        />
+        motion === 'parallax' ? (
+          <ParallaxImage
+            image={data.backgroundImage}
+            preload={isFirst}
+            sizes="100vw"
+            from={isFirst ? 'top' : 'viewport'}
+            className="object-cover"
+          />
+        ) : (
+          <SanityImage
+            image={data.backgroundImage}
+            fill
+            preload={isFirst}
+            sizes="100vw"
+            className="-z-10 object-cover"
+          />
+        )
       }
     >
       <div className={`max-w-measure-narrow rounded-card bg-surface p-8 text-ink lg:p-10 ${text}`}>
