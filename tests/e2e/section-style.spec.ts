@@ -57,18 +57,22 @@ test.describe('tones', () => {
     }
   }
 
-  test('dark tones recolour the text and switch the focus outline to the light ink', async ({
+  test('dark tones recolour the text and switch the focus outline to their own ink', async ({
     page,
   }) => {
     await page.goto(GALLERY)
     const root = (name: string) => variable(page, 'html', name)
     const inkInverse = await root('--color-ink-inverse')
+    const accentInk = await root('--color-accent-ink')
     const focus = await root('--color-focus')
 
     for (const tone of ['inverse', 'accent']) {
       const section = `section[data-tone="${tone}"][id="features-grid-style-${tone}"]`
       expect(await variable(page, section, '--color-ink')).not.toBe(await root('--color-ink'))
-      expect(await variable(page, section, '--color-focus')).toBe(inkInverse)
+      // Each dark tone's outline is the ink that contrasts with its own surface.
+      expect(await variable(page, section, '--color-focus')).toBe(
+        tone === 'inverse' ? inkInverse : accentInk,
+      )
     }
     for (const tone of ['surface', 'alt']) {
       const section = `section[data-tone="${tone}"][id="features-grid-style-${tone}"]`

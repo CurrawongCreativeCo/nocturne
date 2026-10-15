@@ -9,7 +9,7 @@ interface Props {
 }
 
 const button =
-  'inline-flex items-center justify-center rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse transition-colors hover:bg-surface-inverse/85'
+  'inline-flex items-center justify-center rounded-button bg-cta px-6 py-3 text-small font-semibold text-cta-ink transition-colors hover:bg-cta/85'
 const input = 'mt-1 block w-full rounded-control border border-line-strong px-3 py-2 text-ink'
 
 export function SignInView({ callbackUrl: rawCallbackUrl, error }: Props) {

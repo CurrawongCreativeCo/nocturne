@@ -105,4 +105,26 @@ describe('SETTINGS_QUERY', () => {
       allowAiCrawlers: true,
     })
   })
+
+  it('folds in the design settings, and leaves them null when there are none', async () => {
+    expect(await run(singletons)).toMatchObject({ design: null })
+    const design = {
+      _id: 'designSettings',
+      _type: 'designSettings',
+      appearance: 'dark',
+      primary: '#0b3d91',
+      secondary: '#ffd166',
+      gradients: [{ _key: 'a', name: 'Dusk', angle: 90, stops: ['#112233', '#445566'] }],
+      _updatedAt: 'not selected',
+    }
+    expect(await run([...singletons, design])).toMatchObject({
+      design: {
+        appearance: 'dark',
+        primary: '#0b3d91',
+        secondary: '#ffd166',
+        gradients: [{ name: 'Dusk', angle: 90, stops: ['#112233', '#445566'] }],
+      },
+    })
+    expect(await run([design])).toMatchObject({ design: { primary: '#0b3d91' } })
+  })
 })

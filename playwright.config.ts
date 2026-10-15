@@ -4,6 +4,10 @@ import { APP_ENV, APP_PORT, FAKE_SANITY_PORT, REJECTED_CONSENT } from './tests/e
 
 const CI = Boolean(process.env.CI)
 const EXPERIMENTS_SPEC = /experiments\.spec\.ts/
+// Switch the colours the whole fake site is served in, so each runs alone (see the projects below).
+const DESIGN_SPEC = /design-settings\.spec\.ts/
+const DESIGN_VISUAL_SPEC = /design-settings-visual\.spec\.ts/
+const ISOLATED_SPECS = [EXPERIMENTS_SPEC, DESIGN_SPEC, DESIGN_VISUAL_SPEC]
 
 /**
  * End-to-end tests: a production build of the site, pointed at a fake Content Lake that serves
@@ -40,14 +44,29 @@ export default defineConfig({
     },
   },
   projects: [
-    { name: 'desktop', testIgnore: EXPERIMENTS_SPEC, use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', testIgnore: EXPERIMENTS_SPEC, use: { ...devices['Pixel 7'] } },
+    { name: 'desktop', testIgnore: ISOLATED_SPECS, use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', testIgnore: ISOLATED_SPECS, use: { ...devices['Pixel 7'] } },
     {
       // Starts and stops a site-wide A/B test, which makes the proxy rewrite every page request (a
       // form POST included). It runs alone, after everything else, so no other test sees it running.
       name: 'experiments',
       testMatch: EXPERIMENTS_SPEC,
       dependencies: ['desktop', 'mobile'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Serves the Studio's brand colours (a sample palette, light and dark) to the whole site, which
+      // would change every other test's colours. It runs alone, after the A/B tests, then restores them.
+      name: 'design',
+      testMatch: DESIGN_SPEC,
+      dependencies: ['experiments'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // The same palettes as screenshots; after `design` so the two never switch colours at once.
+      name: 'design-visual',
+      testMatch: DESIGN_VISUAL_SPEC,
+      dependencies: ['design'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

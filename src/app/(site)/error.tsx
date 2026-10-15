@@ -35,7 +35,7 @@ export default function PageError({
         <button
           type="button"
           onClick={reset}
-          className="rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
+          className="rounded-button bg-cta px-6 py-3 text-small font-semibold text-cta-ink hover:bg-cta/85"
         >
           Try again
         </button>

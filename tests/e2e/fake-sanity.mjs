@@ -12,6 +12,7 @@ import { handleStripe } from './fake-stripe.mjs'
 import {
   aiCrawlersBlocked,
   customBrowserIcon,
+  designSettingsVariants,
   documents,
   experimentRunning,
   releaseVersions,
@@ -23,6 +24,9 @@ const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
 /** Named variants of the siteIdentity document the tests switch between; `null` serves the fixture as is. */
 const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon }
 let settingsPatch = null
+
+/** The designSettings variant being served (`light` or `dark`), or null for none; POST /__fixture/design/<off|light|dark>. */
+let designPatch = null
 
 /** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */
 let experimentPatch = null
@@ -38,7 +42,7 @@ const BASE_ID = /^versions.[^.]+./
  * `versions.<release>.<id>` documents replace the base document with that id.
  */
 function datasetFor(perspective, variant) {
-  const published = documents
+  const published = [...documents, ...(designPatch ? [designPatch] : [])]
     .map((doc) =>
       settingsPatch && doc._id === 'siteIdentity' ? { ...doc, ...settingsPatch } : doc,
     )
@@ -73,6 +77,12 @@ createServer(async (req, res) => {
   const variant = /^\/__fixture\/settings\/(\w+)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && variant && variant in SETTINGS_VARIANTS) {
     settingsPatch = SETTINGS_VARIANTS[variant]
+    res.writeHead(204).end()
+    return
+  }
+  const design = /^\/__fixture\/design\/(off|light|dark)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && design) {
+    designPatch = design === 'off' ? null : designSettingsVariants[design]
     res.writeHead(204).end()
     return
   }
