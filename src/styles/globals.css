@@ -19,6 +19,30 @@
     outline-offset: 2px;
   }
 
+  /*
+   * Cursors. Tailwind 4's preflight leaves buttons with the arrow, so say here, once, which controls
+   * are clickable (no per-component `cursor-pointer`). Text inputs keep the browser's text cursor.
+   */
+  a[href],
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary,
+  label[for],
+  select:not(:disabled),
+  input:is([type='checkbox'], [type='radio'], [type='submit'], [type='button'], [type='reset']):not(
+      :disabled
+    ) {
+    cursor: pointer;
+  }
+
+  /* Two classes of specificity, so it beats the pointer rules above for aria-disabled links and buttons. */
+  :is(a, button, input, select, textarea, summary, label, [role='button'], [aria-disabled]):is(
+    :disabled,
+    [aria-disabled='true']
+  ) {
+    cursor: not-allowed;
+  }
+
   h1,
   h2,
   h3,
@@ -52,5 +76,17 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/*
+ * Disabled controls look disabled (muted tokens) and ignore hover. This sits in `utilities`, after
+ * Tailwind's own utilities, because a base rule would lose to `bg-*` and `hover:bg-*` classes; the
+ * selector's specificity ties with `hover:` utilities and wins on source order. Opacity is left alone.
+ */
+@layer utilities {
+  :is(button, input, select, textarea, [role='button']):is(:disabled, [aria-disabled='true']) {
+    background-color: var(--color-surface-alt);
+    color: var(--color-ink-muted);
   }
 }

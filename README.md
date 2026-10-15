@@ -1147,6 +1147,20 @@ such as `onDragEnd` cannot cross the server/client boundary: write a small clien
 The ~5 KB usually quoted for LazyMotion + `m` holds for esbuild (5.7 KB here), but Turbopack keeps much more of the
 core. That is why the home page JavaScript budget went from 200 KB to 220 KB (see _Performance budgets_).
 
+### Cursors and interaction feedback
+
+Cursors come from `src/styles/globals.css` (`@layer base`, "Cursors"), not from component classes, because Tailwind 4's
+preflight leaves buttons with the arrow. Links, enabled buttons, `[role="button"]`, `summary`, `label[for]`, selects and
+checkbox, radio, submit, button and reset inputs get `cursor: pointer`; disabled controls and `[aria-disabled="true"]`
+get `not-allowed`; text fields keep the text cursor. Don't add `cursor-pointer` to a component.
+
+Disabled controls also switch to the muted tokens (`surface-alt` background, `ink-muted` text) and ignore hover, from one
+rule at the end of `globals.css`. Use `disabled` or `aria-disabled="true"` and the look follows; don't add `disabled:`
+colour classes. `CtaLink` has the shared press feedback: one `--duration-fast` transition, an `active:` colour and a
+2% scale-down, all removed under reduced motion. A card that leads somewhere uses a stretched link (the title link with
+`after:absolute after:inset-0`, see `PostCard`), so the whole card is clickable with one link in the accessibility tree.
+`tests/e2e/cursors.spec.ts` checks the computed cursor on a sample of controls.
+
 ### Section style
 
 Every page-builder section carries one shared `style` object (type `sectionStyle`,

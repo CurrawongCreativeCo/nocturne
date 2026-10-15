@@ -105,7 +105,7 @@ export function AnnouncementBar({
             onClick={() => {
               dismiss(key)
             }}
-            className="-my-1 -mr-2 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-control hover:bg-ink-inverse/15 focus-visible:outline-ink-inverse"
+            className="-my-1 -mr-2 flex size-8 shrink-0 items-center justify-center rounded-control hover:bg-ink-inverse/15 focus-visible:outline-ink-inverse"
           >
             <svg
               aria-hidden

@@ -46,7 +46,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
 
   return (
     <details ref={ref} className="group md:hidden">
-      <summary className="flex size-10 cursor-pointer list-none items-center justify-center rounded-control hover:bg-surface-alt [&::-webkit-details-marker]:hidden">
+      <summary className="flex size-10 list-none items-center justify-center rounded-control hover:bg-surface-alt [&::-webkit-details-marker]:hidden">
         <span className="sr-only">Menu</span>
         <svg
           aria-hidden

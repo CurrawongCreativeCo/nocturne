@@ -10,15 +10,20 @@ import type { CtaData } from '@/types/sanity'
 const variants = {
   dark: {
     primary:
-      'bg-ink-inverse text-surface-inverse hover:bg-ink-inverse/85 focus-visible:outline-ink-inverse',
+      'bg-ink-inverse text-surface-inverse hover:bg-ink-inverse/85 active:bg-ink-inverse/70 focus-visible:outline-ink-inverse',
     secondary:
-      'ring-1 ring-inset ring-ink-inverse/40 text-ink-inverse hover:bg-ink-inverse/10 focus-visible:outline-ink-inverse',
+      'ring-1 ring-inset ring-ink-inverse/40 text-ink-inverse hover:bg-ink-inverse/10 active:bg-ink-inverse/20 focus-visible:outline-ink-inverse',
   },
   light: {
-    primary: 'bg-surface-inverse text-ink-inverse hover:bg-surface-inverse/85',
-    secondary: 'ring-1 ring-inset ring-line text-ink hover:bg-surface-alt',
+    primary:
+      'bg-surface-inverse text-ink-inverse hover:bg-surface-inverse/85 active:bg-surface-inverse/70',
+    secondary: 'ring-1 ring-inset ring-line text-ink hover:bg-surface-alt active:bg-line',
   },
 } as const
+
+/** One short transition (motion tokens) and a small press. None of it under reduced motion. */
+const feedback =
+  'transition-[color,background-color,transform] duration-(--duration-fast) ease-out motion-safe:active:scale-[0.98] motion-reduce:transition-none'
 
 const sizes = { md: 'px-6 py-3', sm: 'px-4 py-2' } as const
 
@@ -34,7 +39,7 @@ export function CtaLink({ cta, surface = 'dark', size = 'md', className = '' }: 
   return (
     <SanityLink
       link={cta.link}
-      className={`inline-flex items-center justify-center rounded-button text-small font-semibold transition-colors ${sizes[size]} ${variants[surface][stegaClean(cta.variant)]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-button text-small font-semibold ${feedback} ${sizes[size]} ${variants[surface][stegaClean(cta.variant)]} ${className}`}
     >
       {cta.label}
     </SanityLink>

@@ -252,7 +252,7 @@ export function ContactForm({
           onClick={(event) => {
             if (pending) event.preventDefault()
           }}
-          className="inline-flex items-center justify-center rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse transition-colors hover:bg-surface-inverse/85 aria-disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse transition-colors hover:bg-surface-inverse/85"
         >
           {submitLabel}
         </button>
