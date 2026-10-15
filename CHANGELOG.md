@@ -26,6 +26,16 @@ you start a release.
   timeout. It never animates under reduced motion. Timing logic is a unit-tested reducer; end-to-end tests cover
   fast, slow and reduced-motion navigations. See the README's "Navigation feedback".
 
+- **Browser icon (favicon):** every site now shows Currawong's icon by default (`src/app/icon.png` 512 × 512 and
+  `src/app/apple-icon.png` 180 × 180, made from the brand mark by `scripts/make-default-icons.mjs`), replacing the
+  purple placeholder `icon.svg` and the generated `apple-icon.tsx`. A new _Browser icon_ setting in Site settings
+  (General) lets editors keep the default, upload a square PNG or SVG, or copy the site logo and crop it, with
+  padding (None, Small, Medium), a background (Transparent, Light, Dark, Brand) and a preview at 16, 32 and 180 px on
+  light and dark browsers. Custom icons are Sanity CDN PNGs (32, 192, 512 and 180 px) set through `metadata.icons`
+  from the existing settings query, so there are no duplicate `<link rel="icon">` tags and no uploaded SVG markup in
+  the page. The launch check now warns while a site still uses Currawong's default favicon and verifies a custom
+  icon loads as a PNG of the right size. New `tests/e2e/browser-icon.spec.ts`. See the README's "Browser icon (favicon)".
+
 - **Parallax:** a lightweight `Parallax` primitive (`src/components/motion/parallax.tsx`, Motion's `useScroll` and
   `useTransform`) and `ParallaxImage` for pictures. The _Parallax_ animation preset now works: the hero overlay and
   full-bleed backgrounds move behind their text, and `SectionFrame` has a `media` slot that the image + text section
@@ -65,6 +75,11 @@ you start a release.
 ### Fixed
 
 ### Breaking changes / migration steps
+
+**Browser icon:** `src/app/icon.svg` and `src/app/apple-icon.tsx` are deleted and `icon.png` and `apple-icon.png` added. A
+project that replaced them with its own logo keeps its files (delete the template's PNGs, or keep the old `icon.svg`:
+Next.js serves every file-based icon it finds, so remove whichever set you don't want), or sets the icon in Studio
+instead. Run `npm run typegen` after merging (`browserIcon` is new in Site settings and `SETTINGS_QUERY`).
 
 None required for content: sections without a style look as they did. Run `npm run typegen` after merging. If a project
 has its own sections, wrap them in `SectionFrame`, add `style { ${sectionStyleFields} }` to their fragments and use

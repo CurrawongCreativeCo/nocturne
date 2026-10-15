@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
+import { BrowserIconPreview } from '@/features/site/components/browser-icon-preview'
 import { BrandPreview } from '@/features/studio/brand-preview/brand-preview'
 
 export const metadata: Metadata = {
@@ -17,5 +18,13 @@ export const metadata: Metadata = {
  */
 export default function StudioBrandPreviewPage() {
   if (process.env.NODE_ENV !== 'development' && process.env.E2E_GALLERY !== '1') notFound()
-  return <BrandPreview />
+  // The Browser icon input's preview (Site settings), composed here because features can't import each other.
+  return (
+    <BrandPreview>
+      <BrowserIconPreview
+        siteName="Test Co"
+        sources={{ size16: '/icon.png', size32: '/icon.png', size180: '/apple-icon.png' }}
+      />
+    </BrandPreview>
+  )
 }

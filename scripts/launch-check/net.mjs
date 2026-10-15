@@ -6,12 +6,21 @@ const TEXT_TYPE = /^(text\/|application\/(json|xml|xhtml|[a-z.+-]*\+xml)|image\/
 
 /**
  * One request, never throwing. Redirects are not followed unless asked, so a 301 is visible.
- * Text-like bodies are read (capped); images and anything else are discarded unread.
- * Returns `{ url, status, headers, contentType, text, error }` with lower-case header names.
+ * Text-like bodies are read (capped); images and anything else are discarded unread, unless
+ * `bytes` is set, which returns the (capped) body as a Buffer in `bytes`.
+ * Returns `{ url, status, headers, contentType, text, bytes, error }` with lower-case header names.
  */
 export async function request(
   url,
-  { method = 'GET', headers = {}, body, follow = false, timeout = 20_000, fetchImpl = fetch } = {},
+  {
+    method = 'GET',
+    headers = {},
+    body,
+    follow = false,
+    timeout = 20_000,
+    bytes = false,
+    fetchImpl = fetch,
+  } = {},
 ) {
   try {
     const response = await fetchImpl(url, {
@@ -26,7 +35,11 @@ export async function request(
     )
     const contentType = responseHeaders['content-type'] ?? ''
     let text = ''
-    if (TEXT_TYPE.test(contentType) || (!contentType && response.status < 300)) {
+    let data
+    if (bytes) {
+      data = Buffer.from(await response.arrayBuffer()).subarray(0, MAX_BODY)
+      if (TEXT_TYPE.test(contentType)) text = data.toString('utf8')
+    } else if (TEXT_TYPE.test(contentType) || (!contentType && response.status < 300)) {
       text = (await response.text()).slice(0, MAX_BODY)
     } else {
       await response.body?.cancel()
@@ -37,6 +50,7 @@ export async function request(
       headers: responseHeaders,
       contentType,
       text,
+      bytes: data,
     }
   } catch (error) {
     const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : ''

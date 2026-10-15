@@ -185,8 +185,50 @@ Releases and scheduled publishing need a paid Sanity plan (Growth or higher); on
 [Design tokens](#design-tokens)); the brand colour is the `accent` token. The Studio's name comes from
 `studio-brand.json`, else `NEXT_PUBLIC_STUDIO_TITLE` (the setup wizard fills it in from the site name), and
 appears in its header beside the CMS brand's logo or mark (see [CMS branding](#cms-branding)). The font is set
-with `next/font` in `src/app/layout.tsx` (Inter by default); the favicon is `src/app/icon.svg` and
-the iOS icon `src/app/apple-icon.tsx`. All three are placeholders to replace per project. The generated share image has its own copy of the font (Inter Bold, `src/assets/fonts/`), because `next/og` can't use `next/font`.
+with `next/font` in `src/app/layout.tsx` (Inter by default). The browser icon is Currawong's until a site sets its
+own (see [Browser icon](#browser-icon-favicon)). The generated share image has its own copy of the font (Inter Bold, `src/assets/fonts/`), because `next/og` can't use `next/font`.
+
+### Browser icon (favicon)
+
+The small picture in browser tabs, bookmarks, search results and on phone home screens.
+
+**Editors.** In _Site settings → General → Browser icon_ choose:
+
+- _Currawong's default_ (nothing to do). Every site starts here; it is the Currawong bird on paper.
+- _Upload an icon_: a square PNG or SVG, at least 512 px wide. Use the crop tool to frame it.
+- _Use the site logo_: press **Use site logo** to copy the logo into the icon field, then crop it square. The copy
+  is not linked, so changing the logo later does not change the icon.
+
+Once the site has its own icon, _Padding_ (None, Small, Medium) and _Background_ (Transparent, Light, Dark, Brand;
+Light, Dark and Brand come from the `surface`, `surface-inverse` and `accent` design tokens) appear. The preview
+below the fields shows the result at 16 px (tab), 32 px (bookmarks) and 180 px (phone, drawn at half size) on a
+light and a dark browser. Keep it simple: at 16 px a logo with small text turns to mush, so crop to the mark.
+Changes go live with the usual live update or webhook revalidation.
+
+**Developers.**
+
+- **Default files.** `src/app/icon.png` (512 × 512) and `src/app/apple-icon.png` (180 × 180, on paper `#F4EFE6`)
+  are made from Currawong's mark (`src/assets/brand/currawong/mark-no-text.webp`) by `node scripts/make-default-icons.mjs`.
+  Next.js icon files can't be WebP, so the PNGs are committed. The script uses `sharp`, which Next.js already
+  installs; it is not a dependency and nothing runs at build or request time. It crops, scales and places the artwork
+  on paper; it never redraws it. Re-run it only if the artwork changes, then paste the hashes it prints into
+  `DEFAULT_ICON_SHA256` in `scripts/launch-check/leftovers.mjs`.
+- **A client's own default.** Replace those two PNGs, or just set the icon in Studio (no code change).
+- **`favicon.ico` is not needed.** Browsers use the `<link rel="icon">` tags Next.js writes from `icon.png`, and every
+  current browser accepts PNG. An `.ico` only helps very old browsers and tools that request `/favicon.ico`
+  without reading the page; if one matters, add `src/app/favicon.ico` (Next.js serves it first).
+- **How the custom icon is rendered.** `getSiteMetadata` (`src/features/site/api/get-settings.ts`) reads `browserIcon`
+  from `SETTINGS_QUERY` (no extra request) and sets `metadata.icons` to Sanity CDN URLs built by
+  `browserIconLinks` (`src/features/site/utils/browser-icon.ts`): PNGs at 32, 192 and 512 px plus a 180 px Apple icon,
+  using `fm=png`, `fit=fill`, `pad` and `bg`. The editor's crop and hotspot are applied. In this Next.js version,
+  file-based icons are only added when `metadata.icons` is not set, so a custom icon replaces `icon.png` and
+  `apple-icon.png` instead of adding to them: there is never a second `<link rel="icon">` set.
+- **Security.** Icons are always CDN images (PNG). Uploaded SVG markup is never put in the page. Sanity must
+  rasterise SVG uploads for this to work: see the launch check below.
+- **Unverified against a live dataset.** The Sanity docs confirm `pad` and `bg`, but not that `fm=png` rasterises an
+  SVG asset, nor exactly how `pad` changes the output size (the code asks for `w + 2 × pad`). The Studio preview
+  shows the CDN's real output, and the launch check fetches each icon and fails if it isn't a PNG of the size its
+  URL asks for. Check both on the first site that uses an SVG icon.
 
 ## Deploying (Vercel)
 
@@ -1423,14 +1465,14 @@ It prints one line per check (pass, warning or fail) with what to do about anyth
 if any check failed. Warnings never fail the run; read them anyway. `--json` prints the same results as JSON (for the
 future Ops dashboard), and `--max-urls=N` lowers the page cap.
 
-| Area      | Checks                                                                                                                                                                                                                                                                              |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| HTTP      | Home page is 200 over HTTPS; `http://` redirects to HTTPS (permanently); `www` and the bare domain end on the same address; the security headers from `next.config.ts` are present; `/studio` responds                                                                              |
-| SEO       | Canonical URLs use the production domain (not `localhost` or `*.vercel.app`); `robots.txt` allows crawling and lists the sitemap; every sitemap URL returns 200; titles and meta descriptions are unique; each page has one `h1`; no page is `noindex`; `og:image` returns an image |
-| Leftovers | The favicon isn't the template's placeholder (`src/app/icon.svg`); no "A clear headline about what you offer", "Replace:" or "lorem" in visible text; no links to localhost                                                                                                         |
-| 404       | An unknown URL returns 404                                                                                                                                                                                                                                                          |
-| Sanity    | The dataset is private (the same check as `npm run check:dataset`); the production origin is in CORS; `/api/revalidate` answers an unsigned POST with 401 (or 404 when webhook mode is off)                                                                                         |
-| Speed     | Optional: PageSpeed Insights scores for mobile and desktop (at least 90 for performance, accessibility and SEO) when `PSI_API_KEY` is set                                                                                                                                           |
+| Area      | Checks                                                                                                                                                                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP      | Home page is 200 over HTTPS; `http://` redirects to HTTPS (permanently); `www` and the bare domain end on the same address; the security headers from `next.config.ts` are present; `/studio` responds                                                                               |
+| SEO       | Canonical URLs use the production domain (not `localhost` or `*.vercel.app`); `robots.txt` allows crawling and lists the sitemap; every sitemap URL returns 200; titles and meta descriptions are unique; each page has one `h1`; no page is `noindex`; `og:image` returns an image  |
+| Leftovers | The favicon isn't the old purple placeholder (fail), isn't still Currawong's default (warning), and a Browser icon from Studio loads as a PNG of the size its URL asks for; no "A clear headline about what you offer", "Replace:" or "lorem" in visible text; no links to localhost |
+| 404       | An unknown URL returns 404                                                                                                                                                                                                                                                           |
+| Sanity    | The dataset is private (the same check as `npm run check:dataset`); the production origin is in CORS; `/api/revalidate` answers an unsigned POST with 401 (or 404 when webhook mode is off)                                                                                          |
+| Speed     | Optional: PageSpeed Insights scores for mobile and desktop (at least 90 for performance, accessibility and SEO) when `PSI_API_KEY` is set                                                                                                                                            |
 
 - **Pages checked.** The home page plus every URL in the sitemap, capped at 200 (it says when it caps). Sitemap URLs on
   a different host are reported, then checked at the same path on the site you passed, so a wrong `NEXT_PUBLIC_SITE_URL`
@@ -1442,8 +1484,10 @@ future Ops dashboard), and `--max-urls=N` lowers the page cap.
   Viewer token the site holds cannot. In that case the check is a warning with the exact `npx sanity cors add` command
   and where to look (sanity.io/manage → API → CORS origins). With a token that can read it, it fails when the origin is
   missing or lacks _Allow credentials_.
-- **The apple-touch icon** is rendered to a PNG, so it can't be compared with the template's. The check warns when
-  `src/app/apple-icon.tsx` still contains its "Placeholder" comment: update it to match the new logo and delete the comment.
+- **Favicon.** It fetches each icon link on the home page. The old purple placeholder SVG fails. Currawong's default
+  `icon.png` or `apple-icon.png`, served byte for byte, is a warning ("still using Currawong's default favicon"):
+  set the Browser icon in Studio. Icons from the Sanity CDN must answer 200 with `image/png` and be the size their
+  URL asks for, which also proves the CDN rasterised an SVG upload.
 - **Not covered.** Content and design quality, forms actually delivering email, analytics, and Stripe in live mode. Test
   those by hand.
 

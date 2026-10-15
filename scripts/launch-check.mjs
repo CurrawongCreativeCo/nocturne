@@ -75,11 +75,6 @@ function loadEnv() {
   return env
 }
 
-function readIfExists(relative) {
-  const path = join(root, relative)
-  return existsSync(path) ? readFileSync(path, 'utf8') : undefined
-}
-
 const isHtml = (response) =>
   response.status === 200 && /html/i.test(response.contentType) && response.text !== ''
 
@@ -197,12 +192,19 @@ export async function runLaunchChecks({ origin, env, maxUrls, log = noop }) {
     5,
   )
   const icons = await mapLimit(iconHrefs, 5, async (href) => {
-    const response = await request(new URL(href, siteOrigin).toString(), { follow: true })
-    return { href, status: response.status, contentType: response.contentType, body: response.text }
+    const response = await request(new URL(href, siteOrigin).toString(), {
+      follow: true,
+      bytes: true,
+    })
+    return {
+      href,
+      status: response.status,
+      contentType: response.contentType,
+      body: response.text,
+      bytes: response.bytes,
+    }
   })
-  results.push(
-    ...checkPlaceholderIcons({ icons, appleIconSource: readIfExists('src/app/apple-icon.tsx') }),
-  )
+  results.push(...checkPlaceholderIcons({ icons }))
   results.push(...checkTemplateCopy({ pages }))
   results.push(...checkLocalhostLinks({ pages }))
 

@@ -680,6 +680,27 @@ export const documents = [
 export const aiCrawlersBlocked = { allowAiCrawlers: false }
 
 /**
+ * The same, for the Browser icon (tests/e2e/browser-icon.spec.ts): the editor uploaded a square PNG
+ * and chose small padding on a light background. The asset itself is never fetched by the tests;
+ * the site only builds CDN URLs from its id.
+ */
+export const customBrowserIcon = {
+  browserIcon: {
+    _type: 'browserIcon',
+    choice: 'upload',
+    image: {
+      _type: 'image',
+      asset: {
+        _type: 'reference',
+        _ref: 'image-0123456789abcdef0123456789abcdef01234567-1024x1024-png',
+      },
+    },
+    padding: 'small',
+    background: 'light',
+  },
+}
+
+/**
  * A "release" version of the About page, as the Content Lake stores it: a document with
  * `_id: versions.<release>.<id>`. Only served when the request's perspective names the release.
  */

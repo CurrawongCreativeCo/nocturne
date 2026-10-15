@@ -4,6 +4,8 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
+import { browserIconField } from './browser-icon'
+
 export const settings = defineType({
   name: 'settings',
   title: 'Site settings',
@@ -46,6 +48,7 @@ export const settings = defineType({
       preferSvg: true,
       minWidth: 600,
     }),
+    browserIconField,
     imageField({
       name: 'ogImage',
       title: 'Default social share image',
