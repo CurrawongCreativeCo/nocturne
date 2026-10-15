@@ -20,6 +20,17 @@ you start a release.
 
 ### Added
 
+- **Hero supporting content (Studio and site):** the hero gains one approved slot, **Extra content under the heading**,
+  holding a **Statistics bar**, **Badges** (one to three short labels with an optional icon) or **Logos** (up to six,
+  greyscale by default), chosen from pictures in the insert menu. Full background and Split place it under the buttons,
+  Editorial beside the text (under the small picture) and Image with panel inside the panel; it takes the hero's tone and
+  joins the entrance after the buttons, and sits still under reduced motion. Agency staff add or remove it; clients edit
+  what is in it, and see the field only once it has content. A new slot type is one schema object, one component and one
+  line in `components/sections/hero/slots.tsx` (README, _Adding a hero slot_). `StatsBar` now sizes by its own width
+  (container queries) so it suits any column, and its dividers are cut by an `overflow-hidden` box instead of
+  first/odd rules. New shared types `badgeRow` and `logoRow`, GROQ `heroSupportingFields`, and the `fadeUpAfter` motion
+  preset. The field is optional, so existing content is unchanged and needs no migration. Run `npm run typegen` after
+  merging. Visual baselines for the new gallery entries (`hero-slot-*`) need the **Update visual baselines** workflow.
 - **Statistics (Studio and site):** a **Stats** section (layouts _Inline_ and _Cards_; title, intro and one to six
   figures) and a compact **statistics bar** component for the hero's upcoming statistics slot. Each figure is a number
   with a label and optional prefix, suffix and decimal places, formatted on the server with `Intl.NumberFormat('en-AU')`,

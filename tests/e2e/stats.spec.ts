@@ -70,7 +70,14 @@ test.describe('the statistics bar', () => {
   const rows = (page: Page, tone: string) =>
     page.locator(`[data-stats-bar-example="${tone}"] li`).evaluateAll((items) => {
       const tops = items.map((item) => Math.round(item.getBoundingClientRect().top))
-      const starts = items.map((item) => parseFloat(getComputedStyle(item).borderInlineStartWidth))
+      // Every figure has a divider before it, and the row is pulled left inside an overflow-hidden box,
+      // so the first figure in each row has its divider cut off. A figure starting inside the bar shows one.
+      const bar = items[0]?.closest('[data-stats-bar]')?.getBoundingClientRect().left ?? 0
+      const starts = items.map((item) =>
+        item.getBoundingClientRect().left > bar + 1
+          ? parseFloat(getComputedStyle(item).borderInlineStartWidth)
+          : 0,
+      )
       return { rows: new Set(tops).size, starts }
     })
 

@@ -986,6 +986,67 @@ const statItems = (key) => [
   { _key: `${key}-years`, _type: 'statItem', value: 12, label: 'Years in business' },
 ]
 
+/**
+ * The hero's supporting slot (README, "Adding a hero slot"): each slot type in each hero preset, so the
+ * layout, the placement and the tone are all seen. The stats bar is three figures, the badges three
+ * labels (two with icons) and the logos six, the most the slot holds.
+ */
+const SLOT_TYPES = ['stats', 'badges', 'logos']
+const slotItem = (type, id) => {
+  const _key = `${id}-slot`
+  if (type === 'stats') return { _key, _type: 'statsBar', items: statItems(id).slice(0, 3) }
+  if (type === 'badges') {
+    return {
+      _key,
+      _type: 'badgeRow',
+      badges: [
+        { _key: `${id}-b1`, _type: 'badge', label: 'Locally owned', icon: 'heart' },
+        { _key: `${id}-b2`, _type: 'badge', label: 'Free delivery', icon: 'check' },
+        { _key: `${id}-b3`, _type: 'badge', label: 'Five-year warranty' },
+      ],
+    }
+  }
+  return {
+    _key,
+    _type: 'logoRow',
+    greyscale: true,
+    logos: ['Acme', 'Globex', 'Initech', 'Umbrella', 'Hooli', 'Stark'].map((name) => ({
+      _key: `${id}-${name}`,
+      _type: 'logo',
+      name,
+      image: image(''),
+    })),
+  }
+}
+/** The six hero presets (HERO_PRESETS), as the fields they set, plus what each needs to look right. */
+const SLOT_PRESETS = {
+  'full-background': { extra: { variant: 'overlay' } },
+  'split-right': { extra: { variant: 'split', imagePosition: 'right' } },
+  'split-left': { extra: { variant: 'split', imagePosition: 'left' } },
+  'centred-text': {
+    extra: { variant: 'overlay', backgroundImage: undefined },
+    style: { tone: 'surface' },
+  },
+  editorial: { extra: { variant: 'editorial', backgroundImage: undefined } },
+  'image-with-panel': { extra: { variant: 'full-bleed' } },
+}
+const heroSlotGallery = SLOT_TYPES.flatMap((type) =>
+  Object.entries(SLOT_PRESETS).map(([preset, { extra, style }]) => {
+    const id = `slot-${type}-${preset}`
+    const hero = galleryHero(id, { ...extra, supporting: [slotItem(type, id)] })
+    return style ? styled(hero._key, hero, style) : hero
+  }),
+)
+// Beside the text in Editorial, with the small picture too: the slot sits under it.
+heroSlotGallery.push(
+  galleryHero('slot-stats-editorial-inset', {
+    variant: 'editorial',
+    backgroundImage: undefined,
+    secondaryImage: image(''),
+    supporting: [slotItem('stats', 'slot-stats-editorial-inset')],
+  }),
+)
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -1275,6 +1336,7 @@ const gallerySections = [
     title: 'Six figures, no animation',
     items: [...statItems('stats-cards-six'), ...statItems('stats-cards-six-more')].slice(0, 6),
   },
+  ...heroSlotGallery,
   // new-section:gallery
 ]
 
@@ -1291,6 +1353,30 @@ export const galleryIds = gallerySections
  * up (Reveal) and one with Animation None, each below the fold. Their figures are distinct and
  * formatted, so the HTML can be checked for them.
  */
+/**
+ * A real page whose hero carries a statistics slot (tests/e2e/hero-slot.spec.ts), for what the section
+ * gallery cannot show: the slot joining the hero's stagger (the gallery has no MotionProvider), and
+ * reduced motion.
+ */
+documents.push({
+  _id: 'page-hero-slot',
+  _type: 'page',
+  title: 'Hero slot',
+  slug: { _type: 'slug', current: 'hero-slot' },
+  seo: { _type: 'seo', metaDescription: 'A page whose hero has a statistics bar.' },
+  pageBuilder: [
+    {
+      _key: 'hero-slot-page-hero',
+      _type: 'hero',
+      variant: 'split',
+      title: 'Hero with figures',
+      description: 'Hero description.',
+      ctas: [cta('About us', internal('page-about'))],
+      supporting: [slotItem('stats', 'hero-slot-page')],
+    },
+  ],
+})
+
 documents.push({
   _id: 'page-stats',
   _type: 'page',

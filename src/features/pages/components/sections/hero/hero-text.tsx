@@ -18,11 +18,13 @@ interface Props {
   justify: string
   /** The heading's size and weight, which is what sets the layouts apart. */
   headingClassName?: string
+  /** The hero's supporting slot (`<HeroSlot>`), which joins the stagger after the buttons. */
+  slot?: ReactNode
 }
 
 /**
- * The words every hero layout shares: eyebrow, heading, greeting, intro and buttons. A layout
- * supplies the frame, the image and the heading's size around it.
+ * The words every hero layout shares: eyebrow, heading, greeting, intro, buttons and, under them, the
+ * supporting slot. A layout supplies the frame, the image and the heading's size around it.
  */
 export function HeroText({
   data,
@@ -32,6 +34,7 @@ export function HeroText({
   block,
   justify,
   headingClassName = 'text-display font-semibold text-balance',
+  slot,
 }: Props) {
   const { eyebrow, title, heading, headingPlain, description, ctas, showGreeting } = data
   // One <h1> per page: a hero further down the page is a section heading.
@@ -66,6 +69,7 @@ export function HeroText({
         <MotionDiv {...revealChild()}>
           <CtaGroup ctas={ctas} surface={ctaSurfaceFor(tone)} className={`mt-10 ${justify}`} />
         </MotionDiv>
+        {slot}
       </MotionDiv>
     </>
   )
