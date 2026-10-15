@@ -215,6 +215,84 @@ export type Link = {
   openInNewTab?: boolean
 }
 
+export type BusinessInfo = {
+  _id: string
+  _type: 'businessInfo'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  tradingName: string
+  legalName?: string
+  abn?: string
+  phone?: string
+  publicEmail?: string
+  address?: {
+    street?: string
+    suburb?: string
+    state?: 'NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT'
+    postcode?: string
+    country?: string
+  }
+  timeZone:
+    | 'Australia/Sydney'
+    | 'Australia/Melbourne'
+    | 'Australia/Brisbane'
+    | 'Australia/Adelaide'
+    | 'Australia/Darwin'
+    | 'Australia/Perth'
+    | 'Australia/Hobart'
+  openingHours?: Array<{
+    days: Array<string>
+    closed?: boolean
+    opens?: string
+    closes?: string
+    _type: 'hoursRow'
+    _key: string
+  }>
+  specialHours?: Array<{
+    date: string
+    closed?: boolean
+    opens?: string
+    closes?: string
+    note?: string
+    _type: 'specialDay'
+    _key: string
+  }>
+  serviceAreas?: Array<string>
+  socialLinks?: Array<{
+    platform:
+      | 'facebook'
+      | 'instagram'
+      | 'linkedin'
+      | 'x'
+      | 'youtube'
+      | 'tiktok'
+      | 'pinterest'
+      | 'google'
+      | 'other'
+    url: string
+    _type: 'socialLink'
+    _key: string
+  }>
+  businessType?:
+    | 'LocalBusiness'
+    | 'ProfessionalService'
+    | 'MedicalBusiness'
+    | 'Dentist'
+    | 'LegalService'
+    | 'Restaurant'
+    | 'Store'
+    | 'HomeAndConstructionBusiness'
+    | 'HealthAndBeautyBusiness'
+    | 'Other'
+  businessTypeOther?: string
+  geo?: {
+    lat?: number
+    lng?: number
+  }
+  priceRange?: '$' | '$$' | '$$$' | '$$$$'
+}
+
 export type DesignSettings = {
   _id: string
   _type: 'designSettings'
@@ -1063,6 +1141,7 @@ export type AllSanitySchemaTypes =
   | Cta
   | PageReference
   | Link
+  | BusinessInfo
   | DesignSettings
   | CookieBanner
   | Announcement
@@ -3340,7 +3419,7 @@ export type SEARCH_QUERY_RESULT = Array<{
 
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
-// Query: *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {      title,      description,      logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },      ogImage { asset->{ _id } },      // Only when the editor chose their own icon: the default icon needs no data.      "browserIcon": select(        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {          "image": browserIcon.image { asset, crop, hotspot },          "padding": coalesce(browserIcon.padding, "none"),          "background": coalesce(browserIcon.background, "transparent")        }      ),      allowAiCrawlers    },    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {      headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerText    },    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {      message,      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      startsAt,      endsAt,      dismissible    },    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {      title,      message,      privacyLabel,      privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      analyticsText,      marketingText    },    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).    "design": *[_id == "designSettings"][0] {      appearance,      primary,      secondary,      highlight,      surface,      surfaceAlt,      surfaceInverse,      ink,      inkMuted,      line,      gradients[] { name, angle, stops }    }  } {    "title": identity.title,    "description": identity.description,    "logo": identity.logo,    "ogImage": identity.ogImage,    "browserIcon": identity.browserIcon,    "announcement": announcement,    "headerNav": navigation.headerNav,    "headerCta": navigation.headerCta,    "footerNav": navigation.footerNav,    "footerText": navigation.footerText,    "consent": consent,    "design": design,    "allowAiCrawlers": identity.allowAiCrawlers != false  }
+// Query: *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {      title,      description,      logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },      ogImage { asset->{ _id } },      // Only when the editor chose their own icon: the default icon needs no data.      "browserIcon": select(        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {          "image": browserIcon.image { asset, crop, hotspot },          "padding": coalesce(browserIcon.padding, "none"),          "background": coalesce(browserIcon.background, "transparent")        }      ),      allowAiCrawlers    },    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {      headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerText    },    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {      message,      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      startsAt,      endsAt,      dismissible    },    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {      title,      message,      privacyLabel,      privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      analyticsText,      marketingText    },    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).    "design": *[_id == "designSettings"][0] {      appearance,      primary,      secondary,      highlight,      surface,      surfaceAlt,      surfaceInverse,      ink,      inkMuted,      line,      gradients[] { name, angle, stops }    },    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).    "business": *[_id == "businessInfo"][0] {      tradingName,      legalName,      abn,      phone,      publicEmail,      address { street, suburb, state, postcode },      timeZone,      businessType,      businessTypeOther,      geo { lat, lng },      openingHours[] { _key, days, opens, closes, closed },      specialHours[] { _key, date, closed, opens, closes, note },      serviceAreas,      socialLinks[] { _key, platform, url },      priceRange    }  } {    "title": identity.title,    "description": identity.description,    "logo": identity.logo,    "ogImage": identity.ogImage,    "browserIcon": identity.browserIcon,    "announcement": announcement,    "headerNav": navigation.headerNav,    "headerCta": navigation.headerCta,    "footerNav": navigation.footerNav,    "footerText": navigation.footerText,    "consent": consent,    "design": design,    "business": business,    "allowAiCrawlers": identity.allowAiCrawlers != false  }
 export type SETTINGS_QUERY_RESULT = {
   title: null | string
   description: null | string
@@ -3510,6 +3589,94 @@ export type SETTINGS_QUERY_RESULT = {
           angle: number | null
           stops: Array<string>
         }> | null
+      }
+    | null
+  business:
+    | {
+        tradingName: null
+        legalName: null
+        abn: null
+        phone: null
+        publicEmail: null
+        address: null
+        timeZone: null
+        businessType: null
+        businessTypeOther: null
+        geo: null
+        openingHours: null
+        specialHours: null
+        serviceAreas: null
+        socialLinks: null
+        priceRange: null
+      }
+    | {
+        tradingName: string
+        legalName: string | null
+        abn: string | null
+        phone: string | null
+        publicEmail: string | null
+        address: {
+          street: string | null
+          suburb: string | null
+          state: 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA' | null
+          postcode: string | null
+        } | null
+        timeZone:
+          | 'Australia/Adelaide'
+          | 'Australia/Brisbane'
+          | 'Australia/Darwin'
+          | 'Australia/Hobart'
+          | 'Australia/Melbourne'
+          | 'Australia/Perth'
+          | 'Australia/Sydney'
+        businessType:
+          | 'Dentist'
+          | 'HealthAndBeautyBusiness'
+          | 'HomeAndConstructionBusiness'
+          | 'LegalService'
+          | 'LocalBusiness'
+          | 'MedicalBusiness'
+          | 'Other'
+          | 'ProfessionalService'
+          | 'Restaurant'
+          | 'Store'
+          | null
+        businessTypeOther: string | null
+        geo: {
+          lat: number | null
+          lng: number | null
+        } | null
+        openingHours: Array<{
+          _key: string
+          days: Array<string>
+          opens: string | null
+          closes: string | null
+          closed: boolean | null
+        }> | null
+        specialHours: Array<{
+          _key: string
+          date: string
+          closed: boolean | null
+          opens: string | null
+          closes: string | null
+          note: string | null
+        }> | null
+        serviceAreas: Array<string> | null
+        socialLinks: Array<{
+          _key: string
+          platform:
+            | 'facebook'
+            | 'google'
+            | 'instagram'
+            | 'linkedin'
+            | 'other'
+            | 'pinterest'
+            | 'tiktok'
+            | 'x'
+            | 'youtube'
+          url: string
+        }> | null
+        priceRange: '$' | '$$' | '$$$' | '$$$$' | null
       }
     | null
   allowAiCrawlers: boolean | true
@@ -3691,7 +3858,7 @@ declare global {
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_type == "stripePrice" && priceId == $priceId && active == true][0] {\n    priceId,\n    interval\n  }\n': CHECKOUT_PRICE_QUERY_RESULT
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
-    '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerText\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "consent": consent,\n    "design": design,\n    "allowAiCrawlers": identity.allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
+    '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerText\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    },\n    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).\n    "business": *[_id == "businessInfo"][0] {\n      tradingName,\n      legalName,\n      abn,\n      phone,\n      publicEmail,\n      address { street, suburb, state, postcode },\n      timeZone,\n      businessType,\n      businessTypeOther,\n      geo { lat, lng },\n      openingHours[] { _key, days, opens, closes, closed },\n      specialHours[] { _key, date, closed, opens, closes, note },\n      serviceAreas,\n      socialLinks[] { _key, platform, url },\n      priceRange\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "consent": consent,\n    "design": design,\n    "business": business,\n    "allowAiCrawlers": identity.allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '\n  *[_id == "siteIdentity"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }

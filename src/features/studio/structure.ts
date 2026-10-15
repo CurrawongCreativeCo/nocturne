@@ -6,6 +6,7 @@ import { ComposeIcon } from '@sanity/icons/Compose'
 import { DocumentsIcon } from '@sanity/icons/Documents'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { FolderIcon } from '@sanity/icons/Folder'
+import { HomeIcon } from '@sanity/icons/Home'
 import { LockIcon } from '@sanity/icons/Lock'
 import { MenuIcon } from '@sanity/icons/Menu'
 import { SearchIcon } from '@sanity/icons/Search'
@@ -147,6 +148,7 @@ export const structure: StructureResolver = (S, context) => {
       S.documentTypeListItem('author').title('Authors').icon(UserIcon),
       S.documentTypeListItem('category').title('Categories').icon(TagIcon),
     ]),
+    singletonItem(S, 'businessInfo', 'Business info', HomeIcon),
     // new-document:list
     S.divider(),
     group(S, 'reusable', 'Reusable content', StackIcon, [

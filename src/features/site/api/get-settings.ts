@@ -18,6 +18,7 @@ export async function getSettings(mode: FetchMode) {
       TAGS.announcement,
       TAGS.cookieBanner,
       TAGS.designSettings,
+      TAGS.businessInfo,
       TAGS.page,
     ],
   })

@@ -11,7 +11,7 @@ const navItemFields = /* groq */ `
 /**
  * One query for the announcement bar, header, footer and site metadata: one cache entry, one request per change.
  *
- * The data lives in five singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings) and
+ * The data lives in six singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings, businessInfo) and
  * is assembled here into the shape the old single "settings" document had (including null when
  * none exists), so components don't change. Until migrations/split-site-settings has run, each part falls back to the old
  * `settings` document, so the site keeps working whether the deploy or the migration comes first.
@@ -68,6 +68,24 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       inkMuted,
       line,
       gradients[] { name, angle, stops }
+    },
+    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).
+    "business": *[_id == "businessInfo"][0] {
+      tradingName,
+      legalName,
+      abn,
+      phone,
+      publicEmail,
+      address { street, suburb, state, postcode },
+      timeZone,
+      businessType,
+      businessTypeOther,
+      geo { lat, lng },
+      openingHours[] { _key, days, opens, closes, closed },
+      specialHours[] { _key, date, closed, opens, closes, note },
+      serviceAreas,
+      socialLinks[] { _key, platform, url },
+      priceRange
     }
   } {
     "title": identity.title,
@@ -82,6 +100,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "footerText": navigation.footerText,
     "consent": consent,
     "design": design,
+    "business": business,
     "allowAiCrawlers": identity.allowAiCrawlers != false
   }
 `)

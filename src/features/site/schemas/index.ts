@@ -1,6 +1,7 @@
 import type { SchemaTypeDefinition } from 'sanity'
 
 import { announcement } from './announcement'
+import { businessInfo } from './business-info'
 import { cookieBanner } from './cookie-banner'
 import { designSettings } from './design-settings'
 import { navItem } from './nav-item'
@@ -15,5 +16,6 @@ export const siteSchemaTypes: SchemaTypeDefinition[] = [
   announcement,
   cookieBanner,
   designSettings,
+  businessInfo,
   // new-schema:register
 ]
