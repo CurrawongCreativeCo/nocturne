@@ -1,7 +1,6 @@
 import { useSyncExternalStore, type ReactNode } from 'react'
 
-import type { PresetThumbnailProps } from '@/lib/sanity/schema/preset-field'
-
+import type { PresetThumbnailProps } from '../preset-field'
 import { Button, Eyebrow, Heading, Lines, Picture, Wireframe } from './wireframe'
 
 /**

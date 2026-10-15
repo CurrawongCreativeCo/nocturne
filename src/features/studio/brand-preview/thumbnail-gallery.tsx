@@ -2,13 +2,14 @@
 
 import { Card, Stack, Text } from '@sanity/ui'
 
-import { OptionThumbnail } from '../components/preset-picker/option-grid'
 import {
   animationThumbnails,
   sectionVariantThumbnails,
   toneThumbnails,
   type Thumbnail,
-} from '../components/preset-picker/thumbnails/registry'
+} from '@/lib/sanity/schema/thumbnails/registry'
+
+import { OptionThumbnail } from '../components/preset-picker/option-grid'
 
 export interface SectionPreview {
   /** The section's type name: its insert-menu picture is /section-previews/<name>.svg. */

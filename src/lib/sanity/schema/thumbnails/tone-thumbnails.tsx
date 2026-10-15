@@ -1,8 +1,10 @@
-import type { SectionTone } from '@/components/ui/section-style'
 import { colorHex } from '@/config/tokens.generated'
-import type { PresetThumbnailProps } from '@/lib/sanity/schema/preset-field'
 
+import type { SECTION_TONES } from '../../section-style-options'
+import type { PresetThumbnailProps } from '../preset-field'
 import { HEIGHT, WIDTH } from './wireframe'
+
+type SectionTone = (typeof SECTION_TONES)[number]
 
 interface ToneColours {
   background: string
@@ -37,7 +39,8 @@ const TONES: Record<SectionTone, ToneColours> = {
     background: colorHex.surfaceInverse,
     text: colorHex.inkInverse,
     muted: colorHex.inkInverseMuted,
-    button: colorHex.inkInverse,
+    // Mirrors the [data-tone='inverse'] rule in tokens.generated.css.
+    button: `color-mix(in oklab, ${colorHex.accent} 55%, ${colorHex.inkInverse})`,
     buttonText: colorHex.surfaceInverse,
   },
   accent: {

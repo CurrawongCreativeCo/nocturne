@@ -1,5 +1,4 @@
-import type { PresetThumbnailProps } from '@/lib/sanity/schema/preset-field'
-
+import type { PresetThumbnailProps } from '../preset-field'
 import { Button, Eyebrow, Heading, Lines, Picture, Wireframe } from './wireframe'
 
 /** Overlay: text centred over a picture that fills the section. */

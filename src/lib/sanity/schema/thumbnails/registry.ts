@@ -1,9 +1,7 @@
 import type { ComponentType } from 'react'
 
-import type { SectionTone } from '@/components/ui/section-style'
-import type { PresetThumbnailProps } from '@/lib/sanity/schema/preset-field'
-import type { SECTION_MOTIONS } from '@/lib/sanity/section-style-options'
-
+import type { SECTION_MOTIONS, SECTION_TONES } from '../../section-style-options'
+import type { PresetThumbnailProps } from '../preset-field'
 import {
   MotionNoneThumbnail,
   MotionParallaxThumbnail,
@@ -48,7 +46,7 @@ export const animationThumbnails: Record<(typeof SECTION_MOTIONS)[number], Thumb
   parallax: MotionParallaxThumbnail,
 }
 
-export const toneThumbnails: Record<SectionTone, Thumbnail> = {
+export const toneThumbnails: Record<(typeof SECTION_TONES)[number], Thumbnail> = {
   surface: ToneSurfaceThumbnail,
   alt: ToneAltThumbnail,
   inverse: ToneInverseThumbnail,

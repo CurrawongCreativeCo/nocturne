@@ -1250,7 +1250,7 @@ passes `groups: sectionGroups` and `fieldsets: sectionFieldsets`.
 **How the form is laid out.** `style` is drawn without a box of its own (`options.frameless` on `sectionStyle`, honoured
 by `FramelessAwareField`, the Studio-wide `form.components.field` in `sanity.config.ts`), and keeps its stored shape.
 `tone` ("Background") and `motion` ("Animation") are `presetField` pickers with thumbnails
-(`section-thumbnails.tsx`; the swatches are drawn from `src/styles/tokens.json`, so they follow the palette).
+(`src/lib/sanity/schema/thumbnails/`; the swatches are drawn from the design tokens, so they follow the palette).
 `spacing`, `width`, `align` and `anchorId` sit in one collapsed `layoutOptions` fieldset.
 
 **Which options suit which layout.** The shared type can't see its section, so its `hidden` callbacks and validation
@@ -1412,7 +1412,7 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 #### Thumbnails
 
-The pictures the picker shows are in `src/features/studio/components/preset-picker/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
+The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
 | Kind            | Files                                    | Shown for                                               |
 | --------------- | ---------------------------------------- | ------------------------------------------------------- |
@@ -1430,7 +1430,7 @@ The pictures the picker shows are in `src/features/studio/components/preset-pick
 - **Adding an option.** A new section variant, animation preset or tone needs a thumbnail: add the component and its `registry.ts` entry. `src/app/studio-brand-preview/thumbnails.test.ts` fails if any section type has no insert-menu picture, any variant, animation or tone has no thumbnail, or a thumbnail is left over for a value that no longer exists. It also checks that drawings use the theme (no hard-coded colours outside tones), are 4:3, and are still when drawn without a browser.
 - **Review.** `/studio-brand-preview` shows every thumbnail in light and dark under "Preset picker thumbnails". The end-to-end tests run axe over them, check that each is 4:3 and at least 150 px wide, that they change with the scheme (tones don't), and that animations stop under reduced motion. There is no screenshot baseline for them yet.
 
-Connecting thumbnails to the fields (each layout's `thumbnail` in a `presetField`) is part of switching the hero over to the picker; schema files can't import Studio code, so that wiring is composed where the Studio is configured.
+The thumbnails sit in `src/lib/sanity/schema/` beside `presetField`, free of Studio code, so schema files import them directly: `hero.ts` gives each layout one, and `sectionStyle` gives each tone and animation one. `registry.ts` lists the same components for the brand preview page, and the test checks the two are identical.
 
 ### Sanity workflow (migrations and schema deploy)
 

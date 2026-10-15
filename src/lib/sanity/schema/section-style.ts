@@ -26,15 +26,17 @@ import {
   type SectionFormRules,
 } from './section-form'
 import {
-  AccentSwatch,
-  DarkSwatch,
-  MotionNone,
-  MotionParallax,
-  MotionReveal,
-  MotionStagger,
-  SoftSwatch,
-  SurfaceSwatch,
-} from './section-thumbnails'
+  MotionNoneThumbnail,
+  MotionParallaxThumbnail,
+  MotionRevealThumbnail,
+  MotionStaggerThumbnail,
+} from './thumbnails/animation-thumbnails'
+import {
+  ToneAccentThumbnail,
+  ToneAltThumbnail,
+  ToneInverseThumbnail,
+  ToneSurfaceThumbnail,
+} from './thumbnails/tone-thumbnails'
 
 /**
  * Layout and style options every page-builder section shares, set by the agency in the section's
@@ -83,25 +85,25 @@ export const sectionStyle = defineType({
           value: 'surface',
           title: SECTION_TONE_TITLES.surface,
           description: 'The page colour.',
-          thumbnail: SurfaceSwatch,
+          thumbnail: ToneSurfaceThumbnail,
         },
         {
           value: 'alt',
           title: SECTION_TONE_TITLES.alt,
           description: 'A light grey band.',
-          thumbnail: SoftSwatch,
+          thumbnail: ToneAltThumbnail,
         },
         {
           value: 'inverse',
           title: SECTION_TONE_TITLES.inverse,
           description: 'Light text on dark.',
-          thumbnail: DarkSwatch,
+          thumbnail: ToneInverseThumbnail,
         },
         {
           value: 'accent',
           title: SECTION_TONE_TITLES.accent,
           description: 'The brand colour.',
-          thumbnail: AccentSwatch,
+          thumbnail: ToneAccentThumbnail,
         },
       ],
       initialValue: 'surface',
@@ -117,25 +119,25 @@ export const sectionStyle = defineType({
           value: 'none',
           title: 'None',
           description: 'Appears with the page.',
-          thumbnail: MotionNone,
+          thumbnail: MotionNoneThumbnail,
         },
         {
           value: 'reveal',
           title: 'Fade up',
           description: 'Fades in once as it scrolls into view.',
-          thumbnail: MotionReveal,
+          thumbnail: MotionRevealThumbnail,
         },
         {
           value: 'stagger',
           title: 'Staggered',
           description: 'Its parts appear one after another.',
-          thumbnail: MotionStagger,
+          thumbnail: MotionStaggerThumbnail,
         },
         {
           value: 'parallax',
           title: 'Parallax',
           description: 'The picture drifts a little as the page scrolls.',
-          thumbnail: MotionParallax,
+          thumbnail: MotionParallaxThumbnail,
         },
       ],
       initialValue: 'reveal',

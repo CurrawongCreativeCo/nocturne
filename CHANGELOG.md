@@ -21,11 +21,11 @@ you start a release.
 ### Added
 
 - **Preset picker thumbnails (Studio):** one visual language of small theme-aware SVG wireframes (4:3, readable at
-  160 px) in `src/features/studio/components/preset-picker/thumbnails/`, with a registry keyed by the values stored in
+  160 px) in `src/lib/sanity/schema/thumbnails/`, with a registry keyed by the values stored in
   content: the four hero layouts, the four animations (gently looping, still under reduced motion) and live tone
   swatches read from the design tokens. The insert-menu pictures in `public/section-previews/` are redrawn in the same
   language at 4:3, with a dark-mode variant. A unit test fails when a section type, variant, animation or tone has no
-  thumbnail; `/studio-brand-preview` shows them all in light and dark. Not connected to any field yet. See the README's
+  thumbnail; `/studio-brand-preview` shows them all in light and dark. They replace the earlier plain pictures for the hero layouts, tones and animations in the section forms. See the README's
   "Thumbnails".
 
 - **Section forms in three levels (Studio):** every section's form is now layout first, a short Design tab, and advanced
