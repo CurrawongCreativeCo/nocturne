@@ -297,6 +297,8 @@ export const hero = defineType({
         hasPicture: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
         // Split and Editorial lay their text out themselves.
         fixesAlignment: (section) => ['split', 'editorial'].includes(layoutOf(section)),
+        // The hero has its own Image, so the shared Background image is not offered.
+        hasOwnBackgroundImage: () => true,
       },
     },
   ),

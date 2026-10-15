@@ -11,7 +11,9 @@ import { PickerView } from './picker-view'
 export function PresetPickerInput(props: StringInputProps) {
   const { schemaType, value, onChange, readOnly, elementProps, path } = props
   const document = useFormValue([])
-  const current = typeof value === 'string' ? value : null
+  const stored = typeof value === 'string' ? value : null
+  // An unset value shows the option the site falls back to as chosen, so the picker never looks empty.
+  const current = stored ?? schemaType.options?.defaultValue?.({ document, path }) ?? null
   const options = filterVisibleOptions(
     normalisePresetOptions(schemaType.options?.list),
     schemaType.options?.visibleOptions?.({ document, path }),

@@ -17,6 +17,32 @@ export const SECTION_TONE_TITLES: Record<(typeof SECTION_TONES)[number], string>
   accent: 'Accent',
 }
 
+/** How strongly the tone's colour covers a background image, so the text on it stays readable. */
+export const SECTION_OVERLAYS = ['none', 'light', 'medium', 'strong'] as const
+
+export const SECTION_OVERLAY_TITLES: Record<(typeof SECTION_OVERLAYS)[number], string> = {
+  none: 'None',
+  light: 'Light',
+  medium: 'Medium',
+  strong: 'Strong',
+}
+
+/** The opacity of the tone-coloured layer over the image: what the page draws and the contrast check measures. */
+export const SECTION_OVERLAY_OPACITY: Record<(typeof SECTION_OVERLAYS)[number], number> = {
+  none: 0,
+  light: 0.45,
+  medium: 0.7,
+  strong: 0.88,
+}
+
+/**
+ * The overlay an image gets when none is chosen: Medium on the dark tones, where a bright photo
+ * would swallow the light text, and Light on the others.
+ */
+export function defaultOverlayFor(tone: string | null | undefined): 'light' | 'medium' {
+  return tone === 'inverse' || tone === 'accent' ? 'medium' : 'light'
+}
+
 /** Ids the site itself uses (the skip link's target), so an anchor can't collide with them. */
 export const RESERVED_ANCHORS: readonly string[] = ['main-content']
 

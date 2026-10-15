@@ -4,6 +4,7 @@ import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
 import { fadeUp, revealChild, revealInView, staggerContainer } from '@/components/motion/presets'
 
+import { SectionBackground } from './section-background'
 import { resolveSectionStyle, type SectionDefaults, type SectionStyleInput } from './section-style'
 
 /** Gentle: the picture drifts a few percent of its height, not enough to pull the eye from the text. */
@@ -39,6 +40,9 @@ interface Props {
  * Motion plays once when the content scrolls into view. `reveal` fades the container up, `stagger`
  * fades its direct children up one after another, `parallax` gives the `media` slot a gentle
  * Parallax (a section with no media stays still; a hero draws its own, see ParallaxImage). Content stays visible without JavaScript (globals.css, `[data-reveal]`).
+ *
+ * The style's brand gradient and background picture (with its overlay) are drawn first, behind
+ * everything, by SectionBackground; the hero's own `background` goes above them.
  */
 export function SectionFrame({
   style,
@@ -74,6 +78,13 @@ export function SectionFrame({
       aria-labelledby={labelledBy}
       className={`${resolved.sectionClass} ${className}`.trim()}
     >
+      <SectionBackground
+        tone={resolved.tone}
+        gradient={resolved.gradient}
+        image={resolved.image}
+        overlay={resolved.overlay}
+        isFirst={isFirst}
+      />
       {background}
       {motion === 'reveal' ? (
         <MotionDiv {...revealInView(fadeUp)} className={containerClass}>

@@ -10,6 +10,9 @@ describe('resolveSectionStyle', () => {
         align: 'start',
         motion: 'none',
         anchorId: undefined,
+        gradient: undefined,
+        image: undefined,
+        overlay: 'light',
         sectionClass: 'relative isolate py-section px-gutter',
         containerClass: 'mx-auto w-full max-w-content',
       })
@@ -94,5 +97,49 @@ describe('ctaSurfaceFor', () => {
     expect(ctaSurfaceFor('accent')).toBe('dark')
     expect(ctaSurfaceFor('surface')).toBe('light')
     expect(ctaSurfaceFor('alt')).toBe('light')
+  })
+})
+
+describe('background layers', () => {
+  const image = { asset: { _id: 'image-a-1x1-png' } }
+
+  it('has no gradient or picture unless the style sets them', () => {
+    expect(resolveSectionStyle({ tone: 'inverse' })).toMatchObject({
+      gradient: undefined,
+      image: undefined,
+    })
+  })
+
+  it('keeps a gradient slug the schema could have produced', () => {
+    expect(resolveSectionStyle({ gradient: 'forest-dusk' }).gradient).toBe('forest-dusk')
+  })
+
+  it.each(['', 'Forest Dusk', 'a;b', 'url(x)', '--x', 'a--b', '-a'])(
+    'drops %j rather than put it in CSS',
+    (gradient) => {
+      expect(resolveSectionStyle({ gradient }).gradient).toBeUndefined()
+    },
+  )
+
+  it('treats a picture with no asset as none', () => {
+    expect(resolveSectionStyle({ image: {} }).image).toBeUndefined()
+    expect(resolveSectionStyle({ image }).image).toBe(image)
+  })
+
+  it('starts a picture at Medium on the dark tones and Light on the others', () => {
+    for (const tone of ['inverse', 'accent']) {
+      expect(resolveSectionStyle({ tone, image }).overlay).toBe('medium')
+    }
+    for (const tone of ['surface', 'alt']) {
+      expect(resolveSectionStyle({ tone, image }).overlay).toBe('light')
+    }
+    // The section's own default tone counts too (a hero starts dark).
+    expect(resolveSectionStyle({ image }, { tone: 'inverse' }).overlay).toBe('medium')
+  })
+
+  it('lets an explicit overlay win, including None, and ignores an unknown one', () => {
+    expect(resolveSectionStyle({ tone: 'inverse', image, overlay: 'none' }).overlay).toBe('none')
+    expect(resolveSectionStyle({ tone: 'alt', image, overlay: 'strong' }).overlay).toBe('strong')
+    expect(resolveSectionStyle({ tone: 'inverse', image, overlay: 'heavy' }).overlay).toBe('medium')
   })
 })

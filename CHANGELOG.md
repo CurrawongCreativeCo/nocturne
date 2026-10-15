@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+- **Section backgrounds (Studio and site):** beyond its tone, a section can have a **brand gradient** (picked from the
+  gradients in Design settings) and a **background image** with an **overlay** (None, Light, Medium, Strong), all in the
+  Design tab's _Background_ area. The gradient picker appears only when Design settings has gradients; the image is not
+  offered for the hero, which has its own. An image on a dark tone starts at Medium, others at Light. `SectionFrame`
+  draws the layers (gradient, picture, overlay) in an absolutely positioned, `aria-hidden` wrapper, so nothing shifts;
+  the picture is lazy unless the section is first. Studio warns when body or secondary text may fall below 4.5:1 on the
+  chosen overlay or gradient. New fields `style.gradient`, `style.image` and `style.overlay` are optional, so existing
+  content is unchanged and needs no migration. Gradient slugs now come from `src/lib/color/gradients.ts`, shared by the
+  design tokens and the Studio. See the README's _Section backgrounds_. Visual baselines for the new gallery entries
+  (`features-grid-gradient-*`, `media-text-background-*`) need adding with the "Update visual baselines" workflow.
 - **Hero presets (Studio and site):** a hero is chosen as a design. The Content tab opens with six pictures (_Full
   background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with
   panel_), each setting the layout, image side and background in one click, with _Full background image_ (dark) the

@@ -699,6 +699,79 @@ export const documents = [
     controlWeight: 50,
     variants: [{ _key: 'v1', _type: 'experimentVariant', variantId: 'bold', weight: 50 }],
   },
+  {
+    // Brand gradients only, so sections can pick one (README, "Section backgrounds"); no colour is
+    // set, so the design is tokens.json's. The `designSettingsVariants` below replace this document.
+    _id: 'designSettings',
+    _type: 'designSettings',
+    gradients: [
+      { _key: 'g1', name: 'Forest dusk', angle: 135, stops: ['#0b3d2e', '#1b2a3b'] },
+      { _key: 'g2', name: 'Morning mist', angle: 180, stops: ['#f0f9ff', '#e0f2fe'] },
+    ],
+  },
+  {
+    // Sections with a gradient and a picture, to test layers, lazy loading and the first section
+    // (tests/e2e/section-background.spec.ts). noIndex keeps it out of the sitemap and search.
+    _id: 'page-style-background',
+    _type: 'page',
+    title: 'Section backgrounds',
+    slug: { _type: 'slug', current: 'style-background' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'bg-first',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'inverse',
+          anchorId: 'bg-first',
+          image: image(''),
+          overlay: 'medium',
+        },
+        body: [block(['Picture on the first section'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-second',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'surface',
+          anchorId: 'bg-second',
+          image: image(''),
+          overlay: 'strong',
+        },
+        body: [block(['Picture further down'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-gradient',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'inverse',
+          anchorId: 'bg-gradient',
+          gradient: 'forest-dusk',
+        },
+        body: [block(['A brand gradient'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-removed',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          tone: 'alt',
+          anchorId: 'bg-removed',
+          gradient: 'no-longer-defined',
+        },
+        body: [block(['A gradient that left Design settings'], { style: 'h2' })],
+      },
+      {
+        _key: 'bg-none',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', tone: 'accent', anchorId: 'bg-none' },
+        body: [block(['No picture, no gradient'], { style: 'h2' })],
+      },
+    ],
+  },
 ].map((doc) => ({ ...doc, _updatedAt: UPDATED }))
 
 /**
@@ -1061,6 +1134,41 @@ const gallerySections = [
       ],
     },
     { width: 'narrow', align: 'center' },
+  ),
+  // Section backgrounds (README, "Section backgrounds"): brand gradients, and a picture with each overlay.
+  styled('features-grid-gradient-inverse', galleryFeatures(3), {
+    tone: 'inverse',
+    gradient: 'forest-dusk',
+  }),
+  styled('features-grid-gradient-surface', galleryFeatures(3), {
+    tone: 'surface',
+    gradient: 'morning-mist',
+  }),
+  ...['none', 'light', 'medium', 'strong'].map((overlay) =>
+    styled(
+      `media-text-background-${overlay}`,
+      galleryMediaText(`background-${overlay}`, `Picture behind, ${overlay} overlay`, {
+        image: image('Picture'),
+        imagePosition: 'right',
+      }),
+      { tone: 'inverse', image: image(''), overlay },
+    ),
+  ),
+  styled(
+    'media-text-background-surface-default',
+    galleryMediaText('background-surface-default', 'Picture behind, light background', {
+      image: image('Picture'),
+      imagePosition: 'right',
+    }),
+    { tone: 'surface', image: image('') },
+  ),
+  styled(
+    'media-text-background-inverse-default',
+    galleryMediaText('background-inverse-default', 'Picture behind, dark background', {
+      image: image('Picture'),
+      imagePosition: 'right',
+    }),
+    { tone: 'inverse', image: image('') },
   ),
   // new-section:gallery
 ]

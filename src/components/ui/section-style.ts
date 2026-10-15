@@ -1,12 +1,16 @@
 import { stegaClean } from 'next-sanity'
 
+import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
 import {
   SECTION_ALIGNS,
   SECTION_MOTIONS,
+  SECTION_OVERLAYS,
   SECTION_SPACINGS,
   SECTION_TONES,
   SECTION_WIDTHS,
+  defaultOverlayFor,
 } from '@/lib/sanity/section-style-options'
+import type { SanityImageData } from '@/types/sanity'
 
 /**
  * Turns a section's `style` object (schema: lib/sanity/schema/section-style.ts) into the classes and
@@ -20,6 +24,7 @@ export type SectionSpacing = (typeof SECTION_SPACINGS)[number]
 export type SectionWidth = (typeof SECTION_WIDTHS)[number]
 export type SectionAlign = (typeof SECTION_ALIGNS)[number]
 export type SectionMotion = (typeof SECTION_MOTIONS)[number]
+export type SectionOverlay = (typeof SECTION_OVERLAYS)[number]
 
 /** A section's `style` as a query returns it: every field optional, possibly with edit markers. */
 export interface SectionStyleInput {
@@ -29,6 +34,11 @@ export interface SectionStyleInput {
   align?: string | null
   anchorId?: string | null
   motion?: string | null
+  /** The slug of one of the brand gradients in Design settings (`--gradient-<slug>`). */
+  gradient?: string | null
+  /** A picture behind the content, with `overlay` laying the tone's colour over it. */
+  image?: SanityImageData | null
+  overlay?: string | null
 }
 
 /** How one kind of section looks when its style is empty. Keep it equal to its schema's `initial`. */
@@ -48,6 +58,12 @@ export interface ResolvedSectionStyle {
   align: SectionAlign
   motion: SectionMotion
   anchorId: string | undefined
+  /** The brand gradient behind the content, as a CSS variable name without `--gradient-`. */
+  gradient: string | undefined
+  /** The background picture; undefined when there is none (an image without an asset counts as none). */
+  image: SanityImageData | undefined
+  /** How strongly the tone covers the picture; meaningful only with an `image`. */
+  overlay: SectionOverlay
   /** On the <section>: spacing and gutters. The tone is carried by `data-tone`. */
   sectionClass: string
   /** On the element inside it that holds the content: width and centring. */
@@ -84,6 +100,8 @@ export function resolveSectionStyle(
   const spacing = pick(SECTION_SPACINGS, style?.spacing)
   const width = pick(SECTION_WIDTHS, style?.width)
   const anchorId = stegaClean(style?.anchorId) || undefined
+  const tone = pick(SECTION_TONES, style?.tone) ?? defaults.tone ?? 'surface'
+  const gradient = stegaClean(style?.gradient)
 
   const resolvedSpacing =
     !spacing || spacing === 'default' ? (defaults.spacing ?? 'default') : spacing
@@ -91,10 +109,14 @@ export function resolveSectionStyle(
     !width || width === 'default' ? (defaults.container ?? DEFAULT_CONTAINER) : WIDTH_CLASSES[width]
 
   return {
-    tone: pick(SECTION_TONES, style?.tone) ?? defaults.tone ?? 'surface',
+    tone,
     align: pick(SECTION_ALIGNS, style?.align) ?? defaults.align ?? 'start',
     motion: pick(SECTION_MOTIONS, style?.motion) ?? defaults.motion ?? 'none',
     anchorId,
+    // Only a slug the schema could have produced reaches a style attribute.
+    gradient: gradient && GRADIENT_SLUG_PATTERN.test(gradient) ? gradient : undefined,
+    image: style?.image?.asset ? style.image : undefined,
+    overlay: pick(SECTION_OVERLAYS, style?.overlay) ?? defaultOverlayFor(tone),
     // A full-width section runs edge to edge, so it keeps no gutters of its own.
     // The site header is sticky, so a linked-to section needs room above it.
     sectionClass: `relative isolate ${SPACING_CLASSES[resolvedSpacing]}${width === 'full' ? '' : ' px-gutter'}${anchorId ? ' scroll-mt-24' : ''}`,

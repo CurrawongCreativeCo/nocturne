@@ -1335,6 +1335,9 @@ with `joinSubtitle` / `variantSubtitle` ("Hero · Split · Dark"). The rules are
 | `spacing`  | `compact` · `default` · `spacious`         | `py-section-compact` / the section's usual / `py-section-spacious`.                           |
 | `width`    | `narrow` · `default` · `wide` · `full`     | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters. |
 | `align`    | `start` · `center`                         | Alignment classes for the parts the section aligns (headings, intro, buttons).                |
+| `gradient` | slug of a brand gradient                   | A gradient layer behind the content (see _Section backgrounds_ below).                        |
+| `image`    | image with hotspot                         | A picture layer behind the content (see _Section backgrounds_); not offered for the hero.     |
+| `overlay`  | `none` · `light` · `medium` · `strong`     | How strongly the tone's colour covers the picture.                                            |
 | `anchorId` | slug-like string                           | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).  |
 | `motion`   | `none` · `reveal` · `stagger` · `parallax` | Scroll-in animation through the wrappers in `src/components/motion`.                          |
 
@@ -1382,6 +1385,59 @@ JavaScript and with reduced motion (see _Motion_).
 two sections), the focus colour, spacing, anchors and motion; the gallery has an entry per tone and spacing for the features
 grid and the image + text section (ids `features-grid-style-<tone>`, `media-text-style-compact`, …), and a narrow, centred
 rich text.
+
+### Section backgrounds
+
+Beyond its tone, a section can have a **brand gradient** and a **background image**, both in the Design tab under
+_Background_ (agency only). Editors choose; nothing is configured by default, so a section keeps its tone.
+
+- **Tone** (as before): Surface, Soft, Dark, Accent, as swatches. It sets the text colours, so text always follows the
+  tone, not the picture.
+- **Gradient** (optional): a list of swatches, one per gradient in Studio → Design → Brand colours → Gradients. It is
+  stored as the gradient's slug (`forest-dusk`) and drawn as `var(--gradient-forest-dusk)`, the variable the site
+  already defines, so a re-skin changes it everywhere. The field disappears while there are no gradients. If a gradient
+  is renamed or removed, the section shows no gradient and the picker marks it _Not in Design settings_.
+- **Background image** (optional): an image with a hotspot, which keeps the subject in view as the section crops it. It
+  is decoration, so it needs no alt text (the page gives it an empty one). **Overlay** appears once there is a picture:
+  None, Light, Medium or Strong (45%, 70% and 88% of the tone's background colour laid over the picture). An unset
+  overlay is **Medium on the dark tones (Dark, Accent) and Light on the others**; the picker shows that default as chosen
+  and nothing is stored until the editor picks.
+- **Not for the hero.** The hero has its own Image, so its Design tab offers the gradient but not the background image
+  (`hasOwnBackgroundImage` in its section rules).
+
+**Rendering.** `SectionFrame` draws `SectionBackground` (`src/components/ui/section-background.tsx`, a server component)
+first inside the `<section>`: a wrapper that is `absolute inset-0 -z-10 aria-hidden`, holding the gradient layer, the
+picture (`SanityImage` with `fill`, `object-cover`, the hotspot as `object-position`) and the overlay, in that order.
+Everything is absolutely positioned, so it takes no space and cannot shift the layout (CLS stays at 0 for it). The
+picture is lazy unless the section is the first on the page, where it is preloaded because it may be the LCP. The
+hero's own background goes above these layers. The style-to-layers mapping (`gradient`, `image`, `overlay`) is
+`resolveSectionStyle` (unit tested); only a slug matching `GRADIENT_SLUG_PATTERN` ever reaches a style attribute.
+
+**Contrast warnings in Studio.** `backgroundContrastProblem` (`src/lib/color/background-contrast.ts`) checks that body
+text and secondary text reach **4.5:1** and shows a warning (never a block) on the Background image or Gradient field.
+A picture is unknown, so it is measured at its worst: the overlay laid over a pure black and a pure white area. A
+gradient is measured at each of its colours. Notes for agencies:
+
+- _None_ always warns: a photo can be any colour. _Medium_ passes on Dark; on Surface and Soft it passes for body text but
+  warns for secondary text; _Strong_ passes on Surface, Soft and Dark.
+- _Accent_ with a picture warns at every strength, because its white-on-brand text has little contrast to spare before
+  any picture. Prefer Dark for pictures.
+- The check uses the colours in `tokens.json`, as the heading emphasis check does, not custom brand colours from Design
+  settings; check those with the warnings on the Brand colours document.
+- When both are set the picture covers the gradient, so only the picture is checked.
+
+**Keeping the Studio list in step with the page.** `brandGradients` (`src/lib/color/gradients.ts`) decides which gradients
+are usable and their slugs; `resolveDesignTokens` writes the CSS variables from it and the Studio picker lists from it,
+so they cannot disagree. The Studio reads the _published_ Design settings (the site draws what is published), shared for
+three seconds between the fields of a form (`fetchBrandGradients`).
+
+**Tests.** `section-style.test.ts`, `background-contrast.test.ts`, `gradients.test.ts`, `section-background.test.ts` and the
+hero rule in `sections/section-form.test.ts` cover the logic; `tests/e2e/section-background.spec.ts` checks the layers on
+the `style-background` fixture page (position, `aria-hidden`, empty alt, lazy and first-section loading, a removed gradient,
+server rendering) and runs axe over the gallery entries `features-grid-gradient-*` and `media-text-background-*` (one per
+overlay, plus the unset defaults on a light and a dark tone). The fixture's `designSettings` holds two gradients and no
+colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
+the real guard for pictures is the Studio warning and the overlay values above.
 
 ### Highlighting words in a heading
 
