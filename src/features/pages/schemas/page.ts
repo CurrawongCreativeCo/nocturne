@@ -2,39 +2,16 @@ import { DocumentIcon } from '@sanity/icons/Document'
 import { HomeIcon } from '@sanity/icons/Home'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
-import {
-  BLOG_SEGMENT,
-  EXPERIMENT_SEGMENT,
-  GALLERY_SEGMENT,
-  HOME_SLUG,
-  SEARCH_SEGMENT,
-  SIGN_IN_SEGMENT,
-  SIGN_OUT_SEGMENT,
-  slugToPath,
-  STUDIO_BRAND_PREVIEW_SEGMENT,
-} from '@/config/paths'
+import { HOME_SLUG, slugToPath } from '@/config/paths'
 import { ACCESS_MEMBERS } from '@/lib/sanity/access'
 import { lockedForClientsOnceSet } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 
 import { sectionTypes } from './sections'
+import { reservedSegment } from '../utils/reserved-slug'
 import { findDuplicateAnchors } from '../utils/section-anchors'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/
-/** First path segments taken by app routes: a page there could never be reached. */
-const RESERVED_SEGMENTS = new Set([
-  'studio',
-  'api',
-  '_next',
-  BLOG_SEGMENT,
-  EXPERIMENT_SEGMENT,
-  GALLERY_SEGMENT,
-  SEARCH_SEGMENT,
-  SIGN_IN_SEGMENT,
-  SIGN_OUT_SEGMENT,
-  STUDIO_BRAND_PREVIEW_SEGMENT,
-])
-
 export const page = defineType({
   name: 'page',
   title: 'Page',
@@ -75,10 +52,8 @@ export const page = defineType({
           if (!SLUG_PATTERN.test(slug.current)) {
             return 'Lowercase letters, numbers, hyphens; "/" separates path segments'
           }
-          const first = slug.current.split('/')[0] ?? ''
-          return RESERVED_SEGMENTS.has(first)
-            ? `"${first}" is used by the site itself; choose another path`
-            : true
+          const taken = reservedSegment(slug.current)
+          return taken ? `"${taken}" is used by the site itself; choose another path` : true
         }),
     }),
     defineField({

@@ -16,7 +16,7 @@ export interface QuickAction {
 
 /**
  * The cards on Start here. A feature the profile switches off, or whose document type is not in
- * this Studio's schema (the template has no team type yet), gets no card, so a link never leads
+ * this Studio's schema (a client site may have removed it), gets no card, so a link never leads
  * to a screen that is not there.
  */
 export function buildQuickActions(

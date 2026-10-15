@@ -195,6 +195,38 @@ export const locationFragment = /* groq */ `
   }
 `
 
+/**
+ * What a team card shows. `slug` is only a link target when the site has profile pages
+ * (`hasTeamProfiles()`, checked where the card is drawn).
+ */
+const teamCardFields = /* groq */ `
+  _id,
+  name,
+  role,
+  "slug": slug.current,
+  shortBio,
+  portrait { ${imageFields} }
+`
+
+/**
+ * The members are resolved here, so a page needs no second request: "everyone" is the team in its
+ * drag order (members without an `order` last, then by name; 60 at most, matching TEAM_ALL_LIMIT),
+ * "picked" is the editor's own list in their order, leaving out references to members that are not
+ * published (or were deleted).
+ */
+export const teamFragment = /* groq */ `
+  _type == "team" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    title,
+    text,
+    "members": select(
+      selection == "picked" => members[defined(@->_id)]->{ ${teamCardFields} },
+      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { ${teamCardFields} }
+    )
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -214,6 +246,7 @@ const sectionsFragment = /* groq */ `
   ${statsFragment},
   ${galleryFragment},
   ${locationFragment},
+  ${teamFragment},
   _type
 `
 

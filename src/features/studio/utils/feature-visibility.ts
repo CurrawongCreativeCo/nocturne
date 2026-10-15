@@ -5,7 +5,8 @@ import { FEATURE_NAMES, type FeatureName, type Features, siteProfile } from '@/c
 /**
  * Document types each feature owns, by schema name. Turning a feature off hides these from the
  * desk and the "New document" menu; the types stay registered (the profile controls visibility,
- * not the schema). `team` lists the names a team document would take: none exists in the template yet.
+ * not the schema). `team` hides the Team list and the member documents; `teamProfiles` only changes
+ * which of a member's fields show and whether they have pages, so it owns no document type.
  */
 export const FEATURE_DOCUMENT_TYPES: Partial<Record<FeatureName, readonly string[]>> = {
   blog: ['post', 'author', 'category'],
