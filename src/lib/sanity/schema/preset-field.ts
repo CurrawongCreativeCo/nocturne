@@ -1,0 +1,92 @@
+import type { ComponentType } from 'react'
+import { defineField } from 'sanity'
+
+/** What a thumbnail component receives: the Studio scheme it draws on, and whether its card is chosen. */
+export interface PresetThumbnailProps {
+  scheme: 'light' | 'dark'
+  selected: boolean
+}
+
+/** A picture for an option: a URL or static file path, or an inline (theme-aware) React component. */
+export type PresetThumbnail = string | ComponentType<PresetThumbnailProps>
+
+export interface PresetOption {
+  /** Stored in the content. */
+  value: string
+  title: string
+  /** One line under the title. */
+  description?: string
+  thumbnail?: PresetThumbnail
+}
+
+/** One-click preset: sets several fields at once. Editors can still change any of them afterwards. */
+export interface PresetDefinition {
+  value: string
+  title: string
+  description?: string
+  thumbnail?: PresetThumbnail
+  /** Field path (dots reach into objects: 'style.tone') to the value it is set to. */
+  set: Record<string, unknown>
+}
+
+declare module 'sanity' {
+  interface StringOptions {
+    /** Show the options as a grid of pictures. The Studio input is in features/studio/components/preset-picker. */
+    presetPicker?: boolean
+  }
+  interface ObjectOptions {
+    /** Presets shown in a bar above the object's fields (features/studio/components/preset-picker). */
+    presets?: PresetDefinition[]
+  }
+}
+
+interface PresetFieldConfig {
+  name: string
+  title?: string
+  description?: string
+  group?: string
+  options: readonly PresetOption[]
+  /** Defaults to the first option. */
+  initialValue?: string
+  required?: boolean
+}
+
+/**
+ * A string field the Studio shows as a picker of pictures instead of a radio list. The options go in
+ * `options.list`, so without the picker input (a Studio that doesn't register it) the field is still
+ * a normal radio list. Schema files stay free of Studio code: the picker finds the field by
+ * `options.presetPicker`.
+ */
+export function presetField({
+  name,
+  title,
+  description,
+  group,
+  options,
+  initialValue,
+  required = true,
+}: PresetFieldConfig) {
+  return defineField({
+    name,
+    title,
+    description,
+    group,
+    type: 'string',
+    initialValue: initialValue ?? options[0]?.value,
+    options: {
+      presetPicker: true,
+      // `description` and `thumbnail` ride along on each entry; Sanity ignores what it doesn't know.
+      list: options.map((option) => ({ ...option })),
+      layout: 'radio',
+    },
+    validation: required ? (rule) => rule.required() : undefined,
+  })
+}
+
+/**
+ * The `options` for an object type (a section, say) that offers presets above its form:
+ * `defineType({ type: 'object', options: presetsOption([...]), ... })`.
+ */
+export function presetsOption(presets: readonly PresetDefinition[]) {
+  return { presets: [...presets] }
+}

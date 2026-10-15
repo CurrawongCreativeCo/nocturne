@@ -27,3 +27,15 @@ for (const item of brandPreviewCases) {
     })
   }
 }
+
+// The preset picker examples: the grid, the collapsed row and the preset bar, light and dark.
+for (const scheme of ['light', 'dark'] as const) {
+  test(`Preset picker, ${scheme}`, async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop only')
+    await page.goto('/studio-brand-preview')
+    await expect(page.locator('main[data-ready="true"]')).toBeVisible()
+    const examples = page.locator(`[data-picker-scheme="${scheme}"]`)
+    await page.evaluate(() => document.fonts.ready)
+    await expect(examples).toHaveScreenshot(`studio-brand-preset-picker-${scheme}.png`)
+  })
+}

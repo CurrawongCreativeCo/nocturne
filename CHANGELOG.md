@@ -20,6 +20,14 @@ you start a release.
 
 ### Added
 
+- **Preset picker (Studio):** one reusable input to choose by picture instead of a radio list, and a preset mode that
+  sets several fields at once. `presetField` (`src/lib/sanity/schema/preset-field.ts`) makes a string field shown as a
+  grid of cards; `presetsOption` puts a preset bar above an object's form. Both are activated by the existing global
+  input override (`withPresetPicker`), so schemas never import Studio code. Radiogroup keyboard pattern, a collapsed
+  "picture, title, Change" row, thumbnails as inline theme-aware SVG components or static files, and "Custom" when
+  fields no longer match a preset. Unit tests plus an example on `/studio-brand-preview` with axe, keyboard and
+  screenshot coverage. Nothing in the current sections uses it yet. See the README's "Preset picker (Studio)".
+
 - **Navigation feedback:** a thin accent progress bar (`RouteProgress`, under 1 KB gzipped, no new dependency) for
   client-side navigations that take longer than 150 ms; instant navigations show nothing. Started by
   `onRouterTransitionStart` in `instrumentation-client.ts`, finished by a pathname or query change, with a 10 s safety
