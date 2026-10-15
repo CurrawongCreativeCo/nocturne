@@ -109,6 +109,6 @@ async function experiment(request: NextRequest) {
 /** Skips Studio, API routes, Next.js internals and static assets. Legacy ".html" URLs still match. */
 export const config = {
   matcher: [
-    '/((?!(?:studio|api|_next)(?:/|$)|apple-icon$|.*\.(?:ico|png|jpe?g|gif|svg|webp|avif|css|js|map|txt|xml|json|webmanifest|woff2?)$).*)',
+    '/((?!(?:studio|api|_next)(?:/|$)|.*\.(?:ico|png|jpe?g|gif|svg|webp|avif|css|js|map|txt|xml|json|webmanifest|woff2?)$).*)',
   ],
 }

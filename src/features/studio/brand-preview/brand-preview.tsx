@@ -16,7 +16,7 @@ import {
   TextInput,
   ThemeProvider,
 } from '@sanity/ui'
-import { useMemo, useState, useSyncExternalStore } from 'react'
+import { useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 
 import type { Scheme } from '@/config/studio-brand/types'
 
@@ -221,8 +221,33 @@ function PreviewSection({ item, scheme }: { item: BrandPreviewCase; scheme: Sche
   )
 }
 
+/**
+ * Studio inputs from other features, composed by the route (features can't import each other),
+ * shown under the first case's light theme so they get the same Sanity UI context as in Studio.
+ */
+function InputExamples({ children }: { children: ReactNode }) {
+  const theme = useMemo(() => {
+    const first = brandPreviewCases[0]
+    const built = first ? buildStudioTheme(first.brand) : undefined
+    return built ? toUiTheme(built) : undefined
+  }, [])
+  if (!theme) return null
+  return (
+    <section aria-labelledby="input-examples" className="mt-12">
+      <h2 id="input-examples" className="text-h4 font-semibold">
+        Studio inputs
+      </h2>
+      <div className="mt-6">
+        <ThemeProvider scheme="light" theme={theme}>
+          {children}
+        </ThemeProvider>
+      </div>
+    </section>
+  )
+}
+
 /** Every case in light and dark, each under the theme Studio would receive for it. */
-export function BrandPreview() {
+export function BrandPreview({ children }: { children?: ReactNode }) {
   const hydrated = useHydrated()
 
   return (
@@ -246,6 +271,7 @@ export function BrandPreview() {
             </section>
           ))
         : null}
+      {hydrated && children ? <InputExamples>{children}</InputExamples> : null}
     </main>
   )
 }

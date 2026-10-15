@@ -149,6 +149,19 @@ export type Settings = {
     alt?: string
     _type: 'image'
   }
+  browserIcon?: {
+    choice: 'default' | 'upload' | 'logo'
+    image?: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: 'image'
+    }
+    padding?: 'none' | 'small' | 'medium'
+    background?: 'transparent' | 'light' | 'dark' | 'brand'
+  }
   ogImage?: {
     asset?: SanityImageAssetReference
     media?: unknown
@@ -2340,13 +2353,14 @@ export type SEARCH_QUERY_RESULT = Array<{
 
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
-// Query: *[_id == "settings"][0] {    title,    description,    logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    ogImage { asset->{ _id } },    announcement { message, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, startsAt, endsAt, dismissible },    headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerText,    consent { title, message, privacyLabel, privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, analyticsText, marketingText },    "allowAiCrawlers": allowAiCrawlers != false  }
+// Query: *[_id == "settings"][0] {    title,    description,    logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    ogImage { asset->{ _id } },    // Only when the editor chose their own icon: the default icon needs no data.    "browserIcon": select(      browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {        "image": browserIcon.image { asset, crop, hotspot },        "padding": coalesce(browserIcon.padding, "none"),        "background": coalesce(browserIcon.background, "transparent")      }    ),    announcement { message, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, startsAt, endsAt, dismissible },    headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerText,    consent { title, message, privacyLabel, privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, analyticsText, marketingText },    "allowAiCrawlers": allowAiCrawlers != false  }
 export type SETTINGS_QUERY_RESULT =
   | {
       title: null
       description: null
       logo: null
       ogImage: null
+      browserIcon: null
       announcement: null
       headerNav: null
       headerCta: null
@@ -2360,6 +2374,7 @@ export type SETTINGS_QUERY_RESULT =
       description: null
       logo: null
       ogImage: null
+      browserIcon: null
       announcement: null
       headerNav: null
       headerCta: null
@@ -2373,6 +2388,7 @@ export type SETTINGS_QUERY_RESULT =
       description: null
       logo: null
       ogImage: null
+      browserIcon: null
       announcement: null
       headerNav: null
       headerCta: null
@@ -2386,6 +2402,7 @@ export type SETTINGS_QUERY_RESULT =
       description: string | null
       logo: null
       ogImage: null
+      browserIcon: null
       announcement: null
       headerNav: null
       headerCta: null
@@ -2417,6 +2434,15 @@ export type SETTINGS_QUERY_RESULT =
           _id: string
         } | null
       } | null
+      browserIcon: {
+        image: {
+          asset: SanityImageAssetReference | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+        } | null
+        padding: 'medium' | 'none' | 'small'
+        background: 'brand' | 'dark' | 'light' | 'transparent'
+      }
       announcement: {
         message: string
         link: {
@@ -2648,7 +2674,7 @@ declare global {
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_type == "stripePrice" && priceId == $priceId && active == true][0] {\n    priceId,\n    interval\n  }\n': CHECKOUT_PRICE_QUERY_RESULT
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
-    '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    announcement { message, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, startsAt, endsAt, dismissible },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText,\n    consent { title, message, privacyLabel, privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, analyticsText, marketingText },\n    "allowAiCrawlers": allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
+    '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    // Only when the editor chose their own icon: the default icon needs no data.\n    "browserIcon": select(\n      browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n        "image": browserIcon.image { asset, crop, hotspot },\n        "padding": coalesce(browserIcon.padding, "none"),\n        "background": coalesce(browserIcon.background, "transparent")\n      }\n    ),\n    announcement { message, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, startsAt, endsAt, dismissible },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText,\n    consent { title, message, privacyLabel, privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, analyticsText, marketingText },\n    "allowAiCrawlers": allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '\n  *[_id == "settings"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }

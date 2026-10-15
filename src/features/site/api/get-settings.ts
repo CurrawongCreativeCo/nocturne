@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 
+import { dataset, projectId } from '@/config/env'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 import { SETTINGS_QUERY } from './queries'
+import { browserIconLinks } from '../utils/browser-icon'
 
 export async function getSettings(mode: FetchMode) {
   // Menu links resolve page slugs, so a page change can change the settings result too.
@@ -27,6 +29,13 @@ export async function getSiteMetadata(): Promise<Metadata> {
         .url()
     : undefined
 
+  // Next.js adds src/app/icon.png and apple-icon.png only when `icons` is unset, so setting it here
+  // replaces them (never two <link rel="icon"> sets). Without a custom icon the default files apply.
+  const browserIcon = settings?.browserIcon
+  const icons = browserIcon?.image
+    ? browserIconLinks(browserIcon.image, browserIcon, { projectId, dataset })
+    : undefined
+
   const description = settings?.description ?? undefined
   const template = { template: `%s | ${title}`, default: title }
 
@@ -35,6 +44,7 @@ export async function getSiteMetadata(): Promise<Metadata> {
   return {
     title: template,
     description,
+    ...(icons && { icons }),
     openGraph: {
       type: 'website',
       siteName: title,

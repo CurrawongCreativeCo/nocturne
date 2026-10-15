@@ -79,6 +79,24 @@ test.describe('Studio brand preview', () => {
     expect(sitemap).not.toContain('studio-brand-preview')
   })
 
+  test('shows the Browser icon preview: 16, 32 and 180 px on a light and a dark browser', async ({
+    page,
+  }) => {
+    const preview = page.locator('[data-browser-icon-preview]')
+    await expect(preview).toBeVisible()
+    await expect(preview.getByRole('group')).toHaveCount(2)
+    const images = preview.getByRole('img')
+    await expect(images).toHaveCount(6)
+    const sizes = await images.evaluateAll((all) =>
+      all.map((img) => ({
+        width: img.getAttribute('width'),
+        loaded: (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0,
+      })),
+    )
+    expect(sizes.map((size) => size.width)).toEqual(['16', '32', '90', '16', '32', '90'])
+    expect(sizes.every((size) => size.loaded)).toBe(true)
+  })
+
   test('has one h1', async ({ page }) => {
     await expect(page.locator('h1')).toHaveCount(1)
   })
