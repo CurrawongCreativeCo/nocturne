@@ -33,6 +33,22 @@ export const ctaFields = /* groq */ `
   link { ${linkFields} }
 `
 
+/** One `statItem` (schema: lib/sanity/schema/stats.ts), for the Stats section and the hero's statistics bar. */
+export const statItemFields = /* groq */ `
+  _key,
+  value,
+  decimals,
+  prefix,
+  suffix,
+  label
+`
+
+/** A `statsBar`: project it as `statsBar { ${statsBarFields} }`. */
+export const statsBarFields = /* groq */ `
+  items[] { ${statItemFields} },
+  caption
+`
+
 /**
  * A section's shared layout and style options (schema: lib/sanity/schema/section-style.ts). Every
  * section fragment projects it as `style { ${sectionStyleFields} }`; SectionFrame reads it.

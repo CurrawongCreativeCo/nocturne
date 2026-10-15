@@ -1556,6 +1556,50 @@ npx sanity migration run hero-title-to-heading-text --no-dry-run    # asks befor
 It converts each hero's `title` into one block in `heading` (pages, shared sections, drafts and release versions), keeps
 `title`, and is safe to run twice. Publish the migrated drafts afterwards. Delete the folder once every dataset has run it.
 
+### Statistics
+
+A row of headline figures ("12,500+ projects delivered"), as a section of its own and as a compact bar for the hero.
+Both read the same two shared types, `statItem` and `statsBar` (`src/lib/sanity/schema/stats.ts`).
+
+**For editors.** Add a **Stats** section. It starts with three example figures (replace them) and looks finished as it
+is. Each figure has a **value** (type `12500`, not `12,500`: the site adds the commas), a **label** and, under _Number
+format_, an optional **prefix** (`$`), **suffix** (`+`, `%`, `m`) and **decimal places** (0 to 3; `4.9` needs 1). A
+section holds one to six figures; Studio warns when text is too long, and never blocks publishing. The agency-only
+**Layout** is _Inline_ (big figures side by side on the page) or _Cards_ (one card each). The figures count up from 0 the
+first time they scroll into view; set the Design tab's **Animation** to _None_ and they are plain text. A **statistics
+bar** is two to four figures and an optional caption (the hero's slot for it arrives with task 81).
+
+**For developers.**
+
+- **Schema:** `statItem` is `value`, `label` and (in a collapsed _Number format_ fieldset) `prefix`, `suffix`, `decimals`;
+  `statsBar` is `items` (2 to 4) and `caption`. Reuse them in any schema with `type: 'statItem'` or `'statsBar'`, and in
+  GROQ with `statItemFields` / `statsBarFields` (`src/lib/sanity/fragments.ts`), so a hero folds them into its existing
+  query: `statsBar { ${statsBarFields} }`. No extra request.
+- **The figure is formatted on the server.** `formatStat` (`src/lib/stats/format-stat.ts`, unit tested) uses
+  `Intl.NumberFormat('en-AU')` with exactly `decimals` places, then adds prefix and suffix. The result is in the HTML, so
+  it is right for search engines, with JavaScript off and under reduced motion. Pass a figure through `cleanFigure` before
+  formatting a stega-encoded value (draft mode); `StatFigure` does.
+- **`StatFigure`** (`src/components/ui/stat-figure.tsx`, server) renders one figure. Not animated, it is plain text.
+  Animated, the counting text is `aria-hidden` and a visually hidden span holds the final value, so a screen reader hears
+  it once, not "0, 3, 41". It is `tabular-nums` with a `min-width` of the final text's width in `ch`, so the box is the same
+  size from the first frame to the last and the count shifts nothing (CLS stays 0).
+- **`CountUp`** (`src/components/motion/count-up.tsx`) is the island: `useInView` (once), then `useSpring` (1.6 s, no
+  overshoot; Motion's spring takes milliseconds) into `useTransform`, written straight to the text node, with no React
+  render per frame. It never counts under `prefers-reduced-motion`, and ends by writing the server's text exactly. Server
+  components import `count-up-lazy.tsx` (`next/dynamic` in a client file, like `LazyParallax`), so its code is a separate
+  chunk that only a page rendering an animated figure downloads. A page without statistics pays nothing, so the home page
+  budget is unchanged.
+- **When it counts:** Animation _Reveal_ or _Stagger_ (the section starts on _Reveal_). _None_ means no count-up, and so
+  does being the page's first section (`SectionFrame` never animates the first section either).
+- **`StatsBar`** (`src/components/ui/stats-bar.tsx`) is the hero-slot component: no section frame, no colours of its own
+  (text, muted text and dividers come from the surrounding tone, so it reads on a dark or a light hero), thin dividers
+  between figures, one row from `sm` up and two by two on a phone. Pass `animate` only when the hosting section's Animation
+  is not _None_. `/section-gallery/stats-bar` shows it on all four tones (404 outside development and the end-to-end run).
+- **Tests:** unit tests for the formatter and `StatFigure`; `tests/e2e/stats.spec.ts` checks the final values in the
+  server HTML, axe on both layouts and the bar, the divider and 2×2 layout, a real count-up (and that its box never changes
+  size), reduced motion, no JavaScript and Animation _None_. The gallery has `stats-inline`, `stats-cards` and
+  `stats-cards-six` (dark, no animation); the `/stats` fixture page holds an animated and a still section below the fold.
+
 ### Type flow
 
 ```

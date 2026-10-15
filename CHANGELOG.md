@@ -20,6 +20,17 @@ you start a release.
 
 ### Added
 
+- **Statistics (Studio and site):** a **Stats** section (layouts _Inline_ and _Cards_; title, intro and one to six
+  figures) and a compact **statistics bar** component for the hero's upcoming statistics slot. Each figure is a number
+  with a label and optional prefix, suffix and decimal places, formatted on the server with `Intl.NumberFormat('en-AU')`,
+  so the real figure is in the HTML without JavaScript and under reduced motion. Unless the section's Animation is _None_,
+  the figures count up from 0 once when scrolled into view (a small `CountUp` island loaded only on pages that use it, so
+  the home page budget is unchanged; the counting text is `aria-hidden` with a visually hidden final value, and
+  `tabular-nums` with a fixed width prevents layout shift). The bar has thin dividers, takes the surrounding tone and wraps
+  two by two on phones. New shared types `statItem` and `statsBar`, GROQ fragments `statItemFields` / `statsBarFields`, and
+  a gallery page at `/section-gallery/stats-bar`. Existing content is unchanged and needs no migration. Run
+  `npm run typegen` after merging. Visual baselines for the new gallery entries (`stats-*`) need the **Update visual
+  baselines** workflow.
 - **Section dividers (Studio and site):** a section can end in a shape: **Diagonal, Wave, Curve, Arch or Layered wave**,
   chosen from pictures under _Bottom edge_ in the Design tab (agency only). The section below shows through the cut,
   whether it is a flat tone, a gradient or a picture, and moves up to meet it, with its spacing adjusted automatically.

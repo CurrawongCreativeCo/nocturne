@@ -4,6 +4,7 @@ import {
   imageFields,
   portableTextFields,
   sectionStyleFields,
+  statItemFields,
   stripePriceFields,
 } from '@/lib/sanity/fragments'
 
@@ -156,6 +157,16 @@ export const newsletterSignupFragment = /* groq */ `
   }
 `
 
+export const statsFragment = /* groq */ `
+  _type == "stats" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    title,
+    intro,
+    items[] { ${statItemFields} }
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -172,6 +183,7 @@ const sectionsFragment = /* groq */ `
   ${formSectionFragment},
   ${pricingTableFragment},
   ${newsletterSignupFragment},
+  ${statsFragment},
   _type
 `
 

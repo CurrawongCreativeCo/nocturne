@@ -20,6 +20,7 @@ import { MediaText } from './sections/media-text'
 import { NewsletterSignup } from './sections/newsletter-signup'
 import { PricingTable } from './sections/pricing-table'
 import { RichText } from './sections/rich-text'
+import { Stats } from './sections/stats'
 import { Testimonials } from './sections/testimonials'
 // new-section:import
 
@@ -40,6 +41,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   formSection: FormSection,
   pricingTable: PricingTable,
   newsletterSignup: NewsletterSignup,
+  stats: Stats,
   // new-section:register
 }
 
