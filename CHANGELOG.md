@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+- **Style guide (`/section-gallery`):** the section gallery is now a living style guide for client design reviews. The
+  **Sections** view gets links above each section to switch its tone and layout, and a **375 / 768 / 1280 px** width
+  preview built from container widths (no iframes; a small PostCSS step, `scripts/postcss-container-frames.mjs`, gives
+  the stylesheet container-query copies of its responsive rules and is left out of Vercel production builds). The choices
+  live in the URL. A new **Design tokens** view (`/section-gallery/tokens`) shows the colours in use with their WCAG
+  contrast ratios, the type scale, spacing, radii, shadows and motion samples (still under reduced motion). It stays a 404
+  in production; on Vercel preview deployments it opens with `?preview=<STYLEGUIDE_PREVIEW_TOKEN>`. Never indexed, and
+  the fixture page behind it is left out of the sitemap. With nothing chosen the gallery renders as before, so the visual
+  baselines are unchanged. New feature folder `src/features/styleguide`. See the README's "Style guide".
+
 - **Gallery section (Studio and site):** up to 60 pictures (required alt text, optional caption) in a **Grid**, **Masonry**
   or **Slider** layout, with **Columns** (2–4) on the Design tab. Grid and masonry are CSS only; the slider is the shared
   `Slider`. Each thumbnail is a button ("Open image 3 of 12: …") that opens a full-screen native `<dialog>` lightbox with the
@@ -232,6 +242,9 @@ you start a release.
   every tone and spacing on two sections. See the README's "Section style".
 
 ### Changed
+
+- **Sitemap:** the pages count and slice queries (`PAGE_COUNT_QUERY`, `PAGE_SITEMAP_QUERY`) skip the reserved
+  `section-gallery` slug, so the style guide's fixture page can never be listed. Run `npm run typegen` after merging.
 
 - **Cursors and feedback:** every interactive control now shows the right cursor from shared CSS (`globals.css`):
   pointer for enabled controls, `not-allowed` for disabled ones. The per-component `cursor-pointer` classes are gone,

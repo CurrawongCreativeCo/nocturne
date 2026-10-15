@@ -368,6 +368,7 @@ It still needs the CORS step below.
    | `OPS_NOTICES_URL`                | optional: https endpoint for notices on the Studio's Start here screen (see Start here) |
    | `OPS_NOTICES_KEY`                | optional: bearer key sent to that endpoint from the server; never reaches the browser   |
    | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                      |
+   | `STYLEGUIDE_PREVIEW_TOKEN`       | optional: opens the style guide on Vercel preview deployments (see Style guide)         |
    | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                             |
    | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                            |
    | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                             |
@@ -502,7 +503,9 @@ src/
 studio-brand.json                  this site's CMS brand ({} = Currawong's); see CMS branding
 scripts/check-studio-brand.mjs     `npm run check:studio-brand`: prints the resolved CMS brand and warnings
 public/section-previews/           insert-menu thumbnails, one <typeName>.svg per section
-    section-gallery/page.tsx       (in src/app) every section type and variant on one page; dev and tests only
+    section-gallery/page.tsx       (in src/app) the style guide's sections view: every section type and variant, with controls
+    section-gallery/tokens/page.tsx  (in src/app) the style guide's tokens view: colour, type, spacing, motion
+  features/styleguide/             style guide controls, width frames and tokens panel (pure state in utils/)
 scripts/new-section.mjs            `npm run new:section` scaffolder
 scripts/new-{feature,document,singleton}.mjs   `npm run new:feature|document|singleton` scaffolders (shared code: generator-utils.mjs)
 ```
@@ -1961,6 +1964,76 @@ compiler knows `hero.title` is a `string` and `hero.description` is `string | nu
 Data is typed `StegaBranded`: draft-mode strings carry invisible edit markers. They render normally,
 but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
 
+### Style guide
+
+`/section-gallery` is a living style guide for design reviews with a client, in two views:
+
+- **Sections** (`/section-gallery`): every section type and variant on one page, each under its label.
+  - **Tone and layout, per section.** Links above each section switch its Background tone (surface, soft, dark, accent)
+    and, where it has one, its layout (hero: full background, split, editorial, image with panel; statistics: inline,
+    cards; gallery: grid, masonry, slider; media and text: image left or right; features grid: 2, 3 or 4 columns).
+    **As authored** is the default and shows the content as the page has it. A group is left out where a section has
+    nothing to choose, so every combination offered is a sensible one (`applySectionOverride` ignores anything else,
+    hand-edited URLs included).
+  - **Width.** **Full**, **375 px**, **768 px** or **1280 px** at the top previews every section at a phone, tablet or
+    laptop width. These are container widths, not iframes: each section sits in a box of that width that is a
+    [size container](https://developer.mozilla.org/docs/Web/CSS/CSS_containment/Container_queries) named `styleguide`
+    (`WidthFrame`). A frame wider than the window shrinks to fit it.
+  - **The choices live in the URL** (`?width=375&tone.<section key>=inverse&layout.<section key>=split`), so a view can be
+    pasted into an email or a ticket. Nothing is stored. **Reset** goes back to the page as authored.
+- **Design tokens** (`/section-gallery/tokens`): every colour role as a swatch with its class name and hex, then the
+  **contrast ratio** of each pair sections draw (text needs 4.5:1, borders and focus rings 3:1, per WCAG 2.2 AA; ratios are
+  cut, not rounded, so 4.496 never reads as 4.50), the **type scale** (each step set in its class, fluid sizes shown as a
+  pixel range), the three font families, **spacing**, **radii**, **shadows** and the **motion** tokens with samples to
+  play. The colours are the ones in use: `tokens.json` with the Studio's Design settings applied, so a client's palette
+  that fails AA says so here. The motion samples animate only scale and opacity on the tokens' own durations and easing;
+  with `prefers-reduced-motion` they are drawn already finished, the Play button is replaced by a note, and nothing moves.
+
+**Why the width frames need a stylesheet step.** Tailwind's `sm:`, `md:` and `lg:` are window media queries, so a 375 px
+box on a wide screen would still lay out for desktop. `scripts/postcss-container-frames.mjs` (wired in `postcss.config.mjs`,
+for `src/styles/globals.css` only) adds, for every width media query, the same rules as a query on the `styleguide`
+container, and wraps the original rules in `@container not style(--sg-frame: 1)`; the frame sets `--sg-frame: 1`, which
+inherits to everything inside it. Outside a frame nothing changes, and with no frame chosen the page is laid out by the
+window as normal. Lengths in viewport units (`vh`, `vw`, `min-h-screen`) still follow the window. **Vercel production builds
+leave the plugin out** (`VERCEL_ENV=production`), so the live site's stylesheet is unchanged; every other build (development,
+previews, the end-to-end build) has it, about 4 KB larger before compression and 0.2 KB after. If you add a width media
+query by hand to `globals.css`, the plugin picks it up as long as it is a single `min-width`/`max-width` or `width >=`/`<`
+condition; a combined query (`(width >= 40rem) and (hover: hover)`) is left to the window.
+
+#### Access
+
+| Where                                      | Result                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `next dev`, and the end-to-end build       | Open (`NODE_ENV=development`, `E2E_GALLERY=1`).                                            |
+| Vercel **production**                      | **404**, always, a real status from the prerender. A token set there changes nothing.      |
+| Vercel **preview**, token set              | Open with `?preview=<STYLEGUIDE_PREVIEW_TOKEN>`; without it, or with a wrong one, **404**. |
+| A preview with no token, or any other host | **404**.                                                                                   |
+
+To let a client review on a (password-protected) preview URL: add `STYLEGUIDE_PREVIEW_TOKEN` to the project's **Preview**
+environment variables only (16 or more characters, e.g. `openssl rand -hex 16`; shorter is treated as not set), redeploy,
+and send `https://<preview-url>/section-gallery?preview=<token>`. `proxy.ts` checks the token, answers a missing page
+without it, and keeps the token in an `HttpOnly` cookie for eight hours, so the guide's own links need no token and the
+token stays out of the URLs a client copies from the address bar after the first visit. The page checks it again where the
+content is made. The comparison takes the same time whatever the guess. Rotate the token by changing the variable and
+redeploying; existing cookies stop working at once.
+
+It is **never indexed**: `noindex, nofollow` in the page metadata and in an `X-Robots-Tag` header (set by `proxy.ts`, also
+on the 404s), the fixture page that feeds it is left out of the sitemap, and `section-gallery` is a reserved slug. It is
+left out of A/B tests (`proxy.ts`), and `robots.txt` deliberately does not disallow it: a crawler that cannot fetch a page
+cannot see its `noindex`. Responses on a preview are `Cache-Control: private, no-store`.
+
+**Tests.** `tests/e2e/styleguide.spec.ts` (tone and layout switching, impossible combinations ignored, width frames laying
+out two, one and three columns in a desktop window, no iframe, the tokens page, reduced motion, axe, noindex, sitemap);
+`src/proxy.test.ts` and `src/lib/styleguide-access.test.ts` (the token rules, including cookie, wrong and short tokens);
+`scripts/postcss-container-frames.test.mjs` (the stylesheet step). The preview-deployment path cannot run in the
+end-to-end build (it is open there), so check it by hand after changing `proxy.ts`: build with
+`VERCEL_ENV=preview STYLEGUIDE_PREVIEW_TOKEN=<16+ characters>` and request the guide with and without the token.
+
+**Adding to it.** A new section type needs no work here: it appears with a tone control (it has a `style`), and if it has
+layouts, add them to `VARIANT_CONTROLS` in `src/features/pages/utils/section-override.ts` (a test fails when the lists
+drift from the schemas). A new colour pair worth checking goes in `CONTRAST_PAIRS`
+(`src/features/styleguide/utils/token-contrast.ts`).
+
 ## Code quality
 
 **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It checks
@@ -2154,9 +2227,11 @@ When you add a section or a content type, add an example of it to the fixture da
 
 `/section-gallery` renders every section type on one page, each under a label (`ctaBanner (dark tone)`,
 `mediaText (image left)`, `featuresGrid (4 columns)`…), so a styling change can be checked in one place.
-It is not part of the public site: it answers 404 unless `NODE_ENV` is `development` or `E2E_GALLERY=1`
-(`playwright.config.ts` sets it for the test build), and `section-gallery` is a reserved first slug
-segment, so no CMS page can use it.
+It is the sections view of the style guide (see _Style guide_ above). It is not part of the public site: it answers 404
+unless `NODE_ENV` is `development` or `E2E_GALLERY=1` (`playwright.config.ts` sets it for the test build), or on a
+preview deployment with the preview token, and `section-gallery` is a reserved first slug segment, so no CMS page can
+use it. With no tone, layout or width chosen it renders exactly as it did before the controls existed; the controls sit
+outside each `[data-gallery-section]` box, so they never reach the screenshots.
 
 The route draws the page with the slug `section-gallery`, which only the fixture dataset has
 (`tests/e2e/fixtures/dataset.mjs`, `gallerySections`). To look at it in development, run the fake Content

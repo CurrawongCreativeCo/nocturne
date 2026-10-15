@@ -1,49 +1,86 @@
 import { NextRequest } from 'next/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const get = vi.fn()
-vi.mock('@vercel/edge-config', () => ({ get: (key: string) => get(key) as unknown }))
-
 import { proxy } from './proxy'
 
-const request = (path: string) => new NextRequest(`https://example.com${path}`)
+const TOKEN = 'a-long-enough-token-1234'
+
+const request = (path: string, cookie?: string) =>
+  new NextRequest(`https://preview.example.com${path}`, {
+    headers: cookie ? { cookie } : {},
+  })
+
+function preview() {
+  vi.stubEnv('NODE_ENV', 'production')
+  vi.stubEnv('VERCEL_ENV', 'preview')
+  vi.stubEnv('STYLEGUIDE_PREVIEW_TOKEN', TOKEN)
+  vi.stubEnv('E2E_GALLERY', '')
+}
 
 afterEach(() => {
   vi.unstubAllEnvs()
-  get.mockReset()
 })
 
-describe('proxy', () => {
-  it('does nothing, and reads nothing, when EDGE_CONFIG is unset', async () => {
-    vi.stubEnv('EDGE_CONFIG', '')
-    const response = await proxy(request('/old'))
-    expect(response.headers.get('x-middleware-next')).toBe('1')
-    expect(get).not.toHaveBeenCalled()
+describe('proxy: the style guide on a preview deployment', () => {
+  it('answers a missing page when there is no token', async () => {
+    preview()
+    const response = await proxy(request('/section-gallery'))
+    expect(response.headers.get('x-middleware-rewrite')).toBe(
+      'https://preview.example.com/section-gallery/not-found',
+    )
+    expect(response.headers.get('x-robots-tag')).toContain('noindex')
+    expect(response.headers.get('cache-control')).toContain('no-store')
   })
 
-  it('redirects with the stored status, ignoring case and trailing slash', async () => {
-    vi.stubEnv('EDGE_CONFIG', 'https://edge-config.vercel.com/ecfg_test?token=t')
-    get.mockResolvedValue({
-      '/old': { to: '/new', status: 308 },
-      '/promo': { to: 'https://example.com/sale', status: 307 },
-    })
-
-    const permanent = await proxy(request('/OLD/'))
-    expect(permanent.status).toBe(308)
-    expect(permanent.headers.get('location')).toBe('https://example.com/new')
-
-    const temporary = await proxy(request('/promo'))
-    expect(temporary.status).toBe(307)
-    expect(temporary.headers.get('location')).toBe('https://example.com/sale')
+  it('answers a missing page for a wrong or partial token, on the tokens page too', async () => {
+    preview()
+    for (const path of [
+      '/section-gallery?preview=nope',
+      `/section-gallery?preview=${TOKEN.slice(0, -1)}`,
+      '/section-gallery/tokens',
+    ]) {
+      const response = await proxy(request(path))
+      expect(response.headers.get('x-middleware-rewrite'), path).toContain('/not-found')
+    }
   })
 
-  it('passes through misses, and fails open when Edge Config errors', async () => {
-    vi.stubEnv('EDGE_CONFIG', 'https://edge-config.vercel.com/ecfg_test?token=t')
-    get.mockResolvedValue({ '/old': { to: '/new', status: 308 } })
-    expect((await proxy(request('/other'))).headers.get('x-middleware-next')).toBe('1')
+  it('lets the token through and remembers it in a cookie for the links', async () => {
+    preview()
+    const response = await proxy(request(`/section-gallery?preview=${TOKEN}`))
+    expect(response.headers.get('x-middleware-rewrite')).toBeNull()
+    expect(response.headers.get('x-robots-tag')).toContain('noindex')
+    const cookie = response.headers.get('set-cookie') ?? ''
+    expect(cookie).toContain(`styleguide-preview=${TOKEN}`)
+    expect(cookie).toContain('HttpOnly')
+    expect(cookie).toContain('Path=/section-gallery')
+  })
 
-    vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    get.mockRejectedValue(new Error('down'))
-    expect((await proxy(request('/old'))).headers.get('x-middleware-next')).toBe('1')
+  it('accepts the cookie on later requests', async () => {
+    preview()
+    const response = await proxy(request('/section-gallery/tokens', `styleguide-preview=${TOKEN}`))
+    expect(response.headers.get('x-middleware-rewrite')).toBeNull()
+    expect(response.headers.get('set-cookie')).toBeNull()
+  })
+
+  it('does not touch other pages', async () => {
+    preview()
+    const response = await proxy(request('/section-gallery-x'))
+    expect(response.headers.get('x-robots-tag')).toBeNull()
+  })
+
+  it('marks the style guide noindex wherever it is open', async () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    const response = await proxy(request('/section-gallery/tokens'))
+    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow')
+    expect(response.headers.get('cache-control')).toBeNull()
+  })
+
+  it('leaves production to the page, which answers 404', async () => {
+    preview()
+    vi.stubEnv('VERCEL_ENV', 'production')
+    const response = await proxy(request(`/section-gallery?preview=${TOKEN}`))
+    expect(response.headers.get('set-cookie')).toBeNull()
+    expect(response.headers.get('x-middleware-rewrite')).toBeNull()
+    expect(response.headers.get('cache-control')).toBeNull()
   })
 })

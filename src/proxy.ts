@@ -21,9 +21,19 @@ import {
 import { encodeOption } from '@/features/experiments/utils/experiment-flag'
 import { loadActiveExperiment } from '@/features/experiments/utils/experiment-source'
 import { EDGE_REDIRECTS_KEY, lookupRedirect, type EdgeRedirect } from '@/lib/redirects'
+import {
+  currentStyleguideEnv,
+  isStyleguidePath,
+  STYLEGUIDE_TOKEN_COOKIE,
+  STYLEGUIDE_TOKEN_PARAM,
+  styleguideAccess,
+  tokenMatches,
+} from '@/lib/styleguide-access'
 
 /**
- * Runs before every page request, for two jobs:
+ * Runs before every page request, for three jobs:
+ *  0. The style guide's preview token (see `styleguide`): on a preview deployment it answers 404
+ *     unless the request carries the token.
  *  1. Studio-managed redirects, answered before any page renders. The map is written to Edge
  *     Config when a redirect is published (see /api/revalidate). Without EDGE_CONFIG this does
  *     nothing and PageView's `getRedirect` fallback handles redirects instead.
@@ -31,7 +41,49 @@ import { EDGE_REDIRECTS_KEY, lookupRedirect, type EdgeRedirect } from '@/lib/red
  *     variant) and the request is rewritten to the page's prerendered copy for that option.
  */
 export async function proxy(request: NextRequest) {
-  return (await redirect(request)) ?? (await experiment(request)) ?? NextResponse.next()
+  return (
+    styleguide(request) ??
+    (await redirect(request)) ??
+    (await experiment(request)) ??
+    NextResponse.next()
+  )
+}
+
+/**
+ * The style guide (`/section-gallery`) on a Vercel preview deployment: `?preview=<token>` must match
+ * STYLEGUIDE_PREVIEW_TOKEN, and is then kept in a cookie so the page's links need no token. Without
+ * it the request is rewritten to a missing page, so the answer is a real 404 and the guide's
+ * existence is not given away. Development, the end-to-end build and production are decided by the
+ * page itself (`styleguideAccess`); there this only adds the noindex header.
+ */
+function styleguide(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl
+  if (!isStyleguidePath(pathname, GALLERY_PATH)) return null
+
+  const env = currentStyleguideEnv()
+  // Never indexed, whatever the page's own metadata says and whether or not it is shown.
+  const noindex = { 'X-Robots-Tag': 'noindex, nofollow' }
+  if (styleguideAccess(env) !== 'token') return NextResponse.next({ headers: noindex })
+
+  const valid = (given: string | null | undefined) =>
+    tokenMatches(env.previewToken, given) ? given : null
+  const fromUrl = valid(searchParams.get(STYLEGUIDE_TOKEN_PARAM))
+  const allowed = fromUrl !== null || valid(request.cookies.get(STYLEGUIDE_TOKEN_COOKIE)?.value)
+
+  const response = allowed
+    ? NextResponse.next({ headers: noindex })
+    : NextResponse.rewrite(new URL(`${GALLERY_PATH}/not-found`, request.url), { headers: noindex })
+  response.headers.set('Cache-Control', 'private, no-store')
+  if (fromUrl) {
+    response.cookies.set(STYLEGUIDE_TOKEN_COOKIE, fromUrl, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 8,
+      path: GALLERY_PATH,
+      sameSite: 'lax',
+      secure: request.nextUrl.protocol === 'https:',
+    })
+  }
+  return response
 }
 
 async function redirect(request: NextRequest) {
