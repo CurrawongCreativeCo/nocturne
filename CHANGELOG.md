@@ -20,6 +20,20 @@ you start a release.
 
 ### Added
 
+- **Highlighted heading words (Studio and site):** editors select words in a hero title and pick how they stand out:
+  _Brand colour_, _Gradient_, _Highlight colour_ or _Underline_. A new shared type `headingText`
+  (`src/lib/sanity/schema/heading-text.ts`) is a Portable Text array of one plain block whose only formatting is an
+  `emphasis` annotation; the treatment is a preset picker with thumbnails, and the gradient choice sits in a collapsed
+  Advanced area shown only for Gradient. `<RichHeading>` (`src/components/ui/rich-heading.tsx`) renders the right `h1`/`h2`
+  with plain `<span data-emphasis>` wrappers (no `em`, `strong` or `mark`, so the accessible name is just the words;
+  Visual Editing markers survive). The gradient uses `background-clip: text` with `box-decoration-break: clone`, a solid
+  accent where that isn't supported and a system colour under forced colours. Studio warns above two highlighted phrases,
+  past the length guidance and when a treatment is under 3:1 against the section's tone (large text; every gradient stop is
+  checked). The hero uses it in every layout; `heading` is read first and the old `title` is the fallback. GROQ returns
+  `heading` and `"headingPlain": pt::text(heading)`. Gradient presets live in `src/config/heading-gradients.ts`; underline
+  thickness and offset and the highlight strength are the new optional `emphasis` tokens in `tokens.json`. The same type
+  will follow for media + text, CTA banner and features grid titles. See the README's "Highlighting words in a heading".
+
 - **Preset picker thumbnails (Studio):** one visual language of small theme-aware SVG wireframes (4:3, readable at
   160 px) in `src/lib/sanity/schema/thumbnails/`, with a registry keyed by the values stored in
   content: the four hero layouts, the four animations (gently looping, still under reduced motion) and live tone
@@ -113,6 +127,14 @@ you start a release.
 ### Fixed
 
 ### Breaking changes / migration steps
+
+**Highlighted heading words:** the hero gains a `heading` field next to its old `title` string, and the code reads
+`heading` first, so deploying needs no migration and existing heroes look the same. Run
+`migrations/hero-title-to-heading-text` on every dataset so editors see the title in the new field (dry run first; commands
+in the README's "Highlighting words in a heading"); it is safe to repeat and keeps `title`. The old field is removed in a
+later release. Run `npm run typegen` after merging. `tokens.json` gains an optional `emphasis` group (a file without it
+gets the defaults), so run `npm run tokens`. Visual baselines gain the `hero-heading-*` gallery entries: refresh them
+with the "Update visual baselines" workflow.
 
 **Browser icon:** `src/app/icon.svg` and `src/app/apple-icon.tsx` are deleted and `icon.png` and `apple-icon.png` added. A
 project that replaced them with its own logo keeps its files (delete the template's PNGs, or keep the old `icon.svg`:

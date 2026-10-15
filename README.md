@@ -1329,6 +1329,51 @@ two sections), the focus colour, spacing, anchors and motion; the gallery has an
 grid and the image + text section (ids `features-grid-style-<tone>`, `media-text-style-compact`, …), and a narrow, centred
 rich text.
 
+### Highlighting words in a heading
+
+Editors select words in a heading and choose how they stand out. The hero's _Title_ is the first heading to use it;
+media + text, CTA banner and features grid follow in a small separate change.
+
+**For editors.** Select the words in _Title_ and click **Highlight**, then pick one of four looks: _Brand colour_,
+_Gradient_, _Highlight colour_ (a soft marker behind the words) or _Underline_. With no highlight the heading looks as
+it always did. Gradient also has a collapsed _Advanced_ area to pick which gradient. Studio warns, and never blocks
+publishing, when more than two phrases are highlighted, the title is longer than the design handles, or a look is hard to
+read on the section's background (large text needs 3:1, and every gradient stop is checked). On the _Brand_ background a
+brand colour is the same as the text colour, so it shows no difference: pick another look or background.
+
+**For developers.**
+
+- **Type:** `headingText` (`src/lib/sanity/schema/heading-text.ts`) is a Portable Text array limited to one block, the
+  normal style, no lists and no decorators, with one `emphasis` annotation (`treatment`, and `gradient` for Gradient).
+  Add it to a section with `headingField({ name, max, defaultTone })`, which adds the length and contrast warnings (the
+  tone is read from the section's `style.tone`, else `defaultTone`).
+- **Queries:** project the blocks for rendering and `pt::text()` for everything that needs plain text (metadata, search,
+  the share image, breadcrumbs, aria): `heading, "headingPlain": pt::text(heading)`. The hero's fragment does; pure helpers
+  for plain text and phrases are in `src/lib/sanity/heading-text.ts`.
+- **Rendering:** `<RichHeading as="h1" blocks={heading} fallback={title} />` (`src/components/ui/rich-heading.tsx`, a
+  server component). It draws only `<span data-emphasis="brand|gradient|highlight|underline">`, so the accessible name is
+  the words. The look is the `[data-emphasis]` rules in `globals.css`, which use the tokens and follow the section tone.
+  Gradients: `background-clip: text` with a transparent fill and `box-decoration-break: clone`, so wrapped lines keep the
+  whole gradient; a solid accent where that isn't supported and `CanvasText` under forced colours.
+- **Tokens and presets:** underline thickness and offset and the highlight strength are `emphasis` tokens in
+  `tokens.json` (optional). Gradient presets are in `src/config/heading-gradients.ts`: stops are colour tokens (so they
+  follow a re-skin and the tone), the first is the default, and a stored value is never renamed. When design settings can
+  hold gradients, replace that constant and keep its shape.
+- **Contrast:** `src/lib/color/heading-contrast.ts` resolves the colours the way `[data-tone]` does and checks each
+  treatment at 3:1. Keep it in step with the CSS if you change the highlight or the tone rules.
+- **Old title:** the hero reads `heading` first and falls back to the plain `title`. Run the migration on every dataset,
+  then remove `title` in a later release.
+
+```bash
+npx sanity login                                                    # once
+npx sanity migration run hero-title-to-heading-text                 # dry run: prints each patch, writes nothing
+npx sanity dataset export production backup.tar.gz                  # backup
+npx sanity migration run hero-title-to-heading-text --no-dry-run    # asks before it writes
+```
+
+It converts each hero's `title` into one block in `heading` (pages, shared sections, drafts and release versions), keeps
+`title`, and is safe to run twice. Publish the migrated drafts afterwards. Delete the folder once every dataset has run it.
+
 ### Type flow
 
 ```

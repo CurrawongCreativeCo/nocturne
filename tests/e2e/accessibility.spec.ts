@@ -20,6 +20,7 @@ for (const path of [
   '/search?q=design',
   '/members',
   '/mixed',
+  '/highlights',
   '/sign-in',
   '/sign-out',
 ]) {

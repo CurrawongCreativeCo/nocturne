@@ -70,6 +70,11 @@ export const motion = {
   "revealDistance": 24
 } as const
 
+/** Heading emphasis values the Studio contrast check needs (the CSS reads the variables). */
+export const emphasis = {
+  "highlightStrength": 0.22
+} as const
+
 /** Colours for the generated share image (src/app/api/og): hex, as next/og needs. */
 export const ogImage = {
   "background": "#3266e4",

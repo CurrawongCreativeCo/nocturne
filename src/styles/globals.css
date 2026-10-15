@@ -92,6 +92,65 @@
 }
 
 /*
+ * Highlighted heading words (<RichHeading>, README "Highlighting words in a heading"). Colours come
+ * from the design tokens and follow the section's tone: `--color-accent` is redefined inside each
+ * [data-tone], so the same rule reads well on a dark or a brand-coloured background. The Studio
+ * contrast check mirrors these colours (lib/color/heading-contrast.ts); keep them in step.
+ */
+@layer components {
+  [data-emphasis='brand'] {
+    color: var(--color-accent);
+  }
+
+  [data-emphasis='highlight'] {
+    padding-inline: 0.18em;
+    border-radius: var(--radius-sm);
+    background-color: color-mix(
+      in srgb,
+      var(--color-accent) calc(var(--emphasis-highlight-strength) * 100%),
+      transparent
+    );
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  [data-emphasis='underline'] {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: var(--emphasis-underline-thickness);
+    text-underline-offset: var(--emphasis-underline-offset);
+    text-decoration-skip-ink: auto;
+  }
+
+  /* A solid accent first: it is what shows where background-clip: text is not supported. */
+  [data-emphasis='gradient'] {
+    color: var(--color-accent);
+  }
+
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    [data-emphasis='gradient'] {
+      background-image: var(--emphasis-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      /* The accent 'color' stays, so tools that read it (and the contrast checkers) still see a real colour. */
+      -webkit-text-fill-color: transparent;
+      /* Each wrapped line is painted with the whole gradient, not a slice of one long strip. */
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+  }
+
+  /* Windows high contrast: the system picks the colours, so the text must not stay transparent. */
+  @media (forced-colors: active) {
+    [data-emphasis='gradient'] {
+      background-image: none;
+      color: CanvasText;
+      -webkit-text-fill-color: currentcolor;
+    }
+  }
+}
+
+/*
  * Navigation feedback (<RouteProgress>, README "Navigation feedback"). While loading the bar eases
  * toward 85% with a transform transition; when the navigation finishes it completes and fades. The
  * delay before it appears lives in the component. Under reduced motion it is a full-width bar that

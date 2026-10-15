@@ -1,7 +1,9 @@
 import { BlockContentIcon } from '@sanity/icons/BlockContent'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -72,10 +74,27 @@ export const hero = defineType({
         description: 'Small label above the title.',
         validation: (rule) => lengthWarning(rule, LIMITS.eyebrow, 'Labels'),
       }),
+      // Select words in the title to highlight them. Replaces the plain `title` below, which is read
+      // only until the "Hero titles to heading text" migration has run (migrations/README.md).
+      headingField({
+        name: 'heading',
+        title: 'Title',
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        defaultTone: 'inverse',
+        requiredUnless: 'title',
+      }),
       defineField({
         name: 'title',
+        title: 'Title (old)',
         type: 'string',
-        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+        deprecated: {
+          reason: 'Replaced by Title above. Kept until the content migration has run.',
+        },
+        readOnly: true,
+        // Only content not yet migrated still has one.
+        hidden: ({ parent }: { parent?: { title?: string } }) => !parent?.title,
+        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
       }),
       defineField({
         name: 'description',
@@ -143,19 +162,27 @@ export const hero = defineType({
     },
   ),
   preview: {
-    select: { title: 'title', media: 'backgroundImage', variant: 'variant', tone: 'style.tone' },
+    select: {
+      heading: 'heading',
+      title: 'title',
+      media: 'backgroundImage',
+      variant: 'variant',
+      tone: 'style.tone',
+    },
     prepare: ({
+      heading,
       title,
       media,
       variant,
       tone,
     }: {
+      heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       media?: PreviewValue['media']
       variant?: string
       tone?: string
     }) => ({
-      title: title || 'Untitled',
+      title: headingPlainText(heading) || title || 'Untitled',
       subtitle: variantSubtitle('Hero', HERO_VARIANTS, variant, tone),
       media,
     }),

@@ -61,6 +61,19 @@ export const requiredMotion = [
   'reveal-distance',
 ]
 
+/**
+ * Heading emphasis (README, "Highlighting words in a heading"). Optional in tokens.json: a client's
+ * older file without the group gets these, so updating the template never breaks `npm run tokens`.
+ */
+export const defaultEmphasis = {
+  'underline-thickness': '0.08em',
+  'underline-offset': '0.14em',
+  // How much of the accent tints a highlighted phrase (0-1). The Studio contrast check reads it too.
+  'highlight-strength': '0.22',
+}
+
+export const emphasisOf = (tokens) => ({ ...defaultEmphasis, ...tokens.emphasis })
+
 export { hexToRgb }
 
 /** "oklch(0.55 0.2 264)" (or "55% 0.2 264") -> sRGB [r, g, b] (0-255, unrounded, clamped). */
@@ -137,6 +150,12 @@ export function validateTokens(tokens) {
   ) {
     errors.push('motion.reveal-distance must be px or rem')
   }
+  for (const [name, value] of Object.entries(tokens.emphasis ?? {})) {
+    if (!(name in defaultEmphasis)) errors.push(`emphasis.${name} is not a known token`)
+    else if (typeof value !== 'string') errors.push(`emphasis.${name} must be a string`)
+  }
+  const strength = Number(emphasisOf(tokens)['highlight-strength'])
+  if (!(strength > 0 && strength <= 1)) errors.push('emphasis.highlight-strength must be 0-1')
   return errors
 }
 
@@ -254,6 +273,8 @@ export function buildCss(tokens) {
   for (const [name, value] of Object.entries(tokens.motion)) {
     if (!name.startsWith('ease-')) theme(`--${name}`, value)
   }
+  lines.push('')
+  for (const [name, value] of Object.entries(emphasisOf(tokens))) theme(`--emphasis-${name}`, value)
   lines.push('}', '', toneCss)
   return lines.join('\n')
 }
@@ -275,6 +296,7 @@ export function buildTs(tokens) {
       easeInOut: parseBezier(motion['ease-in-out']),
       revealDistance: parseLengthPx(motion['reveal-distance']),
     },
+    emphasis: { highlightStrength: Number(emphasisOf(tokens)['highlight-strength']) },
     ogImage: { background: tokens.color.accent.hex, foreground: tokens.color['accent-ink'].hex },
   }
 
@@ -284,6 +306,8 @@ export function buildTs(tokens) {
       'Every colour token as hex, for code that cannot read oklch (next/og, canvas, e-mail).',
     motion:
       'Motion tokens for JavaScript: durations in seconds, easings as cubic-bezier points, distance in px.',
+    emphasis:
+      'Heading emphasis values the Studio contrast check needs (the CSS reads the variables).',
     ogImage: 'Colours for the generated share image (src/app/api/og): hex, as next/og needs.',
   }
 

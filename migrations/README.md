@@ -29,6 +29,10 @@ and delete it when you write your first real one.
 [`split-site-settings`](split-site-settings/index.ts) is a real one: it copies the old Site settings document
 into the four Website settings singletons with `createIfNotExists`, so it never overwrites and is safe to run
 twice. Read it as an example of moving data between documents; delete it once it has run on every dataset.
+[`hero-title-to-heading-text`](hero-title-to-heading-text/index.ts) changes a field's type (a `string` becomes
+Portable Text) inside page sections: it adds the new field with a keyed patch, keeps the old one for the code's fallback
+and derives its block keys from the section's key, which is what makes it idempotent. It is self-contained, because the
+CLI bundles a migration on its own.
 
 - Make it **idempotent**: skip documents already migrated, so a second run changes nothing.
 - Return `[]`/nothing for documents you don't change. Select with `documentTypes` to keep requests down.

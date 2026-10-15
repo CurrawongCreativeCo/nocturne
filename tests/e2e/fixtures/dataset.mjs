@@ -37,6 +37,27 @@ const block = (children, extra = {}) => ({
   ...extra,
 })
 
+/**
+ * A `headingText` value: a single block whose parts are plain strings or [text, treatment, gradient]
+ * (a highlighted phrase). Keys are derived from the heading's own, so documents stay stable.
+ */
+const headingText = (id, parts) => {
+  const markDefs = []
+  const children = parts.map((part, index) => {
+    if (typeof part === 'string')
+      return { _key: `${id}-s${index}`, _type: 'span', text: part, marks: [] }
+    const [text, treatment, gradient] = part
+    markDefs.push({
+      _key: `${id}-m${index}`,
+      _type: 'emphasis',
+      treatment,
+      ...(gradient && { gradient }),
+    })
+    return { _key: `${id}-s${index}`, _type: 'span', text, marks: [`${id}-m${index}`] }
+  })
+  return [{ _key: `${id}-b`, _type: 'block', style: 'normal', markDefs, children }]
+}
+
 const formField = (label, name, type, { required = false, options } = {}) => ({
   _key: `field-${name}`,
   _type: 'formField',
@@ -852,6 +873,33 @@ const gallerySections = [
       motion: 'parallax',
     },
   ),
+  // Highlighted heading words (README, "Highlighting words in a heading"). The long heading wraps on a
+  // phone, which is the case the gradient's box-decoration-break: clone exists for.
+  galleryHero('heading-gradient', {
+    variant: 'overlay',
+    backgroundImage: undefined,
+    title: undefined,
+    heading: headingText('hero-heading-gradient', [
+      'Websites that ',
+      ['grow with your business', 'gradient', 'brand'],
+      ' and look the part',
+    ]),
+  }),
+  styled(
+    'hero-heading-highlight',
+    galleryHero('heading-highlight', {
+      variant: 'overlay',
+      backgroundImage: undefined,
+      title: undefined,
+      heading: headingText('hero-heading-highlight', [
+        'Make ',
+        ['every word', 'highlight'],
+        ' count with ',
+        ['clear design', 'brand'],
+      ]),
+    }),
+    { tone: 'surface' },
+  ),
   {
     _key: 'rich-text',
     _type: 'richText',
@@ -969,6 +1017,44 @@ const gallerySections = [
 
 /** The gallery sections' ids, in page order: one visual test and one baseline per id. */
 export const galleryIds = gallerySections.map((section) => section._key)
+
+/**
+ * Highlighted heading words (tests/e2e/heading-text.spec.ts): the hero's `heading` wins over a stale
+ * `title`, each treatment appears once, and a hero further down renders an h2.
+ */
+documents.push({
+  _id: 'page-highlights',
+  _type: 'page',
+  title: 'Highlights',
+  slug: { _type: 'slug', current: 'highlights' },
+  seo: { _type: 'seo', metaDescription: 'Highlighted heading words.' },
+  pageBuilder: [
+    {
+      _key: 'highlights-hero',
+      _type: 'hero',
+      title: 'Old plain title',
+      heading: headingText('highlights-hero', [
+        'Build ',
+        ['something', 'gradient', 'brand'],
+        ' people ',
+        ['remember', 'underline'],
+      ]),
+      description: 'Hero description.',
+    },
+    {
+      _key: 'highlights-later',
+      _type: 'hero',
+      style: { _type: 'sectionStyle', tone: 'surface' },
+      heading: headingText('highlights-later', [
+        'A ',
+        ['second', 'highlight'],
+        ' hero is an ',
+        ['h2', 'brand'],
+      ]),
+    },
+  ],
+  _updatedAt: UPDATED,
+})
 
 documents.push({
   _id: 'page-section-gallery',
