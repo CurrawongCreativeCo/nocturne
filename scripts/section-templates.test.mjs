@@ -55,9 +55,12 @@ describe('new section templates with variants', () => {
   it('add the variant field, its list and the subtitle to the schema', () => {
     const schema = schemaTemplate(names, variants)
     expect(schema).toContain('export const PRICING_TABLE_VARIANTS = [')
-    expect(schema).toContain("{ value: 'cards', title: 'Cards' },")
-    expect(schema).toContain("{ value: 'full-bleed', title: 'Full bleed' },")
+    expect(schema).toContain("{ value: 'cards', title: 'Cards', thumbnail: PlaceholderThumbnail },")
+    expect(schema).toContain(
+      "{ value: 'full-bleed', title: 'Full bleed', thumbnail: PlaceholderThumbnail },",
+    )
     expect(schema).toContain('variantField(PRICING_TABLE_VARIANTS)')
+    expect(schema).toContain('thumbnail: PlaceholderThumbnail')
     expect(schema).toContain(
       "variantSubtitle('Pricing table', PRICING_TABLE_VARIANTS, variant, tone)",
     )

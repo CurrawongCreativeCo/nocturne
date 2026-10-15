@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="600" height="360"><rect width="600" height="360" fill="#ffffff"/><rect x="50" y="110" width="60" height="8" rx="4" fill="#6366f1"/><rect x="50" y="128" width="200" height="18" rx="4" fill="#374151"/><rect x="50" y="165" width="220" height="9" rx="4" fill="#9ca3af"/><rect x="50" y="185" width="220" height="9" rx="4" fill="#9ca3af"/><rect x="50" y="205" width="220" height="9" rx="4" fill="#9ca3af"/><rect x="50" y="225" width="150" height="9" rx="4" fill="#9ca3af"/><rect x="50" y="260" width="90" height="28" rx="14" fill="#111827"/><rect x="320" y="60" width="240" height="240" rx="12" fill="#d1d5db"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="600" height="450"><style>
+:root{--bg:#f6f6f8;--fg:#1f2430;--line:#c9ccd4;--accent:#5f2bd4}
+@media (prefers-color-scheme:dark){:root{--bg:#16181d;--fg:#e8eaee;--line:#3a3f4b;--accent:#9f80e5}}
+rect.bg{fill:var(--bg)}
+.h{fill:var(--fg);opacity:.85}.l{fill:var(--fg);opacity:.35}.a{fill:var(--accent)}
+.f{fill:none;stroke:var(--fg);stroke-opacity:.4}.p{fill:var(--fg);fill-opacity:.1;stroke:var(--fg);stroke-opacity:.4}
+.g{fill:var(--fg);opacity:.3}.g2{fill:var(--fg);opacity:.22}.c{fill:var(--fg);fill-opacity:.06;stroke:var(--fg);stroke-opacity:.3}
+.s{fill:none;stroke:var(--accent);stroke-width:1.2}.band{fill:var(--accent);opacity:.9}.k{fill:var(--bg)}
+text{font:600 8px system-ui,sans-serif;fill:var(--fg);opacity:.6}
+</style><rect class="bg" width="160" height="120"/><rect class="a" x="14" y="32" width="16" height="2.5" rx="1.25"/><rect class="h" x="14" y="40" width="62" height="7" rx="2"/><rect class="h" x="14" y="51" width="44" height="7" rx="2"/><rect class="l" x="14" y="68" width="60" height="3" rx="1.5"/><rect class="l" x="14" y="74" width="60" height="3" rx="1.5"/><rect class="l" x="14" y="80" width="60" height="3" rx="1.5"/><rect class="l" x="14" y="86" width="42" height="3" rx="1.5"/><rect class="a" x="14" y="96" width="22" height="8" rx="4"/><rect class="p" x="88" y="16" width="58" height="88" rx="3"/><circle class="g" cx="128.6" cy="42.4" r="5.22"/><path class="g2" d="M93.8 90.8 L111.2 60 L121.64 77.6 L130.92 65.28 L141.36 90.8 Z"/></svg>

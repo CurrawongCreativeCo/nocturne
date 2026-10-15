@@ -1,3 +1,6 @@
+import { readdirSync } from 'node:fs'
+import { join } from 'node:path'
+
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -9,6 +12,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+/** Every section's insert-menu picture (the placeholder the generator copies aside), titled from its file name. */
+function insertMenuPictures() {
+  return readdirSync(join(process.cwd(), 'public/section-previews'))
+    .filter((file) => file.endsWith('.svg') && !file.startsWith('_'))
+    .map((file) => file.replace(/\.svg$/, ''))
+    .map((name) => ({ name, title: name.replace(/([A-Z])/g, ' $1').toLowerCase() }))
+}
+
 /**
  * Sanity UI under each CMS brand theme, for the accessibility and visual tests (Studio needs a login,
  * so it can't be tested directly). Not part of the public site: it answers 404 unless NODE_ENV is
@@ -18,9 +29,10 @@ export const metadata: Metadata = {
  */
 export default function StudioBrandPreviewPage() {
   if (process.env.NODE_ENV !== 'development' && process.env.E2E_GALLERY !== '1') notFound()
-  // The Browser icon input's preview (Site settings), composed here because features can't import each other.
+  // The Browser icon input's preview (Site settings), composed here because features can't import
+  // each other.
   return (
-    <BrandPreview>
+    <BrandPreview sections={insertMenuPictures()}>
       <BrowserIconPreview
         siteName="Test Co"
         sources={{ size16: '/icon.png', size32: '/icon.png', size180: '/apple-icon.png' }}

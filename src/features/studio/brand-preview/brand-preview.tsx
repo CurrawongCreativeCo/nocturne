@@ -22,6 +22,7 @@ import type { Scheme } from '@/config/studio-brand/types'
 
 import { brandPreviewCases, sampleAssets, type BrandPreviewCase } from './cases'
 import { PickerExamples } from './picker-examples'
+import { ThumbnailGallery, type SectionPreview } from './thumbnail-gallery'
 import { StudioLogoView } from '../components/studio-logo'
 import { buildStudioTheme } from '../theme'
 import { toUiTheme } from '../utils/ui-theme'
@@ -226,7 +227,13 @@ function PreviewSection({ item, scheme }: { item: BrandPreviewCase; scheme: Sche
  * Studio inputs from other features, composed by the route (features can't import each other),
  * shown under the first case's light theme so they get the same Sanity UI context as in Studio.
  */
-function InputExamples({ children }: { children: ReactNode }) {
+function InputExamples({
+  children,
+  sections,
+}: {
+  children: ReactNode
+  sections: readonly SectionPreview[]
+}) {
   const theme = useMemo(() => {
     const first = brandPreviewCases[0]
     const built = first ? buildStudioTheme(first.brand) : undefined
@@ -255,12 +262,31 @@ function InputExamples({ children }: { children: ReactNode }) {
           </div>
         ))}
       </div>
+      <h3 className="mt-10 text-base font-semibold">Preset picker thumbnails</h3>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {SCHEMES.map((scheme) => (
+          <div key={scheme} data-thumbnail-scheme={scheme}>
+            <ThemeProvider scheme={scheme} theme={theme}>
+              <Card padding={4} radius={3} border>
+                <ThumbnailGallery sections={sections} />
+              </Card>
+            </ThemeProvider>
+          </div>
+        ))}
+      </div>
     </section>
   )
 }
 
 /** Every case in light and dark, each under the theme Studio would receive for it. */
-export function BrandPreview({ children }: { children?: ReactNode }) {
+export function BrandPreview({
+  children,
+  sections = [],
+}: {
+  children?: ReactNode
+  /** The section types, for the insert-menu pictures. Composed by the route: features can't import each other. */
+  sections?: readonly SectionPreview[]
+}) {
   const hydrated = useHydrated()
 
   return (
@@ -284,7 +310,7 @@ export function BrandPreview({ children }: { children?: ReactNode }) {
             </section>
           ))
         : null}
-      {hydrated && children ? <InputExamples>{children}</InputExamples> : null}
+      {hydrated && children ? <InputExamples sections={sections}>{children}</InputExamples> : null}
     </main>
   )
 }
