@@ -39,14 +39,17 @@ export const PAGE_INDEX_QUERY = defineQuery(/* groq */ `
   }
 `)
 
-/** Cheap count that sizes the sitemap; see `generateSitemaps`. */
+/**
+ * Cheap count that sizes the sitemap; see `generateSitemaps`. The style guide's fixture page (the
+ * reserved `section-gallery` slug, GALLERY_SEGMENT) is left out here and in the slice below.
+ */
 export const PAGE_COUNT_QUERY = defineQuery(/* groq */ `
-  count(*[_type == "page" && defined(slug.current)])
+  count(*[_type == "page" && defined(slug.current) && slug.current != "section-gallery"])
 `)
 
 /** One sitemap file's slice of the page index, only used once the site outgrows a single file. */
 export const PAGE_SITEMAP_QUERY = defineQuery(/* groq */ `
-  *[_type == "page" && defined(slug.current)] | order(_id) [$start...$end] {
+  *[_type == "page" && defined(slug.current) && slug.current != "section-gallery"] | order(_id) [$start...$end] {
     "slug": slug.current,
     _updatedAt,
     "noIndex": seo.noIndex == true || access == "members"

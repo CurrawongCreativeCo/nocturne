@@ -36,6 +36,7 @@ const features = [
   'search',
   'auth',
   'pricing',
+  'styleguide',
   // new-feature:register
 ]
 
