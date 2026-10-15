@@ -7,7 +7,72 @@ export const SECTION_TONES = ['surface', 'alt', 'inverse', 'accent'] as const
 export const SECTION_SPACINGS = ['compact', 'default', 'spacious'] as const
 export const SECTION_WIDTHS = ['narrow', 'default', 'wide', 'full'] as const
 export const SECTION_ALIGNS = ['start', 'center'] as const
-export const SECTION_MOTIONS = ['none', 'reveal', 'stagger', 'parallax'] as const
+/**
+ * The animation presets (components/motion/presets.ts holds what each one does). `reveal` is the
+ * original "Fade up" and `parallax` the original Parallax (now "Subtle"); their stored names never
+ * change, so content saved before the library existed renders as it always did.
+ */
+export const SECTION_MOTIONS = [
+  'none',
+  'reveal',
+  'subtle',
+  'fade',
+  'slide',
+  'stagger',
+  'float',
+  'parallax',
+  'parallaxMedium',
+  'parallaxStrong',
+] as const
+
+/** What editors call each animation preset, in the picker and in messages. */
+export const SECTION_MOTION_TITLES: Record<(typeof SECTION_MOTIONS)[number], string> = {
+  none: 'None',
+  reveal: 'Fade up',
+  subtle: 'Subtle entrance',
+  fade: 'Fade',
+  slide: 'Slide in',
+  stagger: 'Staggered',
+  float: 'Float',
+  parallax: 'Parallax · Subtle',
+  parallaxMedium: 'Parallax · Medium',
+  parallaxStrong: 'Parallax · Strong',
+}
+
+/** The Advanced animation options (components/motion/presets.ts says which preset uses which). */
+export const MOTION_INTENSITIES = ['subtle', 'normal', 'bold'] as const
+export const MOTION_DURATIONS = ['fast', 'normal', 'slow'] as const
+export const MOTION_DELAYS = ['none', 'short', 'long'] as const
+export const MOTION_DIRECTIONS = ['start', 'end', 'up', 'down'] as const
+export const MOTION_TRIGGERS = ['view', 'load'] as const
+export const MOTION_EASINGS = ['easeOut', 'easeInOut', 'easeIn', 'linear'] as const
+
+export const MOTION_INTENSITY_TITLES = { subtle: 'Subtle', normal: 'Normal', bold: 'Bold' } as const
+export const MOTION_DURATION_TITLES = { fast: 'Fast', normal: 'Normal', slow: 'Slow' } as const
+export const MOTION_DELAY_TITLES = { none: 'None', short: 'Short', long: 'Long' } as const
+export const MOTION_DIRECTION_TITLES = {
+  start: 'From the start',
+  end: 'From the end',
+  up: 'From below',
+  down: 'From above',
+} as const
+export const MOTION_TRIGGER_TITLES = { view: 'On scroll into view', load: 'On load' } as const
+export const MOTION_EASING_TITLES = {
+  easeOut: 'Ease out (settles gently)',
+  easeInOut: 'Ease in and out',
+  easeIn: 'Ease in (speeds up)',
+  linear: 'Linear (steady)',
+} as const
+
+/** Bounds for the exact values behind "Custom". The resolver clamps to them, the schema validates against them. */
+export const MOTION_CUSTOM = {
+  durationMs: { min: 100, max: 3000 },
+  /** A float loop is far slower than an entrance. */
+  loopMs: { min: 2000, max: 20000 },
+  distancePx: { min: 0, max: 120 },
+  /** Share of the section that must be on screen before it plays, as a percentage. */
+  thresholdPercent: { min: 5, max: 100 },
+} as const
 
 /** What editors call each tone: in the Background picker and in list previews ("Hero · Split · Dark"). */
 export const SECTION_TONE_TITLES: Record<(typeof SECTION_TONES)[number], string> = {

@@ -3,10 +3,16 @@ import type { ComponentType } from 'react'
 import type { SECTION_EDGES, SECTION_MOTIONS, SECTION_TONES } from '../../section-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
 import {
+  MotionFadeThumbnail,
+  MotionFloatThumbnail,
   MotionNoneThumbnail,
+  MotionParallaxMediumThumbnail,
+  MotionParallaxStrongThumbnail,
   MotionParallaxThumbnail,
   MotionRevealThumbnail,
+  MotionSlideThumbnail,
   MotionStaggerThumbnail,
+  MotionSubtleThumbnail,
 } from './animation-thumbnails'
 import {
   EdgeArchThumbnail,
@@ -103,8 +109,14 @@ export const heroImageShapeThumbnails: Record<string, Thumbnail> = {
 export const animationThumbnails: Record<(typeof SECTION_MOTIONS)[number], Thumbnail> = {
   none: MotionNoneThumbnail,
   reveal: MotionRevealThumbnail,
+  subtle: MotionSubtleThumbnail,
+  fade: MotionFadeThumbnail,
+  slide: MotionSlideThumbnail,
   stagger: MotionStaggerThumbnail,
+  float: MotionFloatThumbnail,
   parallax: MotionParallaxThumbnail,
+  parallaxMedium: MotionParallaxMediumThumbnail,
+  parallaxStrong: MotionParallaxStrongThumbnail,
 }
 
 export const toneThumbnails: Record<(typeof SECTION_TONES)[number], Thumbnail> = {

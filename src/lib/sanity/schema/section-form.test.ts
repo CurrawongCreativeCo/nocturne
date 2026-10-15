@@ -8,6 +8,8 @@ import {
   sectionAtStylePath,
   staleAlignmentMessage,
   staleMotionMessage,
+  motionCustomHidden,
+  motionOptionHidden,
   visibleMotions,
 } from './section-form'
 
@@ -52,7 +54,14 @@ describe('a section that registers rules', () => {
 describe('a section that registers nothing', () => {
   it('has no picture (no Parallax) and offers everything else', () => {
     expect(allowsParallax({ _type: 'unregistered' })).toBe(false)
-    expect(visibleMotions({ _type: 'unregistered' })).toEqual(['none', 'reveal', 'stagger'])
+    expect(visibleMotions({ _type: 'unregistered' })).toEqual([
+      'none',
+      'reveal',
+      'subtle',
+      'fade',
+      'slide',
+      'stagger',
+    ])
     expect(allowsAlignment({ _type: 'unregistered' })).toBe(true)
   })
 })
@@ -91,5 +100,48 @@ describe('stale value warnings', () => {
     const album = inPage({ _type: 'album' }, 'align')
     expect(staleAlignmentMessage('center', album)).toMatch(/sets its own alignment/)
     expect(staleAlignmentMessage(undefined, album)).toBe(true)
+  })
+})
+
+describe('the Advanced animation options', () => {
+  const hiddenFor = (
+    callback: ReturnType<typeof motionOptionHidden>,
+    motion?: string,
+    extra = {},
+  ) => callback({ parent: { motion, ...extra } } as never)
+
+  it('shows an option only for the presets that use it', () => {
+    expect(hiddenFor(motionOptionHidden('intensity'), 'parallax')).toBe(false)
+    expect(hiddenFor(motionOptionHidden('intensity'), 'reveal')).toBe(true)
+    expect(hiddenFor(motionOptionHidden('direction'), 'slide')).toBe(false)
+    expect(hiddenFor(motionOptionHidden('direction'), 'stagger')).toBe(true)
+    expect(hiddenFor(motionOptionHidden('trigger'), 'fade')).toBe(false)
+    expect(hiddenFor(motionOptionHidden('trigger'), 'float')).toBe(true)
+  })
+
+  it('shows nothing for None, an unset animation or one it does not know', () => {
+    for (const motion of ['none', undefined, 'wobble']) {
+      expect(hiddenFor(motionOptionHidden('duration'), motion)).toBe(true)
+      expect(hiddenFor(motionOptionHidden('custom'), motion)).toBe(true)
+    }
+  })
+
+  it('shows the exact values only with Custom on, and only those the preset takes', () => {
+    const distance = motionCustomHidden('distance')
+    expect(hiddenFor(distance, 'reveal')).toBe(true)
+    expect(hiddenFor(distance, 'reveal', { motionCustom: true })).toBe(false)
+    expect(hiddenFor(distance, 'fade', { motionCustom: true })).toBe(true)
+    expect(hiddenFor(motionCustomHidden('threshold'), 'float', { motionCustom: true })).toBe(true)
+    expect(hiddenFor(motionCustomHidden('duration'), 'float', { motionCustom: true })).toBe(false)
+  })
+})
+
+describe('Float and Parallax need a picture', () => {
+  it('withholds every picture preset where there is none, and warns about one left over', () => {
+    const pictureless = visibleMotions({ _type: 'unregistered' })
+    for (const preset of ['float', 'parallax', 'parallaxMedium', 'parallaxStrong']) {
+      expect(pictureless).not.toContain(preset)
+      expect(staleMotionMessage(preset, inPage({ _type: 'unregistered' }))).toMatch(/has none/)
+    }
   })
 })

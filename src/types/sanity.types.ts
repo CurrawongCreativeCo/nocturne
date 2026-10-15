@@ -111,7 +111,27 @@ export type SectionStyle = {
     _type: 'image'
   }
   overlay?: 'none' | 'light' | 'medium' | 'strong'
-  motion?: 'none' | 'reveal' | 'stagger' | 'parallax'
+  motion?:
+    | 'none'
+    | 'reveal'
+    | 'subtle'
+    | 'fade'
+    | 'slide'
+    | 'stagger'
+    | 'float'
+    | 'parallax'
+    | 'parallaxMedium'
+    | 'parallaxStrong'
+  motionIntensity?: 'subtle' | 'normal' | 'bold'
+  motionDuration?: 'fast' | 'normal' | 'slow'
+  motionDelay?: 'none' | 'short' | 'long'
+  motionDirection?: 'start' | 'end' | 'up' | 'down'
+  motionTrigger?: 'view' | 'load'
+  motionCustom?: boolean
+  motionDurationMs?: number
+  motionDistancePx?: number
+  motionEasing?: 'easeOut' | 'easeInOut' | 'easeIn' | 'linear'
+  motionThreshold?: number
   edge?: 'none' | 'diagonal' | 'wave' | 'curve' | 'arch' | 'layered'
   edgeHeight?: 'small' | 'medium' | 'large'
   edgeFlip?: boolean
@@ -1563,7 +1583,7 @@ export type FORM_QUERY_RESULT = {
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    "title": select(access == "members" && !$members => "Members only", title),    access,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    "pageBuilder": select(      access == "members" && !$members => [],      pageBuilder[] {   _key,    access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } } } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },    _type == "gallery" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    columns,    images[] { _key, caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }  },    _type == "location" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    mapImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showHours,    showOpenNow,    showContact,    directionsLabel,    interactiveMap  },    _type == "team" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    text,    "members": select(      selection == "picked" => members[defined(@->_id)]->{   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] {   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    )  },  _type,  _type == "reference" => @->section[0] {      access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } } } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },    _type == "gallery" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    columns,    images[] { _key, caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }  },    _type == "location" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    mapImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showHours,    showOpenNow,    showContact,    directionsLabel,    interactiveMap  },    _type == "team" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    text,    "members": select(      selection == "picked" => members[defined(@->_id)]->{   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] {   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    )  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]    )  }
+// Query: *[_type == "page" && slug.current == $slug][0] {    _id,    _type,    "title": select(access == "members" && !$members => "Members only", title),    access,    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    "pageBuilder": select(      access == "members" && !$members => [],      pageBuilder[] {   _key,    access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } } } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },    _type == "gallery" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    columns,    images[] { _key, caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }  },    _type == "location" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    mapImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showHours,    showOpenNow,    showContact,    directionsLabel,    interactiveMap  },    _type == "team" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    text,    "members": select(      selection == "picked" => members[defined(@->_id)]->{   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] {   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    )  },  _type,  _type == "reference" => @->section[0] {      access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } } } },    showGreeting  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    eyebrow,    title,    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    imagePosition  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },    _type == "gallery" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    intro,    columns,    images[] { _key, caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } }  },    _type == "location" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    title,    intro,    mapImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    showHours,    showOpenNow,    showContact,    directionsLabel,    interactiveMap  },    _type == "team" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop },    variant,    title,    text,    "members": select(      selection == "picked" => members[defined(@->_id)]->{   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } },      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] {   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } } }    )  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]    )  }
 export type PAGE_QUERY_RESULT = {
   _id: string
   _type: 'page'
@@ -1602,7 +1622,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -1655,7 +1696,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -1720,7 +1782,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -1809,7 +1892,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -1910,7 +2014,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -1972,7 +2097,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2046,7 +2192,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2100,7 +2267,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2166,7 +2354,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2226,7 +2435,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2298,7 +2528,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2445,7 +2696,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2604,7 +2876,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2665,7 +2958,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2738,7 +3052,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2798,7 +3133,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2870,7 +3226,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -2982,7 +3359,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3106,7 +3504,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3155,7 +3574,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3204,7 +3644,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3260,7 +3721,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3328,7 +3810,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3411,7 +3914,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3506,7 +4030,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3556,7 +4101,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3618,7 +4184,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3682,7 +4269,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3758,7 +4366,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -3820,7 +4449,28 @@ export type PAGE_QUERY_RESULT = {
               width: 'default' | 'full' | 'narrow' | 'wide' | null
               align: 'center' | 'start' | null
               anchorId: string | null
-              motion: 'none' | 'parallax' | 'reveal' | 'stagger' | null
+              motion:
+                | 'fade'
+                | 'float'
+                | 'none'
+                | 'parallax'
+                | 'parallaxMedium'
+                | 'parallaxStrong'
+                | 'reveal'
+                | 'slide'
+                | 'stagger'
+                | 'subtle'
+                | null
+              motionIntensity: 'bold' | 'normal' | 'subtle' | null
+              motionDuration: 'fast' | 'normal' | 'slow' | null
+              motionDelay: 'long' | 'none' | 'short' | null
+              motionDirection: 'down' | 'end' | 'start' | 'up' | null
+              motionTrigger: 'load' | 'view' | null
+              motionCustom: boolean | null
+              motionDurationMs: number | null
+              motionDistancePx: number | null
+              motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+              motionThreshold: number | null
               gradient: string | null
               overlay: 'light' | 'medium' | 'none' | 'strong' | null
               image: {
@@ -4830,7 +5480,7 @@ declare global {
     '\n  *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': POST_SITEMAP_QUERY_RESULT
     '\n  *[_type == "experiment" && active == true] | order(_createdAt asc)[0] {\n    _id,\n    name,\n    "controlWeight": coalesce(controlWeight, 0),\n    "variants": coalesce(variants[defined(variantId)] { "id": variantId, "weight": coalesce(weight, 0) }, [])\n  }\n': ACTIVE_EXPERIMENT_QUERY_RESULT
     '\n  *[_type == "form" && _id == $id][0] {\n    _id,\n    \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n,\n    successMessage,\n    recipientEmail\n  }\n': FORM_QUERY_RESULT
-    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    "title": select(access == "members" && !$members => "Members only", title),\n    access,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "pageBuilder": select(\n      access == "members" && !$members => [],\n      pageBuilder[] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } }\n }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    columns,\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    text,\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } }\n }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    columns,\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    text,\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n    )\n  }\n': PAGE_QUERY_RESULT
+    '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    "title": select(access == "members" && !$members => "Members only", title),\n    access,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    "pageBuilder": select(\n      access == "members" && !$members => [],\n      pageBuilder[] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } }\n }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    columns,\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    text,\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n } }\n }\n },\n    showGreeting\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    eyebrow,\n    title,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    imagePosition\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    intro,\n    columns,\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    title,\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop\n },\n    variant,\n    title,\n    text,\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n    )\n  }\n': PAGE_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    "title": select(access == "members" => "Members only", title),\n    "description": seo.metaDescription,\n    _updatedAt,\n    "noIndex": seo.noIndex == true || access == "members"\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  count(*[_type == "page" && defined(slug.current) && slug.current != "section-gallery"])\n': PAGE_COUNT_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current) && slug.current != "section-gallery"] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true || access == "members"\n  }\n': PAGE_SITEMAP_QUERY_RESULT

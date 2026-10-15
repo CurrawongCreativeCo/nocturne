@@ -71,6 +71,16 @@ describe('sectionStyle', () => {
       'image',
       'overlay',
       'motion',
+      'motionIntensity',
+      'motionDuration',
+      'motionDelay',
+      'motionDirection',
+      'motionTrigger',
+      'motionCustom',
+      'motionDurationMs',
+      'motionDistancePx',
+      'motionEasing',
+      'motionThreshold',
       'edge',
       'edgeHeight',
       'edgeFlip',
@@ -98,6 +108,11 @@ describe('sectionStyle', () => {
       expect(byName[name]?.fieldset).toBe('layoutOptions')
     }
     expect(sectionStyle.fieldsets).toEqual([
+      expect.objectContaining({
+        name: 'motionAdvanced',
+        title: 'More animation options',
+        options: { collapsible: true, collapsed: true },
+      }),
       expect.objectContaining({
         name: 'layoutOptions',
         title: 'More layout options',

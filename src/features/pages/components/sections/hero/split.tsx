@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -32,6 +33,7 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
     spacing: 'default',
     container: hasImage ? 'max-w-content' : 'max-w-measure',
     align: 'start',
+    motion: MOTION_DEFAULTS.hero,
   }
   const { tone, align, block, text, justify, motion } = sectionTraits(data.style, defaults)
 

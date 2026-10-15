@@ -1,9 +1,8 @@
-import { ParallaxImage } from '@/components/motion/parallax-image'
-import { SanityImage } from '@/components/ui/sanity-image'
+import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SectionFrame } from '@/components/ui/section-frame'
-import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
-import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { sectionMotion, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
+import { HeroBackground } from './hero-background'
 import { HeroText } from './hero-text'
 import { HeroSlot } from './slots'
 import type { SectionProps } from '../../../types'
@@ -15,11 +14,17 @@ const DEFAULTS: SectionDefaults = {
   spacing: 'spacious',
   container: 'max-w-4xl',
   align: 'center',
+  motion: MOTION_DEFAULTS.hero,
 }
 
 /** The image sits behind the text under a scrim (the image is dimmed, the tone's colour shows through). */
 export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
   const { tone, align, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
+  const plan = sectionMotion(data.style, DEFAULTS, {
+    isFirst,
+    hasMedia: Boolean(data.backgroundImage?.asset),
+    placement: 'background',
+  })
 
   return (
     <SectionFrame
@@ -29,24 +34,12 @@ export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'h
       className="overflow-hidden"
       containerClassName={text}
       background={
-        motion === 'parallax' ? (
-          <ParallaxImage
-            image={data.backgroundImage}
-            preload={isFirst}
-            sizes="100vw"
-            from={isFirst ? 'top' : 'viewport'}
-            className="object-cover opacity-40"
-          />
-        ) : (
-          <SanityImage
-            image={data.backgroundImage}
-            fill
-            preload={isFirst}
-            sizes="100vw"
-            className="-z-10 object-cover opacity-40"
-            style={{ objectPosition: hotspotObjectPosition(data.backgroundImage) }}
-          />
-        )
+        <HeroBackground
+          image={data.backgroundImage}
+          plan={plan}
+          isFirst={isFirst}
+          className="object-cover opacity-40"
+        />
       }
     >
       <HeroText

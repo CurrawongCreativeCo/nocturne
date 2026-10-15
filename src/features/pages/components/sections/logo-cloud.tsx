@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { NewTabNotice } from '@/components/ui/sanity-link'
 import { SectionFrame } from '@/components/ui/section-frame'
@@ -11,6 +12,7 @@ const DEFAULTS: SectionDefaults = {
   spacing: 'compact',
   container: 'max-w-content',
   align: 'center',
+  motion: MOTION_DEFAULTS.still,
 }
 
 export function LogoCloud({ data, isFirst }: SectionProps<'logoCloud'>) {

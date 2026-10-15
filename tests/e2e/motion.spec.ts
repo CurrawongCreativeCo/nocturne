@@ -18,7 +18,11 @@ test.describe('motion on', () => {
     const revealed = page.locator(REVEALED)
     await expect(revealed.first()).toBeVisible()
     await expect(revealed.first()).toHaveCSS('opacity', '1')
-    for (const element of await revealed.all()) await expect(element).toHaveCSS('opacity', '1')
+    // Sections below the fold fade up as they arrive (the default for content), so scroll to each.
+    for (const element of await revealed.all()) {
+      await element.scrollIntoViewIfNeeded()
+      await expect(element).toHaveCSS('opacity', '1')
+    }
 
     // The h1 is an LCP candidate: it is never animated.
     await expect(page.getByRole('heading', { level: 1 })).not.toHaveAttribute('data-reveal')

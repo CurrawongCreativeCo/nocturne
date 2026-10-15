@@ -75,10 +75,17 @@ describe('sections without a picture', () => {
     .map(({ name }) => name)
     .filter((name) => name !== 'hero' && name !== 'mediaText')
 
-  it.each(pictureless)('%s: parallax is withheld and the rest is offered', (name) => {
+  it.each(pictureless)('%s: Float and Parallax are withheld and the rest is offered', (name) => {
     const section = { _type: name }
     expect(allowsParallax(section)).toBe(false)
-    expect(visibleMotions(section)).toEqual(['none', 'reveal', 'stagger'])
+    expect(visibleMotions(section)).toEqual([
+      'none',
+      'reveal',
+      'subtle',
+      'fade',
+      'slide',
+      'stagger',
+    ])
     expect(allowsAlignment(section)).toBe(true)
   })
 })

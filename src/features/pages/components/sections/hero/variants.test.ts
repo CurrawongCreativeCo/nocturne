@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest'
 
 import { HERO_VARIANTS } from '@/features/pages/schemas/sections/hero'
 
-/** Files in the folder that are not layouts: the dispatcher, the words every layout shares and the supporting slot. */
-const SHARED = ['index', 'hero-text', 'slots']
+/** Files in the folder that are not layouts: the dispatcher, the words and background picture every layout shares and the supporting slot. */
+const SHARED = ['index', 'hero-text', 'hero-background', 'slots']
 
 describe('hero variants', () => {
   it('has one component file per variant in the schema, and no others', () => {

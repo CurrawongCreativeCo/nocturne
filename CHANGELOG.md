@@ -20,6 +20,21 @@ you start a release.
 
 ### Added
 
+- **Section animation presets:** the Animation picker is now a small library with moving previews (still under reduced
+  motion): _None_, _Fade up_, _Subtle entrance_ (12 px rise), _Fade_, _Slide in_, _Staggered_, _Float_ (a picture drifts
+  slowly in a loop, paused off screen) and _Parallax_ in three strengths. Level 1: sections start on a default for their kind
+  (`MOTION_DEFAULTS`: content fades up, heroes and logo strips stay still). Level 3: a collapsed **More animation
+  options** shows only what the chosen preset uses: intensity (Parallax), duration, delay, direction (Slide in), when it plays,
+  and _Set exact values_ (duration, distance, easing, how much must be in view; validated and clamped). All presets are typed
+  data in `src/components/motion/presets.ts` behind one unit-tested `resolveMotion`. The first section stays still unless
+  _On load_ is chosen, and then never starts at opacity 0. Parallax travels half as far below `md`; Float runs on phones at half
+  travel. Stored `reveal` is still _Fade up_ and `parallax` still the original Parallax (now _Parallax · Subtle_), so no migration
+  is needed; **content with no animation stored now fades up on content sections** (it stayed still before). `Float` is a
+  CSS animation with an IntersectionObserver pause, in its own lazily loaded chunk, so the home page's JavaScript does not
+  grow. `SectionFrame`'s fixed `MEDIA_PARALLAX_SPEED` is gone, code that reads `sectionTraits().motion`
+  now see the new preset names, and `style` gains ten `motion*` fields (run `npm run typegen`). Hero layouts share
+  `HeroBackground`. See the README's "Section animation".
+
 - **Team (Studio and site):** new `teamMember` document (name, role, square portrait with required alt text, short bio of
   up to 300 characters, rich-text bio, qualifications, public email, phone, social links, `order` and an optional page
   address) in a new `src/features/team` feature, and a **Team** section with **Grid**, **Slider** and **List** layouts that

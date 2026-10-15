@@ -1,5 +1,11 @@
 import { stegaClean } from 'next-sanity'
 
+import {
+  MOTION_DEFAULTS,
+  resolveMotion,
+  type MotionAdvancedInput,
+  type MotionContext,
+} from '@/components/motion/presets'
 import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
 import {
   SECTION_ALIGNS,
@@ -42,6 +48,17 @@ export interface SectionStyleInput {
   align?: string | null
   anchorId?: string | null
   motion?: string | null
+  /** The Advanced animation options (README, "Section animation"); each applies only to the presets that use it. */
+  motionIntensity?: string | null
+  motionDuration?: string | null
+  motionDelay?: string | null
+  motionDirection?: string | null
+  motionTrigger?: string | null
+  motionCustom?: boolean | null
+  motionDurationMs?: number | null
+  motionDistancePx?: number | null
+  motionEasing?: string | null
+  motionThreshold?: number | null
   /** The slug of one of the brand gradients in Design settings (`--gradient-<slug>`). */
   gradient?: string | null
   /** A picture behind the content, with `overlay` laying the tone's colour over it. */
@@ -67,7 +84,7 @@ export interface SectionDefaults {
   /** Classes for "Default" width: its usual `max-w-*`. */
   container?: string
   align?: SectionAlign
-  /** Only for sections that animate themselves; others stay still until an editor picks one. */
+  /** What this kind of section does with no animation chosen: `MOTION_DEFAULTS.hero | content | still` (content when left out). */
   motion?: SectionMotion
 }
 
@@ -140,6 +157,37 @@ export function resolveEdge(style: SectionStyleInput | null | undefined): Resolv
   }
 }
 
+/** The stored Advanced animation options, cleaned of edit markers. */
+export function motionAdvancedOf(style: SectionStyleInput | null | undefined): MotionAdvancedInput {
+  return {
+    intensity: stegaClean(style?.motionIntensity),
+    duration: stegaClean(style?.motionDuration),
+    delay: stegaClean(style?.motionDelay),
+    direction: stegaClean(style?.motionDirection),
+    trigger: stegaClean(style?.motionTrigger),
+    custom: style?.motionCustom,
+    durationMs: style?.motionDurationMs,
+    distancePx: style?.motionDistancePx,
+    easing: stegaClean(style?.motionEasing),
+    thresholdPercent: style?.motionThreshold,
+  }
+}
+
+/**
+ * What a section's animation does: the chosen preset (or the section's default) and its Advanced
+ * options through `resolveMotion`. `hasMedia` is whether the section has a picture to move;
+ * `reducedMotion` is left false on the server, where CSS covers visitors who ask for less motion.
+ */
+export function sectionMotion(
+  style: SectionStyleInput | null | undefined,
+  defaults: SectionDefaults | undefined,
+  context: Pick<MotionContext, 'isFirst' | 'hasMedia' | 'placement'> &
+    Partial<Pick<MotionContext, 'reducedMotion'>>,
+) {
+  const { motion } = resolveSectionStyle(style, defaults)
+  return resolveMotion(motion, motionAdvancedOf(style), { reducedMotion: false, ...context })
+}
+
 export function resolveSectionStyle(
   style: SectionStyleInput | null | undefined,
   defaults: SectionDefaults = {},
@@ -158,7 +206,7 @@ export function resolveSectionStyle(
   return {
     tone,
     align: pick(SECTION_ALIGNS, style?.align) ?? defaults.align ?? 'start',
-    motion: pick(SECTION_MOTIONS, style?.motion) ?? defaults.motion ?? 'none',
+    motion: pick(SECTION_MOTIONS, style?.motion) ?? defaults.motion ?? MOTION_DEFAULTS.content,
     anchorId,
     // Only a slug the schema could have produced reaches a style attribute.
     gradient: gradient && GRADIENT_SLUG_PATTERN.test(gradient) ? gradient : undefined,

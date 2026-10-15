@@ -1,5 +1,14 @@
 import type { ConditionalPropertyCallback } from 'sanity'
 
+import {
+  customFieldsFor,
+  isMotionPreset,
+  motionUses,
+  PICTURE_PRESETS,
+  type MotionCustomField,
+  type MotionOption,
+} from '@/components/motion/presets'
+
 import { SECTION_MOTIONS, edgeAllowsFlip, edgeAllowsInvert } from '../section-style-options'
 
 /**
@@ -85,11 +94,11 @@ export function allowsBackgroundImage(section: SectionValue | undefined): boolea
   return !sectionRulesFor(section._type).hasOwnBackgroundImage?.(section)
 }
 
-/** The animations to offer: every one, minus Parallax where there is no picture to move. */
+/** The animations to offer: every one, minus Float and Parallax where there is no picture to move. */
 export function visibleMotions(section: SectionValue | undefined): readonly string[] {
   return allowsParallax(section)
     ? SECTION_MOTIONS
-    : SECTION_MOTIONS.filter((motion) => motion !== 'parallax')
+    : SECTION_MOTIONS.filter((motion) => !PICTURE_PRESETS.includes(motion))
 }
 
 interface FieldContext {
@@ -123,13 +132,42 @@ export function staleAlignmentMessage(value: unknown, context: FieldContext): st
   return 'This layout sets its own alignment, so this choice is left over from another layout. Reset it from the field menu.'
 }
 
-/** The warning for Parallax left on a section whose layout has no picture. */
+/** The warning for Float or Parallax left on a section whose layout has no picture. */
 export function staleMotionMessage(value: unknown, context: FieldContext): string | true {
-  if (value !== 'parallax' || allowsParallax(sectionAtStylePath(context.document, context.path))) {
+  if (
+    !isMotionPreset(value) ||
+    !PICTURE_PRESETS.includes(value) ||
+    allowsParallax(sectionAtStylePath(context.document, context.path))
+  ) {
     return true
   }
-  return 'Parallax moves a picture, and this layout has none. Choose another animation, or a layout with a picture.'
+  return 'Float and Parallax move a picture, and this layout has none. Choose another animation, or a layout with a picture.'
 }
+
+const motionOf = (parent: unknown) => {
+  const motion = (parent as { motion?: unknown } | undefined)?.motion
+  return isMotionPreset(motion) ? motion : undefined
+}
+
+/** An Advanced animation option is shown only while the chosen animation uses it. */
+export const motionOptionHidden =
+  (option: MotionOption): ConditionalPropertyCallback =>
+  ({ parent }) => {
+    const motion = motionOf(parent)
+    return !motion || !motionUses(motion, option)
+  }
+
+/** An exact value is shown only with "Set exact values" on, and only where the animation takes it. */
+export const motionCustomHidden =
+  (field: MotionCustomField): ConditionalPropertyCallback =>
+  ({ parent }) => {
+    const motion = motionOf(parent)
+    return (
+      !motion ||
+      (parent as { motionCustom?: boolean } | undefined)?.motionCustom !== true ||
+      !customFieldsFor(motion).includes(field)
+    )
+  }
 
 interface EdgeParent {
   edge?: string

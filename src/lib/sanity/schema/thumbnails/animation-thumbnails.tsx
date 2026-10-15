@@ -32,24 +32,38 @@ const LOOP = 3.2
 const times = (...values: number[]) => values.join(';')
 
 /** Rises into place and fades in, `delay` (a share of the loop) after the start, then fades out to begin again. */
-function Appear({ delay = 0, children }: { delay?: number; children: ReactNode }) {
+function Appear({
+  delay = 0,
+  from = '0 8',
+  fade = true,
+  children,
+}: {
+  delay?: number
+  /** Where it starts, as an SVG translate ("0 8": 8 below; "-14 0": 14 to the start side). */
+  from?: string
+  /** Whether it also fades in (a plain slide keeps its opacity). */
+  fade?: boolean
+  children: ReactNode
+}) {
   const allowed = useMotionAllowed()
   const keyTimes = times(0, delay, delay + 0.22, 0.85, 1)
   return (
     <g>
       {allowed ? (
         <>
-          <animate
-            attributeName="opacity"
-            values="0;0;1;1;0"
-            keyTimes={keyTimes}
-            dur={`${LOOP}s`}
-            repeatCount="indefinite"
-          />
+          {fade ? (
+            <animate
+              attributeName="opacity"
+              values="0;0;1;1;0"
+              keyTimes={keyTimes}
+              dur={`${LOOP}s`}
+              repeatCount="indefinite"
+            />
+          ) : null}
           <animateTransform
             attributeName="transform"
             type="translate"
-            values="0 8;0 8;0 0;0 0;0 0"
+            values={`${from};${from};0 0;0 0;0 0`}
             keyTimes={keyTimes}
             dur={`${LOOP}s`}
             repeatCount="indefinite"
@@ -129,8 +143,82 @@ export function MotionStaggerThumbnail(_props: PresetThumbnailProps) {
   )
 }
 
+/** Subtle entrance: a short rise (12 px on the site) as it fades in. */
+export function MotionSubtleThumbnail(_props: PresetThumbnailProps) {
+  return (
+    <Wireframe label="motion-subtle">
+      <Appear from="0 4">
+        <Copy />
+        <Picture x={88} y={22} w={58} h={76} />
+      </Appear>
+    </Wireframe>
+  )
+}
+
+/** Fade: it only fades in, with no movement. */
+export function MotionFadeThumbnail(_props: PresetThumbnailProps) {
+  return (
+    <Wireframe label="motion-fade">
+      <Appear from="0 0">
+        <Copy />
+        <Picture x={88} y={22} w={58} h={76} />
+      </Appear>
+    </Wireframe>
+  )
+}
+
+/** Slide in: it slides in from the start side as it fades in. */
+export function MotionSlideThumbnail(_props: PresetThumbnailProps) {
+  return (
+    <Wireframe label="motion-slide">
+      <Appear from="-16 0">
+        <Copy />
+        <Picture x={88} y={22} w={58} h={76} />
+      </Appear>
+    </Wireframe>
+  )
+}
+
+/** Float: the picture bobs slowly up and down in a loop; the text stays put. */
+export function MotionFloatThumbnail(_props: PresetThumbnailProps) {
+  const allowed = useMotionAllowed()
+  return (
+    <Wireframe label="motion-float">
+      <Copy />
+      <g>
+        {allowed ? (
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="0 3;0 -3;0 3"
+            keyTimes="0;0.5;1"
+            calcMode="spline"
+            keySplines="0.4 0 0.6 1;0.4 0 0.6 1"
+            dur="4s"
+            repeatCount="indefinite"
+          />
+        ) : null}
+        <Picture x={88} y={22} w={58} h={76} />
+      </g>
+    </Wireframe>
+  )
+}
+
 /** Parallax: the picture drifts inside its frame while the page scrolls past. */
-export function MotionParallaxThumbnail(_props: PresetThumbnailProps) {
+export function MotionParallaxThumbnail(props: PresetThumbnailProps) {
+  return <ParallaxDrawing travel={7} {...props} />
+}
+
+/** The same drawing with a longer drift: how far the picture travels is the difference between the strengths. */
+export function MotionParallaxMediumThumbnail(props: PresetThumbnailProps) {
+  return <ParallaxDrawing travel={11} {...props} />
+}
+
+export function MotionParallaxStrongThumbnail(props: PresetThumbnailProps) {
+  return <ParallaxDrawing travel={15} {...props} />
+}
+
+function ParallaxDrawing({ travel }: PresetThumbnailProps & { travel: number }) {
   const allowed = useMotionAllowed()
   return (
     <Wireframe label="motion-parallax">
@@ -142,7 +230,7 @@ export function MotionParallaxThumbnail(_props: PresetThumbnailProps) {
             <animateTransform
               attributeName="transform"
               type="translate"
-              values="0 -7;0 7;0 -7"
+              values={`0 ${-travel};0 ${travel};0 ${-travel}`}
               keyTimes="0;0.5;1"
               calcMode="spline"
               keySplines="0.4 0 0.6 1;0.4 0 0.6 1"
@@ -150,7 +238,7 @@ export function MotionParallaxThumbnail(_props: PresetThumbnailProps) {
               repeatCount="indefinite"
             />
           ) : null}
-          <Picture x={0} y={-8} w={58} h={92} frame={false} glyph />
+          <Picture x={0} y={-16} w={58} h={108} frame={false} glyph />
         </g>
       </svg>
       <rect

@@ -92,6 +92,11 @@ test.describe('motion on', () => {
 
   test('has no WCAG 2.2 AA violations', async ({ page }) => {
     await page.goto(PAGE)
+    // Content sections fade up as they arrive: let each finish before axe measures its contrast.
+    for (const element of await page.locator('[data-reveal]').all()) {
+      await element.scrollIntoViewIfNeeded()
+      await expect(element).toHaveCSS('opacity', '1')
+    }
     const { violations } = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze()
