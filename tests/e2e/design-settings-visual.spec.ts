@@ -94,7 +94,9 @@ for (const palette of ['light', 'dark'] as const) {
     test('looks the same: the home page header and first screen', async ({ page }) => {
       await page.goto('/')
       await settle(page)
-      await expect(page).toHaveScreenshot(`${palette}-home.png`)
+      // A whole screen with the hero image and gradients: a few shades of dithering between runs
+      // can differ without anything having moved, so allow 2% of pixels (the sections stay exact).
+      await expect(page).toHaveScreenshot(`${palette}-home.png`, { maxDiffPixelRatio: 0.02 })
     })
   })
 }
