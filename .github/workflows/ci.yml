@@ -71,6 +71,14 @@ jobs:
           npx next typegen
           npm run check
 
+      # A section with variants is a folder (dispatcher plus one component per variant) and gets the
+      # `variant` field. Runs after the plain one, on the same throwaway checkout.
+      - name: Section generator smoke test (variants)
+        run: |
+          npm run new:section ci-smoke-variants -- --variants default,wide,compact
+          npx next typegen
+          npm run check
+
       # The feature, document and singleton generators use the same marker approach. The document
       # goes into the new feature (no schema list yet, so it creates and registers one); the
       # singleton goes into an existing feature with a schema list.

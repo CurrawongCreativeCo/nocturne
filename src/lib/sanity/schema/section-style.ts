@@ -124,7 +124,8 @@ export function sectionFields(
   initial: SectionStyleInitialValue = {},
 ): FieldDefinition[] {
   return [
-    ...content.map((field) => ({ ...field, group: 'content' })),
+    // A field that names its own group (a section's `variant`, in Design) keeps it.
+    ...content.map((field) => ({ ...field, group: field.group ?? 'content' })),
     defineField({
       name: 'style',
       title: 'Design',

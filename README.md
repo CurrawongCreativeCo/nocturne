@@ -1479,7 +1479,8 @@ The section is immediately in Studio's _Add item_ menu with a title and text fie
 
 1. Add fields in `src/features/pages/schemas/sections/pricing-table.ts`
 2. Query them in `pricingTableFragment` (`src/features/pages/api/sections.ts`) and run `npm run typegen`
-3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx`, typed from the query, inside its
+3. Build the UI in `src/features/pages/components/sections/pricing-table.tsx` (a folder when it has
+   [variants](#section-variants)), typed from the query, inside its
    `SectionFrame` (keep `style { ${sectionStyleFields} }` in the fragment, and keep `DEFAULTS` equal to the schema's
    initial style), and style it with the
    [design tokens](#design-tokens) (`bg-surface-alt`, `text-ink-muted`, `py-section`, `text-h2`): a raw colour class fails the
@@ -1495,6 +1496,41 @@ intros, next to the other rules (`validation: (rule) => [rule.required(), length
 Record the limits in a `LIMITS` constant at the top of the section's schema file with the CSS they come from, and change
 them together with the component's typography. The comparison logic is `src/lib/sanity/schema/image-guidance.ts`
 (unit tested); the validator reads `metadata.dimensions` once per asset per Studio session.
+
+### Section variants
+
+A section can have several layouts that share one data contract: the same fields, a different look. The
+hero has four (`overlay`, `split`, `editorial`, `full-bleed`). Use a variant when editors should pick the
+look per use and every layout reads the same fields; use a new section when the content differs.
+
+- **The field.** `variant` is a radio list in the **Design** group (`variantField`,
+  `src/lib/sanity/schema/section-variant.ts`). The first variant is the default and reproduces the section's
+  original look, so content saved before variants existed renders as it always did. The Studio list subtitle
+  shows the choice (`variantSubtitle`: "Hero · Split").
+- **The folder.** `components/sections/hero/` holds `index.tsx` (the dispatcher, a `switch` on
+  `stegaClean(data.variant)` whose `default` is the first variant, so an unknown value falls back safely) and one
+  component per variant. `section-renderer.tsx` still imports `./sections/hero`. Shared markup (the hero's
+  eyebrow, heading, intro and buttons: `hero-text.tsx`) is a helper in the folder. Every variant renders in a
+  `SectionFrame` and styles with tokens only, and the first section's heading is the `<h1>` and its image is
+  preloaded (`isFirst`). Keep the LCP element (the image or the heading) in the server-rendered HTML in each layout.
+- **Fields a variant needs.** Add them to the schema (hide them unless their variant is chosen, as `imagePosition`
+  and `secondaryImage` are on the hero) and to the fragment, then run `npm run typegen`. The hero's `backgroundImage`
+  is the one picture all variants share (behind the text, beside it, or full bleed).
+- **The rule: at most four variants per section.** More means two sections, or the layout is a one-off. A bespoke
+  layout for one client belongs in that client's repo (a new component and variant there), never in the template.
+- **Gallery and tests.** Add a gallery entry per variant, and per option that changes the look (`hero-split-left`,
+  `hero-editorial-inset`), in `tests/e2e/fixtures/dataset.mjs`. They are screenshot on desktop and mobile, and the
+  axe, LCP and JavaScript-budget tests run against the home page. `variants.test.ts` fails if the schema's list and
+  the component files drift apart.
+
+```bash
+npm run new:section pricing-table -- --variants cards,table,compact
+```
+
+`--variants` takes two to four names (the first is the default). The generator makes
+`components/sections/pricing-table/` with `index.tsx` and one `<variant>.tsx` per name instead of a single file,
+adds the `variant` field (with a `PRICING_TABLE_VARIANTS` list), projects it in the fragment, and writes one gallery
+placeholder per variant. Fill in each layout and give each gallery entry real content.
 
 The generator inserts code at the `// new-section:*` marker comments; keep them in place. To add a section
 by hand, follow the same steps and register it in `schemas/sections/index.ts`, `pageBuilderFragment` and

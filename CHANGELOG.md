@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- **Section variants:** a section can have several layouts that share one data contract. A `variant` radio field in
+  the Design group (`variantField`) picks the layout; a folder holds a dispatcher (`index.tsx`, unknown values fall
+  back to the first variant) and one component per variant. The hero has four: `overlay` (the previous look, still
+  the default), `split` (with an image side), `editorial` (oversized type, optional small picture) and `full-bleed`
+  (edge-to-edge picture, text panel bottom left). New hero fields: `eyebrow`, `secondaryImage`, `imagePosition`. The
+  Studio list subtitle shows the layout ("Hero · Split"). `npm run new:section <name> -- --variants a,b,c` scaffolds
+  the folder, the field and one gallery placeholder per variant; CI smoke-tests it. At most four variants per
+  section. See the README's "Section variants".
+
 - **Section style:** every page-builder section has a **Design** field group with one shared `style` object
   (`sectionStyle`): tone (surface, soft, dark, accent), spacing, width, alignment, an anchor id (unique per page, checked
   by the page's Sections field) and an animation preset (none, fade up, staggered, parallax). A new `SectionFrame`
@@ -44,6 +53,12 @@ has its own sections, wrap them in `SectionFrame`, add `style { ${sectionStyleFi
 `sectionFields([...])` in their schemas (see the README's "Section style"); until then they keep working but have no
 Design tab. Visual baselines gain the new `*-style-*` gallery entries: refresh them with the "Update visual baselines"
 workflow.
+
+**Section variants:** `components/sections/hero.tsx` is now the folder `components/sections/hero/`. A project that
+edited the old file merges its changes into `hero/overlay.tsx` (the same look) or `hero/hero-text.tsx` (the text shared
+by every layout). Run `npm run typegen`. Existing heroes keep the overlay look; new heroes no longer store an
+alignment, so the layout chooses it. Visual baselines gain the `hero-*` gallery entries: refresh them with the "Update
+visual baselines" workflow.
 
 ## [1.3.0] - 2026-10-14
 

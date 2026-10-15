@@ -707,6 +707,21 @@ const styledVariants = (id, section) => [
   ...SPACINGS.map((spacing) => styled(`${id}-${spacing}`, section, { spacing })),
 ]
 
+/** One gallery entry per hero variant (see HERO_VARIANTS); the plain `hero` below has no variant set. */
+const galleryHero = (id, extra) => ({
+  _key: `hero-${id}`,
+  _type: 'hero',
+  eyebrow: 'Eyebrow',
+  title: 'Welcome to Test Co',
+  description: 'Hero description, long enough to wrap onto a second line on a phone.',
+  ctas: [
+    cta('About us', internal('page-about')),
+    cta('Learn more', internal('page-about'), 'secondary'),
+  ],
+  backgroundImage: image(''),
+  ...extra,
+})
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -719,6 +734,17 @@ const gallerySections = [
     ],
     backgroundImage: image(''),
   },
+  galleryHero('overlay', { variant: 'overlay' }),
+  galleryHero('split-right', { variant: 'split', imagePosition: 'right' }),
+  galleryHero('split-left', { variant: 'split', imagePosition: 'left' }),
+  galleryHero('split-no-image', { variant: 'split', backgroundImage: undefined }),
+  galleryHero('editorial', { variant: 'editorial', backgroundImage: undefined }),
+  galleryHero('editorial-inset', {
+    variant: 'editorial',
+    backgroundImage: undefined,
+    secondaryImage: image(''),
+  }),
+  galleryHero('full-bleed', { variant: 'full-bleed' }),
   {
     _key: 'rich-text',
     _type: 'richText',

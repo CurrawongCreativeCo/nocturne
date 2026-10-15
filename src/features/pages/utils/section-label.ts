@@ -29,6 +29,8 @@ function variantOf(section: PageSection): string | undefined {
       return 'tone' in section ? `${section.tone} tone` : undefined
     case 'featuresGrid':
       return 'columns' in section ? `${section.columns} columns` : undefined
+    case 'hero':
+      return 'variant' in section ? stegaClean(section.variant) : undefined
     case 'mediaText':
       if (!('imagePosition' in section)) return undefined
       return section.image?.asset ? `image ${section.imagePosition}` : 'no image'

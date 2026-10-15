@@ -20,10 +20,14 @@ import {
 export const heroFragment = /* groq */ `
   _type == "hero" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
+    variant,
+    eyebrow,
     title,
     description,
     ctas[] { ${ctaFields} },
     backgroundImage { ${imageFields} },
+    imagePosition,
+    secondaryImage { ${imageFields} },
     showGreeting
   }
 `
