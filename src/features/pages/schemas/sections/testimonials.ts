@@ -5,13 +5,36 @@ import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
-import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import {
+  TestimonialsGridThumbnail,
+  TestimonialsSliderThumbnail,
+} from '@/lib/sanity/schema/thumbnails/testimonials-thumbnails'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced over max-w-measure-narrow.
   title: 60,
 } as const
+
+/**
+ * One component per variant in components/sections/testimonials/. The first is the default: what
+ * content without a variant renders. At most four per section.
+ */
+export const TESTIMONIALS_VARIANTS = [
+  {
+    value: 'grid',
+    title: 'Grid',
+    description: 'Every quote in a card, side by side.',
+    thumbnail: TestimonialsGridThumbnail,
+  },
+  {
+    value: 'slider',
+    title: 'Slider',
+    description: 'One to three quotes at a time, swiped, dragged or stepped through.',
+    thumbnail: TestimonialsSliderThumbnail,
+  },
+] as const
 
 export const testimonials = defineType({
   name: 'testimonials',
@@ -53,14 +76,16 @@ export const testimonials = defineType({
         ],
       }),
       accessField,
+      // Shown first in the Content tab.
+      variantField(TESTIMONIALS_VARIANTS),
     ],
     { tone: 'alt', align: 'center' },
   ),
   preview: {
-    select: { title: 'title', items: 'items', tone: 'style.tone' },
-    prepare: ({ title, items, tone }: { title?: string; items?: unknown[]; tone?: string }) => ({
+    select: { title: 'title', variant: 'variant', tone: 'style.tone' },
+    prepare: ({ title, variant, tone }: { title?: string; variant?: string; tone?: string }) => ({
       title: title || 'Testimonials',
-      subtitle: joinSubtitle('Testimonials', items?.length ?? 0, toneTitle(tone)),
+      subtitle: variantSubtitle('Testimonials', TESTIMONIALS_VARIANTS, variant, tone),
     }),
   },
 })

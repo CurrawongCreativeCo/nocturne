@@ -20,6 +20,17 @@ you start a release.
 
 ### Added
 
+- **Slider and a Testimonials slider layout (Studio and site):** an accessible touch slider (`Slider`, with
+  `LazySlider` for server components) on Motion's drag: swipe or drag with elastic ends, a spring to the nearest slide
+  chosen from distance and velocity (`snapIndex`, unit tested), Previous and Next, "Go to slide n" buttons and the arrow
+  keys, `inert` slides out of view, carousel/slide ARIA with a polite "Slide n of N" announcement, and
+  `touch-action: pan-y` so phones still scroll the page. Without JavaScript it is a horizontal scroll-snap list; it
+  shifts nothing when the script takes over; reduced motion jumps instantly. Optional autoplay (off, not in the CMS)
+  pauses on hover and focus and has a Pause button. The Testimonials section gains a **Layout** picker (_Grid_, the
+  default and unchanged, and _Slider_ showing one, two or three quotes at a time). Existing content is unchanged and
+  needs no migration; run `npm run typegen` after merging. The slider's spring costs about 22 KB gzipped if imported
+  eagerly, so server components must import `LazySlider`; the home page stays at 217.3 KB (budget 220 KB). Visual
+  baselines for `testimonials-slider` and `testimonials-slider-inverse` need the **Update visual baselines** workflow.
 - **Hero supporting content (Studio and site):** the hero gains one approved slot, **Extra content under the heading**,
   holding a **Statistics bar**, **Badges** (one to three short labels with an optional icon) or **Logos** (up to six,
   greyscale by default), chosen from pictures in the insert menu. Full background and Split place it under the buttons,

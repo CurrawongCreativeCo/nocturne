@@ -399,7 +399,7 @@ src/
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, AI Assist presets
-  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld
+  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, slider (+ slider-lazy, slider-snap)
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
   config/                          env.ts (validated), paths.ts (slug <-> URL),
                                    tokens.generated.ts (GENERATED: token values for the OG image)
@@ -1254,6 +1254,58 @@ such as `onDragEnd` cannot cross the server/client boundary: write a small clien
 The ~5 KB usually quoted for LazyMotion + `m` holds for esbuild (5.7 KB here), but Turbopack keeps much more of the
 core. That is why the home page JavaScript budget went from 200 KB to 220 KB (see _Performance budgets_).
 
+### Slider
+
+`Slider` (`src/components/ui/slider.tsx`, client) is an accessible touch carousel on Motion's drag. The Testimonials
+section uses it for its **Slider** layout (Layout picker: _Grid_ or _Slider_; the grid is the default, so existing content
+is unchanged). Server components import `LazySlider` (`slider-lazy.tsx`, `next/dynamic` in a client file), never `Slider`,
+for the reason given under _Parallax_ above.
+
+```tsx
+<LazySlider label="Customer testimonials" perView={{ base: 1, md: 2, lg: 3 }} gap>
+  {slides}
+</LazySlider>
+```
+
+| Prop       | What it does                                                                                                                 |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `label`    | Names the carousel for screen readers (required).                                                                            |
+| `perView`  | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count. |
+| `gap`      | Space (1.5 rem) between slides.                                                                                              |
+| `autoplay` | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                  |
+
+- **How it moves.** The track is an `m.div` with `drag="x"` and a motion value for `x`. On release `snapIndex`
+  (`slider-snap.ts`, pure and unit tested) picks the slide from the drag distance plus a short projection of the
+  velocity (a flick moves at least one slide; a fast one can pass several), and `animate(x, …)` springs to it. Ends
+  have elastic resistance (`dragElastic`, `dragConstraints` from a `ResizeObserver` that is disconnected on unmount).
+  A drag of more than 5 px swallows the click that follows, so it never opens a link inside a slide.
+  `touch-action: pan-y` keeps vertical page scrolling working on phones.
+- **Without JavaScript** the slides are a horizontal CSS scroll-snap list (focusable, so the keyboard can scroll it).
+  Slide widths come from the same CSS in both modes, the scrollbar is hidden in both, and the controls' space is reserved
+  in the server HTML, so the script taking over shifts nothing (CLS 0). The server HTML and the hydration render are the
+  scroll list; the next layout effect measures and switches to the drag track.
+- **Controls.** Previous and Next (disabled at the ends; focus moves to the other button rather than being lost), one
+  "Go to slide n" button per resting position, and Left/Right arrow keys while focus is inside. Slides out of view are
+  `inert`, so Tab never lands on hidden content.
+- **ARIA.** The `<section>` has `aria-roledescription="carousel"` and the label; each slide is `role="group"` with
+  `aria-roledescription="slide"` and `aria-label="n of N"`; a polite live region says "Slide n of N" after a button or
+  key, never while dragging or sliding by itself.
+- **Reduced motion.** The move is a zero-length animation: instant, no spring. (Not `x.jump`: after a drag, Motion's own
+  release, which it applies a frame late for these visitors, would land after it.)
+- **Autoplay.** If a developer passes `autoplay`, it pauses on hover and focus, shows a visible Pause/Play button
+  (WCAG 2.2.2) and never runs under reduced motion. Nothing in the CMS turns it on; it has no end-to-end test yet.
+- **Needs the `MotionProvider`** for dragging (the public site has it; `/section-gallery` does not, so there it shows the
+  layout and the buttons). The buttons, keys and spring use the standalone `animate`, so they work even in the moments
+  before the `domMax` chunk, which drag needs, has downloaded.
+- **Size** (motion 14.2.0, Turbopack, gzip level 9): the standalone `animate` pulls Motion's animation engine into the
+  slider's own chunk. Imported directly, the slider added **22.2 KB** to the home page's scripts (217.2 → 239.4 KB, over
+  the 220 KB budget), because the engine moved out of the lazily loaded `domMax` chunk. Behind `LazySlider` the home page
+  is **217.3 KB** (+0.1 KB for the wrapper) and the budget is unchanged; a page with a slider loads about 12.6 KB gzipped
+  more than the home page (227.6 vs 215.0 KB, all scripts after idle).
+- **Tests.** `slider-snap.test.ts` (unit); `tests/e2e/slider.spec.ts` on the `/slider` fixture page (buttons, dots, keys,
+  `inert`, `touch-action`, mouse drag, click suppression, spring and reduced motion, no JavaScript, CLS, axe). The gallery
+  has `testimonials-slider` and `testimonials-slider-inverse`.
+
 ### Cursors and interaction feedback
 
 Cursors come from `src/styles/globals.css` (`@layer base`, "Cursors"), not from component classes, because Tailwind 4's
@@ -1692,13 +1744,13 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
-| Kind            | Files                                    | Shown for                                               |
-| --------------- | ---------------------------------------- | ------------------------------------------------------- |
-| Section layouts | `hero-thumbnails.tsx`                    | each section's `variant` (today the four hero layouts)  |
-| Hero presets    | `hero-thumbnails.tsx`                    | the six presets, and the Split proportions and shapes   |
-| Animations      | `animation-thumbnails.tsx`               | the Animation field: none, fade up, staggered, parallax |
-| Tones           | `tone-thumbnails.tsx`                    | the Tone field: live swatches, not pictures             |
-| Insert menu     | `public/section-previews/<typeName>.svg` | the "Add item" menu in the page builder (static files)  |
+| Kind            | Files                                                                        | Shown for                                                           |
+| --------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx` | each section's `variant` (the hero, Stats and Testimonials layouts) |
+| Hero presets    | `hero-thumbnails.tsx`                                                        | the six presets, and the Split proportions and shapes               |
+| Animations      | `animation-thumbnails.tsx`                                                   | the Animation field: none, fade up, staggered, parallax             |
+| Tones           | `tone-thumbnails.tsx`                                                        | the Tone field: live swatches, not pictures                         |
+| Insert menu     | `public/section-previews/<typeName>.svg`                                     | the "Add item" menu in the page builder (static files)              |
 
 `registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 
