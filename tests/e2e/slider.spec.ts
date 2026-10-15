@@ -179,8 +179,10 @@ test.describe('dragging', () => {
   )
 
   const drag = async (page: Page, dx: number) => {
-    const box = await slides(page).first().boundingBox()
-    if (!box) throw new Error('no first slide')
+    // From the middle of the clipped viewport: after a drag the first slide is off to the side, and
+    // pressing there would miss the track.
+    const box = await viewport(page).boundingBox()
+    if (!box) throw new Error('no viewport')
     const y = box.y + box.height / 2
     const x = box.x + box.width / 2
     await page.mouse.move(x, y)
