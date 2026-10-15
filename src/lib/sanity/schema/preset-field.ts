@@ -1,5 +1,11 @@
 import type { ComponentType } from 'react'
-import { defineField } from 'sanity'
+import {
+  defineField,
+  type ConditionalProperty,
+  type Path,
+  type StringRule,
+  type ValidationBuilder,
+} from 'sanity'
 
 /** What a thumbnail component receives: the Studio scheme it draws on, and whether its card is chosen. */
 export interface PresetThumbnailProps {
@@ -29,10 +35,21 @@ export interface PresetDefinition {
   set: Record<string, unknown>
 }
 
+/** Where a picker field sits, for options that depend on the rest of the form. */
+export interface PresetOptionsContext {
+  document: unknown
+  path: Path
+}
+
 declare module 'sanity' {
   interface StringOptions {
     /** Show the options as a grid of pictures. The Studio input is in features/studio/components/preset-picker. */
     presetPicker?: boolean
+    /**
+     * The values to offer right now (Parallax only where there is a picture). The stored value is
+     * always shown, so a choice left over from another layout stays visible rather than vanishing.
+     */
+    visibleOptions?: (context: PresetOptionsContext) => readonly string[]
   }
   interface ObjectOptions {
     /** Presets shown in a bar above the object's fields (features/studio/components/preset-picker). */
@@ -49,6 +66,11 @@ interface PresetFieldConfig {
   /** Defaults to the first option. */
   initialValue?: string
   required?: boolean
+  fieldset?: string
+  hidden?: ConditionalProperty
+  /** Replaces the default (`required`) validation. */
+  validation?: ValidationBuilder<StringRule, string>
+  visibleOptions?: (context: PresetOptionsContext) => readonly string[]
 }
 
 /**
@@ -65,12 +87,18 @@ export function presetField({
   options,
   initialValue,
   required = true,
+  fieldset,
+  hidden,
+  validation,
+  visibleOptions,
 }: PresetFieldConfig) {
   return defineField({
     name,
     title,
     description,
     group,
+    fieldset,
+    hidden,
     type: 'string',
     initialValue: initialValue ?? options[0]?.value,
     options: {
@@ -78,8 +106,9 @@ export function presetField({
       // `description` and `thumbnail` ride along on each entry; Sanity ignores what it doesn't know.
       list: options.map((option) => ({ ...option })),
       layout: 'radio',
+      visibleOptions,
     },
-    validation: required ? (rule) => rule.required() : undefined,
+    validation: validation ?? (required ? (rule) => rule.required() : undefined),
   })
 }
 

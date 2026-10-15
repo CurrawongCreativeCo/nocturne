@@ -3,7 +3,8 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -19,6 +20,7 @@ export const ctaBanner = defineType({
   type: 'object',
   icon: BulbOutlineIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -59,10 +61,10 @@ export const ctaBanner = defineType({
     { spacing: 'compact', align: 'center' },
   ),
   preview: {
-    select: { title: 'title' },
-    prepare: ({ title }: { title?: string }) => ({
+    select: { title: 'title', tone: 'style.tone' },
+    prepare: ({ title, tone }: { title?: string; tone?: string }) => ({
       title: title || 'Untitled',
-      subtitle: 'Call to action banner',
+      subtitle: joinSubtitle('Call to action banner', toneTitle(tone)),
     }),
   },
 })

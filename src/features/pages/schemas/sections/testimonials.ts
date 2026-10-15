@@ -4,7 +4,8 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -18,6 +19,7 @@ export const testimonials = defineType({
   type: 'object',
   icon: CommentIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -55,10 +57,10 @@ export const testimonials = defineType({
     { tone: 'alt', align: 'center' },
   ),
   preview: {
-    select: { title: 'title', items: 'items' },
-    prepare: ({ title, items }: { title?: string; items?: unknown[] }) => ({
+    select: { title: 'title', items: 'items', tone: 'style.tone' },
+    prepare: ({ title, items, tone }: { title?: string; items?: unknown[]; tone?: string }) => ({
       title: title || 'Testimonials',
-      subtitle: `Testimonials · ${items?.length ?? 0}`,
+      subtitle: joinSubtitle('Testimonials', items?.length ?? 0, toneTitle(tone)),
     }),
   },
 })

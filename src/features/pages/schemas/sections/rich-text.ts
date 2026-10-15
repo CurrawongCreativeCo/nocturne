@@ -2,7 +2,8 @@ import { TextIcon } from '@sanity/icons/Text'
 import { defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 export const richText = defineType({
   name: 'richText',
@@ -10,6 +11,7 @@ export const richText = defineType({
   type: 'object',
   icon: TextIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({ name: 'body', type: 'blockContent', validation: (rule) => rule.required() }),
@@ -18,10 +20,10 @@ export const richText = defineType({
     { spacing: 'compact', align: 'start' },
   ),
   preview: {
-    select: { body: 'body' },
-    prepare: ({ body }: { body?: unknown }) => ({
+    select: { body: 'body', tone: 'style.tone' },
+    prepare: ({ body, tone }: { body?: unknown; tone?: string }) => ({
       title: blockPreview(body) || 'Empty text',
-      subtitle: 'Rich text',
+      subtitle: joinSubtitle('Rich text', toneTitle(tone)),
     }),
   },
 })

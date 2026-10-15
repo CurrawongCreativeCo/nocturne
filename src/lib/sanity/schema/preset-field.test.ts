@@ -26,6 +26,21 @@ describe('presetField', () => {
     )
   })
 
+  it('can be hidden, in a fieldset, and offer only some options', () => {
+    const hidden = () => true
+    const visibleOptions = () => ['split']
+    const conditional = presetField({
+      name: 'v',
+      options,
+      fieldset: 'extras',
+      hidden,
+      visibleOptions,
+    })
+    expect(conditional.fieldset).toBe('extras')
+    expect(conditional.hidden).toBe(hidden)
+    expect(conditional.options.visibleOptions).toBe(visibleOptions)
+  })
+
   it('is required unless told otherwise', () => {
     expect(field.validation).toBeTypeOf('function')
     expect(presetField({ name: 'v', options, required: false }).validation).toBeUndefined()

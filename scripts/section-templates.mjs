@@ -12,10 +12,10 @@ export function schemaTemplate({ typeName, title }, variants = []) {
 import { defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'${
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { ${hasVariants ? 'variantField, variantSubtitle' : 'joinSubtitle, toneTitle'} } from '@/lib/sanity/schema/section-variant'${
     hasVariants
       ? `
-import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 
 /**
  * One component per variant in components/sections/${kebabOf(typeName)}/. The first is the default: what
@@ -32,22 +32,25 @@ export const ${typeName} = defineType({
   title: '${title}',
   type: 'object',
   icon: BlockElementIcon,
-  // Content, plus the Design tab (the shared \`style\` field that sectionFields adds).
+  // Content, plus the agency-only Design tab (the shared \`style\` field that sectionFields adds).
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
       defineField({ name: 'text', type: 'text', rows: 3 }),
-      accessField,${hasVariants ? `\n      variantField(${constName}),` : ''}
+      accessField,${hasVariants ? `\n      // Shown first in the Content tab. Give each variant a description and a thumbnail picture.\n      variantField(${constName}),` : ''}
     ],
     // How this section starts when added. Keep it equal to DEFAULTS in the component.
     { align: 'start' },
+    // Which design options suit which layout: add a third argument, { rules: { type: '${typeName}', hasPicture, fixesAlignment } },
+    // once a layout has a picture (Parallax) or sets its own alignment.
   ),
   preview: {
-    select: { title: 'title'${hasVariants ? ", variant: 'variant'" : ''} },
-    prepare: ({ title${hasVariants ? ', variant' : ''} }: { title?: string${hasVariants ? '; variant?: string' : ''} }) => ({
+    select: { title: 'title'${hasVariants ? ", variant: 'variant'" : ''}, tone: 'style.tone' },
+    prepare: ({ title${hasVariants ? ', variant' : ''}, tone }: { title?: string${hasVariants ? '; variant?: string' : ''}; tone?: string }) => ({
       title: title || 'Untitled',
-      subtitle: ${hasVariants ? `variantSubtitle('${escapeJs(title)}', ${constName}, variant)` : `'${title}'`},
+      subtitle: ${hasVariants ? `variantSubtitle('${escapeJs(title)}', ${constName}, variant, tone)` : `joinSubtitle('${escapeJs(title)}', toneTitle(tone))`},
     }),
   },
 })
