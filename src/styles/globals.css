@@ -90,3 +90,48 @@
     color: var(--color-ink-muted);
   }
 }
+
+/*
+ * Navigation feedback (<RouteProgress>, README "Navigation feedback"). While loading the bar eases
+ * toward 85% with a transform transition; when the navigation finishes it completes and fades. The
+ * delay before it appears lives in the component. Under reduced motion it is a full-width bar that
+ * appears and disappears, with nothing growing.
+ */
+@layer components {
+  .route-progress {
+    position: fixed;
+    inset: env(safe-area-inset-top) 0 auto;
+    z-index: 60;
+    height: 3px;
+    background-color: var(--color-accent);
+    pointer-events: none;
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+  }
+
+  .route-progress[data-phase='loading'] {
+    transform: scaleX(0.85);
+    opacity: 1;
+    transition:
+      transform 8s cubic-bezier(0.1, 0.7, 0.3, 1),
+      opacity var(--duration-fast);
+  }
+
+  .route-progress[data-phase='done'] {
+    transform: scaleX(1);
+    transition:
+      transform 200ms ease-out,
+      opacity 200ms ease-out 200ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .route-progress[data-phase='loading'] {
+      transform: scaleX(1);
+    }
+
+    .route-progress[data-phase='done'] {
+      opacity: 0;
+    }
+  }
+}

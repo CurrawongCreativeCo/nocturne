@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- **Navigation feedback:** a thin accent progress bar (`RouteProgress`, under 1 KB gzipped, no new dependency) for
+  client-side navigations that take longer than 150 ms; instant navigations show nothing. Started by
+  `onRouterTransitionStart` in `instrumentation-client.ts`, finished by a pathname or query change, with a 10 s safety
+  timeout. It never animates under reduced motion. Timing logic is a unit-tested reducer; end-to-end tests cover
+  fast, slow and reduced-motion navigations. See the README's "Navigation feedback".
+
 - **Parallax:** a lightweight `Parallax` primitive (`src/components/motion/parallax.tsx`, Motion's `useScroll` and
   `useTransform`) and `ParallaxImage` for pictures. The _Parallax_ animation preset now works: the hero overlay and
   full-bleed backgrounds move behind their text, and `SectionFrame` has a `media` slot that the image + text section

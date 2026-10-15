@@ -3,6 +3,7 @@ import { draftMode } from 'next/headers'
 import { Suspense } from 'react'
 
 import { MotionProvider } from '@/components/motion/motion-provider'
+import { RouteProgress } from '@/components/ui/route-progress'
 import { hasConsentProviders } from '@/config/analytics'
 import { AnalyticsScripts } from '@/features/consent/components/analytics-scripts'
 import { CookieSettingsButton } from '@/features/consent/components/cookie-settings-button'
@@ -48,6 +49,10 @@ export async function SiteShell({
   return (
     <MotionProvider>
       <SiteJsonLd />
+      {/* Navigation feedback for the public site only; useSearchParams needs the boundary. */}
+      <Suspense fallback={null}>
+        <RouteProgress />
+      </Suspense>
       {/*
         First in the DOM so it is where keyboard focus lands when it opens and where Tab continues
         from once it closes; it is fixed to the viewport, so it never moves the page.
