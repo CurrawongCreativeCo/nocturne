@@ -1335,6 +1335,49 @@ each release before proposing it.
 | `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)       |
 | `npm run test:lighthouse` | Lighthouse budgets on `/` and `/about` (needs Chrome installed)            |
 
+### Preset picker (Studio)
+
+Editors choose by picture instead of a text radio list, and can apply a preset that sets several fields in one click. It is Studio-only code in `src/features/studio/components/preset-picker/`, switched on by the global input override in `sanity.config.ts` (`withPresetPicker`, wrapped around the role-aware input). Schema files never import it; they describe the field with `src/lib/sanity/schema/preset-field.ts`.
+
+**Option picker.** `presetField` builds a string field shown as a grid of cards (4:3 thumbnail, title, one-line description):
+
+```ts
+presetField({
+  name: 'variant',
+  title: 'Layout',
+  group: 'design',
+  options: [
+    {
+      value: 'split',
+      title: 'Split',
+      description: 'Picture beside the text.',
+      thumbnail: SplitThumbnail,
+    },
+    {
+      value: 'centred',
+      title: 'Centred',
+      description: 'Text in the middle.',
+      thumbnail: '/studio/centred.svg',
+    },
+  ],
+})
+```
+
+The stored value is the same string as a radio list, so existing content needs no migration. The options also live in `options.list`, so a Studio without the input still shows a plain radio list. A `thumbnail` is either a URL or static file path, or an inline React component that receives `{ scheme, selected }` and can follow light and dark (draw with `currentColor`). An option with no thumbnail shows its first letter.
+
+**Preset mode.** Give an object type (a section) `options: presetsOption([...])` and the Studio shows a preset bar above its normal form. Each preset is `{ value, title, description?, thumbnail?, set }`, where `set` maps field paths to values and dots reach into objects:
+
+```ts
+{ value: 'feature', title: 'Feature', thumbnail: FeatureThumbnail,
+  set: { variant: 'split', imagePosition: 'left', 'style.tone': 'alt' } }
+```
+
+A preset sets the values once, as ordinary patches relative to the section (parent objects such as `style` are created if missing), so undo, drafts and collaboration treat it like any edit. Every field stays editable. The bar shows the preset whose values all match now (a field that was never set counts as its `initialValue`), or **Custom** once any one differs.
+
+**What editors see.** Once something is chosen the picker collapses to one row (picture, title, description and a **Change** button) so long forms stay short. **Change** opens the cards; choosing one closes them again and returns focus to the button. The cards are a `radiogroup`: Tab reaches the chosen card (or the first), the arrow keys, Home and End move focus, and Enter or Space choose. It uses Sanity UI, so it follows the CMS brand theme in light and dark.
+
+**Tests.** Vitest covers option normalisation, preset-to-patch building, preset matching and the keyboard order. `/studio-brand-preview` shows the grid, the collapsed row and a preset bar in light and dark, so the end-to-end tests run axe and keyboard checks over them, and `studio-brand-visual.spec.ts` takes screenshots (Linux baselines: refresh with the "Update visual baselines" workflow). Colour contrast on the picker is not asserted, matching the rest of that page (see _Known contrast gaps_).
+
 ### Sanity workflow (migrations and schema deploy)
 
 `.github/workflows/sanity.yml` keeps the dataset and its deployed schema in step with the code. Set these in the

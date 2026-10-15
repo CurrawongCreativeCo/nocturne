@@ -21,6 +21,7 @@ import { useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import type { Scheme } from '@/config/studio-brand/types'
 
 import { brandPreviewCases, sampleAssets, type BrandPreviewCase } from './cases'
+import { PickerExamples } from './picker-examples'
 import { StudioLogoView } from '../components/studio-logo'
 import { buildStudioTheme } from '../theme'
 import { toUiTheme } from '../utils/ui-theme'
@@ -241,6 +242,18 @@ function InputExamples({ children }: { children: ReactNode }) {
         <ThemeProvider scheme="light" theme={theme}>
           {children}
         </ThemeProvider>
+      </div>
+      <h3 className="mt-10 text-base font-semibold">Preset picker</h3>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {SCHEMES.map((scheme) => (
+          <div key={scheme} data-picker-scheme={scheme}>
+            <ThemeProvider scheme={scheme} theme={theme}>
+              <Card padding={4} radius={3} border>
+                <PickerExamples />
+              </Card>
+            </ThemeProvider>
+          </div>
+        ))}
       </div>
     </section>
   )

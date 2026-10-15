@@ -28,6 +28,7 @@ import { confirmDeletePageActions } from './src/features/studio/actions/confirm-
 import { confirmPublishActions } from './src/features/studio/actions/confirm-publish'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
+import { withPresetPicker } from './src/features/studio/components/preset-picker/with-preset-picker'
 import { RoleNavbar } from './src/features/studio/components/role-navbar'
 import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
 import { StudioIcon } from './src/features/studio/components/studio-icon'
@@ -60,7 +61,10 @@ const CLIENT_NEW_DOCUMENT_IDS = new Set([
   'category',
 ])
 const PROTECTED_TYPES = new Set<string>(CLIENT_PROTECTED_TYPES)
-const RoleAwareInput = createRoleAwareInput(new Set(sectionTypes.map(({ name }) => name)))
+// Role-aware section menus, then the picture picker and preset bar for fields that ask for them.
+const StudioInput = withPresetPicker(
+  createRoleAwareInput(new Set(sectionTypes.map(({ name }) => name))),
+)
 
 export default defineConfig({
   basePath: studioUrl,
@@ -74,8 +78,9 @@ export default defineConfig({
   projectId,
   dataset,
   studio: { components: { logo: StudioLogo, navbar: RoleNavbar } },
-  // Clients only get the approved sections in the page builder's insert menu.
-  form: { components: { input: RoleAwareInput } },
+  // Clients only get the approved sections in the page builder's insert menu; presetPicker fields
+  // and objects with presets get the picture picker.
+  form: { components: { input: StudioInput } },
   // Content variants: lets editors create variants of a document, which A/B experiments serve.
   beta: { variants: { enabled: true } },
   schema: {

@@ -97,6 +97,97 @@ test.describe('Studio brand preview', () => {
     expect(sizes.every((size) => size.loaded)).toBe(true)
   })
 
+  test.describe('Preset picker', () => {
+    const light = (page: Page) => page.locator('[data-picker-scheme="light"]')
+    const example = (page: Page, id: string) => light(page).locator(`[data-picker-example="${id}"]`)
+
+    test('shows the options as a radiogroup with one tab stop', async ({ page }) => {
+      const group = example(page, 'options').getByRole('radiogroup', { name: 'Layout' })
+      await expect(group.getByRole('radio')).toHaveCount(4)
+      await expect(group.getByRole('radio', { checked: true })).toHaveCount(0)
+      // Nothing chosen: the first card is the tab stop, and only it.
+      await expect(group.locator('[role="radio"][tabindex="0"]')).toHaveCount(1)
+      await expect(group.getByRole('radio').first()).toHaveAttribute('tabindex', '0')
+      // Pictures: an inline component, a static file, and the first-letter fallback.
+      await expect(group.locator('[data-thumbnail] svg')).toHaveCount(2)
+      await expect(group.locator('[data-thumbnail] img')).toHaveCount(1)
+    })
+
+    test('arrows move focus, Enter and Space choose, and the choice collapses', async ({
+      page,
+    }) => {
+      const box = example(page, 'options')
+      const radios = box.getByRole('radio')
+      await radios.first().focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(radios.nth(1)).toBeFocused()
+      // Moving focus does not choose.
+      await expect(box.getByRole('radio', { checked: true })).toHaveCount(0)
+      await expect(radios.nth(1)).toHaveAttribute('tabindex', '0')
+      await expect(radios.first()).toHaveAttribute('tabindex', '-1')
+      await page.keyboard.press('End')
+      await expect(radios.nth(3)).toBeFocused()
+      await page.keyboard.press('ArrowRight') // wraps
+      await expect(radios.first()).toBeFocused()
+      await page.keyboard.press('Space')
+      // Chosen: collapsed to one row, focus back on "Change".
+      await expect(box.locator('[data-picker-current]')).toHaveText('Split')
+      await expect(box.getByRole('radio')).toHaveCount(0)
+      await expect(box.getByRole('button', { name: 'Change Layout' })).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(box.getByRole('radio', { checked: true })).toHaveText(/Split/)
+      await expect(box.getByRole('radio', { checked: true })).toBeFocused()
+      await page.keyboard.press('ArrowRight')
+      await page.keyboard.press('Enter')
+      await expect(box.locator('[data-picker-current]')).toHaveText('Centred')
+    })
+
+    test('starts collapsed when a value is set, and Change opens the options', async ({ page }) => {
+      const box = example(page, 'options-collapsed')
+      await expect(box.locator('[data-picker-current]')).toHaveText('Centred')
+      await expect(box.getByRole('radio')).toHaveCount(0)
+      const change = box.getByRole('button', { name: 'Change Layout (collapsed)' })
+      await change.click()
+      await expect(box.getByRole('radio')).toHaveCount(4)
+      await expect(box.getByRole('radio', { checked: true })).toHaveText(/Centred/)
+    })
+
+    test('a preset sets several fields, and any later change makes it Custom', async ({ page }) => {
+      const box = example(page, 'presets')
+      const values = box.locator('[data-preset-values]')
+      await expect(box.locator('[data-picker-current]')).toHaveText('Feature')
+      await box.getByRole('button', { name: /^Change/ }).click()
+      await box.getByRole('radio', { name: /Statement/ }).click()
+      await expect(box.locator('[data-picker-current]')).toHaveText('Statement')
+      await expect(values).toHaveText('{"variant":"centred","style":{"tone":"surface"}}')
+      await box.locator('[data-preset-tone]').selectOption('inverse')
+      await expect(box.locator('[data-picker-current]')).toHaveText('Custom')
+      // Choosing it again sets the fields again.
+      await box.getByRole('button', { name: /^Change/ }).click()
+      await box.getByRole('radio', { name: /Statement/ }).click()
+      await expect(values).toHaveText('{"variant":"centred","style":{"tone":"surface"}}')
+    })
+
+    for (const scheme of SCHEMES) {
+      test(`no WCAG 2.2 AA violations, ${scheme} (colour contrast aside)`, async ({ page }) => {
+        // Open the grids, so the cards are scanned as well as the collapsed rows.
+        const scope = page.locator(`[data-picker-scheme="${scheme}"]`)
+        await scope.getByRole('button', { name: 'Change Layout (collapsed)' }).click()
+        await scope.getByRole('button', { name: /^Change Section presets/ }).click()
+        const { violations } = await new AxeBuilder({ page })
+          .include(`[data-picker-scheme="${scheme}"]`)
+          .withTags(WCAG)
+          .disableRules('color-contrast')
+          .analyze()
+        expect(
+          violations.map(
+            ({ id, nodes }) => `${id}: ${nodes.map((n) => n.target.join(' ')).join(', ')}`,
+          ),
+        ).toEqual([])
+      })
+    }
+  })
+
   test('has one h1', async ({ page }) => {
     await expect(page.locator('h1')).toHaveCount(1)
   })
