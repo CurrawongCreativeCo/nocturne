@@ -26,6 +26,8 @@ interface ViewProps {
   /** Draws the checkout buttons in pricing tables (see `SectionProps.renderCheckout`). */
   renderCheckout?: SectionProps<SectionType>['renderCheckout']
   renderNewsletter?: SectionProps<SectionType>['renderNewsletter']
+  /** Business info for Location sections (see `SectionProps.business`). */
+  business?: SectionProps<SectionType>['business']
   /**
    * Guards members-only pages and sections with the visitor's session. Required, so a route can't
    * forget it: without one, members-only content would have nothing to check against.
@@ -39,6 +41,7 @@ export async function PageView({
   renderForm,
   renderCheckout,
   renderNewsletter,
+  business,
   renderMembersGate,
   ...mode
 }: ViewProps & FetchMode) {
@@ -78,6 +81,7 @@ export async function PageView({
                   renderForm={renderForm}
                   renderCheckout={renderCheckout}
                   renderNewsletter={renderNewsletter}
+                  business={business}
                 />
               )
             },
@@ -100,6 +104,7 @@ export async function PageView({
         renderForm={renderForm}
         renderCheckout={renderCheckout}
         renderNewsletter={renderNewsletter}
+        business={business}
         // Members-only sections stay stubs here and are filled in behind the gate, one by one.
         gate={
           preview
@@ -129,6 +134,7 @@ interface ContentProps {
   renderForm?: ViewProps['renderForm']
   renderCheckout?: ViewProps['renderCheckout']
   renderNewsletter?: ViewProps['renderNewsletter']
+  business?: ViewProps['business']
   gate?: SectionGate
 }
 
@@ -154,6 +160,7 @@ export async function DraftPageView({
   renderForm,
   renderCheckout,
   renderNewsletter,
+  business,
   renderMembersGate,
 }: ViewProps) {
   const mode = await getDraftFetchMode()
@@ -164,6 +171,7 @@ export async function DraftPageView({
       renderForm={renderForm}
       renderCheckout={renderCheckout}
       renderNewsletter={renderNewsletter}
+      business={business}
       renderMembersGate={renderMembersGate}
       {...mode}
     />

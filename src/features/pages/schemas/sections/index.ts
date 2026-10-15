@@ -4,6 +4,7 @@ import { featuresGrid } from './features-grid'
 import { formSection } from './form-section'
 import { gallery } from './gallery'
 import { hero } from './hero'
+import { location } from './location'
 import { logoCloud } from './logo-cloud'
 import { mediaText } from './media-text'
 import { newsletterSignup } from './newsletter-signup'
@@ -40,5 +41,6 @@ export const sectionTypes = [
   newsletterSignup,
   stats,
   gallery,
+  location,
   // new-section:register
 ]

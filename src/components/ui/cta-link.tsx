@@ -28,6 +28,15 @@ const feedback =
 
 const sizes = { md: 'px-6 py-3', sm: 'px-4 py-2' } as const
 
+/** The button classes of a CTA, for a plain `<a>` or `<button>` that isn't a Sanity link (e.g. Google Maps directions). */
+export function ctaClassName(
+  surface: keyof typeof variants,
+  variant: keyof (typeof variants)['dark'] = 'primary',
+  size: keyof typeof sizes = 'md',
+) {
+  return `inline-flex items-center justify-center rounded-button text-small font-semibold ${feedback} ${sizes[size]} ${variants[surface][variant]}`
+}
+
 interface Props {
   /** `_key` is only needed in lists; a standalone CTA (e.g. the header button) has none. */
   cta: Omit<CtaData, '_key'>
@@ -40,7 +49,7 @@ export function CtaLink({ cta, surface = 'dark', size = 'md', className = '' }: 
   return (
     <SanityLink
       link={cta.link}
-      className={`inline-flex items-center justify-center rounded-button text-small font-semibold ${feedback} ${sizes[size]} ${variants[surface][stegaClean(cta.variant)]} ${className}`}
+      className={`${ctaClassName(surface, stegaClean(cta.variant), size)} ${className}`}
     >
       {cta.label}
     </SanityLink>

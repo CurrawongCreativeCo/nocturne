@@ -1,6 +1,7 @@
 import type { StegaBranded } from 'next-sanity'
 import type { ReactNode } from 'react'
 
+import type { LocationBusiness } from '@/types/business'
 import type { PAGE_QUERY_RESULT } from '@/types/sanity.types'
 
 /**
@@ -94,4 +95,9 @@ export interface SectionProps<T extends SectionType> {
   renderCheckout?: (request: CheckoutRequest) => ReactNode
   /** Draws a newsletter signup form. It belongs to the forms feature, so the route supplies it. */
   renderNewsletter?: (request: NewsletterRequest) => ReactNode
+  /**
+   * Business info for Location sections. The site feature owns it, so the route resolves it
+   * (`getLocationBusiness`) from the settings the footer already fetched. Null until the document exists.
+   */
+  business?: LocationBusiness | null
 }

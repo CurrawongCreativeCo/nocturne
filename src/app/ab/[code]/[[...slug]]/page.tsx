@@ -13,6 +13,7 @@ import { getPageMetadata, getPageStaticParams } from '@/features/pages/api/get-p
 import { PageView } from '@/features/pages/components/page-view'
 import { ReturningVisitor } from '@/features/personalization/components/returning-visitor'
 import { CheckoutButton } from '@/features/pricing/components/checkout-button'
+import { getLocationBusiness } from '@/features/site/api/get-location-business'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 const renderForm: ComponentProps<typeof PageView>['renderForm'] = (form, headingId) => (
@@ -71,6 +72,7 @@ export default async function ExperimentPage({ params }: Props) {
       renderForm={renderForm}
       renderCheckout={renderCheckout}
       renderNewsletter={renderNewsletter}
+      business={await getLocationBusiness(PUBLISHED)}
       renderMembersGate={renderMembersGate}
       variant={resolved?.variant}
       {...PUBLISHED}

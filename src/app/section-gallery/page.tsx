@@ -9,6 +9,7 @@ import { getPage } from '@/features/pages/api/get-page'
 import { SectionRenderer } from '@/features/pages/components/section-renderer'
 import { sectionLabel } from '@/features/pages/utils/section-label'
 import { CheckoutButton } from '@/features/pricing/components/checkout-button'
+import { getLocationBusiness } from '@/features/site/api/get-location-business'
 import { DesignStyle } from '@/features/site/components/design-style'
 import { PUBLISHED } from '@/lib/sanity/live'
 
@@ -41,6 +42,7 @@ export default async function SectionGalleryPage() {
 
   const page = await getPage({ slug: GALLERY_SEGMENT, members: false, ...PUBLISHED })
   const sections = page?.pageBuilder ?? []
+  const business = await getLocationBusiness(PUBLISHED)
 
   if (sections.length === 0) {
     return (
@@ -78,6 +80,7 @@ export default async function SectionGalleryPage() {
             documentId={page?._id ?? GALLERY_SEGMENT}
             documentType="page"
             sections={[section, ...below]}
+            business={business}
             {...renderers}
           />
         </div>

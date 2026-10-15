@@ -16,6 +16,7 @@ import { FeaturesGrid } from './sections/features-grid'
 import { FormSection } from './sections/form-section'
 import { Gallery } from './sections/gallery'
 import { Hero } from './sections/hero'
+import { Location } from './sections/location'
 import { LogoCloud } from './sections/logo-cloud'
 import { MediaText } from './sections/media-text'
 import { NewsletterSignup } from './sections/newsletter-signup'
@@ -44,6 +45,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   newsletterSignup: NewsletterSignup,
   stats: Stats,
   gallery: Gallery,
+  location: Location,
   // new-section:register
 }
 
@@ -66,6 +68,8 @@ interface Props {
   /** Passed to every section; see `SectionProps.renderCheckout`. */
   renderCheckout?: SectionProps<SectionType>['renderCheckout']
   renderNewsletter?: SectionProps<SectionType>['renderNewsletter']
+  /** Passed to every section; see `SectionProps.business`. */
+  business?: SectionProps<SectionType>['business']
   /**
    * Set on public views: members-only sections arrive as stubs and are rendered here behind the
    * gate. Leave it out where every section holds its content (draft mode, or inside a page that
@@ -120,6 +124,7 @@ export function SectionRenderer({
   renderForm,
   renderCheckout,
   renderNewsletter,
+  business,
   gate,
 }: Props) {
   if (!sections?.length) return null
@@ -141,6 +146,7 @@ export function SectionRenderer({
               renderForm?: Props['renderForm']
               renderCheckout?: Props['renderCheckout']
               renderNewsletter?: Props['renderNewsletter']
+              business?: Props['business']
             }>
           | undefined
 
@@ -170,6 +176,7 @@ export function SectionRenderer({
                       renderForm={renderForm}
                       renderCheckout={renderCheckout}
                       renderNewsletter={renderNewsletter}
+                      business={business}
                     />
                   ) : null
                 },
@@ -183,6 +190,7 @@ export function SectionRenderer({
               renderForm={renderForm}
               renderCheckout={renderCheckout}
               renderNewsletter={renderNewsletter}
+              business={business}
             />
           )
 
