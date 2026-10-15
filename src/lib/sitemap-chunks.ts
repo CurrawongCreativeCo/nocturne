@@ -11,19 +11,28 @@ export function sitemapChunkRange(id: number, size = SITEMAP_CHUNK_SIZE) {
   return { start: id * size, end: (id + 1) * size }
 }
 
-interface Range {
+export interface Range {
   start: number
   end: number
 }
 
 /**
- * Splits a sitemap file's range over the combined list "all pages, then all posts" into the part
- * that falls on pages and the part that falls on posts (each relative to its own list). A part
+ * Splits a sitemap file's range over a combined list made of several lists end to end (`totals`
+ * are their lengths, in order) into the part that falls on each, relative to its own list. A part
  * with `start >= end` is empty.
  */
-export function splitSitemapRange(range: Range, pageTotal: number) {
-  return {
-    pages: { start: Math.min(range.start, pageTotal), end: Math.min(range.end, pageTotal) },
-    posts: { start: Math.max(range.start - pageTotal, 0), end: Math.max(range.end - pageTotal, 0) },
-  }
+export function splitSitemapRanges<const T extends readonly number[]>(
+  range: Range,
+  totals: T,
+): { [K in keyof T]: Range } {
+  let offset = 0
+  const parts = totals.map((total) => {
+    const part = {
+      start: Math.min(Math.max(range.start - offset, 0), total),
+      end: Math.min(Math.max(range.end - offset, 0), total),
+    }
+    offset += total
+    return part
+  })
+  return parts as { [K in keyof T]: Range }
 }

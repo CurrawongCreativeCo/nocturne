@@ -27,6 +27,7 @@ export const FEATURE_NAMES = [
   'search',
   'businessInfo',
   'team',
+  'teamProfiles',
 ] as const
 export type FeatureName = (typeof FEATURE_NAMES)[number]
 
@@ -71,6 +72,7 @@ export const DEFAULT_FEATURES: Readonly<Features> = {
   search: true,
   businessInfo: true,
   team: true,
+  teamProfiles: true,
 }
 
 export const DEFAULT_TIER: Tier = 'custom'
@@ -206,4 +208,12 @@ export const siteProfile: SiteProfile = resolveSiteProfile(siteProfileInput)
 /** Whether a feature is switched on for this site. The one check routes, queries and Studio use. */
 export function isFeatureEnabled(name: FeatureName, profile: SiteProfile = siteProfile): boolean {
   return profile.features[name]
+}
+
+/**
+ * Whether team members have their own pages (`/team/<slug>`): the team feature is on and so is
+ * its `teamProfiles` switch. Even then a member only has a page once an editor gives them a slug.
+ */
+export function hasTeamProfiles(profile: SiteProfile = siteProfile): boolean {
+  return profile.features.team && profile.features.teamProfiles
 }

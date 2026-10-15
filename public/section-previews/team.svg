@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="600" height="450"><style>
+:root{--bg:#f6f6f8;--fg:#1f2430;--line:#c9ccd4;--accent:#5f2bd4}
+@media (prefers-color-scheme:dark){:root{--bg:#16181d;--fg:#e8eaee;--line:#3a3f4b;--accent:#9f80e5}}
+rect.bg{fill:var(--bg)}
+.h{fill:var(--fg);opacity:.85}.l{fill:var(--fg);opacity:.35}.a{fill:var(--accent)}
+.f{fill:none;stroke:var(--fg);stroke-opacity:.4}.p{fill:var(--fg);fill-opacity:.1;stroke:var(--fg);stroke-opacity:.4}
+.g{fill:var(--fg);opacity:.3}.g2{fill:var(--fg);opacity:.22}.c{fill:var(--fg);fill-opacity:.06;stroke:var(--fg);stroke-opacity:.3}
+.s{fill:none;stroke:var(--accent);stroke-width:1.2}.band{fill:var(--accent);opacity:.9}.k{fill:var(--bg)}
+text{font:600 8px system-ui,sans-serif;fill:var(--fg);opacity:.6}
+</style><rect class="bg" width="160" height="120"/><rect class="h" x="10" y="12" width="60" height="7" rx="2"/><rect class="c" x="10" y="34" width="42" height="70" rx="3"/><rect class="p" x="15" y="39" width="32" height="32" rx="3"/><circle class="g" cx="31" cy="51" r="6"/><rect class="g" x="21" y="59" width="20" height="9" rx="4.5"/><rect class="h" x="15" y="77" width="26" height="4" rx="2"/><rect class="l" x="15" y="85" width="32" height="3" rx="1.5"/><rect class="l" x="15" y="91" width="22" height="3" rx="1.5"/><rect class="c" x="59" y="34" width="42" height="70" rx="3"/><rect class="p" x="64" y="39" width="32" height="32" rx="3"/><circle class="g" cx="80" cy="51" r="6"/><rect class="g" x="70" y="59" width="20" height="9" rx="4.5"/><rect class="h" x="64" y="77" width="26" height="4" rx="2"/><rect class="l" x="64" y="85" width="32" height="3" rx="1.5"/><rect class="l" x="64" y="91" width="22" height="3" rx="1.5"/><rect class="c" x="108" y="34" width="42" height="70" rx="3"/><rect class="p" x="113" y="39" width="32" height="32" rx="3"/><circle class="g" cx="129" cy="51" r="6"/><rect class="g" x="119" y="59" width="20" height="9" rx="4.5"/><rect class="h" x="113" y="77" width="26" height="4" rx="2"/><rect class="l" x="113" y="85" width="32" height="3" rx="1.5"/><rect class="l" x="113" y="91" width="22" height="3" rx="1.5"/></svg>

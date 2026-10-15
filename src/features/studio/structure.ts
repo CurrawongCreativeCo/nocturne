@@ -14,6 +14,7 @@ import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
 import { StackIcon } from '@sanity/icons/Stack'
 import { TagIcon } from '@sanity/icons/Tag'
 import { UserIcon } from '@sanity/icons/User'
+import { UsersIcon } from '@sanity/icons/Users'
 import { WrenchIcon } from '@sanity/icons/Wrench'
 import type { ComponentType } from 'react'
 import { map } from 'rxjs'
@@ -26,6 +27,7 @@ import type {
 
 import { currentAudience } from './roles'
 import { SINGLETON_TYPES } from './singletons'
+import { TeamOrderPane } from './team-order/team-order-pane'
 import { isTypeVisible } from './utils/feature-visibility'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
 import { CLIENT_WEBSITE_SETTINGS_IDS, filterStructureItems } from './utils/structure-access'
@@ -83,6 +85,7 @@ const LISTED_TYPES = new Set([
   'author',
   'category',
   'stripePrice',
+  'teamMember',
   // new-document:listed
 ])
 
@@ -154,6 +157,15 @@ export const structure: StructureResolver = (S, context) => {
         ]
       : []),
     singletonItem(S, 'businessInfo', 'Business info', HomeIcon),
+    ...(hasType('teamMember') && isTypeVisible('teamMember')
+      ? [
+          S.listItem()
+            .title('Team')
+            .id('team')
+            .icon(UsersIcon)
+            .child(S.component(TeamOrderPane).id('team').title('Team')),
+        ]
+      : []),
     // new-document:list
     S.divider(),
     group(S, 'reusable', 'Reusable content', StackIcon, [

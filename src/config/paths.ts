@@ -44,6 +44,19 @@ export function categoryPath(slug: string): string {
 }
 
 /**
+ * Team profile pages: `/team/<slug>` (src/features/team). A CMS page can't have a path *under* it
+ * (`team/anything`: the route would shadow it), but a page called exactly `team` is fine: that is
+ * where the Team section usually lives.
+ */
+export const TEAM_SEGMENT = 'team'
+export const TEAM_PATH = `/${TEAM_SEGMENT}`
+
+/** Member slug -> "/team/<slug>". */
+export function teamPath(slug: string): string {
+  return `${TEAM_PATH}/${slug}`
+}
+
+/**
  * First path segment of the prerendered A/B variant routes. proxy.ts rewrites a page request to
  * "/ab/<code>/<path>" for visitors in an experiment, so a CMS page can't use it either.
  */

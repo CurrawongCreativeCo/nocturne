@@ -8,6 +8,8 @@ import {
   segmentsToSlug,
   slugToPath,
   slugToSegments,
+  TEAM_PATH,
+  teamPath,
 } from './paths'
 
 describe('slug <-> URL mapping', () => {
@@ -42,5 +44,12 @@ describe('blog paths', () => {
     expect(BLOG_PATH).toBe('/blog')
     expect(postPath('hello-world')).toBe('/blog/hello-world')
     expect(categoryPath('news')).toBe('/blog/category/news')
+  })
+})
+
+describe('team paths', () => {
+  it('puts profile pages under /team', () => {
+    expect(TEAM_PATH).toBe('/team')
+    expect(teamPath('ann-lee')).toBe('/team/ann-lee')
   })
 })

@@ -1512,6 +1512,34 @@ const gallerySections = [
     showContact: false,
     directionsLabel: 'Get directions',
   },
+  // Team: everyone in order, a picked list (in the editor's order, skipping an unpublished pick), and the list layout.
+  {
+    _key: 'team-grid',
+    _type: 'team',
+    variant: 'grid',
+    selection: 'all',
+    title: 'Meet the team',
+    text: 'The people who will look after you.',
+  },
+  {
+    _key: 'team-slider',
+    _type: 'team',
+    variant: 'slider',
+    selection: 'picked',
+    title: 'Our partners',
+    members: [
+      { _key: 'pick-dev', ...ref('teamMember-dev') },
+      { _key: 'pick-ann', ...ref('teamMember-ann') },
+      { _key: 'pick-ghost', ...ref('teamMember-unpublished') },
+    ],
+  },
+  {
+    _key: 'team-list',
+    _type: 'team',
+    variant: 'list',
+    selection: 'all',
+    title: 'Who we are',
+  },
   // new-section:gallery
 ]
 
@@ -1628,6 +1656,81 @@ documents.push({
       showOpenNow: false,
       showContact: true,
       directionsLabel: 'Directions',
+    },
+  ],
+})
+
+/**
+ * The team (tests/e2e/team.spec.ts). Order: Ann (1), Ben (2), Cara (3), then Dev, who has no
+ * order and so comes last. Ann has every optional field; Ben a page but no contact details; Cara no
+ * page address (her card must not link); Dev a page. The gallery's picked list also references a
+ * member who does not exist, as an unpublished one resolves to nothing in the published perspective
+ * (the fake lake serves every document, so a real draft cannot be shown here).
+ */
+const teamMember = (id, name, role, extra = {}) => ({
+  _id: `teamMember-${id}`,
+  _type: 'teamMember',
+  name,
+  role,
+  portrait: image(`Portrait of ${name}`),
+  shortBio: `${name} short bio.`,
+  ...extra,
+})
+const memberSlug = (current) => ({ slug: { _type: 'slug', current } })
+
+documents.push(
+  teamMember('ann', 'Ann Lee', 'Principal solicitor', {
+    ...memberSlug('ann-lee'),
+    order: 1,
+    shortBio: 'Ann leads the firm and has acted for local families for twenty years.',
+    bio: [block(['Ann founded the practice in 2004.']), block(['She mentors our graduates.'])],
+    qualifications: ['LLB (Hons)', 'GAICD'],
+    publicEmail: 'ann@example.com',
+    phone: '02 9876 5432',
+    socialLinks: [
+      {
+        _key: 'ann-linkedin',
+        _type: 'socialLink',
+        platform: 'linkedin',
+        url: 'https://www.linkedin.com/in/ann-lee-example',
+      },
+    ],
+  }),
+  teamMember('ben', 'Ben Ng', 'Senior associate', {
+    ...memberSlug('ben-ng'),
+    order: 2,
+    bio: [block(['Ben joined from a large city firm.'])],
+  }),
+  teamMember('cara', 'Cara Doyle', 'Office manager', { order: 3 }),
+  teamMember('dev', 'Dev Patel', 'Paralegal', memberSlug('dev-patel')),
+)
+
+/** Team sections on a real page, with a MotionProvider (tests/e2e/team.spec.ts). `team` alone is a legal page slug. */
+documents.push({
+  _id: 'page-team',
+  _type: 'page',
+  title: 'Our team',
+  slug: { _type: 'slug', current: 'team' },
+  seo: { _type: 'seo', metaDescription: 'The people behind Test Co.' },
+  pageBuilder: [
+    { _key: 'team-hero', _type: 'hero', title: 'Our team', description: 'Hero description.' },
+    {
+      _key: 'team-all',
+      _type: 'team',
+      title: 'Everyone',
+      selection: 'all',
+      variant: 'grid',
+    },
+    {
+      _key: 'team-picked',
+      _type: 'team',
+      title: 'Just two',
+      selection: 'picked',
+      variant: 'list',
+      members: [
+        { _key: 'pick-ben', ...ref('teamMember-ben') },
+        { _key: 'pick-ann', ...ref('teamMember-ann') },
+      ],
     },
   ],
 })

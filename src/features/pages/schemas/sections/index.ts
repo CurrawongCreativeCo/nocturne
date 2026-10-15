@@ -11,6 +11,7 @@ import { newsletterSignup } from './newsletter-signup'
 import { pricingTable } from './pricing-table'
 import { richText } from './rich-text'
 import { stats } from './stats'
+import { team } from './team'
 import { testimonials } from './testimonials'
 // new-section:import
 
@@ -42,5 +43,6 @@ export const sectionTypes = [
   stats,
   gallery,
   location,
+  team,
   // new-section:register
 ]

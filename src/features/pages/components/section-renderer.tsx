@@ -23,6 +23,7 @@ import { NewsletterSignup } from './sections/newsletter-signup'
 import { PricingTable } from './sections/pricing-table'
 import { RichText } from './sections/rich-text'
 import { Stats } from './sections/stats'
+import { Team } from './sections/team'
 import { Testimonials } from './sections/testimonials'
 // new-section:import
 
@@ -46,6 +47,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   stats: Stats,
   gallery: Gallery,
   location: Location,
+  team: Team,
   // new-section:register
 }
 

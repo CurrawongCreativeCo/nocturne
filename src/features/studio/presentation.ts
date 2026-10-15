@@ -4,7 +4,8 @@ import {
   type PresentationPluginOptions,
 } from 'sanity/presentation'
 
-import { BLOG_PATH, categoryPath, HOME_SLUG, postPath, slugToPath } from '@/config/paths'
+import { BLOG_PATH, categoryPath, HOME_SLUG, postPath, slugToPath, teamPath } from '@/config/paths'
+import { hasTeamProfiles } from '@/config/profile'
 
 /**
  * Two-way mapping between documents and URLs for the Presentation tool:
@@ -27,6 +28,16 @@ export const resolve: PresentationPluginOptions['resolve'] = {
         params.slug
           ? {
               filter: `_type == "category" && slug.current == $slug`,
+              params: { slug: params.slug },
+            }
+          : undefined,
+    },
+    {
+      route: '/team/:slug',
+      resolve: ({ params }) =>
+        params.slug
+          ? {
+              filter: `_type == "teamMember" && slug.current == $slug`,
               params: { slug: params.slug },
             }
           : undefined,
@@ -92,6 +103,22 @@ export const resolve: PresentationPluginOptions['resolve'] = {
       message: 'Shown under each of their posts',
       tone: 'positive',
       locations: [{ title: 'Blog', href: BLOG_PATH }],
+    }),
+    teamMember: defineLocations({
+      select: { name: 'name', slug: 'slug.current' },
+      resolve: (doc: { name?: string; slug?: string } | null) => ({
+        // A member's own page when the site has them and this member has an address; otherwise
+        // they only show inside Team sections, which are placed on pages (no location to list).
+        locations:
+          hasTeamProfiles() && doc?.slug
+            ? [{ title: doc.name || 'Untitled', href: teamPath(doc.slug) }]
+            : [],
+        message:
+          hasTeamProfiles() && doc?.slug
+            ? undefined
+            : 'Shown in Team sections. Give them a page address for their own page.',
+        tone: 'positive',
+      }),
     }),
     page: defineLocations({
       select: { title: 'title', slug: 'slug.current' },

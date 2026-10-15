@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_FEATURES,
   FEATURE_NAMES,
+  hasTeamProfiles,
   isFeatureEnabled,
   resolveSiteProfile,
   siteProfile,
@@ -147,5 +148,19 @@ describe('isFeatureEnabled', () => {
 
   it('has the real profile resolve, with every feature a switch', () => {
     expect(Object.keys(siteProfile.features).sort()).toEqual([...FEATURE_NAMES].sort())
+  })
+})
+
+describe('hasTeamProfiles', () => {
+  const profile = (features: SiteProfileInput['features']) =>
+    resolveSiteProfile({ ...valid, features })
+
+  it('is on by default', () => {
+    expect(hasTeamProfiles(profile({}))).toBe(true)
+  })
+
+  it('needs the team feature and its own switch', () => {
+    expect(hasTeamProfiles(profile({ teamProfiles: false }))).toBe(false)
+    expect(hasTeamProfiles(profile({ team: false }))).toBe(false)
   })
 })
