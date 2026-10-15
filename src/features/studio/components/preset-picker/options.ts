@@ -54,3 +54,16 @@ export function normalisePresets(list: unknown): PresetDefinition[] {
     return Object.keys(set).length > 0 ? [{ ...option, set }] : []
   })
 }
+
+/**
+ * The options to show when the field offers only some of them. `visible` undefined offers all; the
+ * stored value is always kept, so a choice that no longer fits still shows (with its warning).
+ */
+export function filterVisibleOptions(
+  options: PresetOption[],
+  visible: readonly string[] | undefined,
+  current: string | null | undefined,
+): PresetOption[] {
+  if (!visible) return options
+  return options.filter((option) => option.value === current || visible.includes(option.value))
+}

@@ -9,6 +9,14 @@ export const SECTION_WIDTHS = ['narrow', 'default', 'wide', 'full'] as const
 export const SECTION_ALIGNS = ['start', 'center'] as const
 export const SECTION_MOTIONS = ['none', 'reveal', 'stagger', 'parallax'] as const
 
+/** What editors call each tone: in the Background picker and in list previews ("Hero · Split · Dark"). */
+export const SECTION_TONE_TITLES: Record<(typeof SECTION_TONES)[number], string> = {
+  surface: 'Surface',
+  alt: 'Soft',
+  inverse: 'Dark',
+  accent: 'Accent',
+}
+
 /** Ids the site itself uses (the skip link's target), so an anchor can't collide with them. */
 export const RESERVED_ANCHORS: readonly string[] = ['main-content']
 

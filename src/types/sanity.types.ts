@@ -52,11 +52,11 @@ export type Avatar = {
 export type SectionStyle = {
   _type: 'sectionStyle'
   tone?: 'surface' | 'alt' | 'inverse' | 'accent'
+  motion?: 'none' | 'reveal' | 'stagger' | 'parallax'
   spacing?: 'compact' | 'default' | 'spacious'
   width?: 'narrow' | 'default' | 'wide' | 'full'
   align?: 'start' | 'center'
   anchorId?: string
-  motion?: 'none' | 'reveal' | 'stagger' | 'parallax'
 }
 
 export type BlockContent = Array<
@@ -505,6 +505,7 @@ export type RichText = {
 
 export type Hero = {
   _type: 'hero'
+  variant: 'overlay' | 'split' | 'editorial' | 'full-bleed'
   eyebrow?: string
   title: string
   description?: string
@@ -532,7 +533,6 @@ export type Hero = {
   }
   showGreeting?: boolean
   access?: 'public' | 'members'
-  variant: 'overlay' | 'split' | 'editorial' | 'full-bleed'
   style?: SectionStyle
 }
 

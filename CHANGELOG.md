@@ -20,6 +20,19 @@ you start a release.
 
 ### Added
 
+- **Section forms in three levels (Studio):** every section's form is now layout first, a short Design tab, and advanced
+  options out of the way, implemented once in `sectionFields` so every section and `npm run new:section` get it. The
+  **Layout** picker (`variantField`, now a preset picker with thumbnails) is first in the Content tab, and fields hide
+  when the chosen layout doesn't use them (the hero's _Image_ is hidden for Editorial). The **Design** tab shows
+  _Background_ (swatches drawn from `tokens.json`) and _Animation_ (pictures) with a collapsed _More layout options_ (space,
+  width, alignment, anchor), and the nested "Design" box is gone (`options.frameless` plus `FramelessAwareField`). A
+  collapsed _Advanced_ fieldset (`sectionFields`' `advanced` option, `sectionFieldsets`) appears only when a section
+  has advanced fields. The layout picker, Design tab and Advanced are hidden from clients (UI only). No
+  nonsensical combinations: Parallax is only offered where a section has a picture and Alignment is hidden where the
+  layout fixes it (`rules` option; the hero's Split and Editorial), with a warning for a value left from a previous
+  layout. List previews read "Hero · Split · Dark". `presetField` gained `hidden`, `fieldset`, `validation` and
+  `visibleOptions`. Stored field names are unchanged: no migration, no change to the rendered site.
+
 - **Preset picker (Studio):** one reusable input to choose by picture instead of a radio list, and a preset mode that
   sets several fields at once. `presetField` (`src/lib/sanity/schema/preset-field.ts`) makes a string field shown as a
   grid of cards; `presetsOption` puts a preset bar above an object's form. Both are activated by the existing global
@@ -103,6 +116,14 @@ has its own sections, wrap them in `SectionFrame`, add `style { ${sectionStyleFi
 `sectionFields([...])` in their schemas (see the README's "Section style"); until then they keep working but have no
 Design tab. Visual baselines gain the new `*-style-*` gallery entries: refresh them with the "Update visual baselines"
 workflow.
+
+**Section forms in three levels:** no content migration (field names are unchanged) and the rendered site is
+identical. A project with its own sections adds `fieldsets: sectionFieldsets` next to `groups: sectionGroups` in each
+section type (without it an Advanced fieldset has nowhere to render) and, optionally, `rules` for Parallax and
+Alignment (see the README's "Section style"). A project that registered its own `form.components.field` composes
+`FramelessAwareField` (`src/features/studio/components/frameless-field.tsx`) into it. Clients no longer see the Design
+tab or the layout picker, and the hero's _Image side_ moved to the Content tab. Run `npm run typegen` (field order
+changes only).
 
 **Section variants:** `components/sections/hero.tsx` is now the folder `components/sections/hero/`. A project that
 edited the old file merges its changes into `hero/overlay.tsx` (the same look) or `hero/hero-text.tsx` (the text shared

@@ -28,6 +28,7 @@ import { confirmDeletePageActions } from './src/features/studio/actions/confirm-
 import { confirmPublishActions } from './src/features/studio/actions/confirm-publish'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
+import { FramelessAwareField } from './src/features/studio/components/frameless-field'
 import { withPresetPicker } from './src/features/studio/components/preset-picker/with-preset-picker'
 import { RoleNavbar } from './src/features/studio/components/role-navbar'
 import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
@@ -79,8 +80,8 @@ export default defineConfig({
   dataset,
   studio: { components: { logo: StudioLogo, navbar: RoleNavbar } },
   // Clients only get the approved sections in the page builder's insert menu; presetPicker fields
-  // and objects with presets get the picture picker.
-  form: { components: { input: StudioInput } },
+  // and objects with presets get the picture picker; frameless objects drop their own box.
+  form: { components: { input: StudioInput, field: FramelessAwareField } },
   // Content variants: lets editors create variants of a document, which A/B experiments serve.
   beta: { variants: { enabled: true } },
   schema: {

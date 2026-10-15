@@ -4,8 +4,15 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+
+import {
+  EditorialThumbnail,
+  FullBleedThumbnail,
+  OverlayThumbnail,
+  SplitThumbnail,
+} from './hero-thumbnails'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -22,11 +29,34 @@ const LIMITS = {
  * and what content without a variant renders.
  */
 export const HERO_VARIANTS = [
-  { value: 'overlay', title: 'Overlay' },
-  { value: 'split', title: 'Split' },
-  { value: 'editorial', title: 'Editorial' },
-  { value: 'full-bleed', title: 'Full bleed' },
+  {
+    value: 'overlay',
+    title: 'Overlay',
+    description: 'Centred text over a faded picture.',
+    thumbnail: OverlayThumbnail,
+  },
+  {
+    value: 'split',
+    title: 'Split',
+    description: 'Text on one side, picture on the other.',
+    thumbnail: SplitThumbnail,
+  },
+  {
+    value: 'editorial',
+    title: 'Editorial',
+    description: 'Oversized heading, small picture.',
+    thumbnail: EditorialThumbnail,
+  },
+  {
+    value: 'full-bleed',
+    title: 'Full bleed',
+    description: 'Picture edge to edge, text at the bottom.',
+    thumbnail: FullBleedThumbnail,
+  },
 ] as const
+
+/** What each layout uses, so the form shows only what matters (the unset variant is the default, Overlay). */
+const layoutOf = (section: { variant?: string }) => section.variant ?? HERO_VARIANTS[0].value
 
 export const hero = defineType({
   name: 'hero',
@@ -34,6 +64,7 @@ export const hero = defineType({
   type: 'object',
   icon: BlockContentIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -66,6 +97,8 @@ export const hero = defineType({
         name: 'backgroundImage',
         title: 'Image',
         description: 'Behind the text in Overlay and Full bleed, beside it in Split.',
+        // Editorial has its own small picture, below, and never draws this one.
+        hidden: ({ parent }: { parent?: { variant?: string } }) => parent?.variant === 'editorial',
         requireAlt: false,
         minWidth: 2400,
         orientation: 'landscape',
@@ -75,7 +108,6 @@ export const hero = defineType({
         title: 'Image side',
         description: 'Which side the picture sits on at desktop widths.',
         type: 'string',
-        group: 'design',
         initialValue: 'right',
         options: { list: ['left', 'right'], layout: 'radio', direction: 'horizontal' },
         hidden: ({ parent }: { parent?: { variant?: string } }) => parent?.variant !== 'split',
@@ -101,20 +133,31 @@ export const hero = defineType({
     ],
     // Alignment is left to the layout: Overlay centres, the others start.
     { tone: 'inverse', spacing: 'spacious', motion: 'none' },
+    {
+      rules: {
+        type: 'hero',
+        // The pictures that sit behind the text are the ones Parallax moves.
+        hasPicture: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
+        // Split and Editorial lay their text out themselves.
+        fixesAlignment: (section) => ['split', 'editorial'].includes(layoutOf(section)),
+      },
+    },
   ),
   preview: {
-    select: { title: 'title', media: 'backgroundImage', variant: 'variant' },
+    select: { title: 'title', media: 'backgroundImage', variant: 'variant', tone: 'style.tone' },
     prepare: ({
       title,
       media,
       variant,
+      tone,
     }: {
       title?: string
       media?: PreviewValue['media']
       variant?: string
+      tone?: string
     }) => ({
       title: title || 'Untitled',
-      subtitle: variantSubtitle('Hero', HERO_VARIANTS, variant),
+      subtitle: variantSubtitle('Hero', HERO_VARIANTS, variant, tone),
       media,
     }),
   },

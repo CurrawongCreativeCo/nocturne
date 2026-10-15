@@ -4,7 +4,8 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -18,6 +19,7 @@ export const logoCloud = defineType({
   type: 'object',
   icon: ImagesIcon,
   groups: sectionGroups,
+  fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
       defineField({
@@ -55,10 +57,10 @@ export const logoCloud = defineType({
     { spacing: 'compact', align: 'center' },
   ),
   preview: {
-    select: { title: 'title', logos: 'logos' },
-    prepare: ({ title, logos }: { title?: string; logos?: unknown[] }) => ({
+    select: { title: 'title', logos: 'logos', tone: 'style.tone' },
+    prepare: ({ title, logos, tone }: { title?: string; logos?: unknown[]; tone?: string }) => ({
       title: title || 'Logo strip',
-      subtitle: `Logo strip · ${logos?.length ?? 0} logos`,
+      subtitle: joinSubtitle('Logo strip', `${logos?.length ?? 0} logos`, toneTitle(tone)),
     }),
   },
 })
