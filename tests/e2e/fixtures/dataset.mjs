@@ -1116,6 +1116,14 @@ heroSlotGallery.push(
   }),
 )
 
+/** `count` pictures with alt text and, for every other one, a caption: "<id> picture 1" and so on. */
+const galleryImages = (id, count) =>
+  Array.from({ length: count }, (_, n) => ({
+    ...image(`${id} picture ${n + 1}`),
+    _key: `${id}-${n + 1}`,
+    ...(n % 2 === 0 ? { caption: `Caption for ${id} picture ${n + 1}` } : {}),
+  }))
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -1424,6 +1432,45 @@ const gallerySections = [
     items: sliderQuotes('testimonials-slider-inverse').slice(0, 4),
   },
   ...heroSlotGallery,
+  // Galleries (README, "Gallery"): twelve pictures so the grids have several rows, six for the slider.
+  // The gallery has no MotionProvider, so the lightbox cannot be driven here; tests/e2e/gallery.spec.ts
+  // opens it on the /gallery page.
+  {
+    _key: 'gallery-grid',
+    _type: 'gallery',
+    variant: 'grid',
+    title: 'Our work',
+    intro: 'A few recent projects.',
+    columns: 3,
+    images: galleryImages('gallery-grid', 12),
+  },
+  {
+    _key: 'gallery-grid-four',
+    _type: 'gallery',
+    variant: 'grid',
+    style: { _type: 'sectionStyle', tone: 'alt' },
+    title: 'Four across',
+    columns: 4,
+    images: galleryImages('gallery-grid-four', 8),
+  },
+  {
+    _key: 'gallery-masonry',
+    _type: 'gallery',
+    variant: 'masonry',
+    title: 'Masonry',
+    intro: 'Pictures keep their own shape.',
+    columns: 3,
+    images: galleryImages('gallery-masonry', 9),
+  },
+  {
+    _key: 'gallery-slider',
+    _type: 'gallery',
+    variant: 'slider',
+    style: { _type: 'sectionStyle', tone: 'inverse' },
+    title: 'Slider',
+    columns: 3,
+    images: galleryImages('gallery-slider', 6),
+  },
   // new-section:gallery
 ]
 
@@ -1479,6 +1526,34 @@ documents.push({
       variant: 'slider',
       title: 'Kind words',
       items: sliderQuotes('slider-page'),
+    },
+  ],
+})
+
+/** Galleries on a real page (tests/e2e/gallery.spec.ts): a MotionProvider, so the lightbox drags. */
+documents.push({
+  _id: 'page-gallery',
+  _type: 'page',
+  title: 'Gallery',
+  slug: { _type: 'slug', current: 'gallery' },
+  seo: { _type: 'seo', metaDescription: 'A page with image galleries.' },
+  pageBuilder: [
+    { _key: 'gallery-hero', _type: 'hero', title: 'Gallery', description: 'Hero description.' },
+    {
+      _key: 'gallery-page-grid',
+      _type: 'gallery',
+      variant: 'grid',
+      title: 'Grid gallery',
+      columns: 3,
+      images: galleryImages('gallery-page-grid', 12),
+    },
+    {
+      _key: 'gallery-page-slider',
+      _type: 'gallery',
+      variant: 'slider',
+      title: 'Slider gallery',
+      columns: 3,
+      images: galleryImages('gallery-page-slider', 6),
     },
   ],
 })
