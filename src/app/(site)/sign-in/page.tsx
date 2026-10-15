@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
+import { isFeatureEnabled } from '@/config/profile'
 import { SignInView } from '@/features/auth/components/sign-in-view'
 
 export const metadata: Metadata = {
@@ -11,6 +13,7 @@ export const metadata: Metadata = {
 export const instant = false
 
 export default async function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
+  if (!isFeatureEnabled('members')) notFound()
   const { callbackUrl, error } = await searchParams
   return (
     <SignInView

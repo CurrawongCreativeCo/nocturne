@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
+import { isFeatureEnabled } from '@/config/profile'
 import { SearchView } from '@/features/search/components/search-view'
 import { getDraftFetchMode } from '@/lib/sanity/live'
 
@@ -21,6 +23,7 @@ export const metadata: Metadata = {
 export const instant = false
 
 export default async function SearchPage({ searchParams }: PageProps<'/search'>) {
+  if (!isFeatureEnabled('search')) notFound()
   const { q } = await searchParams
   return (
     <div className="mx-auto max-w-4xl px-gutter py-section-compact">

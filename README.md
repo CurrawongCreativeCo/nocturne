@@ -1173,6 +1173,61 @@ adjustment the contrast guard made (so the yellow case visibly shows its darkene
 **Colour helpers.** `src/lib/color/` holds hex <-> OKLCH conversion, WCAG contrast and the lightness
 adjustment. `scripts/build-tokens.mjs` uses the same conversion, so there is one implementation.
 
+### Site profile
+
+`site.profile.ts` at the repo root (a Customize file) declares what this site uses. Studio, the routes and
+`/api/site-info` all read it, through `src/config/profile.ts` (Core: the types, defaults, validation and the
+exported `siteProfile`).
+
+```ts
+export const siteProfileInput = defineSiteProfile({
+  client: { name: 'Acme Plumbing', slug: 'acme-plumbing' },
+  tier: 'content', // 'brochure' | 'content' | 'commerce' | 'custom' (default 'custom')
+  features: { pricing: false, members: false, experiments: false, team: false },
+  clientSections: ['richText', 'mediaText', 'faq'], // empty: the default list
+  help: { guideUrl: 'https://…', videos: { 'edit-a-page': 'https://…' } },
+})
+```
+
+- **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo` and
+  `team`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
+- **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;
+  see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
+  Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
+  old `siteProfile` document, which never existed in the schema.
+- **`help`**: the client's editing guide and training videos (https links, by task name), for the Studio's help
+  features to read. `templateVersion` is added from `template-version.json`; the profile does not hold CMS branding
+  (that is `studio-brand.json`).
+- A bad profile (missing client name or slug, an unknown tier, feature or section name, a non-https link) throws
+  with every problem listed, so the build, `npm run dev` and the Studio all stop with a readable message.
+
+**It controls visibility, not the schema.** Every document and section type stays registered, so `schema.json`,
+typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
+feature does:
+
+| Feature                      | When off                                                                                                                                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_ |
+| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                       |
+| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                     |
+| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                      |
+| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                 |
+| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                  |
+| `team`                       | Hides `team` and `teamMember` document types. The template has no team feature yet, so today this only reserves the switch                                                               |
+| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                          |
+
+Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
+import it). Page-builder sections that depend on a disabled feature (a form, pricing table or newsletter section)
+are not hidden: remove them from the page, or leave them out of `clientSections`.
+
+`GET /api/site-info` adds `tier` and `enabled` (the profile's switches); its `features` still reports whether each
+feature's environment is configured. The two are different questions: a feature can be on in the profile and not
+yet configured.
+
+Tests: `src/config/profile.test.ts` (validation and defaults), `src/features/studio/utils/feature-visibility.test.ts`
+(what the Studio hides) and `site-profile-sections.test.ts` (the real profile against the real section list).
+The end-to-end fixtures run with everything on.
+
 ### Studio roles and permissions
 
 The Studio shows a simple view to clients and the full view to Currawong staff. It reads each person's
@@ -1211,9 +1266,8 @@ addresses, for example, stay readable to any Editor through the API. Real enforc
 with GROQ filters, which are a separate Sanity plan feature.
 
 **Approved sections.** Clients may add _Rich text_, _Image + text_, _FAQ_, _Call to action banner_ and
-_Testimonials_ (`DEFAULT_CLIENT_SECTIONS` in `src/features/studio/roles.ts`). When the site has a
-`siteProfile` singleton (`_id` `siteProfile`) with a `clientSections` array of section type names, that list
-is used instead; an empty or missing list falls back to the defaults. Sections already on a page stay
+_Testimonials_ (`DEFAULT_CLIENT_SECTIONS` in `src/features/studio/roles.ts`). When the site profile
+(`site.profile.ts`, see _Site profile_) has a non-empty `clientSections`, that list is used instead. Sections already on a page stay
 visible and editable whatever the list says. A Sanity array's `of` can't vary by user, so
 `src/features/studio/components/section-insert-filter.tsx` wraps the page-builder input and hands only its
 "Add item" button a copy of the type list with the approved sections; it is registered once for the whole
@@ -2414,15 +2468,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Expect                              |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`, `studio-brand.json` (with `studio-brand.schema.json` kept as shipped), `src/assets/brand/client/`                                                                                                                                                                                                                                                                                                                               | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                                                                                                                 | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                                                                                                                        | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                                                                                                             | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url}.ts`, `src/config/studio-brand/**`, `src/assets/brand/currawong/**`, `src/features/studio/theme.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                                                                                     | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                                                                                        | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Expect                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `site.profile.ts` (what the site uses: client, tier, features, approved sections, help links), `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`, `studio-brand.json` (with `studio-brand.schema.json` kept as shipped), `src/assets/brand/client/`                                                                                                                                                                                                                                                            | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                                                                                                                                             | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                                                                                                                                         | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url,profile,define-site-profile}.ts`, `src/config/studio-brand/**`, `src/assets/brand/currawong/**`, `src/features/studio/theme.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                                                                                                                 | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                                                                                                                    | Take either side, regenerate        |
 
 Keep customizations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design
@@ -2441,6 +2495,8 @@ take the template's copy.
 ```json
 {
   "templateVersion": "1.2.0",
+  "tier": "content",
+  "enabled": { "blog": true, "forms": true, "pricing": false, "…": "…" },
   "features": {
     "forms": true,
     "newsletter": false,
@@ -2454,6 +2510,7 @@ take the template's copy.
 }
 ```
 
+- `tier` and `enabled` come from the site profile (`site.profile.ts`): what the site has switched on, for every feature in the profile.
 - `features` says whether each feature's environment is complete, using the checks the features themselves use (forms:
   Turnstile, Resend and the from address; newsletter: also a provider; pricing: `STRIPE_SECRET_KEY`; members: at least one
   sign-in provider; analytics: at least one provider; sentry: `SENTRY_DSN`). It never contains a key or any other env value.

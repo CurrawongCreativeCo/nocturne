@@ -1,7 +1,9 @@
 import type { Metadata, ResolvingMetadata } from 'next'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
+import { isFeatureEnabled } from '@/config/profile'
 import { getPostMetadata, getPostStaticParams } from '@/features/blog/api/get-posts'
 import { DraftPostView, PostView } from '@/features/blog/components/post-view'
 import { PUBLISHED } from '@/lib/sanity/live'
@@ -18,10 +20,12 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
+  if (!isFeatureEnabled('blog')) notFound()
   return getPostMetadata((await params).slug, await parent)
 }
 
 export default async function PostPage({ params }: Props) {
+  if (!isFeatureEnabled('blog')) notFound()
   const { isEnabled: isDraftMode } = await draftMode()
 
   if (isDraftMode) {

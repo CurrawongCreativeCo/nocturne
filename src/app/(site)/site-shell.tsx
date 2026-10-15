@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import { MotionProvider } from '@/components/motion/motion-provider'
 import { RouteProgress } from '@/components/ui/route-progress'
 import { hasConsentProviders } from '@/config/analytics'
+import { isFeatureEnabled } from '@/config/profile'
 import { AnalyticsScripts } from '@/features/consent/components/analytics-scripts'
 import { CookieSettingsButton } from '@/features/consent/components/cookie-settings-button'
 import { DraftModeTools } from '@/features/draft-mode/components/draft-mode-tools'
@@ -41,7 +42,7 @@ export async function SiteShell({
   experiment?: ExperimentAttributes
 }) {
   const { isEnabled: isDraftMode } = await draftMode()
-  const search = <QuickSearch />
+  const search = isFeatureEnabled('search') ? <QuickSearch /> : undefined
   const cookieSettings = hasConsentProviders && (
     <CookieSettingsButton className="text-small text-ink-muted hover:text-ink" />
   )

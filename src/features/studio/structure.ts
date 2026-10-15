@@ -26,6 +26,7 @@ import type {
 
 import { currentAudience } from './roles'
 import { SINGLETON_TYPES } from './singletons'
+import { isTypeVisible } from './utils/feature-visibility'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
 import { CLIENT_WEBSITE_SETTINGS_IDS, filterStructureItems } from './utils/structure-access'
 // new-singleton:import
@@ -143,32 +144,40 @@ export const structure: StructureResolver = (S, context) => {
   const items: Item[] = [
     // new-singleton:list
     pagesTree(S, context),
-    group(S, 'blog', 'Blog', ComposeIcon, [
-      S.documentTypeListItem('post').title('Posts').icon(ComposeIcon),
-      S.documentTypeListItem('author').title('Authors').icon(UserIcon),
-      S.documentTypeListItem('category').title('Categories').icon(TagIcon),
-    ]),
+    ...(isTypeVisible('post')
+      ? [
+          group(S, 'blog', 'Blog', ComposeIcon, [
+            S.documentTypeListItem('post').title('Posts').icon(ComposeIcon),
+            S.documentTypeListItem('author').title('Authors').icon(UserIcon),
+            S.documentTypeListItem('category').title('Categories').icon(TagIcon),
+          ]),
+        ]
+      : []),
     singletonItem(S, 'businessInfo', 'Business info', HomeIcon),
     // new-document:list
     S.divider(),
     group(S, 'reusable', 'Reusable content', StackIcon, [
       S.documentTypeListItem('sharedSection').title('Shared sections'),
-      S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon),
+      ...(isTypeVisible('form')
+        ? [S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon)]
+        : []),
     ]),
     group(S, 'websiteSettings', 'Website settings', CogIcon, websiteSettings),
     ...(design.length > 0 ? [group(S, 'design', 'Design', ColorWheelIcon, design)] : []),
     S.divider(),
     group(S, 'advanced', 'Advanced', WrenchIcon, [
       S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
-      S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon),
-      ...(hasType('stripePrice')
+      ...(isTypeVisible('experiment')
+        ? [S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon)]
+        : []),
+      ...(hasType('stripePrice') && isTypeVisible('stripePrice')
         ? [S.documentTypeListItem('stripePrice').title('Stripe prices')]
         : []),
       S.divider(),
       // Everything else not explicitly listed above.
       ...S.documentTypeListItems().filter((item) => {
         const id = item.getId() ?? ''
-        return !LISTED_TYPES.has(id) && !SINGLETON_TYPES.has(id)
+        return !LISTED_TYPES.has(id) && !SINGLETON_TYPES.has(id) && isTypeVisible(id)
       }),
     ]),
   ]

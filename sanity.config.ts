@@ -50,6 +50,7 @@ import {
   filterDocumentActions,
   filterNewDocumentOptions,
 } from './src/features/studio/utils/document-access'
+import { hideDisabledFromNewMenu } from './src/features/studio/utils/feature-visibility'
 import { filterTools } from './src/features/studio/utils/tool-access'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
 // new-registry:import
@@ -111,7 +112,10 @@ export default defineConfig({
       context.creationContext.type === 'document'
         ? prev
         : filterNewDocumentOptions(
-            hidePricesFromNewMenu(hideSingletonsFromNewMenu(prev, context), context),
+            hidePricesFromNewMenu(
+              hideDisabledFromNewMenu(hideSingletonsFromNewMenu(prev, context), context),
+              context,
+            ),
             currentAudience(context.currentUser),
             CLIENT_NEW_DOCUMENT_IDS,
           ),

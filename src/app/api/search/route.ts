@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
+import { isFeatureEnabled } from '@/config/profile'
 import { searchPages } from '@/features/search/api/search-pages'
 import { parseQuery } from '@/features/search/utils/query'
 import { PUBLISHED } from '@/lib/sanity/live'
@@ -11,6 +12,7 @@ import { PUBLISHED } from '@/lib/sanity/live'
  * CDN absorb repeats too. Published content only: draft previews use the /search page.
  */
 export async function GET(request: NextRequest) {
+  if (!isFeatureEnabled('search')) return NextResponse.json({ results: [] }, { status: 404 })
   const parsed = parseQuery(request.nextUrl.searchParams.getAll('q'))
   if (!parsed.ok) return NextResponse.json({ results: [], reason: parsed.reason }, { status: 400 })
 

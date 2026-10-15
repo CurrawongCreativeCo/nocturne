@@ -26,10 +26,7 @@ export const DEFAULT_CLIENT_SECTIONS: readonly string[] = [
   'testimonials',
 ]
 
-/** Query for the site profile's allow-list (task 25). It resolves to null until that singleton exists. */
-export const CLIENT_SECTIONS_QUERY = '*[_id == "siteProfile"][0].clientSections'
-
-/** The profile's `clientSections` when it lists at least one section, else the default list. */
+/** The site profile's `clientSections` (site.profile.ts) when it lists at least one section, else the default list. */
 export function resolveClientSections(profileSections?: readonly unknown[] | null): Set<string> {
   const fromProfile = (profileSections ?? []).filter(
     (name): name is string => typeof name === 'string' && name.length > 0,
