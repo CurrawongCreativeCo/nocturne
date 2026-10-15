@@ -1203,6 +1203,30 @@ colour classes. `CtaLink` has the shared press feedback: one `--duration-fast` t
 `after:absolute after:inset-0`, see `PostCard`), so the whole card is clickable with one link in the accessibility tree.
 `tests/e2e/cursors.spec.ts` checks the computed cursor on a sample of controls.
 
+### Navigation feedback
+
+A thin accent-coloured bar (`RouteProgress`, `src/components/ui/route-progress.tsx`, mounted once in
+`site-shell.tsx`, so never in Studio) shows only when a client-side navigation takes longer than 150 ms. Pages are
+prerendered and prefetched, so most navigations are instant and show nothing. It replaces `nextjs-toploader`, which
+brings two dependencies and patches clicks and history globally for something Next.js exposes natively.
+
+- **Start:** `src/instrumentation-client.ts` exports `onRouterTransitionStart`, which dispatches a
+  `currawong:navigation-start` event on `window`. Hash links and links to the page you are already on are ignored.
+- **Finish:** `usePathname()` or `useSearchParams()` changing. A 10 s safety timeout hides the bar if Next.js never
+  reports a finish. A new navigation restarts the timers, and keeps a visible bar up rather than flashing it away.
+- **Look:** a 3 px bar below the top safe-area inset, coloured with `--color-accent` (`.route-progress` in
+  `globals.css`). It eases toward 85% with a CSS `transform` transition (no JavaScript animation loop), then
+  completes and fades. Under reduced motion it appears at full width and disappears, with nothing growing. It is
+  `aria-hidden` and announces nothing.
+- **Logic:** the timing is a pure reducer in `route-progress-state.ts`, with unit tests.
+  `tests/e2e/route-progress.spec.ts` checks that prerendered navigations never show it and that a navigation
+  delayed with `page.route()` does, then hides it.
+
+There is deliberately no `loading.tsx` for `/search`. A `loading.tsx` wraps the page in `<Suspense>`, and streamed
+content is hidden until a script reveals it, which would leave the results blank without JavaScript (see the note in
+`app/(site)/search/page.tsx`). Add one only to a dynamic route whose slow content can't be served inline, and never
+to a prerendered route.
+
 ### Section style
 
 Every page-builder section carries one shared `style` object (type `sectionStyle`,

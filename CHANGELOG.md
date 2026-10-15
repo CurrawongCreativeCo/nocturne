@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- **Navigation feedback:** a thin accent progress bar (`RouteProgress`, under 1 KB gzipped, no new dependency) for
+  client-side navigations that take longer than 150 ms; instant navigations show nothing. Started by
+  `onRouterTransitionStart` in `instrumentation-client.ts`, finished by a pathname or query change, with a 10 s safety
+  timeout. It never animates under reduced motion. Timing logic is a unit-tested reducer; end-to-end tests cover
+  fast, slow and reduced-motion navigations. See the README's "Navigation feedback".
+
 - **Browser icon (favicon):** every site now shows Currawong's icon by default (`src/app/icon.png` 512 × 512 and
   `src/app/apple-icon.png` 180 × 180, made from the brand mark by `scripts/make-default-icons.mjs`), replacing the
   purple placeholder `icon.svg` and the generated `apple-icon.tsx`. A new _Browser icon_ setting in Site settings
