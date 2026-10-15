@@ -956,6 +956,36 @@ const edgePair = (id, upper, below) => [
   styled(`edge-${id}--below`, edgeText(`edge-${id}--below`, 'Below the edge'), below),
 ]
 
+/** Four figures that exercise the number format: grouping, decimals, a prefix and a suffix. */
+const statItems = (key) => [
+  {
+    _key: `${key}-projects`,
+    _type: 'statItem',
+    value: 12500,
+    decimals: 0,
+    suffix: '+',
+    label: 'Projects delivered',
+  },
+  {
+    _key: `${key}-rating`,
+    _type: 'statItem',
+    value: 4.9,
+    decimals: 1,
+    suffix: '/5',
+    label: 'Average rating',
+  },
+  {
+    _key: `${key}-revenue`,
+    _type: 'statItem',
+    value: 1.2,
+    decimals: 1,
+    prefix: '$',
+    suffix: 'm',
+    label: 'Raised for clients',
+  },
+  { _key: `${key}-years`, _type: 'statItem', value: 12, label: 'Years in business' },
+]
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -1220,6 +1250,31 @@ const gallerySections = [
     { tone: 'inverse', edge: 'wave', edgeHeight: 'small', spacing: 'spacious' },
     { tone: 'alt', spacing: 'compact' },
   ),
+  // Stats (README, "Statistics"): both layouts with the default three figures and the formatting
+  // options (grouping, decimals, prefix, suffix), then a dark six-figure grid with animation off.
+  {
+    _key: 'stats-inline',
+    _type: 'stats',
+    variant: 'inline',
+    title: 'Numbers we are proud of',
+    intro: 'A few figures from the last twelve years.',
+    items: statItems('stats-inline'),
+  },
+  {
+    _key: 'stats-cards',
+    _type: 'stats',
+    variant: 'cards',
+    title: 'Results that speak for themselves',
+    items: statItems('stats-cards'),
+  },
+  {
+    _key: 'stats-cards-six',
+    _type: 'stats',
+    variant: 'cards',
+    style: { _type: 'sectionStyle', tone: 'inverse', motion: 'none' },
+    title: 'Six figures, no animation',
+    items: [...statItems('stats-cards-six'), ...statItems('stats-cards-six-more')].slice(0, 6),
+  },
   // new-section:gallery
 ]
 
@@ -1230,6 +1285,69 @@ const gallerySections = [
 export const galleryIds = gallerySections
   .map((section) => section._key)
   .filter((id) => !id.endsWith('--below'))
+
+/**
+ * Statistics on a real page (tests/e2e/stats.spec.ts): a hero first, then a Stats section that counts
+ * up (Reveal) and one with Animation None, each below the fold. Their figures are distinct and
+ * formatted, so the HTML can be checked for them.
+ */
+documents.push({
+  _id: 'page-stats',
+  _type: 'page',
+  title: 'Statistics',
+  slug: { _type: 'slug', current: 'stats' },
+  seo: { _type: 'seo', metaDescription: 'A page with animated statistics.' },
+  pageBuilder: [
+    { _key: 'stats-hero', _type: 'hero', title: 'Statistics', description: 'Hero description.' },
+    {
+      _key: 'stats-filler',
+      _type: 'richText',
+      body: [
+        block(['Filler'], { style: 'h2' }),
+        block(['A paragraph of copy so the figures start below the fold. '.repeat(30)]),
+      ],
+    },
+    {
+      _key: 'stats-animated',
+      _type: 'stats',
+      title: 'Animated figures',
+      style: { _type: 'sectionStyle', motion: 'reveal' },
+      items: [
+        { _key: 'a-big', _type: 'statItem', value: 12500, suffix: '+', label: 'Counted up' },
+        { _key: 'a-rate', _type: 'statItem', value: 4.9, decimals: 1, label: 'With a decimal' },
+        {
+          _key: 'a-money',
+          _type: 'statItem',
+          value: 1.2,
+          decimals: 1,
+          prefix: '$',
+          suffix: 'm',
+          label: 'With a symbol',
+        },
+      ],
+    },
+    {
+      _key: 'stats-filler-2',
+      _type: 'richText',
+      body: [
+        block(['More filler'], { style: 'h2' }),
+        block(['A paragraph of copy so the next figures start below the fold. '.repeat(30)]),
+      ],
+    },
+    {
+      _key: 'stats-still',
+      _type: 'stats',
+      variant: 'cards',
+      title: 'Still figures',
+      style: { _type: 'sectionStyle', motion: 'none' },
+      items: [
+        { _key: 's-big', _type: 'statItem', value: 98000, label: 'Never animated' },
+        { _key: 's-two', _type: 'statItem', value: 7, label: 'Plain text' },
+      ],
+    },
+  ],
+  _updatedAt: UPDATED,
+})
 
 /**
  * Highlighted heading words (tests/e2e/heading-text.spec.ts): the hero's `heading` wins over a stale

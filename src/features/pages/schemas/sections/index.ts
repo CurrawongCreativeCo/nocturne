@@ -8,6 +8,7 @@ import { mediaText } from './media-text'
 import { newsletterSignup } from './newsletter-signup'
 import { pricingTable } from './pricing-table'
 import { richText } from './rich-text'
+import { stats } from './stats'
 import { testimonials } from './testimonials'
 // new-section:import
 
@@ -36,5 +37,6 @@ export const sectionTypes = [
   formSection,
   pricingTable,
   newsletterSignup,
+  stats,
   // new-section:register
 ]

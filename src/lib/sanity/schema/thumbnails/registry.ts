@@ -31,6 +31,7 @@ import {
   HeroSplitLeftThumbnail,
   HeroSplitThumbnail,
 } from './hero-thumbnails'
+import { StatsCardsThumbnail, StatsInlineThumbnail } from './stats-thumbnails'
 import {
   ToneAccentThumbnail,
   ToneAltThumbnail,
@@ -53,6 +54,10 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
     split: HeroSplitThumbnail,
     editorial: HeroEditorialThumbnail,
     'full-bleed': HeroFullBleedThumbnail,
+  },
+  stats: {
+    inline: StatsInlineThumbnail,
+    cards: StatsCardsThumbnail,
   },
 }
 

@@ -31,6 +31,7 @@ function variantOf(section: PageSection): string | undefined {
     case 'featuresGrid':
       return 'columns' in section ? `${section.columns} columns` : undefined
     case 'hero':
+    case 'stats':
       return 'variant' in section ? stegaClean(section.variant) : undefined
     case 'mediaText':
       if (!('imagePosition' in section)) return undefined
