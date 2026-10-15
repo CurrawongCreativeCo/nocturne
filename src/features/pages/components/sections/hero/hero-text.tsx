@@ -40,7 +40,9 @@ export function HeroText({
   return (
     <>
       {eyebrow && (
-        <p className="text-small font-semibold tracking-wide text-accent uppercase">{eyebrow}</p>
+        <p className="text-small font-semibold tracking-wide text-accent-text uppercase">
+          {eyebrow}
+        </p>
       )}
       {/* `heading` first; `title` is the old plain string, still read until the content migration has run. */}
       <RichHeading

@@ -28,6 +28,13 @@ export const requiredColors = [
   'ink-inverse-muted',
   'accent',
   'accent-ink',
+  'accent-text',
+  'accent-2',
+  'accent-2-ink',
+  'highlight',
+  'highlight-ink',
+  'cta',
+  'cta-ink',
   'line',
   'line-strong',
   'focus',
@@ -183,11 +190,13 @@ export function parseBezier(value) {
 /**
  * Section tones (SectionFrame, README "Section style"): a `data-tone` element recolours everything
  * inside it by redefining the colour variables the utilities read. They only reference other tokens,
- * so editing tokens.json re-skins the tones too. `--tone-accent` keeps the real accent at :root, since
- * a tone can't read the variable it is redefining. Dark tones switch the focus outline to the light ink.
+ * so editing tokens.json (or the Studio's Design settings, which override the same variables at :root)
+ * re-skins the tones too. `--tone-accent` and `--tone-accent-ink` keep the real accent pair at :root, since
+ * a tone can't read the variable it is redefining. Dark tones switch the focus outline to a contrasting ink.
  */
 const toneCss = `:root {
   --tone-accent: var(--color-accent);
+  --tone-accent-ink: var(--color-accent-ink);
 }
 
 @layer base {
@@ -203,6 +212,7 @@ const toneCss = `:root {
     --color-line: color-mix(in oklab, var(--color-ink-inverse) 20%, transparent);
     --color-line-strong: var(--color-ink-inverse-muted);
     --color-accent: color-mix(in oklab, var(--tone-accent) 55%, var(--color-ink-inverse));
+    --color-accent-text: var(--color-accent);
     --color-focus: var(--color-ink-inverse);
     background-color: var(--color-surface);
     color: var(--color-ink);
@@ -210,14 +220,15 @@ const toneCss = `:root {
 
   [data-tone='accent'] {
     --color-surface: var(--tone-accent);
-    --color-surface-alt: color-mix(in oklab, var(--color-accent-ink) 12%, var(--tone-accent));
-    --color-ink: var(--color-accent-ink);
-    --color-ink-muted: var(--color-accent-ink);
-    --color-line: color-mix(in oklab, var(--color-accent-ink) 35%, transparent);
-    --color-line-strong: var(--color-accent-ink);
-    --color-accent: var(--color-accent-ink);
+    --color-surface-alt: color-mix(in oklab, var(--tone-accent-ink) 12%, var(--tone-accent));
+    --color-ink: var(--tone-accent-ink);
+    --color-ink-muted: var(--tone-accent-ink);
+    --color-line: color-mix(in oklab, var(--tone-accent-ink) 35%, transparent);
+    --color-line-strong: var(--tone-accent-ink);
+    --color-accent: var(--tone-accent-ink);
+    --color-accent-text: var(--tone-accent-ink);
     --color-accent-ink: var(--tone-accent);
-    --color-focus: var(--color-ink-inverse);
+    --color-focus: var(--tone-accent-ink);
     background-color: var(--color-surface);
     color: var(--color-ink);
   }

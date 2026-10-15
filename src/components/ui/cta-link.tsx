@@ -5,6 +5,8 @@ import type { CtaData } from '@/types/sanity'
 
 /**
  * Button styles per background: `dark` for hero/dark banners, `light` for surface or surface-alt sections.
+ * The light primary button uses the `cta` colour: near-black by default, the Primary brand colour once
+ * the Studio's Design settings set one.
  * Dark surfaces also switch the focus ring to the inverse ink so it stays visible.
  */
 const variants = {
@@ -15,8 +17,7 @@ const variants = {
       'ring-1 ring-inset ring-ink-inverse/40 text-ink-inverse hover:bg-ink-inverse/10 active:bg-ink-inverse/20 focus-visible:outline-ink-inverse',
   },
   light: {
-    primary:
-      'bg-surface-inverse text-ink-inverse hover:bg-surface-inverse/85 active:bg-surface-inverse/70',
+    primary: 'bg-cta text-cta-ink hover:bg-cta/85 active:bg-cta/70',
     secondary: 'ring-1 ring-inset ring-line text-ink hover:bg-surface-alt active:bg-line',
   },
 } as const

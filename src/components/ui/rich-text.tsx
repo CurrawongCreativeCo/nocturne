@@ -33,7 +33,7 @@ const components: PortableTextComponents = {
     link: ({ value, children }) => (
       <SanityLink
         link={value as LinkData}
-        className="font-medium text-accent underline underline-offset-2"
+        className="font-medium text-accent-text underline underline-offset-2"
       >
         {children}
       </SanityLink>

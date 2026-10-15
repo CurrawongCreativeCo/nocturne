@@ -10,6 +10,13 @@
   --color-ink-inverse-muted: oklch(0.872 0.01 258.338);
   --color-accent: oklch(0.55 0.2 264);
   --color-accent-ink: oklch(0.99 0 0);
+  --color-accent-text: oklch(0.55 0.2 264);
+  --color-accent-2: oklch(0.5 0.085 195);
+  --color-accent-2-ink: oklch(0.99 0 0);
+  --color-highlight: oklch(0.88 0.17 95);
+  --color-highlight-ink: oklch(0.13 0.028 261.692);
+  --color-cta: oklch(0.13 0.028 261.692);
+  --color-cta-ink: oklch(1 0 0);
   --color-line: oklch(0.928 0.006 264.531);
   --color-line-strong: oklch(0.551 0.027 264.364);
   --color-focus: oklch(0.13 0.028 261.692);
@@ -91,6 +98,7 @@
 
 :root {
   --tone-accent: var(--color-accent);
+  --tone-accent-ink: var(--color-accent-ink);
 }
 
 @layer base {
@@ -106,6 +114,7 @@
     --color-line: color-mix(in oklab, var(--color-ink-inverse) 20%, transparent);
     --color-line-strong: var(--color-ink-inverse-muted);
     --color-accent: color-mix(in oklab, var(--tone-accent) 55%, var(--color-ink-inverse));
+    --color-accent-text: var(--color-accent);
     --color-focus: var(--color-ink-inverse);
     background-color: var(--color-surface);
     color: var(--color-ink);
@@ -113,14 +122,15 @@
 
   [data-tone='accent'] {
     --color-surface: var(--tone-accent);
-    --color-surface-alt: color-mix(in oklab, var(--color-accent-ink) 12%, var(--tone-accent));
-    --color-ink: var(--color-accent-ink);
-    --color-ink-muted: var(--color-accent-ink);
-    --color-line: color-mix(in oklab, var(--color-accent-ink) 35%, transparent);
-    --color-line-strong: var(--color-accent-ink);
-    --color-accent: var(--color-accent-ink);
+    --color-surface-alt: color-mix(in oklab, var(--tone-accent-ink) 12%, var(--tone-accent));
+    --color-ink: var(--tone-accent-ink);
+    --color-ink-muted: var(--tone-accent-ink);
+    --color-line: color-mix(in oklab, var(--tone-accent-ink) 35%, transparent);
+    --color-line-strong: var(--tone-accent-ink);
+    --color-accent: var(--tone-accent-ink);
+    --color-accent-text: var(--tone-accent-ink);
     --color-accent-ink: var(--tone-accent);
-    --color-focus: var(--color-ink-inverse);
+    --color-focus: var(--tone-accent-ink);
     background-color: var(--color-surface);
     color: var(--color-ink);
   }

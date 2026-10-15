@@ -37,7 +37,9 @@ export function MediaText({ data, isFirst }: SectionProps<'mediaText'>) {
     >
       <div className={text}>
         {eyebrow && (
-          <p className="text-small font-semibold tracking-wide text-accent uppercase">{eyebrow}</p>
+          <p className="text-small font-semibold tracking-wide text-accent-text uppercase">
+            {eyebrow}
+          </p>
         )}
         <h2 className="mt-2 text-h2 font-semibold text-balance">{title}</h2>
         <RichText value={body} className="mt-4 text-lead text-ink-muted" />

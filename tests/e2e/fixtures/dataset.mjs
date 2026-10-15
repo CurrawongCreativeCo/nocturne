@@ -702,6 +702,34 @@ export const documents = [
 ].map((doc) => ({ ...doc, _updatedAt: UPDATED }))
 
 /**
+ * Brand colours the fake Content Lake can serve as the `designSettings` singleton while it runs
+ * (tests/e2e/design-settings.spec.ts). The fixture has none, so the default design is tokens.json's.
+ * `light` is a sample palette with a deep green Primary; `dark` adds the dark appearance.
+ */
+export const SAMPLE_PRIMARY = '#0b6e4f'
+export const designSettingsVariants = {
+  light: {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    appearance: 'light',
+    primary: SAMPLE_PRIMARY,
+    secondary: '#e4572e',
+    highlight: '#ffd166',
+    gradients: [{ _key: 'g1', name: 'Forest dusk', angle: 135, stops: ['#0b6e4f', '#1b3a4b'] }],
+    _updatedAt: UPDATED,
+  },
+  dark: {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    appearance: 'dark',
+    primary: '#7ad9b4',
+    secondary: '#f2a07b',
+    highlight: '#ffd166',
+    _updatedAt: UPDATED,
+  },
+}
+
+/**
  * Field changes the fake Content Lake can apply to the published Identity & search document while it runs
  * (tests/e2e/ai-crawlers.spec.ts): the fixture above allows AI crawlers, this one switches them off.
  */

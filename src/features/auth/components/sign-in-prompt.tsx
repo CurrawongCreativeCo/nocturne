@@ -21,7 +21,7 @@ export function SignInPrompt({ callbackUrl, headingLevel }: Props) {
       <p className="mt-3 text-ink-muted">Sign in to see this content.</p>
       <Link
         href={signInPath(callbackUrl)}
-        className="mt-6 inline-flex items-center justify-center rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse transition-colors hover:bg-surface-inverse/85"
+        className="mt-6 inline-flex items-center justify-center rounded-button bg-cta px-6 py-3 text-small font-semibold text-cta-ink transition-colors hover:bg-cta/85"
       >
         Sign in
       </Link>

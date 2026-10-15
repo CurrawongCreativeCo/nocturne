@@ -9,6 +9,7 @@ import { getPage } from '@/features/pages/api/get-page'
 import { SectionRenderer } from '@/features/pages/components/section-renderer'
 import { sectionLabel } from '@/features/pages/utils/section-label'
 import { CheckoutButton } from '@/features/pricing/components/checkout-button'
+import { DesignStyle } from '@/features/site/components/design-style'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 export const metadata: Metadata = {
@@ -55,6 +56,8 @@ export default async function SectionGalleryPage() {
 
   return (
     <main>
+      {/* The public site gets this from SiteShell; the gallery shows the same Studio brand colours. */}
+      <DesignStyle {...PUBLISHED} />
       {sections.map((section) => (
         // The _key is the section's id: tests/e2e/visual.spec.ts names its baseline after it.
         <div key={section._key} data-gallery-section={section._key}>

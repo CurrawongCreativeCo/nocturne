@@ -61,6 +61,11 @@ export const resolve: PresentationPluginOptions['resolve'] = {
       tone: 'positive',
       locations: [{ title: 'Home', href: '/' }],
     }),
+    designSettings: defineLocations({
+      message: 'Colours and gradients used on every page',
+      tone: 'positive',
+      locations: [{ title: 'Home', href: '/' }],
+    }),
     post: defineLocations({
       select: { title: 'title', slug: 'slug.current' },
       resolve: (doc: { title?: string; slug?: string } | null) => ({

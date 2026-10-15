@@ -34,6 +34,18 @@ you start a release.
   thickness and offset and the highlight strength are the new optional `emphasis` tokens in `tokens.json`. The same type
   will follow for media + text, CTA banner and features grid titles. See the README's "Highlighting words in a heading".
 
+- **Brand colours and gradients (Studio):** a `designSettings` singleton under Design → Brand colours (agency only, UI
+  only) lets the agency set _Primary_, _Secondary_, _Highlight_ and a Light or Dark _Appearance_, with a collapsed
+  _Advanced_ area for the full palette and 2–3 stop gradients. A Studio colour input (`ColourInput`) gives a picker, a
+  hex field, AA pass or fail badges and "Suggest an accessible shade" (OKLCH lightness), and a mock-up previews the
+  palette. `resolveDesignTokens` (pure, unit-tested) turns the settings into `:root` CSS variable overrides for only the
+  roles that are set, derives text on Primary, accent text, hover colours, tints and the dark swap, adjusts derived text
+  to AA and reports warnings that Studio validation shows. It is folded into `SETTINGS_QUERY` (new `designSettings`
+  tag; add it to the webhook filter), rendered by `SiteShell` as one server `<style>` (nothing when unset, so the
+  default is exactly `tokens.json`), and the share image uses the resolved accent. New tokens: `accent-text`,
+  `accent-2`, `accent-2-ink`, `highlight`, `highlight-ink`, `cta`, `cta-ink`. New `design` and `design-visual` e2e
+  projects. See the README's "Colour systems".
+
 - **Preset picker thumbnails (Studio):** one visual language of small theme-aware SVG wireframes (4:3, readable at
   160 px) in `src/lib/sanity/schema/thumbnails/`, with a registry keyed by the values stored in
   content: the four hero layouts, the four animations (gently looping, still under reduced motion) and live tone
@@ -124,6 +136,12 @@ you start a release.
   shape in one request, so components are unchanged. The webhook filter, cache tags (`TAGS`), Presentation locations,
   Content health, the SEO preview and the seed content follow.
 
+- **Tones and buttons read the new colour roles:** primary buttons (`CtaLink` and the form, search and sign-in buttons)
+  use `bg-cta text-cta-ink` and accent-coloured text uses `text-accent-text`; both default to the values they had
+  (`surface-inverse`/`ink-inverse` and `accent`), so the site looks the same. The accent tone now takes its text and focus
+  outline from `--tone-accent-ink` (the old rule resolved `--color-ink` to the accent itself, so text matched the
+  background).
+
 ### Fixed
 
 ### Breaking changes / migration steps
@@ -135,6 +153,13 @@ in the README's "Highlighting words in a heading"); it is safe to repeat and kee
 later release. Run `npm run typegen` after merging. `tokens.json` gains an optional `emphasis` group (a file without it
 gets the defaults), so run `npm run tokens`. Visual baselines gain the `hero-heading-*` gallery entries: refresh them
 with the "Update visual baselines" workflow.
+
+**Brand colours:** run `npm run typegen` after merging (`designSettings` is new in `SETTINGS_QUERY`), add
+`designSettings` to the webhook filter's `_type` list (README, "Live mode vs. webhook mode") so a colour change
+publishes without a redeploy, and refresh the visual baselines with the "Update visual baselines" workflow (the accent
+tone's text is now correct, and the new `design-visual` screenshots need first baselines). A project with its own
+primary buttons can switch them to `bg-cta text-cta-ink` to follow the Primary colour; a project that edited
+`tokens.json` must add the seven new colour tokens (`npm run tokens` lists them).
 
 **Browser icon:** `src/app/icon.svg` and `src/app/apple-icon.tsx` are deleted and `icon.png` and `apple-icon.png` added. A
 project that replaced them with its own logo keeps its files (delete the template's PNGs, or keep the old `icon.svg`:

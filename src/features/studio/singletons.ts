@@ -9,6 +9,7 @@ export const SINGLETON_TYPES = new Set([
   'siteNavigation',
   'announcement',
   'cookieBanner',
+  'designSettings',
   // new-singleton:register
 ])
 
