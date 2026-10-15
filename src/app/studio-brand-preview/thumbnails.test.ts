@@ -5,9 +5,13 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { sectionTypes } from '@/features/pages/schemas/sections'
+import { hero } from '@/features/pages/schemas/sections/hero'
 import { sectionStyle } from '@/lib/sanity/schema/section-style'
 import {
   animationThumbnails,
+  heroImageShapeThumbnails,
+  heroPresetThumbnails,
+  heroProportionThumbnails,
   sectionVariantThumbnails,
   toneThumbnails,
   type Thumbnail,
@@ -76,6 +80,26 @@ describe('thumbnails cover every option', () => {
     }
   })
 
+  it('shows in the hero the very thumbnails the registry lists, for presets, proportions and shapes', () => {
+    const presets = (hero.options as { presets?: { value: string; thumbnail?: unknown }[] }).presets
+    expect(Object.keys(heroPresetThumbnails)).toEqual(presets?.map((preset) => preset.value))
+    for (const preset of presets ?? []) {
+      expect(preset.thumbnail, `preset "${preset.value}"`).toBe(heroPresetThumbnails[preset.value])
+    }
+    expect(Object.keys(listOf(hero.fields, 'proportion'))).toEqual(
+      Object.keys(heroProportionThumbnails),
+    )
+    expect(Object.keys(listOf(hero.fields, 'imageShape'))).toEqual(
+      Object.keys(heroImageShapeThumbnails),
+    )
+    for (const [value, thumbnail] of Object.entries(heroProportionThumbnails)) {
+      expect(listOf(hero.fields, 'proportion')[value], `proportion "${value}"`).toBe(thumbnail)
+    }
+    for (const [value, thumbnail] of Object.entries(heroImageShapeThumbnails)) {
+      expect(listOf(hero.fields, 'imageShape')[value], `shape "${value}"`).toBe(thumbnail)
+    }
+  })
+
   it('has an animation thumbnail for every animation preset', () => {
     expect(Object.keys(animationThumbnails).sort()).toEqual([...SECTION_MOTIONS].sort())
   })
@@ -86,6 +110,18 @@ describe('thumbnails cover every option', () => {
 })
 
 const everything: [string, Thumbnail][] = [
+  ...(
+    [
+      ['hero-preset', heroPresetThumbnails],
+      ['hero-proportion', heroProportionThumbnails],
+      ['hero-shape', heroImageShapeThumbnails],
+    ] as const
+  ).flatMap(([group, thumbnails]) =>
+    Object.entries(thumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [
+      `${group}.${value}`,
+      Thumbnail,
+    ]),
+  ),
   ...Object.entries(sectionVariantThumbnails).flatMap(([type, variants]) =>
     Object.entries(variants).map(([value, Thumbnail]): [string, Thumbnail] => [
       `${type}.${value}`,

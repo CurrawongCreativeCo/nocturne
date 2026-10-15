@@ -1,4 +1,5 @@
 import { SanityImage } from '@/components/ui/sanity-image'
+import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 import type { SanityImageData } from '@/types/sanity'
 
 import { LazyParallax } from './parallax-lazy'
@@ -44,6 +45,7 @@ export function ParallaxImage({
             preload={preload}
             sizes={sizes}
             className={className}
+            style={{ objectPosition: hotspotObjectPosition(image) }}
           />
         </div>
       </LazyParallax>

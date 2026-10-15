@@ -20,6 +20,18 @@ you start a release.
 
 ### Added
 
+- **Hero presets (Studio and site):** a hero is chosen as a design. The Content tab opens with six pictures (_Full
+  background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with
+  panel_), each setting the layout, image side and background in one click, with _Full background image_ (dark) the
+  default. The four layouts and their stored values are unchanged, so no migration is needed; the old Layout picker is
+  hidden and the labels are now _Full background_ and _Image with panel_. _Split_ gains two agency-only options in the
+  Design tab's Advanced area: _Proportion_ (50 / 50, 60 / 40 text, 40 / 60 image) and _Image shape_ (Rounded, Square
+  corners, Circle, Arch). Hero pictures keep the editor's hotspot in view through `object-position`
+  (`src/lib/sanity/image-focus.ts`). Layout audit fixes: _Split_'s picture is capped at 24 rem tall on tablets, and
+  _Image with panel_ without a picture no longer leaves a tall empty block. The preset bar is hidden from clients and
+  reads a section's own initial values when matching, so older heroes without a style show the right preset. New
+  gallery entries and end-to-end tests cover every preset and shape; background video comes with task 18. See the
+  README, _Hero presets_.
 - **Highlighted heading words (Studio and site):** editors select words in a hero title and pick how they stand out:
   _Brand colour_, _Gradient_, _Highlight colour_ or _Underline_. A new shared type `headingText`
   (`src/lib/sanity/schema/heading-text.ts`) is a Portable Text array of one plain block whose only formatting is an

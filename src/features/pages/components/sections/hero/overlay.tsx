@@ -2,6 +2,7 @@ import { ParallaxImage } from '@/components/motion/parallax-image'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
 import { HeroText } from './hero-text'
 import type { SectionProps } from '../../../types'
@@ -42,6 +43,7 @@ export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'h
             preload={isFirst}
             sizes="100vw"
             className="-z-10 object-cover opacity-40"
+            style={{ objectPosition: hotspotObjectPosition(data.backgroundImage) }}
           />
         )
       }

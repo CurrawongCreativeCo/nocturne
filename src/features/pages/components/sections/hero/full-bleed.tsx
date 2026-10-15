@@ -2,6 +2,7 @@ import { ParallaxImage } from '@/components/motion/parallax-image'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
 import { HeroText } from './hero-text'
 import type { SectionProps } from '../../../types'
@@ -19,13 +20,15 @@ const DEFAULTS: SectionDefaults = {
  */
 export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
   const { tone, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
+  // Without a picture there is nothing to be tall for: the panel's text sets the height.
+  const hasImage = Boolean(data.backgroundImage?.asset)
 
   return (
     <SectionFrame
       style={data.style}
       defaults={DEFAULTS}
       isFirst={isFirst}
-      className="flex min-h-[28rem] items-end overflow-hidden lg:min-h-[40rem]"
+      className={`flex items-end overflow-hidden ${hasImage ? 'min-h-[28rem] lg:min-h-[40rem]' : ''}`}
       background={
         motion === 'parallax' ? (
           <ParallaxImage
@@ -42,6 +45,7 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
             preload={isFirst}
             sizes="100vw"
             className="-z-10 object-cover"
+            style={{ objectPosition: hotspotObjectPosition(data.backgroundImage) }}
           />
         )
       }

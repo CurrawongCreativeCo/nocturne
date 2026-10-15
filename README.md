@@ -87,11 +87,11 @@ Open http://localhost:3000/studio:
 - **Search:** visitors search from the magnifier in the header (or Ctrl/Cmd+K) for a quick list, or at `/search?q=…` for the full results page. It looks through page titles, meta descriptions and the text of _Rich text_ and _Image + text_ sections, matching the start of each word ("web des" finds "Web design"), with title matches first and up to 20 results, each with a short excerpt. Pages with _Hide from search engines_ ticked and members-only pages are left out, as is text inside members-only sections and other sections (hero, FAQ, features…) and shared sections. A query is 2–80 characters (longer is cut). New or edited pages appear within a few minutes (webhook mode: right after the webhook, which expires every cached search). `search` is reserved, so a page can't use it as its first slug segment.
 - **Members-only content:** a page has a _Who can see this page_ field and every section a _Who can see this_ field (_Everyone_ or _Members only (signed in)_; empty means everyone). A members-only page asks visitors to sign in and shows nothing else, is left out of the sitemap, `/llms.txt` and search, and tells search engines not to index it. A members-only section on a public page is replaced by a "Members only" sign-in prompt for visitors who aren't signed in; the rest of the page is unchanged. A shared section is members-only when the section inside it is. The page's title is replaced by "Members only" until the visitor signs in; its URL, and any menu entry an editor adds for it, are not hidden. In Presentation and draft previews editors see everything. Who counts as a member is set by the developer (see _Members-only content_ below). `sign-in` and `sign-out` are reserved first slug segments; link to `/sign-out` (a button link or a footer menu item with a custom URL) wherever members should find it.
 - **Section forms:** a section's form has three levels, so the common choices are pictures and the rare ones stay out of the way. Agency staff only: clients see just the **Content** tab (see _Studio roles and permissions_; this is the Studio view, not a lock).
-  - **Content tab.** The **Layout** picker comes first (sections with more than one layout, such as the hero), because the layout decides which fields matter. Then the content, showing only what the chosen layout uses: the hero's _Image side_ appears for _Split_ only, its _Small picture_ for _Editorial_ only, and _Image_ for every layout but _Editorial_. A field that is hidden keeps whatever was typed in it, so switching layout back brings it back.
+  - **Content tab.** The **Layout** picker comes first for sections with more than one layout, because the layout decides which fields matter. The hero is the exception: its picker is a row of six named presets (_Full background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with panel_; see _Hero presets_), which set the layout, the image side and the background together. Then the content, showing only what the chosen layout uses: the hero's _Image side_ appears for _Split_ only, its _Small picture_ for _Editorial_ only, and _Image_ for every layout but _Editorial_. A field that is hidden keeps whatever was typed in it, so switching layout back brings it back.
   - **Design tab.** _Background_ (_Surface_, _Soft_, _Dark_, _Accent_) is a row of swatches drawn with the site's real colours. _Animation_ (_None_, _Fade up_, _Staggered_, _Parallax_) is a picture picker; _Fade up_ plays once as the section scrolls into view, _Staggered_ shows its parts one after another, and _Parallax_ drifts a picture as the page scrolls. The first section on a page never fades or staggers, so its heading and main image appear immediately; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still.
-    - _Parallax_ is only offered where a section has a picture to move: the hero's _Overlay_ and _Full bleed_ layouts, and _Image + text_. If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
+    - _Parallax_ is only offered where a section has a picture to move: the hero's _Full background_ and _Image with panel_ layouts, and _Image + text_. If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
     - **More layout options** (collapsed): _Space above and below_ (_Compact_, _Default_ or _Spacious_; _Default_ is the section's usual spacing), _Content width_ (_Narrow_, _Default_, _Wide_, or _Full width_ edge to edge), _Alignment_ (_Start_ or _Centre_ for headings, intro text and buttons) and _Anchor_ (a short name such as `pricing`, so a link to `/#pricing` jumps to the section; lowercase letters, numbers and hyphens, each once per page). _Alignment_ is left out on layouts that set their own (the hero's _Split_ and _Editorial_); a value left over from another layout stays visible with a warning, and **Reset value** in the field's menu clears it.
-  - **Advanced** (collapsed, in the Design tab): extra controls for the few sections that have them. It does not appear when the chosen layout has none.
+  - **Advanced** (collapsed, in the Design tab): extra controls for the few sections that have them. It does not appear when the chosen layout has none. Today that is the hero's _Proportion_ and _Image shape_, for _Split_ only.
 
   Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Dark".
 
@@ -1503,6 +1503,8 @@ The stored value is the same string as a radio list, so existing content needs n
   set: { variant: 'split', imagePosition: 'left', 'style.tone': 'alt' } }
 ```
 
+The preset bar is agency-only, like the other design controls: clients, and the agency's client-view preview, get the plain form. A fresh section's initial values count as what an unset field holds, so a hero with no style (older content) shows as _Full background image_, the look it renders, not as whatever the shared style type would start with.
+
 A preset sets the values once, as ordinary patches relative to the section (parent objects such as `style` are created if missing), so undo, drafts and collaboration treat it like any edit. Every field stays editable. The bar shows the preset whose values all match now (a field that was never set counts as its `initialValue`), or **Custom** once any one differs.
 
 **What editors see.** Once something is chosen the picker collapses to one row (picture, title, description and a **Change** button) so long forms stay short. **Change** opens the cards; choosing one closes them again and returns focus to the button. The cards are a `radiogroup`: Tab reaches the chosen card (or the first), the arrow keys, Home and End move focus, and Enter or Space choose. It uses Sanity UI, so it follows the CMS brand theme in light and dark.
@@ -1516,11 +1518,12 @@ The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn 
 | Kind            | Files                                    | Shown for                                               |
 | --------------- | ---------------------------------------- | ------------------------------------------------------- |
 | Section layouts | `hero-thumbnails.tsx`                    | each section's `variant` (today the four hero layouts)  |
+| Hero presets    | `hero-thumbnails.tsx`                    | the six presets, and the Split proportions and shapes   |
 | Animations      | `animation-thumbnails.tsx`               | the Animation field: none, fade up, staggered, parallax |
 | Tones           | `tone-thumbnails.tsx`                    | the Tone field: live swatches, not pictures             |
 | Insert menu     | `public/section-previews/<typeName>.svg` | the "Add item" menu in the page builder (static files)  |
 
-`registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). Dividers and image shapes will add their own entries when those fields exist.
+`registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 
 - **Theme-aware.** The drawings use the Card colours Sanity UI sets from the Studio theme (`--card-fg-color` and friends), so they follow the CMS brand in light and dark and in a chosen card, with no stylesheet.
 - **Tones show the site, not the Studio.** The swatches read `src/config/tokens.generated.ts`, so a re-skinned site shows its real colours, in both Studio schemes.
@@ -1861,6 +1864,7 @@ look per use and every layout reads the same fields; use a new section when the 
   eyebrow, heading, intro and buttons: `hero-text.tsx`) is a helper in the folder. Every variant renders in a
   `SectionFrame` and styles with tokens only, and the first section's heading is the `<h1>` and its image is
   preloaded (`isFirst`). Keep the LCP element (the image or the heading) in the server-rendered HTML in each layout.
+- **The hero's picker** is the preset bar (see _Hero presets_), so its Layout field is hidden.
 - **Fields a variant needs.** Add them to the schema (hide them unless their variant is chosen, as `imagePosition`
   and `secondaryImage` are on the hero, and `backgroundImage` is for Editorial, which has no big picture), keep them in
   the Content tab, and say in the section's `rules` whether the variant has a picture (Parallax) or fixes its alignment and to the fragment, then run `npm run typegen`. The hero's `backgroundImage`
@@ -1885,6 +1889,69 @@ The generator inserts code at the `// new-section:*` marker comments; keep them 
 by hand, follow the same steps and register it in `schemas/sections/index.ts`, `pageBuilderFragment` and
 `components/section-renderer.tsx`. Until a section is registered in the renderer, `tsc` fails with
 "Property '<name>' is missing".
+
+### Hero presets
+
+Choosing a hero is choosing a design. A new hero is **Full background image**, dark, with nothing to configure. The
+bar at the top of its Content tab offers six pictures, each setting the layout, the image side and the background in
+one click (preset mode, see _Preset picker (Studio)_). Every field stays editable afterwards, and the bar shows
+_Custom_ once one no longer matches.
+
+| Preset                 | Layout (`variant`) | Also sets                      |
+| ---------------------- | ------------------ | ------------------------------ |
+| Full background image  | `overlay`          | Background _Dark_ (a new hero) |
+| Split, image right     | `split`            | _Image side_ right, _Surface_  |
+| Split, image left      | `split`            | _Image side_ left, _Surface_   |
+| Centred text, no image | `overlay`          | Background _Surface_           |
+| Editorial              | `editorial`        | _Surface_                      |
+| Image with panel       | `full-bleed`       | _Dark_                         |
+
+The four layouts are unchanged (the rule of four variants stands: `overlay`, `split`, `editorial`, `full-bleed`), and
+the stored values are the same, so no migration is needed. Only the names editors read changed: _Overlay_ is
+_Full background_ and _Full bleed_ is _Image with panel_ (in the Studio list too: "Hero · Full background · Dark").
+The old **Layout** picker is hidden, because the presets are the one picker. The presets are `HERO_PRESETS` in
+`src/features/pages/schemas/sections/hero.ts`, with thumbnails in `hero-thumbnails.tsx`.
+
+- **Centred text, no image** is _Full background_ on the page colour. A preset never clears a field, so nothing
+  is lost by trying one: leave _Image_ empty, or remove it, for text only. With a picture it is a faded picture
+  behind dark text.
+- **Split options** (Design tab → _Advanced_, shown only for _Split_; clients never see them). _Proportion_: _50 / 50_
+  (the default), _60 / 40 text_ or _40 / 60 image_. _Image shape_: _Rounded_ (the default), _Square corners_,
+  _Circle_ or _Arch_. The picture is cropped to the shape with CSS (`border-radius`), so there is no extra image. A circle is
+  always 1:1 and an arch is 4:5; rounded and square keep 4:3. The proportion applies from the `lg` breakpoint up and
+  follows _Image side_ (the wider column is the picture's or the text's whichever side it is on); below `lg` the text and
+  picture stack. Stored as `proportion` (`even`, `text`, `image`) and `imageShape` (`rounded`, `square`, `circle`,
+  `arch`); unset or unknown values render the default. The logic is in `src/features/pages/utils/hero-split.ts`.
+- **The hotspot is respected.** All four layouts set `object-position` from the picture's hotspot
+  (`src/lib/sanity/image-focus.ts`; the editor's crop is taken into account), so a face or a product stays in
+  view when the shape crops the picture. A picture with no hotspot stays centred.
+- **Background video** is not part of this. The ambient-video work (task 18) will add a video option to the
+  _Full background image_ preset; until then the preset is a still picture.
+- **Six decisions.** A split hero with an eyebrow, heading, description, two buttons and an image takes six
+  decisions, not counting typing: add the _Hero_ section, pick _Split, image right_, upload the image, then each
+  button's link, and the second button's style. Nothing else needs to be opened.
+
+**Layout audit** (375, 768, 1280 and 1920 px; each layout with and without eyebrow, description, no, one or two
+buttons, image and small picture, plus a long heading and description). Nothing overflowed sideways at any width. What it
+found, and what changed:
+
+- _Split_ on a tablet (768 px) drew its picture 696 × 540 px, taller than the text and most of the screen. Rounded and
+  square pictures now stop at 24 rem tall below `lg` (the picture is cropped wider, not distorted).
+- _Split_ cropped from the centre and ignored the editor's hotspot, so a face could be cut off. Fixed, as above.
+- _Image with panel_ with no image kept its 28 to 40 rem minimum height, leaving a tall empty block. It now takes the
+  height of its text, like the other layouts without a picture.
+- The Layout picker beside the new preset bar was a second way to choose the same thing. Hidden.
+
+Not changed, on purpose: _Split_ with no image sits in a narrower, centred column (its heading's left edge differs
+from the one with a picture), and _Editorial_'s small picture sits below the text on a phone, left aligned.
+
+The gallery has an entry for each preset that is not a layout of its own and for every Split option
+(`hero-centred-text`, `hero-split-text-wide`, `hero-split-image-wide-left`, `hero-split-square`, `hero-split-circle`,
+`hero-split-arch-left`, `hero-split-hotspot`), beside the existing layouts. `tests/e2e/hero-variants.spec.ts` runs axe on each, checks that the heading
+(and the picture, when there is one) is in the server HTML and not lazy, and measures the proportions, shapes and
+`object-position` in the browser. LCP for each preset used as the first section follows from that: the picture or the
+heading is server-rendered, never lazy, and the picture's frame has a fixed ratio so it causes no layout shift. A
+Lighthouse run per preset has not been done; `npm run test:lighthouse` still measures the home page.
 
 ## Adding a feature, document type or singleton
 

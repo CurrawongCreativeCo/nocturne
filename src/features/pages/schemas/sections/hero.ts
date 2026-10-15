@@ -1,17 +1,28 @@
 import { BlockContentIcon } from '@sanity/icons/BlockContent'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
+import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import {
+  HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
   HeroFullBleedThumbnail,
   HeroOverlayThumbnail,
+  HeroProportionEvenThumbnail,
+  HeroProportionImageThumbnail,
+  HeroProportionTextThumbnail,
+  HeroShapeArchThumbnail,
+  HeroShapeCircleThumbnail,
+  HeroShapeRoundedThumbnail,
+  HeroShapeSquareThumbnail,
+  HeroSplitLeftThumbnail,
   HeroSplitThumbnail,
 } from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
@@ -27,12 +38,13 @@ const LIMITS = {
 
 /**
  * One component per variant in components/sections/hero/. The first is the default: today's look,
- * and what content without a variant renders.
+ * and what content without a variant renders. The stored values are the layouts' original names; only
+ * the titles editors read changed (README, "Hero presets").
  */
 export const HERO_VARIANTS = [
   {
     value: 'overlay',
-    title: 'Overlay',
+    title: 'Full background',
     description: 'Centred text over a faded picture.',
     thumbnail: HeroOverlayThumbnail,
   },
@@ -50,20 +62,125 @@ export const HERO_VARIANTS = [
   },
   {
     value: 'full-bleed',
-    title: 'Full bleed',
-    description: 'Picture edge to edge, text at the bottom.',
+    title: 'Image with panel',
+    description: 'Picture edge to edge, text on a panel at the bottom.',
     thumbnail: HeroFullBleedThumbnail,
   },
 ] as const
 
-/** What each layout uses, so the form shows only what matters (the unset variant is the default, Overlay). */
+/**
+ * The picker at the top of the Content tab: each preset sets a layout and the options that go with it
+ * (image side, background) in one click. Six pictures, four layouts: Split has two, and "Centred text"
+ * is the Full background layout on a plain background. A preset never clears the image, so nothing is
+ * lost by trying one; leave the image empty for text only. The first is a new hero's look.
+ */
+export const HERO_PRESETS = [
+  {
+    value: 'full-background',
+    title: 'Full background image',
+    description: 'Centred text over a picture. Dark.',
+    thumbnail: HeroOverlayThumbnail,
+    set: { variant: 'overlay', 'style.tone': 'inverse' },
+  },
+  {
+    value: 'split-right',
+    title: 'Split, image right',
+    description: 'Text on the left, picture on the right.',
+    thumbnail: HeroSplitThumbnail,
+    set: { variant: 'split', imagePosition: 'right', 'style.tone': 'surface' },
+  },
+  {
+    value: 'split-left',
+    title: 'Split, image left',
+    description: 'Picture on the left, text on the right.',
+    thumbnail: HeroSplitLeftThumbnail,
+    set: { variant: 'split', imagePosition: 'left', 'style.tone': 'surface' },
+  },
+  {
+    value: 'centred-text',
+    title: 'Centred text, no image',
+    description: 'Heading and buttons on a plain background. Leave the image empty.',
+    thumbnail: HeroCentredTextThumbnail,
+    set: { variant: 'overlay', 'style.tone': 'surface' },
+  },
+  {
+    value: 'editorial',
+    title: 'Editorial',
+    description: 'Oversized heading with a small picture.',
+    thumbnail: HeroEditorialThumbnail,
+    set: { variant: 'editorial', 'style.tone': 'surface' },
+  },
+  {
+    value: 'image-with-panel',
+    title: 'Image with panel',
+    description: 'Picture edge to edge, text on a panel.',
+    thumbnail: HeroFullBleedThumbnail,
+    set: { variant: 'full-bleed', 'style.tone': 'inverse' },
+  },
+] as const
+
+/** Split only: how the width is shared (the first is the default, an even split). */
+const SPLIT_PROPORTION_OPTIONS = [
+  {
+    value: SPLIT_PROPORTIONS[0],
+    title: '50 / 50',
+    description: 'Text and picture share the width.',
+    thumbnail: HeroProportionEvenThumbnail,
+  },
+  {
+    value: SPLIT_PROPORTIONS[1],
+    title: '60 / 40 text',
+    description: 'More room for the words.',
+    thumbnail: HeroProportionTextThumbnail,
+  },
+  {
+    value: SPLIT_PROPORTIONS[2],
+    title: '40 / 60 image',
+    description: 'A bigger picture.',
+    thumbnail: HeroProportionImageThumbnail,
+  },
+] as const
+
+const SPLIT_IMAGE_SHAPE_OPTIONS = [
+  {
+    value: SPLIT_IMAGE_SHAPES[0],
+    title: 'Rounded',
+    description: 'Soft corners, 4:3.',
+    thumbnail: HeroShapeRoundedThumbnail,
+  },
+  {
+    value: SPLIT_IMAGE_SHAPES[1],
+    title: 'Square corners',
+    description: 'Sharp corners, 4:3.',
+    thumbnail: HeroShapeSquareThumbnail,
+  },
+  {
+    value: SPLIT_IMAGE_SHAPES[2],
+    title: 'Circle',
+    description: 'Always square, cut to a circle.',
+    thumbnail: HeroShapeCircleThumbnail,
+  },
+  {
+    value: SPLIT_IMAGE_SHAPES[3],
+    title: 'Arch',
+    description: 'A tall picture with a rounded top.',
+    thumbnail: HeroShapeArchThumbnail,
+  },
+] as const
+
+/** What each layout uses, so the form shows only what matters (the unset variant is the default, Full background). */
 const layoutOf = (section: { variant?: string }) => section.variant ?? HERO_VARIANTS[0].value
+
+/** The Design tab's Split options mean nothing on any other layout, so they are not offered there. */
+const notSplit = ({ parent }: { parent?: { variant?: string } }) => parent?.variant !== 'split'
 
 export const hero = defineType({
   name: 'hero',
   title: 'Hero',
   type: 'object',
   icon: BlockContentIcon,
+  // The preset bar above the form: the one place to choose a hero's design (README, "Hero presets").
+  options: presetsOption(HERO_PRESETS),
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
@@ -109,12 +226,12 @@ export const hero = defineType({
         of: [defineArrayMember({ type: 'cta' })],
         validation: (rule) => rule.max(2),
       }),
-      // Behind the text (Overlay, Full bleed) or beside it (Split). Cropped to fit, so any landscape
+      // Behind the text (Full background, Image with panel) or beside it (Split). Cropped to fit, so any landscape
       // picture works; width is what keeps it sharp.
       imageField({
         name: 'backgroundImage',
         title: 'Image',
-        description: 'Behind the text in Overlay and Full bleed, beside it in Split.',
+        description: 'Behind the text in Full background and Image with panel, beside it in Split.',
         // Editorial has its own small picture, below, and never draws this one.
         hidden: ({ parent }: { parent?: { variant?: string } }) => parent?.variant === 'editorial',
         requireAlt: false,
@@ -147,11 +264,33 @@ export const hero = defineType({
         initialValue: false,
       }),
       accessField,
-      variantField(HERO_VARIANTS),
+      // Set by the presets above the form; the stored value is the layout the section renders. Hidden
+      // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.
+      { ...variantField(HERO_VARIANTS), hidden: true },
     ],
-    // Alignment is left to the layout: Overlay centres, the others start.
+    // Alignment is left to the layout: Full background centres, the others start.
     { tone: 'inverse', spacing: 'spacious', motion: 'none' },
     {
+      // Split's own options, in the collapsed Advanced area of the Design tab: it disappears for the
+      // other layouts.
+      advanced: [
+        presetField({
+          name: 'proportion',
+          title: 'Proportion',
+          description: 'How the width is shared between the text and the picture on wide screens.',
+          options: SPLIT_PROPORTION_OPTIONS,
+          required: false,
+          hidden: notSplit,
+        }),
+        presetField({
+          name: 'imageShape',
+          title: 'Image shape',
+          description: 'The picture is cropped to fit; the hotspot you set on it stays in view.',
+          options: SPLIT_IMAGE_SHAPE_OPTIONS,
+          required: false,
+          hidden: notSplit,
+        }),
+      ],
       rules: {
         type: 'hero',
         // The pictures that sit behind the text are the ones Parallax moves.
