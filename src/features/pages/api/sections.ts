@@ -89,6 +89,7 @@ export const logoCloudFragment = /* groq */ `
 export const testimonialsFragment = /* groq */ `
   _type == "testimonials" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
+    variant,
     title,
     items[] {
       _key,

@@ -32,6 +32,7 @@ import {
   HeroSplitThumbnail,
 } from './hero-thumbnails'
 import { StatsCardsThumbnail, StatsInlineThumbnail } from './stats-thumbnails'
+import { TestimonialsGridThumbnail, TestimonialsSliderThumbnail } from './testimonials-thumbnails'
 import {
   ToneAccentThumbnail,
   ToneAltThumbnail,
@@ -58,6 +59,10 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
   stats: {
     inline: StatsInlineThumbnail,
     cards: StatsCardsThumbnail,
+  },
+  testimonials: {
+    grid: TestimonialsGridThumbnail,
+    slider: TestimonialsSliderThumbnail,
   },
 }
 

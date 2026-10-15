@@ -957,6 +957,17 @@ const edgePair = (id, upper, below) => [
 ]
 
 /** Four figures that exercise the number format: grouping, decimals, a prefix and a suffix. */
+/** Six distinct quotes (names Person 1 to 6), so a test can tell which slide is in view. */
+const sliderQuotes = (id) =>
+  Array.from({ length: 6 }, (_, n) => ({
+    _key: `${id}-${n + 1}`,
+    _type: 'testimonial',
+    quote: `Quote number ${n + 1} from a happy customer.`,
+    name: `Person ${n + 1}`,
+    role: 'CEO',
+    avatar: image(`${id}-${n + 1}`),
+  }))
+
 const statItems = (key) => [
   {
     _key: `${key}-projects`,
@@ -1336,6 +1347,24 @@ const gallerySections = [
     title: 'Six figures, no animation',
     items: [...statItems('stats-cards-six'), ...statItems('stats-cards-six-more')].slice(0, 6),
   },
+  // Testimonials slider (README, "Slider"): six quotes, so it has several stops at every width.
+  // The gallery has no MotionProvider, so it shows the layout only; tests/e2e/slider.spec.ts
+  // drives the real thing on the /slider page.
+  {
+    _key: 'testimonials-slider',
+    _type: 'testimonials',
+    variant: 'slider',
+    title: 'Kind words',
+    items: sliderQuotes('testimonials-slider'),
+  },
+  {
+    _key: 'testimonials-slider-inverse',
+    _type: 'testimonials',
+    variant: 'slider',
+    style: { _type: 'sectionStyle', tone: 'inverse' },
+    title: 'Kind words on dark',
+    items: sliderQuotes('testimonials-slider-inverse').slice(0, 4),
+  },
   ...heroSlotGallery,
   // new-section:gallery
 ]
@@ -1373,6 +1402,25 @@ documents.push({
       description: 'Hero description.',
       ctas: [cta('About us', internal('page-about'))],
       supporting: [slotItem('stats', 'hero-slot-page')],
+    },
+  ],
+})
+
+/** The testimonials slider on a real page (tests/e2e/slider.spec.ts): a MotionProvider, so it drags. */
+documents.push({
+  _id: 'page-slider',
+  _type: 'page',
+  title: 'Slider',
+  slug: { _type: 'slug', current: 'slider' },
+  seo: { _type: 'seo', metaDescription: 'A page with a testimonials slider.' },
+  pageBuilder: [
+    { _key: 'slider-hero', _type: 'hero', title: 'Slider', description: 'Hero description.' },
+    {
+      _key: 'slider-testimonials',
+      _type: 'testimonials',
+      variant: 'slider',
+      title: 'Kind words',
+      items: sliderQuotes('slider-page'),
     },
   ],
 })
