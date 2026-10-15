@@ -51,7 +51,7 @@ export function SearchForm({ defaultValue = '' }: { defaultValue?: string }) {
       />
       <button
         type="submit"
-        className="cursor-pointer rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
+        className="rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
       >
         Search
       </button>

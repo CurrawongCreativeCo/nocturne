@@ -28,7 +28,7 @@ export function CheckoutButton({ priceId, label, planName, highlighted }: Props)
       <button
         type="submit"
         disabled={pending}
-        className={`inline-flex w-full items-center justify-center rounded-button px-6 py-3 text-small font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${
+        className={`inline-flex w-full items-center justify-center rounded-button px-6 py-3 text-small font-semibold transition-colors ${
           highlighted
             ? 'bg-surface-inverse text-ink-inverse hover:bg-surface-inverse/85'
             : 'text-ink ring-1 ring-line ring-inset hover:bg-surface-alt'

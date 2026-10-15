@@ -118,7 +118,7 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={() => dialogRef.current?.close()}
-            className="cursor-pointer rounded-control px-3 py-1.5 text-small font-medium text-ink-muted hover:bg-surface-alt"
+            className="rounded-control px-3 py-1.5 text-small font-medium text-ink-muted hover:bg-surface-alt"
           >
             Close
           </button>
@@ -142,7 +142,7 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
           />
           <button
             type="submit"
-            className="cursor-pointer rounded-button bg-surface-inverse px-5 py-2.5 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
+            className="rounded-button bg-surface-inverse px-5 py-2.5 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
           >
             All results
           </button>

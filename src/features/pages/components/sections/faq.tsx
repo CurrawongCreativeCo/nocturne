@@ -39,7 +39,7 @@ export function Faq({ data, isFirst }: SectionProps<'faq'>) {
       <div className="divide-y divide-line border-y border-line">
         {items.map((item) => (
           <details key={item._key} className="group py-5">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lead font-medium [&::-webkit-details-marker]:hidden">
+            <summary className="flex list-none items-center justify-between gap-4 text-lead font-medium [&::-webkit-details-marker]:hidden">
               {item.question}
               <span
                 aria-hidden

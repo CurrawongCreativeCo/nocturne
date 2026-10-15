@@ -41,7 +41,7 @@ export async function SiteShell({
   const { isEnabled: isDraftMode } = await draftMode()
   const search = <QuickSearch />
   const cookieSettings = hasConsentProviders && (
-    <CookieSettingsButton className="cursor-pointer text-small text-ink-muted hover:text-ink" />
+    <CookieSettingsButton className="text-small text-ink-muted hover:text-ink" />
   )
 
   // MotionProvider wraps the public site only (Studio has its own root); SiteShell also serves /ab.

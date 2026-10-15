@@ -47,6 +47,11 @@ you start a release.
 
 ### Changed
 
+- **Cursors and feedback:** every interactive control now shows the right cursor from shared CSS (`globals.css`):
+  pointer for enabled controls, `not-allowed` for disabled ones. The per-component `cursor-pointer` classes are gone,
+  disabled controls use the muted tokens and ignore hover, and `CtaLink` has a short hover/active transition that is
+  switched off under reduced motion.
+
 - The sections' markup moved into `SectionFrame`: the `<section>` now wraps a content container `<div>`, and the
   Testimonials band, Hero and CTA banner take their colours from the tone mechanism (the banner's own tone now colours its
   card through `data-tone`). The plan badge in the pricing table uses `bg-ink text-surface`. An empty style renders as before.
