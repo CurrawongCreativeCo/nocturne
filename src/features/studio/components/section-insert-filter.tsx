@@ -1,20 +1,22 @@
-import { type ComponentType, useEffect, useMemo, useState } from 'react'
+import { type ComponentType, useMemo } from 'react'
 import {
   type ArrayInputFunctionsProps,
   type ArrayOfObjectsInputProps,
   type ArraySchemaType,
   type InputProps,
   isArrayOfObjectsInputProps,
-  useClient,
   useCurrentUser,
 } from 'sanity'
 
-import { apiVersion } from '@/config/env'
+import { siteProfile } from '@/config/profile'
 import { isClientView } from '@/lib/sanity/roles'
 
-import { CLIENT_SECTIONS_QUERY, filterInsertableTypes, resolveClientSections } from '../roles'
+import { filterInsertableTypes, resolveClientSections } from '../roles'
 
 type FunctionsProps = ArrayInputFunctionsProps<{ _key: string }, ArraySchemaType>
+
+/** The site profile's list (site.profile.ts), else the defaults. */
+const allowed = resolveClientSections(siteProfile.clientSections)
 
 /**
  * Array `of` is fixed in the schema and cannot vary per user, so the insert menu is filtered here:
@@ -23,26 +25,7 @@ type FunctionsProps = ArrayInputFunctionsProps<{ _key: string }, ArraySchemaType
  */
 function SectionInsertFilter(props: ArrayOfObjectsInputProps) {
   const user = useCurrentUser()
-  const client = useClient({ apiVersion })
   const restricted = isClientView(user)
-  const [profileSections, setProfileSections] = useState<readonly unknown[] | null>(null)
-
-  useEffect(() => {
-    if (!restricted) return
-    let cancelled = false
-    client
-      .fetch<string[] | null>(CLIENT_SECTIONS_QUERY)
-      .then((names) => {
-        if (!cancelled) setProfileSections(names)
-      })
-      // No profile document or no read access: the default list applies.
-      .catch(() => undefined)
-    return () => {
-      cancelled = true
-    }
-  }, [client, restricted])
-
-  const allowed = useMemo(() => resolveClientSections(profileSections), [profileSections])
   const DefaultFunctions = props.arrayFunctions as ComponentType<FunctionsProps>
   const FilteredFunctions = useMemo(
     () =>
@@ -54,7 +37,7 @@ function SectionInsertFilter(props: ArrayOfObjectsInputProps) {
         }) as ArraySchemaType
         return <DefaultFunctions {...functionsProps} schemaType={filtered} />
       },
-    [DefaultFunctions, allowed],
+    [DefaultFunctions],
   )
 
   return props.renderDefault({

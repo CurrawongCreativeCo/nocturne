@@ -1,5 +1,6 @@
 import { siteLanguage } from '@/config/env'
 import { FEED_PATH } from '@/config/paths'
+import { isFeatureEnabled } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
 import { getFeedItems } from '@/features/blog/api/get-posts'
 import { buildFeed } from '@/features/blog/utils/feed'
@@ -12,6 +13,7 @@ import { PUBLISHED } from '@/lib/sanity/live'
  * author or a category (or editing the site name) updates it, and it costs no extra request.
  */
 export async function GET() {
+  if (!isFeatureEnabled('blog')) return new Response('Not found', { status: 404 })
   const [items, settings] = await Promise.all([getFeedItems(), getSettings(PUBLISHED)])
   const title = settings?.title || 'Site'
 

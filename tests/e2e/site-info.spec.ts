@@ -8,6 +8,8 @@ test.skip(({ isMobile }) => isMobile, 'Desktop only')
 
 interface SiteInfo {
   templateVersion: string
+  tier: string
+  enabled: Record<string, boolean>
   features: Record<string, boolean>
   commit: string | null
   builtAt: string
@@ -24,8 +26,19 @@ test.describe('/api/site-info', () => {
     expect(response.headers()['content-type']).toContain('application/json')
 
     const body = (await response.json()) as SiteInfo
-    expect(Object.keys(body).sort()).toEqual(['builtAt', 'commit', 'features', 'templateVersion'])
+    expect(Object.keys(body).sort()).toEqual([
+      'builtAt',
+      'commit',
+      'enabled',
+      'features',
+      'templateVersion',
+      'tier',
+    ])
     expect(body.templateVersion).toBe(stamp.version)
+    // The site profile (site.profile.ts) ships with every feature on.
+    expect(body.tier).toBe('custom')
+    expect(Object.values(body.enabled).every(Boolean)).toBe(true)
+    expect(Object.keys(body.enabled)).toContain('blog')
     // The test environment switches these on (constants.ts); Sentry has no DSN.
     expect(body.features).toEqual({
       forms: true,

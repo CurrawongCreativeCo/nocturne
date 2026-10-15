@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { hasConsentProviders } from '@/config/analytics'
+import { siteProfile } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
 import { templateVersion } from '@/config/template-version'
 import { enabledProviders } from '@/features/auth/utils/providers'
@@ -20,6 +21,9 @@ import { sentryDsn } from '@/lib/sentry/config'
 export function GET() {
   return NextResponse.json({
     templateVersion,
+    tier: siteProfile.tier,
+    // What the site profile (site.profile.ts) switches on; `features` below is what is configured.
+    enabled: siteProfile.features,
     features: {
       forms: getFormsConfig().ready,
       newsletter: getNewsletterConfig().ready,

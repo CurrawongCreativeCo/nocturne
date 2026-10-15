@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- **Site profile:** `site.profile.ts` (a Customize file, calling `defineSiteProfile`) declares the client, tier
+  (`brochure`, `content`, `commerce`, `custom`), which features the site uses (`blog`, `forms`, `newsletter`,
+  `pricing`, `members`, `experiments`, `search`, `businessInfo`, `team`), the section types clients may add and
+  help links. `src/config/profile.ts` holds the types, defaults, validation and `isFeatureEnabled()`, and adds
+  `templateVersion`. A disabled feature controls visibility only (the schema is unchanged): its routes answer 404
+  (blog and `feed.xml`, search and `/api/search`, sign-in, sign-out and `/api/auth/*`), the checkout action refuses,
+  the sitemap, `robots.txt` and `llms.txt` leave posts out, the header hides search, and the Studio desk and _New
+  document_ menu hide Blog, Forms, A/B tests, Stripe prices and Team. `/api/site-info` gains `tier` and `enabled`.
+  Features left out of the profile stay on, so nothing changes until a site edits it.
 - **Business info (Studio and site):** a new `businessInfo` singleton (sidebar → _Business info_, visible to clients)
   for Australian businesses: trading and legal name, ABN (ATO checksum, grouped as `12 345 678 901`), phone and public
   email, address (state, 4-digit postcode), time zone, opening hours (days, opens and closes with closes-after-opens
@@ -222,6 +231,11 @@ you start a release.
 ### Fixed
 
 ### Breaking changes / migration steps
+
+**Site profile:** after merging, edit `site.profile.ts` (take the template's file, then set `client.name` and `client.slug`,
+the tier, and `features: { … : false }` for what the site doesn't use). Until you do, every feature stays on and nothing
+changes. The Studio's approved sections now come from the profile's `clientSections` (empty: the same default list)
+instead of a `siteProfile` document, which was never part of the schema; `CLIENT_SECTIONS_QUERY` is gone.
 
 **Business info:** run `npm run typegen` after merging (`business` is new in `SETTINGS_QUERY`), add `businessInfo` to the
 webhook filter's `_type` list (README, "Live mode vs. webhook mode") so a change shows without a redeploy, and create

@@ -1,6 +1,7 @@
 import type { Metadata, MetadataRoute, ResolvedMetadata } from 'next'
 
 import { BLOG_PATH, categoryPath, FEED_PATH, postPath } from '@/config/paths'
+import { isFeatureEnabled } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
@@ -73,6 +74,7 @@ export async function categoryExists(slug: string) {
  * absolute URLs.
  */
 export async function getFeedItems(): Promise<FeedItem[]> {
+  if (!isFeatureEnabled('blog')) return []
   const { posts } = await fetchPostList({ category: null, page: 1, ...PUBLISHED })
   return posts.map((post) => ({
     title: post.title,
@@ -187,18 +189,25 @@ export async function getListMetadata(
   }
 }
 
-/** Published posts search engines may index, newest first, from the cached blog index: no extra request. */
+/**
+ * Published posts search engines may index, newest first, from the cached blog index: no extra
+ * request. Like the other list helpers below, it is empty when the site profile turns the blog off
+ * (the sitemap, robots, llms.txt and feed then leave posts out; the routes themselves answer 404).
+ */
 export async function getIndexablePosts() {
+  if (!isFeatureEnabled('blog')) return []
   return (await getBlogIndex()).posts.filter(({ noIndex }) => !noIndex)
 }
 
 /** Route params for `generateStaticParams`. */
 export async function getPostStaticParams() {
+  if (!isFeatureEnabled('blog')) return [{ slug: PLACEHOLDER_SLUG }]
   const { posts } = await getBlogIndex()
   return posts.length > 0 ? posts.map(({ slug }) => ({ slug })) : [{ slug: PLACEHOLDER_SLUG }]
 }
 
 export async function getCategoryStaticParams() {
+  if (!isFeatureEnabled('blog')) return [{ slug: PLACEHOLDER_SLUG }]
   const { categories } = await getBlogIndex()
   return categories.length > 0
     ? categories.map(({ slug }) => ({ slug }))
@@ -207,6 +216,7 @@ export async function getCategoryStaticParams() {
 
 /** How many posts there are, for sizing the sitemap. Free: it is the total the index already fetched. */
 export async function getPostCount() {
+  if (!isFeatureEnabled('blog')) return 0
   return (await fetchPostList({ category: null, page: 1, ...PUBLISHED })).total
 }
 

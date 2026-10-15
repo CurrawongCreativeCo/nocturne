@@ -3,6 +3,7 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
+import { isFeatureEnabled } from '@/config/profile'
 import {
   categoryExists,
   getCategoryStaticParams,
@@ -21,11 +22,13 @@ export async function generateMetadata(
   { params, searchParams }: Props,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
+  if (!isFeatureEnabled('blog')) notFound()
   const page = parsePage((await searchParams).page) ?? 1
   return getListMetadata({ category: (await params).slug, page }, await parent)
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
+  if (!isFeatureEnabled('blog')) notFound()
   const { slug } = await params
   // An unknown category is answered here, before the streamed part, so it gets a real 404 status.
   // Drafts skip the check: a category that isn't published yet can still be previewed.

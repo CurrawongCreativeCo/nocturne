@@ -3,6 +3,7 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
+import { isFeatureEnabled } from '@/config/profile'
 import { getListMetadata } from '@/features/blog/api/get-posts'
 import { DraftPostListView, PostListView } from '@/features/blog/components/post-list-view'
 import { parsePage } from '@/features/blog/utils/pagination'
@@ -19,11 +20,13 @@ export async function generateMetadata(
   { searchParams }: Props,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
+  if (!isFeatureEnabled('blog')) notFound()
   const page = parsePage((await searchParams).page) ?? 1
   return getListMetadata({ category: null, page }, await parent)
 }
 
 export default function BlogPage({ searchParams }: Props) {
+  if (!isFeatureEnabled('blog')) notFound()
   return (
     <Suspense fallback={null}>
       <BlogList searchParams={searchParams} />

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { stegaClean } from 'next-sanity'
 
+import { isFeatureEnabled } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
 import { cachedSanityFetch, PUBLISHED, TAGS } from '@/lib/sanity/live'
 
@@ -29,6 +30,8 @@ export async function startCheckout(
   _previous: CheckoutState,
   formData: FormData,
 ): Promise<CheckoutState> {
+  if (!isFeatureEnabled('pricing')) return failure(UNAVAILABLE)
+
   const config = getCheckoutConfig(siteUrl)
   if (!config.ready) {
     console.error(`Checkout is not configured. Missing or invalid: ${config.missing.join(', ')}`)
