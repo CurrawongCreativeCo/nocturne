@@ -1,6 +1,6 @@
 import type { ConditionalPropertyCallback } from 'sanity'
 
-import { SECTION_MOTIONS } from '../section-style-options'
+import { SECTION_MOTIONS, edgeAllowsFlip, edgeAllowsInvert } from '../section-style-options'
 
 /**
  * Which of a section's shared design options make sense for the layout it is on. The options live in
@@ -130,3 +130,26 @@ export function staleMotionMessage(value: unknown, context: FieldContext): strin
   }
   return 'Parallax moves a picture, and this layout has none. Choose another animation, or a layout with a picture.'
 }
+
+interface EdgeParent {
+  edge?: string
+}
+
+const edgeOf = (parent: unknown) => (parent as EdgeParent | undefined)?.edge
+const hasEdge = (edge: string | undefined) => !!edge && edge !== 'none'
+
+/** The edge's options mean nothing until a shape is chosen. */
+export const edgeOptionsHidden: ConditionalPropertyCallback = ({ parent }) =>
+  !hasEdge(edgeOf(parent))
+
+/** Curve and Arch are symmetrical, so mirroring them would change nothing. */
+export const edgeFlipHidden: ConditionalPropertyCallback = ({ parent }) =>
+  !edgeAllowsFlip(edgeOf(parent))
+
+/** A diagonal turned upside down is a mirrored diagonal, so Invert is for the curved shapes. */
+export const edgeInvertHidden: ConditionalPropertyCallback = ({ parent }) =>
+  !edgeAllowsInvert(edgeOf(parent))
+
+/** Only the layered wave has a back wave to colour. */
+export const edgeLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
+  edgeOf(parent) !== 'layered'

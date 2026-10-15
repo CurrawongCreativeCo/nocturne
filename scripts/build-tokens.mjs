@@ -81,6 +81,18 @@ export const defaultEmphasis = {
 
 export const emphasisOf = (tokens) => ({ ...defaultEmphasis, ...tokens.emphasis })
 
+/**
+ * Section divider heights (README, "Section dividers"): how tall the cut at a section's bottom edge
+ * is. Fluid, so phones get a smaller one. Optional in tokens.json, like the emphasis group above.
+ */
+export const defaultEdge = {
+  small: 'clamp(1.5rem, 1rem + 2vw, 2.5rem)',
+  medium: 'clamp(2.5rem, 1.5rem + 4vw, 5rem)',
+  large: 'clamp(4rem, 2rem + 8vw, 9rem)',
+}
+
+export const edgeOf = (tokens) => ({ ...defaultEdge, ...tokens.edge })
+
 export { hexToRgb }
 
 /** "oklch(0.55 0.2 264)" (or "55% 0.2 264") -> sRGB [r, g, b] (0-255, unrounded, clamped). */
@@ -160,6 +172,12 @@ export function validateTokens(tokens) {
   for (const [name, value] of Object.entries(tokens.emphasis ?? {})) {
     if (!(name in defaultEmphasis)) errors.push(`emphasis.${name} is not a known token`)
     else if (typeof value !== 'string') errors.push(`emphasis.${name} must be a string`)
+  }
+  for (const [name, value] of Object.entries(tokens.edge ?? {})) {
+    if (!(name in defaultEdge))
+      errors.push(`edge.${name} is not a known token (small, medium, large)`)
+    else if (typeof value !== 'string' || !value.trim())
+      errors.push(`edge.${name} must be a CSS length`)
   }
   const strength = Number(emphasisOf(tokens)['highlight-strength'])
   if (!(strength > 0 && strength <= 1)) errors.push('emphasis.highlight-strength must be 0-1')
@@ -286,6 +304,8 @@ export function buildCss(tokens) {
   }
   lines.push('')
   for (const [name, value] of Object.entries(emphasisOf(tokens))) theme(`--emphasis-${name}`, value)
+  lines.push('')
+  for (const [name, value] of Object.entries(edgeOf(tokens))) theme(`--edge-height-${name}`, value)
   lines.push('}', '', toneCss)
   return lines.join('\n')
 }

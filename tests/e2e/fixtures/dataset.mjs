@@ -942,6 +942,20 @@ const galleryHero = (id, extra) => ({
   ...extra,
 })
 
+/**
+ * Two sections for the gallery, one above the other: the upper has a bottom edge. The second key ends
+ * in `--below`, which the gallery page reads as "render this in the same frame as the one before".
+ */
+const edgeText = (id, title) => ({
+  _key: id,
+  _type: 'richText',
+  body: [block([title], { style: 'h2' }), block(['A paragraph of copy under the heading.'])],
+})
+const edgePair = (id, upper, below) => [
+  styled(`edge-${id}`, edgeText(`edge-${id}`, 'Above the edge'), upper),
+  styled(`edge-${id}--below`, edgeText(`edge-${id}--below`, 'Below the edge'), below),
+]
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -1170,11 +1184,52 @@ const gallerySections = [
     }),
     { tone: 'inverse', image: image('') },
   ),
+  // Section dividers (README, "Section dividers"): each entry is the upper section, followed by the
+  // one below it (key ending `--below`), which the gallery renders in the same frame.
+  ...edgePair('wave-flat', { tone: 'inverse', edge: 'wave' }, { tone: 'alt' }),
+  ...edgePair(
+    'wave-gradient-image',
+    { tone: 'inverse', gradient: 'forest-dusk', edge: 'wave' },
+    { tone: 'inverse', image: image(''), overlay: 'medium' },
+  ),
+  ...edgePair(
+    'layered-accent-line',
+    { tone: 'inverse', edge: 'layered', edgeAccent: 'highlight' },
+    { tone: 'surface' },
+  ),
+  ...edgePair('diagonal', { tone: 'accent', edge: 'diagonal' }, { tone: 'surface' }),
+  ...edgePair('curve', { tone: 'alt', edge: 'curve', edgeAccent: 'accent' }, { tone: 'inverse' }),
+  ...edgePair('arch', { tone: 'inverse', edge: 'arch' }, { tone: 'surface' }),
+  ...edgePair(
+    'wave-large-flip',
+    { tone: 'accent', edge: 'wave', edgeHeight: 'large', edgeFlip: true },
+    { tone: 'surface' },
+  ),
+  ...edgePair(
+    'curve-invert',
+    { tone: 'inverse', edge: 'curve', edgeInvert: true },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'wave-custom-heights',
+    { tone: 'inverse', edge: 'wave', edgeHeightMobile: 24, edgeHeightDesktop: 140 },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'wave-spacious-compact',
+    { tone: 'inverse', edge: 'wave', edgeHeight: 'small', spacing: 'spacious' },
+    { tone: 'alt', spacing: 'compact' },
+  ),
   // new-section:gallery
 ]
 
-/** The gallery sections' ids, in page order: one visual test and one baseline per id. */
-export const galleryIds = gallerySections.map((section) => section._key)
+/**
+ * The gallery sections' ids, in page order: one visual test and one baseline per id. A `--below`
+ * section is drawn in the frame of the one before it (see edgePair), so it has no entry of its own.
+ */
+export const galleryIds = gallerySections
+  .map((section) => section._key)
+  .filter((id) => !id.endsWith('--below'))
 
 /**
  * Highlighted heading words (tests/e2e/heading-text.spec.ts): the hero's `heading` wins over a stale
@@ -1224,3 +1279,68 @@ documents.push({
   pageBuilder: gallerySections,
   _updatedAt: UPDATED,
 })
+
+/**
+ * Section dividers on a real page, with the site's footer under it (tests/e2e/section-edges.spec.ts):
+ * an edge above a flat section, an edge above a picture, an edge above a members-only section, an
+ * edge on a shared section and an edge on the last section, which the footer takes.
+ */
+const edgeSection = (id, title, style) => ({
+  _key: id,
+  _type: 'richText',
+  style: { _type: 'sectionStyle', anchorId: id, ...style },
+  body: [block([title], { style: 'h2' }), block(['A paragraph of copy under the heading.'])],
+})
+documents.push(
+  {
+    _id: 'shared-edge',
+    _type: 'sharedSection',
+    title: 'Shared section with an edge',
+    section: [
+      {
+        ...edgeSection('shared-edge-section', 'Shared, with a diagonal', {
+          tone: 'accent',
+          edge: 'diagonal',
+        }),
+      },
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    _id: 'page-edges',
+    _type: 'page',
+    title: 'Section dividers',
+    slug: { _type: 'slug', current: 'edges' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('edge-first', 'First, with a wave', { tone: 'inverse', edge: 'wave' }),
+      edgeSection('edge-second', 'Second, with a layered wave', {
+        tone: 'alt',
+        edge: 'layered',
+        edgeAccent: 'accent',
+        edgeHeight: 'large',
+      }),
+      edgeSection('edge-third', 'Third, over a picture', {
+        tone: 'surface',
+        image: image(''),
+        overlay: 'strong',
+        edge: 'arch',
+      }),
+      {
+        ...edgeSection('edge-members', 'Secret members section', {
+          tone: 'inverse',
+          edge: 'curve',
+        }),
+        access: 'members',
+      },
+      { _key: 'edge-shared', ...ref('shared-edge') },
+      edgeSection('edge-after-shared', 'After the shared section', { tone: 'surface' }),
+      edgeSection('edge-last', 'Last, with a curve', {
+        tone: 'inverse',
+        edge: 'curve',
+        edgeHeight: 'medium',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+)

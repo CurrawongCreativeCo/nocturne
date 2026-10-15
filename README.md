@@ -1329,17 +1329,18 @@ combined with `hiddenFromClients`) and the fieldset vanishes when none of them a
 with `joinSubtitle` / `variantSubtitle` ("Hero · Split · Dark"). The rules are unit tested per section and layout
 (`section-form.test.ts`, `sections/section-form.test.ts`, `sections/section-fields.test.ts`).
 
-| Field      | Values                                     | What it does                                                                                  |
-| ---------- | ------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `tone`     | `surface` · `alt` · `inverse` · `accent`   | `data-tone` on the `<section>`; recolours everything inside (see below).                      |
-| `spacing`  | `compact` · `default` · `spacious`         | `py-section-compact` / the section's usual / `py-section-spacious`.                           |
-| `width`    | `narrow` · `default` · `wide` · `full`     | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters. |
-| `align`    | `start` · `center`                         | Alignment classes for the parts the section aligns (headings, intro, buttons).                |
-| `gradient` | slug of a brand gradient                   | A gradient layer behind the content (see _Section backgrounds_ below).                        |
-| `image`    | image with hotspot                         | A picture layer behind the content (see _Section backgrounds_); not offered for the hero.     |
-| `overlay`  | `none` · `light` · `medium` · `strong`     | How strongly the tone's colour covers the picture.                                            |
-| `anchorId` | slug-like string                           | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).  |
-| `motion`   | `none` · `reveal` · `stagger` · `parallax` | Scroll-in animation through the wrappers in `src/components/motion`.                          |
+| Field      | Values                                                      | What it does                                                                                              |
+| ---------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `tone`     | `surface` · `alt` · `inverse` · `accent`                    | `data-tone` on the `<section>`; recolours everything inside (see below).                                  |
+| `spacing`  | `compact` · `default` · `spacious`                          | `py-section-compact` / the section's usual / `py-section-spacious`.                                       |
+| `width`    | `narrow` · `default` · `wide` · `full`                      | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters.             |
+| `align`    | `start` · `center`                                          | Alignment classes for the parts the section aligns (headings, intro, buttons).                            |
+| `gradient` | slug of a brand gradient                                    | A gradient layer behind the content (see _Section backgrounds_ below).                                    |
+| `image`    | image with hotspot                                          | A picture layer behind the content (see _Section backgrounds_); not offered for the hero.                 |
+| `overlay`  | `none` · `light` · `medium` · `strong`                      | How strongly the tone's colour covers the picture.                                                        |
+| `edge`     | `none` · `diagonal` · `wave` · `curve` · `arch` · `layered` | The shape of the section's bottom edge (see _Section dividers_ below); `edge*` siblings hold its options. |
+| `anchorId` | slug-like string                                            | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).              |
+| `motion`   | `none` · `reveal` · `stagger` · `parallax`                  | Scroll-in animation through the wrappers in `src/components/motion`.                                      |
 
 **Rendering.** A section component renders inside `SectionFrame` (`src/components/ui/section-frame.tsx`, a server
 component) instead of its own `<section>` and padding, and passes its content as children:
@@ -1438,6 +1439,77 @@ server rendering) and runs axe over the gallery entries `features-grid-gradient-
 overlay, plus the unset defaults on a light and a dark tone). The fixture's `designSettings` holds two gradients and no
 colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
 the real guard for pictures is the Studio warning and the overlay values above.
+
+### Section dividers
+
+A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch or a layered wave. The
+section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
+meet it, so the colours and spacing come out right without anything to configure.
+
+**For editors** (Design tab, agency only). Under _Bottom edge_ pick a picture: None (the default, a straight edge),
+Diagonal, Wave, Curve, Arch or Layered wave. Then, as they apply to the shape:
+
+- **Edge height**: Small, Medium or Large. Smaller on phones.
+- **Flip**: mirror the shape left to right (Diagonal, Wave and Layered wave; Curve and Arch are symmetrical, so it is not offered).
+- **Accent line**: none, or a thin line along the edge in Primary, Secondary or Highlight.
+- **Back wave colour** (Layered wave only): Secondary or Highlight, drawn behind the front wave and partly see-through.
+- **More edge options** (collapsed): **Invert** (the shape bulges into the next section instead; not offered for Diagonal,
+  where it is the same as Flip) and a **custom height** for phones, tablets (from 768 px) and desktops (from 1024 px), in
+  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium.
+
+The edge belongs to the **upper** section: one owner per boundary, it moves with its section when reordered, and a shared
+section carries its own edge wherever it is used. To change a boundary, edit the section above it.
+
+**How it is drawn.**
+
+- _The shapes_ are defined once in `src/components/ui/section-edges.ts` as paths in a 0 to 1 box
+  (`viewBox="0 0 1 1"`, `preserveAspectRatio="none"`, so they stretch to any width and height). A shape is the line where
+  the section ends; Flip mirrors x, Invert mirrors y. Wave and Layered wave are generated from a sine so they stay smooth;
+  the others are written by hand. Everything is unit tested (`section-edges.test.ts`): the paths stay inside the box,
+  run the full width, and Flip and Invert each change a wave.
+- _The cut_: `SectionFrame` wraps a section that has an edge in `[data-section-edge-frame]` (lifted with a `z-index` that `SectionRenderer` lowers
+  for each later section, so every cut sits above whatever follows it) and sets `--edge-mask`, an SVG data URI of the shape. `globals.css` applies it to the
+  `<section>` as `mask-image` (and `-webkit-mask-image`) in two layers: a solid one for everything above the bottom band,
+  and the shape for the band, so **only the bottom band is cut and the content area is never masked**. The section adds the
+  edge's height to its bottom padding (`--edge-h`), so its content stays out of the band. Nothing samples colours.
+- _The section below_: `SectionRenderer` (`section-renderer.tsx`) puts `data-edge-above` and `--edge-above` (the same height)
+  on the element that wraps the next section. `globals.css` pulls it up by that height (negative `margin-top`) and adds the
+  same amount to its top padding, so its content lands exactly where it would without the edge. In draft mode the editable
+  `<div data-sanity>` wrapper carries the attributes, so Presentation shows the same result. A section that renders nothing
+  does not pull the next one up (`:empty`).
+- _Heights_ are tokens, `edge` in `src/styles/tokens.json` (`small`, `medium`, `large`; fluid `clamp()` values, smaller on
+  phones), written to `--edge-height-*`. The group is optional in a client's `tokens.json` (defaults in
+  `scripts/build-tokens.mjs`). A custom height sets three variables switched at the breakpoints (`data-edge-custom`).
+- _Accent line and back wave_ are decorative SVGs (`aria-hidden`, `pointer-events: none`) in the frame: the back wave under
+  the section, so it shows only through the cut, and the line over it as a stroke with `vector-effect: non-scaling-stroke`,
+  so it keeps its width however the shape stretches.
+- Browsers **without mask support** show a straight edge: the section is still taller by the edge's height and the next one
+  still meets it, only the cut is missing, and the SVGs are hidden (`@supports not`).
+
+**Edge cases.**
+
+| Case                             | What happens                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| First section                    | Works like any other; the hero's LCP picture is still preloaded.                                                                                                                                                                                                                                                                                              |
+| Last section                     | The footer takes the edge like a section would: `SectionRenderer` adds a band of the footer's colour (`bg-surface-alt`) under the cut (`[data-edge-backdrop]`) and hides the footer's top border. If a project changes the footer's background, change `[data-edge-backdrop]` in `globals.css` to match.                                                      |
+| Members-only sections            | A locked section is a stub with no style, so it has no edge and nothing is pulled up under it; the cut above it shows the page colour. Once unlocked, its own edge draws, but the section after it is not pulled up, because the public page does not know the edge until sign-in. In preview (draft mode) every section is complete, so edges work normally. |
+| A/B variants and shared sections | Both go through the same `SectionRenderer`; a shared section's edge comes with its `style`.                                                                                                                                                                                                                                                                   |
+| Anchors                          | The section below an edge has `scroll-margin-top: 6rem + the edge's height`, so a `#link` lands with the whole cut in view.                                                                                                                                                                                                                                   |
+| Reordering                       | Neighbours are worked out at render time, so moving a section moves its edge with it.                                                                                                                                                                                                                                                                         |
+
+**Adding a shape.** Add the line to `LINES` in `section-edges.ts` (a path in the 0 to 1 box that runs from one side to the
+other), the value to `SECTION_EDGES` and its title in `section-style-options.ts`, a picker entry in
+`section-style.ts` and a thumbnail in `thumbnails/edge-thumbnails.tsx` and the registry (a test fails until all agree), then
+add a gallery pair to `tests/e2e/fixtures/dataset.mjs` and run `npm run typegen`.
+
+**Tests.** Unit: `section-edges.test.ts` (paths, heights, spacing variables), `section-style.test.ts` (`resolveEdge`: options that do
+nothing for a shape are ignored), `section-style.test.ts` in the schema folder (which options show for which shape). End to
+end: `tests/e2e/section-edges.spec.ts` runs axe over every gallery pair, checks by bounding box on phone and desktop widths
+that the section below is pulled up by exactly the edge's height while its content is neither covered nor moved, the
+mask and its `-webkit-` twin, the layered wave's layers, heights and breakpoints, and the `/edges` fixture page (followers,
+members stub, shared section, anchor margin, footer band, layout shift). Gallery pairs are `edge-*` entries (the section
+below has a key ending `--below` and is drawn in the same frame); their visual baselines are Linux-only, so run the
+**Update visual baselines** workflow after changing a shape or the CSS.
 
 ### Highlighting words in a heading
 

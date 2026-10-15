@@ -46,7 +46,16 @@ export const sectionStyleFields = /* groq */ `
   motion,
   gradient,
   overlay,
-  image { ${imageFields} }
+  image { ${imageFields} },
+  edge,
+  edgeHeight,
+  edgeFlip,
+  edgeAccent,
+  edgeLayer,
+  edgeInvert,
+  edgeHeightMobile,
+  edgeHeightTablet,
+  edgeHeightDesktop
 `
 
 export const seoFields = /* groq */ `

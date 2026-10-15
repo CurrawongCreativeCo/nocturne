@@ -14,12 +14,13 @@ export function sectionLabel(section: PageSection): string {
 /** The shared Design options an editor changed, e.g. "inverse section", "compact spacing". */
 function styleVariants(section: PageSection): string[] {
   if (!('style' in section) || !section.style) return []
-  const { tone, spacing, width, align } = stegaClean(section.style)
+  const { tone, spacing, width, align, edge } = stegaClean(section.style)
   return [
     tone && `${tone} section`,
     spacing && spacing !== 'default' && `${spacing} spacing`,
     width && width !== 'default' && `${width} width`,
     align && `${align} aligned`,
+    edge && edge !== 'none' && `${edge} edge`,
   ].filter((variant): variant is string => Boolean(variant))
 }
 

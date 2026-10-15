@@ -1,7 +1,7 @@
 import { defineField } from 'sanity'
 import { describe, expect, it } from 'vitest'
 
-import { SECTION_OVERLAYS } from '../section-style-options'
+import { SECTION_EDGES, SECTION_OVERLAYS } from '../section-style-options'
 import { sectionFields, sectionFieldsets, sectionGroups, sectionStyle } from './section-style'
 
 const names = (fields: readonly { name: string }[]) => fields.map(({ name }) => name)
@@ -71,6 +71,15 @@ describe('sectionStyle', () => {
       'image',
       'overlay',
       'motion',
+      'edge',
+      'edgeHeight',
+      'edgeFlip',
+      'edgeAccent',
+      'edgeLayer',
+      'edgeInvert',
+      'edgeHeightMobile',
+      'edgeHeightTablet',
+      'edgeHeightDesktop',
       'spacing',
       'width',
       'align',
@@ -94,6 +103,11 @@ describe('sectionStyle', () => {
         title: 'More layout options',
         options: { collapsible: true, collapsed: true },
       }),
+      expect.objectContaining({
+        name: 'edgeAdvanced',
+        title: 'More edge options',
+        options: { collapsible: true, collapsed: true },
+      }),
     ])
   })
 
@@ -103,7 +117,7 @@ describe('sectionStyle', () => {
 
   it('shows Background, Overlay and Animation as pictures', () => {
     const picker = (name: string) => styleFields.find((f) => f.name === name)?.options
-    for (const name of ['tone', 'overlay', 'motion']) {
+    for (const name of ['tone', 'overlay', 'motion', 'edge']) {
       expect(picker(name)?.presetPicker).toBe(true)
       expect(picker(name)?.list.every((option) => option.thumbnail)).toBe(true)
     }
@@ -131,5 +145,50 @@ describe('sectionStyle', () => {
     expect(at({})).toBe(true)
     expect(at({ image: { _type: 'image' } })).toBe(true)
     expect(at({ image: { asset: { _ref: 'image-a-1x1-png' } } })).toBe(false)
+  })
+})
+
+describe('the bottom edge', () => {
+  const field = (name: string) => styleFields.find((f) => f.name === name)
+  const hidden = (name: string, parent: unknown) =>
+    (field(name)?.hidden as (c: never) => boolean)({ parent } as never)
+
+  it('offers the five shapes and None, with None first so the default is no edge', () => {
+    const list = field('edge')?.options?.list as { value: string }[]
+    expect(list.map((option) => option.value)).toEqual([...SECTION_EDGES])
+    expect(list[0]?.value).toBe('none')
+    expect(field('edge')).toMatchObject({ initialValue: 'none' })
+  })
+
+  it('shows the options only once a shape is chosen', () => {
+    for (const name of ['edgeHeight', 'edgeAccent', 'edgeHeightMobile']) {
+      expect(hidden(name, {})).toBe(true)
+      expect(hidden(name, { edge: 'none' })).toBe(true)
+      expect(hidden(name, { edge: 'wave' })).toBe(false)
+    }
+  })
+
+  it('offers only the options that change the chosen shape', () => {
+    expect(hidden('edgeFlip', { edge: 'wave' })).toBe(false)
+    expect(hidden('edgeFlip', { edge: 'curve' })).toBe(true)
+    expect(hidden('edgeFlip', { edge: 'arch' })).toBe(true)
+    expect(hidden('edgeInvert', { edge: 'curve' })).toBe(false)
+    expect(hidden('edgeInvert', { edge: 'diagonal' })).toBe(true)
+    expect(hidden('edgeLayer', { edge: 'layered' })).toBe(false)
+    expect(hidden('edgeLayer', { edge: 'wave' })).toBe(true)
+  })
+
+  it('keeps Invert and the custom heights in the collapsed Advanced fieldset', () => {
+    for (const name of [
+      'edgeInvert',
+      'edgeHeightMobile',
+      'edgeHeightTablet',
+      'edgeHeightDesktop',
+    ]) {
+      expect(field(name)?.fieldset).toBe('edgeAdvanced')
+    }
+    for (const name of ['edge', 'edgeHeight', 'edgeFlip', 'edgeAccent']) {
+      expect(field(name)?.fieldset).toBeUndefined()
+    }
   })
 })

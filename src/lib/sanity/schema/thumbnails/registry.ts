@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 
-import type { SECTION_MOTIONS, SECTION_TONES } from '../../section-style-options'
+import type { SECTION_EDGES, SECTION_MOTIONS, SECTION_TONES } from '../../section-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
 import {
   MotionNoneThumbnail,
@@ -8,6 +8,14 @@ import {
   MotionRevealThumbnail,
   MotionStaggerThumbnail,
 } from './animation-thumbnails'
+import {
+  EdgeArchThumbnail,
+  EdgeCurveThumbnail,
+  EdgeDiagonalThumbnail,
+  EdgeLayeredThumbnail,
+  EdgeNoneThumbnail,
+  EdgeWaveThumbnail,
+} from './edge-thumbnails'
 import {
   HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
@@ -84,4 +92,13 @@ export const toneThumbnails: Record<(typeof SECTION_TONES)[number], Thumbnail> =
   alt: ToneAltThumbnail,
   inverse: ToneInverseThumbnail,
   accent: ToneAccentThumbnail,
+}
+
+export const edgeThumbnails: Record<(typeof SECTION_EDGES)[number], Thumbnail> = {
+  none: EdgeNoneThumbnail,
+  diagonal: EdgeDiagonalThumbnail,
+  wave: EdgeWaveThumbnail,
+  curve: EdgeCurveThumbnail,
+  arch: EdgeArchThumbnail,
+  layered: EdgeLayeredThumbnail,
 }

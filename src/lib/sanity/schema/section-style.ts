@@ -11,8 +11,17 @@ import { backgroundContrastProblem } from '@/lib/color/background-contrast'
 import { hiddenFromClients } from '../roles'
 import {
   ANCHOR_PATTERN,
+  EDGE_CUSTOM_MAX,
+  EDGE_CUSTOM_MIN,
   RESERVED_ANCHORS,
   SECTION_ALIGNS,
+  SECTION_EDGE_ACCENTS,
+  SECTION_EDGE_ACCENT_TITLES,
+  SECTION_EDGE_HEIGHTS,
+  SECTION_EDGE_HEIGHT_TITLES,
+  SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LAYER_TITLES,
+  SECTION_EDGE_TITLES,
   SECTION_OVERLAY_TITLES,
   defaultOverlayFor,
   SECTION_SPACINGS,
@@ -25,6 +34,10 @@ import { presetField } from './preset-field'
 import {
   alignmentHidden,
   backgroundImageHidden,
+  edgeFlipHidden,
+  edgeInvertHidden,
+  edgeLayerHidden,
+  edgeOptionsHidden,
   overlayHidden,
   registerSectionRules,
   sectionAtStylePath,
@@ -39,6 +52,14 @@ import {
   MotionRevealThumbnail,
   MotionStaggerThumbnail,
 } from './thumbnails/animation-thumbnails'
+import {
+  EdgeArchThumbnail,
+  EdgeCurveThumbnail,
+  EdgeDiagonalThumbnail,
+  EdgeLayeredThumbnail,
+  EdgeNoneThumbnail,
+  EdgeWaveThumbnail,
+} from './thumbnails/edge-thumbnails'
 import {
   OverlayLightThumbnail,
   OverlayMediumThumbnail,
@@ -89,6 +110,12 @@ export const sectionStyle = defineType({
       name: 'layoutOptions',
       title: 'More layout options',
       description: 'Space, width, alignment and anchor. The defaults suit most sections.',
+      options: { collapsible: true, collapsed: true },
+    },
+    {
+      name: 'edgeAdvanced',
+      title: 'More edge options',
+      description: 'Turn the shape inside out, or set the height for each screen size.',
       options: { collapsible: true, collapsed: true },
     },
   ],
@@ -257,6 +284,113 @@ export const sectionStyle = defineType({
       validation: (rule) =>
         rule.custom((value, context) => staleMotionMessage(value, context)).warning(),
     }),
+    presetField({
+      name: 'edge',
+      title: 'Bottom edge',
+      description:
+        'The shape of this section’s bottom edge. The section below shows through the cut, whatever its background, and moves up to meet it.',
+      required: false,
+      options: [
+        {
+          value: 'none',
+          title: SECTION_EDGE_TITLES.none,
+          description: 'A straight edge.',
+          thumbnail: EdgeNoneThumbnail,
+        },
+        {
+          value: 'diagonal',
+          title: SECTION_EDGE_TITLES.diagonal,
+          description: 'A slanted cut.',
+          thumbnail: EdgeDiagonalThumbnail,
+        },
+        {
+          value: 'wave',
+          title: SECTION_EDGE_TITLES.wave,
+          description: 'One soft wave.',
+          thumbnail: EdgeWaveThumbnail,
+        },
+        {
+          value: 'curve',
+          title: SECTION_EDGE_TITLES.curve,
+          description: 'The section bulges down.',
+          thumbnail: EdgeCurveThumbnail,
+        },
+        {
+          value: 'arch',
+          title: SECTION_EDGE_TITLES.arch,
+          description: 'A rounded doorway.',
+          thumbnail: EdgeArchThumbnail,
+        },
+        {
+          value: 'layered',
+          title: SECTION_EDGE_TITLES.layered,
+          description: 'Two waves, one behind the other.',
+          thumbnail: EdgeLayeredThumbnail,
+        },
+      ],
+      initialValue: 'none',
+    }),
+    defineField({
+      name: 'edgeHeight',
+      title: 'Edge height',
+      description: 'Smaller on phones.',
+      type: 'string',
+      initialValue: 'medium',
+      options: radio(SECTION_EDGE_HEIGHTS, SECTION_EDGE_HEIGHT_TITLES),
+      hidden: edgeOptionsHidden,
+    }),
+    defineField({
+      name: 'edgeFlip',
+      title: 'Flip',
+      description: 'Mirror the shape left to right.',
+      type: 'boolean',
+      initialValue: false,
+      hidden: edgeFlipHidden,
+    }),
+    defineField({
+      name: 'edgeAccent',
+      title: 'Accent line',
+      description: 'A thin line in a brand colour along the edge.',
+      type: 'string',
+      initialValue: 'none',
+      options: radio(SECTION_EDGE_ACCENTS, SECTION_EDGE_ACCENT_TITLES),
+      hidden: edgeOptionsHidden,
+    }),
+    defineField({
+      name: 'edgeLayer',
+      title: 'Back wave colour',
+      description: 'Drawn behind the front wave, partly see-through.',
+      type: 'string',
+      initialValue: 'accent-2',
+      options: radio(SECTION_EDGE_LAYERS, SECTION_EDGE_LAYER_TITLES),
+      hidden: edgeLayerHidden,
+    }),
+    defineField({
+      name: 'edgeInvert',
+      title: 'Invert',
+      description: 'The shape bulges into the next section instead.',
+      type: 'boolean',
+      fieldset: 'edgeAdvanced',
+      initialValue: false,
+      hidden: edgeInvertHidden,
+    }),
+    ...(
+      [
+        ['edgeHeightMobile', 'Height on phones'],
+        ['edgeHeightTablet', 'Height on tablets'],
+        ['edgeHeightDesktop', 'Height on desktops'],
+      ] as const
+    ).map(([name, title]) =>
+      defineField({
+        name,
+        title,
+        description: `In pixels, ${EDGE_CUSTOM_MIN} to ${EDGE_CUSTOM_MAX}. Leave empty to use the edge height above (a screen size left empty keeps the smaller one’s).`,
+        type: 'number',
+        fieldset: 'edgeAdvanced',
+        hidden: edgeOptionsHidden,
+        validation: (rule) => rule.integer().min(EDGE_CUSTOM_MIN).max(EDGE_CUSTOM_MAX),
+      }),
+    ),
     defineField({
       name: 'spacing',
       title: 'Space above and below',
