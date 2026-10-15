@@ -20,6 +20,18 @@ you start a release.
 
 ### Added
 
+- **Section dividers (Studio and site):** a section can end in a shape: **Diagonal, Wave, Curve, Arch or Layered wave**,
+  chosen from pictures under _Bottom edge_ in the Design tab (agency only). The section below shows through the cut,
+  whether it is a flat tone, a gradient or a picture, and moves up to meet it, with its spacing adjusted automatically.
+  Options: **Edge height** (Small, Medium, Large; smaller on phones), **Flip**, an **Accent line** in a brand colour and,
+  for the layered wave, its **back wave colour**; a collapsed area has **Invert** and a **custom height** per screen size.
+  Options that do nothing for the chosen shape are hidden and ignored. The edge belongs to the upper section, so it moves
+  with it and a shared section carries its own. The shapes live in `src/components/ui/section-edges.ts` and are cut with
+  `mask-image` (with the `-webkit-` prefix); browsers without mask support show a straight edge. The footer takes the
+  last section's edge. New optional fields `style.edge`, `edgeHeight`, `edgeFlip`, `edgeAccent`, `edgeLayer`, `edgeInvert`
+  and `edgeHeightMobile`/`Tablet`/`Desktop`; new optional `edge` group in `tokens.json` (defaults apply when it is missing).
+  Existing content is unchanged and needs no migration. Run `npm run typegen` after merging. Visual baselines for the new
+  gallery entries (`edge-*`) need the **Update visual baselines** workflow.
 - **Section backgrounds (Studio and site):** beyond its tone, a section can have a **brand gradient** (picked from the
   gradients in Design settings) and a **background image** with an **overlay** (None, Light, Medium, Strong), all in the
   Design tab's _Background_ area. The gradient picker appears only when Design settings has gradients; the image is not

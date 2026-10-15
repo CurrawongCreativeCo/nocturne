@@ -1,10 +1,19 @@
-import { Children, Fragment, type ReactNode } from 'react'
+import { Children, Fragment, type CSSProperties, type ReactNode } from 'react'
 
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
 import { fadeUp, revealChild, revealInView, staggerContainer } from '@/components/motion/presets'
 
 import { SectionBackground } from './section-background'
+import {
+  closeToTop,
+  edgeBackLine,
+  edgeHeightIsCustom,
+  edgeHeightStyle,
+  edgeLine,
+  edgeMaskImage,
+  type ResolvedEdge,
+} from './section-edges'
 import { resolveSectionStyle, type SectionDefaults, type SectionStyleInput } from './section-style'
 
 /** Gentle: the picture drifts a few percent of its height, not enough to pull the eye from the text. */
@@ -33,6 +42,29 @@ interface Props {
 }
 
 /**
+ * The decorative SVGs of an edge sit over the next section, in the band the cut leaves. Stretched
+ * to the band (`preserveAspectRatio="none"`), with strokes that keep their width however it stretches.
+ */
+const EDGE_SVG_CLASS = 'pointer-events-none absolute inset-x-0 bottom-0 w-full overflow-visible'
+const EDGE_SVG_STYLE = { height: 'var(--edge-h)' } as const
+
+function EdgeSvg({ children, ...rest }: { children: ReactNode; 'data-edge-layer': string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 1 1"
+      preserveAspectRatio="none"
+      className={EDGE_SVG_CLASS}
+      style={EDGE_SVG_STYLE}
+      {...rest}
+    >
+      {children}
+    </svg>
+  )
+}
+
+/**
  * The <section> every page-builder section renders inside: tone (`data-tone`, which recolours
  * everything within, see tokens.generated.css), spacing, width, the anchor `id` and the motion
  * preset, all from the section's shared `style`. A section supplies only its content.
@@ -43,6 +75,11 @@ interface Props {
  *
  * The style's brand gradient and background picture (with its overlay) are drawn first, behind
  * everything, by SectionBackground; the hero's own `background` goes above them.
+ *
+ * A section with a bottom edge (section dividers) is wrapped in a frame that lifts it above the next
+ * section; globals.css cuts the section to the shape with a mask. The wrapper also holds the two
+ * pictures that can't be inside the mask: a layered wave's back wave (under the section, showing
+ * through the cut) and the accent line (over it).
  */
 export function SectionFrame({
   style,
@@ -71,10 +108,11 @@ export function SectionFrame({
     </>
   )
 
-  return (
+  const section = (
     <section
       id={resolved.anchorId}
       data-tone={resolved.tone}
+      data-spacing={resolved.spacing}
       aria-labelledby={labelledBy}
       className={`${resolved.sectionClass} ${className}`.trim()}
     >
@@ -101,5 +139,49 @@ export function SectionFrame({
         <div className={containerClass}>{content}</div>
       )}
     </section>
+  )
+
+  return resolved.edge ? <EdgeFrame edge={resolved.edge}>{section}</EdgeFrame> : section
+}
+
+function EdgeFrame({ edge, children }: { edge: ResolvedEdge; children: ReactNode }) {
+  const transform = { flip: edge.flip, invert: edge.invert }
+  const accent = edge.accent === 'none' ? undefined : `var(--color-${edge.accent})`
+
+  return (
+    <div
+      data-section-edge-frame={edge.shape}
+      data-edge-custom={edgeHeightIsCustom(edge.height) ? '' : undefined}
+      className="relative"
+      style={
+        {
+          ...edgeHeightStyle(edge.height, '--edge-h'),
+          '--edge-mask': edgeMaskImage(edge.shape, transform),
+        } as CSSProperties
+      }
+    >
+      {edge.shape === 'layered' ? (
+        <EdgeSvg data-edge-layer="back">
+          <path
+            d={closeToTop(edgeBackLine(transform))}
+            fill={`var(--color-${edge.layer})`}
+            fillOpacity={0.55}
+          />
+        </EdgeSvg>
+      ) : null}
+      {children}
+      {accent ? (
+        <EdgeSvg data-edge-layer="line">
+          <path
+            d={edgeLine(edge.shape, transform)}
+            fill="none"
+            stroke={accent}
+            strokeWidth={3}
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </EdgeSvg>
+      ) : null}
+    </div>
   )
 }

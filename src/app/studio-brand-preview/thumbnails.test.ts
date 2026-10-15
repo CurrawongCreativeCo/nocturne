@@ -9,6 +9,7 @@ import { hero } from '@/features/pages/schemas/sections/hero'
 import { sectionStyle } from '@/lib/sanity/schema/section-style'
 import {
   animationThumbnails,
+  edgeThumbnails,
   heroImageShapeThumbnails,
   heroPresetThumbnails,
   heroProportionThumbnails,
@@ -16,7 +17,7 @@ import {
   toneThumbnails,
   type Thumbnail,
 } from '@/lib/sanity/schema/thumbnails/registry'
-import { SECTION_MOTIONS, SECTION_TONES } from '@/lib/sanity/section-style-options'
+import { SECTION_EDGES, SECTION_MOTIONS, SECTION_TONES } from '@/lib/sanity/section-style-options'
 
 /**
  * Lives in the route folder because it reads two features (the page builder's sections and Studio's
@@ -78,6 +79,9 @@ describe('thumbnails cover every option', () => {
     for (const [value, thumbnail] of Object.entries(toneThumbnails)) {
       expect(listOf(sectionStyle.fields, 'tone')[value], `tone "${value}"`).toBe(thumbnail)
     }
+    for (const [value, thumbnail] of Object.entries(edgeThumbnails)) {
+      expect(listOf(sectionStyle.fields, 'edge')[value], `edge "${value}"`).toBe(thumbnail)
+    }
   })
 
   it('shows in the hero the very thumbnails the registry lists, for presets, proportions and shapes', () => {
@@ -102,6 +106,10 @@ describe('thumbnails cover every option', () => {
 
   it('has an animation thumbnail for every animation preset', () => {
     expect(Object.keys(animationThumbnails).sort()).toEqual([...SECTION_MOTIONS].sort())
+  })
+
+  it('has a picture for every bottom edge', () => {
+    expect(Object.keys(edgeThumbnails).sort()).toEqual([...SECTION_EDGES].sort())
   })
 
   it('has a swatch for every tone', () => {
@@ -136,6 +144,10 @@ const everything: [string, Thumbnail][] = [
     `tone.${value}`,
     Thumbnail,
   ]),
+  ...Object.entries(edgeThumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [
+    `edge.${value}`,
+    Thumbnail,
+  ]),
 ]
 
 describe.each(everything)('thumbnail %s', (name, Thumbnail) => {
@@ -146,8 +158,8 @@ describe.each(everything)('thumbnail %s', (name, Thumbnail) => {
     expect(markup).toContain('aria-hidden="true"')
   })
 
-  it('takes its colours from the Studio theme, except tones, which show the site tokens', () => {
-    if (name.startsWith('tone.')) {
+  it('takes its colours from the Studio theme, except tones and edges, which show the site tokens', () => {
+    if (name.startsWith('tone.') || name.startsWith('edge.')) {
       expect(markup).toMatch(/fill="#[0-9a-f]{6}"/)
     } else {
       expect(markup).not.toMatch(/#[0-9a-f]{3,8}\b/i)

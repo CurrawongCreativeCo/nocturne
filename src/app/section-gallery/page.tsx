@@ -54,21 +54,30 @@ export default async function SectionGalleryPage() {
     )
   }
 
+  // A section whose key ends in `--below` is drawn in the same frame as the one before it, so a
+  // section divider is shown together with the section it cuts into (see the edge entries).
+  const groups: { section: (typeof sections)[number]; below: typeof sections }[] = []
+  for (const section of sections) {
+    const previous = groups[groups.length - 1]
+    if (section._key.endsWith('--below') && previous) previous.below.push(section)
+    else groups.push({ section, below: [] })
+  }
+
   return (
     <main>
       {/* The public site gets this from SiteShell; the gallery shows the same Studio brand colours. */}
       <DesignStyle {...PUBLISHED} />
-      {sections.map((section) => (
+      {groups.map(({ section, below }) => (
         // The _key is the section's id: tests/e2e/visual.spec.ts names its baseline after it.
         <div key={section._key} data-gallery-section={section._key}>
           <p className="bg-surface-inverse px-gutter py-2 text-small font-medium text-ink-inverse">
             {sectionLabel(section)}
           </p>
-          {/* One renderer per section so each can be captured alone; only the hero reads isFirst. */}
+          {/* One renderer per group so each can be captured alone; only the hero reads isFirst. */}
           <SectionRenderer
             documentId={page?._id ?? GALLERY_SEGMENT}
             documentType="page"
-            sections={[section]}
+            sections={[section, ...below]}
             {...renderers}
           />
         </div>
