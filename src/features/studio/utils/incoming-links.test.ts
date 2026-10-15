@@ -12,7 +12,7 @@ const sources: LinkSources = {
     { _id: 'c', title: 'Unrelated', pageBuilder: [{ cta: link('other') }] },
   ],
   sharedSections: [{ _id: 's', title: 'Banner', section: { cta: link('target') } }],
-  settings: [{ _id: 'settings', headerNav: [{ link: link('target') }], footerNav: [] }],
+  navigation: [{ _id: 'siteNavigation', headerNav: [{ link: link('target') }], footerNav: [] }],
 }
 
 describe('findIncomingLinks', () => {
@@ -32,7 +32,11 @@ describe('findIncomingLinks', () => {
   it('ignores a stale reference on an external link', () => {
     const stale = { _type: 'link', linkType: 'external', internal: { _ref: 'target' } }
     const result = findIncomingLinks(
-      { pages: [{ _id: 'a', title: 'A', pageBuilder: [stale] }], sharedSections: [], settings: [] },
+      {
+        pages: [{ _id: 'a', title: 'A', pageBuilder: [stale] }],
+        sharedSections: [],
+        navigation: [],
+      },
       'target',
     )
     expect(result.documents).toEqual([])

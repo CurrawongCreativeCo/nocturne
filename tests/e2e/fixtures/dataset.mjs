@@ -133,31 +133,38 @@ const blogPosts = [
 ]
 
 export const documents = [
+  // Site settings are four singletons; SETTINGS_QUERY assembles them into one result.
   {
-    _id: 'settings',
-    _type: 'settings',
+    _id: 'siteIdentity',
+    _type: 'siteIdentity',
     title: 'Test Co',
     description: 'Default description for Test Co.',
-    // Tests move the browser clock around this window (tests/e2e/announcement.spec.ts).
-    announcement: {
-      _type: 'announcement',
-      message: 'Summer sale: 20% off all services',
-      link: internal('page-about'),
-      startsAt: '2026-01-01T00:00:00Z',
-      endsAt: '2100-01-01T00:00:00Z',
-      dismissible: true,
-    },
+  },
+  {
+    _id: 'siteNavigation',
+    _type: 'siteNavigation',
     headerNav: [navItem('Home', 'page-home'), navItem('About', 'page-about')],
     headerCta: { _type: 'cta', label: 'Contact', variant: 'primary', link: internal('page-about') },
     footerNav: [navItem('About', 'page-about')],
     footerText: 'Test Co. All rights reserved.',
-    consent: {
-      _type: 'consent',
-      title: 'Your privacy choices',
-      message: 'Test Co uses analytics cookies only if you allow them.',
-      privacyLabel: 'Read the privacy policy',
-      privacyLink: internal('page-about'),
-    },
+  },
+  {
+    // Tests move the browser clock around this window (tests/e2e/announcement.spec.ts).
+    _id: 'announcement',
+    _type: 'announcement',
+    message: 'Summer sale: 20% off all services',
+    link: internal('page-about'),
+    startsAt: '2026-01-01T00:00:00Z',
+    endsAt: '2100-01-01T00:00:00Z',
+    dismissible: true,
+  },
+  {
+    _id: 'cookieBanner',
+    _type: 'cookieBanner',
+    title: 'Your privacy choices',
+    message: 'Test Co uses analytics cookies only if you allow them.',
+    privacyLabel: 'Read the privacy policy',
+    privacyLink: internal('page-about'),
   },
   {
     // Starts with a hero: the hero provides the page's <h1>.
@@ -674,7 +681,7 @@ export const documents = [
 ].map((doc) => ({ ...doc, _updatedAt: UPDATED }))
 
 /**
- * Field changes the fake Content Lake can apply to the published Site settings while it runs
+ * Field changes the fake Content Lake can apply to the published Identity & search document while it runs
  * (tests/e2e/ai-crawlers.spec.ts): the fixture above allows AI crawlers, this one switches them off.
  */
 export const aiCrawlersBlocked = { allowAiCrawlers: false }

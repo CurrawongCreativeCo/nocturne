@@ -26,6 +26,9 @@ Each migration is a folder, `migrations/<id>/index.ts`, with a default export fr
 [`example-rename-page-summary`](example-rename-page-summary/index.ts) renames a field and has a unit test
 next to it (`npm test` picks up `migrations/**/*.test.ts`). It matches nothing in a fresh dataset; copy it
 and delete it when you write your first real one.
+[`split-site-settings`](split-site-settings/index.ts) is a real one: it copies the old Site settings document
+into the four Website settings singletons with `createIfNotExists`, so it never overwrites and is safe to run
+twice. Read it as an example of moving data between documents; delete it once it has run on every dataset.
 
 - Make it **idempotent**: skip documents already migrated, so a second run changes nothing.
 - Return `[]`/nothing for documents you don't change. Select with `documentTypes` to keep requests down.

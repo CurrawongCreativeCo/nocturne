@@ -66,8 +66,13 @@ const data = {
     // Used by no page: invisible to visitors, so its link to Lonely doesn't count.
     { _id: 'unused', title: 'Unused', section: [{ _type: 'ctaBanner', ctas: [cta('lonely')] }] },
   ],
-  settings: [
-    { _id: 'settings', headerNav: [{ link: link('home') }], headerCta: null, footerNav: null },
+  navigation: [
+    {
+      _id: 'siteNavigation',
+      headerNav: [{ link: link('home') }],
+      headerCta: null,
+      footerNav: null,
+    },
   ],
   redirects: [
     { _id: 'r1', source: '/old', destination: '/older' },

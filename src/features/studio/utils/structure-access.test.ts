@@ -1,22 +1,24 @@
 import { describe, expect, it } from 'vitest'
 
-import { filterStructureItems } from './structure-access'
+import {
+  CLIENT_STRUCTURE_IDS,
+  CLIENT_WEBSITE_SETTINGS_IDS,
+  filterStructureItems,
+} from './structure-access'
 
 const idOf = (item: string) => (item === '---' ? null : item)
 
 describe('filterStructureItems', () => {
   const items = [
-    'settings',
-    '---',
+    'startHere',
     'pages',
-    'sharedSection',
-    'form',
     'blog',
-    'redirect',
-    'experiment',
-    'stripePrice',
     '---',
-    'someNewType',
+    'reusable',
+    'websiteSettings',
+    'design',
+    '---',
+    'advanced',
   ]
 
   it('leaves agency staff with everything', () => {
@@ -25,18 +27,35 @@ describe('filterStructureItems', () => {
 
   it.each(['editor', 'contributor'] as const)('limits a %s to the client items', (audience) => {
     expect(filterStructureItems(items, audience, idOf)).toEqual([
-      'settings',
-      '---',
+      'startHere',
       'pages',
       'blog',
+      '---',
+      'websiteSettings',
     ])
   })
 
-  it('hides forms, redirects, A/B tests, Stripe prices and shared sections from clients', () => {
+  it('hides reusable content, design and advanced from clients', () => {
     const shown = filterStructureItems(items, 'editor', idOf)
-    for (const hidden of ['form', 'redirect', 'experiment', 'stripePrice', 'sharedSection']) {
-      expect(shown).not.toContain(hidden)
-    }
+    for (const hidden of ['reusable', 'design', 'advanced']) expect(shown).not.toContain(hidden)
+  })
+
+  it('lists exactly the client items', () => {
+    expect([...CLIENT_STRUCTURE_IDS].sort()).toEqual(
+      ['blog', 'businessInfo', 'pages', 'startHere', 'team', 'websiteSettings'].sort(),
+    )
+  })
+
+  it('limits clients to Identity, Navigation and Announcement bar inside Website settings', () => {
+    const screens = ['siteIdentity', 'siteNavigation', 'announcement', 'cookieBanner', 'brand']
+    expect(filterStructureItems(screens, 'editor', idOf, CLIENT_WEBSITE_SETTINGS_IDS)).toEqual([
+      'siteIdentity',
+      'siteNavigation',
+      'announcement',
+    ])
+    expect(filterStructureItems(screens, 'agency', idOf, CLIENT_WEBSITE_SETTINGS_IDS)).toEqual(
+      screens,
+    )
   })
 
   it('shows Team and Business info when the site has them', () => {

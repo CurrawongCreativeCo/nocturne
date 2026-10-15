@@ -12,11 +12,11 @@ interface Titled {
 export interface LinkSources {
   pages: (Titled & { pageBuilder?: unknown })[]
   sharedSections: (Titled & { section?: unknown })[]
-  settings: { _id: string; headerNav?: unknown; headerCta?: unknown; footerNav?: unknown }[]
+  navigation: { _id: string; headerNav?: unknown; headerCta?: unknown; footerNav?: unknown }[]
 }
 
 export interface IncomingLinks {
-  /** Site settings menus, e.g. "Header menu". */
+  /** Menus in Navigation, e.g. "Header menu". */
   menus: string[]
   /** Other pages, and shared sections (which pages embed), that link to the page. */
   documents: { id: string; title: string; kind: 'page' | 'sharedSection' }[]
@@ -31,11 +31,11 @@ const MENU_FIELDS = [
 /** Drafts count: the link is in the content editors see, and it goes live when they publish. */
 export function findIncomingLinks(sources: LinkSources, pageId: string): IncomingLinks {
   const links = (content: unknown) => collectLinkTargets(content).includes(pageId)
-  const settings = resolveVersions(sources.settings)[0]?.doc
+  const navigation = resolveVersions(sources.navigation)[0]?.doc
 
   return {
-    menus: settings
-      ? MENU_FIELDS.filter(([field]) => links(settings[field])).map(([, label]) => label)
+    menus: navigation
+      ? MENU_FIELDS.filter(([field]) => links(navigation[field])).map(([, label]) => label)
       : [],
     documents: [
       ...resolveVersions(sources.pages)

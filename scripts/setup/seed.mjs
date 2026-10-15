@@ -36,11 +36,16 @@ export function seedDocuments(siteName) {
   const heading = (text, style = 'h2') => block(text, { style })
   const bullet = (text) => block(text, { listItem: 'bullet', level: 1 })
 
-  const settings = {
-    _id: 'settings',
-    _type: 'settings',
+  // Site settings are focused singletons, one per Website settings screen in Studio.
+  const siteIdentity = {
+    _id: 'siteIdentity',
+    _type: 'siteIdentity',
     title: siteName,
     description: `${siteName}: replace this with one sentence about what you do. It appears in search results.`,
+  }
+  const siteNavigation = {
+    _id: 'siteNavigation',
+    _type: 'siteNavigation',
     headerNav: [navItem('Home', 'page-home'), navItem('About', 'page-about')],
     headerCta: {
       _type: 'cta',
@@ -159,7 +164,7 @@ export function seedDocuments(siteName) {
             question: 'Where do I change the menu and footer?',
             answer: [
               block(
-                'In Studio, open Site settings at the top of the sidebar. The header, footer and default SEO all live there.',
+                'In Studio, open Website settings in the sidebar. The menu and footer are in Navigation; the site name and default SEO are in Identity & search.',
               ),
             ],
           },
@@ -169,7 +174,7 @@ export function seedDocuments(siteName) {
             question: 'How do I add a new page?',
             answer: [
               block(
-                'In Studio, open Pages and create a "Landing page" or "Content page" to start from a template. Add it to the header menu in Site settings.',
+                'In Studio, open Pages and create a "Landing page" or "Content page" to start from a template. Add it to the header menu in Website settings → Navigation.',
               ),
             ],
           },
@@ -224,5 +229,5 @@ export function seedDocuments(siteName) {
     ],
   }
 
-  return [settings, home, about]
+  return [siteIdentity, siteNavigation, home, about]
 }

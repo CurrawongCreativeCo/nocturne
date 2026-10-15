@@ -15,7 +15,7 @@ import {
 export interface HealthItem {
   /** Published document id and type, as the "edit" intent expects them. */
   id: string
-  type: 'page' | 'sharedSection' | 'settings' | 'redirect'
+  type: 'page' | 'sharedSection' | 'siteNavigation' | 'redirect'
   title: string
   detail?: string
 }
@@ -27,13 +27,13 @@ export interface HealthGroup {
   items: HealthItem[]
 }
 
-const SETTINGS_ID = 'settings'
+const NAVIGATION_ID = 'siteNavigation'
 const DELETED_PAGE = 'a deleted page'
 
 /** Runs every check over the query result. Drafts count, so fixing a problem in a draft clears it. */
 export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
   const pages = resolveVersions(data.pages)
-  const settings = resolveVersions(data.settings)[0]
+  const navigation = resolveVersions(data.navigation)[0]
   const titles = new Map(pages.map(({ id, doc }) => [id, doc.title]))
   const publishedIds = new Set(pages.filter(({ published }) => published).map(({ id }) => id))
 
@@ -60,13 +60,13 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
         title: doc.title,
         content: doc.section,
       })),
-    ...(settings
+    ...(navigation
       ? [
           {
-            id: SETTINGS_ID,
-            type: 'settings' as const,
-            title: 'Site settings',
-            content: [settings.doc.headerNav, settings.doc.headerCta, settings.doc.footerNav],
+            id: NAVIGATION_ID,
+            type: 'siteNavigation' as const,
+            title: 'Navigation',
+            content: [navigation.doc.headerNav, navigation.doc.headerCta, navigation.doc.footerNav],
           },
         ]
       : []),

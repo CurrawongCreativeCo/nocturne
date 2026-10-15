@@ -1,11 +1,20 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
+import { BellIcon } from '@sanity/icons/Bell'
 import { CogIcon } from '@sanity/icons/Cog'
+import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { ComposeIcon } from '@sanity/icons/Compose'
+import { DocumentsIcon } from '@sanity/icons/Documents'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { FolderIcon } from '@sanity/icons/Folder'
+import { LockIcon } from '@sanity/icons/Lock'
+import { MenuIcon } from '@sanity/icons/Menu'
+import { SearchIcon } from '@sanity/icons/Search'
 import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
+import { StackIcon } from '@sanity/icons/Stack'
 import { TagIcon } from '@sanity/icons/Tag'
 import { UserIcon } from '@sanity/icons/User'
+import { WrenchIcon } from '@sanity/icons/Wrench'
+import type { ComponentType } from 'react'
 import { map } from 'rxjs'
 import type {
   ListItemBuilder,
@@ -17,7 +26,7 @@ import type {
 import { currentAudience } from './roles'
 import { SINGLETON_TYPES } from './singletons'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
-import { filterStructureItems } from './utils/structure-access'
+import { CLIENT_WEBSITE_SETTINGS_IDS, filterStructureItems } from './utils/structure-access'
 // new-singleton:import
 
 const PAGES_QUERY = `*[_type == "page"]{ _id, "slug": slug.current }`
@@ -31,6 +40,7 @@ const pagesTree = (S: StructureBuilder, { documentStore }: StructureResolverCont
   S.listItem()
     .title('Pages')
     .id('pages')
+    .icon(DocumentsIcon)
     .child(
       documentStore.listenQuery(PAGES_QUERY, {}, {}).pipe(
         map((pages: PageRef[] | null) => {
@@ -70,53 +80,97 @@ const LISTED_TYPES = new Set([
   'post',
   'author',
   'category',
+  'stripePrice',
   // new-document:listed
 ])
 
+/**
+ * Design screens that arrive in later tasks (brand colours, motion presets). Each shows under
+ * "Design" only once its singleton type is in the schema, so the group never appears empty.
+ */
+const DESIGN_SINGLETONS = [
+  { type: 'brandColours', title: 'Brand colours' },
+  { type: 'motionPresets', title: 'Motion presets' },
+] as const
+
+type Item = ListItemBuilder | ReturnType<StructureBuilder['divider']>
+
 /** An item's id, or null for a divider (see filterStructureItems). */
-const idOf = (item: ListItemBuilder | ReturnType<StructureBuilder['divider']>) =>
-  'getId' in item ? item.getId() : null
+const idOf = (item: Item) => ('getId' in item ? item.getId() : null)
+
+const singletonItem = (S: StructureBuilder, type: string, title: string, icon: ComponentType) =>
+  S.listItem()
+    .title(title)
+    .id(type)
+    .icon(icon)
+    .child(S.document().schemaType(type).documentId(type).title(title))
+
+/** A sidebar group: one item that opens a list of its own. */
+const group = (
+  S: StructureBuilder,
+  id: string,
+  title: string,
+  icon: ComponentType,
+  items: Item[],
+) => S.listItem().title(title).id(id).icon(icon).child(S.list().id(id).title(title).items(items))
 
 /**
- * Desk structure: singletons pinned at the top, then every other document type. Clients see only
- * the items listed in CLIENT_STRUCTURE_IDS (utils/structure-access.ts).
+ * Desk structure, grouped by what people do rather than by schema type: Pages, Blog, Reusable
+ * content, Website settings, Design and Advanced. Clients see only the items listed in
+ * CLIENT_STRUCTURE_IDS (utils/structure-access.ts), and inside Website settings only
+ * CLIENT_WEBSITE_SETTINGS_IDS.
  */
 export const structure: StructureResolver = (S, context) => {
-  const items = [
-    S.listItem()
-      .title('Site settings')
-      .id('settings')
-      .icon(CogIcon)
-      .child(S.document().schemaType('settings').documentId('settings').title('Site settings')),
+  const audience = currentAudience(context.currentUser)
+  const hasType = (name: string) => Boolean(context.schema.get(name))
+
+  const websiteSettings = filterStructureItems(
+    [
+      singletonItem(S, 'siteIdentity', 'Identity & search', SearchIcon),
+      singletonItem(S, 'siteNavigation', 'Navigation', MenuIcon),
+      singletonItem(S, 'announcement', 'Announcement bar', BellIcon),
+      singletonItem(S, 'cookieBanner', 'Cookie banner', LockIcon),
+    ],
+    audience,
+    idOf,
+    CLIENT_WEBSITE_SETTINGS_IDS,
+  )
+  const design = DESIGN_SINGLETONS.filter(({ type }) => hasType(type)).map(({ type, title }) =>
+    singletonItem(S, type, title, ColorWheelIcon),
+  )
+
+  const items: Item[] = [
     // new-singleton:list
-    S.divider(),
     pagesTree(S, context),
-    S.documentTypeListItem('sharedSection').title('Shared sections'),
-    S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon),
-    S.listItem()
-      .title('Blog')
-      .id('blog')
-      .icon(ComposeIcon)
-      .child(
-        S.list()
-          .title('Blog')
-          .items([
-            S.documentTypeListItem('post').title('Posts').icon(ComposeIcon),
-            S.documentTypeListItem('author').title('Authors').icon(UserIcon),
-            S.documentTypeListItem('category').title('Categories').icon(TagIcon),
-          ]),
-      ),
-    S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
-    S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon),
+    group(S, 'blog', 'Blog', ComposeIcon, [
+      S.documentTypeListItem('post').title('Posts').icon(ComposeIcon),
+      S.documentTypeListItem('author').title('Authors').icon(UserIcon),
+      S.documentTypeListItem('category').title('Categories').icon(TagIcon),
+    ]),
     // new-document:list
     S.divider(),
-    // Everything else not explicitly listed above.
-    ...S.documentTypeListItems().filter((item) => {
-      const id = item.getId() ?? ''
-      return !LISTED_TYPES.has(id) && !SINGLETON_TYPES.has(id)
-    }),
+    group(S, 'reusable', 'Reusable content', StackIcon, [
+      S.documentTypeListItem('sharedSection').title('Shared sections'),
+      S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon),
+    ]),
+    group(S, 'websiteSettings', 'Website settings', CogIcon, websiteSettings),
+    ...(design.length > 0 ? [group(S, 'design', 'Design', ColorWheelIcon, design)] : []),
+    S.divider(),
+    group(S, 'advanced', 'Advanced', WrenchIcon, [
+      S.documentTypeListItem('redirect').title('Redirects').icon(ArrowRightIcon),
+      S.documentTypeListItem('experiment').title('A/B tests').icon(SplitHorizontalIcon),
+      ...(hasType('stripePrice')
+        ? [S.documentTypeListItem('stripePrice').title('Stripe prices')]
+        : []),
+      S.divider(),
+      // Everything else not explicitly listed above.
+      ...S.documentTypeListItems().filter((item) => {
+        const id = item.getId() ?? ''
+        return !LISTED_TYPES.has(id) && !SINGLETON_TYPES.has(id)
+      }),
+    ]),
   ]
   return S.list()
     .title('Content')
-    .items(filterStructureItems(items, currentAudience(context.currentUser), idOf))
+    .items(filterStructureItems(items, audience, idOf))
 }

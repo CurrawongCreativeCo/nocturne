@@ -262,7 +262,7 @@
             />
             <p class="help" id="projectName-help">
               Names the new Sanity project and appears in the starter content. You can change it
-              later in Site settings.
+              later in Website settings.
             </p>
             <p class="error" id="projectName-error"></p>
           </div>
@@ -377,7 +377,7 @@
             <div>
               <strong>Add starter content</strong
               ><span
-                >A home page and an about page built from the sections, plus site settings with a
+                >A home page and an about page built from the sections, plus website settings with a
                 menu and footer. Never overwrites existing documents. Uses your Sanity CLI
                 login.</span
               >
@@ -597,7 +597,7 @@
           ),
           result.seed &&
             (result.seed.ok
-              ? ['ok', 'Added starter content: Home and About pages, Site settings']
+              ? ['ok', 'Added starter content: Home and About pages, site name and menu']
               : ['warn', `Starter content not added. ${escapeHtml(result.seed.message)}`]),
           [
             'ok',

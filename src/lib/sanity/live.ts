@@ -77,7 +77,10 @@ export const revalidateSecret = process.env.SANITY_REVALIDATE_SECRET || undefine
  */
 export const TAGS = {
   page: 'page',
-  settings: 'settings',
+  siteIdentity: 'siteIdentity',
+  siteNavigation: 'siteNavigation',
+  announcement: 'announcement',
+  cookieBanner: 'cookieBanner',
   redirect: 'redirect',
   sharedSection: 'sharedSection',
   post: 'post',

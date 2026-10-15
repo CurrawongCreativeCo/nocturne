@@ -10,7 +10,7 @@ export async function getSettings(mode: FetchMode) {
   const { data } = await cachedSanityFetch({
     query: SETTINGS_QUERY,
     ...mode,
-    tags: [TAGS.settings, TAGS.page],
+    tags: [TAGS.siteIdentity, TAGS.siteNavigation, TAGS.announcement, TAGS.cookieBanner, TAGS.page],
   })
   return data
 }

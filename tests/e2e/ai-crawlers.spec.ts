@@ -18,7 +18,7 @@ async function useSettings(request: APIRequestContext, variant: 'default' | 'aiC
   )
   expect(control.status()).toBe(204)
 
-  const body = JSON.stringify({ _type: 'settings', _id: 'settings' })
+  const body = JSON.stringify({ _type: 'siteIdentity', _id: 'siteIdentity' })
   const webhook = await request.post('/api/revalidate', {
     data: body,
     headers: {

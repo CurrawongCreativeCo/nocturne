@@ -19,7 +19,7 @@ import {
 
 const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
 
-/** Named variants of the settings document the tests switch between; `null` serves the fixture as is. */
+/** Named variants of the siteIdentity document the tests switch between; `null` serves the fixture as is. */
 const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked }
 let settingsPatch = null
 
@@ -38,7 +38,9 @@ const BASE_ID = /^versions.[^.]+./
  */
 function datasetFor(perspective, variant) {
   const published = documents
-    .map((doc) => (settingsPatch && doc._id === 'settings' ? { ...doc, ...settingsPatch } : doc))
+    .map((doc) =>
+      settingsPatch && doc._id === 'siteIdentity' ? { ...doc, ...settingsPatch } : doc,
+    )
     .map((doc) =>
       experimentPatch && doc._type === 'experiment' ? { ...doc, ...experimentPatch } : doc,
     )

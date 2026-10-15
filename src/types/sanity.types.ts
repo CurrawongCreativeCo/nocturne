@@ -127,15 +127,56 @@ export type Link = {
   openInNewTab?: boolean
 }
 
-export type NavItem = {
-  _type: 'navItem'
-  label: string
-  link: Link
+export type CookieBanner = {
+  _id: string
+  _type: 'cookieBanner'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  message?: string
+  privacyLabel?: string
+  privacyLink?: Link
+  analyticsText?: string
+  marketingText?: string
 }
 
-export type Settings = {
+export type Announcement = {
   _id: string
-  _type: 'settings'
+  _type: 'announcement'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  message?: string
+  link?: Link
+  startsAt?: string
+  endsAt?: string
+  dismissible?: boolean
+}
+
+export type SiteNavigation = {
+  _id: string
+  _type: 'siteNavigation'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  headerNav?: Array<
+    {
+      _key: string
+    } & NavItem
+  >
+  headerCta?: Cta
+  footerNav?: Array<
+    {
+      _key: string
+    } & NavItem
+  >
+  footerText?: string
+}
+
+export type SiteIdentity = {
+  _id: string
+  _type: 'siteIdentity'
   _createdAt: string
   _updatedAt: string
   _rev: string
@@ -157,34 +198,7 @@ export type Settings = {
     alt?: string
     _type: 'image'
   }
-  announcement?: {
-    message: string
-    link?: Link
-    startsAt?: string
-    endsAt?: string
-    dismissible?: boolean
-  }
-  headerNav?: Array<
-    {
-      _key: string
-    } & NavItem
-  >
-  headerCta?: Cta
-  footerNav?: Array<
-    {
-      _key: string
-    } & NavItem
-  >
-  footerText?: string
   allowAiCrawlers?: boolean
-  consent?: {
-    title?: string
-    message?: string
-    privacyLabel?: string
-    privacyLink?: Link
-    analyticsText?: string
-    marketingText?: string
-  }
 }
 
 export type SanityImageCrop = {
@@ -201,6 +215,12 @@ export type SanityImageHotspot = {
   y: number
   height: number
   width: number
+}
+
+export type NavItem = {
+  _type: 'navItem'
+  label: string
+  link: Link
 }
 
 export type Experiment = {
@@ -876,10 +896,13 @@ export type AllSanitySchemaTypes =
   | Cta
   | PageReference
   | Link
-  | NavItem
-  | Settings
+  | CookieBanner
+  | Announcement
+  | SiteNavigation
+  | SiteIdentity
   | SanityImageCrop
   | SanityImageHotspot
+  | NavItem
   | Experiment
   | Category
   | Slug
@@ -2340,85 +2363,47 @@ export type SEARCH_QUERY_RESULT = Array<{
 
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
-// Query: *[_id == "settings"][0] {    title,    description,    logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },    ogImage { asset->{ _id } },    announcement { message, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, startsAt, endsAt, dismissible },    headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },    footerText,    consent { title, message, privacyLabel, privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab }, analyticsText, marketingText },    "allowAiCrawlers": allowAiCrawlers != false  }
-export type SETTINGS_QUERY_RESULT =
-  | {
-      title: null
-      description: null
-      logo: null
-      ogImage: null
-      announcement: null
-      headerNav: null
-      headerCta: null
-      footerNav: null
-      footerText: null
-      consent: null
-      allowAiCrawlers: true
-    }
-  | {
-      title: string
-      description: null
-      logo: null
-      ogImage: null
-      announcement: null
-      headerNav: null
-      headerCta: null
-      footerNav: null
-      footerText: null
-      consent: null
-      allowAiCrawlers: true
-    }
-  | {
-      title: string | null
-      description: null
-      logo: null
-      ogImage: null
-      announcement: null
-      headerNav: null
-      headerCta: null
-      footerNav: null
-      footerText: null
-      consent: null
-      allowAiCrawlers: true
-    }
-  | {
-      title: string | null
-      description: string | null
-      logo: null
-      ogImage: null
-      announcement: null
-      headerNav: null
-      headerCta: null
-      footerNav: null
-      footerText: null
-      consent: null
-      allowAiCrawlers: true
-    }
-  | {
-      title: string
-      description: string | null
-      logo: {
-        alt: string | null
-        crop: SanityImageCrop | null
-        hotspot: SanityImageHotspot | null
-        asset: {
-          _id: string
-          metadata: {
-            lqip: string | null
-            dimensions: {
-              width: number
-              height: number
-            } | null
-          } | null
+// Query: *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "settings"]][0] {    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {      title,      description,      logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, dimensions { width, height } }  } },      ogImage { asset->{ _id } },      allowAiCrawlers    },    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {      headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab } },      footerText    },    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {      message,      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      startsAt,      endsAt,      dismissible    },    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {      title,      message,      privacyLabel,      privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab },      analyticsText,      marketingText    }  } {    "title": identity.title,    "description": identity.description,    "logo": identity.logo,    "ogImage": identity.ogImage,    "announcement": announcement,    "headerNav": navigation.headerNav,    "headerCta": navigation.headerCta,    "footerNav": navigation.footerNav,    "footerText": navigation.footerText,    "consent": consent,    "allowAiCrawlers": identity.allowAiCrawlers != false  }
+export type SETTINGS_QUERY_RESULT = {
+  title: null | string
+  description: null | string
+  logo: null | {
+    alt: string | null
+    crop: SanityImageCrop | null
+    hotspot: SanityImageHotspot | null
+    asset: {
+      _id: string
+      metadata: {
+        lqip: string | null
+        dimensions: {
+          width: number
+          height: number
         } | null
       } | null
-      ogImage: {
-        asset: {
-          _id: string
-        } | null
-      } | null
-      announcement: {
-        message: string
+    } | null
+  }
+  ogImage: null | {
+    asset: {
+      _id: string
+    } | null
+  }
+  announcement:
+    | {
+        message: null
+        link: null
+        startsAt: null
+        endsAt: null
+        dismissible: null
+      }
+    | {
+        message: string | null
+        link: null
+        startsAt: null
+        endsAt: null
+        dismissible: null
+      }
+    | {
+        message: string | null
         link: {
           linkType: 'external' | 'internal'
           slug: string | null
@@ -2428,40 +2413,74 @@ export type SETTINGS_QUERY_RESULT =
         startsAt: string | null
         endsAt: string | null
         dismissible: boolean | null
-      } | null
-      headerNav: Array<{
-        _key: string
-        label: string
-        link: {
-          linkType: 'external' | 'internal'
-          slug: string | null
-          url: string | null
-          openInNewTab: boolean | null
-        }
-      }> | null
-      headerCta: {
-        _key: null
-        label: string
-        variant: 'primary' | 'secondary'
-        link: {
-          linkType: 'external' | 'internal'
-          slug: string | null
-          url: string | null
-          openInNewTab: boolean | null
-        }
-      } | null
-      footerNav: Array<{
-        _key: string
-        label: string
-        link: {
-          linkType: 'external' | 'internal'
-          slug: string | null
-          url: string | null
-          openInNewTab: boolean | null
-        }
-      }> | null
-      footerText: string | null
-      consent: {
+      }
+    | null
+  headerNav: Array<{
+    _key: string
+    label: string
+    link: {
+      linkType: 'external' | 'internal'
+      slug: string | null
+      url: string | null
+      openInNewTab: boolean | null
+    }
+  }> | null
+  headerCta: null | {
+    _key: null
+    label: string
+    variant: 'primary' | 'secondary'
+    link: {
+      linkType: 'external' | 'internal'
+      slug: string | null
+      url: string | null
+      openInNewTab: boolean | null
+    }
+  }
+  footerNav: Array<{
+    _key: string
+    label: string
+    link: {
+      linkType: 'external' | 'internal'
+      slug: string | null
+      url: string | null
+      openInNewTab: boolean | null
+    }
+  }> | null
+  footerText: null | string
+  consent:
+    | {
+        title: null
+        message: null
+        privacyLabel: null
+        privacyLink: null
+        analyticsText: null
+        marketingText: null
+      }
+    | {
+        title: string
+        message: null
+        privacyLabel: null
+        privacyLink: null
+        analyticsText: null
+        marketingText: null
+      }
+    | {
+        title: string | null
+        message: null
+        privacyLabel: null
+        privacyLink: null
+        analyticsText: null
+        marketingText: null
+      }
+    | {
+        title: null
+        message: string | null
+        privacyLabel: null
+        privacyLink: null
+        analyticsText: null
+        marketingText: null
+      }
+    | {
         title: string | null
         message: string | null
         privacyLabel: string | null
@@ -2473,14 +2492,14 @@ export type SETTINGS_QUERY_RESULT =
         } | null
         analyticsText: string | null
         marketingText: string | null
-      } | null
-      allowAiCrawlers: boolean | true
-    }
-  | null
+      }
+    | null
+  allowAiCrawlers: boolean | true
+} | null
 
 // Source: src/features/studio/content-health/api/query.ts
 // Variable: CONTENT_HEALTH_QUERY
-// Query: {  "pages": *[_type == "page"] {    _id,    title,    "slug": slug.current,    "metaDescription": seo.metaDescription,    pageBuilder  },  "sharedSections": *[_type == "sharedSection"] {    _id,    title,    section  },  "settings": *[_id in ["settings", "drafts.settings"]] {    _id,    headerNav,    headerCta,    footerNav  },  "redirects": *[_type == "redirect"] {    _id,    source,    destination  }}
+// Query: {  "pages": *[_type == "page"] {    _id,    title,    "slug": slug.current,    "metaDescription": seo.metaDescription,    pageBuilder  },  "sharedSections": *[_type == "sharedSection"] {    _id,    title,    section  },  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {    _id,    headerNav,    headerCta,    footerNav  },  "redirects": *[_type == "redirect"] {    _id,    source,    destination  }}
 export type CONTENT_HEALTH_QUERY_RESULT = {
   pages: Array<{
     _id: string
@@ -2565,7 +2584,7 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
         } & Testimonials)
     >
   }>
-  settings: Array<
+  navigation: Array<
     | {
         _id: string
         headerNav: null
@@ -2596,7 +2615,7 @@ export type CONTENT_HEALTH_QUERY_RESULT = {
 
 // Source: src/lib/sanity/schema/seo-preview/query.ts
 // Variable: SEO_PREVIEW_SETTINGS_QUERY
-// Query: *[_id == "settings"][0] { title, description, ogImage }
+// Query: *[_id == "siteIdentity"][0] { title, description, ogImage }
 export type SEO_PREVIEW_SETTINGS_QUERY_RESULT =
   | {
       title: null
@@ -2648,9 +2667,9 @@ declare global {
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_type == "stripePrice" && priceId == $priceId && active == true][0] {\n    priceId,\n    interval\n  }\n': CHECKOUT_PRICE_QUERY_RESULT
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
-    '\n  *[_id == "settings"][0] {\n    title,\n    description,\n    logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n    ogImage { asset->{ _id } },\n    announcement { message, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, startsAt, endsAt, dismissible },\n    headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n    footerText,\n    consent { title, message, privacyLabel, privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }, analyticsText, marketingText },\n    "allowAiCrawlers": allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
-    '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "settings": *[_id in ["settings", "drafts.settings"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
-    '\n  *[_id == "settings"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
+    '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      allowAiCrawlers\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n }\n },\n      footerText\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab\n },\n      analyticsText,\n      marketingText\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "consent": consent,\n    "allowAiCrawlers": identity.allowAiCrawlers != false\n  }\n': SETTINGS_QUERY_RESULT
+    '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
+    '\n  *[_id == "siteIdentity"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too
