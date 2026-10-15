@@ -41,8 +41,23 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     },
   ]),
   locations: {
-    settings: defineLocations({
-      message: 'Used on every page (header, footer and default SEO)',
+    siteIdentity: defineLocations({
+      message: 'Used on every page (site name, logo and default SEO)',
+      tone: 'positive',
+      locations: [{ title: 'Home', href: '/' }],
+    }),
+    siteNavigation: defineLocations({
+      message: 'Used on every page (header and footer)',
+      tone: 'positive',
+      locations: [{ title: 'Home', href: '/' }],
+    }),
+    announcement: defineLocations({
+      message: 'Shown above the header on every page',
+      tone: 'positive',
+      locations: [{ title: 'Home', href: '/' }],
+    }),
+    cookieBanner: defineLocations({
+      message: 'Shown on every page when analytics is set up',
       tone: 'positive',
       locations: [{ title: 'Home', href: '/' }],
     }),

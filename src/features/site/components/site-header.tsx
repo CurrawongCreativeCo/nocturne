@@ -23,7 +23,7 @@ export async function SiteHeader({ search, ...mode }: FetchMode & { search?: Rea
             // Eager, not preloaded: the hero image is the page's LCP and should win the bandwidth.
             <SanityImage
               image={settings.logo}
-              alt={settings.title}
+              alt={settings.title ?? ''}
               height={32}
               className="h-8 w-auto"
               loading="eager"

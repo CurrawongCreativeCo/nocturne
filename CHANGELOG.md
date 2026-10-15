@@ -28,8 +28,8 @@ you start a release.
 
 - **Browser icon (favicon):** every site now shows Currawong's icon by default (`src/app/icon.png` 512 × 512 and
   `src/app/apple-icon.png` 180 × 180, made from the brand mark by `scripts/make-default-icons.mjs`), replacing the
-  purple placeholder `icon.svg` and the generated `apple-icon.tsx`. A new _Browser icon_ setting in Site settings
-  (General) lets editors keep the default, upload a square PNG or SVG, or copy the site logo and crop it, with
+  purple placeholder `icon.svg` and the generated `apple-icon.tsx`. A new _Browser icon_ setting in Website settings → Identity & search
+  lets editors keep the default, upload a square PNG or SVG, or copy the site logo and crop it, with
   padding (None, Small, Medium), a background (Transparent, Light, Dark, Brand) and a preview at 16, 32 and 180 px on
   light and dark browsers. Custom icons are Sanity CDN PNGs (32, 192, 512 and 180 px) set through `metadata.icons`
   from the existing settings query, so there are no duplicate `<link rel="icon">` tags and no uploaded SVG markup in
@@ -72,6 +72,15 @@ you start a release.
   Testimonials band, Hero and CTA banner take their colours from the tone mechanism (the banner's own tone now colours its
   card through `data-tone`). The plan badge in the pricing table uses `bg-ink text-surface`. An empty style renders as before.
 
+- **Studio sidebar:** regrouped by what people do: Start here (when it exists), Pages, Blog, Reusable content (Shared
+  sections, Forms), Website settings, Design (hidden until it has screens) and Advanced (Redirects, A/B tests, Stripe
+  prices and the catch-all list). Clients see Start here, Pages, Blog and Website settings (Identity & search,
+  Navigation, Announcement bar). See the README's "Editing content".
+- **Site settings split into four singletons:** `siteIdentity` (Identity & search), `siteNavigation`, `announcement`
+  and `cookieBanner` replace the single `settings` document. `SETTINGS_QUERY` assembles them into the same result
+  shape in one request, so components are unchanged. The webhook filter, cache tags (`TAGS`), Presentation locations,
+  Content health, the SEO preview and the seed content follow.
+
 ### Fixed
 
 ### Breaking changes / migration steps
@@ -92,6 +101,11 @@ edited the old file merges its changes into `hero/overlay.tsx` (the same look) o
 by every layout). Run `npm run typegen`. Existing heroes keep the overlay look; new heroes no longer store an
 alignment, so the layout chooses it. Visual baselines gain the `hero-*` gallery entries: refresh them with the "Update
 visual baselines" workflow.
+
+- Run `migrations/split-site-settings` on every dataset (dry run first; commands in the README's "Sanity workflow").
+  Until it has run, the site reads the old `settings` document, so the deploy and the migration can happen in either
+  order. Add `siteIdentity`, `siteNavigation`, `announcement` and `cookieBanner` to the Sanity webhook's filter
+  (replace `settings`) in webhook mode.
 
 ## [1.3.0] - 2026-10-14
 

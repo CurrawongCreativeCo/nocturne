@@ -155,7 +155,7 @@ export function findRedirectProblems(rules: RedirectRule[]): RedirectProblem[] {
 // -- Orphans ----------------------------------------------------------------------------------
 
 export interface PageLink {
-  /** The document holding the link: a page id, or "settings". */
+  /** The document holding the link: a page id, or "siteNavigation". */
   from: string
   /** The page it points at. */
   to: string

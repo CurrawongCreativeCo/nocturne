@@ -18,7 +18,7 @@ export const CONTENT_HEALTH_QUERY = defineQuery(/* groq */ `{
     title,
     section
   },
-  "settings": *[_id in ["settings", "drafts.settings"]] {
+  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {
     _id,
     headerNav,
     headerCta,

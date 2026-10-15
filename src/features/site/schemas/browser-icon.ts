@@ -20,7 +20,6 @@ export const browserIconField = defineField({
   name: 'browserIcon',
   title: 'Browser icon',
   type: 'object',
-  group: 'general',
   description:
     'The small picture in browser tabs, bookmarks and on phone home screens. Leave it on the default until the site has its own.',
   options: { collapsible: false },

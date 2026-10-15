@@ -6,26 +6,39 @@ import type { Audience } from '../roles'
  * that don't have them) are simply never shown.
  */
 export const CLIENT_STRUCTURE_IDS: ReadonlySet<string> = new Set([
-  'settings',
+  'startHere',
   'pages',
   'blog',
+  'websiteSettings',
   'team',
   'businessInfo',
 ])
 
 /**
- * Filters desk items for the audience. `idOf` returns an item's id, or null for a divider.
- * Dividers are kept between groups but never lead, trail or double up once items are removed.
+ * What clients see inside Website settings: the cookie banner (legal wording) stays with the
+ * agency, as do any screens added later.
+ */
+export const CLIENT_WEBSITE_SETTINGS_IDS: ReadonlySet<string> = new Set([
+  'siteIdentity',
+  'siteNavigation',
+  'announcement',
+])
+
+/**
+ * Filters desk items for the audience, keeping the ids in `allowed` (the top-level list by default).
+ * `idOf` returns an item's id, or null for a divider. Dividers are kept between groups but never
+ * lead, trail or double up once items are removed.
  */
 export function filterStructureItems<T>(
   items: readonly T[],
   audience: Audience,
   idOf: (item: T) => string | null | undefined,
+  allowed: ReadonlySet<string> = CLIENT_STRUCTURE_IDS,
 ): T[] {
   if (audience === 'agency') return [...items]
   const kept = items.filter((item) => {
     const id = idOf(item)
-    return id === null || (id !== undefined && CLIENT_STRUCTURE_IDS.has(id))
+    return id === null || (id !== undefined && allowed.has(id))
   })
   return kept.filter((item, index) => {
     if (idOf(item) !== null) return true

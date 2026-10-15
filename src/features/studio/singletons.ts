@@ -5,7 +5,10 @@ import type { DocumentActionsResolver, NewDocumentOptionsResolver, Template } fr
  * desk structure). They can't be created, duplicated or deleted from the UI.
  */
 export const SINGLETON_TYPES = new Set([
-  'settings',
+  'siteIdentity',
+  'siteNavigation',
+  'announcement',
+  'cookieBanner',
   // new-singleton:register
 ])
 

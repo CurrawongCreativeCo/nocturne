@@ -63,16 +63,27 @@ Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Roles:** clients see a simpler Studio than Currawong staff; see [Studio roles and permissions](#studio-roles-and-permissions).
-- **Site settings** (top of the sidebar) holds the site name, logo, announcement bar, header menu and button, footer, and default SEO.
-- **Announcement bar:** in Site settings → _Announcement_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
-- **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Site settings), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
-- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from Site settings. All of it goes through `src/components/ui/json-ld.tsx`.
+- **The sidebar** is grouped by what you are doing, not by how the data is stored. Agency staff see every item; clients see the ones marked (client).
+  - **Start here** (client): a short guide to the first things to do. It appears once that screen exists.
+  - **Pages** (client): every page on the site, as a tree of folders, with an _All pages_ list underneath.
+  - **Blog** (client): _Posts_ are the articles, _Authors_ are the people credited on them, and _Categories_ group posts so visitors can filter.
+  - **Reusable content:** _Shared sections_ are sections you write once and place on many pages, and _Forms_ are the contact and newsletter forms (including where their messages go).
+  - **Website settings** (client, except _Cookie banner_) holds the things that appear on every page:
+    - _Identity & search_ (client) is the site name, description, logo, default share image and browser icon, plus (agency only, under _Advanced_) whether AI crawlers may read the site.
+    - _Navigation_ (client) is the header menu and button, and the footer links and text.
+    - _Announcement bar_ (client) is the one-line banner above the header.
+    - _Cookie banner_ is the wording of the consent banner (agency only).
+  - **Design:** colour and motion choices for the site. It stays hidden until those screens (_Brand colours_, _Motion presets_) exist.
+  - **Advanced:** _Redirects_ send old addresses to new ones, _A/B tests_ run headline experiments, _Stripe prices_ are the synced pricing plans, and anything the site adds later lands here too.
+- **Announcement bar:** in Website settings → _Announcement bar_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
+- **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Website settings → _Identity & search_), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
+- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Identity & search_. All of it goes through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
-- **AI crawlers and `/llms.txt`:** in Site settings → _Search & AI_, _Allow AI crawlers_ (on by default) decides how the site treats AI tools.
+- **AI crawlers and `/llms.txt`:** in Website settings → _Identity & search_ → _Advanced_ (agency only), _Allow AI crawlers_ (on by default) decides how the site treats AI tools.
   - _On:_ `/llms.txt` lists the site name, its default description and every page that isn't hidden from search engines, as Markdown links followed by each page's meta description (a page without one is listed by title only), so AI tools can find your content. Posts follow under a _Blog_ heading, newest first, with the post's meta description or else its summary; posts hidden from search engines are left out.
   - _Off:_ `robots.txt` disallows the whole site for GPTBot, ClaudeBot, Google-Extended, PerplexityBot and CCBot, and `/llms.txt` answers 404. Google, Bing and other search engines are untouched. The list lives in `src/lib/ai-crawlers.ts`.
   - It is a request, not a lock: well-behaved crawlers obey `robots.txt`, others don't. A crawler that has already stored your pages keeps them. Changes appear as soon as the settings are published (webhook mode: after the webhook).
-- **Cookie banner:** in Site settings → _Cookie banner_, edit the banner's title, message, privacy policy link and link text, and the one-line descriptions beside _Analytics_ and _Marketing_. Empty fields use sensible defaults. The banner offers **Accept all**, **Reject all** (equal prominence) and **Choose** (analytics and marketing separately; necessary cookies are always on), and a **Cookie settings** link in the footer reopens it so visitors can change their mind. It only exists when the developer has set up an analytics provider (see _Analytics and cookie consent_); with none, there is nothing to ask and no banner or footer link. Banner text changes appear like any other settings change. In Presentation the banner shows too, but no analytics ever load for editors.
+- **Cookie banner:** in Website settings → _Cookie banner_ (agency only), edit the banner's title, message, privacy policy link and link text, and the one-line descriptions beside _Analytics_ and _Marketing_. Empty fields use sensible defaults. The banner offers **Accept all**, **Reject all** (equal prominence) and **Choose** (analytics and marketing separately; necessary cookies are always on), and a **Cookie settings** link in the footer reopens it so visitors can change their mind. It only exists when the developer has set up an analytics provider (see _Analytics and cookie consent_); with none, there is nothing to ask and no banner or footer link. Banner text changes appear like any other settings change. In Presentation the banner shows too, but no analytics ever load for editors.
 - **Search:** visitors search from the magnifier in the header (or Ctrl/Cmd+K) for a quick list, or at `/search?q=…` for the full results page. It looks through page titles, meta descriptions and the text of _Rich text_ and _Image + text_ sections, matching the start of each word ("web des" finds "Web design"), with title matches first and up to 20 results, each with a short excerpt. Pages with _Hide from search engines_ ticked and members-only pages are left out, as is text inside members-only sections and other sections (hero, FAQ, features…) and shared sections. A query is 2–80 characters (longer is cut). New or edited pages appear within a few minutes (webhook mode: right after the webhook, which expires every cached search). `search` is reserved, so a page can't use it as its first slug segment.
 - **Members-only content:** a page has a _Who can see this page_ field and every section a _Who can see this_ field (_Everyone_ or _Members only (signed in)_; empty means everyone). A members-only page asks visitors to sign in and shows nothing else, is left out of the sitemap, `/llms.txt` and search, and tells search engines not to index it. A members-only section on a public page is replaced by a "Members only" sign-in prompt for visitors who aren't signed in; the rest of the page is unchanged. A shared section is members-only when the section inside it is. The page's title is replaced by "Members only" until the visitor signs in; its URL, and any menu entry an editor adds for it, are not hidden. In Presentation and draft previews editors see everything. Who counts as a member is set by the developer (see _Members-only content_ below). `sign-in` and `sign-out` are reserved first slug segments; link to `/sign-out` (a button link or a footer menu item with a custom URL) wherever members should find it.
 - **Section design:** every section has a **Design** tab next to **Content** (agency use: it is for Currawong staff, and hiding it from clients arrives with the client mode task). It sets, for that one section:
@@ -101,10 +112,10 @@ Open http://localhost:3000/studio:
     characters. Review before publishing.
 - **Blog:** _Blog_ in the sidebar holds _Posts_, _Authors_ and _Categories_. A post needs a title, slug, summary, main image (with alt text), published date, author and body; give it at least one category, because related posts are chosen by shared categories. The slug becomes `/blog/<slug>`, so `blog` is reserved and a page can't use it. Details:
   - _Index:_ `/blog` shows 12 posts per page, newest first by _Published at_, with Previous / Next links (`?page=2`) and a filter of the categories that have a post. `/blog/category/<slug>` lists one category the same way. Page 1 has no `?page`, and every page is its own canonical URL.
-  - _Summary_ is the card text, the RSS description and the search description unless the post's SEO group sets one. The main image is the share image unless the SEO group has its own; there is no generated image for blog URLs, so set a default in Site settings if you want one on `/blog`.
+  - _Summary_ is the card text, the RSS description and the search description unless the post's SEO group sets one. The main image is the share image unless the SEO group has its own; there is no generated image for blog URLs, so set a default in _Identity & search_ if you want one on `/blog`.
   - _Related posts:_ up to three other posts that share a category, the most shared categories first (counting the post's first five), then newest. A post whose categories nobody else uses shows none.
   - _Going live:_ a post is public once published; _Published at_ only sets the order and the date shown, so a future date doesn't hide it. Use a content release to schedule one. Studio only warns before deleting an author that posts still use; those posts keep working and just lose the byline.
-  - _RSS:_ `/feed.xml` is an RSS 2.0 feed of the newest 12 posts, with absolute URLs, and blog pages advertise it in their `<head>`. It takes the title and description from Site settings.
+  - _RSS:_ `/feed.xml` is an RSS 2.0 feed of the newest 12 posts, with absolute URLs, and blog pages advertise it in their `<head>`. It takes the title and description from _Identity & search_.
   - _Search engines:_ posts get `Article` JSON-LD (author, dates, image, categories; the publisher is the site's Organization). Posts and `/blog` are in the sitemap unless the post's _Hide from search engines_ is ticked; category pages are not.
   - _Bad URLs:_ an unknown post or category gets a real 404. A `?page` past the last page (or not a number) shows the 404 page with `noindex` but answers 200, because the page number can only be read after the response has started streaming.
 - **Forms:** _Forms_ in the sidebar holds forms you build yourself; show one on a page with the _Form_ section (_Add item → Form_, then pick it). One form can sit on many pages. A form has:
@@ -192,7 +203,7 @@ own (see [Browser icon](#browser-icon-favicon)). The generated share image has i
 
 The small picture in browser tabs, bookmarks, search results and on phone home screens.
 
-**Editors.** In _Site settings → General → Browser icon_ choose:
+**Editors.** In _Website settings → Identity & search → Browser icon_ choose:
 
 - _Currawong's default_ (nothing to do). Every site starts here; it is the Currawong bird on paper.
 - _Upload an icon_: a square PNG or SVG, at least 512 px wide. Use the crop tool to frame it.
@@ -338,7 +349,7 @@ src/
     studio/[[...tool]]/page.tsx
     (site)/blog/                     blog index, [slug] (post), category/[slug]
     (site)/site-shell.tsx            header, <main>, footer: shared by (site)/layout and ab/[code]/layout
-    (site)/site-consent.tsx          cookie banner with its text from Site settings
+    (site)/site-consent.tsx          cookie banner with its text from the Cookie banner singleton
     ab/[code]/[[...slug]]/           pages prerendered per A/B option (proxy rewrites visitors here)
     api/experiments/route.ts         the running experiment as JSON, for proxy.ts
     feed.xml/route.ts                RSS 2.0 feed
@@ -369,7 +380,7 @@ src/
     experiments/                   A/B tests: experiment schema, assignment logic, signed variant codes (flags)
       api/                         queries.ts, get-experiment.ts (running test, code -> option)
       utils/                       assign (weights, cookie), experiment-flag (flags SDK), experiment-source (proxy lookup)
-    site/                          Site settings singleton: header, footer, default metadata
+    site/                          site settings singletons (siteIdentity, siteNavigation, announcement, cookieBanner): header, footer, default metadata
     search/                        site search: GROQ query, results page view, quick search dialog
       api/                         queries.ts (SEARCH_QUERY), search-pages.ts (cached read + snippets)
       components/                  search-view (server), search-form, quick-search (trigger), quick-search-dialog (lazy)
@@ -566,7 +577,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "settings", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1043,23 +1054,23 @@ Administrator sees the agency view, can manage members, tokens, CORS and dataset
 **Two kinds of limit.** Sanity's roles are enforced by Sanity's servers; hiding things in the Studio is a
 convenience. Someone with the Editor role who knows the API can still do what the Studio hides.
 
-| What                                                                              | Agency (Administrator, Developer) | Editor                                                                     | Contributor         | Enforced by                                    |
-| --------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------- | ------------------- | ---------------------------------------------- |
-| Publish, unpublish                                                                | Yes                               | Yes                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
-| Project settings, members, API tokens, CORS, datasets                             | Administrator only                | No                                                                         | No                  | **Sanity**                                     |
-| Edit, create and delete content through the API or Vision                         | Yes                               | Yes (any document)                                                         | Drafts only         | **Sanity**                                     |
-| Studio tools                                                                      | All                               | Presentation (first), Structure                                            | Same as Editor      | Studio                                         |
-| Vision, AI settings, Content health                                               | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
-| Sidebar                                                                           | Everything                        | Site settings, Pages, Blog (Team and Business info when the site has them) | Same as Editor      | Studio                                         |
-| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
-| Site settings groups _Search & AI_, _Cookie banner_                               | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
-| _Who can see this_ (members-only) fields                                          | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
-| SEO _Hide from search engines_                                                    | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
-| A page's slug once it has a value                                                 | Editable                          | Read-only                                                                  | Read-only           | Studio                                         |
-| Sections in the _Add item_ menu                                                   | All                               | Approved list below                                                        | Approved list below | Studio                                         |
-| Delete, Duplicate on pages, posts and singletons                                  | Yes                               | Hidden                                                                     | Hidden              | Studio                                         |
-| _New document_ menu                                                               | Everything                        | Page templates, Post, Author, Category                                     | Same as Editor      | Studio                                         |
-| "Agency view" badge and client-view preview                                       | Yes                               | No                                                                         | No                  | Studio                                         |
+| What                                                                              | Agency (Administrator, Developer) | Editor                                                                                                                                     | Contributor         | Enforced by                                    |
+| --------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- | ---------------------------------------------- |
+| Publish, unpublish                                                                | Yes                               | Yes                                                                                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
+| Project settings, members, API tokens, CORS, datasets                             | Administrator only                | No                                                                                                                                         | No                  | **Sanity**                                     |
+| Edit, create and delete content through the API or Vision                         | Yes                               | Yes (any document)                                                                                                                         | Drafts only         | **Sanity**                                     |
+| Studio tools                                                                      | All                               | Presentation (first), Structure                                                                                                            | Same as Editor      | Studio                                         |
+| Vision, AI settings, Content health                                               | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| Sidebar                                                                           | Everything                        | Start here, Pages, Blog, Website settings (Identity & search, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
+| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| Cookie banner, and _Allow AI crawlers_ in Identity & search                       | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| _Who can see this_ (members-only) fields                                          | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| SEO _Hide from search engines_                                                    | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| A page's slug once it has a value                                                 | Editable                          | Read-only                                                                                                                                  | Read-only           | Studio                                         |
+| Sections in the _Add item_ menu                                                   | All                               | Approved list below                                                                                                                        | Approved list below | Studio                                         |
+| Delete, Duplicate on pages, posts and singletons                                  | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
+| _New document_ menu                                                               | Everything                        | Page templates, Post, Author, Category                                                                                                     | Same as Editor      | Studio                                         |
+| "Agency view" badge and client-view preview                                       | Yes                               | No                                                                                                                                         | No                  | Studio                                         |
 
 Because the Studio-only limits can be bypassed, don't rely on them to protect secrets. Form recipient
 addresses, for example, stay readable to any Editor through the API. Real enforcement needs custom roles
@@ -1339,6 +1350,22 @@ secret or the project ID is missing, and fork pull requests never receive secret
 The dry run only reads and prints what each migration would change; read the log before merging.
 **CI never runs a real migration.** Do that by hand with `npx sanity migration run <id> --no-dry-run`; when a
 schema change needs a migration and how to write one are in [migrations/README.md](migrations/README.md).
+
+**Splitting Site settings.** The single _Site settings_ document is now four singletons (`siteIdentity`,
+`siteNavigation`, `announcement`, `cookieBanner`). Until `migrations/split-site-settings` has run on a dataset,
+the site keeps reading the old `settings` document (see `SETTINGS_QUERY`), so deploying first is safe, but the
+new Studio screens start empty. Run it once per dataset (it copies, never deletes, and is safe to repeat):
+
+```bash
+npx sanity login                                                  # once
+npx sanity migration run split-site-settings                      # dry run: prints what it would create
+npx sanity dataset export production backup.tar.gz                # backup
+npx sanity migration run split-site-settings --no-dry-run         # asks before it writes
+```
+
+Then publish the new documents (the migration copies drafts as drafts), and check the site. Once every dataset
+has been migrated, delete the `settings` fallbacks from `SETTINGS_QUERY`, delete the migration folder, and delete
+the old `settings` document by hand.
 
 ### Backups
 
@@ -1833,7 +1860,7 @@ the changelog transformation.
   needs inline scripts and styles. `/studio` is excluded from the framing restriction.
 - `error.tsx` handles a page that fails to render, keeping the header and footer. `global-error.tsx`
   handles failures in the layouts themselves.
-- Structured data (schema.org Organization and WebSite) is generated from Site settings on every
+- Structured data (schema.org Organization and WebSite) is generated from the site settings on every
   page, reusing the cached settings query.
 - `npm audit` reports issues in `braces` and `sprintf-js`, which have no fixed release yet. Both run only
   inside the Sanity CLI and ESLint, at build time, on this project's own files. Patched versions of

@@ -471,7 +471,7 @@ export function checkOgImages({ fetched, missing, total }) {
         id,
         title,
         'No page sets an og:image.',
-        'Add a default share image in Studio (Site settings → SEO).',
+        'Add a default share image in Studio (Website settings → Identity & search).',
       ),
     ]
   }
@@ -482,7 +482,7 @@ export function checkOgImages({ fetched, missing, total }) {
         id,
         title,
         `${fetched.length} image${fetched.length === 1 ? '' : 's'} fine; no og:image on ${listSome(missing.map(path), 3)} of ${total} pages.`,
-        'Add a default share image in Studio (Site settings → SEO).',
+        'Add a default share image in Studio (Website settings → Identity & search).',
       ),
     ]
   }

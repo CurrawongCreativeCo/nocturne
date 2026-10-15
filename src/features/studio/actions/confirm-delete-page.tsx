@@ -144,7 +144,7 @@ function IncomingLinksList({ state }: { state: State }) {
         <Stack gap={2} as="ul" style={{ margin: 0, paddingLeft: '1.25em' }}>
           {menus.map((menu) => (
             <Text as="li" size={1} key={menu}>
-              {menu} (Site settings)
+              {menu} (Navigation)
             </Text>
           ))}
           {documents.map(({ id, title, kind }) => (

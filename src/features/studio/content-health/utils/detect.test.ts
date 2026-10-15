@@ -84,15 +84,15 @@ describe('findOrphanPages', () => {
   ]
 
   it('returns pages nothing links to, never the home page', () => {
-    expect(findOrphanPages(pages, [{ from: 'settings', to: 'about' }])).toEqual([
+    expect(findOrphanPages(pages, [{ from: 'siteNavigation', to: 'about' }])).toEqual([
       { id: 'team', slug: 'about/team' },
       { id: 'lonely', slug: 'lonely' },
     ])
   })
 
-  it('counts links from settings and from other pages', () => {
+  it('counts links from the navigation and from other pages', () => {
     const links = [
-      { from: 'settings', to: 'about' },
+      { from: 'siteNavigation', to: 'about' },
       { from: 'about', to: 'team' },
       { from: 'home', to: 'lonely' },
     ]
