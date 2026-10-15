@@ -1567,7 +1567,8 @@ format_, an optional **prefix** (`$`), **suffix** (`+`, `%`, `m`) and **decimal 
 section holds one to six figures; Studio warns when text is too long, and never blocks publishing. The agency-only
 **Layout** is _Inline_ (big figures side by side on the page) or _Cards_ (one card each). The figures count up from 0 the
 first time they scroll into view; set the Design tab's **Animation** to _None_ and they are plain text. A **statistics
-bar** is two to four figures and an optional caption (the hero's slot for it arrives with task 81).
+bar** is two to four figures and an optional caption; the hero shows one in its supporting slot (_Hero supporting
+content_).
 
 **For developers.**
 
@@ -1592,9 +1593,13 @@ bar** is two to four figures and an optional caption (the hero's slot for it arr
 - **When it counts:** Animation _Reveal_ or _Stagger_ (the section starts on _Reveal_). _None_ means no count-up, and so
   does being the page's first section (`SectionFrame` never animates the first section either).
 - **`StatsBar`** (`src/components/ui/stats-bar.tsx`) is the hero-slot component: no section frame, no colours of its own
-  (text, muted text and dividers come from the surrounding tone, so it reads on a dark or a light hero), thin dividers
-  between figures, one row from `sm` up and two by two on a phone. Pass `animate` only when the hosting section's Animation
-  is not _None_. `/section-gallery/stats-bar` shows it on all four tones (404 outside development and the end-to-end run).
+  (text, muted text and dividers come from the surrounding tone, so it reads on a dark or a light hero). Its columns follow
+  its own width (container queries), not the screen's: three figures sit in a row from about 32 rem across, four from about
+  42 rem, and narrower than that they wrap two to a row, which is what lets one bar suit a full-width hero, a text panel and
+  a narrow column. Every figure has a thin divider before it and the row is pulled one gutter to the left inside an
+  `overflow-hidden` box, so the first figure of each row loses its divider however the row wraps. Pass `animate` only when
+  the hosting section's Animation is not _None_, and `centred` under a centred heading. `/section-gallery/stats-bar` shows it
+  on all four tones (404 outside development and the end-to-end run).
 - **Tests:** unit tests for the formatter and `StatFigure`; `tests/e2e/stats.spec.ts` checks the final values in the
   server HTML, axe on both layouts and the bar, the divider and 2×2 layout, a real count-up (and that its box never changes
   size), reduced motion, no JavaScript and Animation _None_. The gallery has `stats-inline`, `stats-cards` and
@@ -2124,6 +2129,69 @@ The gallery has an entry for each preset that is not a layout of its own and for
 `object-position` in the browser. LCP for each preset used as the first section follows from that: the picture or the
 heading is server-rendered, never lazy, and the picture's frame has a fixed ratio so it causes no layout shift. A
 Lighthouse run per preset has not been done; `npm run test:lighthouse` still measures the home page.
+
+### Hero supporting content
+
+The hero has one approved slot, **Extra content under the heading** (Content tab), for something that backs the
+heading up: a **Statistics bar** (two to four figures, see _Statistics_), **Badges** (one to three short labels, each with
+an optional icon: tick, star, shield, clock, heart, lightning bolt, leaf or award) or **Logos** (one to six, in grey by
+default; the _Greyscale_ switch keeps their colours instead). Nothing is added by default, so a hero looks the same
+until an agency adds one.
+
+**For editors.** Open the hero's Content tab, choose _Add item_ under _Extra content under the heading_ and pick one of the
+three pictures. Add the figures, labels or logos and publish. It sits where the layout puts it, and the spacing, widths and
+wrapping at every screen size are automatic. Clients see the slot only when it has something in it, and can change that
+content; adding it and taking it out are for the agency. The slot holds one item: remove it to choose another type.
+
+| Layout           | Where the slot sits                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| Full background  | Under the buttons (centred when the text is)                                            |
+| Split            | Under the buttons, in the text column                                                   |
+| Editorial        | In a column beside the text from `lg` up (under the small picture); below it on a phone |
+| Image with panel | Inside the panel, under the buttons                                                     |
+
+The slot takes the hero's tone, so it reads on a dark or a light hero. Greyscale logos stay dark grey, so on a dark
+hero use white or transparent-background logos, or turn _Greyscale_ off.
+
+**Animation.** The slot joins the hero's entrance as the next item after the buttons (beside the text in Editorial it
+fades up on its own, timed to start after them). Figures count up only when the hero is not the first section and its
+Animation is not _None_. Under `prefers-reduced-motion`, and without JavaScript, the slot is simply there.
+
+**Studio rules.** The array is `supporting` with `options.slot: true`, which the Studio-wide input
+(`src/features/studio/components/slot-input.tsx`) reads: _Add item_ disappears once the slot is full, duplicating is
+off, and for clients adding and removing are off too (the field is hidden from them while empty). The rules are
+`slotDisabledActions` in `src/lib/sanity/schema/slot-actions.ts` (unit tested). They use Sanity's `disableActions`, so
+they are about the form, not permissions: for a hard guarantee use a document-level role rule. The insert-menu pictures are
+`public/hero-slot-previews/<type>.svg`.
+
+#### Adding a hero slot
+
+A new slot type is one schema object, one component and one registry line:
+
+1. **Schema.** Create the type as a shared object (`src/lib/sanity/schema/<name>.ts`, registered in `index.ts`; see
+   `badge-row.ts` for a small one) and add `defineArrayMember({ type: '<name>' })` to the hero's `supporting` array
+   (`src/features/pages/schemas/sections/hero.ts`). Add `public/hero-slot-previews/<name>.svg` for the insert menu.
+2. **GROQ.** Add a fields fragment to `src/lib/sanity/fragments.ts` and a `_type == "<name>" => { ... }` line to
+   `heroSupportingFields`. Run `npm run typegen` (with the fake project from `tests/e2e/constants.ts`, never your `.env`).
+3. **Component.** Make a compact component in `src/components/ui/` with no section frame and no colours of its own (use
+   `text-ink`, `text-ink-muted`, `border-line`, `text-accent-text`), and size it to the room it is given (container
+   queries, as `StatsBar` does), because any layout can host it. Take a `centred` prop if it has an alignment.
+4. **Registry.** Add the type to `SLOTS` in `src/features/pages/components/sections/hero/slots.tsx`. TypeScript fails
+   until you do, because `SLOTS` is keyed by every `_type` the generated query can return.
+
+Nothing else changes: the layouts do not know which types exist. Where the slot sits is a separate table,
+`HERO_SLOT_PLACEMENT` in `src/features/pages/utils/hero-slot.ts` (unit tested against `HERO_VARIANTS`), which a new
+**layout** extends. Each layout renders `<HeroSlot placement="...">` for the spot it has, and the slot appears only if the
+map agrees. Add a fixture and a gallery entry for the new type in `tests/e2e/fixtures/dataset.mjs` (`SLOT_TYPES` and
+`slotItem`, which put every type in every hero preset) and refresh the visual baselines. Reuse this pattern in another
+section only when there is a real need: free nesting was rejected because it gives awkward layouts and complex rendering,
+and a fixed optional field per feature makes the schema grow with every release.
+
+**Tests.** Unit: the placement map, the slot actions, the badge icons. End to end (`tests/e2e/hero-slot.spec.ts`): every
+slot type in every hero preset passes axe and fits at 375, 768 and 1280 px; placement (under the buttons, inside the
+panel, beside the text, below it on a phone); the server HTML holds the figures; and the slot on a real page (`/hero-slot`)
+fades in, is there at once under reduced motion and without JavaScript. The visual baselines for `hero-slot-*` are
+Linux-only: refresh them with the **Update visual baselines** workflow.
 
 ## Adding a feature, document type or singleton
 

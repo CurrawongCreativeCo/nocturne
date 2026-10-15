@@ -29,13 +29,28 @@ export const scaleIn: Variants = {
   visible: { opacity: 1, scale: 1, transition },
 }
 
+const STAGGER = 0.08
+
 /** On the parent: reveals its `staggerItem` children one after another. */
 export const staggerContainer: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: tokens.durationFast } },
+  visible: { transition: { staggerChildren: STAGGER, delayChildren: tokens.durationFast } },
 }
 
 export const staggerItem: Variants = fadeUp
+
+/**
+ * `fadeUp` that starts after `steps` children of a `staggerContainer` would have: for an element that
+ * has to join a stagger from outside its container (the hero's slot beside the text, after the buttons).
+ */
+export const fadeUpAfter = (steps: number): Variants => ({
+  hidden: { opacity: 0, y: tokens.revealDistance },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { ...slowTransition, delay: tokens.durationFast + steps * STAGGER },
+  },
+})
 
 /**
  * Props to spread on a Motion element so it plays `variants` on load. `data-reveal` is the hook

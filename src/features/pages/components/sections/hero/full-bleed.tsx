@@ -5,6 +5,7 @@ import { sectionTraits, type SectionDefaults } from '@/components/ui/section-sty
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
 import { HeroText } from './hero-text'
+import { HeroSlot } from './slots'
 import type { SectionProps } from '../../../types'
 
 const DEFAULTS: SectionDefaults = {
@@ -19,7 +20,7 @@ const DEFAULTS: SectionDefaults = {
  * left. The panel takes the tone's colours, so its text keeps its contrast over any picture.
  */
 export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
-  const { tone, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
+  const { tone, align, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
   // Without a picture there is nothing to be tall for: the panel's text sets the height.
   const hasImage = Boolean(data.backgroundImage?.asset)
 
@@ -59,6 +60,14 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
           block={block}
           justify={justify}
           headingClassName="text-h1 font-semibold text-balance"
+          slot={
+            <HeroSlot
+              data={data}
+              placement="in-panel"
+              centred={align === 'center'}
+              animate={!isFirst && motion !== 'none'}
+            />
+          }
         />
       </div>
     </SectionFrame>

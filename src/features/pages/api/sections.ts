@@ -1,6 +1,7 @@
 import {
   ctaFields,
   formFields,
+  heroSupportingFields,
   imageFields,
   portableTextFields,
   sectionStyleFields,
@@ -33,6 +34,7 @@ export const heroFragment = /* groq */ `
     proportion,
     imageShape,
     secondaryImage { ${imageFields} },
+    supporting[] { ${heroSupportingFields} },
     showGreeting
   }
 `
