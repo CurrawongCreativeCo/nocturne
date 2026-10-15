@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { connection, NextResponse } from 'next/server'
 
 import { siteProfile } from '@/config/profile'
 import { fetchNotices } from '@/lib/ops/fetch-notices'
@@ -9,6 +9,8 @@ import { fetchNotices } from '@/lib/ops/fetch-notices'
  * Studio skips the panel silently. Notices are written for the client and treated as public.
  */
 export async function GET() {
+  // Read at request time: the endpoint and key can change without a rebuild, and a 204 can't be prerendered.
+  await connection()
   const notices = await fetchNotices(siteProfile.client.slug)
   if (notices === null) return new NextResponse(null, { status: 204 })
   return NextResponse.json({ notices }, { headers: { 'cache-control': 'private, max-age=60' } })
