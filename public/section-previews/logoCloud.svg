@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="600" height="360"><rect width="600" height="360" fill="#ffffff"/><rect x="220" y="120" width="160" height="10" rx="4" fill="#6b7280"/><rect x="60" y="170" width="80" height="30" rx="6" fill="#9ca3af"/><rect x="160" y="170" width="80" height="30" rx="6" fill="#9ca3af"/><rect x="260" y="170" width="80" height="30" rx="6" fill="#9ca3af"/><rect x="360" y="170" width="80" height="30" rx="6" fill="#9ca3af"/><rect x="460" y="170" width="80" height="30" rx="6" fill="#9ca3af"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="600" height="450"><style>
+:root{--bg:#f6f6f8;--fg:#1f2430;--line:#c9ccd4;--accent:#5f2bd4}
+@media (prefers-color-scheme:dark){:root{--bg:#16181d;--fg:#e8eaee;--line:#3a3f4b;--accent:#9f80e5}}
+rect.bg{fill:var(--bg)}
+.h{fill:var(--fg);opacity:.85}.l{fill:var(--fg);opacity:.35}.a{fill:var(--accent)}
+.f{fill:none;stroke:var(--fg);stroke-opacity:.4}.p{fill:var(--fg);fill-opacity:.1;stroke:var(--fg);stroke-opacity:.4}
+.g{fill:var(--fg);opacity:.3}.g2{fill:var(--fg);opacity:.22}.c{fill:var(--fg);fill-opacity:.06;stroke:var(--fg);stroke-opacity:.3}
+.s{fill:none;stroke:var(--accent);stroke-width:1.2}.band{fill:var(--accent);opacity:.9}.k{fill:var(--bg)}
+text{font:600 8px system-ui,sans-serif;fill:var(--fg);opacity:.6}
+</style><rect class="bg" width="160" height="120"/><rect class="l" x="56" y="36" width="48" height="3" rx="1.5"/><rect class="c" x="10" y="54" width="24" height="14" rx="3"/><rect class="c" x="40" y="54" width="24" height="14" rx="3"/><rect class="c" x="70" y="54" width="24" height="14" rx="3"/><rect class="c" x="100" y="54" width="24" height="14" rx="3"/><rect class="c" x="130" y="54" width="24" height="14" rx="3"/><rect class="l" x="14" y="59" width="16" height="4" rx="2"/><rect class="l" x="44" y="59" width="16" height="4" rx="2"/><rect class="l" x="74" y="59" width="16" height="4" rx="2"/><rect class="l" x="104" y="59" width="16" height="4" rx="2"/><rect class="l" x="134" y="59" width="16" height="4" rx="2"/></svg>

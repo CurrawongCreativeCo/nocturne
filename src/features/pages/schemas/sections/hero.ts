@@ -6,13 +6,12 @@ import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
-
 import {
-  EditorialThumbnail,
-  FullBleedThumbnail,
-  OverlayThumbnail,
-  SplitThumbnail,
-} from './hero-thumbnails'
+  HeroEditorialThumbnail,
+  HeroFullBleedThumbnail,
+  HeroOverlayThumbnail,
+  HeroSplitThumbnail,
+} from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -33,25 +32,25 @@ export const HERO_VARIANTS = [
     value: 'overlay',
     title: 'Overlay',
     description: 'Centred text over a faded picture.',
-    thumbnail: OverlayThumbnail,
+    thumbnail: HeroOverlayThumbnail,
   },
   {
     value: 'split',
     title: 'Split',
     description: 'Text on one side, picture on the other.',
-    thumbnail: SplitThumbnail,
+    thumbnail: HeroSplitThumbnail,
   },
   {
     value: 'editorial',
     title: 'Editorial',
     description: 'Oversized heading, small picture.',
-    thumbnail: EditorialThumbnail,
+    thumbnail: HeroEditorialThumbnail,
   },
   {
     value: 'full-bleed',
     title: 'Full bleed',
     description: 'Picture edge to edge, text at the bottom.',
-    thumbnail: FullBleedThumbnail,
+    thumbnail: HeroFullBleedThumbnail,
   },
 ] as const
 
