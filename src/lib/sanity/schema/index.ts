@@ -2,6 +2,7 @@ import type { SchemaTypeDefinition } from 'sanity'
 
 import { blockContent } from './block-content'
 import { cta } from './cta'
+import { headingText } from './heading-text'
 import { link } from './link'
 import { sectionStyle } from './section-style'
 import { seo } from './seo'
@@ -12,5 +13,6 @@ export const sharedSchemaTypes: SchemaTypeDefinition[] = [
   cta,
   seo,
   blockContent,
+  headingText,
   sectionStyle,
 ]

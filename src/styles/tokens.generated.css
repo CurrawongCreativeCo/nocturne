@@ -90,6 +90,10 @@
   --duration: 300ms;
   --duration-slow: 600ms;
   --reveal-distance: 24px;
+
+  --emphasis-underline-thickness: 0.08em;
+  --emphasis-underline-offset: 0.14em;
+  --emphasis-highlight-strength: 0.22;
 }
 
 :root {

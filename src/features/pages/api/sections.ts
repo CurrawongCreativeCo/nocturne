@@ -23,6 +23,8 @@ export const heroFragment = /* groq */ `
     variant,
     eyebrow,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     description,
     ctas[] { ${ctaFields} },
     backgroundImage { ${imageFields} },

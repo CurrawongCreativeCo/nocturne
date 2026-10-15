@@ -14,6 +14,8 @@ const GALLERY = '/section-gallery'
 const PLACEHOLDER_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#6366f1"/></svg>`
 
 const heroIds = galleryIds.filter((id: string) => id.startsWith('hero-'))
+// Highlighted-heading entries have their own words; heading-text.spec.ts checks their markup.
+const plainTitleIds = heroIds.filter((id: string) => !id.startsWith('hero-heading-'))
 // The first image is the LCP candidate; these layouts have one in the gallery.
 const withImage = [
   'hero-overlay',
@@ -55,6 +57,8 @@ for (const id of heroIds) {
       ),
     ).toEqual([])
   })
+
+  if (!plainTitleIds.includes(id)) continue
 
   test(`${id} renders its heading and image in the server HTML`, async ({ request }) => {
     const html = await (await request.get(GALLERY)).text()
