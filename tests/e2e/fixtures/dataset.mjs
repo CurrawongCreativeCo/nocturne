@@ -885,6 +885,28 @@ const gallerySections = [
   galleryHero('split-right', { variant: 'split', imagePosition: 'right' }),
   galleryHero('split-left', { variant: 'split', imagePosition: 'left' }),
   galleryHero('split-no-image', { variant: 'split', backgroundImage: undefined }),
+  // Split options (README, "Hero presets"): proportions and image shapes. The right-hand picture
+  // is the one that changes, so each also sits on the left once, where the columns swap.
+  galleryHero('split-text-wide', { variant: 'split', proportion: 'text' }),
+  galleryHero('split-image-wide-left', {
+    variant: 'split',
+    imagePosition: 'left',
+    proportion: 'image',
+  }),
+  galleryHero('split-square', { variant: 'split', imageShape: 'square' }),
+  galleryHero('split-circle', { variant: 'split', imageShape: 'circle' }),
+  galleryHero('split-arch-left', { variant: 'split', imagePosition: 'left', imageShape: 'arch' }),
+  // A hotspot at the lower left: the crop to 4:3 keeps it in view (object-position, hero-variants.spec.ts).
+  galleryHero('split-hotspot', {
+    variant: 'split',
+    backgroundImage: { ...image(''), hotspot: { x: 0.2, y: 0.8, width: 0.2, height: 0.2 } },
+  }),
+  // The "Centred text" preset: the Full background layout on the page colour, with no picture.
+  styled(
+    'hero-centred-text',
+    galleryHero('centred-text', { variant: 'overlay', backgroundImage: undefined }),
+    { tone: 'surface' },
+  ),
   galleryHero('editorial', { variant: 'editorial', backgroundImage: undefined }),
   galleryHero('editorial-inset', {
     variant: 'editorial',

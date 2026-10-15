@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 import { galleryIds } from './fixtures/dataset.mjs'
 
@@ -21,6 +21,12 @@ const withImage = [
   'hero-overlay',
   'hero-split-right',
   'hero-split-left',
+  'hero-split-text-wide',
+  'hero-split-image-wide-left',
+  'hero-split-square',
+  'hero-split-circle',
+  'hero-split-arch-left',
+  'hero-split-hotspot',
   'hero-full-bleed',
   'hero-parallax',
   'hero-full-bleed-parallax',
@@ -39,6 +45,13 @@ test('the gallery has an entry for every hero variant', () => {
     'hero-split-left',
     'hero-editorial',
     'hero-full-bleed',
+    // One per preset that is not a layout of its own, and the Split options.
+    'hero-centred-text',
+    'hero-split-text-wide',
+    'hero-split-image-wide-left',
+    'hero-split-square',
+    'hero-split-circle',
+    'hero-split-arch-left',
   ]) {
     expect(heroIds).toContain(id)
   }
@@ -77,3 +90,77 @@ for (const id of heroIds) {
     expect(section).not.toMatch(/class="[^"]*\w(?:text|font)-[\w-]+/)
   })
 }
+
+/** A box, which Playwright returns as null for an element that is not on the page. */
+function box(found: { x: number; y: number; width: number; height: number } | null) {
+  if (!found) throw new Error('The element has no box: is it on the page?')
+  return found
+}
+
+/** The picture's and the text's boxes in a gallery entry, at the desktop width (two columns). */
+async function splitBoxes(page: Page, id: string) {
+  await page.goto(GALLERY)
+  const section = page.locator(`[data-gallery-section="${id}"]`)
+  const image = box(await section.locator('img').boundingBox())
+  const text = box(await section.locator('h1').boundingBox())
+  const style = await section.locator('img').evaluate((img) => {
+    const css = getComputedStyle(img)
+    return {
+      radius: css.borderTopLeftRadius,
+      bottomRadius: css.borderBottomLeftRadius,
+      position: css.objectPosition,
+    }
+  })
+  const grid = await section.locator('h1').evaluate((h1) => {
+    const columns = getComputedStyle(h1.closest('[class*="grid"]') ?? h1).gridTemplateColumns
+    const [first = 0, second = 0] = columns.split(' ').map(parseFloat)
+    return [first, second] as const
+  })
+  return { image, text, style, grid }
+}
+
+test.describe('split options', () => {
+  test.skip(({ isMobile }) => isMobile, 'two columns start at the lg breakpoint')
+
+  test('the columns share the width as the proportion says, on either side', async ({ page }) => {
+    const wideText = await splitBoxes(page, 'hero-split-text-wide')
+    expect(wideText.grid[0] / wideText.grid[1]).toBeCloseTo(3 / 2, 1)
+    // The picture is on the right, in the narrower column.
+    expect(wideText.image.x).toBeGreaterThan(wideText.text.x)
+
+    const wideImage = await splitBoxes(page, 'hero-split-image-wide-left')
+    // Picture left and wider: its (first) column is the 60 per cent one.
+    expect(wideImage.grid[0] / wideImage.grid[1]).toBeCloseTo(3 / 2, 1)
+    expect(wideImage.image.x).toBeLessThan(wideImage.text.x)
+    expect(wideImage.image.width).toBeGreaterThan(wideImage.text.width)
+
+    const even = await splitBoxes(page, 'hero-split-right')
+    expect(even.grid[0]).toBeCloseTo(even.grid[1], 0)
+  })
+
+  test('the picture is rounded, square-cornered, a circle or an arch', async ({ page }) => {
+    const rounded = await splitBoxes(page, 'hero-split-right')
+    expect(parseFloat(rounded.style.radius)).toBeGreaterThan(0)
+    expect(rounded.image.width / rounded.image.height).toBeCloseTo(4 / 3, 1)
+
+    const square = await splitBoxes(page, 'hero-split-square')
+    expect(parseFloat(square.style.radius)).toBe(0)
+
+    const circle = await splitBoxes(page, 'hero-split-circle')
+    // Forced to 1:1, and cut to a circle (a radius far past half its side is clamped to half).
+    expect(circle.image.width).toBeCloseTo(circle.image.height, 0)
+    expect(parseFloat(circle.style.radius)).toBeGreaterThanOrEqual(circle.image.width / 2)
+
+    const arch = await splitBoxes(page, 'hero-split-arch-left')
+    expect(parseFloat(arch.style.radius)).toBeGreaterThanOrEqual(arch.image.width / 2)
+    expect(parseFloat(arch.style.bottomRadius)).toBe(0)
+    expect(arch.image.height).toBeGreaterThan(arch.image.width)
+  })
+
+  test('keeps the hotspot in view through object-position', async ({ page }) => {
+    const { style } = await splitBoxes(page, 'hero-split-hotspot')
+    expect(style.position).toBe('20% 80%')
+    const plain = await splitBoxes(page, 'hero-split-right')
+    expect(plain.style.position).toBe('50% 50%')
+  })
+})

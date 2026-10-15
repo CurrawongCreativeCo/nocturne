@@ -9,9 +9,18 @@ import {
   MotionStaggerThumbnail,
 } from './animation-thumbnails'
 import {
+  HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
   HeroFullBleedThumbnail,
   HeroOverlayThumbnail,
+  HeroProportionEvenThumbnail,
+  HeroProportionImageThumbnail,
+  HeroProportionTextThumbnail,
+  HeroShapeArchThumbnail,
+  HeroShapeCircleThumbnail,
+  HeroShapeRoundedThumbnail,
+  HeroShapeSquareThumbnail,
+  HeroSplitLeftThumbnail,
   HeroSplitThumbnail,
 } from './hero-thumbnails'
 import {
@@ -37,6 +46,30 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
     editorial: HeroEditorialThumbnail,
     'full-bleed': HeroFullBleedThumbnail,
   },
+}
+
+/** Hero preset value -> its drawing (the preset bar at the top of the hero's Content tab). */
+export const heroPresetThumbnails: Record<string, Thumbnail> = {
+  'full-background': HeroOverlayThumbnail,
+  'split-right': HeroSplitThumbnail,
+  'split-left': HeroSplitLeftThumbnail,
+  'centred-text': HeroCentredTextThumbnail,
+  editorial: HeroEditorialThumbnail,
+  'image-with-panel': HeroFullBleedThumbnail,
+}
+
+/** The hero's Split options, in the Design tab's Advanced area. */
+export const heroProportionThumbnails: Record<string, Thumbnail> = {
+  even: HeroProportionEvenThumbnail,
+  text: HeroProportionTextThumbnail,
+  image: HeroProportionImageThumbnail,
+}
+
+export const heroImageShapeThumbnails: Record<string, Thumbnail> = {
+  rounded: HeroShapeRoundedThumbnail,
+  square: HeroShapeSquareThumbnail,
+  circle: HeroShapeCircleThumbnail,
+  arch: HeroShapeArchThumbnail,
 }
 
 export const animationThumbnails: Record<(typeof SECTION_MOTIONS)[number], Thumbnail> = {

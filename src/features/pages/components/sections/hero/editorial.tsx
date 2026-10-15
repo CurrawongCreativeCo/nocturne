@@ -1,6 +1,7 @@
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
 import { HeroText } from './hero-text'
 import type { SectionProps } from '../../../types'
@@ -46,6 +47,7 @@ export function HeroEditorial({ data, isFirst = false, greeting }: SectionProps<
           preload={isFirst}
           sizes="(min-width: 1024px) 16rem, 50vw"
           className="aspect-square w-48 rounded-card object-cover lg:w-full"
+          style={{ objectPosition: hotspotObjectPosition(data.secondaryImage) }}
         />
       )}
     </SectionFrame>

@@ -4,6 +4,9 @@ import { Card, Stack, Text } from '@sanity/ui'
 
 import {
   animationThumbnails,
+  heroImageShapeThumbnails,
+  heroPresetThumbnails,
+  heroProportionThumbnails,
   sectionVariantThumbnails,
   toneThumbnails,
   type Thumbnail,
@@ -36,6 +39,28 @@ function groups(sections: readonly SectionPreview[]): Group[] {
           thumbnail,
         })),
       ),
+    },
+    {
+      id: 'hero-presets',
+      title: 'Hero presets',
+      note: 'The bar at the top of the hero’s Content tab, then its Split options in the Design tab.',
+      items: [
+        ...Object.entries(heroPresetThumbnails).map(([value, thumbnail]) => ({
+          key: `hero-preset.${value}`,
+          title: value,
+          thumbnail,
+        })),
+        ...Object.entries(heroProportionThumbnails).map(([value, thumbnail]) => ({
+          key: `hero-proportion.${value}`,
+          title: `proportion · ${value}`,
+          thumbnail,
+        })),
+        ...Object.entries(heroImageShapeThumbnails).map(([value, thumbnail]) => ({
+          key: `hero-shape.${value}`,
+          title: `shape · ${value}`,
+          thumbnail,
+        })),
+      ],
     },
     {
       id: 'animations',

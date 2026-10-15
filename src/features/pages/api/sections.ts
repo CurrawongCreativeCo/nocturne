@@ -29,6 +29,8 @@ export const heroFragment = /* groq */ `
     ctas[] { ${ctaFields} },
     backgroundImage { ${imageFields} },
     imagePosition,
+    proportion,
+    imageShape,
     secondaryImage { ${imageFields} },
     showGreeting
   }
