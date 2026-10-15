@@ -142,7 +142,7 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
           />
           <button
             type="submit"
-            className="rounded-button bg-surface-inverse px-5 py-2.5 text-small font-semibold text-ink-inverse hover:bg-surface-inverse/85"
+            className="rounded-button bg-cta px-5 py-2.5 text-small font-semibold text-cta-ink hover:bg-cta/85"
           >
             All results
           </button>

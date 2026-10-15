@@ -379,7 +379,7 @@ src/
     experiments/                   A/B tests: experiment schema, assignment logic, signed variant codes (flags)
       api/                         queries.ts, get-experiment.ts (running test, code -> option)
       utils/                       assign (weights, cookie), experiment-flag (flags SDK), experiment-source (proxy lookup)
-    site/                          site settings singletons (siteIdentity, siteNavigation, announcement, cookieBanner): header, footer, default metadata
+    site/                          site settings singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings): header, footer, default metadata, brand colours
     search/                        site search: GROQ query, results page view, quick search dialog
       api/                         queries.ts (SEARCH_QUERY), search-pages.ts (cached read + snippets)
       components/                  search-view (server), search-form, quick-search (trigger), quick-search-dialog (lazy)
@@ -576,7 +576,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -797,16 +797,17 @@ the same check as `src/types/sanity.types.ts`.
 
 **Tokens and the utilities they give you**
 
-| Group    | Tokens (`tokens.json`)                                                                                                                                      | Utilities                                                                                                |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `color`  | `surface`, `surface-alt`, `surface-inverse`, `ink`, `ink-muted`, `ink-inverse`, `ink-inverse-muted`, `accent`, `accent-ink`, `line`, `line-strong`, `focus` | `bg-surface`, `text-ink-muted`, `border-line`, `ring-line`, `bg-accent text-accent-ink`, `outline-focus` |
-| `color`  | status colours: `danger`, `danger-surface`, `danger-ink`, and the same three for `success` and `warning`                                                    | `border-danger bg-danger-surface text-danger-ink`                                                        |
-| `font`   | `display` (defaults to the body font), `body`, `mono`                                                                                                       | `font-display`, `font-body`, `font-mono` (every `h1`–`h4` uses the display font)                         |
-| `type`   | `display`, `h1`, `h2`, `h3`, `h4`, `lead`, `body`, `small`: a fluid `clamp()` size, line height and letter spacing each                                     | `text-display`, `text-h1`, `text-h2`, `text-lead`, `text-small`...                                       |
-| `space`  | `section-y-compact`, `section-y`, `section-y-spacious`, `gutter`, `measure`, plus `measure-narrow` and `content` (widths)                                   | `py-section-compact`, `py-section`, `py-section-spacious`, `px-gutter`, `max-w-measure`, `max-w-content` |
-| `radius` | `sm`, `control` (inputs, small buttons), `card`, `panel` (banners), `button`, `pill`                                                                        | `rounded-sm`, `rounded-control`, `rounded-card`, `rounded-panel`, `rounded-button`, `rounded-pill`       |
-| `shadow` | `card`, `raised`                                                                                                                                            | `shadow-card`, `shadow-raised`                                                                           |
-| `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`                                                                  | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS        |
+| Group    | Tokens (`tokens.json`)                                                                                                                                      | Utilities                                                                                                     |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `color`  | `surface`, `surface-alt`, `surface-inverse`, `ink`, `ink-muted`, `ink-inverse`, `ink-inverse-muted`, `accent`, `accent-ink`, `line`, `line-strong`, `focus` | `bg-surface`, `text-ink-muted`, `border-line`, `ring-line`, `bg-accent text-accent-ink`, `outline-focus`      |
+| `color`  | status colours: `danger`, `danger-surface`, `danger-ink`, and the same three for `success` and `warning`                                                    | `border-danger bg-danger-surface text-danger-ink`                                                             |
+| `color`  | Studio-settable roles (see [Colour systems](#colour-systems)): `accent-text`, `accent-2`, `accent-2-ink`, `highlight`, `highlight-ink`, `cta`, `cta-ink`    | `text-accent-text`, `bg-accent-2 text-accent-2-ink`, `bg-highlight text-highlight-ink`, `bg-cta text-cta-ink` |
+| `font`   | `display` (defaults to the body font), `body`, `mono`                                                                                                       | `font-display`, `font-body`, `font-mono` (every `h1`–`h4` uses the display font)                              |
+| `type`   | `display`, `h1`, `h2`, `h3`, `h4`, `lead`, `body`, `small`: a fluid `clamp()` size, line height and letter spacing each                                     | `text-display`, `text-h1`, `text-h2`, `text-lead`, `text-small`...                                            |
+| `space`  | `section-y-compact`, `section-y`, `section-y-spacious`, `gutter`, `measure`, plus `measure-narrow` and `content` (widths)                                   | `py-section-compact`, `py-section`, `py-section-spacious`, `px-gutter`, `max-w-measure`, `max-w-content`      |
+| `radius` | `sm`, `control` (inputs, small buttons), `card`, `panel` (banners), `button`, `pill`                                                                        | `rounded-sm`, `rounded-control`, `rounded-card`, `rounded-panel`, `rounded-button`, `rounded-pill`            |
+| `shadow` | `card`, `raised`                                                                                                                                            | `shadow-card`, `shadow-raised`                                                                                |
+| `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`                                                                  | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS             |
 
 Each colour has an `oklch` value (what the CSS uses) and a `hex` fallback, because `next/og` cannot
 parse `oklch()`. The generator checks that the two agree (within 2/255 per channel), so a stale hex is an
@@ -854,9 +855,62 @@ file.
 
 **The share image.** It can't read CSS variables. The generated share image
 (`src/app/api/og/[[...slug]]/route.tsx`) takes the `accent` hex as its background and `accent-ink` hex as
-its text from `ogImage` in `tokens.generated.ts`. Changing the tokens changes it after `npm run tokens`;
+its text: the Studio's Primary colour and its derived text colour when the Brand colours set one, otherwise
+`ogImage` in `tokens.generated.ts` (read from the same cached settings entry as the page, so no extra
+request). Changing the tokens changes it after `npm run tokens`;
 the OG font file stays separate (see _Editing content_). The Studio is not tied to the tokens: it has its
 own brand (see [CMS branding](#cms-branding)).
+
+### Colour systems
+
+Three separate things are called "colours". Pick by who changes them and what they colour:
+
+| System                              | Where it lives                                                               | Colours                               | Change it when                                                                                                                                                             |
+| ----------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Design tokens** (`tokens.json`)   | `src/styles/tokens.json`, in code                                            | The public site: the full palette     | Building or re-skinning a site: the designer's complete default palette (every role, status colours, fonts, radii).                                                        |
+| **Brand colours** (Studio)          | Studio → Design → **Brand colours** (`designSettings`), agency only          | The public site: a small set of roles | The agency (or a client with agency help) adjusts the brand without a deploy: Primary, Secondary, Highlight, Light or Dark, and optionally the full palette and gradients. |
+| **CMS brand** (`studio-brand.json`) | `studio-brand.json`, `src/assets/brand/` (see [CMS branding](#cms-branding)) | The Studio itself, not the site       | Making the Studio look like the client's (or Currawong's) product.                                                                                                         |
+
+**Precedence on the public site**, lowest to highest:
+
+1. `tokens.json`: the default. With nothing set in Brand colours the site looks exactly as this file defines it.
+2. **Brand colours** override a small set of roles as `:root` CSS variables.
+3. A section's **background tone** (`data-tone` remaps, see _Section style_) recolours everything inside that
+   section from whatever the variables are by then, so a new Primary flows into the accent tone, and a dark
+   appearance into the inverse tone.
+4. Rare component overrides, in code only.
+
+**Brand colours (Studio → Design → Brand colours).** Agency only: the item is hidden from clients in the desk
+structure, which is a UI convenience, not a permission (the document can still be opened by id by anyone with
+Studio access; see _Studio roles and permissions_).
+
+- **Basic:** _Appearance_ (Light or Dark), _Primary_ (the `accent` role: buttons, the accent tone, links and
+  eyebrows, the share image), _Secondary_ (a new `accent-2` role, available as `bg-accent-2 text-accent-2-ink` and
+  in gradients) and _Highlight_ (optional, `bg-highlight text-highlight-ink`). Dark swaps the surface and ink pairs
+  (the page goes dark, the inverse tone goes light) and sets `color-scheme: dark`.
+- **Advanced** (collapsed): _Background_, _Alternate background_, _Inverse background_, _Text_, _Muted text_ and
+  _Borders_, and **gradients**: a name, an angle and two or three colours each. Each gradient becomes a CSS variable
+  `--gradient-<name>` (for example `--gradient-forest-dusk`) for headings and backgrounds to use.
+- **Colour input:** a colour picker plus a hex field (stored as validated `#rrggbb`), contrast badges (AA pass or
+  fail, with the ratio) for the colours it sits on, and **Suggest an accessible shade**, which moves OKLCH
+  lightness (hue and chroma stay) by the smallest amount that reaches 4.5:1. A mock-up above the form redraws as you
+  edit; use the Presentation tool for the real pages, which update live.
+- **Derived automatically:** text on Primary (near-black or white, whichever reads better), accent-coloured text
+  (`accent-text`: a darker or lighter shade of Primary when Primary alone fails 4.5:1 on the page, while buttons and
+  backgrounds keep your exact colour), the button colours (`cta`, `cta-ink`), the tints and borders when only the
+  background changes, and the inks after a Dark appearance or a new background. Hover shades follow the colour
+  (`hover:bg-cta/85`). Colours you choose yourself are never changed; if they fail, Studio validation shows a warning
+  naming the ratio.
+
+With nothing set, no CSS is added. Otherwise `SiteShell` renders one `<style>` with `:root{...}` containing only
+what differs from `tokens.json`, on the server, so there is no flash and no JavaScript. It comes from
+`resolveDesignTokens` (`src/features/site/utils/resolve-design-tokens.ts`, pure and unit-tested), fed by the
+`design` part of `SETTINGS_QUERY`, so it is one cached read like every other setting. The `designSettings` tag is in
+`TAGS` and the webhook filter; drafts and Presentation update through `SanityLive`. The Studio's own colours are not
+affected.
+
+The **primary button** (`CtaLink`, the form, search and sign-in buttons) uses the `cta` colour, which is near-black
+by default and becomes Primary once one is set. Use `bg-accent` where you want the accent itself.
 
 ### CMS branding
 
@@ -1517,7 +1571,7 @@ Deleting the scratch dataset is permanent, so check the name first.
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
   Chrome it checks pages and metadata, redirects, security headers, robots and sitemap, the webhook
-  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the newsletter signup (validation, the success message, an identical answer for a repeated address, a failed spam check, the rate limit, JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), A/B tests (no running test leaves pages, cookies and attributes untouched; with one running, an `ab` cookie for control and for the variant each get their content and `data-variant`, new visitors are assigned and kept in an option, crawlers and the blog are skipped; the fake Content Lake serves variant documents and the test starts and stops the experiment with a signed webhook), search (the page with and without JavaScript, title and body matches, hidden and members-only pages left out, validation and the length cap, the JSON route, the dialog by pointer and keyboard, debounce, failure states, axe with the dialog open), the cookie banner (first visit with focus in the banner and no shift, Accept all and Reject all identical, no provider request before consent, Accept loading Plausible, PostHog and Google with Consent Mode defaults denied first, Reject staying off and persisting, Choose, reopening from the footer and withdrawing, keyboard use, axe with the banner open and expanded; every other test starts as a visitor who already rejected, so the banner doesn't take focus), members-only content (an anonymous visitor gets the sign-in prompt and none of the content, not even in the HTML; signing in through the test form returns to the page and shows it; refused passwords and addresses; sign-out; members pages left out of the sitemap, `/llms.txt` and search), the pricing table (active plans with Intl-formatted amounts in three currencies, one highlighted plan, distinct button names, archived prices left out), Checkout (a subscription and a one-time price create the right Stripe session and redirect; a tampered price id is refused) and the Stripe webhook (bad, tampered and replayed signatures rejected; unused events acknowledged; a price event upserts a document with the write token; a deleted price is marked inactive; the fake Content Lake also plays Stripe and records writes), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post.
+  route, keyboard focus and the skip link, the mobile menu, the announcement bar (inside, before and after its window; dismissal), the returning-visitor greeting (absent on a first visit, shown on the second), the blog (index, pagination, categories, a post with its Article JSON-LD and related posts, 404s, the RSS feed parsed as XML, the sitemap), forms (required-field errors announced and focused, kept answers, server-side re-validation, the success message, a failed spam check, the rate limit, and the same flow with JavaScript off), the newsletter signup (validation, the success message, an identical answer for a repeated address, a failed spam check, the rate limit, JavaScript off), the AI crawler policy in both states (`robots.txt` and `/llms.txt` with crawlers allowed and switched off; the fake Content Lake serves a settings variant and the test expires the cache with a signed webhook), A/B tests (no running test leaves pages, cookies and attributes untouched; with one running, an `ab` cookie for control and for the variant each get their content and `data-variant`, new visitors are assigned and kept in an option, crawlers and the blog are skipped; the fake Content Lake serves variant documents and the test starts and stops the experiment with a signed webhook), search (the page with and without JavaScript, title and body matches, hidden and members-only pages left out, validation and the length cap, the JSON route, the dialog by pointer and keyboard, debounce, failure states, axe with the dialog open), the cookie banner (first visit with focus in the banner and no shift, Accept all and Reject all identical, no provider request before consent, Accept loading Plausible, PostHog and Google with Consent Mode defaults denied first, Reject staying off and persisting, Choose, reopening from the footer and withdrawing, keyboard use, axe with the banner open and expanded; every other test starts as a visitor who already rejected, so the banner doesn't take focus), members-only content (an anonymous visitor gets the sign-in prompt and none of the content, not even in the HTML; signing in through the test form returns to the page and shows it; refused passwords and addresses; sign-out; members pages left out of the sitemap, `/llms.txt` and search), the pricing table (active plans with Intl-formatted amounts in three currencies, one highlighted plan, distinct button names, archived prices left out), Checkout (a subscription and a one-time price create the right Stripe session and redirect; a tampered price id is refused) and the Stripe webhook (bad, tampered and replayed signatures rejected; unused events acknowledged; a price event upserts a document with the write token; a deleted price is marked inactive; the fake Content Lake also plays Stripe and records writes), and runs axe for WCAG 2.2 AA on every page, including the blog index, a category and a post. A separate `design` project (after everything else, because it changes the whole site's colours) serves a sample Brand colours palette from the fake Content Lake, light and dark, and checks the primary button's computed colour with JavaScript off, that the home page ships the same scripts, the share image, and axe on every tone and the home page; `design-visual` takes screenshots of the same palettes.
 
 Running the end-to-end tests locally:
 

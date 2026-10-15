@@ -39,7 +39,9 @@ export function HeroText({
   return (
     <>
       {eyebrow && (
-        <p className="text-small font-semibold tracking-wide text-accent uppercase">{eyebrow}</p>
+        <p className="text-small font-semibold tracking-wide text-accent-text uppercase">
+          {eyebrow}
+        </p>
       )}
       <Heading className={eyebrow ? `mt-2 ${headingClassName}` : headingClassName}>{title}</Heading>
       {/* Request-time (cookie) content: the page stays prerendered around this boundary. */}

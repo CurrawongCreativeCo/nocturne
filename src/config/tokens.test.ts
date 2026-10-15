@@ -28,6 +28,13 @@ describe('generated design tokens', () => {
     expect(css).toContain('--color-brand-foreground: var(--color-accent-ink);')
   })
 
+  it('default the Studio-settable roles to the look the site had without them', () => {
+    // Brand colours (Studio Design settings) override these; unset, nothing visibly changes.
+    expect(colorHex.accentText).toBe(colorHex.accent)
+    expect(colorHex.cta).toBe(colorHex.surfaceInverse)
+    expect(colorHex.ctaInk).toBe(colorHex.inkInverse)
+  })
+
   it('give the OG image the accent colours', () => {
     expect(ogImage).toEqual({ background: colorHex.accent, foreground: colorHex.accentInk })
   })
@@ -48,6 +55,9 @@ describe('colour contrast (WCAG 2.2 AA, 4.5:1)', () => {
     ['ink-muted', 'surface'],
     ['ink-inverse', 'surface-inverse'],
     ['accent-ink', 'accent'],
+    ['accent-2-ink', 'accent-2'],
+    ['highlight-ink', 'highlight'],
+    ['cta-ink', 'cta'],
     // Also used in the default design: muted text on tinted surfaces, links and the accent as text.
     ['ink-muted', 'surface-alt'],
     ['ink-inverse-muted', 'surface-inverse'],
@@ -59,7 +69,9 @@ describe('colour contrast (WCAG 2.2 AA, 4.5:1)', () => {
   ] as const
 
   const hex = (name: string) =>
-    colorHex[name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()) as keyof typeof colorHex]
+    colorHex[
+      name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase()) as keyof typeof colorHex
+    ]
 
   it.each(pairs)('%s on %s', (foreground, background) => {
     expect(contrastRatio(hex(foreground), hex(background))).toBeGreaterThanOrEqual(AA)

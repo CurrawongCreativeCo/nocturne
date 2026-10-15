@@ -85,11 +85,11 @@ const LISTED_TYPES = new Set([
 ])
 
 /**
- * Design screens that arrive in later tasks (brand colours, motion presets). Each shows under
+ * Design screens (brand colours now; motion presets arrive in a later task). Each shows under
  * "Design" only once its singleton type is in the schema, so the group never appears empty.
  */
 const DESIGN_SINGLETONS = [
-  { type: 'brandColours', title: 'Brand colours' },
+  { type: 'designSettings', title: 'Brand colours' },
   { type: 'motionPresets', title: 'Motion presets' },
 ] as const
 

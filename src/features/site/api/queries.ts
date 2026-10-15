@@ -11,14 +11,14 @@ const navItemFields = /* groq */ `
 /**
  * One query for the announcement bar, header, footer and site metadata: one cache entry, one request per change.
  *
- * The data lives in four singletons (siteIdentity, siteNavigation, announcement, cookieBanner) and
+ * The data lives in five singletons (siteIdentity, siteNavigation, announcement, cookieBanner, designSettings) and
  * is assembled here into the shape the old single "settings" document had (including null when
  * none exists), so components don't change. Until migrations/split-site-settings has run, each part falls back to the old
  * `settings` document, so the site keeps working whether the deploy or the migration comes first.
  * Delete the `settings` fallbacks once the migration has run on every dataset.
  */
 export const SETTINGS_QUERY = defineQuery(/* groq */ `
-  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "settings"]][0] {
+  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {
     "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {
       title,
       description,
@@ -54,6 +54,20 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       privacyLink { ${linkFields} },
       analyticsText,
       marketingText
+    },
+    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).
+    "design": *[_id == "designSettings"][0] {
+      appearance,
+      primary,
+      secondary,
+      highlight,
+      surface,
+      surfaceAlt,
+      surfaceInverse,
+      ink,
+      inkMuted,
+      line,
+      gradients[] { name, angle, stops }
     }
   } {
     "title": identity.title,
@@ -67,6 +81,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "footerNav": navigation.footerNav,
     "footerText": navigation.footerText,
     "consent": consent,
+    "design": design,
     "allowAiCrawlers": identity.allowAiCrawlers != false
   }
 `)

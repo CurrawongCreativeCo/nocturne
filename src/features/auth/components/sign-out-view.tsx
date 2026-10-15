@@ -10,7 +10,7 @@ export function SignOutView() {
       <form action={signOutAction} className="mt-8">
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-button bg-surface-inverse px-6 py-3 text-small font-semibold text-ink-inverse transition-colors hover:bg-surface-inverse/85"
+          className="inline-flex items-center justify-center rounded-button bg-cta px-6 py-3 text-small font-semibold text-cta-ink transition-colors hover:bg-cta/85"
         >
           Sign out
         </button>

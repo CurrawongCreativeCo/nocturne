@@ -4,10 +4,10 @@ import { join } from 'node:path'
 import { ImageResponse } from 'next/og'
 
 import { segmentsToSlug } from '@/config/paths'
-import { ogImage } from '@/config/tokens.generated'
 import { getPage, getPageStaticParams } from '@/features/pages/api/get-page'
 import { OG_TITLE_MAX_LINES, ogTitleFontSize } from '@/features/pages/utils/og-title'
 import { getSettings } from '@/features/site/api/get-settings'
+import { resolveDesignTokens } from '@/features/site/utils/resolve-design-tokens'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 /**
@@ -31,6 +31,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   ])
   if (!page) return new Response('Not found', { status: 404 })
 
+  // The accent pair: tokens.json's, or the Studio's Primary colour with its derived text colour.
+  const { accent } = resolveDesignTokens(settings?.design)
   const siteName = settings?.title || 'Site'
   const title = page.seo?.metaTitle || page.title
 
@@ -43,8 +45,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: 80,
-        background: ogImage.background,
-        color: ogImage.foreground,
+        background: accent.background,
+        color: accent.foreground,
         fontFamily: 'Inter',
       }}
     >

@@ -9,6 +9,7 @@ import { AnalyticsScripts } from '@/features/consent/components/analytics-script
 import { CookieSettingsButton } from '@/features/consent/components/cookie-settings-button'
 import { DraftModeTools } from '@/features/draft-mode/components/draft-mode-tools'
 import { QuickSearch } from '@/features/search/components/quick-search'
+import { DesignStyle, DraftDesignStyle } from '@/features/site/components/design-style'
 import {
   SiteAnnouncement,
   DraftSiteAnnouncement,
@@ -48,6 +49,14 @@ export async function SiteShell({
   // MotionProvider wraps the public site only (Studio has its own root); SiteShell also serves /ab.
   return (
     <MotionProvider>
+      {/* The Studio's brand colours as CSS variables; renders nothing when none are set. */}
+      {isDraftMode ? (
+        <Suspense fallback={null}>
+          <DraftDesignStyle />
+        </Suspense>
+      ) : (
+        <DesignStyle {...PUBLISHED} />
+      )}
       <SiteJsonLd />
       {/* Navigation feedback for the public site only; useSearchParams needs the boundary. */}
       <Suspense fallback={null}>

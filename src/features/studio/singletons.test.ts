@@ -11,6 +11,13 @@ const resolve = (schemaType: string) =>
     schemaType,
   }).map((item) => item.action)
 
+describe('design settings singleton', () => {
+  it('is a singleton, so it can only be edited in place', () => {
+    expect(SINGLETON_TYPES.has('designSettings')).toBe(true)
+    expect(resolve('designSettings')).toEqual(['publish', 'discardChanges', 'restore'])
+  })
+})
+
 describe('site settings singletons', () => {
   it('registers the four Website settings screens', () => {
     for (const type of ['siteIdentity', 'siteNavigation', 'announcement', 'cookieBanner']) {
