@@ -11,6 +11,7 @@ import { evaluate, parse } from 'groq-js'
 import { handleStripe } from './fake-stripe.mjs'
 import {
   aiCrawlersBlocked,
+  customBrowserIcon,
   documents,
   experimentRunning,
   releaseVersions,
@@ -20,7 +21,7 @@ import {
 const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
 
 /** Named variants of the siteIdentity document the tests switch between; `null` serves the fixture as is. */
-const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked }
+const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon }
 let settingsPatch = null
 
 /** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */

@@ -24,6 +24,14 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       description,
       logo { ${imageFields} },
       ogImage { asset->{ _id } },
+      // Only when the editor chose their own icon: the default icon needs no data.
+      "browserIcon": select(
+        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {
+          "image": browserIcon.image { asset, crop, hotspot },
+          "padding": coalesce(browserIcon.padding, "none"),
+          "background": coalesce(browserIcon.background, "transparent")
+        }
+      ),
       allowAiCrawlers
     },
     "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {
@@ -52,6 +60,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "description": identity.description,
     "logo": identity.logo,
     "ogImage": identity.ogImage,
+    "browserIcon": identity.browserIcon,
     "announcement": announcement,
     "headerNav": navigation.headerNav,
     "headerCta": navigation.headerCta,

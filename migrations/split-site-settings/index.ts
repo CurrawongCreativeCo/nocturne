@@ -8,7 +8,10 @@ type Fields = Record<string, unknown>
  * top-level fields. Without `from`, the listed top-level fields are copied across.
  */
 const TARGETS: readonly { id: string; fields?: readonly string[]; from?: string }[] = [
-  { id: 'siteIdentity', fields: ['title', 'description', 'logo', 'ogImage', 'allowAiCrawlers'] },
+  {
+    id: 'siteIdentity',
+    fields: ['title', 'description', 'logo', 'ogImage', 'browserIcon', 'allowAiCrawlers'],
+  },
   { id: 'siteNavigation', fields: ['headerNav', 'headerCta', 'footerNav', 'footerText'] },
   { id: 'announcement', from: 'announcement' },
   { id: 'cookieBanner', from: 'consent' },

@@ -4,6 +4,8 @@ import { defineField, defineType } from 'sanity'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
+import { browserIconField } from './browser-icon'
+
 /** A singleton: the one document has `_id === 'siteIdentity'` (see SINGLETON_TYPES and the desk structure). */
 export const siteIdentity = defineType({
   name: 'siteIdentity',
@@ -50,6 +52,7 @@ export const siteIdentity = defineType({
       requireAlt: false,
       description: '1200×630. Used when a page has no share image of its own.',
     }),
+    browserIconField,
     defineField({
       name: 'allowAiCrawlers',
       title: 'Allow AI crawlers',
