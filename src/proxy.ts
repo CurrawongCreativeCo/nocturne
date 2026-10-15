@@ -9,6 +9,7 @@ import {
   SIGN_IN_PATH,
   SIGN_OUT_PATH,
   STUDIO_BRAND_PREVIEW_PATH,
+  TEAM_PATH,
 } from '@/config/paths'
 import {
   chooseOption,
@@ -101,8 +102,12 @@ async function redirect(request: NextRequest) {
   return match ? NextResponse.redirect(new URL(match.to, request.url), match.status) : null
 }
 
-/** Only CMS pages have variants; the blog, search, gallery, brand preview, sign-in and variant routes themselves are left alone. */
+/**
+ * Only CMS pages have variants; the blog, search, gallery, brand preview, sign-in, variant and team
+ * profile routes themselves are left alone. A page called exactly `/team` is still a CMS page.
+ */
 function isPagePath(pathname: string) {
+  if (pathname.startsWith(`${TEAM_PATH}/`)) return false
   return ![
     BLOG_PATH,
     EXPERIMENT_PATH,

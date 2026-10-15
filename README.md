@@ -119,6 +119,7 @@ Open http://localhost:3000/studio:
   - _RSS:_ `/feed.xml` is an RSS 2.0 feed of the newest 12 posts, with absolute URLs, and blog pages advertise it in their `<head>`. It takes the title and description from _Identity & search_.
   - _Search engines:_ posts get `Article` JSON-LD (author, dates, image, categories; the publisher is the site's Organization). Posts and `/blog` are in the sitemap unless the post's _Hide from search engines_ is ticked; category pages are not.
   - _Bad URLs:_ an unknown post or category gets a real 404. A `?page` past the last page (or not a number) shows the 404 page with `noindex` but answers 200, because the page number can only be read after the response has started streaming.
+- **Team:** _Team_ in the sidebar lists your people in the order the website shows them. **Drag a row** to move someone (or use the up and down arrows on each row, which also work from the keyboard); the new order saves straight away. _New team member_ adds one. A member needs a name and a square portrait with alt text; their role and a short bio (300 characters at most) appear on the cards. Show the team on any page with _Add item → Team_: choose **Everyone** (in team order) or **Choose members** and pick them in the order you want. Agencies choose the layout (grid, slider or list). If the site has profile pages, each member also has a collapsed **Profile page** group (page address, full bio, qualifications) and **Contact details** group (public email, phone, social links); a member with an address gets a page at `/team/<address>` and their card links to it, and a member without one just has a card. Details in [Team](#team).
 - **Forms:** _Forms_ in the sidebar holds forms you build yourself; show one on a page with the _Form_ section (_Add item → Form_, then pick it). One form can sit on many pages. A form has:
   - _Fields_ (up to 20): a _label_, an internal _name_ (e.g. `email`; a lowercase letter, then letters, numbers and `_`; unique in the form, and best left alone once live), a _type_ (short text, email, phone, long text, drop-down, checkbox), _required_, and for a drop-down its _choices_.
   - _Button text_, a _success message_ (shown in place of the form after sending) and _Send submissions to_, the address that receives each one. Replying to the email reaches the visitor if the form has an email field they filled in.
@@ -433,6 +434,7 @@ src/
     api/draft-mode/{enable,disable}
     studio/[[...tool]]/page.tsx
     (site)/blog/                     blog index, [slug] (post), category/[slug]
+    (site)/team/[slug]/page.tsx      a team member's profile page
     (site)/site-shell.tsx            header, <main>, footer: shared by (site)/layout and ab/[code]/layout
     (site)/site-consent.tsx          cookie banner with its text from the Cookie banner singleton
     ab/[code]/[[...slug]]/           pages prerendered per A/B option (proxy rewrites visitors here)
@@ -601,7 +603,7 @@ visitor ─▶ proxy.ts ─ reads the running experiment (cached /api/experiment
 - **Proxy cost.** The proxy can't query Sanity on every request, so it asks `/api/experiments` (a cached route tagged `experiment`) and remembers the answer for `EXPERIMENT_CACHE_SECONDS` (60) per server instance. A failure means "no test". The rewrite response sends `Vary: Cookie`; if you put another CDN in front that caches HTML, make it vary on the `ab` cookie (Vercel needs nothing).
 - **What is skipped.** Draft mode, crawlers (`isCrawler` in `utils/assign.ts`), the blog, Studio, API routes and static files.
 - **Analytics hook.** `SiteShell` (`app/(site)/site-shell.tsx`) puts `data-experiment` and `data-variant` on `<main>` for pages rendered under `/ab/<code>`. Read them from your analytics script (for example after consent: `document.querySelector('main').dataset.variant`).
-- **Reserved slug.** `ab` joins `blog` and `studio` as a first path segment a page can't use.
+- **Reserved slug.** `ab` joins `blog` and `studio` as a first path segment a page can't use. (`team` is reserved only _under_ itself: a page called `team` is fine, `team/anything` is not. See [Team](#team).)
 
 ### Request budget
 
@@ -615,7 +617,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **Visitors:** zero. Pages are prerendered and every query result is cached until its content changes.
 - **Publishing:** only the cached results containing the changed documents are refetched, once each.
 - **Large sites:** a sitemap file holds at most 45,000 URLs (Google allows 50,000). The files cover all pages, then
-  all posts, in that order. Past one file, `generateSitemaps` splits the sitemap into `/sitemap/0.xml`,
+  all posts, then all team profile pages, in that order. Past one file, `generateSitemaps` splits the sitemap into `/sitemap/0.xml`,
   `/sitemap/1.xml`, … and `robots.txt` lists every file. Sizing it costs one cheap `count()` query for pages
   (`PAGE_COUNT_QUERY`) and none for posts (the total comes with `POSTS_QUERY`), and each file one sliced query per type
   (`PAGE_SITEMAP_QUERY`, `POST_SITEMAP_QUERY`, ordered by `_id`). Whenever a file holds all the pages (or all the posts) the file is
@@ -629,6 +631,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **`/api/site-info`** adds none: it is prerendered and reads only environment variables.
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
+- **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
   recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
@@ -664,7 +667,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1197,8 +1200,8 @@ export const siteProfileInput = defineSiteProfile({
 })
 ```
 
-- **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo` and
-  `team`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
+- **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo`,
+  `team` and `teamProfiles`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
 - **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;
   see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
   Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
@@ -1213,16 +1216,17 @@ export const siteProfileInput = defineSiteProfile({
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
 feature does:
 
-| Feature                      | When off                                                                                                                                                                                 |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_ |
-| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                       |
-| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                     |
-| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                      |
-| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                 |
-| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                  |
-| `team`                       | Hides `team` and `teamMember` document types. The template has no team feature yet, so today this only reserves the switch                                                               |
-| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                          |
+| Feature                      | When off                                                                                                                                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                       |
+| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                             |
+| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                           |
+| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                            |
+| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                       |
+| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                        |
+| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                               |
+| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form |
+| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
 import it). Page-builder sections that depend on a disabled feature (a form, pricing table or newsletter section)
@@ -1688,6 +1692,66 @@ set, and the details themselves are edited once, in _Business info_ (the section
   before the click and the frame, focus and title after it, no JavaScript, axe before and after loading the map). The
   section gallery has `location`, `location-image`, `location-interactive` and `location-address-only`; their screenshot
   baselines need the **Update visual baselines** workflow (macOS skips visual tests).
+
+### Team
+
+Team members are documents (`teamMember`, in `src/features/team`), shown by the **Team** section and, when the site has
+profile pages, on their own page at `/team/<slug>`.
+
+- **A member.** _Name_ (required), _Role_, _Portrait_ (required, square, 800 px or wider; alt text is required and the usual
+  image guidance warns about size and shape), _Short bio_ (up to 300 characters; the cards and the page's search
+  description) and _Order_ (a number; editors rarely touch it, see below). If the site has profile pages there are also
+  two collapsed groups: **Profile page** (_Page address_, _Full bio_ in rich text, _Qualifications_ as tags) and
+  **Contact details** (_Public email_, _Phone_, _Social links_ with a platform and an https link). With
+  [`teamProfiles`](#site-profile) off those fields are hidden, so editors are not asked for what the site never shows.
+- **Ordering.** _Team_ in the desk is a custom list (`src/features/studio/team-order/`), not the stock document list.
+  Drag a row, or use its up and down buttons (keyboard and touch), and everyone is numbered 1, 2, 3… in `order`. Only the
+  members whose number changed are written, to the published document and any draft, so a later publish never undoes
+  the order. The list listens to the dataset, so another editor's change appears at once. Members with no `order` come
+  last, then by name; the site sorts the same way (`order(coalesce(order, 999999) asc, name asc)`). The writing needs the
+  editor to be allowed to edit team members; if it fails, the list reverts and says so. `team-order.test.ts` covers the logic.
+- **The section.** _Add item → Team_: _Section title_, _Intro_, **Who to show** (_Everyone_, the first 60 in team order, or
+  _Choose members_ with a list of references in the editor's order; references to members who are not published are
+  skipped, and "Choose members" with none chosen is a validation error). Agencies pick the **Layout**: _Grid_ (the
+  default; one, two then three across), _Slider_ (the shared `Slider` via `LazySlider`: one, two then three in view) or
+  _List_ (a row each with a small portrait). A section with no members renders nothing. The members are resolved inside
+  `teamFragment` (`src/features/pages/api/sections.ts`), so a page needs no second request.
+- **Cards.** Portrait, name (a heading, one level under the section title), role and short bio, drawn by components in
+  the pages feature (`sections/team/team-card.tsx`), because the pages feature cannot import the team feature. A card is
+  a `MotionDiv` that lifts 4 px on hover (`whileHover`, transform only; Motion drops it for visitors who ask for less
+  motion; nothing moves on touch). The name is the card's only link (stretched over the card) when the site has profile
+  pages and the member has a page address.
+- **Profile pages.** `src/app/(site)/team/[slug]/page.tsx` composes the team feature like the blog post route:
+  published members are cached and prerendered (`generateStaticParams` from `TEAM_INDEX_QUERY`), draft mode reads its
+  options inside `<Suspense>`. The page has one `<h1>` (the name), the portrait, role, qualifications, short and full bio
+  and a "Get in touch" list (email as `mailto:`, phone as `tel:`, social links); anything the member lacks is left out,
+  and with no contact details there is no "Get in touch". `Person` JSON-LD carries the name, job title, description,
+  image, email, telephone, `sameAs` (social links), `hasCredential` (qualifications) and `worksFor` pointing at the
+  site's Organization. Metadata is the name and role, the short bio and the portrait as the share image.
+- **404s.** An unknown slug, a member with no page address, one who is only a draft (the published perspective hides drafts), and every `/team/…` URL when
+  `teamProfiles` (or `team`) is off answer a real 404, checked against the cached `TEAM_INDEX_QUERY` first so probing costs
+  nothing. Drafts skip the check so an unpublished member can be previewed in Presentation.
+- **Slugs.** A member's address is one path segment (`ann-lee`; `utils/slug.ts`). In the page schema `team/<anything>` is
+  reserved, because `/team/[slug]` would answer first, but a page called exactly `team` is allowed: that is where the
+  Team section usually lives (`reservedSegment`, `src/features/pages/utils/reserved-slug.ts`, unit tested). The proxy
+  leaves `/team/…` out of A/B tests (they are not CMS pages).
+- **Sitemap.** Profile pages are listed after the pages and posts (`getTeamSitemap`, from the cached index, so no extra
+  request). A member without an address is not listed.
+- **Studio.** Presentation opens `/team/<slug>` on the member and lists their page under "Used on these pages"; a member
+  with no page shows a note instead. Quick action "Update the team" on Start here opens the Team list.
+  Clients see _Team_ by default (`CLIENT_STRUCTURE_IDS`), and may add the Team section if `team` is in `clientSections`.
+  Publishing a member whose address changed does not offer a redirect (that confirmation covers pages and posts); add one
+  under _Redirects_.
+- **Adding a field** means the schema (`src/features/team/schemas/team-member.ts`), the queries (`TEAM_MEMBER_QUERY` for the
+  page, `teamCardFields` in the section fragment for cards), then `npm run typegen`. Keep contact fields on the profile page
+  only: a card is a link, and a phone number in a link is hard to use.
+- **Tests.** Unit: `slug.test.ts`, `phone.test.ts`, `social.test.ts`, `team-order.test.ts`, `reserved-slug.test.ts`,
+  `sitemap-chunks.test.ts` (three lists) and the profile switch in `profile.test.ts`. End to end: `tests/e2e/team.spec.ts`
+  (the section on `/team`: order, picked members in order, linked or not; the hover lift with and without
+  reduced motion; a profile page with its contact details, JSON-LD and metadata; no-contact member; 404s for an unknown
+  slug and a member with no address; the sitemap; axe) and `accessibility.spec.ts` (`/team`, `/team/ann-lee`).
+  The section gallery has `team-grid`, `team-slider` and `team-list`; their screenshot baselines need the **Update visual
+  baselines** workflow (macOS skips visual tests).
 
 ### Cursors and interaction feedback
 

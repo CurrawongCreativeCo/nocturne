@@ -4,7 +4,7 @@ import {
   SITEMAP_CHUNK_SIZE,
   sitemapChunkCount,
   sitemapChunkRange,
-  splitSitemapRange,
+  splitSitemapRanges,
 } from './sitemap-chunks'
 
 describe('sitemapChunkCount', () => {
@@ -45,41 +45,50 @@ describe('sitemapChunkRange', () => {
   })
 })
 
-describe('splitSitemapRange', () => {
+describe('splitSitemapRanges', () => {
   const size = 10
 
-  it('gives a small site one file holding every page and post', () => {
-    expect(splitSitemapRange(sitemapChunkRange(0, size), 4)).toEqual({
-      pages: { start: 0, end: 4 },
-      posts: { start: 0, end: 6 },
-    })
+  it('gives a small site one file holding every list', () => {
+    expect(splitSitemapRanges(sitemapChunkRange(0, size), [4, 3, 2])).toEqual([
+      { start: 0, end: 4 },
+      { start: 0, end: 3 },
+      { start: 0, end: 2 },
+    ])
   })
 
-  it('lets posts start in the same file where the pages end', () => {
-    expect(splitSitemapRange(sitemapChunkRange(1, size), 14)).toEqual({
-      pages: { start: 10, end: 14 },
-      posts: { start: 0, end: 6 },
-    })
+  it('lets a list start in the same file where the one before ends', () => {
+    expect(splitSitemapRanges(sitemapChunkRange(1, size), [14, 6, 3])).toEqual([
+      { start: 10, end: 14 },
+      { start: 0, end: 6 },
+      { start: 0, end: 0 },
+    ])
   })
 
-  it('gives later files to posts only', () => {
-    expect(splitSitemapRange(sitemapChunkRange(2, size), 14)).toEqual({
-      pages: { start: 14, end: 14 },
-      posts: { start: 6, end: 16 },
-    })
+  it('gives later files to the later lists only', () => {
+    expect(splitSitemapRanges(sitemapChunkRange(2, size), [14, 16, 5])).toEqual([
+      { start: 14, end: 14 },
+      { start: 6, end: 16 },
+      { start: 0, end: 0 },
+    ])
+    expect(splitSitemapRanges(sitemapChunkRange(3, size), [14, 16, 5])).toEqual([
+      { start: 14, end: 14 },
+      { start: 16, end: 16 },
+      { start: 0, end: 5 },
+    ])
   })
 
-  it('covers every page and post exactly once', () => {
-    const pageTotal = 14
-    const postTotal = 23
-    const files = sitemapChunkCount(pageTotal + postTotal, size)
-    const seen = { pages: [] as number[], posts: [] as number[] }
+  it('covers every item of every list exactly once', () => {
+    const totals = [14, 23, 7]
+    const files = sitemapChunkCount(
+      totals.reduce((a, b) => a + b),
+      size,
+    )
+    const seen: number[][] = totals.map(() => [])
     for (let id = 0; id < files; id++) {
-      const { pages, posts } = splitSitemapRange(sitemapChunkRange(id, size), pageTotal)
-      for (let i = pages.start; i < pages.end; i++) seen.pages.push(i)
-      for (let i = posts.start; i < Math.min(posts.end, postTotal); i++) seen.posts.push(i)
+      splitSitemapRanges(sitemapChunkRange(id, size), totals).forEach(({ start, end }, list) => {
+        for (let i = start; i < end; i++) seen[list]?.push(i)
+      })
     }
-    expect(seen.pages).toEqual(Array.from({ length: pageTotal }, (_, i) => i))
-    expect(seen.posts).toEqual(Array.from({ length: postTotal }, (_, i) => i))
+    expect(seen).toEqual(totals.map((total) => Array.from({ length: total }, (_, i) => i)))
   })
 })

@@ -16,6 +16,8 @@ for (const path of [
   '/blog?page=2',
   '/blog/category/news',
   '/blog/welcome-to-the-blog',
+  '/team',
+  '/team/ann-lee',
   '/search',
   '/search?q=design',
   '/members',

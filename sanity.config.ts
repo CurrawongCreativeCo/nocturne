@@ -53,6 +53,7 @@ import {
 } from './src/features/studio/utils/document-access'
 import { hideDisabledFromNewMenu } from './src/features/studio/utils/feature-visibility'
 import { filterTools } from './src/features/studio/utils/tool-access'
+import { teamSchemaTypes } from './src/features/team/schemas'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
 // new-registry:import
 
@@ -94,6 +95,7 @@ export default defineConfig({
       ...pricingSchemaTypes,
       ...experimentSchemaTypes,
       ...siteSchemaTypes,
+      ...teamSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,
     ],

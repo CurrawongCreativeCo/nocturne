@@ -91,6 +91,7 @@ export const TAGS = {
   form: 'form',
   stripePrice: 'stripePrice',
   experiment: 'experiment',
+  teamMember: 'teamMember',
   // new-document:tag
 } as const
 

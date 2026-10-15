@@ -35,6 +35,20 @@ you start a release.
   now see the new preset names, and `style` gains ten `motion*` fields (run `npm run typegen`). Hero layouts share
   `HeroBackground`. See the README's "Section animation".
 
+- **Team (Studio and site):** new `teamMember` document (name, role, square portrait with required alt text, short bio of
+  up to 300 characters, rich-text bio, qualifications, public email, phone, social links, `order` and an optional page
+  address) in a new `src/features/team` feature, and a **Team** section with **Grid**, **Slider** and **List** layouts that
+  shows everyone in team order or the members an editor picks, in their order. The members are resolved inside the
+  section's GROQ fragment (no extra request), and cards (portrait, name, role, short bio, a transform-only hover lift) are
+  drawn in the pages feature. Optional profile pages at `/team/<slug>` with `Person` JSON-LD, metadata, real 404s and
+  sitemap entries; the new `teamProfiles` site-profile switch (on by default) turns them off and hides their fields. The
+  desk's **Team** entry is a drag-to-reorder list (with up and down buttons for keyboard and touch) that writes the
+  `order` field; Presentation resolves `/team/<slug>`. `team/<anything>` is a reserved page path, but a page called `team`
+  is fine. `splitSitemapRange` is replaced by `splitSitemapRanges` (any number of lists). **To adopt:** add `teamMember` to
+  the Sanity webhook filter in webhook mode; a client site with its own `site.profile.ts` may add `teamProfiles: false`.
+  Visual baselines for `team-grid`, `team-slider` and `team-list` need the **Update visual baselines** workflow. See the
+  README's "Team".
+
 - **Style guide (`/section-gallery`):** the section gallery is now a living style guide for client design reviews. The
   **Sections** view gets links above each section to switch its tone and layout, and a **375 / 768 / 1280 px** width
   preview built from container widths (no iframes; a small PostCSS step, `scripts/postcss-container-frames.mjs`, gives
