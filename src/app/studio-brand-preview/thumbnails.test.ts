@@ -36,16 +36,31 @@ describe('thumbnails cover every option', () => {
     expect(files.sort()).toEqual(sectionTypes.map((type) => type.name).sort())
   })
 
-  it('has a layout thumbnail for every section variant, and none for a variant that does not exist', () => {
+  it('gives every section variant a thumbnail in its schema, which the Layout picker shows', () => {
     for (const type of sectionTypes) {
-      const values = variantValues(type)
-      const drawn = Object.keys(sectionVariantThumbnails[type.name] ?? {})
-      expect(drawn.sort(), `${type.name} variants`).toEqual([...values].sort())
+      const field = type.fields.find((candidate) => candidate.name === 'variant')
+      const list = (
+        field?.options as { list?: { value: string; thumbnail?: unknown }[] } | undefined
+      )?.list
+      for (const entry of list ?? []) {
+        expect(
+          entry.thumbnail,
+          `${type.name} variant "${entry.value}" has no thumbnail`,
+        ).toBeTruthy()
+      }
     }
-    const known: string[] = sectionTypes.map((type) => type.name)
-    expect(Object.keys(sectionVariantThumbnails).filter((name) => !known.includes(name))).toEqual(
-      [],
-    )
+  })
+
+  it('keeps the reference layout drawings in step with the variants that exist', () => {
+    for (const [name, drawn] of Object.entries(sectionVariantThumbnails)) {
+      const type = sectionTypes.find((candidate) => candidate.name === name)
+      expect(type, `a layout drawing for "${name}", which is not a section`).toBeDefined()
+      for (const value of Object.keys(drawn)) {
+        expect(type ? variantValues(type) : [], `${name} has no variant "${value}"`).toContain(
+          value,
+        )
+      }
+    }
   })
 
   it('has an animation thumbnail for every animation preset', () => {

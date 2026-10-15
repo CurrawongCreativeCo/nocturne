@@ -12,17 +12,18 @@ export function schemaTemplate({ typeName, title }, variants = []) {
 import { defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
-import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+${hasVariants ? "import { PlaceholderThumbnail } from '@/lib/sanity/schema/placeholder-thumbnail'\n" : ''}import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { ${hasVariants ? 'variantField, variantSubtitle' : 'joinSubtitle, toneTitle'} } from '@/lib/sanity/schema/section-variant'${
     hasVariants
       ? `
 
 /**
  * One component per variant in components/sections/${kebabOf(typeName)}/. The first is the default: what
- * content without a variant renders. At most four per section.
+ * content without a variant renders. At most four per section. Add a \`description\` to each, and replace
+ * the placeholder thumbnail with a drawing of the layout.
  */
 export const ${constName} = [
-${variants.map((v) => `  { value: '${v.kebab}', title: '${escapeJs(v.title)}' },`).join('\n')}
+${variants.map((v) => `  { value: '${v.kebab}', title: '${escapeJs(v.title)}', thumbnail: PlaceholderThumbnail },`).join('\n')}
 ] as const`
       : ''
   }
