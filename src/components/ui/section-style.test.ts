@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { ctaSurfaceFor, resolveEdge, resolveSectionStyle, sectionTraits } from './section-style'
+import {
+  ctaSurfaceFor,
+  motionAdvancedOf,
+  resolveEdge,
+  resolveSectionStyle,
+  sectionMotion,
+  sectionTraits,
+} from './section-style'
 
 describe('resolveSectionStyle', () => {
   it('renders an empty style as the section always looked', () => {
@@ -8,7 +15,8 @@ describe('resolveSectionStyle', () => {
       expect(resolveSectionStyle(style)).toEqual({
         tone: 'surface',
         align: 'start',
-        motion: 'none',
+        // No animation chosen: content sections fade up (MOTION_DEFAULTS.content).
+        motion: 'reveal',
         anchorId: undefined,
         gradient: undefined,
         image: undefined,
@@ -27,6 +35,7 @@ describe('resolveSectionStyle', () => {
       spacing: 'spacious',
       container: 'max-w-4xl',
       align: 'center',
+      motion: 'none',
     } as const
     const empty = resolveSectionStyle({}, defaults)
     expect(empty).toMatchObject({ tone: 'inverse', align: 'center', motion: 'none' })
@@ -78,7 +87,7 @@ describe('sectionTraits', () => {
     expect(sectionTraits({ align: 'center' })).toEqual({
       tone: 'surface',
       align: 'center',
-      motion: 'none',
+      motion: 'reveal',
       block: 'mx-auto',
       text: 'text-center',
       justify: 'justify-center',
@@ -89,7 +98,10 @@ describe('sectionTraits', () => {
 
   it('reports the motion preset, so a section can draw its own parallax picture', () => {
     expect(sectionTraits({ motion: 'parallax' }).motion).toBe('parallax')
-    expect(sectionTraits({}).motion).toBe('none')
+    expect(sectionTraits({}).motion).toBe('reveal')
+    expect(sectionTraits({}, { motion: 'none' }).motion).toBe('none')
+    // An explicit None beats the section's default.
+    expect(sectionTraits({ motion: 'none' }).motion).toBe('none')
   })
 })
 
@@ -210,5 +222,60 @@ describe('resolveEdge', () => {
   it('tells the section which spacing it has, for the padding maths', () => {
     expect(resolveSectionStyle({ spacing: 'compact' }).spacing).toBe('compact')
     expect(resolveSectionStyle({}, { spacing: 'spacious' }).spacing).toBe('spacious')
+  })
+})
+
+describe('sectionMotion', () => {
+  const context = { isFirst: false, hasMedia: false }
+
+  it('plays a content section’s default fade up', () => {
+    expect(sectionMotion({}, undefined, context)).toMatchObject({ kind: 'enter', trigger: 'view' })
+  })
+
+  it('stays still where the section’s default is none, and for an explicit None', () => {
+    expect(sectionMotion({}, { motion: 'none' }, context)).toEqual({ kind: 'none' })
+    expect(sectionMotion({ motion: 'none' }, undefined, context)).toEqual({ kind: 'none' })
+  })
+
+  it('reads the Advanced options from the style', () => {
+    const plan = sectionMotion({ motion: 'parallaxMedium', motionIntensity: 'bold' }, undefined, {
+      ...context,
+      hasMedia: true,
+    })
+    expect(plan).toMatchObject({ kind: 'parallax', speed: 0.45 })
+  })
+
+  it('moves nothing for a picture preset without a picture', () => {
+    expect(sectionMotion({ motion: 'float' }, undefined, context)).toEqual({ kind: 'none' })
+  })
+})
+
+describe('motionAdvancedOf', () => {
+  it('maps the stored field names', () => {
+    expect(
+      motionAdvancedOf({
+        motionIntensity: 'bold',
+        motionDuration: 'slow',
+        motionDelay: 'long',
+        motionDirection: 'end',
+        motionTrigger: 'load',
+        motionCustom: true,
+        motionDurationMs: 800,
+        motionDistancePx: 30,
+        motionEasing: 'linear',
+        motionThreshold: 40,
+      }),
+    ).toEqual({
+      intensity: 'bold',
+      duration: 'slow',
+      delay: 'long',
+      direction: 'end',
+      trigger: 'load',
+      custom: true,
+      durationMs: 800,
+      distancePx: 30,
+      easing: 'linear',
+      thresholdPercent: 40,
+    })
   })
 })

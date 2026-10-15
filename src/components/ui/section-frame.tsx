@@ -1,8 +1,9 @@
 import { Children, Fragment, type CSSProperties, type ReactNode } from 'react'
 
+import { LazyFloat } from '@/components/motion/float-lazy'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
-import { fadeUp, revealChild, revealInView, staggerContainer } from '@/components/motion/presets'
+import { enterProps, revealChild } from '@/components/motion/presets'
 
 import { SectionBackground } from './section-background'
 import {
@@ -14,10 +15,12 @@ import {
   edgeMaskImage,
   type ResolvedEdge,
 } from './section-edges'
-import { resolveSectionStyle, type SectionDefaults, type SectionStyleInput } from './section-style'
-
-/** Gentle: the picture drifts a few percent of its height, not enough to pull the eye from the text. */
-const MEDIA_PARALLAX_SPEED = 0.15
+import {
+  resolveSectionStyle,
+  sectionMotion,
+  type SectionDefaults,
+  type SectionStyleInput,
+} from './section-style'
 
 interface Props {
   /** The section's `style` as the query returns it. */
@@ -69,9 +72,11 @@ function EdgeSvg({ children, ...rest }: { children: ReactNode; 'data-edge-layer'
  * everything within, see tokens.generated.css), spacing, width, the anchor `id` and the motion
  * preset, all from the section's shared `style`. A section supplies only its content.
  *
- * Motion plays once when the content scrolls into view. `reveal` fades the container up, `stagger`
- * fades its direct children up one after another, `parallax` gives the `media` slot a gentle
- * Parallax (a section with no media stays still; a hero draws its own, see ParallaxImage). Content stays visible without JavaScript (globals.css, `[data-reveal]`).
+ * Motion is the section's animation preset, resolved by `resolveMotion` (components/motion/presets.ts,
+ * README "Section animation"). An entrance plays once as the content scrolls into view (or on load):
+ * it moves the container, or, staggered, its direct children one after another. Float and the
+ * Parallax strengths move the `media` slot (a section with no media stays still; a hero draws its
+ * own, see HeroBackground). Content stays visible without JavaScript (globals.css, `[data-reveal]`).
  *
  * The style's brand gradient and background picture (with its overlay) are drawn first, behind
  * everything, by SectionBackground; the hero's own `background` goes above them.
@@ -93,11 +98,21 @@ export function SectionFrame({
   children,
 }: Props) {
   const resolved = resolveSectionStyle(style, defaults)
-  const motion = isFirst ? 'none' : resolved.motion
+  const plan = sectionMotion(style, defaults, {
+    isFirst,
+    hasMedia: Boolean(media),
+    placement: 'beside',
+  })
   const containerClass = `${resolved.containerClass} ${containerClassName}`.trim()
   const mediaNode =
-    media && motion === 'parallax' ? (
-      <LazyParallax speed={MEDIA_PARALLAX_SPEED}>{media}</LazyParallax>
+    media && plan.kind === 'parallax' ? (
+      <LazyParallax speed={plan.speed} from={plan.from}>
+        {media}
+      </LazyParallax>
+    ) : media && plan.kind === 'float' ? (
+      <LazyFloat distancePx={plan.distancePx} durationMs={plan.durationMs}>
+        {media}
+      </LazyFloat>
     ) : (
       media
     )
@@ -124,15 +139,16 @@ export function SectionFrame({
         isFirst={isFirst}
       />
       {background}
-      {motion === 'reveal' ? (
-        <MotionDiv {...revealInView(fadeUp)} className={containerClass}>
+      {plan.kind === 'enter' && plan.target === 'container' ? (
+        <MotionDiv {...enterProps(plan)} className={containerClass}>
           {content}
         </MotionDiv>
-      ) : motion === 'stagger' ? (
-        <MotionDiv {...revealInView(staggerContainer)} className={containerClass}>
+      ) : plan.kind === 'enter' ? (
+        <MotionDiv {...enterProps(plan)} className={containerClass}>
           {Children.map(
             [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
-            (child) => (child ? <MotionDiv {...revealChild()}>{child}</MotionDiv> : null),
+            (child) =>
+              child ? <MotionDiv {...revealChild(plan.childVariants)}>{child}</MotionDiv> : null,
           )}
         </MotionDiv>
       ) : (

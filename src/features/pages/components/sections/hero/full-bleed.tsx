@@ -1,9 +1,8 @@
-import { ParallaxImage } from '@/components/motion/parallax-image'
-import { SanityImage } from '@/components/ui/sanity-image'
+import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SectionFrame } from '@/components/ui/section-frame'
-import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
-import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { sectionMotion, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
+import { HeroBackground } from './hero-background'
 import { HeroText } from './hero-text'
 import { HeroSlot } from './slots'
 import type { SectionProps } from '../../../types'
@@ -13,6 +12,7 @@ const DEFAULTS: SectionDefaults = {
   spacing: 'default',
   container: 'max-w-content',
   align: 'start',
+  motion: MOTION_DEFAULTS.hero,
 }
 
 /**
@@ -21,6 +21,11 @@ const DEFAULTS: SectionDefaults = {
  */
 export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
   const { tone, align, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
+  const plan = sectionMotion(data.style, DEFAULTS, {
+    isFirst,
+    hasMedia: Boolean(data.backgroundImage?.asset),
+    placement: 'background',
+  })
   // Without a picture there is nothing to be tall for: the panel's text sets the height.
   const hasImage = Boolean(data.backgroundImage?.asset)
 
@@ -31,24 +36,12 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
       isFirst={isFirst}
       className={`flex items-end overflow-hidden ${hasImage ? 'min-h-[28rem] lg:min-h-[40rem]' : ''}`}
       background={
-        motion === 'parallax' ? (
-          <ParallaxImage
-            image={data.backgroundImage}
-            preload={isFirst}
-            sizes="100vw"
-            from={isFirst ? 'top' : 'viewport'}
-            className="object-cover"
-          />
-        ) : (
-          <SanityImage
-            image={data.backgroundImage}
-            fill
-            preload={isFirst}
-            sizes="100vw"
-            className="-z-10 object-cover"
-            style={{ objectPosition: hotspotObjectPosition(data.backgroundImage) }}
-          />
-        )
+        <HeroBackground
+          image={data.backgroundImage}
+          plan={plan}
+          isFirst={isFirst}
+          className="object-cover"
+        />
       }
     >
       <div className={`max-w-measure-narrow rounded-card bg-surface p-8 text-ink lg:p-10 ${text}`}>

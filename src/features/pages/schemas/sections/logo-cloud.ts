@@ -54,7 +54,7 @@ export const logoCloud = defineType({
       }),
       accessField,
     ],
-    { spacing: 'compact', align: 'center' },
+    { spacing: 'compact', align: 'center', motion: 'none' },
   ),
   preview: {
     select: { title: 'title', logos: 'logos', tone: 'style.tone' },

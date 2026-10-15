@@ -67,6 +67,41 @@
     }
   }
 
+  /*
+   * Float (section animation preset): a picture drifts slowly up and down. Transform only. Half the
+   * travel below md, still for visitors who ask for less motion, paused off screen (Float sets data-paused).
+   */
+  @keyframes float-drift {
+    from {
+      transform: translateY(calc(var(--float-distance) * var(--float-scale) * -0.5));
+    }
+    to {
+      transform: translateY(calc(var(--float-distance) * var(--float-scale) * 0.5));
+    }
+  }
+
+  [data-float] {
+    --float-scale: 0.5;
+    /* It alternates, so each way takes half the loop. */
+    animation: float-drift calc(var(--float-duration) / 2) ease-in-out infinite alternate;
+  }
+
+  [data-float][data-paused] {
+    animation-play-state: paused;
+  }
+
+  @media (min-width: 48rem) {
+    [data-float] {
+      --float-scale: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-float] {
+      animation: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     ::before,

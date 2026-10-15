@@ -1,3 +1,4 @@
+import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -12,6 +13,7 @@ const DEFAULTS: SectionDefaults = {
   spacing: 'spacious',
   container: 'max-w-content',
   align: 'start',
+  motion: MOTION_DEFAULTS.hero,
 }
 
 /**

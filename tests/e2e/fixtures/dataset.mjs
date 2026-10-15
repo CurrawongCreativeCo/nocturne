@@ -523,6 +523,114 @@ export const documents = [
     ],
   },
   {
+    // The animation presets and their Advanced options (tests/e2e/motion-presets.spec.ts). noIndex
+    // keeps it out of the sitemap and search. The first section plays "On load"; the spacers keep
+    // the rest below the fold; everything else plays as it scrolls into view.
+    _id: 'page-motion-presets',
+    _type: 'page',
+    title: 'Animation presets',
+    slug: { _type: 'slug', current: 'motion-presets' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'presets-first',
+        _type: 'richText',
+        style: {
+          _type: 'sectionStyle',
+          motion: 'slide',
+          motionTrigger: 'load',
+          motionDirection: 'up',
+          anchorId: 'first',
+        },
+        body: [block(['First section, plays on load'], { style: 'h2' })],
+      },
+      {
+        _key: 'presets-first-still',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', motion: 'none', spacing: 'spacious' },
+        body: [
+          block(['Spacer'], { style: 'h2' }),
+          ...Array.from({ length: 14 }, () => block(['Space to scroll through. '.repeat(10)])),
+        ],
+      },
+      ...[
+        ['subtle', { motion: 'subtle' }],
+        ['fade', { motion: 'fade' }],
+        ['slide', { motion: 'slide', motionDirection: 'end' }],
+        [
+          'custom',
+          {
+            motion: 'reveal',
+            motionCustom: true,
+            motionDurationMs: 1500,
+            motionDistancePx: 60,
+            motionEasing: 'linear',
+            motionThreshold: 50,
+          },
+        ],
+        // Left over from another preset: Direction means nothing to Subtle, so it must not apply.
+        ['leftover', { motion: 'subtle', motionDirection: 'end', motionIntensity: 'bold' }],
+      ].flatMap(([id, style]) => [
+        {
+          _key: `presets-${id}`,
+          _type: 'richText',
+          style: { _type: 'sectionStyle', anchorId: id, ...style },
+          body: [block([`Preset ${id}`], { style: 'h2' }), block(['Body text. '.repeat(6)])],
+        },
+        {
+          _key: `presets-space-${id}`,
+          _type: 'richText',
+          style: { _type: 'sectionStyle', motion: 'none', spacing: 'spacious' },
+          body: [
+            block(['Space'], { style: 'h2' }),
+            ...Array.from({ length: 14 }, () => block(['Space to scroll through. '.repeat(10)])),
+          ],
+        },
+      ]),
+      {
+        _key: 'presets-float',
+        _type: 'mediaText',
+        title: 'Floating picture',
+        body: [block(['The picture drifts; the text stays put.'])],
+        image: image('Floating picture'),
+        imagePosition: 'right',
+        style: { _type: 'sectionStyle', motion: 'float', anchorId: 'float' },
+      },
+      {
+        _key: 'presets-space-float',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', motion: 'none', spacing: 'spacious' },
+        body: [
+          block(['Space'], { style: 'h2' }),
+          ...Array.from({ length: 14 }, () => block(['Space to scroll through. '.repeat(10)])),
+        ],
+      },
+      {
+        _key: 'presets-parallax',
+        _type: 'mediaText',
+        title: 'Strong parallax picture',
+        body: [block(['Body text beside the picture.'])],
+        image: image('Parallax picture'),
+        imagePosition: 'left',
+        style: {
+          _type: 'sectionStyle',
+          motion: 'parallaxStrong',
+          motionIntensity: 'bold',
+          anchorId: 'parallax-strong',
+        },
+      },
+      {
+        _key: 'presets-parallax-subtle',
+        _type: 'mediaText',
+        title: 'Subtle parallax picture',
+        body: [block(['Body text beside the picture.'])],
+        image: image('Parallax picture'),
+        imagePosition: 'left',
+        style: { _type: 'sectionStyle', motion: 'parallax', anchorId: 'parallax-subtle' },
+      },
+    ],
+  },
+  {
     // Public page with members-only sections: a plain one and a shared one between public ones.
     _id: 'page-mixed',
     _type: 'page',

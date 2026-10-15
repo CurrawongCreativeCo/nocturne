@@ -89,8 +89,8 @@ Open http://localhost:3000/studio:
 - **Members-only content:** a page has a _Who can see this page_ field and every section a _Who can see this_ field (_Everyone_ or _Members only (signed in)_; empty means everyone). A members-only page asks visitors to sign in and shows nothing else, is left out of the sitemap, `/llms.txt` and search, and tells search engines not to index it. A members-only section on a public page is replaced by a "Members only" sign-in prompt for visitors who aren't signed in; the rest of the page is unchanged. A shared section is members-only when the section inside it is. The page's title is replaced by "Members only" until the visitor signs in; its URL, and any menu entry an editor adds for it, are not hidden. In Presentation and draft previews editors see everything. Who counts as a member is set by the developer (see _Members-only content_ below). `sign-in` and `sign-out` are reserved first slug segments; link to `/sign-out` (a button link or a footer menu item with a custom URL) wherever members should find it.
 - **Section forms:** a section's form has three levels, so the common choices are pictures and the rare ones stay out of the way. Agency staff only: clients see just the **Content** tab (see _Studio roles and permissions_; this is the Studio view, not a lock).
   - **Content tab.** The **Layout** picker comes first for sections with more than one layout, because the layout decides which fields matter. The hero is the exception: its picker is a row of six named presets (_Full background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with panel_; see _Hero presets_), which set the layout, the image side and the background together. Then the content, showing only what the chosen layout uses: the hero's _Image side_ appears for _Split_ only, its _Small picture_ for _Editorial_ only, and _Image_ for every layout but _Editorial_. A field that is hidden keeps whatever was typed in it, so switching layout back brings it back.
-  - **Design tab.** _Background_ (_Surface_, _Soft_, _Dark_, _Accent_) is a row of swatches drawn with the site's real colours. _Animation_ (_None_, _Fade up_, _Staggered_, _Parallax_) is a picture picker; _Fade up_ plays once as the section scrolls into view, _Staggered_ shows its parts one after another, and _Parallax_ drifts a picture as the page scrolls. The first section on a page never fades or staggers, so its heading and main image appear immediately; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still.
-    - _Parallax_ is only offered where a section has a picture to move: the hero's _Full background_ and _Image with panel_ layouts, and _Image + text_. If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
+  - **Design tab.** _Background_ (_Surface_, _Soft_, _Dark_, _Accent_) is a row of swatches drawn with the site's real colours. _Animation_ is a picture picker with gently moving previews (still for anyone who asks for less motion): _None_, _Fade up_, _Subtle entrance_, _Fade_, _Slide in_, _Staggered_, _Float_ and _Parallax_ in three strengths (_Subtle_, _Medium_, _Strong_). Sections start on the right one for what they are (content fades up; the hero's text enters by itself; logo strips stay still), so most never need touching. _Float_ and _Parallax_ move a picture, so they are only offered where a section has one. A collapsed **More animation options** appears under the picker and shows only what the chosen animation uses (intensity, duration, delay, direction, when it plays, or exact values). The first section on a page stays still so its heading and main image appear immediately, unless you choose _On load_, which slides or rises it without ever fading it in; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still. See [Section animation](#section-animation).
+    - _Float_ and _Parallax_ are only offered where a section has a picture to move: the hero's _Full background_ and _Image with panel_ layouts, and _Image + text_. If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
     - **More layout options** (collapsed): _Space above and below_ (_Compact_, _Default_ or _Spacious_; _Default_ is the section's usual spacing), _Content width_ (_Narrow_, _Default_, _Wide_, or _Full width_ edge to edge), _Alignment_ (_Start_ or _Centre_ for headings, intro text and buttons) and _Anchor_ (a short name such as `pricing`, so a link to `/#pricing` jumps to the section; lowercase letters, numbers and hyphens, each once per page). _Alignment_ is left out on layouts that set their own (the hero's _Split_ and _Editorial_); a value left over from another layout stays visible with a warning, and **Reset value** in the field's menu clears it.
   - **Advanced** (collapsed, in the Design tab): extra controls for the few sections that have them. It does not appear when the chosen layout has none. Today that is the hero's _Proportion_ and _Image shape_, for _Split_ only.
 
@@ -1455,6 +1455,98 @@ such as `onDragEnd` cannot cross the server/client boundary: write a small clien
 The ~5 KB usually quoted for LazyMotion + `m` holds for esbuild (5.7 KB here), but Turbopack keeps much more of the
 core. That is why the home page JavaScript budget went from 200 KB to 220 KB (see _Performance budgets_).
 
+### Section animation
+
+Section animation is a small preset library in three levels. Each level is a layer over the last, and the Studio shows
+only what applies.
+
+**1. Defaults, by kind of section (in code).** `MOTION_DEFAULTS` (`src/components/motion/presets.ts`) is what a section
+does when its style names no animation. `SectionDefaults.motion` picks the kind:
+
+| Kind      | Default   | Sections                                                                                                                                                                  |
+| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `content` | _Fade up_ | Everything unless it says otherwise (rich text, image + text, features, FAQ, testimonials, stats, gallery…). A section left out of `DEFAULTS` is content.                 |
+| `hero`    | _None_    | The four hero layouts. The hero's own text enters on load after the LCP-safe elements (the heading and picture never animate: `hero-text.tsx`), so the frame stays still. |
+| `still`   | _None_    | The logo strip.                                                                                                                                                           |
+
+New sections added in the Studio store the kind's default, so what you see in the picker is what the site does. An
+explicit _None_ always beats the default, and content saved before the library existed (no `motion` stored) now fades up
+like any new content section. Stored `reveal` is still _Fade up_ and `parallax` still the original Parallax (now named
+_Parallax · Subtle_), so nothing needs migrating.
+
+**2. Presets (the Animation picker).** Typed data in `presets.ts`, drawn by `SectionFrame`; the picker shows a gently
+animated picture for each (`animation-thumbnails.tsx`: SVG animation, mounted only while motion is allowed, so static
+under reduced motion).
+
+| Preset (stored)                        | What it does                                                                        | Needs a picture |
+| -------------------------------------- | ----------------------------------------------------------------------------------- | --------------- |
+| _None_ (`none`)                        | Appears with the page.                                                              |                 |
+| _Fade up_ (`reveal`)                   | Fades in and rises 24 px (the `reveal-distance` token) over 0.6 s, once, in view.   |                 |
+| _Subtle entrance_ (`subtle`)           | Fades in and rises 12 px.                                                           |                 |
+| _Fade_ (`fade`)                        | Fades in; no movement.                                                              |                 |
+| _Slide in_ (`slide`)                   | Fades in while sliding 32 px in from the start side (or the chosen direction).      |                 |
+| _Staggered_ (`stagger`)                | The section's direct children fade up 0.08 s apart.                                 |                 |
+| _Float_ (`float`)                      | The picture drifts up and down 16 px in a slow loop (9 s), paused while off screen. | yes             |
+| _Parallax · Subtle_ (`parallax`)       | The picture drifts as the page scrolls: speed 0.15 beside the text, 0.25 behind it. | yes             |
+| _Parallax · Medium_ (`parallaxMedium`) | Speed 0.3 beside, 0.4 behind.                                                       | yes             |
+| _Parallax · Strong_ (`parallaxStrong`) | Speed 0.45 beside, 0.55 behind. Use on one picture per page.                        | yes             |
+
+The picker offers only what fits the section (`visibleMotions`): Float and the Parallax strengths are withheld where the
+layout has no picture (the hero's _Full background_ and _Image with panel_, and _Image + text_), and an unfitting value
+left behind by a layout change stays selected with a yellow warning. Speeds are in the units `Parallax` takes (see
+_Motion_); a picture behind a hero travels further than one beside text.
+
+**3. Advanced (collapsed "More animation options").** Each option is shown only for the presets that use it
+(`MOTION_USES`; `motionOptionHidden` in the schema reads the same table), and `resolveMotion` ignores a stored value the
+preset does not use, so a leftover from another preset can never change the result.
+
+| Option                    | Values                                                                                                                  | Used by                                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Intensity                 | Subtle (×0.6) · Normal · Bold (×1.5) of the strength chosen                                                             | Parallax (all three). Speed stays within 0.05–0.6.                                          |
+| Duration                  | Fast 0.35 s · Normal 0.6 s · Slow 0.9 s (Float: 6 · 9 · 13 s loop)                                                      | Every entrance, and Float                                                                   |
+| Delay                     | None · Short 0.15 s · Long 0.4 s                                                                                        | Every entrance                                                                              |
+| Direction                 | From the start · end · below · above                                                                                    | Slide in. The start is the left (the site is LTR).                                          |
+| When it plays             | On scroll into view · On load                                                                                           | Every entrance (see the first section below)                                                |
+| Set exact values (Custom) | Duration 100–3000 ms, distance 0–120 px, easing (ease out · in and out · in · linear), how much must be in view 5–100 % | Entrances. Fade has no distance; Float takes a loop of 2–20 s and a travel of 0–40 px only. |
+
+Exact values are validated in the Studio (whole numbers within the range, with a message) and clamped again by the
+resolver, so a value saved from elsewhere cannot break the page.
+
+**`resolveMotion(preset, advanced, { isFirst, hasMedia, reducedMotion, placement })`** is the one place that turns this
+into what to draw: `{ kind: 'none' }`, an `enter` plan (variants, trigger, viewport), a `float` plan or a `parallax`
+plan. It is pure and covered by `presets.test.ts`. The rules it enforces:
+
+- **The first section never starts at opacity 0.** It stays still, even with an entrance chosen, unless the editor sets
+  _When it plays_ to _On load_; then it plays as a transform only (opacity stays 1, so the heading and picture are in the
+  server HTML and the LCP is untouched), and _Fade_ does nothing there. Parallax on a first section rests unshifted at the
+  top of the page (`from: 'top'`).
+- **No picture, no picture animation.** Float and Parallax resolve to nothing without a picture.
+- **Reduced motion moves nothing.** The resolver returns nothing when told the visitor asked for less motion; on the
+  server, which cannot know, CSS covers it: `[data-reveal]` is forced to its final state (`globals.css`), Parallax never
+  attaches its transform, and Float's CSS animation is switched off.
+- **Without JavaScript** every entrance is readable (`[data-reveal]` shows), and Float, being CSS, still runs.
+
+**Phones and touch.** Parallax travels half as far below `md` (a CSS variable in `Parallax`, as before). Float _does_ run on
+small screens, also at half the travel: it is a transform on the compositor with no script per frame, it pauses
+off screen, and a still picture on a phone read as broken next to the desktop. Hover-free, so nothing depends on a pointer.
+
+**Float** (`float.tsx`, `float-lazy.tsx`, `[data-float]` in `globals.css`) is a CSS keyframe animation (`translateY`, alternating
+so one loop is the _Duration_). The client component only adds `data-paused` while the element is off screen
+(`useInView`: one IntersectionObserver that Motion disconnects on unmount) and `LazyFloat` keeps even that out of pages
+without a floating picture, so no JavaScript beyond the preset data joins the home page. For a hero background the picture is
+drawn 20 px larger than its frame so the drift never shows an edge.
+
+**Adding a preset.** Add the name to `SECTION_MOTIONS` and its title to `SECTION_MOTION_TITLES`
+(`src/lib/sanity/section-style-options.ts`), its row in `MOTION_USES`, its behaviour in `resolveMotion`, a thumbnail in
+`animation-thumbnails.tsx` and `registry.ts`, and a picker entry in `section-style.ts`. The tests fail until each table has
+a row for it. Keep the library small: a preset needs a reason a Custom value or an Advanced option cannot give.
+
+**Tests.** `presets.test.ts` (the resolver: compatibility of stored values, every preset, every option, clamping, the first
+section, reduced motion), `section-style.test.ts` (defaults and `sectionMotion`), `section-form.test.ts` (which options and
+presets the form shows), and `tests/e2e/motion-presets.spec.ts` on the `/motion-presets` fixture page (each entrance
+starts from its own offset and settles, a leftover option is ignored, the first section plays on load and is in the
+server HTML at full opacity, Float runs and pauses off screen, Parallax speeds, reduced motion, no JavaScript, axe).
+
 ### Slider
 
 `Slider` (`src/components/ui/slider.tsx`, client) is an accessible touch carousel on Motion's drag. The Testimonials
@@ -1672,18 +1764,18 @@ combined with `hiddenFromClients`) and the fieldset vanishes when none of them a
 with `joinSubtitle` / `variantSubtitle` ("Hero · Split · Dark"). The rules are unit tested per section and layout
 (`section-form.test.ts`, `sections/section-form.test.ts`, `sections/section-fields.test.ts`).
 
-| Field      | Values                                                      | What it does                                                                                              |
-| ---------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `tone`     | `surface` · `alt` · `inverse` · `accent`                    | `data-tone` on the `<section>`; recolours everything inside (see below).                                  |
-| `spacing`  | `compact` · `default` · `spacious`                          | `py-section-compact` / the section's usual / `py-section-spacious`.                                       |
-| `width`    | `narrow` · `default` · `wide` · `full`                      | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters.             |
-| `align`    | `start` · `center`                                          | Alignment classes for the parts the section aligns (headings, intro, buttons).                            |
-| `gradient` | slug of a brand gradient                                    | A gradient layer behind the content (see _Section backgrounds_ below).                                    |
-| `image`    | image with hotspot                                          | A picture layer behind the content (see _Section backgrounds_); not offered for the hero.                 |
-| `overlay`  | `none` · `light` · `medium` · `strong`                      | How strongly the tone's colour covers the picture.                                                        |
-| `edge`     | `none` · `diagonal` · `wave` · `curve` · `arch` · `layered` | The shape of the section's bottom edge (see _Section dividers_ below); `edge*` siblings hold its options. |
-| `anchorId` | slug-like string                                            | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).              |
-| `motion`   | `none` · `reveal` · `stagger` · `parallax`                  | Scroll-in animation through the wrappers in `src/components/motion`.                                      |
+| Field      | Values                                                                                                                   | What it does                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `tone`     | `surface` · `alt` · `inverse` · `accent`                                                                                 | `data-tone` on the `<section>`; recolours everything inside (see below).                                  |
+| `spacing`  | `compact` · `default` · `spacious`                                                                                       | `py-section-compact` / the section's usual / `py-section-spacious`.                                       |
+| `width`    | `narrow` · `default` · `wide` · `full`                                                                                   | `max-w-measure-narrow` / the section's usual / `max-w-content` / `max-w-none` and no gutters.             |
+| `align`    | `start` · `center`                                                                                                       | Alignment classes for the parts the section aligns (headings, intro, buttons).                            |
+| `gradient` | slug of a brand gradient                                                                                                 | A gradient layer behind the content (see _Section backgrounds_ below).                                    |
+| `image`    | image with hotspot                                                                                                       | A picture layer behind the content (see _Section backgrounds_); not offered for the hero.                 |
+| `overlay`  | `none` · `light` · `medium` · `strong`                                                                                   | How strongly the tone's colour covers the picture.                                                        |
+| `edge`     | `none` · `diagonal` · `wave` · `curve` · `arch` · `layered`                                                              | The shape of the section's bottom edge (see _Section dividers_ below); `edge*` siblings hold its options. |
+| `anchorId` | slug-like string                                                                                                         | The `<section>`'s `id`. The page's Sections field rejects a repeat (`findDuplicateAnchors`).              |
+| `motion`   | `none` · `reveal` · `subtle` · `fade` · `slide` · `stagger` · `float` · `parallax` · `parallaxMedium` · `parallaxStrong` | The animation preset (see _Section animation_); the `motion*` siblings hold its Advanced options.         |
 
 **Rendering.** A section component renders inside `SectionFrame` (`src/components/ui/section-frame.tsx`, a server
 component) instead of its own `<section>` and padding, and passes its content as children:
@@ -1719,11 +1811,11 @@ tone: never hard-code a palette class in a section. On the dark tones `--color-f
 the global `:focus-visible` rule draws. Buttons are drawn for a background through `CtaGroup`'s `surface`: pass
 `ctaSurfaceFor(tone)` (dark tones get the light buttons). Any element can carry `data-tone` too: the CTA banner's card does.
 
-**Motion presets.** `reveal` wraps the container in `MotionDiv` with `revealInView(fadeUp)`; `stagger` wraps each direct
-child of the frame in a `revealChild()` item under a `staggerContainer`, so give a section sensible top-level parts
-(a header, a list); `parallax` gives the frame's `media` slot a gentle `Parallax` (a section that doesn't pass `media` stays still; the hero
-backgrounds draw their own `ParallaxImage`, see _Motion_). All of it keeps content visible without
-JavaScript and with reduced motion (see _Motion_).
+**Motion presets.** `SectionFrame` asks `sectionMotion` (`section-style.ts`) for a plan from `resolveMotion` and draws it: an
+entrance wraps the container in a `MotionDiv` (or, `stagger`, each direct child, so give a section sensible top-level
+parts: a header, a list), Float and Parallax wrap the frame's `media` slot (a section that doesn't pass `media` stays still;
+the hero backgrounds draw their own, see `HeroBackground`). All of it keeps content visible without JavaScript and with
+reduced motion. The presets, their options and the defaults per kind of section are described under _Section animation_.
 
 **Tests.** `section-style.test.ts` covers the mapping; `tests/e2e/section-style.spec.ts` checks tones (axe on every tone for
 two sections), the focus colour, spacing, anchors and motion; the gallery has an entry per tone and spacing for the features
@@ -1933,7 +2025,7 @@ content_).
   components import `count-up-lazy.tsx` (`next/dynamic` in a client file, like `LazyParallax`), so its code is a separate
   chunk that only a page rendering an animated figure downloads. A page without statistics pays nothing, so the home page
   budget is unchanged.
-- **When it counts:** Animation _Reveal_ or _Stagger_ (the section starts on _Reveal_). _None_ means no count-up, and so
+- **When it counts:** any Animation but _None_ (the section starts on _Fade up_). _None_ means no count-up, and so
   does being the page's first section (`SectionFrame` never animates the first section either).
 - **`StatsBar`** (`src/components/ui/stats-bar.tsx`) is the hero-slot component: no section frame, no colours of its own
   (text, muted text and dividers come from the surrounding tone, so it reads on a dark or a light hero). Its columns follow
@@ -2105,13 +2197,13 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
-| Kind            | Files                                                                                                  | Shown for                                                                    |
-| --------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts) |
-| Hero presets    | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                        |
-| Animations      | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, staggered, parallax                      |
-| Tones           | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                  |
-| Insert menu     | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                       |
+| Kind            | Files                                                                                                  | Shown for                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts)                          |
+| Hero presets    | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                                                 |
+| Animations      | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, subtle, fade, slide, staggered, float, parallax (three strengths) |
+| Tones           | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                                           |
+| Insert menu     | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                                                |
 
 `registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 

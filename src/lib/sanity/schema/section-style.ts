@@ -6,6 +6,7 @@ import {
   type FieldDefinition,
 } from 'sanity'
 
+import { customRange, isMotionPreset } from '@/components/motion/presets'
 import { backgroundContrastProblem } from '@/lib/color/background-contrast'
 
 import { hiddenFromClients } from '../roles'
@@ -14,6 +15,19 @@ import {
   EDGE_CUSTOM_MAX,
   EDGE_CUSTOM_MIN,
   RESERVED_ANCHORS,
+  SECTION_MOTION_TITLES,
+  MOTION_DELAYS,
+  MOTION_DELAY_TITLES,
+  MOTION_DIRECTIONS,
+  MOTION_DIRECTION_TITLES,
+  MOTION_DURATIONS,
+  MOTION_DURATION_TITLES,
+  MOTION_EASINGS,
+  MOTION_EASING_TITLES,
+  MOTION_INTENSITIES,
+  MOTION_INTENSITY_TITLES,
+  MOTION_TRIGGERS,
+  MOTION_TRIGGER_TITLES,
   SECTION_ALIGNS,
   SECTION_EDGE_ACCENTS,
   SECTION_EDGE_ACCENT_TITLES,
@@ -38,6 +52,8 @@ import {
   edgeInvertHidden,
   edgeLayerHidden,
   edgeOptionsHidden,
+  motionCustomHidden,
+  motionOptionHidden,
   overlayHidden,
   registerSectionRules,
   sectionAtStylePath,
@@ -46,12 +62,6 @@ import {
   visibleMotions,
   type SectionFormRules,
 } from './section-form'
-import {
-  MotionNoneThumbnail,
-  MotionParallaxThumbnail,
-  MotionRevealThumbnail,
-  MotionStaggerThumbnail,
-} from './thumbnails/animation-thumbnails'
 import {
   EdgeArchThumbnail,
   EdgeCurveThumbnail,
@@ -66,6 +76,7 @@ import {
   OverlayNoneThumbnail,
   OverlayStrongThumbnail,
 } from './thumbnails/overlay-thumbnails'
+import { animationThumbnails } from './thumbnails/registry'
 import {
   ToneAccentThumbnail,
   ToneAltThumbnail,
@@ -81,6 +92,19 @@ import {
  * An empty style renders each section as it always has, so existing content needs no migration.
  * The value lists live in ../section-style-options.ts, which the site can import without Studio.
  */
+
+/** The error for an exact animation value outside the range its preset allows; true when it is fine or empty. */
+function motionRangeProblem(
+  value: unknown,
+  motion: string | undefined,
+  field: 'duration' | 'distance' | 'threshold',
+  unit: string,
+): string | true {
+  if (value === undefined || value === null) return true
+  if (typeof value !== 'number' || !Number.isInteger(value)) return 'Use a whole number'
+  const { min, max } = customRange(isMotionPreset(motion) ? motion : 'reveal', field)
+  return value >= min && value <= max ? true : `Use ${min} to ${max} ${unit}`
+}
 
 const radio = (values: readonly string[], titles: Record<string, string>) => ({
   list: values.map((value) => ({ title: titles[value] ?? value, value })),
@@ -106,6 +130,12 @@ export const sectionStyle = defineType({
   // The fields are rendered straight into the Design tab, not in a box of their own.
   options: { frameless: true },
   fieldsets: [
+    {
+      name: 'motionAdvanced',
+      title: 'More animation options',
+      description: 'Fine-tune the chosen animation. Only the options it uses are shown.',
+      options: { collapsible: true, collapsed: true },
+    },
     {
       name: 'layoutOptions',
       title: 'More layout options',
@@ -249,40 +279,199 @@ export const sectionStyle = defineType({
       name: 'motion',
       title: 'Animation',
       description:
-        'How the section appears as it scrolls into view. Skipped for visitors who ask for less motion. Fade up and staggered are not used on the first section of a page.',
+        'How the section appears as it scrolls into view. Skipped for visitors who ask for less motion. The first section of a page stays still unless you choose On load in the options below.',
       required: false,
       options: [
         {
           value: 'none',
-          title: 'None',
+          title: SECTION_MOTION_TITLES.none,
           description: 'Appears with the page.',
-          thumbnail: MotionNoneThumbnail,
+          thumbnail: animationThumbnails.none,
         },
         {
           value: 'reveal',
-          title: 'Fade up',
-          description: 'Fades in once as it scrolls into view.',
-          thumbnail: MotionRevealThumbnail,
+          title: SECTION_MOTION_TITLES.reveal,
+          description: 'Fades in and rises 24 px, once.',
+          thumbnail: animationThumbnails.reveal,
+        },
+        {
+          value: 'subtle',
+          title: SECTION_MOTION_TITLES.subtle,
+          description: 'Fades in and rises 12 px, once.',
+          thumbnail: animationThumbnails.subtle,
+        },
+        {
+          value: 'fade',
+          title: SECTION_MOTION_TITLES.fade,
+          description: 'Fades in, with no movement.',
+          thumbnail: animationThumbnails.fade,
+        },
+        {
+          value: 'slide',
+          title: SECTION_MOTION_TITLES.slide,
+          description: 'Slides in from the start side.',
+          thumbnail: animationThumbnails.slide,
         },
         {
           value: 'stagger',
-          title: 'Staggered',
+          title: SECTION_MOTION_TITLES.stagger,
           description: 'Its parts appear one after another.',
-          thumbnail: MotionStaggerThumbnail,
+          thumbnail: animationThumbnails.stagger,
+        },
+        {
+          value: 'float',
+          title: SECTION_MOTION_TITLES.float,
+          description: 'The picture drifts slowly in a loop.',
+          thumbnail: animationThumbnails.float,
         },
         {
           value: 'parallax',
-          title: 'Parallax',
+          title: SECTION_MOTION_TITLES.parallax,
           description: 'The picture drifts a little as the page scrolls.',
-          thumbnail: MotionParallaxThumbnail,
+          thumbnail: animationThumbnails.parallax,
+        },
+        {
+          value: 'parallaxMedium',
+          title: SECTION_MOTION_TITLES.parallaxMedium,
+          description: 'A clearer drift as the page scrolls.',
+          thumbnail: animationThumbnails.parallaxMedium,
+        },
+        {
+          value: 'parallaxStrong',
+          title: SECTION_MOTION_TITLES.parallaxStrong,
+          description: 'A strong drift. Use on one picture per page.',
+          thumbnail: animationThumbnails.parallaxStrong,
         },
       ],
       initialValue: 'reveal',
-      // Parallax moves a picture, so it is only offered on layouts that have one.
+      // Float and Parallax move a picture, so they are only offered on layouts that have one.
       visibleOptions: ({ document, path }) =>
         visibleMotions(sectionAtStylePath(document, path as never)),
       validation: (rule) =>
         rule.custom((value, context) => staleMotionMessage(value, context)).warning(),
+    }),
+    defineField({
+      name: 'motionIntensity',
+      title: 'Intensity',
+      description: 'Scales how far the picture travels. Normal is the strength you chose above.',
+      type: 'string',
+      fieldset: 'motionAdvanced',
+      initialValue: 'normal',
+      options: radio(MOTION_INTENSITIES, MOTION_INTENSITY_TITLES),
+      hidden: motionOptionHidden('intensity'),
+    }),
+    defineField({
+      name: 'motionDuration',
+      title: 'Duration',
+      description: 'How long it takes. For Float, how long one drift takes.',
+      type: 'string',
+      fieldset: 'motionAdvanced',
+      initialValue: 'normal',
+      options: radio(MOTION_DURATIONS, MOTION_DURATION_TITLES),
+      hidden: motionOptionHidden('duration'),
+    }),
+    defineField({
+      name: 'motionDelay',
+      title: 'Delay',
+      description: 'A pause before it starts.',
+      type: 'string',
+      fieldset: 'motionAdvanced',
+      initialValue: 'none',
+      options: radio(MOTION_DELAYS, MOTION_DELAY_TITLES),
+      hidden: motionOptionHidden('delay'),
+    }),
+    defineField({
+      name: 'motionDirection',
+      title: 'Direction',
+      description: 'Where it slides in from. The start is the left in English.',
+      type: 'string',
+      fieldset: 'motionAdvanced',
+      initialValue: 'start',
+      options: radio(MOTION_DIRECTIONS, MOTION_DIRECTION_TITLES),
+      hidden: motionOptionHidden('direction'),
+    }),
+    defineField({
+      name: 'motionTrigger',
+      title: 'When it plays',
+      description:
+        'The first section of a page stays still unless this is On load, and then it slides or rises without fading, so its heading and picture are never hidden.',
+      type: 'string',
+      fieldset: 'motionAdvanced',
+      initialValue: 'view',
+      options: radio(MOTION_TRIGGERS, MOTION_TRIGGER_TITLES),
+      hidden: motionOptionHidden('trigger'),
+    }),
+    defineField({
+      name: 'motionCustom',
+      title: 'Set exact values',
+      description: 'Type the timing and distance yourself instead of using the choices above.',
+      type: 'boolean',
+      fieldset: 'motionAdvanced',
+      initialValue: false,
+      hidden: motionOptionHidden('custom'),
+    }),
+    defineField({
+      name: 'motionDurationMs',
+      title: 'Duration (milliseconds)',
+      type: 'number',
+      fieldset: 'motionAdvanced',
+      hidden: motionCustomHidden('duration'),
+      validation: (rule) =>
+        rule.custom((value, { parent }) =>
+          motionRangeProblem(
+            value,
+            (parent as { motion?: string } | undefined)?.motion,
+            'duration',
+            'ms',
+          ),
+        ),
+    }),
+    defineField({
+      name: 'motionDistancePx',
+      title: 'Distance (pixels)',
+      description: 'How far it travels.',
+      type: 'number',
+      fieldset: 'motionAdvanced',
+      hidden: motionCustomHidden('distance'),
+      validation: (rule) =>
+        rule.custom((value, { parent }) =>
+          motionRangeProblem(
+            value,
+            (parent as { motion?: string } | undefined)?.motion,
+            'distance',
+            'px',
+          ),
+        ),
+    }),
+    defineField({
+      name: 'motionEasing',
+      title: 'Easing',
+      description: 'The feel of the movement.',
+      type: 'string',
+      fieldset: 'motionAdvanced',
+      initialValue: 'easeOut',
+      options: {
+        list: MOTION_EASINGS.map((value) => ({ title: MOTION_EASING_TITLES[value], value })),
+        layout: 'dropdown',
+      },
+      hidden: motionCustomHidden('easing'),
+    }),
+    defineField({
+      name: 'motionThreshold',
+      title: 'How much must be in view (%)',
+      description: 'The share of the section that has to be on screen before it plays.',
+      type: 'number',
+      fieldset: 'motionAdvanced',
+      hidden: motionCustomHidden('threshold'),
+      validation: (rule) =>
+        rule.custom((value, { parent }) =>
+          motionRangeProblem(
+            value,
+            (parent as { motion?: string } | undefined)?.motion,
+            'threshold',
+            '%',
+          ),
+        ),
     }),
     presetField({
       name: 'edge',
