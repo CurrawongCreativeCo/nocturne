@@ -181,6 +181,20 @@ export const galleryFragment = /* groq */ `
   }
 `
 
+export const locationFragment = /* groq */ `
+  _type == "location" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    title,
+    intro,
+    mapImage { ${imageFields} },
+    showHours,
+    showOpenNow,
+    showContact,
+    directionsLabel,
+    interactiveMap
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -199,6 +213,7 @@ const sectionsFragment = /* groq */ `
   ${newsletterSignupFragment},
   ${statsFragment},
   ${galleryFragment},
+  ${locationFragment},
   _type
 `
 

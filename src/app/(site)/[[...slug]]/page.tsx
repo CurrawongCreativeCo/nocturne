@@ -10,7 +10,8 @@ import { getPageMetadata, getPageStaticParams } from '@/features/pages/api/get-p
 import { DraftPageView, PageView } from '@/features/pages/components/page-view'
 import { ReturningVisitor } from '@/features/personalization/components/returning-visitor'
 import { CheckoutButton } from '@/features/pricing/components/checkout-button'
-import { PUBLISHED } from '@/lib/sanity/live'
+import { getLocationBusiness } from '@/features/site/api/get-location-business'
+import { getDraftFetchMode, PUBLISHED } from '@/lib/sanity/live'
 
 /** Forms are their own feature; this route is where the page builder meets them. */
 const renderForm: ComponentProps<typeof PageView>['renderForm'] = (form, headingId) => (
@@ -70,6 +71,8 @@ export default async function Page({ params }: Props) {
       renderForm={renderForm}
       renderCheckout={renderCheckout}
       renderNewsletter={renderNewsletter}
+      // Location sections show Business info; it is the settings entry the footer already fetched.
+      business={await getLocationBusiness(PUBLISHED)}
       renderMembersGate={renderMembersGate}
       {...PUBLISHED}
     />
@@ -77,6 +80,7 @@ export default async function Page({ params }: Props) {
 }
 
 async function DraftPage({ params }: Pick<Props, 'params'>) {
+  const business = await getLocationBusiness(await getDraftFetchMode())
   return (
     <DraftPageView
       slug={segmentsToSlug((await params).slug)}
@@ -84,6 +88,7 @@ async function DraftPage({ params }: Pick<Props, 'params'>) {
       renderForm={renderForm}
       renderCheckout={renderCheckout}
       renderNewsletter={renderNewsletter}
+      business={business}
       renderMembersGate={renderMembersGate}
     />
   )

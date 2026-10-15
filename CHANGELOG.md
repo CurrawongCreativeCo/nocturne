@@ -30,6 +30,16 @@ you start a release.
   optional `initialIndex`, `onIndexChange`, `dots`, `directionLock` and `ref` props (defaults unchanged). Visual baselines
   for `gallery-grid`, `gallery-grid-four`, `gallery-masonry` and `gallery-slider` need the **Update visual baselines**
   workflow.
+- **Location section (Studio and site):** shows the address, opening hours, phone and email from Business info with a
+  "Get directions" link (map coordinates when set, otherwise the encoded address) and either an optional map image or
+  address cards. Fields: title, intro, map image, show hours, show the "Open now" badge, show phone and email and the
+  directions label; agencies can offer an interactive map (Design tab → Advanced). No Google iframe, script or request
+  is on the page: the optional interactive map loads only after a click, with a note that it comes from Google. Uses the
+  shared `OpeningHours` and `OpenNowBadge`. Business info is resolved by the route (`getLocationBusiness`, no new query)
+  and passed down as `SectionProps.business`; **projects with their own routes that render `PageView` or
+  `SectionRenderer` should pass `business` too**, or Location sections render nothing there. `ctaClassName` is now
+  exported from `cta-link.tsx`. Visual baselines for `location`, `location-image`, `location-interactive` and
+  `location-address-only` need the **Update visual baselines** workflow.
 - **Start here Studio tool:** the first screen a client sees (`src/features/studio/start-here/`), listed first for client
   roles and also available to staff. It greets the person by first name and names the site, shows shortcut cards driven
   by the site profile (Edit your website, Write a blog post, Update the team, Business info and opening hours, Help),

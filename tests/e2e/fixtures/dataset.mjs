@@ -1471,6 +1471,47 @@ const gallerySections = [
     columns: 3,
     images: galleryImages('gallery-slider', 6),
   },
+  // Location reads the businessInfo document above. The default is address, contact and hours on cards.
+  {
+    _key: 'location',
+    _type: 'location',
+    title: 'Visit us',
+    intro: 'Find us in Newtown, or call ahead.',
+    showHours: true,
+    showOpenNow: true,
+    showContact: true,
+    directionsLabel: 'Get directions',
+  },
+  {
+    _key: 'location-image',
+    _type: 'location',
+    style: { _type: 'sectionStyle', tone: 'alt' },
+    title: 'Find the shop',
+    mapImage: image('A map of Newtown'),
+    showHours: true,
+    showOpenNow: true,
+    showContact: true,
+    directionsLabel: 'Get directions',
+  },
+  {
+    _key: 'location-interactive',
+    _type: 'location',
+    title: 'Come and say hello',
+    mapImage: image('A map of Newtown'),
+    showHours: false,
+    showContact: true,
+    directionsLabel: 'Directions on Google Maps',
+    interactiveMap: true,
+  },
+  {
+    _key: 'location-address-only',
+    _type: 'location',
+    style: { _type: 'sectionStyle', tone: 'inverse' },
+    title: 'Where we are',
+    showHours: false,
+    showContact: false,
+    directionsLabel: 'Get directions',
+  },
   // new-section:gallery
 ]
 
@@ -1554,6 +1595,39 @@ documents.push({
       title: 'Slider gallery',
       columns: 3,
       images: galleryImages('gallery-page-slider', 6),
+    },
+  ],
+})
+
+/** Location sections on a real page (tests/e2e/location.spec.ts): a MotionProvider and the footer's Business info. */
+documents.push({
+  _id: 'page-location',
+  _type: 'page',
+  title: 'Location',
+  slug: { _type: 'slug', current: 'location' },
+  seo: { _type: 'seo', metaDescription: 'A page with the business location.' },
+  pageBuilder: [
+    { _key: 'location-hero', _type: 'hero', title: 'Location', description: 'Hero description.' },
+    {
+      _key: 'location-cards',
+      _type: 'location',
+      title: 'Visit us',
+      intro: 'Find us in Newtown, or call ahead.',
+      showHours: true,
+      showOpenNow: true,
+      showContact: true,
+      directionsLabel: 'Get directions',
+      interactiveMap: true,
+    },
+    {
+      _key: 'location-picture',
+      _type: 'location',
+      title: 'With a map image',
+      mapImage: image('A map of Newtown'),
+      showHours: true,
+      showOpenNow: false,
+      showContact: true,
+      directionsLabel: 'Directions',
     },
   ],
 })

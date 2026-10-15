@@ -178,6 +178,7 @@ Open http://localhost:3000/studio:
 | Pricing table         | Plans from Stripe prices, each with a checkout button                    |
 | Newsletter signup     | An email box that adds visitors to your mailing list                     |
 | Gallery               | Up to 60 pictures in a grid, masonry or slider, each opening full screen |
+| Location              | Address, map, opening hours and contact actions from Business info       |
 
 **Shared sections:** use _Shared sections_ in the sidebar for a section that appears unchanged on
 several pages, like a promo banner or a newsletter sign-up. Create one (a title for your own reference,
@@ -1548,6 +1549,50 @@ get a warning; more than 60 is an error (a page of that many is slow, and reads 
   swipe down and spring back, reduced motion, axe with the lightbox open). The section gallery has `gallery-grid`,
   `gallery-grid-four`, `gallery-masonry` and `gallery-slider`; their screenshot baselines need the **Update visual
   baselines** workflow (macOS skips visual tests).
+
+### Location
+
+The **Location** section (`src/features/pages/components/sections/location/`) shows where the business is: the address,
+opening hours, phone and email from [Business info](#business-info), with a "Get directions" button and either a map
+image or address cards. Editors: _Add section → Location_ and fill in the title. It looks finished with nothing else
+set, and the details themselves are edited once, in _Business info_ (the section says so in its description).
+
+- **Editors' fields.** _Section title_ (starts as "Visit us"), _Intro_, _Map image_ (optional), _Show opening hours_,
+  _Show the "Open now" badge_ (hidden unless hours are shown), _Show phone and email_ and _Directions button label_
+  ("Get directions"). With no map image the details sit on cards, the address one first; with one, the details stack
+  beside the picture (below it on a phone). A section whose Business info has nothing to show (no document, or all of
+  the address, contact and hours empty or switched off) renders nothing rather than an empty box.
+- **The map image** is a styled static map the designer exports, so no map service loads. It needs alt text, and the
+  usual image guidance applies (4:3, 1200 px wide or more).
+- **Agencies** get **Offer an interactive map** in the Design tab's collapsed Advanced area (off by default).
+- **Directions.** A plain link to `https://www.google.com/maps/dir/?api=1&destination=…`, opened in a new tab (with the
+  "opens in a new tab" notice for screen readers). The destination is the **map coordinates** from Business info
+  _Advanced_ when they are set (an exact pin), otherwise the address in full ("1 King Street, Newtown NSW 2042,
+  Australia"), always URL-encoded (`utils/location-links.ts`, unit tested). With neither, there is no button.
+- **No Google by default.** The page holds no Google iframe, script or request, and following the directions link is
+  the visitor's own navigation. With the interactive map on, a "Load interactive map" button and a note ("This map comes
+  from Google. Loading it shares your visit with Google.") appear; only the click adds the `<iframe>`
+  (`output=embed`, the keyless Google Maps embed address) and moves focus to it. The button is a client island
+  (`map-embed.tsx`, no listeners or timers) drawn only after hydration, so without JavaScript there is no dead button
+  and everything else is still there. The static map or card is server-rendered and swapped for the frame on click.
+  The embed address is not Google's official, keyed Maps Embed API; it is the long-standing public one. Check it loads
+  on the live site, and switch to an API-key embed in `utils/location-links.ts` if Google changes it.
+- **Data, with no query.** Business info is already in `SETTINGS_QUERY`. The route resolves it with
+  `getLocationBusiness` (`src/features/site/api/get-location-business.ts`: the settings the footer already fetched, so
+  the same cache entry, cleaned with `stegaClean`, upcoming special days from `getToday`, and the `tel:` link from
+  `parseAuPhone`) and passes it down `PageView` → `SectionRenderer` → `SectionProps.business` (`LocationBusiness`,
+  `src/types/business.ts`), because a section can't import the site feature. The page, A/B and section-gallery routes all
+  pass it; a new route that renders `PageView` or `SectionRenderer` must too. As in the footer, the business text is not
+  click-to-edit in Presentation.
+- **Hours.** The shared `OpeningHours` (grouped days, closed days, split shifts, upcoming special days) and the optional
+  `OpenNowBadge`, which works out open or closed in the browser from the business time zone (see _Business info_).
+- **Contact.** Phone and email are text and links (`tel:` and `mailto:`); a phone number we can't dial shows as text.
+- **Tests.** `location-links.test.ts` and `location/index.test.tsx` (unit: the encoded URLs, switches, nothing to show, no
+  `<iframe>` in the server markup); `tests/e2e/location.spec.ts` on the `/location` fixture page (address, contact,
+  hours and special days, the directions link, the badge in the business time zone, a map image, no request to Google
+  before the click and the frame, focus and title after it, no JavaScript, axe before and after loading the map). The
+  section gallery has `location`, `location-image`, `location-interactive` and `location-address-only`; their screenshot
+  baselines need the **Update visual baselines** workflow (macOS skips visual tests).
 
 ### Cursors and interaction feedback
 
