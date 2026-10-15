@@ -7,8 +7,8 @@ export const AGENCY_ONLY_TOOLS: ReadonlySet<string> = new Set([
   'content-health',
 ])
 
-/** Tool order for clients: Presentation first, so the Studio opens on the live preview. */
-const CLIENT_FIRST_TOOLS = ['presentation']
+/** Tool order for clients: Start here first, so the Studio opens on it, then Presentation (the live preview). */
+const CLIENT_FIRST_TOOLS = ['start-here', 'presentation']
 
 /** Agency staff keep every tool in its configured order. Clients lose the agency-only tools. */
 export function filterTools<T extends { name: string }>(

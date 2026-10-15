@@ -21,7 +21,7 @@ Tick each line as "pass" or note what you saw.
 ## 1. Admin (Administrator): the full view
 
 - [ ] A strip above the navbar shows the **Agency view** badge and a **Preview client view** button.
-- [ ] Tools: Presentation, Structure, Vision, AI settings and Content health are all there.
+- [ ] Tools: Start here, Presentation, Structure, Vision, AI settings and Content health are all there.
 - [ ] Sidebar: Site settings, Pages, Shared sections, Forms, Blog, Redirects, A/B tests (and any other types).
 - [ ] A page shows the **Who can see this page** field and, in SEO, **Hide from search engines**.
 - [ ] Site settings has the Search & AI and Cookie banner groups.
@@ -41,7 +41,7 @@ Tick each line as "pass" or note what you saw.
 ## 3. Editor: the simple, safe view
 
 - [ ] No badge or strip above the navbar.
-- [ ] Tools: Presentation first (the Studio opens on it), then Structure. No Vision, AI settings or Content health.
+- [ ] Tools: Start here first (the Studio opens on it), then Presentation, then Structure. No Vision, AI settings or Content health.
 - [ ] Sidebar: Site settings, Pages and Blog only. No Forms, Redirects, A/B tests or Shared sections. Type
       `/studio/structure/redirect` in the address bar: the list is empty or missing rather than offered.
 - [ ] Site settings shows General, Announcement, Header and Footer only.

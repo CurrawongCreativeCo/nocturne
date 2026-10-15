@@ -2,9 +2,15 @@ import { describe, expect, it } from 'vitest'
 
 import { filterTools } from './tool-access'
 
-const tools = ['structure', 'presentation', 'vision', 'content-health', 'ai-settings', 'other'].map(
-  (name) => ({ name }),
-)
+const tools = [
+  'structure',
+  'presentation',
+  'start-here',
+  'vision',
+  'content-health',
+  'ai-settings',
+  'other',
+].map((name) => ({ name }))
 const names = (list: { name: string }[]) => list.map((t) => t.name)
 
 describe('filterTools', () => {
@@ -13,9 +19,14 @@ describe('filterTools', () => {
   })
 
   it.each(['editor', 'contributor'] as const)(
-    'hides agency-only tools and puts Presentation first for a %s',
+    'hides agency-only tools and puts Start here, then Presentation, first for a %s',
     (audience) => {
-      expect(names(filterTools(tools, audience))).toEqual(['presentation', 'structure', 'other'])
+      expect(names(filterTools(tools, audience))).toEqual([
+        'start-here',
+        'presentation',
+        'structure',
+        'other',
+      ])
     },
   )
 

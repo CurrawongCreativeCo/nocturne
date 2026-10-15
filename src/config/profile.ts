@@ -45,6 +45,8 @@ export interface SiteProfileInput {
     guideUrl?: string
     /** Training videos by task ('edit-a-page'), as https URLs. */
     videos?: Readonly<Record<string, string>>
+    /** Where "Ask Currawong" in the Studio's Start here tells clients to write. */
+    supportEmail?: string
   }
 }
 
@@ -53,7 +55,7 @@ export interface SiteProfile {
   tier: Tier
   features: Features
   clientSections: string[]
-  help: { guideUrl?: string; videos?: Record<string, string> }
+  help: { guideUrl?: string; videos?: Record<string, string>; supportEmail?: string }
   /** The template release this site was last brought up to (template-version.json). */
   templateVersion: string
 }
@@ -77,6 +79,8 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const isHttpsUrl = (value: unknown) => {
   if (typeof value !== 'string') return false
@@ -152,6 +156,12 @@ export function validateSiteProfile(input: unknown, options: ValidateOptions = {
       if (help.guideUrl !== undefined && !isHttpsUrl(help.guideUrl)) {
         errors.push('help.guideUrl must be an https URL.')
       }
+      if (
+        help.supportEmail !== undefined &&
+        !(typeof help.supportEmail === 'string' && EMAIL.test(help.supportEmail))
+      ) {
+        errors.push('help.supportEmail must be an email address.')
+      }
       if (help.videos !== undefined) {
         if (!isRecord(help.videos)) {
           errors.push('help.videos must map a task name to an https URL.')
@@ -185,6 +195,7 @@ export function resolveSiteProfile(
     help: {
       ...(input.help?.guideUrl ? { guideUrl: input.help.guideUrl } : {}),
       ...(input.help?.videos ? { videos: { ...input.help.videos } } : {}),
+      ...(input.help?.supportEmail ? { supportEmail: input.help.supportEmail } : {}),
     },
     templateVersion,
   }

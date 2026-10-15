@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- **Start here Studio tool:** the first screen a client sees (`src/features/studio/start-here/`), listed first for client
+  roles and also available to staff. It greets the person by first name and names the site, shows shortcut cards driven
+  by the site profile (Edit your website, Write a blog post, Update the team, Business info and opening hours, Help),
+  the eight newest changes with who made them and when (en-AU, "2 days ago"), and up to five things to check in plain
+  words (links to unpublished pages, images without descriptions, drafts waiting over seven days) using the
+  content-health detectors. Help shows `help.guideUrl` and "Ask Currawong" with `help.supportEmail` and a copy button.
+  New optional `OPS_NOTICES_URL` / `OPS_NOTICES_KEY` env vars add notices from the Ops dashboard through a server route,
+  `/api/ops-notices` (204 when unset; the key stays on the server). `help.supportEmail` is new in `site.profile.ts`.
+  `START_HERE_QUERY` is in the generated types (run `npm run typegen`).
 - **Site profile:** `site.profile.ts` (a Customize file, calling `defineSiteProfile`) declares the client, tier
   (`brochure`, `content`, `commerce`, `custom`), which features the site uses (`blog`, `forms`, `newsletter`,
   `pricing`, `members`, `experiments`, `search`, `businessInfo`, `team`), the section types clients may add and

@@ -64,7 +64,7 @@ Open http://localhost:3000/studio:
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
 - **Roles:** clients see a simpler Studio than Currawong staff; see [Studio roles and permissions](#studio-roles-and-permissions).
 - **The sidebar** is grouped by what you are doing, not by how the data is stored. Agency staff see every item; clients see the ones marked (client).
-  - **Start here** (client): a short guide to the first things to do. It appears once that screen exists.
+  - **Start here** (client) is also a tool in the top bar, not only a sidebar item: the Studio opens on it. See [Start here](#start-here-studio-home-screen).
   - **Pages** (client): every page on the site, as a tree of folders, with an _All pages_ list underneath.
   - **Blog** (client): _Posts_ are the articles, _Authors_ are the people credited on them, and _Categories_ group posts so visitors can filter.
   - **Business info** (client): your trading name, ABN, phone, email, address and opening hours, written once and used in the footer and in search engines' business listings. See [Business info](#business-info).
@@ -96,6 +96,7 @@ Open http://localhost:3000/studio:
 
   Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Dark".
 
+- **Start here** (toolbar, first for clients) is the first screen: a greeting, shortcut cards (_Edit your website_, _Write a blog post_, _Update the team_, _Business info and opening hours_, _Help_), your eight most recent changes with who made them and when, and up to five things to check in plain words. See [Start here](#start-here-studio-home-screen).
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **Image and text guidance:** image fields say what suits their spot ("Recommended: 2400 × 1600 px, landscape.") and show a yellow warning, never an error, when an uploaded picture is narrower than that or a different shape by more than 15%, for example "This image is 1200 × 1800 (portrait). This spot looks best with a landscape image at least 2400 px wide." You can still publish; the warning is a nudge to swap the picture. SVGs are never checked. Section titles and intro text warn the same way when they run past what the design handles (a hero title over 80 characters, other headings over 60–70, intro text over 200). Current targets: hero background 2400 px wide, landscape; _Image + text_ 1600 px at 4:3; testimonial and author portraits 800 px square; logos 400–600 px wide if not SVG (SVG preferred).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
@@ -337,38 +338,40 @@ It still needs the CORS step below.
    `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
 2. **Environment variables** (Production and Preview):
 
-   | Variable                         | Value                                                                               |
-   | -------------------------------- | ----------------------------------------------------------------------------------- |
-   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                                                   |
-   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                                                   |
-   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                   |
-   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                          |
-   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                         |
-   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Currawong Creative)           |
-   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                    |
-   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                   |
-   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                         |
-   | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                                    |
-   | `RESEND_API_KEY`                 | only for forms: Resend API key                                                      |
-   | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`                       |
-   | `NEWSLETTER_PROVIDER`            | only for newsletter signup: `resend`, `loops` or `mailchimp` (see below)            |
-   | `STRIPE_SECRET_KEY`              | only for pricing: Stripe secret or restricted key (see below)                       |
-   | `STRIPE_WEBHOOK_SECRET`          | only for pricing: the webhook endpoint's `whsec_…` signing secret                   |
-   | `SANITY_WRITE_TOKEN`             | only for pricing: Editor token the Stripe webhook writes with                       |
-   | `STRIPE_SUCCESS_URL`             | optional: where buyers land after paying (default `/?checkout=success`)             |
-   | `STRIPE_CANCEL_URL`              | optional: where "back" from Stripe leads (default: the pricing page they came from) |
-   | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | optional: Plausible site domain (see Analytics, below)                              |
-   | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                                     |
-   | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                                           |
-   | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`                                  |
-   | `SENTRY_DSN`                     | optional: turns on Sentry error tracking (see Error tracking, below)                |
-   | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                  |
-   | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                         |
-   | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                        |
-   | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                         |
-   | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id                            |
-   | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store                      |
-   | `VERCEL_TEAM_ID`                 | optional: Edge Config redirects; only for team-owned stores                         |
+   | Variable                         | Value                                                                                   |
+   | -------------------------------- | --------------------------------------------------------------------------------------- |
+   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                                                       |
+   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                                                       |
+   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                       |
+   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                              |
+   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                             |
+   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Currawong Creative)               |
+   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                        |
+   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                       |
+   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                             |
+   | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                                        |
+   | `RESEND_API_KEY`                 | only for forms: Resend API key                                                          |
+   | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`                           |
+   | `NEWSLETTER_PROVIDER`            | only for newsletter signup: `resend`, `loops` or `mailchimp` (see below)                |
+   | `STRIPE_SECRET_KEY`              | only for pricing: Stripe secret or restricted key (see below)                           |
+   | `STRIPE_WEBHOOK_SECRET`          | only for pricing: the webhook endpoint's `whsec_…` signing secret                       |
+   | `SANITY_WRITE_TOKEN`             | only for pricing: Editor token the Stripe webhook writes with                           |
+   | `STRIPE_SUCCESS_URL`             | optional: where buyers land after paying (default `/?checkout=success`)                 |
+   | `STRIPE_CANCEL_URL`              | optional: where "back" from Stripe leads (default: the pricing page they came from)     |
+   | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | optional: Plausible site domain (see Analytics, below)                                  |
+   | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                                         |
+   | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                                               |
+   | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`                                      |
+   | `SENTRY_DSN`                     | optional: turns on Sentry error tracking (see Error tracking, below)                    |
+   | `OPS_NOTICES_URL`                | optional: https endpoint for notices on the Studio's Start here screen (see Start here) |
+   | `OPS_NOTICES_KEY`                | optional: bearer key sent to that endpoint from the server; never reaches the browser   |
+   | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                      |
+   | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                             |
+   | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                            |
+   | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                             |
+   | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id                                |
+   | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store                          |
+   | `VERCEL_TEAM_ID`                 | optional: Edge Config redirects; only for team-owned stores                             |
 
 3. **Allow the production origin in Sanity**, or Studio and live updates won't connect:
    `npx sanity cors add https://example.com --credentials` (or sanity.io/manage → API → CORS
@@ -478,7 +481,7 @@ src/
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
-                                   AI settings tool, AI Assist presets
+                                   AI settings tool, Start here tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, slider (+ slider-lazy, slider-snap)
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
   config/                          env.ts (validated), paths.ts (slug <-> URL),
@@ -1185,7 +1188,7 @@ export const siteProfileInput = defineSiteProfile({
   tier: 'content', // 'brochure' | 'content' | 'commerce' | 'custom' (default 'custom')
   features: { pricing: false, members: false, experiments: false, team: false },
   clientSections: ['richText', 'mediaText', 'faq'], // empty: the default list
-  help: { guideUrl: 'https://…', videos: { 'edit-a-page': 'https://…' } },
+  help: { guideUrl: 'https://…', videos: { 'edit-a-page': 'https://…' }, supportEmail: 'help@…' },
 })
 ```
 
@@ -1195,8 +1198,8 @@ export const siteProfileInput = defineSiteProfile({
   see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
   Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
   old `siteProfile` document, which never existed in the schema.
-- **`help`**: the client's editing guide and training videos (https links, by task name), for the Studio's help
-  features to read. `templateVersion` is added from `template-version.json`; the profile does not hold CMS branding
+- **`help`**: the client's editing guide and training videos (https links, by task name) and the support email
+  address (`supportEmail`), for the Studio's help features to read. Start here shows the guide link and the address. `templateVersion` is added from `template-version.json`; the profile does not hold CMS branding
   (that is `studio-brand.json`).
 - A bad profile (missing client name or slug, an unknown tier, feature or section name, a non-https link) throws
   with every problem listed, so the build, `npm run dev` and the Studio all stop with a readable message.
@@ -1228,6 +1231,65 @@ Tests: `src/config/profile.test.ts` (validation and defaults), `src/features/stu
 (what the Studio hides) and `site-profile-sections.test.ts` (the real profile against the real section list).
 The end-to-end fixtures run with everything on.
 
+### Start here (Studio home screen)
+
+A Studio tool (`src/features/studio/start-here/`, registered in `sanity.config.ts` as `startHere()`). Clients land on
+it; agency staff find it in the toolbar with the other tools (`filterTools` puts it, then Presentation, first for
+clients). It is read-only and makes one content query (`START_HERE_QUERY`, raw perspective, so drafts count), one
+history request for the author names, and, only when notices are set up, one call to the site's own route.
+
+- **Greeting:** the first word of the person's Sanity name ("Hello, Ben"; just "Hello" if the name is blank or an email
+  address) and the site name from `site.profile.ts` (`client.name`).
+- **Shortcut cards**, built from the site profile by `buildQuickActions`: _Edit your website_ (Presentation at `/`),
+  _Write a blog post_ (opens a new post; needs `features.blog`), _Update the team_ (needs `features.team` **and** a
+  `teamMember` document type, which the template does not have yet, so the card stays hidden until a project adds
+  one), _Business info and opening hours_ (needs `features.businessInfo`) and _Help_ (scrolls to the Help panel).
+- **Recent changes:** the newest eight documents the person can see, newest first, with the author ("by Ann Lee", or
+  "by you") and when ("2 days ago", then a date from about two months). A draft and its published copy count once and
+  show a _Draft_ badge. Clients only see the types in their sidebar (pages, posts, authors, categories, Identity &
+  search, Navigation, Announcement bar, Business info, team); agency staff see every type the profile has not hidden.
+  Names come from Sanity's history API; if it fails the time still shows.
+- **Things to check:** at most five, in this order: pages or menus that link to a page that is not published, pages with
+  images that have no description (alt text), and drafts last edited more than seven days ago. They reuse the detectors
+  in `content-health/utils/detect.ts`; fixing the problem in a draft clears it. Shared sections are only checked for
+  agency staff, because clients cannot open them. Each row has a **Fix it** link.
+- **Help:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
+  selectable text and a **Copy email address** button. Each part is left out when the profile does not set it. The
+  support form replaces the address in a later release.
+- **Notices:** set `OPS_NOTICES_URL` (an https endpoint) and, if it needs one, `OPS_NOTICES_KEY`. The site's
+  `/api/ops-notices` route asks `OPS_NOTICES_URL?site=<client.slug>` with `Authorization: Bearer <key>`, caches the answer
+  for five minutes and passes on up to five notices; the key never reaches the browser. The endpoint answers
+  `{ "notices": [{ "id", "title", "body", "tone": "info" | "caution" | "critical", "url" }] }` (only `title` is required;
+  `url` must be https; everything is shown as plain text). With `OPS_NOTICES_URL` unset the route answers 204 and the
+  panel is skipped; if the dashboard is down the panel is skipped too. **The route is public** (anyone can request it), so write
+  notices as you would a public announcement and never put anything private in one.
+- **Layout:** `@sanity/ui` with responsive padding; the cards wrap from three across to one column on a phone.
+
+**Check it by hand (client account).** Use a throwaway project member with the **Editor** role (or, as an Administrator,
+click **Preview client view**), and make sure the project has a few pages, one draft left alone for over a week (or
+temporarily lower `STALE_DRAFT_DAYS` in `utils/relative-time.ts`), a page whose image has no alt text, and a link to a
+draft-only page.
+
+1. Open `/studio`. It opens on **Start here**, with Presentation next and no Vision, AI settings or Content health.
+2. The greeting uses your first name and the card line names the site.
+3. Click **Edit your website**: it opens Presentation on the home page. Go back and click **Write a blog post**: a new
+   post opens. Click **Business info and opening hours**: the Business info document opens.
+4. Switch `features.blog` to `false` in `site.profile.ts` and reload: the blog card disappears.
+5. Recent changes lists the documents you just edited, newest first, with "by you" and a time such as "2 minutes ago".
+   Edit a page and reload to see it jump to the top with a _Draft_ badge.
+6. Things to check lists the missing description, the unpublished link and the old draft in plain words, and **Fix it**
+   opens the right document. Fix one, reload, and it disappears.
+7. Help: **Copy email address** copies the address (paste it somewhere to confirm) and says "Copied to your clipboard."
+   The guide link opens in a new tab. Press Tab: every card, link and button shows a focus ring.
+8. Narrow the window to phone width: no sideways scrolling, and the cards stack in one column.
+9. Optional: point `OPS_NOTICES_URL` at a test endpoint that answers `{"notices":[{"title":"Test","tone":"caution"}]}`
+   and the notice appears at the top. Unset it and it disappears with no error.
+
+Tests: `start-here/utils/*.test.ts` (relative time, wording, shortcut list from a profile, recent changes, things to check,
+history parsing), `src/lib/ops/notices.test.ts` (notice parsing and the endpoint check) and
+`tests/e2e/ops-notices.spec.ts` (the route answers 204 when unset). The tool itself needs a signed-in Studio, so it
+is checked by hand.
+
 ### Studio roles and permissions
 
 The Studio shows a simple view to clients and the full view to Currawong staff. It reads each person's
@@ -1247,7 +1309,7 @@ convenience. Someone with the Editor role who knows the API can still do what th
 | Publish, unpublish                                                                                              | Yes                               | Yes                                                                                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
 | Project settings, members, API tokens, CORS, datasets                                                           | Administrator only                | No                                                                                                                                         | No                  | **Sanity**                                     |
 | Edit, create and delete content through the API or Vision                                                       | Yes                               | Yes (any document)                                                                                                                         | Drafts only         | **Sanity**                                     |
-| Studio tools                                                                                                    | All                               | Presentation (first), Structure                                                                                                            | Same as Editor      | Studio                                         |
+| Studio tools                                                                                                    | All                               | Start here (first), Presentation, Structure                                                                                                | Same as Editor      | Studio                                         |
 | Vision, AI settings, Content health                                                                             | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
 | Sidebar                                                                                                         | Everything                        | Start here, Pages, Blog, Website settings (Identity & search, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
 | Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections                               | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
