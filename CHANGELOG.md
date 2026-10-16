@@ -300,6 +300,7 @@ you start a release.
 
 ### Changed
 
+- **CI:** the e2e shards now split `desktop` and `mobile` only; before, shard 1 ran every test and shards 2–4 none (Playwright keeps a project with its dependencies in one shard). The A/B, design and design-screenshot projects run in their own `e2e (isolated)` job, and the five generator smoke tests are parallel `generator (…)` jobs instead of steps in `check`. If branch protection lists required checks, add `e2e (isolated)` and the `generator (…)` jobs.
 - **Sitemap:** the pages count and slice queries (`PAGE_COUNT_QUERY`, `PAGE_SITEMAP_QUERY`) skip the reserved
   `section-gallery` slug, so the style guide's fixture page can never be listed. Run `npm run typegen` after merging.
 
