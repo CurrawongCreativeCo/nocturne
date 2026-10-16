@@ -53,10 +53,14 @@ test.describe('the copy of the list', () => {
     // The button is there only while the row moves.
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto(GALLERY)
-    await page.locator(`${MARQUEE} a`).first().focus()
-    await page.keyboard.press('Tab')
-    // The next stop is the Pause button, not the copy's link to the same address.
-    await expect(toggle(page)).toBeFocused()
+    // The next stop after the real link is the Pause button, not the copy's link to the same
+    // address. Retried as a whole: on a slow runner the page can still be hydrating when the first
+    // Tab lands.
+    await expect(async () => {
+      await page.locator(`${MARQUEE} a`).first().focus()
+      await page.keyboard.press('Tab')
+      await expect(toggle(page)).toBeFocused({ timeout: 1000 })
+    }).toPass()
   })
 })
 
@@ -131,10 +135,13 @@ test.describe('with motion allowed', () => {
 
   test('pauses while focus is inside the row', async ({ page }) => {
     await page.goto(GALLERY)
-    await page.locator(`${MARQUEE} a`).first().focus()
-    expect(await playState(page)).toBe('paused')
+    // Polled: the style can settle a frame after focus moves, and a slow runner may still be hydrating.
+    await expect(async () => {
+      await page.locator(`${MARQUEE} a`).first().focus()
+      expect(await playState(page)).toBe('paused')
+    }).toPass()
     await toggle(page).focus()
-    expect(await playState(page)).toBe('running')
+    await expect.poll(() => playState(page)).toBe('running')
   })
 
   test('pauses on hover', async ({ page, isMobile }) => {

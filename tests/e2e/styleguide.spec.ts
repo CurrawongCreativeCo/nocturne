@@ -127,7 +127,7 @@ test.describe('width frames', () => {
   test('lay a section out for the chosen width, not the window', async ({ page }) => {
     // Three columns on the 1280 px desktop window...
     await page.goto(GALLERY)
-    expect(await columns(items(page))).toBe(3)
+    await expect.poll(() => columns(items(page))).toBe(3)
 
     // ...two in a tablet frame, one in a phone frame, three again in a laptop frame.
     for (const [width, expected] of [
@@ -137,9 +137,10 @@ test.describe('width frames', () => {
     ] as const) {
       await page.goto(`${GALLERY}?width=${width}`)
       const frame = page.locator(`[data-styleguide-frame="${width}"]`).first()
+      await expect(frame).toBeVisible()
       const box = await frame.boundingBox()
       expect(box?.width).toBeCloseTo(Math.min(width, page.viewportSize()?.width ?? width), -1)
-      expect(await columns(items(page)), `${width} px`).toBe(expected)
+      await expect.poll(() => columns(items(page)), { message: `${width} px` }).toBe(expected)
     }
   })
 
