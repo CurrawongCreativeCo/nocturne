@@ -358,9 +358,13 @@
   padding-top: calc(var(--spacing-section-spacious) + var(--edge-above));
 }
 
-/* Section links glide, unless the visitor asks for less motion (the reduced-motion rule above also forces auto). */
+/*
+ * Section links glide, unless the visitor asks for less motion (the reduced-motion rule above also
+ * forces auto). Only while a hash target exists, so every other scroll (scrollIntoView, scrollTo,
+ * restoring a position) stays instant.
+ */
 @media (prefers-reduced-motion: no-preference) {
-  html {
+  html:has(:target) {
     scroll-behavior: smooth;
   }
 }

@@ -31,6 +31,35 @@ test.describe('section links', () => {
   })
 })
 
+test.describe('smooth scrolling', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('glides to a section, and only for section links', async ({ page }) => {
+    await page.goto(PAGE)
+    const positions = await page.evaluate(
+      () =>
+        new Promise<number[]>((resolve) => {
+          const seen: number[] = []
+          const tick = () => {
+            seen.push(Math.round(window.scrollY))
+            if (seen.length < 40) requestAnimationFrame(tick)
+            else resolve(seen)
+          }
+          document.querySelector<HTMLAnchorElement>('a[href="#details"]')?.click()
+          tick()
+        }),
+    )
+    // Several in-between positions, not one jump.
+    expect(new Set(positions.filter((y) => y > 0)).size).toBeGreaterThan(3)
+
+    await page.goto(PAGE)
+    await page.evaluate(() => {
+      window.scrollTo(0, 500)
+    })
+    expect(await page.evaluate(() => Math.round(window.scrollY))).toBe(500)
+  })
+})
+
 test.describe('panel and booking buttons', () => {
   test('are buttons that say they open a dialog', async ({ page }) => {
     await page.goto(PAGE)
