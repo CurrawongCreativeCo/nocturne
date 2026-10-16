@@ -237,6 +237,21 @@ export const teamFragment = /* groq */ `
   }
 `
 
+export const videoFragment = /* groq */ `
+  _type == "video" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    title,
+    text,
+    source,
+    url,
+    "fileUrl": file.asset->url,
+    "captionsUrl": captions.asset->url,
+    poster { ${imageFields} },
+    aspectRatio
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -257,6 +272,7 @@ const sectionsFragment = /* groq */ `
   ${galleryFragment},
   ${locationFragment},
   ${teamFragment},
+  ${videoFragment},
   _type
 `
 

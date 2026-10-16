@@ -13,6 +13,7 @@ import { richText } from './rich-text'
 import { stats } from './stats'
 import { team } from './team'
 import { testimonials } from './testimonials'
+import { video } from './video'
 // new-section:import
 
 /**
@@ -44,5 +45,6 @@ export const sectionTypes = [
   gallery,
   location,
   team,
+  video,
   // new-section:register
 ]
