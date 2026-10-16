@@ -86,6 +86,8 @@ export const featuresGridFragment = /* groq */ `
 export const logoCloudFragment = /* groq */ `
   _type == "logoCloud" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
+    variant,
+    logoColour,
     title,
     logos[] {
       _key,

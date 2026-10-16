@@ -103,6 +103,58 @@
     }
   }
 
+  /*
+   * Marquee (Logo strip layout): the track holds the list twice and slides one list's width, so the
+   * loop is seamless. The duration is the token times the logo count (--logo-count, set inline), so
+   * the speed stays steady however many logos there are. Transform only. It pauses on hover and
+   * focus, and while data-paused is set (the Pause button; not by hovering or focusing the button itself). Without JavaScript (nothing to stop it
+   * with) and under reduced motion there is no animation: the first list wraps as a static grid and
+   * the copy, the button and the fade are dropped (!important beats the utilities on the markup).
+   */
+  @keyframes marquee-scroll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  [data-marquee-track] {
+    animation: marquee-scroll calc(var(--marquee-per-logo, 5s) * var(--logo-count, 1)) linear
+      infinite;
+  }
+
+  [data-marquee-viewport]:is(:hover, :focus-within) [data-marquee-track],
+  [data-marquee][data-paused] [data-marquee-track] {
+    animation-play-state: paused;
+  }
+
+  [data-marquee-viewport] {
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  @media (scripting: none), (prefers-reduced-motion: reduce) {
+    [data-marquee-viewport] {
+      mask-image: none;
+    }
+
+    [data-marquee-track] {
+      animation: none;
+      width: auto !important;
+    }
+
+    [data-marquee-group] {
+      flex-wrap: wrap !important;
+      justify-content: var(--marquee-static-justify, center) !important;
+      min-width: 0 !important;
+      padding-right: 0 !important;
+      row-gap: 2rem;
+    }
+
+    [data-marquee-copy],
+    [data-marquee-toggle] {
+      display: none !important;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     ::before,

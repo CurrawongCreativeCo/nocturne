@@ -4,14 +4,46 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { presetField } from '@/lib/sanity/schema/preset-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
-import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import {
+  LogoCloudGridThumbnail,
+  LogoCloudMarqueeThumbnail,
+} from '@/lib/sanity/schema/thumbnails/logo-cloud-thumbnails'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // A single line of small text above the logos.
   title: 60,
 } as const
+
+/**
+ * One component per variant in components/sections/logo-cloud/. The first is the default: the wrapped
+ * grid, and what content without a variant renders. At most four per section.
+ */
+export const LOGO_CLOUD_VARIANTS = [
+  {
+    value: 'grid',
+    title: 'Grid',
+    description: 'The logos in a wrapped row, still.',
+    thumbnail: LogoCloudGridThumbnail,
+  },
+  {
+    value: 'marquee',
+    title: 'Marquee',
+    description: 'One endless row that scrolls by itself, with a Pause button.',
+    thumbnail: LogoCloudMarqueeThumbnail,
+  },
+] as const
+
+/** The marquee's logo colour; unset is greyscale, as in the grid. */
+const LOGO_COLOUR_OPTIONS = [
+  { value: 'grey', title: 'Greyscale', description: 'Muted logos that turn to colour on hover.' },
+  { value: 'colour', title: 'Full colour', description: 'Logos always in their own colours.' },
+] as const
+
+const notMarquee = ({ parent }: { parent?: { variant?: string } }) => parent?.variant !== 'marquee'
 
 export const logoCloud = defineType({
   name: 'logoCloud',
@@ -53,14 +85,38 @@ export const logoCloud = defineType({
         ],
       }),
       accessField,
+      // Shown first in the Content tab.
+      variantField(LOGO_CLOUD_VARIANTS),
     ],
     { spacing: 'compact', align: 'center', motion: 'none' },
+    {
+      // The marquee's own option, in the collapsed Advanced area of the Design tab: it disappears for the grid.
+      advanced: [
+        presetField({
+          name: 'logoColour',
+          title: 'Logo colour',
+          options: LOGO_COLOUR_OPTIONS,
+          required: false,
+          hidden: notMarquee,
+        }),
+      ],
+    },
   ),
   preview: {
-    select: { title: 'title', logos: 'logos', tone: 'style.tone' },
-    prepare: ({ title, logos, tone }: { title?: string; logos?: unknown[]; tone?: string }) => ({
+    select: { title: 'title', logos: 'logos', variant: 'variant', tone: 'style.tone' },
+    prepare: ({
+      title,
+      logos,
+      variant,
+      tone,
+    }: {
+      title?: string
+      logos?: unknown[]
+      variant?: string
+      tone?: string
+    }) => ({
       title: title || 'Logo strip',
-      subtitle: joinSubtitle('Logo strip', `${logos?.length ?? 0} logos`, toneTitle(tone)),
+      subtitle: `${variantSubtitle('Logo strip', LOGO_CLOUD_VARIANTS, variant, tone)} · ${logos?.length ?? 0} logos`,
     }),
   },
 })
