@@ -1093,6 +1093,23 @@ const styledVariants = (id, section) => [
   ...SPACINGS.map((spacing) => styled(`${id}-${spacing}`, section, { spacing })),
 ]
 
+/**
+ * A hero's "Animate individual parts" with a different animation on every part (the ones a layout
+ * does not have are ignored): used by the gallery and by the /hero-parts page. The heading and pictures
+ * only move, because on the first section they may not start hidden, clipped or smaller (their LCP).
+ */
+const allParts = {
+  enabled: true,
+  eyebrowPreset: 'reveal',
+  headingPreset: 'slide',
+  descriptionPreset: 'slide',
+  buttonsPreset: 'scale',
+  buttonsDelay: 'long',
+  slotPreset: 'fade',
+  imagePreset: 'rise',
+  backgroundPreset: 'rise',
+}
+
 /** One gallery entry per hero variant (see HERO_VARIANTS); the plain `hero` below has no variant set. */
 const galleryHero = (id, extra) => ({
   _key: `hero-${id}`,
@@ -1286,6 +1303,46 @@ const gallerySections = [
       motion: 'parallax',
     },
   ),
+  // Animated parts (README, "Animating individual parts"). The visual tests emulate reduced motion, so
+  // each shows its parts at rest: these baselines prove the wrappers change nothing about the layout.
+  galleryHero('parts-overlay', {
+    variant: 'overlay',
+    supporting: [slotItem('badges', 'parts-overlay')],
+    partMotion: allParts,
+  }),
+  // Fade, Reveal and Scale are ignored on the first section's heading and pictures: nothing wraps them.
+  galleryHero('parts-ignored', {
+    variant: 'split',
+    partMotion: {
+      enabled: true,
+      headingPreset: 'reveal',
+      imagePreset: 'scale',
+      eyebrowPreset: 'fade',
+    },
+  }),
+  galleryHero('parts-split', { variant: 'split', partMotion: allParts }),
+  galleryHero('parts-split-circle', {
+    variant: 'split',
+    imageShape: 'circle',
+    partMotion: { ...allParts, imagePreset: 'slide' },
+  }),
+  galleryHero('parts-split-parallax', {
+    variant: 'split',
+    imageShape: 'arch',
+    partMotion: { enabled: true, imagePreset: 'parallax' },
+  }),
+  galleryHero('parts-editorial', {
+    variant: 'editorial',
+    backgroundImage: undefined,
+    secondaryImage: image(''),
+    supporting: [slotItem('stats', 'parts-editorial')],
+    partMotion: allParts,
+  }),
+  galleryHero('parts-full-bleed', {
+    variant: 'full-bleed',
+    supporting: [slotItem('badges', 'parts-full-bleed')],
+    partMotion: { ...allParts, backgroundPreset: 'parallax' },
+  }),
   // Highlighted heading words (README, "Highlighting words in a heading"). The long heading wraps on a
   // phone, which is the case the gradient's box-decoration-break: clone exists for.
   galleryHero('heading-gradient', {
@@ -1687,6 +1744,59 @@ documents.push({
     },
   ],
 })
+
+/**
+ * Animated hero parts on real pages (tests/e2e/hero-parts.spec.ts), for what the gallery cannot show:
+ * a MotionProvider, so the parts really play. The first page's hero is the first section (its heading
+ * and picture never start hidden); the second page starts with text, so its hero is further down.
+ */
+documents.push(
+  {
+    _id: 'page-hero-parts',
+    _type: 'page',
+    title: 'Hero parts',
+    slug: { _type: 'slug', current: 'hero-parts' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'hero-parts-first',
+        _type: 'hero',
+        variant: 'overlay',
+        eyebrow: 'Eyebrow',
+        title: 'Hero with animated parts',
+        description: 'Each part plays its own animation.',
+        ctas: [cta('About us', internal('page-about'))],
+        backgroundImage: image(''),
+        supporting: [slotItem('badges', 'hero-parts-first')],
+        partMotion: allParts,
+      },
+    ],
+  },
+  {
+    _id: 'page-hero-parts-later',
+    _type: 'page',
+    title: 'Hero parts later',
+    slug: { _type: 'slug', current: 'hero-parts-later' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'hero-parts-intro',
+        _type: 'richText',
+        body: [block(['Introduction'], { style: 'h2' })],
+      },
+      {
+        _key: 'hero-parts-later',
+        _type: 'hero',
+        variant: 'split',
+        title: 'A hero further down',
+        description:
+          'Its heading and picture may fade, because they are not the first on the page.',
+        backgroundImage: image(''),
+        partMotion: { enabled: true, headingPreset: 'reveal', imagePreset: 'scale' },
+      },
+    ],
+  },
+)
 
 /** The testimonials slider on a real page (tests/e2e/slider.spec.ts): a MotionProvider, so it drags. */
 documents.push({

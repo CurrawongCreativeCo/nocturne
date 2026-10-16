@@ -1,18 +1,20 @@
 import { stegaClean } from 'next-sanity'
 
 import { MOTION_DEFAULTS } from '@/components/motion/presets'
-import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveHeroParts } from '@/features/pages/utils/hero-parts'
 import {
   splitColumns,
   splitImageClass,
+  splitImageFrameClass,
+  splitImageShapeClass,
   splitImageShape,
   splitImageShare,
   splitProportion,
 } from '@/features/pages/utils/hero-split'
-import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
+import { HeroPicture } from './hero-picture'
 import { HeroText } from './hero-text'
 import { HeroSlot } from './slots'
 import type { SectionProps } from '../../../types'
@@ -36,6 +38,7 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
     motion: MOTION_DEFAULTS.hero,
   }
   const { tone, align, block, text, justify, motion } = sectionTraits(data.style, defaults)
+  const parts = resolveHeroParts(data, defaults, isFirst)
 
   return (
     <SectionFrame
@@ -54,25 +57,29 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
           block={block}
           justify={justify}
           headingClassName="text-h1 font-semibold text-balance"
+          parts={parts}
           slot={
             <HeroSlot
               data={data}
               placement="below-buttons"
               centred={align === 'center'}
               animate={!isFirst && motion !== 'none'}
+              plan={parts.slot}
             />
           }
         />
       </div>
-      <SanityImage
+      <HeroPicture
         image={data.backgroundImage}
+        plan={parts.image}
+        isFirst={isFirst}
         width={1200}
-        preload={isFirst}
         sizes={`(min-width: 1024px) ${splitImageShare(proportion)}vw, 100vw`}
         // A fixed shape reserves the space before the picture arrives, whatever the upload's ratio;
         // the hotspot decides which part of the picture the crop keeps.
         className={splitImageClass(shape)}
-        style={{ objectPosition: hotspotObjectPosition(data.backgroundImage) }}
+        frameClassName={splitImageFrameClass(shape)}
+        imageClassName={splitImageShapeClass(shape)}
       />
     </SectionFrame>
   )

@@ -27,6 +27,8 @@ import {
   HeroSplitThumbnail,
 } from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
+import { heroPartMotionField } from './hero-part-motion'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-display, balanced over max-w-4xl: about three lines on a phone.
@@ -319,6 +321,8 @@ export const hero = defineType({
           required: false,
           hidden: notSplit,
         }),
+        // Agency-only and off by default: one animation and delay per part (README, "Animating individual parts").
+        heroPartMotionField,
       ],
       rules: {
         type: 'hero',

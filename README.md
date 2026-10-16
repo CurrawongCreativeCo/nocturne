@@ -1467,11 +1467,11 @@ only what applies.
 **1. Defaults, by kind of section (in code).** `MOTION_DEFAULTS` (`src/components/motion/presets.ts`) is what a section
 does when its style names no animation. `SectionDefaults.motion` picks the kind:
 
-| Kind      | Default   | Sections                                                                                                                                                                  |
-| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `content` | _Fade up_ | Everything unless it says otherwise (rich text, image + text, features, FAQ, testimonials, stats, gallery…). A section left out of `DEFAULTS` is content.                 |
-| `hero`    | _None_    | The four hero layouts. The hero's own text enters on load after the LCP-safe elements (the heading and picture never animate: `hero-text.tsx`), so the frame stays still. |
-| `still`   | _None_    | The logo strip.                                                                                                                                                           |
+| Kind      | Default   | Sections                                                                                                                                                                                                                                                     |
+| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `content` | _Fade up_ | Everything unless it says otherwise (rich text, image + text, features, FAQ, testimonials, stats, gallery…). A section left out of `DEFAULTS` is content.                                                                                                    |
+| `hero`    | _None_    | The four hero layouts. The hero's own text enters on load after the LCP-safe elements (the heading and picture never animate by default: `hero-text.tsx`), so the frame stays still. Each part can be animated on its own: see _Animating individual parts_. |
+| `still`   | _None_    | The logo strip.                                                                                                                                                                                                                                              |
 
 New sections added in the Studio store the kind's default, so what you see in the picker is what the site does. An
 explicit _None_ always beats the default, and content saved before the library existed (no `motion` stored) now fades up
@@ -1550,6 +1550,78 @@ section, reduced motion), `section-style.test.ts` (defaults and `sectionMotion`)
 presets the form shows), and `tests/e2e/motion-presets.spec.ts` on the `/motion-presets` fixture page (each entrance
 starts from its own offset and settles, a leftover option is ignored, the first section plays on load and is in the
 server HTML at full opacity, Float runs and pauses off screen, Parallax speeds, reduced motion, no JavaScript, axe).
+
+### Animating individual parts
+
+Agency only, in **Design → Advanced → Animate individual parts** on the hero (off by default). A section declares its
+animatable parts in code; the hero's are `HERO_PARTS` in `src/features/pages/utils/hero-parts.ts`: **eyebrow, heading,
+intro text, buttons, extra content (the slot), picture and background picture**. Each part is described once
+(`HERO_PART_SPECS`): whether it is a picture, whether it takes a turn in the timing sequence, whether it is an LCP
+candidate, and what it does with nothing chosen.
+
+**Three levels, each over the one before** (`resolvePartMotion`, `src/components/motion/part-motion.ts`):
+
+1. **The component default.** The intro, buttons and extra content rise one after another on load (150 ms, then 80 ms
+   apart), exactly as the hero always has; the eyebrow, heading and pictures simply appear with the page. A hero without
+   _Animate individual parts_ looks and behaves as before.
+2. **The section's animation** (the Animation picker above). An entrance on the section moves all its content as one, so
+   the parts add nothing of their own; Float and Parallax belong to the background picture.
+3. **The part's own choice**, only while the switch is on. Inherit (the default) keeps what the levels above gave.
+
+**What the form shows.** The switch, then one compact row per part the chosen layout and content actually have: an
+**animation** (Inherit · None · Fade · Rise · Reveal · Slide · Scale, plus Parallax for the pictures) and a **delay**
+(Auto · Short 0.15 s · Long 0.4 s). A part that is not there has no row: no eyebrow text, no buttons, no extra content,
+no picture, or a layout without one (_Split_ and _Editorial_ have a picture beside the text; _Full background_ and
+_Image with panel_ have a background; `heroPartsPresent` is the single source for the Studio and the page). Auto takes
+turns, 80 ms apart, in the order above, among the text parts that animate; a Short or Long delay still keeps its part's
+place in that order.
+
+| Preset   | What it does                                                                                       |
+| -------- | -------------------------------------------------------------------------------------------------- |
+| Fade     | Fades in.                                                                                          |
+| Rise     | Fades in and rises 24 px (the `reveal-distance` token).                                            |
+| Reveal   | Wipes in from the start edge with a `clip-path`; opacity is never touched.                         |
+| Slide    | Fades in while sliding 32 px in from the start.                                                    |
+| Scale    | Fades in while growing from 95 %.                                                                  |
+| Parallax | Pictures only: drifts with the scroll, at the subtle speed (0.15 beside the text, 0.25 behind it). |
+
+**Invalid combinations are ignored, never drawn.** Parallax on text falls back to Inherit (the form does not offer it);
+a stored choice for a part the hero does not have, or while the switch is off, does nothing; an unknown preset or
+delay reads as Inherit and Auto; reduced motion moves nothing.
+
+**The first section's heading and pictures (LCP).** These must paint whole with the page, so on the first section they
+never start at opacity 0, and they **ignore Fade, Reveal and Scale**, which start with less of the part showing. Rise
+and Slide start at opacity 1 and only move; Parallax rests unshifted at the top. This is stricter than "Reveal with
+opacity 1": Lighthouse showed that even a `clip-path` Reveal that leaves a sliver showing moves the LCP from 1.55 s to
+4 s, because Chrome counts a heading again each time more of it is painted, so the LCP lands when the wipe finishes.
+Further down the page the heading's Reveal works as described. The eyebrow, intro, buttons and extra content are not
+LCP candidates and may start hidden, as they always have.
+
+**Markup.** `hero-text.tsx` wraps a part in the existing `MotionDiv` or `MotionSpan` (the eyebrow's text, so the `<p>`
+stays valid) only when it animates, with the variants the resolver returned (`partProps`); a part that does not animate
+has no wrapper. Pictures use `hero-picture.tsx` (beside the text) and `hero-background.tsx`: an entrance animates a
+frame around the picture, so its corners, crop and focal point are untouched, and Parallax drifts it inside a clipped
+frame of the same shape. No new client component: the wrappers, `LazyParallax` and `LazyFloat` are the existing ones.
+Everything keeps the `data-reveal` hook, so without JavaScript and under reduced motion the parts are simply there
+(`globals.css` also clears `clip-path` for them).
+
+**Adding a part** to the hero: add it to `HERO_PARTS`, `HERO_PART_TITLES`, `HERO_PART_SPECS` and `heroPartsPresent`, its
+two fields (`<part>Preset`, `<part>Delay`) to the `partMotion` projection in `heroFragment`, and its element in
+`hero-text.tsx` or the layout. The tests fail until each table has a row for it. **Another section** gets the same
+feature with its own `PART_SPECS`, a `partMotion` object field in its `advanced` list (copy `hero-part-motion.ts`) and
+`resolvePartMotion` in its layouts.
+
+**Changed behaviour.** On a hero below the first section that has its own entrance (_Fade up_ and the like), the text no
+longer also rises on load inside the moving section: the section's entrance moves it, once.
+
+**Tests.** `part-motion.test.ts` (the three levels, inheritance, delays and the Auto sequence, invalid combinations, the
+first section's LCP rules), `hero-parts.test.ts` (which parts exist for each layout, the hero's resolution),
+`hero-part-motion.test.ts` (agency-only, one compact row per part, rows hidden for absent parts) and
+`tests/e2e/hero-parts.spec.ts`: the server HTML of `/hero-parts` (heading and picture at full opacity, nothing clipped),
+the parts ending whole, reduced motion, no JavaScript, axe, `/hero-parts-later` (the heading wipes in), and the gallery's
+`hero-parts-*` entries. The visual baselines for `hero-parts-*` are rendered under reduced motion, so they show the
+parts at rest and prove the wrappers change nothing about the layout. `/hero-parts` is also in `lighthouserc.json`
+(LCP at most 2.5 s, like the home page).
 
 ### Slider
 
@@ -2724,8 +2796,8 @@ content; adding it and taking it out are for the agency. The slot holds one item
 The slot takes the hero's tone, so it reads on a dark or a light hero. Greyscale logos stay dark grey, so on a dark
 hero use white or transparent-background logos, or turn _Greyscale_ off.
 
-**Animation.** The slot joins the hero's entrance as the next item after the buttons (beside the text in Editorial it
-fades up on its own, timed to start after them). Figures count up only when the hero is not the first section and its
+**Animation.** The slot is the hero's _extra content_ part (see _Animating individual parts_): by default it rises after
+the buttons, in the same sequence in every layout, and the agency can give it its own animation and delay. Figures count up only when the hero is not the first section and its
 Animation is not _None_. Under `prefers-reduced-motion`, and without JavaScript, the slot is simply there.
 
 **Studio rules.** The array is `supporting` with `options.slot: true`, which the Studio-wide input

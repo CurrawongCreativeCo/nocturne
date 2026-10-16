@@ -1,6 +1,7 @@
 import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SectionFrame } from '@/components/ui/section-frame'
-import { sectionMotion, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveHeroParts } from '@/features/pages/utils/hero-parts'
 
 import { HeroBackground } from './hero-background'
 import { HeroText } from './hero-text'
@@ -21,11 +22,7 @@ const DEFAULTS: SectionDefaults = {
  */
 export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
   const { tone, align, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
-  const plan = sectionMotion(data.style, DEFAULTS, {
-    isFirst,
-    hasMedia: Boolean(data.backgroundImage?.asset),
-    placement: 'background',
-  })
+  const parts = resolveHeroParts(data, DEFAULTS, isFirst)
   // Without a picture there is nothing to be tall for: the panel's text sets the height.
   const hasImage = Boolean(data.backgroundImage?.asset)
 
@@ -38,7 +35,7 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
       background={
         <HeroBackground
           image={data.backgroundImage}
-          plan={plan}
+          plan={parts.background}
           isFirst={isFirst}
           className="object-cover"
         />
@@ -52,6 +49,7 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
           tone={tone}
           block={block}
           justify={justify}
+          parts={parts}
           headingClassName="text-h1 font-semibold text-balance"
           slot={
             <HeroSlot
@@ -59,6 +57,7 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
               placement="in-panel"
               centred={align === 'center'}
               animate={!isFirst && motion !== 'none'}
+              plan={parts.slot}
             />
           }
         />

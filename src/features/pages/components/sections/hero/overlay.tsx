@@ -1,6 +1,7 @@
 import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SectionFrame } from '@/components/ui/section-frame'
-import { sectionMotion, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveHeroParts } from '@/features/pages/utils/hero-parts'
 
 import { HeroBackground } from './hero-background'
 import { HeroText } from './hero-text'
@@ -20,11 +21,7 @@ const DEFAULTS: SectionDefaults = {
 /** The image sits behind the text under a scrim (the image is dimmed, the tone's colour shows through). */
 export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
   const { tone, align, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
-  const plan = sectionMotion(data.style, DEFAULTS, {
-    isFirst,
-    hasMedia: Boolean(data.backgroundImage?.asset),
-    placement: 'background',
-  })
+  const parts = resolveHeroParts(data, DEFAULTS, isFirst)
 
   return (
     <SectionFrame
@@ -36,7 +33,7 @@ export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'h
       background={
         <HeroBackground
           image={data.backgroundImage}
-          plan={plan}
+          plan={parts.background}
           isFirst={isFirst}
           className="object-cover opacity-40"
         />
@@ -49,12 +46,14 @@ export function HeroOverlay({ data, isFirst = false, greeting }: SectionProps<'h
         tone={tone}
         block={block}
         justify={justify}
+        parts={parts}
         slot={
           <HeroSlot
             data={data}
             placement="below-buttons"
             centred={align === 'center'}
             animate={!isFirst && motion !== 'none'}
+            plan={parts.slot}
           />
         }
       />

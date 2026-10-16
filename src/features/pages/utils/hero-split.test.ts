@@ -5,7 +5,9 @@ import {
   SPLIT_PROPORTIONS,
   splitColumns,
   splitImageClass,
+  splitImageFrameClass,
   splitImageShape,
+  splitImageShapeClass,
   splitImageShare,
   splitProportion,
 } from './hero-split'
@@ -42,4 +44,14 @@ describe('hero split options', () => {
       expect(splitImageClass(shape)).toContain('object-cover')
     }
   })
+})
+
+describe('the animated picture’s classes', () => {
+  it.each(SPLIT_IMAGE_SHAPES)(
+    '%s: frame and shape together are the still picture’s classes',
+    (shape) => {
+      const together = `${splitImageFrameClass(shape)} ${splitImageShapeClass(shape)}`.split(' ')
+      expect(new Set(together)).toEqual(new Set(splitImageClass(shape).split(' ')))
+    },
+  )
 })

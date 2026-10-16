@@ -35,7 +35,17 @@ export const heroFragment = /* groq */ `
     imageShape,
     secondaryImage { ${imageFields} },
     supporting[] { ${heroSupportingFields} },
-    showGreeting
+    showGreeting,
+    partMotion {
+      enabled,
+      eyebrowPreset, eyebrowDelay,
+      headingPreset, headingDelay,
+      descriptionPreset, descriptionDelay,
+      buttonsPreset, buttonsDelay,
+      slotPreset, slotDelay,
+      imagePreset, imageDelay,
+      backgroundPreset, backgroundDelay
+    }
   }
 `
 
