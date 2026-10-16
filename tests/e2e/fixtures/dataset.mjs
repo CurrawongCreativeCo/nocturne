@@ -18,6 +18,14 @@ const external = (url, openInNewTab = false) => ({
   url,
   openInNewTab,
 })
+const anchor = (id) => ({ _type: 'link', linkType: 'anchor', anchor: id })
+const panel = (id, fallbackUrl) => ({
+  _type: 'link',
+  linkType: 'panel',
+  panel: ref(id),
+  ...(fallbackUrl && { fallbackUrl }),
+})
+const booking = (bookingUrl) => ({ _type: 'link', linkType: 'booking', bookingUrl })
 const cta = (label, link, variant = 'primary') => ({
   _key: key(),
   _type: 'cta',
@@ -94,6 +102,25 @@ const abHero = (title) => ({ _key: key(), _type: 'hero', title, description: 'He
 const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
+
+/** Four steps with labels, in a fixed order the tests check. The first has a picture. */
+const processSteps = (id) => [
+  {
+    _key: `${id}-discover`,
+    label: 'Week 1',
+    title: 'Discover',
+    text: 'We learn about your business and your customers.',
+    icon: image(`${id}-discover`),
+  },
+  {
+    _key: `${id}-design`,
+    label: 'Weeks 2–3',
+    title: 'Design',
+    text: 'We shape the look and feel.',
+  },
+  { _key: `${id}-build`, title: 'Build', text: 'We bring the design to life.' },
+  { _key: `${id}-launch`, label: 'Week 7', title: 'Launch', text: 'We go live and stay close.' },
+]
 
 // Video section (tests/e2e/video.spec.ts). The files are never fetched: the specs stand in for the CDN and the players.
 const VIDEO_ASSET_ID = 'file-0123456789abcdef0123456789abcdef01234567-mp4'
@@ -363,6 +390,14 @@ export const documents = [
         ],
       },
       {
+        // Its scroll-linked line is part of what the memory test (memory.spec.ts) repeats.
+        _key: 'about-process',
+        _type: 'process',
+        variant: 'alternating',
+        title: 'How we work',
+        steps: processSteps('about-process'),
+      },
+      {
         _key: key(),
         _type: 'ctaBanner',
         title: 'Dark banner',
@@ -552,6 +587,54 @@ export const documents = [
           block(['Framed text 6'], { style: 'h2' }),
           block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
         ],
+      },
+    ],
+  },
+  {
+    // Typed link actions (link-actions.spec.ts): a section on this page, a panel, booking.
+    _id: 'panel-enquire',
+    _type: 'panel',
+    title: 'Enquire now',
+  },
+  {
+    _id: 'page-link-actions',
+    _type: 'page',
+    title: 'Link actions',
+    slug: { _type: 'slug', current: 'link-actions' },
+    seo: { _type: 'seo', metaDescription: 'Links that jump to a section or open a panel.' },
+    pageBuilder: [
+      {
+        _key: 'link-actions-hero',
+        _type: 'hero',
+        title: 'Link actions',
+        description: 'Buttons that do more than go to a page.',
+        ctas: [
+          cta('Jump to details', anchor('details')),
+          cta('Open enquiry', panel('panel-enquire', '/about'), 'secondary'),
+        ],
+      },
+      {
+        _key: 'link-actions-booking',
+        _type: 'ctaBanner',
+        title: 'Ready when you are',
+        tone: 'dark',
+        ctas: [cta('Book a visit', booking('/about'))],
+      },
+      {
+        _key: 'link-actions-spacer',
+        _type: 'richText',
+        body: [
+          block(['Lead-in copy'], { style: 'h2' }),
+          ...Array.from({ length: 12 }, () =>
+            block(['A paragraph of copy so the page is long enough to scroll. '.repeat(12)]),
+          ),
+        ],
+      },
+      {
+        _key: 'link-actions-details',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', anchorId: 'details' },
+        body: [block(['The details'], { style: 'h2' }), block(['This is where the link lands.'])],
       },
     ],
   },
@@ -1961,6 +2044,23 @@ const gallerySections = [
     text: 'A quiet loop of the team at work.',
     file: fileRef(VIDEO_ASSET_ID),
   }),
+  // Process (README, "Process timeline"): both layouts with four steps. The first step has a label
+  // and a picture; the gallery has no MotionProvider, so the line shows fully drawn.
+  {
+    _key: 'process-vertical',
+    _type: 'process',
+    variant: 'vertical',
+    title: 'How we work',
+    intro: 'Four steps from first chat to launch.',
+    steps: processSteps('process-vertical'),
+  },
+  {
+    _key: 'process-alternating',
+    _type: 'process',
+    variant: 'alternating',
+    title: 'From idea to launch',
+    steps: processSteps('process-alternating'),
+  },
   // Logo strip marquee: greyscale (the default) and full colour. One logo links, to check the copy's tab order.
   {
     _key: 'logo-cloud-marquee',
@@ -2287,6 +2387,41 @@ documents.push({
       members: [
         { _key: 'pick-ben', ...ref('teamMember-ben') },
         { _key: 'pick-ann', ...ref('teamMember-ann') },
+      ],
+    },
+  ],
+})
+
+// Tall enough that the scroll-linked line is part-drawn at some scroll positions (process.spec.ts).
+documents.push({
+  _id: 'page-process',
+  _type: 'page',
+  title: 'Process',
+  slug: { _type: 'slug', current: 'process' },
+  seo: { _type: 'seo', metaDescription: 'A page with a process timeline.' },
+  pageBuilder: [
+    { _key: 'process-hero', _type: 'hero', title: 'Process', description: 'Hero description.' },
+    {
+      _key: 'process-filler',
+      _type: 'richText',
+      body: [
+        block(['Filler'], { style: 'h2' }),
+        block(['A paragraph of copy so the timeline starts below the fold. '.repeat(30)]),
+      ],
+    },
+    {
+      _key: 'process-timeline',
+      _type: 'process',
+      variant: 'alternating',
+      title: 'Our process',
+      steps: processSteps('process-page'),
+    },
+    {
+      _key: 'process-tail',
+      _type: 'richText',
+      body: [
+        block(['After the timeline'], { style: 'h2' }),
+        block(['A paragraph of copy so the page scrolls past the timeline. '.repeat(40)]),
       ],
     },
   ],

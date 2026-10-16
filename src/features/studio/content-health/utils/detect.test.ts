@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  collectAnchorTargets,
+  collectDefinedAnchors,
   collectLinkTargets,
   findBrokenLinkTargets,
+  findMissingAnchors,
+  findMissingPanels,
   findImagesWithoutAlt,
   findOrphanPages,
   findRedirectProblems,
@@ -209,5 +213,38 @@ describe('resolveVersions', () => {
       { id: 'b', doc: docs[2], published: true },
       { id: 'c', doc: docs[3], published: false },
     ])
+  })
+})
+
+describe('anchor and panel links', () => {
+  const anchorLink = (anchor: string) => ({ _type: 'link', linkType: 'anchor', anchor })
+  const panelLink = (ref: string) => ({
+    _type: 'link',
+    linkType: 'panel',
+    panel: { _type: 'reference', _ref: ref },
+  })
+
+  it('finds anchor links that no section defines', () => {
+    const sections = [
+      { _type: 'hero', style: { anchorId: 'top' }, ctas: [{ link: anchorLink('pricing') }] },
+      { _type: 'faq', style: { anchorId: 'pricing' } },
+      { _type: 'cta', ctas: [{ link: anchorLink('#gone') }] },
+    ]
+    expect(findMissingAnchors(sections, collectDefinedAnchors(sections))).toEqual(['gone'])
+  })
+
+  it('counts anchors of shared sections the page uses', () => {
+    const sections = [{ _type: 'reference', _ref: 'shared1' }, { link: anchorLink('contact') }]
+    const shared = new Map([['shared1', ['contact']]])
+    expect(findMissingAnchors(sections, collectDefinedAnchors(sections, shared))).toEqual([])
+  })
+
+  it('ignores anchors on links of another type', () => {
+    expect(collectAnchorTargets({ _type: 'link', linkType: 'external', anchor: 'old' })).toEqual([])
+  })
+
+  it('finds panels with no published version', () => {
+    const content = [{ link: panelLink('a') }, { link: panelLink('b') }, { link: panelLink('a') }]
+    expect(findMissingPanels(content, new Set(['a']))).toEqual(['b'])
   })
 })

@@ -31,7 +31,11 @@ const FRAME_FILE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100
 
 test.use({ reducedMotion: 'reduce' })
 
+/** Location's "Open now" badge reads the clock: pin it so the badge text is the same on every run. */
+const FRIDAY_MORNING = new Date('2026-10-16T10:00:00+11:00')
+
 test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(FRIDAY_MORNING)
   await page.route('https://cdn.sanity.io/**', (route) =>
     route.fulfill({ contentType: 'image/svg+xml', body: PLACEHOLDER_IMAGE }),
   )

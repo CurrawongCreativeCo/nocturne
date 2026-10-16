@@ -56,6 +56,63 @@ export function findBrokenLinkTargets(value: unknown, publishedIds: ReadonlySet<
   return [...new Set(collectLinkTargets(value))].filter((id) => !publishedIds.has(id))
 }
 
+/** Anchor ids that `link` objects of type "A section on this page" jump to, anywhere inside `value`. */
+export function collectAnchorTargets(value: unknown): string[] {
+  if (Array.isArray(value)) return value.flatMap(collectAnchorTargets)
+  if (!isRecord(value)) return []
+  if (value._type === 'link') {
+    const anchor = typeof value.anchor === 'string' ? value.anchor.trim().replace(/^#/, '') : ''
+    return value.linkType === 'anchor' && anchor ? [anchor] : []
+  }
+  return Object.values(value).flatMap(collectAnchorTargets)
+}
+
+/** Anchors the page's own sections (and the shared sections it uses, via `sharedAnchors`) define. */
+export function collectDefinedAnchors(
+  sections: unknown,
+  sharedAnchors: ReadonlyMap<string, string[]> = new Map(),
+): Set<string> {
+  const defined = new Set<string>()
+  const walk = (node: unknown) => {
+    if (Array.isArray(node)) {
+      node.forEach(walk)
+      return
+    }
+    if (!isRecord(node)) return
+    if (node._type === 'reference' && typeof node._ref === 'string') {
+      sharedAnchors.get(node._ref)?.forEach((id) => defined.add(id))
+      return
+    }
+    if (isRecord(node.style) && typeof node.style.anchorId === 'string' && node.style.anchorId) {
+      defined.add(node.style.anchorId)
+    }
+    Object.values(node).forEach(walk)
+  }
+  walk(sections)
+  return defined
+}
+
+/** Distinct anchors a page links to that none of its sections defines. */
+export function findMissingAnchors(content: unknown, defined: ReadonlySet<string>): string[] {
+  return [...new Set(collectAnchorTargets(content))].filter((id) => !defined.has(id))
+}
+
+/** Ids of the panels that "Open a panel" links point at. */
+export function collectPanelTargets(value: unknown): string[] {
+  if (Array.isArray(value)) return value.flatMap(collectPanelTargets)
+  if (!isRecord(value)) return []
+  if (value._type === 'link') {
+    const ref = isRecord(value.panel) ? value.panel._ref : undefined
+    return value.linkType === 'panel' && typeof ref === 'string' ? [ref] : []
+  }
+  return Object.values(value).flatMap(collectPanelTargets)
+}
+
+/** Distinct panels linked to that have no published version (never published, or deleted). */
+export function findMissingPanels(value: unknown, publishedIds: ReadonlySet<string>): string[] {
+  return [...new Set(collectPanelTargets(value))].filter((id) => !publishedIds.has(id))
+}
+
 /** Ids of the shared sections referenced in a page builder array. */
 export function collectSharedSectionIds(sections: unknown): string[] {
   if (!Array.isArray(sections)) return []

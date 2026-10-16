@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="600" height="450"><style>
+:root{--bg:#f6f6f8;--fg:#1f2430;--line:#c9ccd4;--accent:#5f2bd4}
+@media (prefers-color-scheme:dark){:root{--bg:#16181d;--fg:#e8eaee;--line:#3a3f4b;--accent:#9f80e5}}
+rect.bg{fill:var(--bg)}
+.h{fill:var(--fg);opacity:.85}.l{fill:var(--fg);opacity:.35}.a{fill:var(--accent)}.t{fill:var(--line)}
+</style><rect class="bg" width="160" height="120"/><rect class="h" x="52" y="10" width="56" height="7" rx="2"/><rect class="t" x="79.25" y="30" width="1.5" height="78"/><rect class="a" x="79.25" y="30" width="1.5" height="52"/><circle class="a" cx="80" cy="36" r="4"/><rect class="h" x="30" y="32" width="40" height="5" rx="2"/><rect class="l" x="18" y="40" width="52" height="3" rx="1.5"/><circle class="a" cx="80" cy="62" r="4"/><rect class="h" x="92" y="58" width="40" height="5" rx="2"/><rect class="l" x="92" y="66" width="52" height="3" rx="1.5"/><circle class="a" cx="80" cy="88" r="4"/><rect class="h" x="30" y="84" width="40" height="5" rx="2"/><rect class="l" x="18" y="92" width="52" height="3" rx="1.5"/></svg>

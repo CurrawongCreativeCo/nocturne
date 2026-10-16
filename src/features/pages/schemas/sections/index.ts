@@ -9,6 +9,7 @@ import { logoCloud } from './logo-cloud'
 import { mediaText } from './media-text'
 import { newsletterSignup } from './newsletter-signup'
 import { pricingTable } from './pricing-table'
+import { process } from './process'
 import { richText } from './rich-text'
 import { stats } from './stats'
 import { team } from './team'
@@ -46,5 +47,6 @@ export const sectionTypes = [
   location,
   team,
   video,
+  process,
   // new-section:register
 ]

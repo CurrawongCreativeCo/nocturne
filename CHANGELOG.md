@@ -34,6 +34,34 @@ you start a release.
   field is hidden and its value shows as the Image design's shape until changed). New fixtures, section-gallery entries for every
   shape and frame, `/framed-images`, `tests/e2e/framed-image.spec.ts` and unit tests. Add the new screenshot baselines with the
   **Update visual baselines** workflow.
+- **Typed link actions:** a link now has a **Goes to** picker: _A page on this site_ and _Another website_ (stored exactly as
+  before), plus _A section on this page_ (pick from the page's anchors or type one; renders `#id`). _Open a panel_ and
+  _Book_ are built into the schema, renderer and Content health but switched off in `src/config/link-actions.ts` until
+  panels (task 93) and booking (task 95) exist. Panel and booking links render a `<button aria-haspopup="dialog">` inside a
+  GET form, so without JavaScript they go to a fallback URL. Section links scroll smoothly unless the visitor asks for
+  reduced motion. Content health reports links to missing sections and unpublished panels. See README, _Link actions_.
+
+### Changed
+
+- The link fragment (`linkFields`) also returns `anchor`, `panel` (id and title), `fallbackUrl` and `bookingUrl`.
+  **Open in a new tab** moved into a collapsed Advanced area and shows for _Another website_ only.
+
+### Fixed
+
+### Breaking changes / migration steps
+
+None. Existing links keep their stored values. Run `npm run typegen` after merging.
+
+## [1.4.0] - 2026-10-16
+
+### Added
+
+- **Process section:** _Add item → Process_, a numbered `<ol>` of steps beside a line that fills as the visitor scrolls
+  (`useScroll` into a `scaleY` on an `m.div`, transform only). Two layouts: _Vertical_ (default) and _Alternating_
+  (left and right of a centre line from `md`; phones are always vertical). Fields: title, intro and two to ten steps
+  (title, text, optional label such as "Week 1", optional decorative icon or image). Starts with four example steps.
+  Steps reveal with the Stagger animation; Animation _None_ turns that off. The line is fully drawn under reduced motion
+  and without JavaScript, and its scroll code loads only on pages that use the section. See README, _Process timeline_.
 - **Logo strip marquee:** the Logo strip gains a **Layout** picker (_Grid_, the default and unchanged, and _Marquee_). The
   marquee is an endless CSS-driven row of logos (the list rendered twice, the copy `aria-hidden` with `tabindex="-1"`
   links; `translateX` only) with faded edges (`mask-image`), pausing on hover and focus and a visible Pause / Play button
@@ -347,8 +375,6 @@ you start a release.
   outline from `--tone-accent-ink` (the old rule resolved `--color-ink` to the accent itself, so text matched the
   background).
 
-### Fixed
-
 ### Breaking changes / migration steps
 
 **Image design:** run `npm run typegen` after merging (`imageDesign` is new in the Image + text, hero, gallery and team
@@ -357,6 +383,10 @@ fragments, and the `frame` document type is new). Add `"frame"` to the revalidat
 as the Image design's shape until changed, so no content migration is needed. A client site that edited `hero-picture.tsx`,
 `hero-split.ts` (the `splitImage*Class` helpers now return only layout classes) or `team-card.tsx` should take the template's
 versions and re-apply its changes. Add the new gallery entries' baselines with the **Update visual baselines** workflow.
+
+**Process section:** run `npm run typegen` after merging (`process` is a new section type and fragment). No content
+migration: nothing existing changes. Add screenshot baselines for the two new gallery entries (`process-vertical`,
+`process-alternating`) with the **Update visual baselines** workflow.
 
 **Logo strip marquee:** run `npm run typegen` after merging (`variant` and `logoColour` are new in `logoCloudFragment`) and
 `npm run tokens` if you edit `tokens.json` (the new `motion.marquee-per-logo` token is optional; without it the marquee
@@ -728,7 +758,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.0.0...v1.1.0

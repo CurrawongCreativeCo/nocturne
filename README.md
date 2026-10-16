@@ -97,7 +97,7 @@ Open http://localhost:3000/studio:
   Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Dark".
 
 - **Start here** (toolbar, first for clients) is the first screen: a greeting, shortcut cards (_Edit your website_, _Write a blog post_, _Update the team_, _Business info and opening hours_, _Help_), your eight most recent changes with who made them and when, and up to five things to check in plain words. See [Start here](#start-here-studio-home-screen).
-- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
+- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, links to missing sections or unpublished panels, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **Image and text guidance:** image fields say what suits their spot ("Recommended: 2400 × 1600 px, landscape.") and show a yellow warning, never an error, when an uploaded picture is narrower than that or a different shape by more than 15%, for example "This image is 1200 × 1800 (portrait). This spot looks best with a landscape image at least 2400 px wide." You can still publish; the warning is a nudge to swap the picture. SVGs are never checked. Section titles and intro text warn the same way when they run past what the design handles (a hero title over 80 characters, other headings over 60–70, intro text over 200). Current targets: hero background 2400 px wide, landscape; _Image + text_ 1600 px at 4:3; testimonial and author portraits 800 px square; logos 400–600 px wide if not SVG (SVG preferred).
 - **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
   or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
@@ -2323,6 +2323,47 @@ content_).
   size), reduced motion, no JavaScript and Animation _None_. The gallery has `stats-inline`, `stats-cards` and
   `stats-cards-six` (dark, no animation); the `/stats` fixture page holds an animated and a still section below the fold.
 
+### Process timeline
+
+A numbered list of steps ("Discover, Design, Build, Launch") beside a line that fills as the visitor scrolls.
+
+**For editors.** Add a **Process** section. It starts with four example steps (replace them) and looks finished as it
+is. Each step has a **title**, an optional short **label** above it ("Week 1"), optional **text** and an optional
+**icon or image** (decorative; the title says what it means). A section holds two to ten steps, in the order the page
+reads; Studio warns when text is too long and never blocks publishing. The agency-only **Layout** is _Vertical_ (one
+line down the left, every step beside it) or _Alternating_ (from tablet width the line runs down the middle and steps
+fall to the left and right in turn; phones always see the vertical layout). The steps appear one after another as they
+scroll into view (the _Stagger_ animation); set the Design tab's **Animation** to _None_ and they are simply there. The
+line fills as the page scrolls either way.
+
+**For developers.**
+
+- **Markup:** an `<ol>` of `<li>` steps, each with an `aria-hidden` number on the line, an optional label, an `<h3>`
+  title and text. The line is decorative (`aria-hidden`). The order is the order of the `steps` array.
+- **Components** (`src/features/pages/components/sections/process/`): `index.tsx` picks the layout from `variant`;
+  `vertical.tsx` and `alternating.tsx` differ only in where the line runs and which side a step sits on, and share
+  `process-layout.tsx` (header, line, list) and `process-step.tsx` (one step, a `MotionLi`).
+- **The line** (`process-timeline.tsx`, client): `useScroll({ target, offset: ['start 80%', 'end 60%'] })` drives a
+  `scaleY` on an `m.div` with `transform-origin: top`. It is empty when the steps' top is 80% down the screen and full
+  when their bottom is 60% down. Only `transform` animates, and Motion uses a ScrollTimeline where the browser has one,
+  so there is no scroll listener of ours to clean up. The track is faded out over its last 4 rem so it doesn't trail
+  below the last marker.
+- **Lazy:** server components import `process-timeline-lazy.tsx` (`next/dynamic` in a client file, like `LazyParallax`),
+  so Motion's scroll code is a separate chunk only a page with a Process section downloads. The home page budget is
+  unchanged. The server still renders it.
+- **No JavaScript or reduced motion:** the scale is attached only after hydration and never under
+  `prefers-reduced-motion`, so the server HTML, visitors without JavaScript and visitors who ask for less motion all see
+  the line fully drawn. Steps carry `data-reveal`, which `globals.css` forces visible in both cases.
+- **Steps reveal** with the section's animation preset (`stagger` by default, so `DEFAULTS.motion` is `'stagger'` in
+  `process-layout.tsx` and the schema's initial style). The section resolves it with `sectionMotion` and each step plays
+  its child variant as it arrives, rather than the whole list waiting for its top to enter, which on a tall list would
+  reveal steps before they are on screen. The `SectionFrame` itself is given `motion: 'none'` so nothing animates twice.
+- **Tests:** `tests/e2e/process.spec.ts` checks the `<ol>` and step order in the server HTML, axe on both layouts and a
+  page, the line empty above, part drawn midway and full below the timeline, the reveal, reduced motion and no
+  JavaScript. The About fixture page holds an alternating timeline, so the memory test (`memory.spec.ts`) repeats it.
+  The gallery has `process-vertical` and `process-alternating` (it has no `MotionProvider`, so it shows the layout only);
+  the `/process` fixture page holds one below the fold.
+
 ### Type flow
 
 ```
@@ -2428,6 +2469,28 @@ each release before proposing it.
 | `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`) |
 | `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)       |
 | `npm run test:lighthouse` | Lighthouse budgets on `/` and `/about` (needs Chrome installed)            |
+
+### Link actions
+
+Every link (CTAs, menus, rich text) is a typed action, chosen with the **Goes to** picker. The default is _A page on this site_, as before, and fields appear only for the chosen action.
+
+| Choice                 | Stored `linkType` | Fields                                                   | Renders                                         |
+| ---------------------- | ----------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| A page on this site    | `internal`        | Page                                                     | `<Link>`                                        |
+| Another website        | `external`        | URL; Advanced: open in a new tab                         | `<a>`                                           |
+| A section on this page | `anchor`          | Section (buttons for this page's anchors, or type one)   | `<a href="#id">`                                |
+| Open a panel           | `panel`           | Panel; Advanced: fallback link                           | `<button aria-haspopup="dialog">` in a GET form |
+| Book                   | `booking`         | Optional booking link (else the site's booking settings) | `<button aria-haspopup="dialog">` in a GET form |
+
+`internal` and `external` store exactly what they always did, so existing content needs no migration. Resolving a stored link to what to render is pure and tested (`src/components/ui/resolve-link.ts`); `SanityLink` and `CtaLink` render the result.
+
+**Sections.** A section link needs an anchor on a section of the same page (_Layout options → Anchor_). It only works on the page the link sits on, so use it in page content rather than the menu. The target's `scroll-margin` leaves room for the sticky header and the section edge. Scrolling is smooth unless the visitor prefers reduced motion.
+
+**Panels and booking.** The _Open a panel_ and _Book_ choices stay out of the Studio until panels (task 93) and booking (task 95) exist; switch them on in `src/config/link-actions.ts` and add the `panel` document type. The button is plain server markup (`<button data-overlay-kind="panel|booking" data-overlay-id="...">`), so it adds no JavaScript. The overlay adds one delegated `click` listener, finds the trigger with `event.target.closest('[data-overlay-kind]')` (`OVERLAY_TRIGGER_SELECTOR`) and calls `event.preventDefault()` before opening its dialog, which also stops the fallback form submitting. If JavaScript hasn't loaded, or nothing claims the click, the form submits to the fallback URL (for booking, the override or the booking page). The panel reference resolves to an id and title only; its content is the panel feature's. The title is added to the button's accessible name ("Enquire (opens Enquire now)").
+
+**Content health** reports section links whose anchor no section on the page has (shared sections the page uses count) and buttons for panels with no published version. Links inside shared sections and the menu can't be checked against a single page, so they are skipped.
+
+**Tests.** Vitest covers the resolver and the health checks; `tests/e2e/link-actions.spec.ts` covers section scrolling, the dialog attributes, an overlay claiming the click, and the no-JavaScript fallback.
 
 ### Preset picker (Studio)
 

@@ -21,6 +21,7 @@ import { LogoCloud } from './sections/logo-cloud'
 import { MediaText } from './sections/media-text'
 import { NewsletterSignup } from './sections/newsletter-signup'
 import { PricingTable } from './sections/pricing-table'
+import { Process } from './sections/process'
 import { RichText } from './sections/rich-text'
 import { Stats } from './sections/stats'
 import { Team } from './sections/team'
@@ -50,6 +51,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   location: Location,
   team: Team,
   video: Video,
+  process: Process,
   // new-section:register
 }
 

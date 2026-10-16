@@ -1,25 +1,16 @@
-import Link from 'next/link'
-import { stegaClean } from 'next-sanity'
 import type { ReactNode } from 'react'
 
-import { slugToPath } from '@/config/paths'
+import { NewTabNotice, ResolvedAnchor } from '@/components/ui/basic-link'
+import { LinkActionButton } from '@/components/ui/link-action-button'
+import { resolveLink, type LinkData } from '@/components/ui/resolve-link'
 
-/** Structural shape of `linkFields`; CTAs, menu items and rich-text links all satisfy it. */
-export interface LinkData {
-  linkType?: string | null
-  slug?: string | null
-  url?: string | null
-  openInNewTab?: boolean | null
-}
-
-/** Tells screen-reader users a link opens a new tab (WCAG G201); sighted users see the tab open. */
-export function NewTabNotice() {
-  return <span className="sr-only"> (opens in a new tab)</span>
-}
+export type { LinkData }
+export { NewTabNotice }
 
 /**
- * Renders a Sanity `link` object: <Link> for internal pages, <a> for external URLs.
- * Renders nothing when the link is incomplete (e.g. an unfinished draft).
+ * Renders a Sanity `link` object: <Link> for pages, <a> for websites and sections of the page,
+ * and a <button> for panels and booking. Renders nothing when the link is incomplete (e.g. an
+ * unfinished draft). Client components use `BasicLink` instead, which leaves the button out.
  */
 export function SanityLink({
   link,
@@ -30,32 +21,32 @@ export function SanityLink({
   className?: string
   children: ReactNode
 }) {
-  if (!link) return null
-  const newTab = link.openInNewTab ?? false
+  const resolved = resolveLink(link)
+  if (!resolved) return null
 
-  if (stegaClean(link.linkType) === 'internal') {
-    if (!link.slug) return null
+  if (resolved.kind === 'panel') {
     return (
-      <Link
-        href={slugToPath(stegaClean(link.slug))}
+      <LinkActionButton
+        kind="panel"
+        id={resolved.panelId}
+        fallbackHref={resolved.fallbackHref}
+        title={resolved.title}
         className={className}
-        {...(newTab && { target: '_blank' })}
       >
         {children}
-        {newTab && <NewTabNotice />}
-      </Link>
+      </LinkActionButton>
     )
   }
-
-  if (!link.url) return null
+  if (resolved.kind === 'booking') {
+    return (
+      <LinkActionButton kind="booking" fallbackHref={resolved.fallbackHref} className={className}>
+        {children}
+      </LinkActionButton>
+    )
+  }
   return (
-    <a
-      href={stegaClean(link.url)}
-      className={className}
-      {...(newTab && { target: '_blank', rel: 'noopener noreferrer' })}
-    >
+    <ResolvedAnchor resolved={resolved} className={className}>
       {children}
-      {newTab && <NewTabNotice />}
-    </a>
+    </ResolvedAnchor>
   )
 }
