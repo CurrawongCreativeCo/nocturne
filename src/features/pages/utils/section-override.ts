@@ -29,6 +29,14 @@ const VARIANT_CONTROLS: Partial<Record<PageSection['_type'], VariantControl>> = 
       { value: 'full-bleed', title: 'Image with panel' },
     ],
   },
+  logoCloud: {
+    field: 'variant',
+    label: 'Layout',
+    options: [
+      { value: 'grid', title: 'Grid' },
+      { value: 'marquee', title: 'Marquee' },
+    ],
+  },
   stats: {
     field: 'variant',
     label: 'Layout',

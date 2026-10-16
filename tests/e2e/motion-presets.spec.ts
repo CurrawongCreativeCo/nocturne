@@ -44,19 +44,20 @@ test.describe('with motion', () => {
 
   test('starts each preset from its own offset', async ({ page }) => {
     await page.goto(PAGE)
-    expect(await matrix(page, 'subtle')).toMatchObject({ x: 0, y: 12 })
+    // Polled throughout: a slow runner can still be hydrating when the page loads.
+    await expect.poll(() => matrix(page, 'subtle')).toMatchObject({ x: 0, y: 12 })
     // Fade has no offset at all.
-    expect(await matrix(page, 'fade')).toMatchObject({ x: 0, y: 0 })
+    await expect.poll(() => matrix(page, 'fade')).toMatchObject({ x: 0, y: 0 })
     // Slide in "from the end" starts to the right, with no vertical offset.
-    expect(await matrix(page, 'slide')).toMatchObject({ x: 32, y: 0 })
+    await expect.poll(() => matrix(page, 'slide')).toMatchObject({ x: 32, y: 0 })
     // Custom: 60 px.
-    expect(await matrix(page, 'custom')).toMatchObject({ x: 0, y: 60 })
+    await expect.poll(() => matrix(page, 'custom')).toMatchObject({ x: 0, y: 60 })
   })
 
   test('ignores an Advanced option the preset does not use', async ({ page }) => {
     await page.goto(PAGE)
     // Stored Direction "end" and Intensity "bold" belong to other presets: Subtle still just rises 12 px.
-    expect(await matrix(page, 'leftover')).toMatchObject({ x: 0, y: 12 })
+    await expect.poll(() => matrix(page, 'leftover')).toMatchObject({ x: 0, y: 12 })
   })
 
   test('the first section plays on load and is never hidden', async ({ page, request }) => {
@@ -108,12 +109,15 @@ test.describe('with motion', () => {
           Number(getComputedStyle(element).getPropertyValue('--parallax-amount')),
         )
     // Subtle beside the text is the original 0.15; Strong 0.45 at Bold is 0.675, held at 0.6.
-    expect(await amount('parallax-subtle')).toBe(0.15)
-    expect(await amount('parallax-strong')).toBe(0.6)
+    // The client sets the amount once it has loaded, so wait for it.
+    await expect.poll(() => amount('parallax-subtle')).toBe(0.15)
+    await expect.poll(() => amount('parallax-strong')).toBe(0.6)
   })
 
   test('has no WCAG 2.2 AA violations once everything has played', async ({ page }) => {
     await page.goto(PAGE)
+    // Let the page finish hydrating: a section replaced mid-scroll is "not attached to the DOM".
+    await page.waitForLoadState('networkidle')
     for (const id of [
       'subtle',
       'fade',
@@ -123,6 +127,7 @@ test.describe('with motion', () => {
       'float',
       'parallax-strong',
     ]) {
+      await expect(page.locator(`section#${id}`)).toBeAttached()
       await page.locator(`section#${id}`).scrollIntoViewIfNeeded()
     }
     await expect(entrance(page, 'custom')).toHaveCSS('opacity', '1', { timeout: 5000 })

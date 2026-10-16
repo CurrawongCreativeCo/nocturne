@@ -1761,6 +1761,31 @@ const gallerySections = [
     text: 'A quiet loop of the team at work.',
     file: fileRef(VIDEO_ASSET_ID),
   }),
+  // Logo strip marquee: greyscale (the default) and full colour. One logo links, to check the copy's tab order.
+  {
+    _key: 'logo-cloud-marquee',
+    _type: 'logoCloud',
+    variant: 'marquee',
+    title: 'Trusted by',
+    logos: ['Acme', 'Globex', 'Initech', 'Umbrella', 'Hooli'].map((name, index) => ({
+      _key: key(),
+      name,
+      image: image(name),
+      ...(index === 0 && { url: 'https://example.com/acme' }),
+    })),
+  },
+  {
+    _key: 'logo-cloud-marquee-colour',
+    _type: 'logoCloud',
+    variant: 'marquee',
+    logoColour: 'colour',
+    title: 'Our partners',
+    logos: ['Acme', 'Globex', 'Initech', 'Umbrella', 'Hooli'].map((name) => ({
+      _key: key(),
+      name,
+      image: image(name),
+    })),
+  },
   // new-section:gallery
 ]
 
@@ -1869,6 +1894,29 @@ documents.push({
       variant: 'slider',
       title: 'Kind words',
       items: sliderQuotes('slider-page'),
+    },
+  ],
+})
+
+/** A Logo strip marquee on a real page (tests/e2e/logo-marquee.spec.ts), for no JavaScript: the gallery streams in with a script. */
+documents.push({
+  _id: 'page-logos',
+  _type: 'page',
+  title: 'Logos',
+  slug: { _type: 'slug', current: 'logos' },
+  seo: { _type: 'seo', metaDescription: 'A page with a logo marquee.' },
+  pageBuilder: [
+    { _key: 'logos-hero', _type: 'hero', title: 'Logos', description: 'Hero description.' },
+    {
+      _key: 'logos-marquee',
+      _type: 'logoCloud',
+      variant: 'marquee',
+      title: 'Trusted by',
+      logos: ['Acme', 'Globex', 'Initech'].map((name) => ({
+        _key: key(),
+        name,
+        image: image(name),
+      })),
     },
   ],
 })

@@ -152,7 +152,7 @@ export function validateTokens(tokens) {
     }
   }
 
-  for (const key of ['duration-fast', 'duration', 'duration-slow']) {
+  for (const key of ['duration-fast', 'duration', 'duration-slow', 'marquee-per-logo']) {
     if (tokens.motion?.[key] && Number.isNaN(parseDuration(tokens.motion[key]))) {
       errors.push(`motion.${key} must be a duration such as 150ms or 0.2s`)
     }

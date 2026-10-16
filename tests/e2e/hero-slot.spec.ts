@@ -80,6 +80,8 @@ test.describe('placement', () => {
     await page.goto(GALLERY)
     const frame = section(page, id)
     const get = async (selector: string) => {
+      // The slot can arrive a moment after load on a slow runner: wait until it is drawn.
+      await expect(frame.locator(selector).first()).toBeVisible()
       const found = await frame.locator(selector).first().boundingBox()
       if (!found) throw new Error(`${selector} has no box in ${id}`)
       return found
