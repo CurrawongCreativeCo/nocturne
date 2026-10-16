@@ -42,7 +42,15 @@ export async function getPage({
     query: PAGE_QUERY,
     params: { slug, members },
     ...mode,
-    tags: [TAGS.page, TAGS.sharedSection, TAGS.form, TAGS.teamMember],
+    tags: [
+      TAGS.page,
+      TAGS.sharedSection,
+      TAGS.form,
+      TAGS.teamMember,
+      TAGS.event,
+      TAGS.eventCategory,
+      TAGS.businessInfo,
+    ],
   })
   return data
 }

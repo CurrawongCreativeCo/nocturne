@@ -23,6 +23,11 @@ import {
   EdgeWaveThumbnail,
 } from './edge-thumbnails'
 import {
+  EventsAgendaThumbnail,
+  EventsFeaturedThumbnail,
+  EventsListThumbnail,
+} from './events-thumbnails'
+import {
   GalleryGridThumbnail,
   GalleryMasonryThumbnail,
   GallerySliderThumbnail,
@@ -91,6 +96,11 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
   testimonials: {
     grid: TestimonialsGridThumbnail,
     slider: TestimonialsSliderThumbnail,
+  },
+  events: {
+    list: EventsListThumbnail,
+    agenda: EventsAgendaThumbnail,
+    featured: EventsFeaturedThumbnail,
   },
   linkList: {
     stacked: LinkListMinimalThumbnail,

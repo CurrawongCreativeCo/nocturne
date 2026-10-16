@@ -18,6 +18,8 @@ for (const path of [
   '/blog/welcome-to-the-blog',
   '/team',
   '/team/ann-lee',
+  '/events',
+  '/events/pottery-workshop',
   '/search',
   '/search?q=design',
   '/members',

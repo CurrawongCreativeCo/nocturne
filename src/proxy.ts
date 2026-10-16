@@ -1,6 +1,7 @@
 import { get } from '@vercel/edge-config'
 import { NextResponse, type NextRequest } from 'next/server'
 
+import { EVENTS_PATH } from '@/config/event-paths'
 import {
   BLOG_PATH,
   EXPERIMENT_PATH,
@@ -103,11 +104,12 @@ async function redirect(request: NextRequest) {
 }
 
 /**
- * Only CMS pages have variants; the blog, search, gallery, brand preview, sign-in, variant and team
- * profile routes themselves are left alone. A page called exactly `/team` is still a CMS page.
+ * Only CMS pages have variants; the blog, search, gallery, brand preview, sign-in, variant, team
+ * profile and event routes themselves are left alone. A page called exactly `/team` or `/events` is
+ * still a CMS page.
  */
 function isPagePath(pathname: string) {
-  if (pathname.startsWith(`${TEAM_PATH}/`)) return false
+  if (pathname.startsWith(`${TEAM_PATH}/`) || pathname.startsWith(`${EVENTS_PATH}/`)) return false
   return ![
     BLOG_PATH,
     EXPERIMENT_PATH,

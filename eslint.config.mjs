@@ -38,6 +38,7 @@ const features = [
   'pricing',
   'styleguide',
   'team',
+  'events',
   // new-feature:register
 ]
 

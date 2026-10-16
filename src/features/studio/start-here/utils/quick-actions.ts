@@ -8,7 +8,7 @@ export type ActionTarget =
   | { kind: 'help' }
 
 export interface QuickAction {
-  id: 'website' | 'blog' | 'team' | 'business' | 'help'
+  id: 'website' | 'blog' | 'events' | 'team' | 'business' | 'help'
   title: string
   description: string
   target: ActionTarget
@@ -38,6 +38,14 @@ export function buildQuickActions(
       title: 'Write a blog post',
       description: 'Start a new article. It stays a draft until you publish it.',
       target: { kind: 'intent', intent: 'create', params: { type: 'post' } },
+    })
+  }
+  if (features.events && schemaTypes.has('event')) {
+    actions.push({
+      id: 'events',
+      title: 'Add an event',
+      description: 'Put a workshop, class or open day on the calendar.',
+      target: { kind: 'intent', intent: 'create', params: { type: 'event' } },
     })
   }
   if (features.team && schemaTypes.has('teamMember')) {
