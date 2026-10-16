@@ -108,10 +108,10 @@ test.describe('with motion', () => {
         .evaluate((element) =>
           Number(getComputedStyle(element).getPropertyValue('--parallax-amount')),
         )
-    // Subtle beside the text is the original 0.15; Strong 0.45 at Bold is 0.675, held at 0.6.
+    // Subtle beside the text is the original 0.15; Strong 0.45 at Bold is 0.675, held at 0.35 (a 1.15 picture scale, image-travel.ts) for a picture that moves inside its frame.
     // The client sets the amount once it has loaded, so wait for it.
     await expect.poll(() => amount('parallax-subtle')).toBe(0.15)
-    await expect.poll(() => amount('parallax-strong')).toBe(0.6)
+    await expect.poll(() => amount('parallax-strong')).toBe(0.35)
   })
 
   test('has no WCAG 2.2 AA violations once everything has played', async ({ page }) => {

@@ -1642,7 +1642,7 @@ the picture looks exactly as it always did.
    an **approved custom frame**.
 
 A collapsed **More image options** holds the exact values, and shows only those the choices above use:
-_Set exact motion values_ (parallax only) reveals **Travel distance** (2.5–7.5 % of the picture's height each way; phones get half),
+_Set exact motion values_ (parallax only) reveals **Travel distance** (2–7 % of the picture's height each way; phones get half),
 **Direction** (down drifts with the scroll, up goes against it) and **Picture scale** (1.05–1.15; empty uses just enough for the
 travel). A frame has a **Frame colour** (a design token: accent, second accent, highlight or text colour) and a **Frame inset**
 (how far it sits in from the edge, 0–12 %; for the offset border, how far it sticks out). Hidden fields keep their values, but the
@@ -1671,8 +1671,8 @@ box        aspect ratio and place in the layout (the corners of a plain picture)
 ```
 
 - **No edge ever shows.** `Parallax` moves its content by `speed × 0.2` of its height each way (`× 0.1` below `md`), and the
-  picture is scaled by `1 + 2 × travel`, held to 1.05–1.15 (`src/components/motion/image-travel.ts`, unit tested). Travel is
-  therefore 2.5–7.5 %, and with a chosen scale the travel is held to what that scale covers.
+  picture is scaled by `1 + 2 × travel + 0.01` (a 1 % slack for rounding), held to 1.05–1.15 (`src/components/motion/image-travel.ts`, unit tested). Travel is
+  therefore 2–7 %, and with a chosen scale the travel is held to what that scale covers.
 - **Plain stays plain.** With no motion and no frame the output is exactly the `<img>` (with its shape), so a default picture is
   untouched. The picture keeps its alt text, `sizes`, hotspot (`object-position`) and preload.
 - **Cost.** Transform only (the frame and clip never animate), `will-change` only while the picture is in view (Parallax), no

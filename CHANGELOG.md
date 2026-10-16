@@ -28,7 +28,7 @@ you start a release.
   five built-in inline SVGs (Simple line, Double line, Offset border, Organic brush, Corner brackets; `currentColor`, non-scaling
   strokes) or an **approved custom frame**: a new agency-only `frame` document (Studio → Design → Image frames) holding an SVG
   checked on save (an SVG with a viewBox, under 50 KB, no scripts), used by its CDN URL as a CSS mask on a token-coloured `div`,
-  never inlined. The picture is scaled by twice its travel, held to 1.05–1.15 so no edge shows; phones get half the travel;
+  never inlined. The picture is scaled by twice its travel plus a 1 % slack, held to 1.05–1.15 so no edge shows; phones get half the travel;
   reduced motion and no JavaScript get the still, unscaled picture with its frame. Nothing is switched on in existing content, and
   a picture with no design renders exactly as before. The hero's split shapes now use the same component (its older **Image shape**
   field is hidden and its value shows as the Image design's shape until changed). New fixtures, section-gallery entries for every

@@ -74,7 +74,7 @@ describe('FramedImage', () => {
     expect(parallax).toBeLessThan(picture)
     expect(html).toContain('data-fill')
     // Scaled by twice the travel from md up, a little less on a phone, and only where scripting is on.
-    expect(html).toContain('--framed-scale-md:1.06')
+    expect(html).toContain('--framed-scale-md:1.07')
     expect(html).toContain('--framed-scale:1.05')
     expect(html).toContain('[@media(scripting:enabled)]')
     expect(html).toContain('motion-safe:')

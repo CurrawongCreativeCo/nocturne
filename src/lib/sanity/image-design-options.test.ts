@@ -102,20 +102,20 @@ describe('resolveImageDesign: motion', () => {
   it('moves a picture by Subtle or Medium parallax', () => {
     expect(resolveImageDesign({ motion: 'subtle' }).motion).toMatchObject({
       speed: 0.15,
-      scale: 1.06,
+      scale: 1.07,
     })
     expect(resolveImageDesign({ motion: 'medium' }).motion).toMatchObject({
       speed: 0.3,
-      scale: 1.12,
+      scale: 1.13,
     })
     expect(resolveImageDesign({ motion: 'none' }).motion).toBeNull()
   })
 
   it('ignores Advanced values unless Custom is on', () => {
     const stored = { motion: 'subtle', travel: 7, direction: 'up', scale: 1.14 }
-    expect(resolveImageDesign(stored).motion).toMatchObject({ speed: 0.15, scale: 1.06 })
+    expect(resolveImageDesign(stored).motion).toMatchObject({ speed: 0.15, scale: 1.07 })
     expect(resolveImageDesign({ ...stored, custom: true }).motion).toMatchObject({
-      speed: -0.35,
+      speed: -0.325,
       scale: 1.14,
     })
   })
@@ -126,17 +126,17 @@ describe('resolveImageDesign: motion', () => {
 
   it('holds a custom travel (a percentage of the height) within the allowed range', () => {
     expect(resolveImageDesign({ motion: 'subtle', custom: true, travel: 40 }).motion?.travel).toBe(
-      0.075,
+      0.07,
     )
     expect(resolveImageDesign({ motion: 'subtle', custom: true, travel: 0 }).motion?.travel).toBe(
-      0.025,
+      0.02,
     )
   })
 
   it('lets a section’s own Parallax move a picture whose Motion is None, but not override a choice', () => {
-    expect(resolveImageDesign({}, { sectionTravel: 0.06 }).motion).toMatchObject({ scale: 1.12 })
+    expect(resolveImageDesign({}, { sectionTravel: 0.06 }).motion).toMatchObject({ scale: 1.13 })
     expect(resolveImageDesign({ motion: 'subtle' }, { sectionTravel: 0.06 }).motion).toMatchObject({
-      scale: 1.06,
+      scale: 1.07,
     })
   })
 

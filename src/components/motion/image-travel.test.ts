@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   MOTION_TRAVEL,
+  SCALE_SLACK,
   PARALLAX_FACTOR,
   SCALE_MAX,
   SCALE_MIN,
@@ -14,9 +15,10 @@ import {
 } from './image-travel'
 
 describe('scaleForTravel', () => {
-  it('scales by exactly twice the travel, so no edge shows', () => {
-    expect(scaleForTravel(0.03)).toBe(1.06)
-    expect(scaleForTravel(0.06)).toBe(1.12)
+  it('scales by twice the travel plus a 1 % slack, so no edge shows', () => {
+    expect(SCALE_SLACK).toBe(0.01)
+    expect(scaleForTravel(0.03)).toBe(1.07)
+    expect(scaleForTravel(0.06)).toBe(1.13)
     expect(scaleForTravel(TRAVEL_MIN)).toBe(SCALE_MIN)
     expect(scaleForTravel(TRAVEL_MAX)).toBe(SCALE_MAX)
   })
@@ -45,20 +47,20 @@ describe('resolveImageMotion', () => {
   it('matches the section Parallax strengths for Subtle and Medium', () => {
     expect(resolveImageMotion({ travel: MOTION_TRAVEL.subtle })).toMatchObject({
       speed: 0.15,
-      scale: 1.06,
+      scale: 1.07,
       from: 'viewport',
     })
     expect(resolveImageMotion({ travel: MOTION_TRAVEL.medium })).toMatchObject({
       speed: 0.3,
-      scale: 1.12,
+      scale: 1.13,
     })
   })
 
   it('gives a phone half the travel, with a scale that still covers it', () => {
     const motion = resolveImageMotion({ travel: 0.06 })
-    expect(motion.scalePhone).toBe(1.06)
-    expect(motion.scalePhone).toBeGreaterThanOrEqual(1 + 2 * (motion.travel / 2))
-    expect(resolveImageMotion({ travel: 0.025 }).scalePhone).toBe(SCALE_MIN)
+    expect(motion.scalePhone).toBe(1.07)
+    expect(motion.scalePhone).toBeGreaterThanOrEqual(1 + 2 * (motion.travel / 2) + SCALE_SLACK)
+    expect(resolveImageMotion({ travel: TRAVEL_MIN }).scalePhone).toBe(SCALE_MIN)
   })
 
   it('reverses with direction up, and rests at the top for a first section', () => {
@@ -76,8 +78,8 @@ describe('resolveImageMotion', () => {
     const motion = resolveImageMotion({ travel: 0.07, scale: 1.08 })
     expect(motion.scale).toBe(1.08)
     expect(motion.scalePhone).toBe(1.08)
-    expect(motion.travel).toBe(0.04)
-    expect(1 + 2 * motion.travel).toBeLessThanOrEqual(motion.scale)
+    expect(motion.travel).toBe(0.035)
+    expect(1 + 2 * motion.travel + SCALE_SLACK).toBeLessThanOrEqual(motion.scale)
     expect(resolveImageMotion({ travel: 0.05, scale: 3 }).scale).toBe(SCALE_MAX)
     expect(resolveImageMotion({ travel: 0.05, scale: 1 }).scale).toBe(SCALE_MIN)
   })

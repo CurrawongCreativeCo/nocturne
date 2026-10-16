@@ -3,8 +3,9 @@
  *
  * Parallax moves its content by `speed × factor` of its own height each way, with the factor 0.2 from
  * `md` up and 0.1 below (half the travel on a phone). The picture is scaled by exactly twice that
- * travel so no edge ever shows. A picture's travel is a share of its height, kept to a range that
- * scales it by 1.05 to 1.15: less would look like a flat crop, more starts to soften the photo.
+ * travel, plus a 1 % slack so rounding and a scroll sampled a frame late can't show an edge. A
+ * picture's travel is a share of its height, kept to a range that scales it by 1.05 to 1.15: less
+ * would look like a flat crop, more starts to soften the photo.
  */
 
 /** Parallax's `--parallax-factor` from `md` up. The travel on a phone is half of it (see Parallax). */
@@ -15,9 +16,12 @@ export const SCALE_MIN = 1.05
 /** ...and never more than this, so the photo stays sharp. */
 export const SCALE_MAX = 1.15
 
-/** Each way, as a share of the frame's height, from `md` up. 2.5 % scales by 1.05, 7.5 % by 1.15. */
-export const TRAVEL_MIN = 0.025
-export const TRAVEL_MAX = 0.075
+/** Extra scale beyond twice the travel, so the picture covers its frame with room to spare. */
+export const SCALE_SLACK = 0.01
+
+/** Each way, as a share of the frame's height, from `md` up. 2 % scales by 1.05, 7 % by 1.15. */
+export const TRAVEL_MIN = 0.02
+export const TRAVEL_MAX = 0.07
 
 /** Travel (share of height, each way) of the named strengths. Subtle matches the section Parallax preset. */
 export const MOTION_TRAVEL = { subtle: 0.03, medium: 0.06 } as const
@@ -29,9 +33,9 @@ const round = (value: number, places = 3) => {
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
-/** The scale that covers a travel (each way, share of height), within 1.05 to 1.15. */
+/** The scale that covers a travel (each way, share of height) with the slack, within 1.05 to 1.15. */
 export function scaleForTravel(travel: number): number {
-  return round(clamp(1 + 2 * travel, SCALE_MIN, SCALE_MAX))
+  return round(clamp(1 + 2 * travel + SCALE_SLACK, SCALE_MIN, SCALE_MAX))
 }
 
 /** The Parallax `speed` (its amount) that moves a picture by a travel from `md` up. */
@@ -86,7 +90,7 @@ export function resolveImageMotion({
     TRAVEL_MIN,
     TRAVEL_MAX,
   )
-  const held = chosen ? Math.min(wanted, (chosen - 1) / 2) : wanted
+  const held = chosen ? Math.min(wanted, (chosen - 1 - SCALE_SLACK) / 2) : wanted
   return {
     speed: (direction === 'up' ? -1 : 1) * speedForTravel(held),
     from: isFirst ? 'top' : 'viewport',

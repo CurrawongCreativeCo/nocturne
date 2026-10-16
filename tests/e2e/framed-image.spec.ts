@@ -96,7 +96,12 @@ test.describe('motion on', () => {
     }
 
     // The frame never moves inside its box, however far the page scrolls...
-    for (const next of samples.slice(1)) expect(next.frame).toEqual(samples[0]?.frame)
+    // (to a tenth of a pixel: sub-pixel layout noise is not movement)
+    const settled = (frame: { x: number; y: number; w: number; h: number }) =>
+      [frame.x, frame.y, frame.w, frame.h].map((value) => Math.round(value * 10) / 10 + 0)
+    for (const next of samples.slice(1)) {
+      expect(settled(next.frame)).toEqual(settled(samples[0]?.frame ?? next.frame))
+    }
     // ...while the picture does: both its transform and its place behind the frame change.
     expect(new Set(samples.map(({ offset }) => Math.round(offset))).size).toBeGreaterThan(1)
     expect(new Set(samples.map(({ picture }) => Math.round(picture.y))).size).toBeGreaterThan(1)
@@ -132,14 +137,14 @@ test.describe('motion on', () => {
     const scope = section(page, 'Built-in frame')
     await expect(scaler(scope)).toBeAttached()
     const desktop = parseFloat(await scaler(scope).evaluate((el) => getComputedStyle(el).scale))
-    // Medium parallax: 6 % travel each way, scaled by twice that.
-    expect(desktop).toBeCloseTo(1.12, 2)
+    // Medium parallax: 6 % travel each way, scaled by twice that plus a 1 % slack.
+    expect(desktop).toBeCloseTo(1.13, 2)
     expect(desktop).toBeGreaterThanOrEqual(1.05)
     expect(desktop).toBeLessThanOrEqual(1.15)
 
     await page.setViewportSize({ width: 390, height: 800 })
     const phone = parseFloat(await scaler(scope).evaluate((el) => getComputedStyle(el).scale))
-    expect(phone).toBeCloseTo(1.06, 2)
+    expect(phone).toBeCloseTo(1.07, 2)
     expect(phone).toBeLessThan(desktop)
   })
 

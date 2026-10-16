@@ -111,7 +111,13 @@ export function SectionFrame({
   const containerClass = `${resolved.containerClass} ${containerClassName}`.trim()
   const mediaNode =
     typeof media === 'function' ? (
-      media(plan.kind === 'parallax' ? plan : undefined)
+      plan.kind === 'float' ? (
+        <LazyFloat distancePx={plan.distancePx} durationMs={plan.durationMs}>
+          {media(undefined)}
+        </LazyFloat>
+      ) : (
+        media(plan.kind === 'parallax' ? plan : undefined)
+      )
     ) : media && plan.kind === 'parallax' ? (
       <LazyParallax speed={plan.speed} from={plan.from}>
         {media}
