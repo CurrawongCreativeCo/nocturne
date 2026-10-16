@@ -252,6 +252,22 @@ export const videoFragment = /* groq */ `
   }
 `
 
+export const processFragment = /* groq */ `
+  _type == "process" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    title,
+    intro,
+    steps[] {
+      _key,
+      label,
+      title,
+      text,
+      icon { ${imageFields} }
+    }
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -273,6 +289,7 @@ const sectionsFragment = /* groq */ `
   ${locationFragment},
   ${teamFragment},
   ${videoFragment},
+  ${processFragment},
   _type
 `
 

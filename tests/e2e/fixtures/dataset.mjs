@@ -95,6 +95,25 @@ const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
 
+/** Four steps with labels, in a fixed order the tests check. The first has a picture. */
+const processSteps = (id) => [
+  {
+    _key: `${id}-discover`,
+    label: 'Week 1',
+    title: 'Discover',
+    text: 'We learn about your business and your customers.',
+    icon: image(`${id}-discover`),
+  },
+  {
+    _key: `${id}-design`,
+    label: 'Weeks 2–3',
+    title: 'Design',
+    text: 'We shape the look and feel.',
+  },
+  { _key: `${id}-build`, title: 'Build', text: 'We bring the design to life.' },
+  { _key: `${id}-launch`, label: 'Week 7', title: 'Launch', text: 'We go live and stay close.' },
+]
+
 // Video section (tests/e2e/video.spec.ts). The files are never fetched: the specs stand in for the CDN and the players.
 const VIDEO_ASSET_ID = 'file-0123456789abcdef0123456789abcdef01234567-mp4'
 const CAPTIONS_ASSET_ID = 'file-89abcdef0123456789abcdef0123456789abcdef-vtt'
@@ -355,6 +374,14 @@ export const documents = [
             markDefs: [{ _key: 'link-1', ...external('https://example.org', true) }],
           },
         ],
+      },
+      {
+        // Its scroll-linked line is part of what the memory test (memory.spec.ts) repeats.
+        _key: 'about-process',
+        _type: 'process',
+        variant: 'alternating',
+        title: 'How we work',
+        steps: processSteps('about-process'),
       },
       {
         _key: key(),
@@ -1761,6 +1788,23 @@ const gallerySections = [
     text: 'A quiet loop of the team at work.',
     file: fileRef(VIDEO_ASSET_ID),
   }),
+  // Process (README, "Process timeline"): both layouts with four steps. The first step has a label
+  // and a picture; the gallery has no MotionProvider, so the line shows fully drawn.
+  {
+    _key: 'process-vertical',
+    _type: 'process',
+    variant: 'vertical',
+    title: 'How we work',
+    intro: 'Four steps from first chat to launch.',
+    steps: processSteps('process-vertical'),
+  },
+  {
+    _key: 'process-alternating',
+    _type: 'process',
+    variant: 'alternating',
+    title: 'From idea to launch',
+    steps: processSteps('process-alternating'),
+  },
   // new-section:gallery
 ]
 
@@ -2039,6 +2083,41 @@ documents.push({
       members: [
         { _key: 'pick-ben', ...ref('teamMember-ben') },
         { _key: 'pick-ann', ...ref('teamMember-ann') },
+      ],
+    },
+  ],
+})
+
+// Tall enough that the scroll-linked line is part-drawn at some scroll positions (process.spec.ts).
+documents.push({
+  _id: 'page-process',
+  _type: 'page',
+  title: 'Process',
+  slug: { _type: 'slug', current: 'process' },
+  seo: { _type: 'seo', metaDescription: 'A page with a process timeline.' },
+  pageBuilder: [
+    { _key: 'process-hero', _type: 'hero', title: 'Process', description: 'Hero description.' },
+    {
+      _key: 'process-filler',
+      _type: 'richText',
+      body: [
+        block(['Filler'], { style: 'h2' }),
+        block(['A paragraph of copy so the timeline starts below the fold. '.repeat(30)]),
+      ],
+    },
+    {
+      _key: 'process-timeline',
+      _type: 'process',
+      variant: 'alternating',
+      title: 'Our process',
+      steps: processSteps('process-page'),
+    },
+    {
+      _key: 'process-tail',
+      _type: 'richText',
+      body: [
+        block(['After the timeline'], { style: 'h2' }),
+        block(['A paragraph of copy so the page scrolls past the timeline. '.repeat(40)]),
       ],
     },
   ],

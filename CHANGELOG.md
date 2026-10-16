@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- **Process section:** _Add item → Process_, a numbered `<ol>` of steps beside a line that fills as the visitor scrolls
+  (`useScroll` into a `scaleY` on an `m.div`, transform only). Two layouts: _Vertical_ (default) and _Alternating_
+  (left and right of a centre line from `md`; phones are always vertical). Fields: title, intro and two to ten steps
+  (title, text, optional label such as "Week 1", optional decorative icon or image). Starts with four example steps.
+  Steps reveal with the Stagger animation; Animation _None_ turns that off. The line is fully drawn under reduced motion
+  and without JavaScript, and its scroll code loads only on pages that use the section. See README, _Process timeline_.
 - **Video section:** _Add item → Video_ with two layouts. _Embed_ (default) is a poster and a Play button
   ("Play video: <title>") for YouTube, Vimeo or an uploaded MP4; **no third-party script, iframe or request loads until
   the click**, then one iframe (`youtube-nocookie.com`, or `player.vimeo.com` with `dnt=1`) with autoplay and a title,
