@@ -101,8 +101,15 @@ jobs:
           npm run check
 
   e2e:
+    name: e2e (${{ matrix.shard }}/4)
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      # Four shards, each with its own build and fake Content Lake, so the suite runs in parallel
+      # instead of as one 20+ minute job. A failure in one shard doesn't hide the others.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -121,18 +128,20 @@ jobs:
       # Production build against a fake Content Lake: pages, metadata, redirects, headers,
       # keyboard and mobile navigation, and axe accessibility scans.
       - name: End-to-end tests
-        run: npm run test:e2e
+        run: npx playwright test --shard=${{ matrix.shard }}/4
 
       # Lighthouse scores on / and /about against the build Playwright just made. Budgets are in
       # lighthouserc.json; the JavaScript size budget is tests/e2e/performance.spec.ts.
+      # Runs once (shard 1); every shard leaves a build behind.
       - name: Lighthouse CI
+        if: matrix.shard == 1
         run: npx lhci autorun
 
       - name: Upload report on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: test-reports
+          name: test-reports-${{ matrix.shard }}
           path: |
             playwright-report
             test-results
