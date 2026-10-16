@@ -21,6 +21,7 @@ export const PAGE_QUERY = defineQuery(/* groq */ `
     _type,
     "title": select(access == "members" && !$members => "Members only", title),
     access,
+    "minimal": minimalLayout == true,
     seo { ${seoFields} },
     "pageBuilder": select(
       access == "members" && !$members => [],

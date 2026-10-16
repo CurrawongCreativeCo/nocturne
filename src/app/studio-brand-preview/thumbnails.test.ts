@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { sectionTypes } from '@/features/pages/schemas/sections'
 import { hero } from '@/features/pages/schemas/sections/hero'
+import { linkList } from '@/features/pages/schemas/sections/link-list'
 import { sectionStyle } from '@/lib/sanity/schema/section-style'
 import {
   animationThumbnails,
@@ -13,6 +14,7 @@ import {
   heroImageShapeThumbnails,
   heroPresetThumbnails,
   heroProportionThumbnails,
+  linkListPresetThumbnails,
   sectionVariantThumbnails,
   toneThumbnails,
   type Thumbnail,
@@ -104,6 +106,17 @@ describe('thumbnails cover every option', () => {
     }
   })
 
+  it('shows in the Link list the very thumbnails the registry lists for its five presets', () => {
+    const presets = (linkList.options as { presets?: { value: string; thumbnail?: unknown }[] })
+      .presets
+    expect(Object.keys(linkListPresetThumbnails)).toEqual(presets?.map((preset) => preset.value))
+    for (const preset of presets ?? []) {
+      expect(preset.thumbnail, `preset "${preset.value}"`).toBe(
+        linkListPresetThumbnails[preset.value],
+      )
+    }
+  })
+
   it('has an animation thumbnail for every animation preset', () => {
     expect(Object.keys(animationThumbnails).sort()).toEqual([...SECTION_MOTIONS].sort())
   })
@@ -123,6 +136,7 @@ const everything: [string, Thumbnail][] = [
       ['hero-preset', heroPresetThumbnails],
       ['hero-proportion', heroProportionThumbnails],
       ['hero-shape', heroImageShapeThumbnails],
+      ['link-list-preset', linkListPresetThumbnails],
     ] as const
   ).flatMap(([group, thumbnails]) =>
     Object.entries(thumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [
