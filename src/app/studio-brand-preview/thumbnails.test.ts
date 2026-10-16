@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 import { sectionTypes } from '@/features/pages/schemas/sections'
 import { hero } from '@/features/pages/schemas/sections/hero'
 import { linkList } from '@/features/pages/schemas/sections/link-list'
+import { imageDesign } from '@/lib/sanity/schema/image-design'
 import { sectionStyle } from '@/lib/sanity/schema/section-style'
 import {
   animationThumbnails,
@@ -15,6 +16,9 @@ import {
   heroPresetThumbnails,
   heroProportionThumbnails,
   linkListPresetThumbnails,
+  imageAppearanceThumbnails,
+  imageFrameThumbnails,
+  imageMotionThumbnails,
   sectionVariantThumbnails,
   toneThumbnails,
   type Thumbnail,
@@ -117,6 +121,19 @@ describe('thumbnails cover every option', () => {
     }
   })
 
+  it('shows in the Image design the very thumbnails the registry lists, for appearance, motion and frame', () => {
+    for (const [name, thumbnails] of [
+      ['appearance', imageAppearanceThumbnails],
+      ['motion', imageMotionThumbnails],
+      ['frame', imageFrameThumbnails],
+    ] as const) {
+      expect(Object.keys(listOf(imageDesign.fields, name))).toEqual(Object.keys(thumbnails))
+      for (const [value, thumbnail] of Object.entries(thumbnails)) {
+        expect(listOf(imageDesign.fields, name)[value], `${name} "${value}"`).toBe(thumbnail)
+      }
+    }
+  })
+
   it('has an animation thumbnail for every animation preset', () => {
     expect(Object.keys(animationThumbnails).sort()).toEqual([...SECTION_MOTIONS].sort())
   })
@@ -137,6 +154,9 @@ const everything: [string, Thumbnail][] = [
       ['hero-proportion', heroProportionThumbnails],
       ['hero-shape', heroImageShapeThumbnails],
       ['link-list-preset', linkListPresetThumbnails],
+      ['image-appearance', imageAppearanceThumbnails],
+      ['image-motion', imageMotionThumbnails],
+      ['image-frame', imageFrameThumbnails],
     ] as const
   ).flatMap(([group, thumbnails]) =>
     Object.entries(thumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [

@@ -31,12 +31,15 @@ export function HeroEditorial({ data, isFirst = false, greeting }: SectionProps<
     <HeroPicture
       image={data.secondaryImage}
       plan={parts.image}
+      design={undefined}
+      fallbackShape="standard"
       isFirst={isFirst}
+      aspect="1/1"
       width={512}
       sizes="(min-width: 1024px) 16rem, 50vw"
-      className="aspect-square w-48 rounded-card object-cover lg:w-full"
+      className="w-48 lg:w-full"
       frameClassName="w-48 lg:w-full"
-      imageClassName="aspect-square w-full rounded-card object-cover"
+      imageClassName="w-full"
     />
   )
 
