@@ -20,11 +20,23 @@ you start a release.
 
 ### Added
 
+- **Typed link actions:** a link now has a **Goes to** picker: _A page on this site_ and _Another website_ (stored exactly as
+  before), plus _A section on this page_ (pick from the page's anchors or type one; renders `#id`). _Open a panel_ and
+  _Book_ are built into the schema, renderer and Content health but switched off in `src/config/link-actions.ts` until
+  panels (task 93) and booking (task 95) exist. Panel and booking links render a `<button aria-haspopup="dialog">` inside a
+  GET form, so without JavaScript they go to a fallback URL. Section links scroll smoothly unless the visitor asks for
+  reduced motion. Content health reports links to missing sections and unpublished panels. See README, _Link actions_.
+
 ### Changed
+
+- The link fragment (`linkFields`) also returns `anchor`, `panel` (id and title), `fallbackUrl` and `bookingUrl`.
+  **Open in a new tab** moved into a collapsed Advanced area and shows for _Another website_ only.
 
 ### Fixed
 
 ### Breaking changes / migration steps
+
+None. Existing links keep their stored values. Run `npm run typegen` after merging.
 
 ## [1.4.0] - 2026-10-16
 

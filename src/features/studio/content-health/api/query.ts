@@ -18,6 +18,10 @@ export const CONTENT_HEALTH_QUERY = defineQuery(/* groq */ `{
     title,
     section
   },
+  "panels": *[_type == "panel"] {
+    _id,
+    title
+  },
   "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {
     _id,
     headerNav,

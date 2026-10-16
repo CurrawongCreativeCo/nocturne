@@ -3,9 +3,12 @@ import type { CONTENT_HEALTH_QUERY_RESULT } from '@/types/sanity.types'
 
 import {
   collectLinkTargets,
+  collectDefinedAnchors,
   collectSharedSectionIds,
   findBrokenLinkTargets,
   findImagesWithoutAlt,
+  findMissingAnchors,
+  findMissingPanels,
   findOrphanPages,
   findRedirectProblems,
   resolveVersions,
@@ -118,6 +121,47 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
       : []
   })
 
+  // A link to a section of the page needs that anchor on the same page. Links in shared sections
+  // and the navigation have no single page to check against, so only a page's own content counts.
+  const sharedAnchors = new Map(
+    sharedSections.map(({ id, doc }) => [id, [...collectDefinedAnchors(doc.section)]]),
+  )
+  const brokenAnchors = publishedPages.flatMap(({ id, doc }): HealthItem[] => {
+    const missing = findMissingAnchors(
+      doc.pageBuilder,
+      collectDefinedAnchors(doc.pageBuilder, sharedAnchors),
+    )
+    return missing.length
+      ? [
+          {
+            id,
+            type: 'page',
+            title: doc.title,
+            detail: `Links to ${missing.map((anchor) => `#${anchor}`).join(', ')}, which no section on this page has`,
+          },
+        ]
+      : []
+  })
+
+  // `panel` documents arrive with task 93, so the generated type of this list is still empty.
+  const panelDocs: { _id: string; title?: string | null }[] = data.panels
+  const panels = resolveVersions(panelDocs)
+  const publishedPanelIds = new Set(panels.filter(({ published }) => published).map(({ id }) => id))
+  const panelTitles = new Map(panels.map(({ id, doc }) => [id, doc.title]))
+  const brokenPanels = linkSources.flatMap(({ id, type, title, content }): HealthItem[] => {
+    const missing = findMissingPanels(content, publishedPanelIds)
+    return missing.length
+      ? [
+          {
+            id,
+            type,
+            title,
+            detail: `Opens ${missing.map((panel) => panelTitles.get(panel) ?? 'a deleted panel').join(', ')}, which ${missing.length === 1 ? 'has' : 'have'} no published version`,
+          },
+        ]
+      : []
+  })
+
   const redirectTitles = new Map(data.redirects.map((rule) => [rule._id, rule.source]))
   const redirects = findRedirectProblems(
     data.redirects.flatMap((rule) =>
@@ -164,6 +208,19 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
       title: 'Links to unpublished pages',
       description: 'Visitors following these links reach a page that does not exist.',
       items: brokenLinks,
+    },
+    {
+      id: 'broken-anchors',
+      title: 'Links to missing sections',
+      description:
+        'These links jump to an anchor that no section on the page has, so they do nothing.',
+      items: brokenAnchors,
+    },
+    {
+      id: 'broken-panels',
+      title: 'Links to unpublished panels',
+      description: 'These buttons open a panel that visitors can’t see.',
+      items: brokenPanels,
     },
     {
       id: 'redirects',

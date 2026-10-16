@@ -10,6 +10,16 @@ const link = (id: string) => ({
   internal: { _type: 'reference', _ref: id },
 })
 const cta = (id: string) => ({ _type: 'cta', label: 'Go', link: link(id) })
+const anchorCta = (anchor: string) => ({
+  _type: 'cta',
+  label: 'Jump',
+  link: { _type: 'link', linkType: 'anchor', anchor },
+})
+const panelCta = (ref: string) => ({
+  _type: 'cta',
+  label: 'Open',
+  link: { _type: 'link', linkType: 'panel', panel: { _type: 'reference', _ref: ref } },
+})
 
 // Loosely typed on purpose: the page builder's generated type is far larger than the test needs.
 const data = {
@@ -26,7 +36,14 @@ const data = {
       title: 'About',
       slug: 'about',
       metaDescription: null,
-      pageBuilder: [{ _type: 'hero', ctas: [cta('contact'), cta('team')] }],
+      pageBuilder: [
+        {
+          _type: 'hero',
+          ctas: [cta('contact'), cta('team'), anchorCta('details'), anchorCta('pricing')],
+        },
+        { _type: 'faq', style: { anchorId: 'details' } },
+        { _type: 'ctaBanner', ctas: [panelCta('enquire'), panelCta('gone')] },
+      ],
     },
     // Published, with an unpublished draft on top that links to the about page.
     {
@@ -66,6 +83,10 @@ const data = {
     // Used by no page: invisible to visitors, so its link to Lonely doesn't count.
     { _id: 'unused', title: 'Unused', section: [{ _type: 'ctaBanner', ctas: [cta('lonely')] }] },
   ],
+  panels: [
+    { _id: 'enquire', title: 'Enquire' },
+    { _id: 'drafts.gone', title: 'Old offer' },
+  ],
   navigation: [
     {
       _id: 'siteNavigation',
@@ -97,6 +118,18 @@ describe('buildReport', () => {
   it('lists shared sections with images that have no alt text', () => {
     expect(groups['alt-text']?.map(({ id, type, detail }) => [id, type, detail])).toEqual([
       ['promo', 'sharedSection', '1 image: Image + text image'],
+    ])
+  })
+
+  it('lists anchor links that no section on the page has', () => {
+    expect(groups['broken-anchors']?.map(({ id, detail }) => [id, detail])).toEqual([
+      ['about', 'Links to #pricing, which no section on this page has'],
+    ])
+  })
+
+  it('lists links to panels with no published version', () => {
+    expect(groups['broken-panels']?.map(({ id, detail }) => [id, detail])).toEqual([
+      ['about', 'Opens Old offer, which has no published version'],
     ])
   })
 

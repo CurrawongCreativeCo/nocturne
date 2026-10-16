@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 
-import { SanityLink } from '@/components/ui/sanity-link'
+import { BasicLink } from '@/components/ui/basic-link'
 
 import type { ConsentCopy } from '../types'
 import { COOKIE_SETTINGS_ID } from './cookie-settings-button'
@@ -83,12 +83,12 @@ function Banner({ copy, current }: { copy?: ConsentCopy | null; current: StoredC
           </p>
           <p className="mt-1 text-small text-ink-inverse-muted">
             {message}{' '}
-            <SanityLink
+            <BasicLink
               link={copy?.privacyLink}
               className="text-ink-inverse underline underline-offset-2 hover:no-underline focus-visible:outline-ink-inverse"
             >
               {copy?.privacyLabel || DEFAULTS.privacyLabel}
-            </SanityLink>
+            </BasicLink>
           </p>
           {choosing && (
             <fieldset id="consent-choices" className="mt-4 space-y-3">
