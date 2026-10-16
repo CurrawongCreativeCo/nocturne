@@ -25,6 +25,7 @@ import { RichText } from './sections/rich-text'
 import { Stats } from './sections/stats'
 import { Team } from './sections/team'
 import { Testimonials } from './sections/testimonials'
+import { Video } from './sections/video'
 // new-section:import
 
 /**
@@ -48,6 +49,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   gallery: Gallery,
   location: Location,
   team: Team,
+  video: Video,
   // new-section:register
 }
 

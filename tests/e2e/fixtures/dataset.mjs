@@ -95,6 +95,21 @@ const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
 
+// Video section (tests/e2e/video.spec.ts). The files are never fetched: the specs stand in for the CDN and the players.
+const VIDEO_ASSET_ID = 'file-0123456789abcdef0123456789abcdef01234567-mp4'
+const CAPTIONS_ASSET_ID = 'file-89abcdef0123456789abcdef0123456789abcdef-vtt'
+const fileRef = (id) => ({ _type: 'file', asset: ref(id) })
+const VIDEO_URL = {
+  youtube: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  vimeo: 'https://vimeo.com/76979871',
+}
+const videoSection = (id, fields) => ({
+  _key: id,
+  _type: 'video',
+  poster: image(`${fields.title} poster`),
+  ...fields,
+})
+
 // The blog: 14 posts, so the index paginates (12 + 2). The first four have categories, set up so
 // "Welcome to the blog" has three related posts whose score order differs from their date order:
 // the roundup shares two categories but is oldest of the three.
@@ -286,6 +301,12 @@ export const documents = [
         imagePosition: 'right',
         ctas: [cta('Read more', internal('page-about'))],
       },
+      videoSection(key(), {
+        variant: 'embed',
+        title: 'Watch our story',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
       {
         _key: key(),
         _type: 'testimonials',
@@ -751,6 +772,20 @@ export const documents = [
     _type: 'sanity.imageAsset',
     url: 'https://cdn.sanity.io/images/test/test/0123456789abcdef0123456789abcdef01234567-1200x630.png',
     metadata: { dimensions: { width: 1200, height: 630 } },
+  },
+  {
+    _id: VIDEO_ASSET_ID,
+    _type: 'sanity.fileAsset',
+    url: 'https://cdn.sanity.io/files/test/test/0123456789abcdef0123456789abcdef01234567.mp4',
+    mimeType: 'video/mp4',
+    size: 2_000_000,
+  },
+  {
+    _id: CAPTIONS_ASSET_ID,
+    _type: 'sanity.fileAsset',
+    url: 'https://cdn.sanity.io/files/test/test/89abcdef0123456789abcdef0123456789abcdef.vtt',
+    mimeType: 'text/vtt',
+    size: 400,
   },
   {
     // Has its own share image: no generated one may be added next to it.
@@ -1705,6 +1740,27 @@ const gallerySections = [
     selection: 'all',
     title: 'Who we are',
   },
+  videoSection('video-embed', {
+    variant: 'embed',
+    title: 'Watch our story',
+    text: 'A short film about how we work.',
+    source: 'youtube',
+    url: VIDEO_URL.youtube,
+  }),
+  videoSection('video-embed-upload', {
+    variant: 'embed',
+    title: 'Behind the scenes',
+    source: 'upload',
+    file: fileRef(VIDEO_ASSET_ID),
+    captions: fileRef(CAPTIONS_ASSET_ID),
+    aspectRatio: '4:3',
+  }),
+  videoSection('video-ambient', {
+    variant: 'ambient',
+    title: 'Made in the studio',
+    text: 'A quiet loop of the team at work.',
+    file: fileRef(VIDEO_ASSET_ID),
+  }),
   // new-section:gallery
 ]
 
@@ -1814,6 +1870,41 @@ documents.push({
       title: 'Kind words',
       items: sliderQuotes('slider-page'),
     },
+  ],
+})
+
+/** Video sections on a real page (tests/e2e/video.spec.ts): one of each source, and an ambient loop. */
+documents.push({
+  _id: 'page-video',
+  _type: 'page',
+  title: 'Video',
+  slug: { _type: 'slug', current: 'video' },
+  seo: { _type: 'seo', metaDescription: 'A page with videos.' },
+  pageBuilder: [
+    { _key: 'video-hero', _type: 'hero', title: 'Video', description: 'Hero description.' },
+    videoSection('video-youtube', {
+      title: 'YouTube film',
+      text: 'Plays from YouTube.',
+      source: 'youtube',
+      url: VIDEO_URL.youtube,
+    }),
+    videoSection('video-vimeo', {
+      title: 'Vimeo film',
+      source: 'vimeo',
+      url: 'https://vimeo.com/76979871/abcdef1234',
+    }),
+    videoSection('video-upload', {
+      title: 'Uploaded film',
+      source: 'upload',
+      file: fileRef(VIDEO_ASSET_ID),
+      captions: fileRef(CAPTIONS_ASSET_ID),
+    }),
+    videoSection('video-loop', {
+      variant: 'ambient',
+      title: 'Ambient loop',
+      text: 'A quiet loop.',
+      file: fileRef(VIDEO_ASSET_ID),
+    }),
   ],
 })
 

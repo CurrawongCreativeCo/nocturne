@@ -1825,6 +1825,56 @@ profile pages, on their own page at `/team/<slug>`.
   The section gallery has `team-grid`, `team-slider` and `team-list`; their screenshot baselines need the **Update visual
   baselines** workflow (macOS skips visual tests).
 
+### Video
+
+The **Video** section (_Add item → Video_) has two layouts, chosen by agencies in the **Layout** picker (_Embed_ is the
+default). Both need a **Poster image** (required, with alt text; 16:9 and 1600 px or wider is recommended and warned
+about), a **Title** (required; also names the Play button) and an optional **Description**.
+
+- **Embed.** _Video source_ is **YouTube**, **Vimeo** or **Uploaded video (MP4)**; the form shows only the fields that
+  source uses.
+  - _YouTube / Vimeo:_ paste the address from the browser (watch, share, short and embed links all work, and a Vimeo
+    link to an unlisted video keeps its key). Publishing is blocked if the address isn't a video on the chosen service.
+    The page shows only the poster, a **Play** button named "Play video: <title>" and a note ("Plays from YouTube" or
+    "Plays from Vimeo"). **Nothing from YouTube or Vimeo loads until the click**: no script, no iframe, no request. The
+    click swaps in one iframe (`youtube-nocookie.com`, or `player.vimeo.com` with `dnt=1`) with autoplay on and the
+    title as its `title`, and moves focus into it. Without JavaScript the poster shows with a "Watch … on YouTube" link.
+  - _Uploaded video:_ a native `<video controls preload="none">` with the poster. It downloads nothing until played. An
+    optional **Captions file** (WebVTT, `.vtt`) becomes a captions track (English; YouTube and Vimeo supply their own).
+    Please caption every uploaded video that has speech.
+- **Ambient** (uploaded MP4 only, so _Video source_ is hidden). Words over a dimmed, silent, looping video, like the
+  hero's _Full background_ layout (dark by default). It is `muted loop playsInline autoPlay` with no controls, and a
+  visible **Pause** button (WCAG 2.2.2: moving content that starts by itself must be stoppable) that becomes **Play**.
+  If a browser refuses to autoplay (low-power mode) the button says **Play**. **For visitors who ask for reduced
+  motion the poster shows instead**: the video is never requested, and there is no button. The poster is also what
+  shows without JavaScript and before the video starts. Keep clips short, silent and compressed; the file field
+  **warns above 5 MB** (it doesn't block publishing, because an agency may have a reason). An Ambient section with no
+  file renders as an Embed.
+- **Shape** (16:9 default, 4:3, 1:1 or 21:9) sets the frame of an Embed. An unset or unknown value is 16:9.
+- **JavaScript cost.** The page itself stays server-rendered. The only client code is `video-facade.tsx` (a button and
+  one piece of state) and `ambient-player.tsx` (a media-query store and the Pause button), both plain React with no Motion.
+  They load through `dynamic` wrappers (`video-facade-lazy.tsx`, `ambient-player-lazy.tsx`, the `LazySlider` pattern), so
+  a page without a Video section downloads neither: imported directly, they added about 1.5 KB gzipped to every page and
+  pushed the home page over its budget. The home page fixture includes an Embed, so the JavaScript budget test covers a
+  page that has one.
+- **Security headers.** `next.config.ts` sets no `frame-src`, `default-src` or `Permissions-Policy` entry that
+  stops a player: its only Content-Security-Policy is `frame-ancestors 'self'` (who may frame _us_), the referrer policy
+  is `strict-origin-when-cross-origin` (YouTube needs a referrer), and the iframe's own `allow` attribute delegates
+  autoplay, fullscreen and picture-in-picture. If you add a CSP to a project, allow `frame-src https://www.youtube-nocookie.com
+https://player.vimeo.com`, and `media-src` / `img-src` for `https://cdn.sanity.io`.
+  `tests/e2e/video.spec.ts` checks the headers and that the iframe request is made.
+- **Logic and tests.** `src/features/pages/utils/video-source.ts` (unit tested: address parsing including look-alike
+  hosts, player addresses, aspect classes, the size warning) is shared by Studio validation and the page. End to end,
+  `tests/e2e/video.spec.ts` on `/video`: no iframe before the click and exactly one after (YouTube and Vimeo, with
+  their parameters), focus moves into it, the keyboard works, the native player fetches nothing until played, the
+  Ambient loop pauses and resumes with the button (headless Chromium can't decode H.264, so the test stands in for
+  `play()` and `pause()`), reduced motion shows the poster, and axe passes before and after Play and on the gallery
+  entries. The section gallery has `video-embed`, `video-embed-upload` and `video-ambient`; their screenshot baselines
+  need the **Update visual baselines** workflow (macOS skips visual tests).
+- **Launch check.** Not yet confirmed against the live Sanity CDN: that `cdn.sanity.io/files/...` serves a `.vtt` with
+  CORS headers (browsers fetch caption tracks with CORS) and plays the MP4 with range requests. Open an uploaded video with
+  captions on a staging page before launch.
+
 ### Cursors and interaction feedback
 
 Cursors come from `src/styles/globals.css` (`@layer base`, "Cursors"), not from component classes, because Tailwind 4's
@@ -2745,8 +2795,8 @@ The old **Layout** picker is hidden, because the presets are the one picker. The
 - **The hotspot is respected.** All four layouts set `object-position` from the picture's hotspot
   (`src/lib/sanity/image-focus.ts`; the editor's crop is taken into account), so a face or a product stays in
   view when the shape crops the picture. A picture with no hotspot stays centred.
-- **Background video** is not part of this. The ambient-video work (task 18) will add a video option to the
-  _Full background image_ preset; until then the preset is a still picture.
+- **Background video** is the Video section's _Ambient_ layout (see _Video_), not a hero option: it is a separate
+  section so the hero's layouts and its LCP picture stay as they are.
 - **Six decisions.** A split hero with an eyebrow, heading, description, two buttons and an image takes six
   decisions, not counting typing: add the _Hero_ section, pick _Split, image right_, upload the image, then each
   button's link, and the second button's style. Nothing else needs to be opened.

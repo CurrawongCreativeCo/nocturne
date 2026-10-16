@@ -20,6 +20,17 @@ you start a release.
 
 ### Added
 
+- **Video section:** _Add item → Video_ with two layouts. _Embed_ (default) is a poster and a Play button
+  ("Play video: <title>") for YouTube, Vimeo or an uploaded MP4; **no third-party script, iframe or request loads until
+  the click**, then one iframe (`youtube-nocookie.com`, or `player.vimeo.com` with `dnt=1`) with autoplay and a title,
+  and a "Plays from YouTube/Vimeo" note. Uploaded video is a native `<video controls preload="none">` with the poster
+  and an optional WebVTT captions track. _Ambient_ (uploaded MP4 only) is a muted, looping, `playsInline` background
+  video with a visible Pause button (WCAG 2.2.2), the poster instead under reduced motion, and a Studio warning for
+  files over 5 MB. Fields: title, description, source, address or file, poster (required), captions, shape (16:9, 4:3,
+  1:1, 21:9). Address parsing is shared by validation and the page (`video-source.ts`, unit tested). The security headers
+  already allow the outbound iframes (checked by `tests/e2e/video.spec.ts`). Two small client components, no Motion, loaded
+  lazily so pages without a Video section download neither; the JavaScript budget is unchanged. The hero's "background video" note now points to the Ambient layout. Add the new
+  section's screenshot baselines with the **Update visual baselines** workflow.
 - **Animate individual parts (hero):** an agency-only switch in the hero's Design → Advanced area. Off by default; when on,
   one compact row per part the layout and content actually have (eyebrow, heading, intro text, buttons, extra content,
   picture, background picture) with an animation (Inherit, None, Fade, Rise, Reveal, Slide, Scale, and Parallax for the
