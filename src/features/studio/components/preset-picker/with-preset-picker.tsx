@@ -8,6 +8,7 @@ import {
 
 import { PresetBarInput } from './preset-bar-input'
 import { PresetPickerInput } from './preset-picker-input'
+import { AnchorPickerInput } from '../anchor-picker/anchor-picker-input'
 import { GradientPickerInput } from '../gradient-picker/gradient-picker-input'
 import { SlotInput } from '../slot-input'
 
@@ -20,6 +21,9 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
   return function PresetAwareInput(props: InputProps) {
     if (isStringInputProps(props) && props.schemaType.options?.presetPicker === true) {
       return <PresetPickerInput {...props} />
+    }
+    if (isStringInputProps(props) && props.schemaType.options?.anchorPicker === true) {
+      return <AnchorPickerInput {...props} />
     }
     if (isStringInputProps(props) && props.schemaType.options?.gradientPicker === true) {
       return <GradientPickerInput {...props} />

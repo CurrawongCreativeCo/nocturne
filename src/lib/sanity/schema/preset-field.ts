@@ -45,6 +45,8 @@ declare module 'sanity' {
   interface StringOptions {
     /** Show the options as a grid of pictures. The Studio input is in features/studio/components/preset-picker. */
     presetPicker?: boolean
+    /** Offer the anchors of the document's sections beside a text box (features/studio/components/anchor-picker). */
+    anchorPicker?: boolean
     /**
      * The values to offer right now (Parallax only where there is a picture). The stored value is
      * always shown, so a choice left over from another layout stays visible rather than vanishing.

@@ -358,6 +358,13 @@
   padding-top: calc(var(--spacing-section-spacious) + var(--edge-above));
 }
 
+/* Section links glide, unless the visitor asks for less motion (the reduced-motion rule above also forces auto). */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* The sticky header's room (scroll-mt-24) plus the edge, so a link lands with the whole cut in view. */
 [data-edge-above] section[id] {
   scroll-margin-top: calc(6rem + var(--edge-above));

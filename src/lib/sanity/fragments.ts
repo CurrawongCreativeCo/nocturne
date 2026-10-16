@@ -18,12 +18,19 @@ export const imageFields = /* groq */ `
   }
 `
 
-/** Resolves internal references to a slug, so the frontend never needs a second query. */
+/**
+ * Resolves internal references to a slug, so the frontend never needs a second query. A panel
+ * resolves to its id and title only; the panel's content is rendered by the panel feature.
+ */
 export const linkFields = /* groq */ `
   linkType,
   "slug": internal->slug.current,
   url,
-  openInNewTab
+  openInNewTab,
+  anchor,
+  "panel": panel->{ "id": _id, title },
+  fallbackUrl,
+  bookingUrl
 `
 
 export const ctaFields = /* groq */ `

@@ -135,7 +135,8 @@ test.describe('count-up', () => {
         widths.push(figure.getBoundingClientRect().width)
       })
       observer.observe(counting, { childList: true, characterData: true, subtree: true })
-      figure.scrollIntoView({ block: 'center' })
+      // Instant: the site scrolls smoothly for section links, which would leave the page mid-scroll.
+      figure.scrollIntoView({ block: 'center', behavior: 'instant' })
       await new Promise((resolve) => setTimeout(resolve, ms))
       observer.disconnect()
       return { texts, widths }

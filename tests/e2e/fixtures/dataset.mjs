@@ -18,6 +18,14 @@ const external = (url, openInNewTab = false) => ({
   url,
   openInNewTab,
 })
+const anchor = (id) => ({ _type: 'link', linkType: 'anchor', anchor: id })
+const panel = (id, fallbackUrl) => ({
+  _type: 'link',
+  linkType: 'panel',
+  panel: ref(id),
+  ...(fallbackUrl && { fallbackUrl }),
+})
+const booking = (bookingUrl) => ({ _type: 'link', linkType: 'booking', bookingUrl })
 const cta = (label, link, variant = 'primary') => ({
   _key: key(),
   _type: 'cta',
@@ -462,6 +470,54 @@ export const documents = [
           block(['Parallax text 4'], { style: 'h2' }),
           block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
         ],
+      },
+    ],
+  },
+  {
+    // Typed link actions (link-actions.spec.ts): a section on this page, a panel, booking.
+    _id: 'panel-enquire',
+    _type: 'panel',
+    title: 'Enquire now',
+  },
+  {
+    _id: 'page-link-actions',
+    _type: 'page',
+    title: 'Link actions',
+    slug: { _type: 'slug', current: 'link-actions' },
+    seo: { _type: 'seo', metaDescription: 'Links that jump to a section or open a panel.' },
+    pageBuilder: [
+      {
+        _key: 'link-actions-hero',
+        _type: 'hero',
+        title: 'Link actions',
+        description: 'Buttons that do more than go to a page.',
+        ctas: [
+          cta('Jump to details', anchor('details')),
+          cta('Open enquiry', panel('panel-enquire', '/about'), 'secondary'),
+        ],
+      },
+      {
+        _key: 'link-actions-booking',
+        _type: 'ctaBanner',
+        title: 'Ready when you are',
+        tone: 'dark',
+        ctas: [cta('Book a visit', booking('/about'))],
+      },
+      {
+        _key: 'link-actions-spacer',
+        _type: 'richText',
+        body: [
+          block(['Lead-in copy'], { style: 'h2' }),
+          ...Array.from({ length: 12 }, () =>
+            block(['A paragraph of copy so the page is long enough to scroll. '.repeat(12)]),
+          ),
+        ],
+      },
+      {
+        _key: 'link-actions-details',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', anchorId: 'details' },
+        body: [block(['The details'], { style: 'h2' }), block(['This is where the link lands.'])],
       },
     ],
   },
