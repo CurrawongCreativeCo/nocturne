@@ -79,11 +79,17 @@ for (const id of heroIds) {
   if (!plainTitleIds.includes(id)) continue
 
   test(`${id} renders its heading and image in the server HTML`, async ({ request }) => {
-    const html = await (await request.get(GALLERY)).text()
-    const start = html.indexOf(`data-gallery-section="${id}"`)
-    expect(start).toBeGreaterThan(-1)
-    const next = html.indexOf('data-gallery-section=', start + 1)
-    const section = html.slice(start, next === -1 ? undefined : next)
+    // The first request to a cold page can stream the section in after a placeholder, so ask until
+    // the section is in the HTML itself (the cache is warm from then on).
+    let section = ''
+    await expect(async () => {
+      const html = await (await request.get(GALLERY)).text()
+      const start = html.indexOf(`data-gallery-section="${id}"`)
+      expect(start).toBeGreaterThan(-1)
+      const next = html.indexOf('data-gallery-section=', start + 1)
+      section = html.slice(start, next === -1 ? undefined : next)
+      expect(section).toContain('<h1')
+    }).toPass()
 
     expect(section).toMatch(/<h1[^>]*>Welcome to Test Co<\/h1>/)
     // The image is in the HTML and not lazy, so the browser requests it at once. Layouts without a
@@ -106,6 +112,9 @@ function box(found: { x: number; y: number; width: number; height: number } | nu
 async function splitBoxes(page: Page, id: string) {
   await page.goto(GALLERY)
   const section = page.locator(`[data-gallery-section="${id}"]`)
+  // Wait until both are drawn: a slow runner can measure before they are, which gives no box.
+  await expect(section.locator('img')).toBeVisible()
+  await expect(section.locator('h1')).toBeVisible()
   const image = box(await section.locator('img').boundingBox())
   const text = box(await section.locator('h1').boundingBox())
   const style = await section.locator('img').evaluate((img) => {

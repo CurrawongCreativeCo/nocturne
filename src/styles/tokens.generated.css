@@ -90,6 +90,7 @@
   --duration: 300ms;
   --duration-slow: 600ms;
   --reveal-distance: 24px;
+  --marquee-per-logo: 5s;
 
   --emphasis-underline-thickness: 0.08em;
   --emphasis-underline-offset: 0.14em;

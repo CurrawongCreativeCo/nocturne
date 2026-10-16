@@ -26,6 +26,13 @@ you start a release.
   (title, text, optional label such as "Week 1", optional decorative icon or image). Starts with four example steps.
   Steps reveal with the Stagger animation; Animation _None_ turns that off. The line is fully drawn under reduced motion
   and without JavaScript, and its scroll code loads only on pages that use the section. See README, _Process timeline_.
+- **Logo strip marquee:** the Logo strip gains a **Layout** picker (_Grid_, the default and unchanged, and _Marquee_). The
+  marquee is an endless CSS-driven row of logos (the list rendered twice, the copy `aria-hidden` with `tabindex="-1"`
+  links; `translateX` only) with faded edges (`mask-image`), pausing on hover and focus and a visible Pause / Play button
+  (WCAG 2.2.2) that is its only JavaScript. The duration is the new optional `motion.marquee-per-logo` token (5 s) times
+  the logo count. Under reduced motion, or without JavaScript, it is the static wrapped grid. An agency-only **Logo
+  colour** option (Design → Advanced, Marquee only) keeps logos greyscale (default) or full colour. New fixtures
+  (`logo-cloud-marquee`, `logo-cloud-marquee-colour`, `/logos`), `tests/e2e/logo-marquee.spec.ts` and a variants test.
 - **Video section:** _Add item → Video_ with two layouts. _Embed_ (default) is a poster and a Play button
   ("Play video: <title>") for YouTube, Vimeo or an uploaded MP4; **no third-party script, iframe or request loads until
   the click**, then one iframe (`youtube-nocookie.com`, or `player.vimeo.com` with `dnt=1`) with autoplay and a title,
@@ -299,6 +306,7 @@ you start a release.
 
 ### Changed
 
+- **CI:** the e2e shards now split `desktop` and `mobile` only; before, shard 1 ran every test and shards 2–4 none (Playwright keeps a project with its dependencies in one shard). The A/B, design and design-screenshot projects run in their own `e2e (isolated)` job, and the five generator smoke tests are parallel `generator (…)` jobs instead of steps in `check`. If branch protection lists required checks, add `e2e (isolated)` and the `generator (…)` jobs.
 - **Sitemap:** the pages count and slice queries (`PAGE_COUNT_QUERY`, `PAGE_SITEMAP_QUERY`) skip the reserved
   `section-gallery` slug, so the style guide's fixture page can never be listed. Run `npm run typegen` after merging.
 
@@ -329,6 +337,12 @@ you start a release.
 ### Fixed
 
 ### Breaking changes / migration steps
+
+**Logo strip marquee:** run `npm run typegen` after merging (`variant` and `logoColour` are new in `logoCloudFragment`) and
+`npm run tokens` if you edit `tokens.json` (the new `motion.marquee-per-logo` token is optional; without it the marquee
+uses 5 s). `components/sections/logo-cloud.tsx` is now the folder `components/sections/logo-cloud/`; if a client site
+edited the old file, move its changes into `grid.tsx`. Existing logo strips have no `variant` and render the grid as
+before. Add screenshot baselines for the two new gallery entries with the **Update visual baselines** workflow.
 
 **Site profile:** after merging, edit `site.profile.ts` (take the template's file, then set `client.name` and `client.slug`,
 the tier, and `features: { … : false }` for what the site doesn't use). Until you do, every feature stays on and nothing

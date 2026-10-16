@@ -63,40 +63,50 @@ jobs:
       - name: Typecheck, lint, format, unit tests
         run: npm run check
 
-      # The generator edits several files at marker comments; prove its output still passes
-      # every check. Runs on the throwaway CI checkout, so nothing is committed.
-      - name: Section generator smoke test
-        run: |
-          npm run new:section ci-smoke-section
-          npx next typegen
-          npm run check
+  # The generators edit several files at marker comments; prove each one's output still passes every
+  # check. A section with variants is a folder (dispatcher plus one component per variant) with the
+  # `variant` field; the document goes into the new feature (no schema list yet, so it creates and
+  # registers one); the singleton goes into an existing feature with a schema list. One job each, in
+  # parallel (they were five steps of about 2.5 minutes in `check`). They run on throwaway checkouts,
+  # so nothing is committed.
+  generators:
+    name: generator (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ci-placeholder
+      NEXT_PUBLIC_SANITY_DATASET: production
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: section
+            command: npm run new:section ci-smoke-section
+          - name: section with variants
+            command: npm run new:section ci-smoke-variants -- --variants default,wide,compact
+          - name: feature
+            command: npm run new:feature ci-smoke-feature
+          - name: document
+            command: |
+              npm run new:feature ci-smoke-feature
+              npm run new:document ci-smoke-feature ci-smoke-document
+          - name: singleton
+            command: npm run new:singleton blog ci-smoke-singleton
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      # A section with variants is a folder (dispatcher plus one component per variant) and gets the
-      # `variant` field. Runs after the plain one, on the same throwaway checkout.
-      - name: Section generator smoke test (variants)
-        run: |
-          npm run new:section ci-smoke-variants -- --variants default,wide,compact
-          npx next typegen
-          npm run check
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
 
-      # The feature, document and singleton generators use the same marker approach. The document
-      # goes into the new feature (no schema list yet, so it creates and registers one); the
-      # singleton goes into an existing feature with a schema list.
-      - name: Feature generator smoke test
-        run: |
-          npm run new:feature ci-smoke-feature
-          npx next typegen
-          npm run check
+      - run: npm ci
 
-      - name: Document generator smoke test
+      - name: Generate, then run every check
         run: |
-          npm run new:document ci-smoke-feature ci-smoke-document
-          npx next typegen
-          npm run check
-
-      - name: Singleton generator smoke test
-        run: |
-          npm run new:singleton blog ci-smoke-singleton
+          ${{ matrix.command }}
           npx next typegen
           npm run check
 
@@ -127,8 +137,12 @@ jobs:
 
       # Production build against a fake Content Lake: pages, metadata, redirects, headers,
       # keyboard and mobile navigation, and axe accessibility scans.
+      #
+      # Only `desktop` and `mobile` are sharded: the isolated projects (their own job below) depend on
+      # them, and Playwright keeps a project with its dependencies in one shard, which put every test
+      # in shard 1 and none in the others.
       - name: End-to-end tests
-        run: npx playwright test --shard=${{ matrix.shard }}/4
+        run: npx playwright test --project=desktop --project=mobile --shard=${{ matrix.shard }}/4
 
       # Lighthouse scores on / and /about against the build Playwright just made. Budgets are in
       # lighthouserc.json; the JavaScript size budget is tests/e2e/performance.spec.ts.
@@ -146,4 +160,45 @@ jobs:
             playwright-report
             test-results
             .lighthouseci
+          retention-days: 7
+
+  # The projects that change the whole site's state (an A/B test, the Studio's brand colours). Each
+  # runs alone and in order against its own fake Content Lake; locally playwright.config.ts chains
+  # them with `dependencies`, which CI cannot shard.
+  e2e-isolated:
+    name: e2e (isolated)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: A/B tests
+        run: npx playwright test --project=experiments --no-deps
+
+      - name: Design settings
+        run: npx playwright test --project=design --no-deps
+
+      - name: Design settings (screenshots)
+        run: npx playwright test --project=design-visual --no-deps
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-reports-isolated
+          path: |
+            playwright-report
+            test-results
           retention-days: 7

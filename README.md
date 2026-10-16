@@ -171,7 +171,7 @@ Open http://localhost:3000/studio:
 | Rich text             | Long-form copy: headings, lists, links, inline images                    |
 | Image + text          | A picture beside a short story, image on either side                     |
 | Features grid         | 2–4 columns of benefits with icons                                       |
-| Logo strip            | Client or partner logos                                                  |
+| Logo strip            | Client or partner logos, in a still row or a scrolling marquee           |
 | Testimonials          | Customer quotes with name, role and photo                                |
 | FAQ                   | Questions that expand to answers                                         |
 | Call to action banner | A closing prompt in brand, dark or light tone                            |
@@ -898,7 +898,7 @@ the same check as `src/types/sanity.types.ts`.
 | `space`  | `section-y-compact`, `section-y`, `section-y-spacious`, `gutter`, `measure`, plus `measure-narrow` and `content` (widths)                                   | `py-section-compact`, `py-section`, `py-section-spacious`, `px-gutter`, `max-w-measure`, `max-w-content`      |
 | `radius` | `sm`, `control` (inputs, small buttons), `card`, `panel` (banners), `button`, `pill`                                                                        | `rounded-sm`, `rounded-control`, `rounded-card`, `rounded-panel`, `rounded-button`, `rounded-pill`            |
 | `shadow` | `card`, `raised`                                                                                                                                            | `shadow-card`, `shadow-raised`                                                                                |
-| `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`                                                                  | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS             |
+| `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`, `marquee-per-logo` (seconds per logo, optional)                 | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS             |
 
 Each colour has an `oklch` value (what the CSS uses) and a `hex` fallback, because `next/og` cannot
 parse `oklch()`. The generator checks that the two agree (within 2/255 per channel), so a stale hex is an
@@ -1824,6 +1824,32 @@ profile pages, on their own page at `/team/<slug>`.
   slug and a member with no address; the sitemap; axe) and `accessibility.spec.ts` (`/team`, `/team/ann-lee`).
   The section gallery has `team-grid`, `team-slider` and `team-list`; their screenshot baselines need the **Update visual
   baselines** workflow (macOS skips visual tests).
+
+### Logo strip
+
+The **Logo strip** (_Add item → Logo strip_) has two layouts, chosen by agencies in the **Layout** picker (_Grid_ is the
+default and looks as it always did: greyscale logos in a wrapped, centred row that turn to colour on hover).
+
+- **Marquee.** One endless row of the same logos that scrolls by itself, faded at both edges, with a **Pause** button
+  below it. It pauses while the pointer is over the logos or keyboard focus is on one, and the button holds it still
+  until pressed again (WCAG 2.2.2: moving content that lasts over five seconds must be stoppable). The button is the
+  marquee's only JavaScript (`marquee-toggle.tsx`, a few lines that set `data-paused`, loaded lazily so other pages don't pay for it); the motion is CSS.
+  - _Logo colour_ (Design tab → _Advanced_, shown only for _Marquee_; clients never see it): **Greyscale** (the default,
+    turning to colour on hover and focus) or **Full colour**. Stored as `logoColour` (`grey`, `colour`); unset or unknown
+    renders greyscale.
+  - _Speed._ The loop takes the `motion.marquee-per-logo` design token (5 s) times the number of logos, so the pace stays
+    steady whether there are four logos or twenty (a ten-logo row takes 50 s). Edit it in `src/styles/tokens.json` and
+    run `npm run tokens`. A `tokens.json` without it (older client sites) uses 5 s.
+  - _Reduced motion, and no JavaScript._ Visitors who ask for reduced motion see the **static wrapped grid** instead:
+    no animation, no fade, no copy, no button. So do visitors with JavaScript off, since nothing could stop the motion.
+  - _Accessibility._ The list is rendered twice so the loop has no seam. The copy is `aria-hidden`, its logos have empty
+    `alt`, and its links have `tabindex="-1"`, so screen readers and the Tab key meet each logo once. Short rows are
+    spaced out to at least the screen width, so the copy never shows a gap. Animation is `transform` only.
+  - _Tests._ `tests/e2e/logo-marquee.spec.ts` checks the copy (hidden, out of the tab order), the duration, Pause and
+    Play, pausing on hover and focus, greyscale versus colour, the static grid under reduced motion and without
+    JavaScript (on `/logos`, since the gallery streams in with a script), and axe in each state. The gallery has
+    `logo-cloud-marquee` and `logo-cloud-marquee-colour`; their screenshot baselines need the **Update visual
+    baselines** workflow (macOS skips visual tests).
 
 ### Video
 

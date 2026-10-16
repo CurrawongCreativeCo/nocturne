@@ -42,6 +42,7 @@ import {
   HeroSplitLeftThumbnail,
   HeroSplitThumbnail,
 } from './hero-thumbnails'
+import { LogoCloudGridThumbnail, LogoCloudMarqueeThumbnail } from './logo-cloud-thumbnails'
 import { StatsCardsThumbnail, StatsInlineThumbnail } from './stats-thumbnails'
 import { TestimonialsGridThumbnail, TestimonialsSliderThumbnail } from './testimonials-thumbnails'
 import {
@@ -71,6 +72,10 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
     grid: GalleryGridThumbnail,
     masonry: GalleryMasonryThumbnail,
     slider: GallerySliderThumbnail,
+  },
+  logoCloud: {
+    grid: LogoCloudGridThumbnail,
+    marquee: LogoCloudMarqueeThumbnail,
   },
   stats: {
     inline: StatsInlineThumbnail,
