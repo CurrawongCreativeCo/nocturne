@@ -7,7 +7,11 @@ import type { PageSection } from '../types'
  * (banner tone, image side, grid columns), so every variant is told apart on the page.
  */
 export function sectionLabel(section: PageSection): string {
-  const variants = [variantOf(section), ...styleVariants(section)].filter(Boolean)
+  const variants = [
+    variantOf(section),
+    ...imageVariants(section),
+    ...styleVariants(section),
+  ].filter(Boolean)
   return variants.length > 0 ? `${section._type} (${variants.join(', ')})` : section._type
 }
 
@@ -21,6 +25,17 @@ function styleVariants(section: PageSection): string[] {
     width && width !== 'default' && `${width} width`,
     align && `${align} aligned`,
     edge && edge !== 'none' && `${edge} edge`,
+  ].filter((variant): variant is string => Boolean(variant))
+}
+
+/** The picture's design when an editor changed it, e.g. "circle picture", "organic-brush frame", "medium picture motion". */
+function imageVariants(section: PageSection): string[] {
+  if (!('imageDesign' in section) || !section.imageDesign) return []
+  const { appearance, motion, frame } = stegaClean(section.imageDesign)
+  return [
+    appearance && appearance !== 'standard' && `${appearance} picture`,
+    appearance === 'framed' && frame && frame !== 'none' && `${frame} frame`,
+    motion && motion !== 'none' && `${motion} picture motion`,
   ].filter((variant): variant is string => Boolean(variant))
 }
 

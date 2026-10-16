@@ -92,6 +92,7 @@ export const TAGS = {
   stripePrice: 'stripePrice',
   experiment: 'experiment',
   teamMember: 'teamMember',
+  frame: 'frame',
   // new-document:tag
 } as const
 

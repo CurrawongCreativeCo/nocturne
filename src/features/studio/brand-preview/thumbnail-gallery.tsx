@@ -8,6 +8,9 @@ import {
   heroImageShapeThumbnails,
   heroPresetThumbnails,
   heroProportionThumbnails,
+  imageAppearanceThumbnails,
+  imageFrameThumbnails,
+  imageMotionThumbnails,
   sectionVariantThumbnails,
   toneThumbnails,
   type Thumbnail,
@@ -72,6 +75,28 @@ function groups(sections: readonly SectionPreview[]): Group[] {
         title: value,
         thumbnail,
       })),
+    },
+    {
+      id: 'image-design',
+      title: 'Image design',
+      note: 'The Image design object: shape, motion inside the frame, and decorative frames.',
+      items: [
+        ...Object.entries(imageAppearanceThumbnails).map(([value, thumbnail]) => ({
+          key: `image-appearance.${value}`,
+          title: `shape · ${value}`,
+          thumbnail,
+        })),
+        ...Object.entries(imageMotionThumbnails).map(([value, thumbnail]) => ({
+          key: `image-motion.${value}`,
+          title: `motion · ${value}`,
+          thumbnail,
+        })),
+        ...Object.entries(imageFrameThumbnails).map(([value, thumbnail]) => ({
+          key: `image-frame.${value}`,
+          title: `frame · ${value}`,
+          thumbnail,
+        })),
+      ],
     },
     {
       id: 'tones',

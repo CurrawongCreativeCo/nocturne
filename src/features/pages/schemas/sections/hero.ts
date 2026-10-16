@@ -6,6 +6,7 @@ import { headingPlainText } from '@/lib/sanity/heading-text'
 import { isClientView } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField } from '@/lib/sanity/schema/heading-text'
+import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
@@ -250,6 +251,8 @@ export const hero = defineType({
         options: { list: ['left', 'right'], layout: 'radio', direction: 'horizontal' },
         hidden: ({ parent }: { parent?: { variant?: string } }) => parent?.variant !== 'split',
       }),
+      // Split's picture: its shape, how it moves inside its frame and decorative frames (agency only, Design tab).
+      imageDesignField({ hidden: notSplit }),
       // A small picture beside the oversized heading; the Editorial layout is the only one to use it.
       imageField({
         name: 'secondaryImage',
@@ -313,13 +316,14 @@ export const hero = defineType({
           required: false,
           hidden: notSplit,
         }),
+        // Superseded by the Image design's Appearance, which shows this value until it is changed. Hidden
+        // rather than removed so content that chose a shape keeps it.
         presetField({
           name: 'imageShape',
           title: 'Image shape',
-          description: 'The picture is cropped to fit; the hotspot you set on it stays in view.',
           options: SPLIT_IMAGE_SHAPE_OPTIONS,
           required: false,
-          hidden: notSplit,
+          hidden: true,
         }),
         // Agency-only and off by default: one animation and delay per part (README, "Animating individual parts").
         heroPartMotionField,

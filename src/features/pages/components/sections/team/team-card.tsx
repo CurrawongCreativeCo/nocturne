@@ -2,9 +2,10 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { HoverLift } from '@/components/motion/hover-lift'
-import { SanityImage } from '@/components/ui/sanity-image'
+import { FramedImage } from '@/components/ui/framed-image'
 import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
+import { resolveImageDesign } from '@/lib/sanity/image-design-options'
 
 import type { SectionProps } from '../../../types'
 
@@ -12,8 +13,15 @@ export type Member = NonNullable<SectionProps<'team'>['data']['members']>[number
 
 const surface = 'relative rounded-card bg-surface shadow-card ring-1 ring-line'
 
+type Design = SectionProps<'team'>['data']['imageDesign']
+
+/** A portrait's corners are the card's until the design names a shape. */
+const PORTRAIT_SHAPE = { fallbackShape: 'square' } as const
+
 interface CardProps {
   member: Member
+  /** The section's `imageDesign`: shape, motion and frame for every portrait. */
+  design?: Design
   /** The member's name is a heading: one level under the section's title (or its own level without one). */
   headingLevel: 'h2' | 'h3'
   /** Preload the portrait (the first card of a section at the top of the page). */
@@ -38,17 +46,23 @@ function MemberName({ member, headingLevel: Heading }: Pick<CardProps, 'member' 
 }
 
 /** Portrait on top, then name, role and short bio. Fills the height it is given (grid and slider). */
-export function TeamCard({ member, headingLevel, eager }: CardProps) {
+export function TeamCard({ member, design, headingLevel, eager }: CardProps) {
+  // The default portrait fills the top of the card; a shape of its own (a circle, an arch) sits inside it.
+  const inset = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE).shape !== 'square'
   return (
     <HoverLift className={`${surface} flex h-full w-full flex-col overflow-hidden`}>
-      <SanityImage
-        image={member.portrait}
-        width={600}
-        height={600}
-        sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
-        preload={eager}
-        className="aspect-square w-full object-cover"
-      />
+      <div className={inset ? 'px-6 pt-6' : undefined}>
+        <FramedImage
+          image={member.portrait}
+          design={design}
+          context={PORTRAIT_SHAPE}
+          width={600}
+          height={600}
+          sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
+          preload={eager}
+          aspect="1/1"
+        />
+      </div>
       <div className="flex flex-1 flex-col p-6">
         <MemberName member={member} headingLevel={headingLevel} />
         {member.role && <p className="mt-1 text-small font-medium text-ink-muted">{member.role}</p>}
@@ -59,17 +73,22 @@ export function TeamCard({ member, headingLevel, eager }: CardProps) {
 }
 
 /** The list layout: a small portrait beside the text. */
-export function TeamRow({ member, headingLevel, eager }: CardProps) {
+export function TeamRow({ member, design, headingLevel, eager }: CardProps) {
   return (
     <HoverLift className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6`}>
-      <SanityImage
-        image={member.portrait}
-        width={256}
-        height={256}
-        sizes="(min-width: 640px) 128px, 96px"
-        preload={eager}
-        className="size-24 shrink-0 rounded-card object-cover sm:size-32"
-      />
+      <div className="size-24 shrink-0 sm:size-32">
+        <FramedImage
+          image={member.portrait}
+          // Too small to move in; the shape and frame still apply.
+          design={{ ...design, motion: 'none' }}
+          context={{ fallbackShape: 'standard' }}
+          width={256}
+          height={256}
+          sizes="(min-width: 640px) 128px, 96px"
+          preload={eager}
+          aspect="1/1"
+        />
+      </div>
       <div className="min-w-0">
         <MemberName member={member} headingLevel={headingLevel} />
         {member.role && <p className="mt-1 text-small font-medium text-ink-muted">{member.role}</p>}

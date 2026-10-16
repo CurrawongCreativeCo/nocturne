@@ -31,7 +31,8 @@ export function GallerySlider({ data, isFirst }: SectionProps<'gallery'>) {
               fill
               eager={isFirst && i < columns}
               sizes={columnSizes(columns)}
-              className="group relative block aspect-4/3 w-full overflow-hidden rounded-card bg-surface-alt"
+              design={data.imageDesign}
+              className="group relative block w-full"
             />
           ))}
         </LazySlider>

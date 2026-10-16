@@ -2,6 +2,7 @@ import { UsersIcon } from '@sanity/icons/Users'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
@@ -91,6 +92,8 @@ export const team = defineType({
               : true,
           ),
       }),
+      // Shape, motion and frames for the portraits: agency only, in the Design tab.
+      imageDesignField(),
       accessField,
       // Shown first in the Content tab.
       variantField(TEAM_VARIANTS),
