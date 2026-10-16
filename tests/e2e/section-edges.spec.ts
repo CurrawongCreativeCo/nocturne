@@ -180,22 +180,23 @@ test.describe('heights', () => {
     await page.setViewportSize(PHONE)
     await page.goto(GALLERY)
     const frame = group(page, 'edge-wave-flat').locator('[data-section-edge-frame]')
+    await expect.poll(() => edgeHeight(frame)).toBeGreaterThan(0)
     const phone = await edgeHeight(frame)
     await page.setViewportSize(DESKTOP)
-    const desktop = await edgeHeight(frame)
-    expect(phone).toBeLessThan(desktop)
+    await expect.poll(() => edgeHeight(frame)).toBeGreaterThan(phone)
   })
 
   test('a custom height follows the breakpoints', async ({ page }) => {
     await page.goto(GALLERY)
     const frame = group(page, 'edge-wave-custom-heights').locator('[data-section-edge-frame]')
+    // Polled after each resize: the new breakpoint applies a frame later.
     await page.setViewportSize(PHONE)
-    expect(await edgeHeight(frame)).toBe(24)
+    await expect.poll(() => edgeHeight(frame)).toBe(24)
     // The tablet value is blank, so it keeps the phone's until the desktop one applies.
     await page.setViewportSize({ width: 800, height: 800 })
-    expect(await edgeHeight(frame)).toBe(24)
+    await expect.poll(() => edgeHeight(frame)).toBe(24)
     await page.setViewportSize(DESKTOP)
-    expect(await edgeHeight(frame)).toBe(140)
+    await expect.poll(() => edgeHeight(frame)).toBe(140)
   })
 })
 
