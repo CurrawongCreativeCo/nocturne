@@ -60,3 +60,32 @@ export function splitImageClass(shape: SplitImageShape): string {
       return 'aspect-[4/3] max-h-96 w-full rounded-card object-cover lg:max-h-none'
   }
 }
+
+/**
+ * `splitImageClass` in two halves, for a picture that animates inside a frame (the hero's `image` part):
+ * where it sits in the column (on the frame) and what it looks like (on the <img>). Together they are
+ * the same classes, so an animated picture has the shape of a still one.
+ */
+export function splitImageFrameClass(shape: SplitImageShape): string {
+  switch (shape) {
+    case 'circle':
+      return 'w-full max-w-xl justify-self-center'
+    case 'arch':
+      return 'w-full max-w-lg justify-self-center'
+    default:
+      return 'w-full'
+  }
+}
+
+export function splitImageShapeClass(shape: SplitImageShape): string {
+  switch (shape) {
+    case 'square':
+      return 'aspect-[4/3] max-h-96 w-full object-cover lg:max-h-none'
+    case 'circle':
+      return 'aspect-square w-full rounded-full object-cover'
+    case 'arch':
+      return 'aspect-[4/5] w-full rounded-t-full object-cover'
+    default:
+      return 'aspect-[4/3] max-h-96 w-full rounded-card object-cover lg:max-h-none'
+  }
+}

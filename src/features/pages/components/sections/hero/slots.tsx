@@ -2,7 +2,7 @@ import { stegaClean } from 'next-sanity'
 import type { ComponentType } from 'react'
 
 import { MotionDiv } from '@/components/motion/motion-elements'
-import { fadeUpAfter, revealChild, revealOnLoad } from '@/components/motion/presets'
+import { partProps, type PartPlan } from '@/components/motion/part-motion'
 import { BadgeRow } from '@/components/ui/badge-row'
 import { LogoRow } from '@/components/ui/logo-row'
 import { StatsBar } from '@/components/ui/stats-bar'
@@ -50,15 +50,17 @@ interface Props {
   placement: HeroSlotPlacement
   centred: boolean
   animate: boolean
+  /** What the slot does on load (`resolveHeroParts`); with none it simply appears. */
+  plan?: PartPlan
 }
 
 /**
  * Draws the hero's slot, if it has one and this is where its layout puts it (`utils/hero-slot.ts`).
- * Under the buttons it joins the hero's stagger as the next child, so `HeroText` must render it inside
- * its stagger container; beside the text it fades up on its own, timed to start after the buttons.
- * Reduced motion and no JavaScript show it at once (`data-reveal`, globals.css).
+ * Its animation is the hero's `slot` part (README, "Animating individual parts"): by default it rises
+ * after the buttons, in the same sequence under the buttons or beside the text. Reduced motion and no
+ * JavaScript show it at once (`data-reveal`, globals.css).
  */
-export function HeroSlot({ data, placement, centred, animate }: Props) {
+export function HeroSlot({ data, placement, centred, animate, plan }: Props) {
   const item = data.supporting?.[0]
   if (!item || heroSlotPlacement(stegaClean(data.variant)) !== placement) return null
 
@@ -66,11 +68,9 @@ export function HeroSlot({ data, placement, centred, animate }: Props) {
   const Component = SLOTS[stegaClean(item._type)] as ComponentType<SlotProps<SlotType>> | undefined
   if (!Component) return null
 
-  const motion = placement === 'beside-text' ? revealOnLoad(fadeUpAfter(2)) : revealChild()
-
   return (
     <MotionDiv
-      {...motion}
+      {...partProps(plan)}
       data-hero-slot={stegaClean(item._type)}
       className={HERO_SLOT_SPACING[placement]}
     >

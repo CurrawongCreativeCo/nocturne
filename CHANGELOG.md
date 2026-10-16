@@ -20,6 +20,27 @@ you start a release.
 
 ### Added
 
+- **Video section:** _Add item → Video_ with two layouts. _Embed_ (default) is a poster and a Play button
+  ("Play video: <title>") for YouTube, Vimeo or an uploaded MP4; **no third-party script, iframe or request loads until
+  the click**, then one iframe (`youtube-nocookie.com`, or `player.vimeo.com` with `dnt=1`) with autoplay and a title,
+  and a "Plays from YouTube/Vimeo" note. Uploaded video is a native `<video controls preload="none">` with the poster
+  and an optional WebVTT captions track. _Ambient_ (uploaded MP4 only) is a muted, looping, `playsInline` background
+  video with a visible Pause button (WCAG 2.2.2), the poster instead under reduced motion, and a Studio warning for
+  files over 5 MB. Fields: title, description, source, address or file, poster (required), captions, shape (16:9, 4:3,
+  1:1, 21:9). Address parsing is shared by validation and the page (`video-source.ts`, unit tested). The security headers
+  already allow the outbound iframes (checked by `tests/e2e/video.spec.ts`). Two small client components, no Motion, loaded
+  lazily so pages without a Video section download neither; the JavaScript budget is unchanged. The hero's "background video" note now points to the Ambient layout. Add the new
+  section's screenshot baselines with the **Update visual baselines** workflow.
+- **Animate individual parts (hero):** an agency-only switch in the hero's Design → Advanced area. Off by default; when on,
+  one compact row per part the layout and content actually have (eyebrow, heading, intro text, buttons, extra content,
+  picture, background picture) with an animation (Inherit, None, Fade, Rise, Reveal, Slide, Scale, and Parallax for the
+  pictures) and a delay (Auto, Short, Long). Auto follows a sequence 80 ms apart. Sections declare their parts in code
+  (`HERO_PARTS`, `PartSpec`); `resolvePartMotion` (`src/components/motion/part-motion.ts`, unit-tested) resolves the component
+  default, then the section's animation, then the part's own choice, and ignores combinations that make no sense. The first
+  section's heading and pictures never start hidden and ignore Fade, Reveal and Scale (a clip-path Reveal on the heading
+  moved the Lighthouse LCP from 1.55 s to 4 s); Reveal is a `clip-path` wipe with opacity untouched. No new client
+  components; `/hero-parts` joins the Lighthouse run. Content needs no migration: a hero without `partMotion` looks as
+  before, except that below the first section a hero with its own entrance no longer also staggers its text on load.
 - **Section animation presets:** the Animation picker is now a small library with moving previews (still under reduced
   motion): _None_, _Fade up_, _Subtle entrance_ (12 px rise), _Fade_, _Slide in_, _Staggered_, _Float_ (a picture drifts
   slowly in a loop, paused off screen) and _Parallax_ in three strengths. Level 1: sections start on a default for their kind

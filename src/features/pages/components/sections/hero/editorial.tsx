@@ -1,9 +1,9 @@
 import { MOTION_DEFAULTS } from '@/components/motion/presets'
-import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
-import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { resolveHeroParts } from '@/features/pages/utils/hero-parts'
 
+import { HeroPicture } from './hero-picture'
 import { HeroText } from './hero-text'
 import { HeroSlot } from './slots'
 import type { SectionProps } from '../../../types'
@@ -25,15 +25,18 @@ export function HeroEditorial({ data, isFirst = false, greeting }: SectionProps<
   const { tone, align, block, text, justify, motion } = sectionTraits(data.style, DEFAULTS)
   const hasInset = Boolean(data.secondaryImage?.asset)
   const hasSlot = Boolean(data.supporting?.length)
+  const parts = resolveHeroParts(data, DEFAULTS, isFirst)
 
   const inset = hasInset && (
-    <SanityImage
+    <HeroPicture
       image={data.secondaryImage}
+      plan={parts.image}
+      isFirst={isFirst}
       width={512}
-      preload={isFirst}
       sizes="(min-width: 1024px) 16rem, 50vw"
       className="aspect-square w-48 rounded-card object-cover lg:w-full"
-      style={{ objectPosition: hotspotObjectPosition(data.secondaryImage) }}
+      frameClassName="w-48 lg:w-full"
+      imageClassName="aspect-square w-full rounded-card object-cover"
     />
   )
 
@@ -52,6 +55,7 @@ export function HeroEditorial({ data, isFirst = false, greeting }: SectionProps<
           tone={tone}
           block={block}
           justify={justify}
+          parts={parts}
           // 1.5 times the display size on wide screens, so no new font size is hard-coded here.
           headingClassName="text-display font-semibold tracking-tight text-balance lg:text-[calc(var(--text-display)*1.5)]"
         />
@@ -64,6 +68,7 @@ export function HeroEditorial({ data, isFirst = false, greeting }: SectionProps<
             placement="beside-text"
             centred={align === 'center'}
             animate={!isFirst && motion !== 'none'}
+            plan={parts.slot}
           />
         </div>
       ) : (

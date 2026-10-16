@@ -95,6 +95,21 @@ const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
 
+// Video section (tests/e2e/video.spec.ts). The files are never fetched: the specs stand in for the CDN and the players.
+const VIDEO_ASSET_ID = 'file-0123456789abcdef0123456789abcdef01234567-mp4'
+const CAPTIONS_ASSET_ID = 'file-89abcdef0123456789abcdef0123456789abcdef-vtt'
+const fileRef = (id) => ({ _type: 'file', asset: ref(id) })
+const VIDEO_URL = {
+  youtube: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  vimeo: 'https://vimeo.com/76979871',
+}
+const videoSection = (id, fields) => ({
+  _key: id,
+  _type: 'video',
+  poster: image(`${fields.title} poster`),
+  ...fields,
+})
+
 // The blog: 14 posts, so the index paginates (12 + 2). The first four have categories, set up so
 // "Welcome to the blog" has three related posts whose score order differs from their date order:
 // the roundup shares two categories but is oldest of the three.
@@ -286,6 +301,12 @@ export const documents = [
         imagePosition: 'right',
         ctas: [cta('Read more', internal('page-about'))],
       },
+      videoSection(key(), {
+        variant: 'embed',
+        title: 'Watch our story',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
       {
         _key: key(),
         _type: 'testimonials',
@@ -753,6 +774,20 @@ export const documents = [
     metadata: { dimensions: { width: 1200, height: 630 } },
   },
   {
+    _id: VIDEO_ASSET_ID,
+    _type: 'sanity.fileAsset',
+    url: 'https://cdn.sanity.io/files/test/test/0123456789abcdef0123456789abcdef01234567.mp4',
+    mimeType: 'video/mp4',
+    size: 2_000_000,
+  },
+  {
+    _id: CAPTIONS_ASSET_ID,
+    _type: 'sanity.fileAsset',
+    url: 'https://cdn.sanity.io/files/test/test/89abcdef0123456789abcdef0123456789abcdef.vtt',
+    mimeType: 'text/vtt',
+    size: 400,
+  },
+  {
     // Has its own share image: no generated one may be added next to it.
     _id: 'page-own-image',
     _type: 'page',
@@ -1093,6 +1128,23 @@ const styledVariants = (id, section) => [
   ...SPACINGS.map((spacing) => styled(`${id}-${spacing}`, section, { spacing })),
 ]
 
+/**
+ * A hero's "Animate individual parts" with a different animation on every part (the ones a layout
+ * does not have are ignored): used by the gallery and by the /hero-parts page. The heading and pictures
+ * only move, because on the first section they may not start hidden, clipped or smaller (their LCP).
+ */
+const allParts = {
+  enabled: true,
+  eyebrowPreset: 'reveal',
+  headingPreset: 'slide',
+  descriptionPreset: 'slide',
+  buttonsPreset: 'scale',
+  buttonsDelay: 'long',
+  slotPreset: 'fade',
+  imagePreset: 'rise',
+  backgroundPreset: 'rise',
+}
+
 /** One gallery entry per hero variant (see HERO_VARIANTS); the plain `hero` below has no variant set. */
 const galleryHero = (id, extra) => ({
   _key: `hero-${id}`,
@@ -1286,6 +1338,46 @@ const gallerySections = [
       motion: 'parallax',
     },
   ),
+  // Animated parts (README, "Animating individual parts"). The visual tests emulate reduced motion, so
+  // each shows its parts at rest: these baselines prove the wrappers change nothing about the layout.
+  galleryHero('parts-overlay', {
+    variant: 'overlay',
+    supporting: [slotItem('badges', 'parts-overlay')],
+    partMotion: allParts,
+  }),
+  // Fade, Reveal and Scale are ignored on the first section's heading and pictures: nothing wraps them.
+  galleryHero('parts-ignored', {
+    variant: 'split',
+    partMotion: {
+      enabled: true,
+      headingPreset: 'reveal',
+      imagePreset: 'scale',
+      eyebrowPreset: 'fade',
+    },
+  }),
+  galleryHero('parts-split', { variant: 'split', partMotion: allParts }),
+  galleryHero('parts-split-circle', {
+    variant: 'split',
+    imageShape: 'circle',
+    partMotion: { ...allParts, imagePreset: 'slide' },
+  }),
+  galleryHero('parts-split-parallax', {
+    variant: 'split',
+    imageShape: 'arch',
+    partMotion: { enabled: true, imagePreset: 'parallax' },
+  }),
+  galleryHero('parts-editorial', {
+    variant: 'editorial',
+    backgroundImage: undefined,
+    secondaryImage: image(''),
+    supporting: [slotItem('stats', 'parts-editorial')],
+    partMotion: allParts,
+  }),
+  galleryHero('parts-full-bleed', {
+    variant: 'full-bleed',
+    supporting: [slotItem('badges', 'parts-full-bleed')],
+    partMotion: { ...allParts, backgroundPreset: 'parallax' },
+  }),
   // Highlighted heading words (README, "Highlighting words in a heading"). The long heading wraps on a
   // phone, which is the case the gradient's box-decoration-break: clone exists for.
   galleryHero('heading-gradient', {
@@ -1648,6 +1740,27 @@ const gallerySections = [
     selection: 'all',
     title: 'Who we are',
   },
+  videoSection('video-embed', {
+    variant: 'embed',
+    title: 'Watch our story',
+    text: 'A short film about how we work.',
+    source: 'youtube',
+    url: VIDEO_URL.youtube,
+  }),
+  videoSection('video-embed-upload', {
+    variant: 'embed',
+    title: 'Behind the scenes',
+    source: 'upload',
+    file: fileRef(VIDEO_ASSET_ID),
+    captions: fileRef(CAPTIONS_ASSET_ID),
+    aspectRatio: '4:3',
+  }),
+  videoSection('video-ambient', {
+    variant: 'ambient',
+    title: 'Made in the studio',
+    text: 'A quiet loop of the team at work.',
+    file: fileRef(VIDEO_ASSET_ID),
+  }),
   // new-section:gallery
 ]
 
@@ -1688,6 +1801,59 @@ documents.push({
   ],
 })
 
+/**
+ * Animated hero parts on real pages (tests/e2e/hero-parts.spec.ts), for what the gallery cannot show:
+ * a MotionProvider, so the parts really play. The first page's hero is the first section (its heading
+ * and picture never start hidden); the second page starts with text, so its hero is further down.
+ */
+documents.push(
+  {
+    _id: 'page-hero-parts',
+    _type: 'page',
+    title: 'Hero parts',
+    slug: { _type: 'slug', current: 'hero-parts' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'hero-parts-first',
+        _type: 'hero',
+        variant: 'overlay',
+        eyebrow: 'Eyebrow',
+        title: 'Hero with animated parts',
+        description: 'Each part plays its own animation.',
+        ctas: [cta('About us', internal('page-about'))],
+        backgroundImage: image(''),
+        supporting: [slotItem('badges', 'hero-parts-first')],
+        partMotion: allParts,
+      },
+    ],
+  },
+  {
+    _id: 'page-hero-parts-later',
+    _type: 'page',
+    title: 'Hero parts later',
+    slug: { _type: 'slug', current: 'hero-parts-later' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'hero-parts-intro',
+        _type: 'richText',
+        body: [block(['Introduction'], { style: 'h2' })],
+      },
+      {
+        _key: 'hero-parts-later',
+        _type: 'hero',
+        variant: 'split',
+        title: 'A hero further down',
+        description:
+          'Its heading and picture may fade, because they are not the first on the page.',
+        backgroundImage: image(''),
+        partMotion: { enabled: true, headingPreset: 'reveal', imagePreset: 'scale' },
+      },
+    ],
+  },
+)
+
 /** The testimonials slider on a real page (tests/e2e/slider.spec.ts): a MotionProvider, so it drags. */
 documents.push({
   _id: 'page-slider',
@@ -1704,6 +1870,41 @@ documents.push({
       title: 'Kind words',
       items: sliderQuotes('slider-page'),
     },
+  ],
+})
+
+/** Video sections on a real page (tests/e2e/video.spec.ts): one of each source, and an ambient loop. */
+documents.push({
+  _id: 'page-video',
+  _type: 'page',
+  title: 'Video',
+  slug: { _type: 'slug', current: 'video' },
+  seo: { _type: 'seo', metaDescription: 'A page with videos.' },
+  pageBuilder: [
+    { _key: 'video-hero', _type: 'hero', title: 'Video', description: 'Hero description.' },
+    videoSection('video-youtube', {
+      title: 'YouTube film',
+      text: 'Plays from YouTube.',
+      source: 'youtube',
+      url: VIDEO_URL.youtube,
+    }),
+    videoSection('video-vimeo', {
+      title: 'Vimeo film',
+      source: 'vimeo',
+      url: 'https://vimeo.com/76979871/abcdef1234',
+    }),
+    videoSection('video-upload', {
+      title: 'Uploaded film',
+      source: 'upload',
+      file: fileRef(VIDEO_ASSET_ID),
+      captions: fileRef(CAPTIONS_ASSET_ID),
+    }),
+    videoSection('video-loop', {
+      variant: 'ambient',
+      title: 'Ambient loop',
+      text: 'A quiet loop.',
+      file: fileRef(VIDEO_ASSET_ID),
+    }),
   ],
 })
 

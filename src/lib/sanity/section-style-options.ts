@@ -64,6 +64,39 @@ export const MOTION_EASING_TITLES = {
   linear: 'Linear (steady)',
 } as const
 
+/**
+ * The per-part animation (components/motion/part-motion.ts, README "Animating individual parts"): one
+ * preset and one delay per part of a section. `inherit` follows the section's animation; `parallax`
+ * is offered only for the parts that are pictures.
+ */
+export const PART_PRESETS = [
+  'inherit',
+  'none',
+  'fade',
+  'rise',
+  'reveal',
+  'slide',
+  'scale',
+  'parallax',
+] as const
+export const PART_DELAYS = ['auto', 'short', 'long'] as const
+
+export const PART_PRESET_TITLES: Record<(typeof PART_PRESETS)[number], string> = {
+  inherit: 'Inherit',
+  none: 'None',
+  fade: 'Fade',
+  rise: 'Rise',
+  reveal: 'Reveal',
+  slide: 'Slide',
+  scale: 'Scale',
+  parallax: 'Parallax',
+}
+export const PART_DELAY_TITLES: Record<(typeof PART_DELAYS)[number], string> = {
+  auto: 'Auto',
+  short: 'Short',
+  long: 'Long',
+}
+
 /** Bounds for the exact values behind "Custom". The resolver clamps to them, the schema validates against them. */
 export const MOTION_CUSTOM = {
   durationMs: { min: 100, max: 3000 },

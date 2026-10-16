@@ -30,6 +30,11 @@ const withImage = [
   'hero-full-bleed',
   'hero-parallax',
   'hero-full-bleed-parallax',
+  'hero-parts-overlay',
+  'hero-parts-split',
+  'hero-parts-split-circle',
+  'hero-parts-split-parallax',
+  'hero-parts-full-bleed',
 ]
 
 test.beforeEach(async ({ page }) => {

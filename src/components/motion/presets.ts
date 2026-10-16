@@ -39,7 +39,7 @@ export const scaleIn: Variants = {
   visible: { opacity: 1, scale: 1, transition },
 }
 
-const STAGGER = 0.08
+export const STAGGER = 0.08
 
 /** On the parent: reveals its `staggerItem` children one after another. */
 export const staggerContainer: Variants = {
@@ -50,22 +50,10 @@ export const staggerContainer: Variants = {
 export const staggerItem: Variants = fadeUp
 
 /**
- * `fadeUp` that starts after `steps` children of a `staggerContainer` would have: for an element that
- * has to join a stagger from outside its container (the hero's slot beside the text, after the buttons).
- */
-export const fadeUpAfter = (steps: number): Variants => ({
-  hidden: { opacity: 0, y: tokens.revealDistance },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { ...slowTransition, delay: tokens.durationFast + steps * STAGGER },
-  },
-})
-
-/**
  * Props to spread on a Motion element so it plays `variants` on load. `data-reveal` is the hook
  * globals.css uses to show the element without JavaScript and for reduced motion; never start
- * content hidden without it. Don't use this on the h1 or the first image (the LCP candidates).
+ * content hidden without it. On the h1 or the first image (the LCP candidates) the variants must keep
+ * opacity at 1 (the hero's parts do, see part-motion.ts).
  */
 export const revealOnLoad = (variants: Variants) =>
   ({ 'data-reveal': '', variants, initial: 'hidden', animate: 'visible' }) as const
@@ -228,7 +216,7 @@ const clamp = (value: unknown, { min, max }: { min: number; max: number }): numb
 
 /** Seconds for Fast, Normal and Slow. Normal is the original Fade up (0.6 s). */
 const DURATION_S = { fast: 0.35, normal: tokens.durationSlow, slow: 0.9 } as const
-const DELAY_S = { none: 0, short: 0.15, long: 0.4 } as const
+export const DELAY_S = { none: 0, short: 0.15, long: 0.4 } as const
 /** One float loop, in ms, for Fast, Normal and Slow. */
 const LOOP_MS = { fast: 6000, normal: 9000, slow: 13000 } as const
 const FLOAT_DISTANCE_PX = 16
