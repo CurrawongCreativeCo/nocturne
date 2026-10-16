@@ -9,10 +9,10 @@ import {
   splitImageClass,
   splitImageFrameClass,
   splitImageShapeClass,
-  splitImageShape,
   splitImageShare,
   splitProportion,
 } from '@/features/pages/utils/hero-split'
+import { appearanceFromHeroShape, resolveImageDesign } from '@/lib/sanity/image-design-options'
 
 import { HeroPicture } from './hero-picture'
 import { HeroText } from './hero-text'
@@ -21,13 +21,15 @@ import type { SectionProps } from '../../../types'
 
 /**
  * Text on one side, the picture on the other (`imagePosition`; right unless set). `proportion` shares
- * the width and `imageShape` cuts the picture; both are set in the Design tab and default to an even
- * split with rounded corners.
+ * the width and the Image design cuts, moves and frames the picture (components/ui/framed-image.tsx);
+ * both are set in the Design tab and default to an even split with rounded corners.
  */
 export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'hero'>) {
   const imageFirst = stegaClean(data.imagePosition) === 'left'
   const proportion = splitProportion(stegaClean(data.proportion))
-  const shape = splitImageShape(stegaClean(data.imageShape))
+  // The Image design's shape wins; until it names one, the older "Image shape" decides.
+  const fallbackShape = appearanceFromHeroShape(stegaClean(data.imageShape))
+  const shape = resolveImageDesign(stegaClean(data.imageDesign), { fallbackShape }).shape
   // Without an image, a two-column grid would squeeze the text into one half.
   const hasImage = Boolean(data.backgroundImage?.asset)
   const defaults: SectionDefaults = {
@@ -72,11 +74,12 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
       <HeroPicture
         image={data.backgroundImage}
         plan={parts.image}
+        design={data.imageDesign}
+        fallbackShape={fallbackShape}
         isFirst={isFirst}
+        aspect="4/3"
         width={1200}
         sizes={`(min-width: 1024px) ${splitImageShare(proportion)}vw, 100vw`}
-        // A fixed shape reserves the space before the picture arrives, whatever the upload's ratio;
-        // the hotspot decides which part of the picture the crop keeps.
         className={splitImageClass(shape)}
         frameClassName={splitImageFrameClass(shape)}
         imageClassName={splitImageShapeClass(shape)}

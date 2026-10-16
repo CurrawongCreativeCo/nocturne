@@ -126,6 +126,12 @@ const processSteps = (id) => [
 const VIDEO_ASSET_ID = 'file-0123456789abcdef0123456789abcdef01234567-mp4'
 const CAPTIONS_ASSET_ID = 'file-89abcdef0123456789abcdef0123456789abcdef-vtt'
 const fileRef = (id) => ({ _type: 'file', asset: ref(id) })
+const FRAME_ASSET_ID = 'file-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-svg'
+const FRAME_URL =
+  'https://cdn.sanity.io/files/test/test/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.svg'
+
+/** An `imageDesign` value (README, "Image design"). */
+const imageDesign = (fields) => ({ _type: 'imageDesign', ...fields })
 const VIDEO_URL = {
   youtube: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   vimeo: 'https://vimeo.com/76979871',
@@ -468,6 +474,117 @@ export const documents = [
         _type: 'richText',
         body: [
           block(['Parallax text 4'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+    ],
+  },
+  {
+    // Pictures that move inside a still frame (tests/e2e/framed-image.spec.ts).
+    _id: 'page-framed-images',
+    _type: 'page',
+    title: 'Framed images',
+    slug: { _type: 'slug', current: 'framed-images' },
+    seo: { _type: 'seo', metaDescription: 'Pictures that move inside a still frame.' },
+    pageBuilder: [
+      {
+        _key: 'framed-text-1',
+        _type: 'richText',
+        body: [
+          block(['Framed text 1'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        _key: 'framed-builtin',
+        _type: 'mediaText',
+        title: 'Built-in frame',
+        body: [block(['A framed picture that drifts behind its frame.'])],
+        image: image('Built-in frame picture'),
+        imagePosition: 'right',
+        imageDesign: imageDesign({ appearance: 'framed', frame: 'double-line', motion: 'medium' }),
+      },
+      {
+        _key: 'framed-text-2',
+        _type: 'richText',
+        body: [
+          block(['Framed text 2'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        _key: 'framed-custom',
+        _type: 'mediaText',
+        title: 'Approved custom frame',
+        body: [block(['The frame is an approved SVG, used as a mask.'])],
+        image: image('Custom frame picture'),
+        imagePosition: 'left',
+        imageDesign: imageDesign({
+          appearance: 'framed',
+          frame: 'custom',
+          customFrame: ref('frame-leaf'),
+          motion: 'subtle',
+        }),
+      },
+      {
+        _key: 'framed-text-3',
+        _type: 'richText',
+        body: [
+          block(['Framed text 3'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        // Shape and motion with no frame at all: the clip still holds.
+        _key: 'framed-circle',
+        _type: 'mediaText',
+        title: 'Circle with parallax',
+        body: [block(['A circle is always square.'])],
+        image: image('Circle picture'),
+        imagePosition: 'right',
+        imageDesign: imageDesign({ appearance: 'circle', motion: 'subtle' }),
+      },
+      {
+        _key: 'framed-text-4',
+        _type: 'richText',
+        body: [
+          block(['Framed text 4'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        // The section's own parallax moves the picture inside its frame, not the frame (stored values unchanged).
+        _key: 'framed-section-parallax',
+        _type: 'mediaText',
+        title: 'Section parallax',
+        body: [block(['Only the picture drifts.'])],
+        image: image('Section parallax picture'),
+        imagePosition: 'right',
+        style: { _type: 'sectionStyle', motion: 'parallax' },
+      },
+      {
+        _key: 'framed-text-5',
+        _type: 'richText',
+        body: [
+          block(['Framed text 5'], { style: 'h2' }),
+          block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+        ],
+      },
+      {
+        // A frame with no motion: the picture neither moves nor is scaled.
+        _key: 'framed-still',
+        _type: 'mediaText',
+        title: 'No motion',
+        body: [block(['Nothing moves here.'])],
+        image: image('Still picture'),
+        imagePosition: 'right',
+        imageDesign: imageDesign({ appearance: 'framed', frame: 'corner-brackets' }),
+      },
+      {
+        _key: 'framed-text-6',
+        _type: 'richText',
+        body: [
+          block(['Framed text 6'], { style: 'h2' }),
           block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
         ],
       },
@@ -869,6 +986,21 @@ export const documents = [
     url: 'https://cdn.sanity.io/files/test/test/89abcdef0123456789abcdef0123456789abcdef.vtt',
     mimeType: 'text/vtt',
     size: 400,
+  },
+  {
+    // An approved custom frame (image design, tests/e2e/framed-image.spec.ts): the specs stand in for the CDN file.
+    _id: FRAME_ASSET_ID,
+    _type: 'sanity.fileAsset',
+    url: FRAME_URL,
+    mimeType: 'image/svg+xml',
+    size: 420,
+  },
+  {
+    _id: 'frame-leaf',
+    _type: 'frame',
+    title: 'Leaf border',
+    svg: fileRef(FRAME_ASSET_ID),
+    _updatedAt: UPDATED,
   },
   {
     // Has its own share image: no generated one may be added next to it.
@@ -1394,6 +1526,16 @@ const gallerySections = [
   galleryHero('split-square', { variant: 'split', imageShape: 'square' }),
   galleryHero('split-circle', { variant: 'split', imageShape: 'circle' }),
   galleryHero('split-arch-left', { variant: 'split', imagePosition: 'left', imageShape: 'arch' }),
+  // The Image design replaces the older Image shape (hero-split.ts): it wins, and a hero without one keeps its shape.
+  galleryHero('split-framed', {
+    variant: 'split',
+    imageDesign: imageDesign({ appearance: 'framed', frame: 'organic-brush' }),
+  }),
+  galleryHero('split-design-circle', {
+    variant: 'split',
+    imageShape: 'arch',
+    imageDesign: imageDesign({ appearance: 'circle' }),
+  }),
   // A hotspot at the lower left: the crop to 4:3 keeps it in view (object-position, hero-variants.spec.ts).
   galleryHero('split-hotspot', {
     variant: 'split',
@@ -1506,6 +1648,43 @@ const gallerySections = [
     imagePosition: 'right',
   }),
   galleryMediaText('no-image', 'Without an image', { imagePosition: 'right' }),
+  // Image design (README, "Image design"): a shape, a frame and parallax inside a still frame. The
+  // gallery has no MotionProvider and the baselines use reduced motion, so these show the still,
+  // unscaled picture with its frame.
+  ...[
+    ['rounded', { appearance: 'rounded' }],
+    ['circle', { appearance: 'circle' }],
+    ['arch', { appearance: 'arch' }],
+    ['framed', { appearance: 'framed' }],
+    ['frame-double-line', { appearance: 'framed', frame: 'double-line' }],
+    ['frame-offset-border', { appearance: 'framed', frame: 'offset-border' }],
+    ['frame-organic-brush', { appearance: 'framed', frame: 'organic-brush' }],
+    ['frame-corner-brackets', { appearance: 'framed', frame: 'corner-brackets' }],
+    ['frame-custom', { appearance: 'framed', frame: 'custom', customFrame: ref('frame-leaf') }],
+    [
+      'frame-tweaked',
+      { appearance: 'framed', frame: 'thin-line', frameColour: 'highlight', frameInset: 8 },
+    ],
+    ['parallax-subtle', { motion: 'subtle' }],
+    ['parallax-medium', { appearance: 'framed', frame: 'thin-line', motion: 'medium' }],
+    [
+      'parallax-custom',
+      {
+        appearance: 'rounded',
+        motion: 'subtle',
+        custom: true,
+        travel: 6,
+        direction: 'up',
+        scale: 1.12,
+      },
+    ],
+  ].map(([id, design]) =>
+    galleryMediaText(`image-${id}`, `Image design: ${id}`, {
+      image: image('Picture'),
+      imagePosition: 'right',
+      imageDesign: imageDesign(design),
+    }),
+  ),
   galleryFeatures(2),
   galleryFeatures(3),
   galleryFeatures(4),
@@ -1737,6 +1916,15 @@ const gallerySections = [
     images: galleryImages('gallery-grid-four', 8),
   },
   {
+    _key: 'gallery-grid-rounded',
+    _type: 'gallery',
+    variant: 'grid',
+    title: 'Rounded corners',
+    columns: 3,
+    imageDesign: imageDesign({ appearance: 'rounded' }),
+    images: galleryImages('gallery-grid-rounded', 3),
+  },
+  {
     _key: 'gallery-masonry',
     _type: 'gallery',
     variant: 'masonry',
@@ -1803,6 +1991,18 @@ const gallerySections = [
     selection: 'all',
     title: 'Meet the team',
     text: 'The people who will look after you.',
+  },
+  {
+    _key: 'team-grid-circle',
+    _type: 'team',
+    variant: 'grid',
+    selection: 'picked',
+    title: 'Portraits in circles',
+    imageDesign: imageDesign({ appearance: 'circle' }),
+    members: [
+      { _key: 'pick-circle-dev', ...ref('teamMember-dev') },
+      { _key: 'pick-circle-ann', ...ref('teamMember-ann') },
+    ],
   },
   {
     _key: 'team-slider',

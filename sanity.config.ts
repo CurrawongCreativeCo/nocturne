@@ -18,6 +18,7 @@ import { studioBrand } from './src/config/studio-brand/client'
 import { blogSchemaTypes } from './src/features/blog/schemas'
 import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
+import { framesSchemaTypes } from './src/features/frames/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { sectionTypes } from './src/features/pages/schemas/sections'
 import { pageTemplates } from './src/features/pages/schemas/templates'
@@ -96,6 +97,7 @@ export default defineConfig({
       ...experimentSchemaTypes,
       ...siteSchemaTypes,
       ...teamSchemaTypes,
+      ...framesSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,
     ],

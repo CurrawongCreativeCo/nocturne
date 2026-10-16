@@ -86,6 +86,7 @@ const LISTED_TYPES = new Set([
   'category',
   'stripePrice',
   'teamMember',
+  'frame',
   // new-document:listed
 ])
 
@@ -140,9 +141,13 @@ export const structure: StructureResolver = (S, context) => {
     idOf,
     CLIENT_WEBSITE_SETTINGS_IDS,
   )
-  const design = DESIGN_SINGLETONS.filter(({ type }) => hasType(type)).map(({ type, title }) =>
-    singletonItem(S, type, title, ColorWheelIcon),
-  )
+  const design = [
+    ...DESIGN_SINGLETONS.filter(({ type }) => hasType(type)).map(({ type, title }) =>
+      singletonItem(S, type, title, ColorWheelIcon),
+    ),
+    // The approved SVG frames a picture can use (agency only, like the rest of Design).
+    ...(hasType('frame') ? [S.documentTypeListItem('frame').title('Image frames')] : []),
+  ]
 
   const items: Item[] = [
     // new-singleton:list

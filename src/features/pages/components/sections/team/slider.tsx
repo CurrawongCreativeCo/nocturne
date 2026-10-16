@@ -20,6 +20,7 @@ export function TeamSlider({ data, isFirst }: SectionProps<'team'>) {
           <TeamCard
             key={member._id}
             member={member}
+            design={data.imageDesign}
             headingLevel={headingLevelFor(data)}
             eager={isFirst && index === 0}
           />

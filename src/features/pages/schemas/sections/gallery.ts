@@ -2,6 +2,7 @@ import { ImagesIcon } from '@sanity/icons/Images'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -96,6 +97,10 @@ export const gallery = defineType({
         of: [defineArrayMember(pictureMember)],
         options: { layout: 'grid' },
         validation: (rule) => [rule.required().min(1), rule.max(MAX_IMAGES)],
+      }),
+      // Masonry keeps every picture's own shape, so a shape, motion or frame means nothing there.
+      imageDesignField({
+        hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant === 'masonry',
       }),
       accessField,
       // Shown first in the Content tab.
