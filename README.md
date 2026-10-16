@@ -2252,6 +2252,47 @@ content_).
   size), reduced motion, no JavaScript and Animation _None_. The gallery has `stats-inline`, `stats-cards` and
   `stats-cards-six` (dark, no animation); the `/stats` fixture page holds an animated and a still section below the fold.
 
+### Process timeline
+
+A numbered list of steps ("Discover, Design, Build, Launch") beside a line that fills as the visitor scrolls.
+
+**For editors.** Add a **Process** section. It starts with four example steps (replace them) and looks finished as it
+is. Each step has a **title**, an optional short **label** above it ("Week 1"), optional **text** and an optional
+**icon or image** (decorative; the title says what it means). A section holds two to ten steps, in the order the page
+reads; Studio warns when text is too long and never blocks publishing. The agency-only **Layout** is _Vertical_ (one
+line down the left, every step beside it) or _Alternating_ (from tablet width the line runs down the middle and steps
+fall to the left and right in turn; phones always see the vertical layout). The steps appear one after another as they
+scroll into view (the _Stagger_ animation); set the Design tab's **Animation** to _None_ and they are simply there. The
+line fills as the page scrolls either way.
+
+**For developers.**
+
+- **Markup:** an `<ol>` of `<li>` steps, each with an `aria-hidden` number on the line, an optional label, an `<h3>`
+  title and text. The line is decorative (`aria-hidden`). The order is the order of the `steps` array.
+- **Components** (`src/features/pages/components/sections/process/`): `index.tsx` picks the layout from `variant`;
+  `vertical.tsx` and `alternating.tsx` differ only in where the line runs and which side a step sits on, and share
+  `process-layout.tsx` (header, line, list) and `process-step.tsx` (one step, a `MotionLi`).
+- **The line** (`process-timeline.tsx`, client): `useScroll({ target, offset: ['start 80%', 'end 60%'] })` drives a
+  `scaleY` on an `m.div` with `transform-origin: top`. It is empty when the steps' top is 80% down the screen and full
+  when their bottom is 60% down. Only `transform` animates, and Motion uses a ScrollTimeline where the browser has one,
+  so there is no scroll listener of ours to clean up. The track is faded out over its last 4 rem so it doesn't trail
+  below the last marker.
+- **Lazy:** server components import `process-timeline-lazy.tsx` (`next/dynamic` in a client file, like `LazyParallax`),
+  so Motion's scroll code is a separate chunk only a page with a Process section downloads. The home page budget is
+  unchanged. The server still renders it.
+- **No JavaScript or reduced motion:** the scale is attached only after hydration and never under
+  `prefers-reduced-motion`, so the server HTML, visitors without JavaScript and visitors who ask for less motion all see
+  the line fully drawn. Steps carry `data-reveal`, which `globals.css` forces visible in both cases.
+- **Steps reveal** with the section's animation preset (`stagger` by default, so `DEFAULTS.motion` is `'stagger'` in
+  `process-layout.tsx` and the schema's initial style). The section resolves it with `sectionMotion` and each step plays
+  its child variant as it arrives, rather than the whole list waiting for its top to enter, which on a tall list would
+  reveal steps before they are on screen. The `SectionFrame` itself is given `motion: 'none'` so nothing animates twice.
+- **Tests:** `tests/e2e/process.spec.ts` checks the `<ol>` and step order in the server HTML, axe on both layouts and a
+  page, the line empty above, part drawn midway and full below the timeline, the reveal, reduced motion and no
+  JavaScript. The About fixture page holds an alternating timeline, so the memory test (`memory.spec.ts`) repeats it.
+  The gallery has `process-vertical` and `process-alternating` (it has no `MotionProvider`, so it shows the layout only);
+  the `/process` fixture page holds one below the fold.
+
 ### Type flow
 
 ```

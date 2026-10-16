@@ -20,6 +20,22 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.4.0] - 2026-10-16
+
+### Added
+
+- **Process section:** _Add item → Process_, a numbered `<ol>` of steps beside a line that fills as the visitor scrolls
+  (`useScroll` into a `scaleY` on an `m.div`, transform only). Two layouts: _Vertical_ (default) and _Alternating_
+  (left and right of a centre line from `md`; phones are always vertical). Fields: title, intro and two to ten steps
+  (title, text, optional label such as "Week 1", optional decorative icon or image). Starts with four example steps.
+  Steps reveal with the Stagger animation; Animation _None_ turns that off. The line is fully drawn under reduced motion
+  and without JavaScript, and its scroll code loads only on pages that use the section. See README, _Process timeline_.
 - **Logo strip marquee:** the Logo strip gains a **Layout** picker (_Grid_, the default and unchanged, and _Marquee_). The
   marquee is an endless CSS-driven row of logos (the list rendered twice, the copy `aria-hidden` with `tabindex="-1"`
   links; `translateX` only) with faded edges (`mask-image`), pausing on hover and focus and a visible Pause / Play button
@@ -328,9 +344,11 @@ you start a release.
   outline from `--tone-accent-ink` (the old rule resolved `--color-ink` to the accent itself, so text matched the
   background).
 
-### Fixed
-
 ### Breaking changes / migration steps
+
+**Process section:** run `npm run typegen` after merging (`process` is a new section type and fragment). No content
+migration: nothing existing changes. Add screenshot baselines for the two new gallery entries (`process-vertical`,
+`process-alternating`) with the **Update visual baselines** workflow.
 
 **Logo strip marquee:** run `npm run typegen` after merging (`variant` and `logoColour` are new in `logoCloudFragment`) and
 `npm run tokens` if you edit `tokens.json` (the new `motion.marquee-per-logo` token is optional; without it the marquee
@@ -702,7 +720,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.0.0...v1.1.0
