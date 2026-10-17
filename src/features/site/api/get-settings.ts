@@ -6,6 +6,7 @@ import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity
 
 import { SETTINGS_QUERY } from './queries'
 import { browserIconLinks } from '../utils/browser-icon'
+import { hasBusinessDetails } from '../utils/business-details'
 
 export async function getSettings(mode: FetchMode) {
   // Menu links resolve page slugs, so a page change can change the settings result too.
@@ -22,7 +23,8 @@ export async function getSettings(mode: FetchMode) {
       TAGS.page,
     ],
   })
-  return data
+  // An empty Business info document (the setup wizard creates one) counts as none.
+  return data && !hasBusinessDetails(data.business) ? { ...data, business: null } : data
 }
 
 /** Site-wide defaults; each page's own metadata overrides them. Shares the published settings entry. */
