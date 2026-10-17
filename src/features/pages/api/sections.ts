@@ -278,6 +278,18 @@ export const processFragment = /* groq */ `
   }
 `
 
+export const embedFragment = /* groq */ `
+  _type == "embed" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    title,
+    text,
+    provider,
+    url,
+    height,
+    customHeight
+  }
+`
+
 export const linkListFragment = /* groq */ `
   _type == "linkList" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -353,6 +365,7 @@ const sectionsFragment = /* groq */ `
   ${teamFragment},
   ${videoFragment},
   ${processFragment},
+  ${embedFragment},
   ${linkListFragment},
   ${eventsFragment},
   _type

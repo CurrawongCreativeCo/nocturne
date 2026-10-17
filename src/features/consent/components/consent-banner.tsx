@@ -3,11 +3,11 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
 import { BasicLink } from '@/components/ui/basic-link'
+import { ACCEPT_ALL, REJECT_ALL, type StoredConsent } from '@/lib/consent/consent-state'
+import { closeConsent, saveConsent, useConsentState } from '@/lib/consent/consent-store'
 
 import type { ConsentCopy } from '../types'
 import { COOKIE_SETTINGS_ID } from './cookie-settings-button'
-import { ACCEPT_ALL, REJECT_ALL, type StoredConsent } from '../utils/consent-state'
-import { closeConsent, saveConsent, useConsentState } from '../utils/consent-store'
 
 const DEFAULTS = {
   title: 'Cookies on this site',

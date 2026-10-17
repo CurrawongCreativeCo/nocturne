@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- **Embed section:** an approved third-party form, map or player (Typeform, Google Maps, Spotify) behind a click-to-load card.
+  Editors pick a service and paste its public address, checked against that service's pattern (no embed code, HTML or
+  script ever); _Height_ is a Short, Medium or Tall picker that follows the service when unset, with an agency-only exact
+  height in Advanced. Nothing loads before the click; a service that sets cookies says so first and waits for the
+  **marketing** consent category (cookie settings and a link to the service stand in while it is off). The iframe gets the
+  section heading as its `title`, `loading="lazy"` and the narrowest sandbox the service works with. Adds the shared provider
+  registry `src/config/embed-providers.ts` that booking reuses, and moves the consent store (`consent-state`,
+  `consent-store`) from `src/features/consent/utils/` to `src/lib/consent/` so other features can read the visitor's choice.
+  See README, _Embed_.
 - **Enquiries:** with `ENQUIRIES_STORE=1` (and `SANITY_WRITE_TOKEN`) a form submission accepted by Resend is also stored as an
   `enquiry` document: the form (weak reference and title), every answer as `{ label, value }`, the page path, `createdAt`, a
   `status` (new, read, archived) and the referrer and UTM values from hidden inputs. It only writes to a dataset it can confirm is
@@ -125,6 +134,7 @@ None for content: existing links keep their stored values, and nothing is switch
 Webhook mode: add `"panel"`, `"event"` and `"eventCategory"` to the Sanity webhook filter (README, _Live mode vs. webhook mode_). Header, footer and menu buttons can't open panels (they use their fallback link). Clients now see _Reusable content → Panels_ in the Studio. `events` is a new feature switch (on by default); a client who doesn't want events sets `events: false` in `site.profile.ts`.
 For Enquiries: nothing happens until you set `ENQUIRIES_STORE=1`; then see README, _Enquiries_ (private dataset, `SANITY_WRITE_TOKEN`,
 the repository secret for the retention workflow, and the collection notice in the form's _Intro_). The `enquiry` type is new in the schema.
+A project that imports `consent-state` or `consent-store` from `src/features/consent/utils/` must now import them from `@/lib/consent/`.
 
 ## [1.4.0] - 2026-10-16
 

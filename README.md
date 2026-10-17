@@ -483,7 +483,7 @@ src/
       utils/                       allowed-members (AUTH_ALLOWED_EMAILS), providers (env), safe-path, messages
     consent/                       cookie banner, consent store (localStorage), analytics loader
       components/                  consent-banner, cookie-settings-button, analytics-scripts
-      utils/                       consent-state (parse/serialize), consent-store (client), analytics-snippets
+      utils/                       analytics-snippets, clear-analytics-storage (the choice itself lives in src/lib/consent: consent-state, consent-store)
     pricing/                       Stripe prices: webhook sync, Checkout action, stripePrice schema
       api/                         handle-webhook.ts, write-prices.ts, checkout.ts (server action), queries.ts
       components/                  checkout-button (client form)
@@ -2216,7 +2216,7 @@ about), a **Title** (required; also names the Play button) and an optional **Des
 - **Shape** (16:9 default, 4:3, 1:1 or 21:9) sets the frame of an Embed. An unset or unknown value is 16:9.
 - **JavaScript cost.** The page itself stays server-rendered. The only client code is `video-facade.tsx` (a button and
   one piece of state) and `ambient-player.tsx` (a media-query store and the Pause button), both plain React with no Motion.
-  They load through `dynamic` wrappers (`video-facade-lazy.tsx`, `ambient-player-lazy.tsx`, the `LazySlider` pattern), so
+  They load through `dynamic` wrappers (`lazy-facade.tsx`, shared with the Embed section's card because each wrapper is itself shared JavaScript, and `ambient-player-lazy.tsx`; the `LazySlider` pattern), so
   a page without a Video section downloads neither: imported directly, they added about 1.5 KB gzipped to every page and
   pushed the home page over its budget. The home page fixture includes an Embed, so the JavaScript budget test covers a
   page that has one.
@@ -2237,6 +2237,56 @@ https://player.vimeo.com`, and `media-src` / `img-src` for `https://cdn.sanity.i
 - **Launch check.** Not yet confirmed against the live Sanity CDN: that `cdn.sanity.io/files/...` serves a `.vtt` with
   CORS headers (browsers fetch caption tracks with CORS) and plays the MP4 with range requests. Open an uploaded video with
   captions on a staging page before launch.
+
+### Embed
+
+The **Embed** section (_Add item → Embed_) puts an **approved** third-party form, map or player in a page: Typeform,
+Google Maps and Spotify. It never takes embed code, HTML or a script: an editor picks a service and pastes its public
+address, and the page rebuilds the iframe address from the ids in it.
+
+- **Fields.** _Heading_ (also the iframe's `title`, so say what it is: "Book a consultation"), an optional _Description_,
+  _Service_, _Address_ (shown once a service is chosen; publishing is blocked if it isn't one of that service's
+  addresses, and the message shows an example) and _Height_. _Height_ is a picture picker of **Short** (240 px),
+  **Medium** (480 px) and **Tall** (720 px). Left alone it follows the service (a Spotify player is short; a form or map
+  is medium), and the picker shows that choice as selected without storing it. Agencies also get **Exact height (px)**
+  (120 to 1600) in the Design tab's collapsed _Advanced_ area; it replaces the preset.
+- **What visitors see.** A card with the service's name, a short note and a button ("Show the form", "Show the map" or
+  "Show the player"). Nothing from the service loads until the button is pressed: no iframe, no request, no cookie. The
+  note says the service sets cookies before anything loads, and a link (_Open on Typeform_) always offers the service's
+  own page in a new tab, which is also all there is without JavaScript. After the click the iframe has the section's
+  heading as its `title`, `loading="lazy"`, `referrerpolicy="strict-origin-when-cross-origin"` and focus moves into it.
+  The card and the iframe share one height, so nothing shifts.
+- **Consent.** Every provider in the registry sets cookies, so each asks for the **marketing** category
+  (`src/features/consent`; the store itself is shared, in `src/lib/consent/`). While marketing is off, or the visitor
+  hasn't chosen, the card says so, offers **Cookie settings** (which reopens the banner) and the link to the service
+  instead of the button. Accepting marketing in the banner brings the button back with no reload, and withdrawing it
+  removes an iframe that is already showing. Until the browser has read the choice the card shows the same note as for a visitor who hasn't allowed marketing, so the page looks identical before and after hydration (which keeps the screenshot stable); a returning visitor who allowed marketing sees the button a moment later. A provider with `consent: null` in the registry skips the gate.
+- **Sandbox.** The iframe's `sandbox` is the narrowest token list its provider works with, kept in the registry
+  (`allow-scripts allow-same-origin` plus what that service needs: forms, popups that escape the sandbox so the
+  service's own links work, presentation for Spotify). Never `allow-top-navigation` or `allow-modals`; a test fails if a
+  provider adds either.
+- **The provider registry** is `src/config/embed-providers.ts`, shared with booking (task 95): `id`, `label`, `noun`,
+  `delivery` (`iframe` or `script`), `displays` (`inline` or `dialog`), `setsCookies`, `consent`, the URL `pattern`
+  (matched against `https://host/path` only, so look-alike hosts, other ports, credentials and `http` are refused), a
+  `resolve` that returns the iframe address and the service's own page from the matched ids, `sandbox`, `allow` and
+  `defaultHeight`. The Embed section offers `delivery: 'iframe'` providers that list `inline`. **To add a service**: add
+  an entry (a regular expression with named groups, never a catch-all), the registry's test checks that its example
+  resolves and that its sandbox stays narrow, then list its iframe host in your CSP if the project has one.
+- **Security headers.** As with Video, `next.config.ts` sets no `frame-src`: if you add a CSP, allow
+  `frame-src https://form.typeform.com https://www.google.com https://open.spotify.com`. `Permissions-Policy` already
+  denies camera, microphone and location, so a Typeform with a video or audio question can't use them.
+- **JavaScript cost.** The page stays server-rendered. The only client code is `embed-facade.tsx` (one piece of state and
+  the shared consent store, with no listeners, observers or timers of its own), loaded through a `dynamic` wrapper
+  (`lazy-facade.tsx`, shared with the Video facade: a second wrapper cost the home page about 100 bytes of a budget with no headroom), so a page without an Embed downloads none of it.
+- **Logic and tests.** `src/config/embed-providers.ts` (unit tested: every address form, look-alike and injected
+  addresses, heights, the notes) and the section's schema test. End to end, `tests/e2e/embed.spec.ts` on `/embed`: no
+  iframe and no provider request before the click, the cookie note, sandbox and `title`, heights, the open link, the
+  consent states (accepted, rejected, undecided, changed in the banner) and axe in each. The section gallery has an
+  `embed` entry; its screenshot baseline needs the **Update visual baselines** workflow (macOS skips visual tests).
+- **Launch check.** Not yet confirmed against the live providers: that each sandbox is enough for the service to work
+  (a Typeform submits and shows its thank-you screen, the map's _View larger map_ and the Spotify _Open in Spotify_
+  links open, a Spotify track plays), and that the _Short_ height suits Spotify's player. Try one of each on a staging
+  page before launch.
 
 ### Cursors and interaction feedback
 

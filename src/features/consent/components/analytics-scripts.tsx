@@ -4,10 +4,10 @@ import Script from 'next/script'
 import { useEffect, useRef } from 'react'
 
 import { gaId, plausibleDomain, posthogHost, posthogKey } from '@/config/analytics'
+import { useConsentState } from '@/lib/consent/consent-store'
 
 import { gaInlineScript, posthogScriptUrl } from '../utils/analytics-snippets'
 import { clearAnalyticsStorage } from '../utils/clear-analytics-storage'
-import { useConsentState } from '../utils/consent-store'
 
 declare global {
   interface Window {

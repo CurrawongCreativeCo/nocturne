@@ -149,6 +149,14 @@ const videoSection = (id, fields) => ({
   ...fields,
 })
 
+// Embed section (tests/e2e/embed.spec.ts). The providers are never reached: the spec stands in for them.
+const EMBED_URL = {
+  typeform: 'https://form.typeform.com/to/AbCd1234',
+  maps: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3312.0!2d151.17!3d-33.89!2m3!1f0!2f0!3f0',
+  spotify: 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M',
+}
+const embedSection = (id, fields) => ({ _key: id, _type: 'embed', ...fields })
+
 // The blog: 14 posts, so the index paginates (12 + 2). The first four have categories, set up so
 // "Welcome to the blog" has three related posts whose score order differs from their date order:
 // the roundup shares two categories but is oldest of the three.
@@ -2242,6 +2250,12 @@ const gallerySections = [
     seeAllLink: external('https://example.com/events'),
     seeAllLabel: 'See all events',
   })),
+  embedSection('embed', {
+    title: 'Book a consultation',
+    text: 'Tell us about your project and we will be in touch.',
+    provider: 'typeform',
+    url: EMBED_URL.typeform,
+  }),
   // new-section:gallery
 ]
 
@@ -2374,6 +2388,36 @@ documents.push({
         image: image(name),
       })),
     },
+  ],
+})
+
+/** Embed sections on a real page (tests/e2e/embed.spec.ts): one per approved provider, and an exact height. */
+documents.push({
+  _id: 'page-embed',
+  _type: 'page',
+  title: 'Embed',
+  slug: { _type: 'slug', current: 'embed' },
+  seo: { _type: 'seo', metaDescription: 'A page with embeds.' },
+  pageBuilder: [
+    { _key: 'embed-hero', _type: 'hero', title: 'Embed', description: 'Hero description.' },
+    embedSection('embed-typeform', {
+      title: 'Book a consultation',
+      text: 'Tell us about your project.',
+      provider: 'typeform',
+      url: EMBED_URL.typeform,
+      height: 'tall',
+    }),
+    embedSection('embed-maps', {
+      title: 'Find the studio',
+      provider: 'google-maps',
+      url: EMBED_URL.maps,
+    }),
+    embedSection('embed-spotify', {
+      title: 'Our studio playlist',
+      provider: 'spotify',
+      url: EMBED_URL.spotify,
+      customHeight: 352,
+    }),
   ],
 })
 

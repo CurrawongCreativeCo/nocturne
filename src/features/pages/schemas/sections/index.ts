@@ -1,4 +1,5 @@
 import { ctaBanner } from './cta-banner'
+import { embed } from './embed'
 import { events } from './events'
 import { faq } from './faq'
 import { featuresGrid } from './features-grid'
@@ -50,6 +51,7 @@ export const sectionTypes = [
   team,
   video,
   process,
+  embed,
   linkList,
   events,
   // new-section:register
