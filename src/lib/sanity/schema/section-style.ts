@@ -86,7 +86,7 @@ import {
 
 /**
  * Layout and style options every page-builder section shares, set by the agency in the section's
- * "Design" tab: Background and Animation as pictures, then a collapsed "More layout options" (space,
+ * "Design" tab: Background and Animation as pictures, then a collapsed "Advanced: layout" (space,
  * width, alignment, anchor). The tab and its fields are hidden from clients. SectionFrame (components/ui/section-frame.tsx) turns them into classes; the
  * value lists below are the contract with `resolveSectionStyle` (components/ui/section-style.ts).
  * An empty style renders each section as it always has, so existing content needs no migration.
@@ -132,19 +132,19 @@ export const sectionStyle = defineType({
   fieldsets: [
     {
       name: 'motionAdvanced',
-      title: 'More animation options',
+      title: 'Advanced: animation',
       description: 'Fine-tune the chosen animation. Only the options it uses are shown.',
       options: { collapsible: true, collapsed: true },
     },
     {
       name: 'layoutOptions',
-      title: 'More layout options',
+      title: 'Advanced: layout',
       description: 'Space, width, alignment and anchor. The defaults suit most sections.',
       options: { collapsible: true, collapsed: true },
     },
     {
       name: 'edgeAdvanced',
-      title: 'More edge options',
+      title: 'Advanced: edge',
       description: 'Turn the shape inside out, or set the height for each screen size.',
       options: { collapsible: true, collapsed: true },
     },
@@ -165,19 +165,20 @@ export const sectionStyle = defineType({
         {
           value: 'alt',
           title: SECTION_TONE_TITLES.alt,
-          description: 'A light grey band.',
+          description: 'A gentle tint of the page colour, for bands and cards.',
           thumbnail: ToneAltThumbnail,
         },
         {
           value: 'inverse',
           title: SECTION_TONE_TITLES.inverse,
-          description: 'Light text on dark.',
+          description:
+            'The opposite of the page: light text on dark, or dark on light on a dark site.',
           thumbnail: ToneInverseThumbnail,
         },
         {
           value: 'accent',
           title: SECTION_TONE_TITLES.accent,
-          description: 'The brand colour.',
+          description: 'The Primary brand colour.',
           thumbnail: ToneAccentThumbnail,
         },
       ],
@@ -187,7 +188,7 @@ export const sectionStyle = defineType({
       name: 'gradient',
       title: 'Gradient',
       description:
-        'A brand gradient behind the content, from Design settings. The background above still sets the text colours. A picture, if you add one, covers it.',
+        'A brand gradient behind the content, from Design → Brand colours. The background above still sets the text colours. A picture, if you add one, covers it.',
       type: 'string',
       // The picker is hidden altogether while Design settings has no gradients.
       options: { gradientPicker: true },
@@ -199,7 +200,7 @@ export const sectionStyle = defineType({
             const gradients = await fetchBrandGradients(getClient({ apiVersion: '2025-01-01' }))
             const chosen = gradients.find((gradient) => gradient.slug === value)
             if (!chosen) {
-              return 'This gradient is no longer in Design settings, so the section shows no gradient. Choose another, or clear it.'
+              return 'This gradient is no longer in Brand colours, so the section shows no gradient. Choose another, or clear it.'
             }
             return (
               backgroundContrastProblem({

@@ -95,7 +95,7 @@ export function backgroundContrastProblem({
     if (worst.ratio >= BODY_TEXT_RATIO) return null
     return {
       ratio: worst.ratio,
-      message: `${worst.kind === 'body' ? 'Text' : 'Secondary text'} may be hard to read on this gradient: one of its colours gives ${pct(worst.ratio)} (text needs ${BODY_TEXT_RATIO}:1). Pick a darker or lighter background, or change the gradient in Design settings.`,
+      message: `${worst.kind === 'body' ? 'Text' : 'Secondary text'} may be hard to read on this gradient: one of its colours gives ${pct(worst.ratio)} (text needs ${BODY_TEXT_RATIO}:1). Pick a darker or lighter background, or change the gradient in Design → Brand colours.`,
     }
   }
 

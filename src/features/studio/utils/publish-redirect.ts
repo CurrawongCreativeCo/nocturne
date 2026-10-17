@@ -53,6 +53,17 @@ export function detectAddressChange(
   return { from, to }
 }
 
+/**
+ * Whether Publish asks first: for a first publish (the address goes live) and for an address
+ * change (the redirect choice). An edit to a live page at the same address publishes straight away.
+ */
+export function needsPublishConfirmation(
+  hasPublished: boolean,
+  change: AddressChange | null,
+): boolean {
+  return !hasPublished || change !== null
+}
+
 export type RedirectPlan =
   /** Safe to create. `chained` are redirects that already point at the old address and will take an extra hop. */
   | { kind: 'create'; chained: string[] }

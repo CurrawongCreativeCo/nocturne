@@ -25,7 +25,7 @@ describe('variantField', () => {
 
 describe('variantSubtitle', () => {
   it('names the chosen variant and the tone', () => {
-    expect(variantSubtitle('Hero', variants, 'split', 'inverse')).toBe('Hero · Split · Dark')
+    expect(variantSubtitle('Hero', variants, 'split', 'inverse')).toBe('Hero · Split · Contrast')
   })
 
   it('leaves out an unset tone', () => {
@@ -34,22 +34,22 @@ describe('variantSubtitle', () => {
   })
 
   it('shows the default for an unset or unknown variant', () => {
-    expect(variantSubtitle('Hero', variants, undefined, 'alt')).toBe('Hero · Overlay · Soft')
+    expect(variantSubtitle('Hero', variants, undefined, 'alt')).toBe('Hero · Overlay · Tinted')
     expect(variantSubtitle('Hero', variants, 'future')).toBe('Hero · Overlay')
   })
 })
 
 describe('joinSubtitle and toneTitle', () => {
   it('join the parts that exist', () => {
-    expect(joinSubtitle('FAQ', 0, undefined, '', null, false, 'Soft')).toBe('FAQ · 0 · Soft')
+    expect(joinSubtitle('FAQ', 0, undefined, '', null, false, 'Tinted')).toBe('FAQ · 0 · Tinted')
   })
 
   it('name each tone the way the Background picker does', () => {
     expect(['surface', 'alt', 'inverse', 'accent'].map(toneTitle)).toEqual([
-      'Surface',
-      'Soft',
-      'Dark',
-      'Accent',
+      'Page',
+      'Tinted',
+      'Contrast',
+      'Brand',
     ])
     expect(toneTitle(undefined)).toBeUndefined()
   })

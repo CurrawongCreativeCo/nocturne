@@ -1,8 +1,10 @@
 import { ComposeIcon } from '@sanity/icons/Compose'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
-import { postPath } from '@/config/paths'
+import { siteLanguage } from '@/config/env'
 import { imageField } from '@/lib/sanity/schema/image-field'
+
+import { formatDate } from '../utils/format-date'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
@@ -57,21 +59,11 @@ export const post = defineType({
       description: 'Shown at the top of the post and on its card. Also the default share image.',
       validation: (rule) => rule.required(),
     }),
+    // The article straight after its picture; the details that file it come after (docs/editor-guide/write-a-blog-post.md).
     defineField({
-      name: 'publishedAt',
-      title: 'Published at',
-      type: 'datetime',
+      name: 'body',
+      type: 'blockContent',
       group: 'content',
-      description:
-        'Sets the order on the blog and the date shown. Publish the document when it should go live, or schedule it with a release.',
-      initialValue: () => new Date().toISOString(),
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: 'author',
-      type: 'reference',
-      group: 'content',
-      to: [{ type: 'author' }],
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -84,9 +76,20 @@ export const post = defineType({
       validation: (rule) => rule.unique(),
     }),
     defineField({
-      name: 'body',
-      type: 'blockContent',
+      name: 'author',
+      type: 'reference',
       group: 'content',
+      to: [{ type: 'author' }],
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'publishedAt',
+      title: 'Published at',
+      type: 'datetime',
+      group: 'content',
+      description:
+        'Sets the order on the blog and the date shown. Publish the document when it should go live, or schedule it with a release.',
+      initialValue: () => new Date().toISOString(),
       validation: (rule) => rule.required(),
     }),
     defineField({ name: 'seo', type: 'seo', group: 'seo' }),
@@ -99,20 +102,23 @@ export const post = defineType({
     },
   ],
   preview: {
-    select: { title: 'title', slug: 'slug.current', author: 'author.name', media: 'mainImage' },
+    select: { title: 'title', date: 'publishedAt', author: 'author.name', media: 'mainImage' },
     prepare: ({
       title,
-      slug,
+      date,
       author,
       media,
     }: {
       title?: string
-      slug?: string
+      date?: string
       author?: string
       media?: PreviewValue['media']
     }) => ({
       title: title || 'Untitled',
-      subtitle: [slug ? postPath(slug) : undefined, author].filter(Boolean).join(' · '),
+      // "17 October 2026 · Sam Lee": the date as the blog shows it, which also sets the post order.
+      subtitle: [date ? formatDate(date, siteLanguage) : undefined, author]
+        .filter(Boolean)
+        .join(' · '),
       media,
     }),
   },

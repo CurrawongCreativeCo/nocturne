@@ -29,6 +29,7 @@ import {
 } from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
 import { heroPartMotionField } from './hero-part-motion'
+import { imageSideOptions } from './image-side'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -248,7 +249,7 @@ export const hero = defineType({
         description: 'Which side the picture sits on at desktop widths.',
         type: 'string',
         initialValue: 'right',
-        options: { list: ['left', 'right'], layout: 'radio', direction: 'horizontal' },
+        options: imageSideOptions,
         hidden: ({ parent }: { parent?: { variant?: string } }) => parent?.variant !== 'split',
       }),
       // Split's picture: its shape, how it moves inside its frame and decorative frames (agency only, Design tab).

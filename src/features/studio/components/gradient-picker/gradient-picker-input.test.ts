@@ -24,9 +24,9 @@ describe('gradientOptions', () => {
     expect(rest.every((option) => typeof option.thumbnail === 'function')).toBe(true)
   })
 
-  it('keeps a stored gradient that has left Design settings, so it can be cleared', () => {
+  it('keeps a stored gradient that has left Brand colours, so it can be cleared', () => {
     const options = gradientOptions(gradients, 'old-one')
-    expect(options.at(-1)).toMatchObject({ value: 'old-one', title: 'Not in Design settings' })
+    expect(options.at(-1)).toMatchObject({ value: 'old-one', title: 'Not in Brand colours' })
     expect(gradientOptions(gradients, 'sunrise')).toHaveLength(3)
   })
 })

@@ -129,6 +129,19 @@ you start a release.
 - The webhook filter gains `"panel"` (README, Webhook mode): add it to existing webhooks.
 - The link fragment (`linkFields`) also returns `anchor`, `panel` (id and title), `fallbackUrl` and `bookingUrl`.
   **Open in a new tab** moved into a collapsed Advanced area and shows for _Another website_ only.
+- **Studio wording and order (audit quick fixes, `docs/studio-audit/2026-10-17/report.md`).** No stored data changes.
+  Call-to-action _Variant_ is now **Button style** with _Filled_ and _Outline_ (stored `primary` and `secondary`). The hero
+  and Image + text show _Image left_ and _Image right_ instead of the raw values, and Image + text's list subtitle names the
+  side. The blog post editor puts the body straight after the main image, then categories, author and date, as the editor
+  guide describes; the post list shows the date and author instead of the URL. Navigation gets help text, and _Footer
+  text_ is now **Copyright line**. Field help and warnings say **Brand colours** (the sidebar's name) instead of _Design
+  settings_.
+- **Section backgrounds are named by role:** _Page_, _Tinted_, _Contrast_ and _Brand_ (were _Surface_, _Soft_, _Dark_,
+  _Accent_), in the picker and in list subtitles ("Hero · Split · Contrast"). Stored values are unchanged.
+- **Collapsed fine-tuning areas are all called Advanced:** _Advanced: animation_, _Advanced: edge_, _Advanced: layout_
+  and _Advanced: image_ (were _More … options_).
+- **Publishing a live page or post no longer opens a dialog** unless it is the first publish or the address changed (where
+  the dialog offers the redirect). The rule is `needsPublishConfirmation` in `src/features/studio/utils/publish-redirect.ts`.
 
 ### Fixed
 

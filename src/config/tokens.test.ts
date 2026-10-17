@@ -29,7 +29,7 @@ describe('generated design tokens', () => {
   })
 
   it('default the Studio-settable roles to the look the site had without them', () => {
-    // Brand colours (Studio Design settings) override these; unset, nothing visibly changes.
+    // Brand colours (Studio, Design → Brand colours) override these; unset, nothing visibly changes.
     expect(colorHex.accentText).toBe(colorHex.accent)
     expect(colorHex.cta).toBe(colorHex.surfaceInverse)
     expect(colorHex.ctaInk).toBe(colorHex.inkInverse)

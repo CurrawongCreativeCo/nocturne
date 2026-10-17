@@ -35,7 +35,7 @@ export function gradientOptions(
   if (stored && !gradients.some((gradient) => gradient.slug === stored)) {
     options.push({
       value: stored,
-      title: 'Not in Design settings',
+      title: 'Not in Brand colours',
       description: 'Removed or renamed, so the page shows no gradient. Choose another or None.',
     })
   }

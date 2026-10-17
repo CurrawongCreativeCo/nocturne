@@ -54,7 +54,7 @@ test.describe('sections view', () => {
     const frame = section(page, id).locator('section').first()
     await expect(frame).toHaveAttribute('data-tone', 'surface')
 
-    await controls(page, 'mediaText (image left)').getByRole('link', { name: 'Dark' }).click()
+    await controls(page, 'mediaText (image left)').getByRole('link', { name: 'Contrast' }).click()
     await expect(page).toHaveURL(new RegExp(`tone\\.${id}=inverse`))
     await expect(frame).toHaveAttribute('data-tone', 'inverse')
     await expect(section(page, id).locator('p').first()).toHaveText(
@@ -83,7 +83,7 @@ test.describe('sections view', () => {
     )
 
     // A FAQ has no layouts, so its controls hold a tone only.
-    await expect(controls(page, 'faq').getByRole('link', { name: 'Dark' })).toBeVisible()
+    await expect(controls(page, 'faq').getByRole('link', { name: 'Contrast' })).toBeVisible()
     await expect(controls(page, 'faq').getByText('Layout')).toHaveCount(0)
   })
 

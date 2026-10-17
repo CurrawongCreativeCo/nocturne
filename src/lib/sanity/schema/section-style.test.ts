@@ -110,17 +110,17 @@ describe('sectionStyle', () => {
     expect(sectionStyle.fieldsets).toEqual([
       expect.objectContaining({
         name: 'motionAdvanced',
-        title: 'More animation options',
+        title: 'Advanced: animation',
         options: { collapsible: true, collapsed: true },
       }),
       expect.objectContaining({
         name: 'layoutOptions',
-        title: 'More layout options',
+        title: 'Advanced: layout',
         options: { collapsible: true, collapsed: true },
       }),
       expect.objectContaining({
         name: 'edgeAdvanced',
-        title: 'More edge options',
+        title: 'Advanced: edge',
         options: { collapsible: true, collapsed: true },
       }),
     ])

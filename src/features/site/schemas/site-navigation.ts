@@ -15,21 +15,33 @@ export const siteNavigation = defineType({
     defineField({
       name: 'headerNav',
       title: 'Header menu',
+      description:
+        'The links across the top of every page, in this order. Up to seven fit on a laptop; put the rest in the footer.',
       type: 'array',
       group: 'header',
       of: [defineArrayMember({ type: 'navItem' })],
       validation: (rule) => rule.max(7),
     }),
-    defineField({ name: 'headerCta', title: 'Header button', type: 'cta', group: 'header' }),
+    defineField({
+      name: 'headerCta',
+      title: 'Header button',
+      description:
+        'Optional. One button after the menu links, such as "Book a call". Also shown in the phone menu.',
+      type: 'cta',
+      group: 'header',
+    }),
     defineField({
       name: 'footerNav',
       title: 'Footer links',
+      description:
+        'Links along the bottom of every page: policies, contact and anything not in the header.',
       type: 'array',
       group: 'footer',
       of: [defineArrayMember({ type: 'navItem' })],
     }),
     defineField({
       name: 'footerText',
+      title: 'Copyright line',
       type: 'string',
       group: 'footer',
       description:

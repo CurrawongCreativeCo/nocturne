@@ -748,18 +748,18 @@ export type Category = {
   slug: Slug
 }
 
-export type AuthorReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'author'
-}
-
 export type CategoryReference = {
   _ref: string
   _type: 'reference'
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: 'category'
+}
+
+export type AuthorReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'author'
 }
 
 export type Post = {
@@ -779,14 +779,14 @@ export type Post = {
     alt?: string
     _type: 'image'
   }
-  publishedAt: string
-  author: AuthorReference
+  body: BlockContent
   categories?: Array<
     {
       _key: string
     } & CategoryReference
   >
-  body: BlockContent
+  author: AuthorReference
+  publishedAt: string
   seo?: Seo
 }
 
@@ -1695,8 +1695,8 @@ export type AllSanitySchemaTypes =
   | Experiment
   | Enquiry
   | Category
-  | AuthorReference
   | CategoryReference
+  | AuthorReference
   | Post
   | Author
   | Events

@@ -107,12 +107,15 @@ export const MOTION_CUSTOM = {
   thresholdPercent: { min: 5, max: 100 },
 } as const
 
-/** What editors call each tone: in the Background picker and in list previews ("Hero · Split · Dark"). */
+/**
+ * What editors call each tone: in the Background picker and in list previews ("Hero · Split · Contrast"). Named by
+ * role, not colour, because Brand colours can make any of them light or dark (README, "Colour systems").
+ */
 export const SECTION_TONE_TITLES: Record<(typeof SECTION_TONES)[number], string> = {
-  surface: 'Surface',
-  alt: 'Soft',
-  inverse: 'Dark',
-  accent: 'Accent',
+  surface: 'Page',
+  alt: 'Tinted',
+  inverse: 'Contrast',
+  accent: 'Brand',
 }
 
 /** How strongly the tone's colour covers a background image, so the text on it stays readable. */
