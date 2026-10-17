@@ -8,6 +8,9 @@ import {
   Heading,
   Spinner,
   Stack,
+  Tab,
+  TabList,
+  TabPanel,
   Text,
 } from '@sanity/ui'
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
@@ -18,6 +21,7 @@ import { apiVersion, studioUrl } from '@/config/env'
 import { siteProfile } from '@/config/profile'
 import type { START_HERE_QUERY_RESULT } from '@/types/sanity.types'
 
+import { EditorGuide } from './editor-guide'
 import { HelpPanel } from './help-panel'
 import { OpsNotices, useOpsNotices } from './ops-notices'
 import { newEnquiriesMessage } from '../../enquiries/wording'
@@ -25,6 +29,7 @@ import { currentAudience } from '../../roles'
 import { isTypeVisible } from '../../utils/feature-visibility'
 import { fetchLastChanges } from '../api/last-changes'
 import { START_HERE_QUERY } from '../api/query'
+import { editorGuide } from '../utils/editor-guide'
 import {
   buildQuickActions,
   toolHref,
@@ -43,6 +48,8 @@ interface Data {
   checks: ThingsToCheck
   enquiries: { new: number; total: number }
 }
+
+type TabName = 'overview' | 'help'
 
 type State =
   { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; data: Data }
@@ -68,6 +75,8 @@ export function StartHereTool() {
   const audience = currentAudience(user)
   const notices = useOpsNotices()
   const helpHeading = useRef<HTMLHeadingElement>(null)
+  const focusHelpHeading = useRef(false)
+  const [tab, setTab] = useState<TabName>('overview')
   const [state, setState] = useState<State>({ status: 'loading' })
 
   const schemaTypes = useMemo(() => new Set(schema.getTypeNames()), [schema])
@@ -118,11 +127,16 @@ export function StartHereTool() {
     }
   }, [client, audience, typeTitle])
 
+  // The Help tab mounts after the click, so the heading is focused once it is there.
+  useEffect(() => {
+    if (tab !== 'help' || !focusHelpHeading.current) return
+    focusHelpHeading.current = false
+    helpHeading.current?.focus()
+  }, [tab])
+
   const showHelp = () => {
-    const heading = helpHeading.current
-    if (!heading) return
-    heading.scrollIntoView({ block: 'start' })
-    heading.focus()
+    focusHelpHeading.current = true
+    setTab('help')
   }
 
   return (
@@ -140,62 +154,97 @@ export function StartHereTool() {
 
           <OpsNotices notices={notices} />
 
-          <Stack as="section" gap={4} aria-labelledby="start-here-actions">
-            <Heading as="h2" size={1} id="start-here-actions">
-              What would you like to do?
-            </Heading>
-            <div role="list" style={ACTION_GRID_STYLE}>
-              {actions.map((action) => (
-                <div key={action.id} role="listitem">
-                  <ActionCard
-                    action={action}
-                    resolveIntent={router.resolveIntentLink}
-                    navigate={(path) => {
-                      router.navigateUrl({ path })
-                    }}
-                    onHelp={showHelp}
-                  />
-                </div>
-              ))}
-            </div>
-          </Stack>
-
-          {state.status === 'loading' && (
-            <Flex align="center" gap={3} role="status">
-              <Spinner muted />
-              <Text muted size={1}>
-                Loading your latest changes…
-              </Text>
-            </Flex>
-          )}
-          {state.status === 'error' && (
-            <Card tone="critical" padding={4} radius={2} role="alert">
-              <Text size={1}>Could not load your latest changes: {state.message}</Text>
-            </Card>
-          )}
-          {state.status === 'ready' && (
-            <>
-              {/* Only once there is something to show: a site that doesn't store enquiries sees nothing. */}
-              {state.data.enquiries.total > 0 &&
-                schemaTypes.has('enquiry') &&
-                isTypeVisible('enquiry') && (
-                  <EnquiriesSummary newCount={state.data.enquiries.new} />
-                )}
-              <RecentChanges
-                recent={state.data.recent}
-                changes={state.data.changes}
-                typeTitle={typeTitle}
-                currentUserId={user?.id}
+          <Stack gap={4}>
+            <TabList gap={2}>
+              <Tab
+                aria-controls="start-here-panel-overview"
+                id="start-here-tab-overview"
+                label="Overview"
+                selected={tab === 'overview'}
+                onClick={() => {
+                  setTab('overview')
+                }}
               />
-              <ThingsToCheckList checks={state.data.checks} />
-            </>
-          )}
+              <Tab
+                aria-controls="start-here-panel-help"
+                id="start-here-tab-help"
+                label="Help"
+                selected={tab === 'help'}
+                onClick={() => {
+                  setTab('help')
+                }}
+              />
+            </TabList>
 
-          <HelpPanel
-            ref={helpHeading}
-            guideUrl={siteProfile.help.guideUrl}
-            supportEmail={siteProfile.help.supportEmail}
-          />
+            {tab === 'overview' && (
+              <TabPanel aria-labelledby="start-here-tab-overview" id="start-here-panel-overview">
+                <Stack gap={[5, 5, 6]}>
+                  <Stack as="section" gap={4} aria-labelledby="start-here-actions">
+                    <Heading as="h2" size={1} id="start-here-actions">
+                      What would you like to do?
+                    </Heading>
+                    <div role="list" style={ACTION_GRID_STYLE}>
+                      {actions.map((action) => (
+                        <div key={action.id} role="listitem">
+                          <ActionCard
+                            action={action}
+                            resolveIntent={router.resolveIntentLink}
+                            navigate={(path) => {
+                              router.navigateUrl({ path })
+                            }}
+                            onHelp={showHelp}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </Stack>
+
+                  {state.status === 'loading' && (
+                    <Flex align="center" gap={3} role="status">
+                      <Spinner muted />
+                      <Text muted size={1}>
+                        Loading your latest changes…
+                      </Text>
+                    </Flex>
+                  )}
+                  {state.status === 'error' && (
+                    <Card tone="critical" padding={4} radius={2} role="alert">
+                      <Text size={1}>Could not load your latest changes: {state.message}</Text>
+                    </Card>
+                  )}
+                  {state.status === 'ready' && (
+                    <>
+                      {/* Only once there is something to show: a site that doesn't store enquiries sees nothing. */}
+                      {state.data.enquiries.total > 0 &&
+                        schemaTypes.has('enquiry') &&
+                        isTypeVisible('enquiry') && (
+                          <EnquiriesSummary newCount={state.data.enquiries.new} />
+                        )}
+                      <RecentChanges
+                        recent={state.data.recent}
+                        changes={state.data.changes}
+                        typeTitle={typeTitle}
+                        currentUserId={user?.id}
+                      />
+                      <ThingsToCheckList checks={state.data.checks} />
+                    </>
+                  )}
+                </Stack>
+              </TabPanel>
+            )}
+
+            {tab === 'help' && (
+              <TabPanel aria-labelledby="start-here-tab-help" id="start-here-panel-help">
+                <HelpPanel
+                  ref={helpHeading}
+                  guideUrl={siteProfile.help.guideUrl}
+                  supportEmail={siteProfile.help.supportEmail}
+                >
+                  <EditorGuide guide={editorGuide} videos={siteProfile.help.videos} />
+                </HelpPanel>
+              </TabPanel>
+            )}
+          </Stack>
         </Stack>
       </Container>
     </Box>

@@ -1379,9 +1379,11 @@ history request for the author names, and, only when notices are set up, one cal
   images that have no description (alt text), and drafts last edited more than seven days ago. They reuse the detectors
   in `content-health/utils/detect.ts`; fixing the problem in a draft clears it. Shared sections are only checked for
   agency staff, because clients cannot open them. Each row has a **Fix it** link.
-- **Help:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
+- **Help tab:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
   selectable text and a **Copy email address** button. Each part is left out when the profile does not set it. The
-  support form replaces the address in a later release.
+  support form replaces the address in a later release. Under them is this site's **editor guide** (next section).
+  The **Help** shortcut card opens this tab.
+- **Tabs:** Start here has two, **Overview** (shortcuts, recent changes, things to check) and **Help**.
 - **Notices:** set `OPS_NOTICES_URL` (an https endpoint) and, if it needs one, `OPS_NOTICES_KEY`. The site's
   `/api/ops-notices` route asks `OPS_NOTICES_URL?site=<client.slug>` with `Authorization: Bearer <key>`, caches the answer
   for five minutes and passes on up to five notices; the key never reaches the browser. The endpoint answers
@@ -1405,7 +1407,7 @@ draft-only page.
    Edit a page and reload to see it jump to the top with a _Draft_ badge.
 6. Things to check lists the missing description, the unpublished link and the old draft in plain words, and **Fix it**
    opens the right document. Fix one, reload, and it disappears.
-7. Help: **Copy email address** copies the address (paste it somewhere to confirm) and says "Copied to your clipboard."
+7. Help: open the **Help** tab (or click the **Help** card). **Copy email address** copies the address (paste it somewhere to confirm) and says "Copied to your clipboard."
    The guide link opens in a new tab. Press Tab: every card, link and button shows a focus ring.
 8. Narrow the window to phone width: no sideways scrolling, and the cards stack in one column.
 9. Optional: point `OPS_NOTICES_URL` at a test endpoint that answers `{"notices":[{"title":"Test","tone":"caution"}]}`
@@ -1415,6 +1417,47 @@ Tests: `start-here/utils/*.test.ts` (relative time, wording, shortcut list from 
 history parsing), `src/lib/ops/notices.test.ts` (notice parsing and the endpoint check) and
 `tests/e2e/ops-notices.spec.ts` (the route answers 204 when unset). The tool itself needs a signed-in Studio, so it
 is checked by hand.
+
+#### Editor guide (Help tab)
+
+The Help tab shows short, plain-English task guides and a description of each section a client may add, and only
+what **this site** uses. It is built from files, not written per client.
+
+- **The guides** are markdown files in `docs/editor-guide/`, written once in the template: _Change a heading_, _Replace a photo_,
+  _Publish and undo_, _Write a blog post_, _Update opening hours_ and _Add a team member_. Each starts with frontmatter
+  (`title`, `summary`, `order`, and optionally `feature` and `requires`). A guide with `feature: blog` appears only when
+  `features.blog` is on, and `requires: post` also needs that document type in `schema.json`, so a client site that removes a type loses its guide.
+  Write them in Australian English, in short steps, and use only headings, paragraphs, lists, **bold** and `[links](https://…)`:
+  nothing else is rendered.
+- **The sections** come from `clientSections` in `site.profile.ts` (the default list when it is empty). For each, the guide lists the
+  fields a client edits, with the field's description, its **recommended picture size** (the sentence `imageField` adds, such as
+  "1600 × 1200 px, landscape") and its **length guidance** (the `max`/`min` limits in the field's validation, such as "Up to 60 characters"
+  or "Up to 2 items"). Agency-only fields (the Design tab and anything hidden from clients) are left out, and so is any field
+  `schema.json` does not store. `schema.json` holds only the shape of the data, so titles, descriptions and limits are read from the
+  section schemas themselves.
+- **Videos** are not baked in. Add `help.videos` to `site.profile.ts`, keyed by the guide's file name without `.md`:
+
+  ```ts
+  help: { videos: { 'change-a-heading': 'https://…', 'publish-and-undo': 'https://…' } },
+  ```
+
+  A guide with a video shows **Watch the video (new tab)**; one without shows nothing. Each guide file has a comment
+  marking where its video belongs.
+
+- **Generating it:** `scripts/build-editor-guide.mjs` writes `src/features/studio/start-here/editor-guide.generated.json` (committed).
+  `npm run typegen` runs it straight after `sanity schema extract`, and `npm run editor-guide` runs it alone
+  (`-- --check` reports whether the file is current without writing). CI runs typegen and fails when the committed file differs, so after
+  changing a guide, `site.profile.ts`, or a section's fields or descriptions, run `npm run typegen` and commit the result.
+- **Showing it:** `start-here/components/editor-guide.tsx` lists each guide and section in an expandable row (native `details`, so
+  it works by keyboard), and `markdown.tsx` renders the guide text from the small parser in `utils/markdown.ts`. Links must be
+  `https://`; anything else shows as plain text. No markup is ever injected.
+
+To add a guide, add a file to `docs/editor-guide/` and run `npm run typegen`. For a client site, edit `site.profile.ts` and run it again.
+
+Tests: `scripts/editor-guide-utils.test.mjs` (frontmatter, image advice, limits, feature filtering, section fields),
+`start-here/utils/markdown.test.ts` and `editor-guide.test.ts`. The tab itself needs a signed-in Studio, so check it by hand:
+open **Start here → Help**, expand a guide and a section, switch `features.blog` to `false`, run `npm run typegen`, reload,
+and confirm the blog guide is gone.
 
 ### Studio roles and permissions
 

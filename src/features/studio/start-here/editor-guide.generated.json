@@ -1,0 +1,230 @@
+{
+  "guides": [
+    {
+      "id": "change-a-heading",
+      "title": "Change a heading",
+      "summary": "Edit the words at the top of a section, then publish.",
+      "body": "Headings are the large titles on your pages. You can change any of them in a minute.\n\n## Steps\n\n1. Open **Edit your website** from Start here.\n2. Click the heading you want to change. It becomes editable.\n3. Type the new words. Keep it short: about **8 words** reads best.\n4. Click **Publish** when you are happy.\n\n## Good to know\n\n- Each page has **one main heading** at the very top. Other headings in the page are section titles.\n- Changes stay as a **draft** until you publish, so nobody sees half-finished work.\n- Prefer a form? Open the page in **Pages**, find the section and edit its **Title** field."
+    },
+    {
+      "id": "replace-a-photo",
+      "title": "Replace a photo",
+      "summary": "Swap a picture and keep it sharp and accessible.",
+      "body": "A new photo takes the same place as the old one, so the layout stays tidy.\n\n## Steps\n\n1. Open the page, then open the section that holds the photo.\n2. Click the photo, then **Remove** (or drag the new file onto it).\n3. Upload your new photo from your computer.\n4. Drag the small circle (the **hotspot**) onto the most important part, such as a face. The photo then crops around it.\n5. Fill in the **Alternative text** field. See below.\n6. Click **Publish**.\n\n## Choosing a good photo\n\n- Each photo field shows a **Recommended** size. Aim for that size or larger.\n- Use the right shape for the spot (landscape, portrait or square).\n- Avoid photos with words in them. Screen readers cannot read the words.\n\n## Alternative text\n\nDescribe what the photo shows in one short sentence, for example \"Two electricians fitting a switchboard\". It helps people using screen readers and it helps Google. Leave it empty only if the photo is purely decoration."
+    },
+    {
+      "id": "publish-and-undo",
+      "title": "Publish and undo",
+      "summary": "Make changes live, or step back to an earlier version.",
+      "body": "Nothing you edit goes live until you publish it.\n\n## Publish\n\n1. Make your changes. They save automatically as a **draft**.\n2. Read them over. Use **Edit your website** to see the page as visitors will.\n3. Click **Publish**. Your site updates within a minute.\n\n## Undo a mistake\n\n- **Not published yet?** Open the menu next to **Publish** and choose **Discard changes**. The page goes back to the live version.\n- **Already published?** Open the menu next to **Publish** and choose **Review changes** or **History**. Pick an earlier version and click **Restore**, then publish again.\n\n## Take something off the site\n\nOpen the menu next to **Publish** and choose **Unpublish**. The page disappears from the site but stays in the Studio, so you can bring it back later.\n\n## Good to know\n\n- Every version is kept, so you can always go back.\n- If two people edit at once, you will see each other's changes appear."
+    },
+    {
+      "id": "write-a-blog-post",
+      "title": "Write a blog post",
+      "summary": "Start a new article, add a picture and publish it.",
+      "body": "## Steps\n\n1. From Start here, click **Write a blog post**.\n2. Add a **Title**. Keep it under about **60 characters** so it fits in search results.\n3. Check the **Slug**. This is the page address. Short and plain is best.\n4. Write a **short summary** of one or two sentences. It appears on the blog list and in search results.\n5. Add a **main image** and its alternative text. See \"Replace a photo\".\n6. Write the article in the body. Use headings to break up long text and keep paragraphs short.\n7. Choose a **category** and an **author**.\n8. Click **Publish**.\n\n## Good to know\n\n- Set a **publish date** to keep the order of posts right.\n- A post stays a draft until you publish, so you can come back to it later."
+    },
+    {
+      "id": "update-opening-hours",
+      "title": "Update opening hours",
+      "summary": "Change your hours, holiday closures and contact details.",
+      "body": "Your opening hours, phone number and address live in one place. Change them once and they update everywhere they appear, such as the footer.\n\n## Steps\n\n1. From Start here, click **Business info and opening hours**.\n2. Find **Opening hours**. Each row covers a set of days with the same hours, for example Monday to Friday.\n3. Change the **Opens** and **Closes** times. Use 24-hour time, such as 08:00 or 17:30.\n4. Tick **Closed on these days** for days you do not open. Days without a row show as closed.\n5. Check the phone number and address while you are there.\n6. Click **Publish**.\n\n## Public holidays and special days\n\nUse **Public holidays and special days** for one-off changes, such as Christmas Day. Days that have passed disappear from the site by themselves, so there is nothing to tidy up afterwards.\n\n## Good to know\n\n- Two rows for the same day make a split shift, such as a lunch break.\n- The site and Google both read these hours, so keep them accurate."
+    },
+    {
+      "id": "add-a-team-member",
+      "title": "Add a team member",
+      "summary": "Add a person to the team section, with a photo.",
+      "body": "## Steps\n\n1. Open **Team** in the left-hand menu, then click **Create new**.\n2. Fill in their **name** and **role**.\n3. Upload their **portrait** and fill in its alternative text. Use the same shape for everyone so the cards line up. See \"Replace a photo\".\n4. Add a **short bio**. Two or three sentences is plenty.\n5. Click **Publish**.\n\n## Change the order\n\nDrag people up or down in the Team list. The site follows the same order.\n\n## Remove someone\n\nOpen their entry, open the menu next to **Publish** and choose **Unpublish** to hide them, or **Delete** to remove them for good."
+    }
+  ],
+  "sections": [
+    {
+      "name": "richText",
+      "title": "Rich text",
+      "fields": [
+        {
+          "name": "body",
+          "title": "Body",
+          "kind": "Formatted text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "mediaText",
+      "title": "Image + text",
+      "fields": [
+        {
+          "name": "eyebrow",
+          "title": "Eyebrow",
+          "kind": "Short text",
+          "required": false,
+          "description": "Small label above the title.",
+          "length": "Up to 30 characters"
+        },
+        {
+          "name": "title",
+          "title": "Title",
+          "kind": "Short text",
+          "required": true,
+          "length": "Up to 60 characters"
+        },
+        {
+          "name": "body",
+          "title": "Body",
+          "kind": "Formatted text",
+          "required": false
+        },
+        {
+          "name": "ctas",
+          "title": "Calls to action",
+          "kind": "List",
+          "required": false,
+          "length": "Up to 2 items"
+        },
+        {
+          "name": "image",
+          "title": "Image",
+          "kind": "Image",
+          "required": false,
+          "imageSize": "1600 × 1200 px, landscape."
+        },
+        {
+          "name": "imagePosition",
+          "title": "Image position",
+          "kind": "Choice",
+          "required": true,
+          "choices": [
+            "Left",
+            "Right"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "testimonials",
+      "title": "Testimonials",
+      "fields": [
+        {
+          "name": "title",
+          "title": "Section title",
+          "kind": "Short text",
+          "required": false,
+          "length": "Up to 60 characters"
+        },
+        {
+          "name": "items",
+          "title": "Testimonials",
+          "kind": "List",
+          "required": true,
+          "items": [
+            {
+              "name": "quote",
+              "title": "Quote",
+              "kind": "Long text",
+              "required": true
+            },
+            {
+              "name": "name",
+              "title": "Name",
+              "kind": "Short text",
+              "required": true
+            },
+            {
+              "name": "role",
+              "title": "Role",
+              "kind": "Short text",
+              "required": false,
+              "description": "e.g. \"CEO, Acme\""
+            },
+            {
+              "name": "avatar",
+              "title": "Avatar",
+              "kind": "Image",
+              "required": false,
+              "imageSize": "800 × 800 px, square."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "faq",
+      "title": "FAQ",
+      "fields": [
+        {
+          "name": "title",
+          "title": "Section title",
+          "kind": "Short text",
+          "required": false,
+          "length": "Up to 70 characters"
+        },
+        {
+          "name": "intro",
+          "title": "Intro",
+          "kind": "Long text",
+          "required": false,
+          "length": "Up to 200 characters"
+        },
+        {
+          "name": "items",
+          "title": "Questions",
+          "kind": "List",
+          "required": true,
+          "items": [
+            {
+              "name": "question",
+              "title": "Question",
+              "kind": "Short text",
+              "required": true
+            },
+            {
+              "name": "answer",
+              "title": "Answer",
+              "kind": "Formatted text",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ctaBanner",
+      "title": "Call to action banner",
+      "fields": [
+        {
+          "name": "title",
+          "title": "Title",
+          "kind": "Short text",
+          "required": true,
+          "length": "Up to 70 characters"
+        },
+        {
+          "name": "text",
+          "title": "Text",
+          "kind": "Long text",
+          "required": false,
+          "length": "Up to 160 characters"
+        },
+        {
+          "name": "ctas",
+          "title": "Calls to action",
+          "kind": "List",
+          "required": false,
+          "length": "Up to 2 items"
+        },
+        {
+          "name": "tone",
+          "title": "Tone",
+          "kind": "Choice",
+          "required": true,
+          "choices": [
+            "Brand",
+            "Dark",
+            "Light"
+          ]
+        }
+      ]
+    }
+  ]
+}
