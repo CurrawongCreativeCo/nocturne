@@ -22,6 +22,8 @@ you start a release.
 
 ### Changed
 
+- **Start here quick actions:** each action is now a bordered card with an icon, a chevron and hover and focus states, in three columns on wide screens, two at 1024 px and one on phones. _Edit your website_ comes first and is the stronger primary card.
+
 ### Fixed
 
 - Studio → Design → Brand colours: an empty colour now shows the site's real default in the swatch and as the
