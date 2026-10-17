@@ -142,14 +142,20 @@ test.describe('the Events section', () => {
   }) => {
     await page.goto('/events')
     const classes = section(page, 'Classes')
-    const days = await classes
-      .getByRole('heading', { level: 3 })
+    // The agenda streams in per request: wait for its first day.
+    const dayHeadings = classes.getByRole('heading', { level: 3 })
+    await dayHeadings.first().waitFor()
+    const days = await dayHeadings
       .locator('time')
       .evaluateAll((times) => times.map((time) => time.getAttribute('datetime') ?? ''))
     // The club's Tuesdays, without the skipped one, plus the workshop and the supper night.
     const clubDays = days.filter((day) => eventDates.club.includes(day))
     expect(clubDays.length).toBeGreaterThanOrEqual(5)
-    expect(days).not.toContain(eventDates.skipped)
+    // Another class may fall on the skipped Tuesday, so look for the club itself on that day.
+    const skippedDay = classes.getByRole('listitem').filter({
+      has: page.locator(`time[datetime="${eventDates.skipped}"]`),
+    })
+    await expect(skippedDay.getByText('Weekly pottery club')).toHaveCount(0)
     expect(days).toEqual([...days].sort())
     expect(new Set(days).size).toBe(days.length)
     await expect(
