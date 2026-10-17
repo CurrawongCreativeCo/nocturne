@@ -3,6 +3,7 @@ import type { MetadataRoute } from 'next'
 import { studioUrl } from '@/config/env'
 import { siteUrl } from '@/config/site-url'
 import { getPostCount } from '@/features/blog/api/get-posts'
+import { getEventCount } from '@/features/events/api/event'
 import { getPageCount } from '@/features/pages/api/get-page'
 import { getSettings } from '@/features/site/api/get-settings'
 import { getTeamCount } from '@/features/team/api/team-member'
@@ -11,13 +12,14 @@ import { PUBLISHED } from '@/lib/sanity/live'
 import { sitemapChunkCount } from '@/lib/sitemap-chunks'
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const [pages, posts, team, settings] = await Promise.all([
+  const [pages, posts, team, events, settings] = await Promise.all([
     getPageCount(),
     getPostCount(),
     getTeamCount(),
+    getEventCount(),
     getSettings(PUBLISHED),
   ])
-  const count = sitemapChunkCount(pages + posts + team)
+  const count = sitemapChunkCount(pages + posts + team + events)
   // One file keeps the familiar /sitemap.xml; more than one lists every file.
   const paths =
     count === 1 ? ['/sitemap.xml'] : Array.from({ length: count }, (_, i) => `/sitemap/${i}.xml`)

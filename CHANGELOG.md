@@ -29,6 +29,13 @@ you start a release.
   registry `src/config/embed-providers.ts` that booking reuses, and moves the consent store (`consent-state`,
   `consent-store`) from `src/features/consent/utils/` to `src/lib/consent/` so other features can read the visitor's choice.
   See README, _Embed_.
+- **Editor guide in Studio:** a **Help** tab in Start here (beside **Overview**) with short task guides (_Change a heading_, _Replace a
+  photo_, _Publish and undo_, _Write a blog post_, _Update opening hours_, _Add a team member_) and a description of every section a client
+  may add, with its fields, recommended picture sizes and length limits. It shows only what the site uses: guides follow the profile's
+  features and the schema, and sections follow `clientSections`. The guides are markdown in `docs/editor-guide/`; training videos come
+  from `help.videos` in `site.profile.ts`. `scripts/build-editor-guide.mjs` builds the committed
+  `editor-guide.generated.json`, `npm run typegen` runs it, and CI fails when it is stale. Adds `jiti` as a dev dependency (already
+  installed through ESLint and Sanity). After merging, run `npm run typegen` and commit the result.
 - **Image design:** one shared treatment for a section's main picture (`FramedImage`): a still frame with the picture moving
   gently inside it (true image-only parallax), shapes (_Standard_, _Rounded_, _Circle_, _Arch_, _Framed_) and decorative frames
   that stay still while the picture drifts behind them. Agency only, in the Design tab of **Image + text**, the **Hero's Split
@@ -50,6 +57,37 @@ you start a release.
   GET form, so without JavaScript they go to a fallback URL. Section links scroll smoothly unless the visitor asks for
   reduced motion. Content health reports links to missing sections and unpublished panels. See README, _Link actions_.
 
+- **Link list section and Link page template:** _Add item → Link list_: an optional profile (picture or logo, name, bio up
+  to 160 characters), social icons (Business info's by default, or a custom set) and ordered links with a label, the shared
+  **Goes to** action, a description, an icon or thumbnail, a group heading, one large (featured) link, Show or Hide, and
+  Show from / Show until. Five layouts as pictures in the agency-only preset bar (Minimal, Cards, Editorial, Compact,
+  Image-focused; the last is Cards with large pictures, because a section has at most four layouts). Scheduling is decided
+  at request time in a small `<Suspense>` boundary, so pages stay cached and a link that isn't due isn't in the HTML. A click
+  sends a `link_click` event to the analytics providers the visitor has accepted (an inline script,
+  `src/lib/analytics/track-script.ts`, so no JavaScript is added to any page), and links to another website can carry UTM tags (Advanced).
+- **Minimal page option and Link page template:** an agency-only page option, _Minimal page (no header or footer)_, and a
+  _Link page_ new-page template (slug `links`, a profile, social icons, a Minimal list and a footer note). `PAGE_QUERY`
+  gains a `minimal` flag; the shell's header, announcement and footer are wrapped in `[data-site-chrome]`. See README, _Link list_.
+- `SocialIcon` (`components/ui/social-icon.tsx`) and the shared platform list (`lib/social-platforms.ts`); Business info's
+  social profiles are available to page sections through `LocationBusiness.socialLinks`.
+
+- **Events:** an `event` document (title, page address, start and end, all day, a time zone that starts as Business info's,
+  summary, description, image, venue or online link, category, a registration button using the shared **Goes to** action,
+  status _Scheduled_ / _Cancelled_ / _Sold out_, a places note) and an _Event category_ document, in a new `events` feature
+  (switch: `features.events` in `site.profile.ts`). Simple repeats: weekly, fortnightly, or monthly on the same weekday, with
+  a last date and skipped days, expanded at request time by a pure, unit-tested function (nothing stored per date; the wall
+  clock holds across daylight saving). The **Events** section (_Add item → Events_) has List, Agenda and Featured layouts as
+  pictures, shows what is upcoming by default, and has an agency-only category filter and count; "upcoming" is decided per
+  request in a small `<Suspense>` boundary (no clock in a cached result, no client JavaScript). Event pages at
+  `/events/<slug>` (`Event` JSON-LD, a branded share image at `/api/og/events/<slug>`, Presentation resolvers, sitemap),
+  add-to-calendar files at `/events/<slug>.ics` and a subscribable feed at `/events/feed.ics` (RFC 5545 with a generated
+  `VTIMEZONE`, escaping, folding, `RRULE` and `EXDATE`), plus Google Calendar and Outlook links. Studio: _Events_ with
+  Upcoming, Past and All lists, the subtitle "Sat 14 Mar, 10:00 am · Workshop", validation, and an _Add an event_ card on
+  Start here. See README, _Events_.
+- `src/lib/events/` (time zones, recurrence, formatting, calendar links, `.ics`), `eventCardFields` and `eventLastRelevant`
+  in `src/lib/sanity/fragments.ts`, `TIME_ZONES` in `src/lib/time-zones.ts` (moved from Business info's schema so other
+  features can use it) and `hasEvents()` in `src/config/profile.ts`.
+
 ### Changed
 
 - The link fragment (`linkFields`) also returns `anchor`, `panel` (id and title), `fallbackUrl` and `bookingUrl`.
@@ -59,8 +97,12 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None for content: existing links keep their stored values. Run `npm run typegen` after merging. A project that imports
-`consent-state` or `consent-store` from `src/features/consent/utils/` must now import them from `@/lib/consent/`.
+None. Existing links keep their stored values. Run `npm run typegen` after merging. Add `link_click` as a goal in Plausible
+if you use it. The new visual baselines (`link-list-*`, `events-*`) need the **Update visual baselines** workflow.
+For Events: add `"event"` and `"eventCategory"` to the Sanity webhook filter if you use webhook mode (README, _Live mode vs.
+webhook mode_). `events` is a new feature switch (on by default); a client who doesn't want events sets `events: false` in
+`site.profile.ts`. Nothing in your content changes.
+A project that imports `consent-state` or `consent-store` from `src/features/consent/utils/` must now import them from `@/lib/consent/`.
 
 ## [1.4.0] - 2026-10-16
 

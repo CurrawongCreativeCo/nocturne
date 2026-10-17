@@ -4,7 +4,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { HOME_SLUG, slugToPath } from '@/config/paths'
 import { ACCESS_MEMBERS } from '@/lib/sanity/access'
-import { lockedForClientsOnceSet } from '@/lib/sanity/roles'
+import { hiddenFromClients, lockedForClientsOnceSet } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 
 import { sectionTypes } from './sections'
@@ -64,6 +64,17 @@ export const page = defineType({
       group: 'content',
     }),
     defineField({
+      name: 'minimalLayout',
+      title: 'Minimal page (no header or footer)',
+      description:
+        'Shows just the page: no announcement bar, header or footer. For a link-in-bio page (use the Link page template) or a landing page that should keep visitors on it.',
+      type: 'boolean',
+      initialValue: false,
+      group: 'content',
+      // Agency only, like the other design controls: it changes how the whole page is framed.
+      hidden: hiddenFromClients,
+    }),
+    defineField({
       name: 'pageBuilder',
       title: 'Sections',
       type: 'array',
@@ -103,10 +114,20 @@ export const page = defineType({
     defineField({ name: 'seo', type: 'seo', group: 'seo' }),
   ],
   preview: {
-    select: { title: 'title', slug: 'slug.current', access: 'access' },
-    prepare: ({ title, slug, access }: { title?: string; slug?: string; access?: string }) => ({
+    select: { title: 'title', slug: 'slug.current', access: 'access', minimal: 'minimalLayout' },
+    prepare: ({
+      title,
+      slug,
+      access,
+      minimal,
+    }: {
+      title?: string
+      slug?: string
+      access?: string
+      minimal?: boolean
+    }) => ({
       title: title || 'Untitled',
-      subtitle: `${slugToPath(slug)}${access === ACCESS_MEMBERS ? ' · Members only' : ''}`,
+      subtitle: `${slugToPath(slug)}${access === ACCESS_MEMBERS ? ' · Members only' : ''}${minimal ? ' · Minimal' : ''}`,
       media: slug === HOME_SLUG ? HomeIcon : DocumentIcon,
     }),
   },

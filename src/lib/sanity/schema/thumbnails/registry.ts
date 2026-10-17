@@ -24,6 +24,11 @@ import {
   EdgeWaveThumbnail,
 } from './edge-thumbnails'
 import {
+  EventsAgendaThumbnail,
+  EventsFeaturedThumbnail,
+  EventsListThumbnail,
+} from './events-thumbnails'
+import {
   GalleryGridThumbnail,
   GalleryMasonryThumbnail,
   GallerySliderThumbnail,
@@ -58,6 +63,13 @@ import {
   ImageSquareThumbnail,
   ImageStandardThumbnail,
 } from './image-design-thumbnails'
+import {
+  LinkListCardsThumbnail,
+  LinkListCompactThumbnail,
+  LinkListEditorialThumbnail,
+  LinkListImageThumbnail,
+  LinkListMinimalThumbnail,
+} from './link-list-thumbnails'
 import { LogoCloudGridThumbnail, LogoCloudMarqueeThumbnail } from './logo-cloud-thumbnails'
 import { StatsCardsThumbnail, StatsInlineThumbnail } from './stats-thumbnails'
 import { TestimonialsGridThumbnail, TestimonialsSliderThumbnail } from './testimonials-thumbnails'
@@ -101,6 +113,26 @@ export const sectionVariantThumbnails: Record<string, Record<string, Thumbnail>>
     grid: TestimonialsGridThumbnail,
     slider: TestimonialsSliderThumbnail,
   },
+  events: {
+    list: EventsListThumbnail,
+    agenda: EventsAgendaThumbnail,
+    featured: EventsFeaturedThumbnail,
+  },
+  linkList: {
+    stacked: LinkListMinimalThumbnail,
+    cards: LinkListCardsThumbnail,
+    editorial: LinkListEditorialThumbnail,
+    compact: LinkListCompactThumbnail,
+  },
+}
+
+/** Link list preset value -> its drawing (the preset bar). Image-focused is Cards with large pictures. */
+export const linkListPresetThumbnails: Record<string, Thumbnail> = {
+  minimal: LinkListMinimalThumbnail,
+  cards: LinkListCardsThumbnail,
+  editorial: LinkListEditorialThumbnail,
+  compact: LinkListCompactThumbnail,
+  'image-focused': LinkListImageThumbnail,
 }
 
 /** Hero preset value -> its drawing (the preset bar at the top of the hero's Content tab). */

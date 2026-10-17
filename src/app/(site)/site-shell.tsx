@@ -18,6 +18,7 @@ import {
 import { SiteFooter, DraftSiteFooter } from '@/features/site/components/site-footer'
 import { SiteHeader, DraftSiteHeader } from '@/features/site/components/site-header'
 import { SiteJsonLd } from '@/features/site/components/site-json-ld'
+import { TRACK_SCRIPT } from '@/lib/analytics/track-script'
 import { PUBLISHED, revalidateSecret, SanityLive } from '@/lib/sanity/live'
 import { expireLiveTags } from '@/lib/sanity/live-action'
 
@@ -82,21 +83,24 @@ export async function SiteShell({
       >
         Skip to content
       </a>
-      {/* Always rendered hidden; a client component reveals it inside its date window. */}
-      {isDraftMode ? (
-        <Suspense fallback={null}>
-          <DraftSiteAnnouncement />
-        </Suspense>
-      ) : (
-        <SiteAnnouncement {...PUBLISHED} />
-      )}
-      {isDraftMode ? (
-        <Suspense fallback={null}>
-          <DraftSiteHeader search={search} />
-        </Suspense>
-      ) : (
-        <SiteHeader {...PUBLISHED} search={search} />
-      )}
+      {/* Header and announcement step aside on a "Minimal page" (see globals.css). */}
+      <div data-site-chrome="">
+        {/* Always rendered hidden; a client component reveals it inside its date window. */}
+        {isDraftMode ? (
+          <Suspense fallback={null}>
+            <DraftSiteAnnouncement />
+          </Suspense>
+        ) : (
+          <SiteAnnouncement {...PUBLISHED} />
+        )}
+        {isDraftMode ? (
+          <Suspense fallback={null}>
+            <DraftSiteHeader search={search} />
+          </Suspense>
+        ) : (
+          <SiteHeader {...PUBLISHED} search={search} />
+        )}
+      </div>
       <main
         id="main-content"
         tabIndex={-1}
@@ -106,13 +110,15 @@ export async function SiteShell({
       >
         {children}
       </main>
-      {isDraftMode ? (
-        <Suspense fallback={null}>
-          <DraftSiteFooter extra={cookieSettings} />
-        </Suspense>
-      ) : (
-        <SiteFooter {...PUBLISHED} extra={cookieSettings} />
-      )}
+      <div data-site-chrome="">
+        {isDraftMode ? (
+          <Suspense fallback={null}>
+            <DraftSiteFooter extra={cookieSettings} />
+          </Suspense>
+        ) : (
+          <SiteFooter {...PUBLISHED} extra={cookieSettings} />
+        )}
+      </div>
       {/*
         Subscribes to Content Lake changes and expires matching cache tags. In webhook mode
         only editors need it (live previews); visitors' caches are expired by /api/revalidate.
@@ -127,6 +133,8 @@ export async function SiteShell({
           {/* Cookieless, so it needs no consent. Providers needing consent load only after it. */}
           <Analytics />
           {hasConsentProviders && <AnalyticsScripts />}
+          {/* Custom events (the Link list's clicks) once a provider has loaded; no bundle, see track-script.ts. */}
+          {hasConsentProviders && <script dangerouslySetInnerHTML={{ __html: TRACK_SCRIPT }} />}
         </>
       )}
     </MotionProvider>

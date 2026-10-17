@@ -1507,6 +1507,55 @@ const galleryImages = (id, count) =>
     ...(n % 2 === 0 ? { caption: `Caption for ${id} picture ${n + 1}` } : {}),
   }))
 
+/**
+ * Links for the Link list gallery entries and the /links page (tests/e2e/link-list.spec.ts). The
+ * featured one comes first; "Shop" and "Follow along" are groups; thumbnails only matter to the layouts
+ * that draw them.
+ */
+const linkItem = (id, label, link, extra = {}) => ({
+  _key: id,
+  _type: 'linkItem',
+  label,
+  link,
+  visibility: 'show',
+  ...extra,
+})
+const galleryLinks = (prefix) => [
+  linkItem(`${prefix}-book`, 'Book a consultation', external('https://example.com/book'), {
+    description: 'Thirty minutes, free of charge',
+    featured: true,
+    icon: 'clock',
+    thumbnail: image('Booking'),
+  }),
+  linkItem(`${prefix}-journal`, 'Read the journal', internal('page-about'), {
+    description: 'Notes from the studio',
+    icon: 'star',
+    thumbnail: image('Journal'),
+  }),
+  linkItem(`${prefix}-shop`, 'Shop the range', external('https://example.com/shop'), {
+    description: 'New this season',
+    icon: 'bolt',
+    group: 'Shop',
+    thumbnail: image('Shop'),
+  }),
+  linkItem(`${prefix}-gift`, 'Gift cards', external('https://example.com/gift'), {
+    icon: 'heart',
+    group: 'Shop',
+    thumbnail: image('Gift cards'),
+  }),
+  linkItem(`${prefix}-insta`, 'Follow on Instagram', external('https://instagram.com/testco'), {
+    icon: 'leaf',
+    group: 'Follow along',
+    thumbnail: image('Instagram'),
+  }),
+]
+const galleryProfile = {
+  _type: 'object',
+  name: 'Test Co',
+  bio: 'Small-batch ceramics from the Inner West. Orders ship Australia-wide.',
+  image: image('Test Co logo'),
+}
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -2100,6 +2149,36 @@ const gallerySections = [
     provider: 'typeform',
     url: EMBED_URL.typeform,
   }),
+  // One entry per preset: Minimal, Cards, Editorial, Compact and Image-focused (Cards with large pictures).
+  // The fixed clock the visual tests pin (visual.spec.ts) is 16 Oct 2026, so schedules are stable.
+  ...[
+    ['stacked', 'standard', 'center'],
+    ['cards', 'standard', 'center'],
+    ['editorial', 'standard', 'start'],
+    ['compact', 'standard', 'start'],
+    ['image-focused', 'large', 'center'],
+  ].map(([name, thumbnailSize, align]) => ({
+    _key: `link-list-${name}`,
+    _type: 'linkList',
+    variant: name === 'image-focused' ? 'cards' : name,
+    thumbnailSize,
+    style: { _type: 'sectionStyle', align },
+    profile: galleryProfile,
+    socialSource: 'business',
+    links: galleryLinks(`ll-${name}`),
+  })),
+  // Events: the gallery's own events are in 2099 and in the "Workshop" category, so nothing about them
+  // changes with the date. Each section filters to that category.
+  ...['list', 'agenda', 'featured'].map((name) => ({
+    _key: `events-${name}`,
+    _type: 'events',
+    variant: name,
+    title: 'What’s on',
+    text: 'Workshops, talks and open days at the studio.',
+    category: ref('eventCategory-workshop'),
+    seeAllLink: external('https://example.com/events'),
+    seeAllLabel: 'See all events',
+  })),
   // new-section:gallery
 ]
 
@@ -2436,6 +2515,213 @@ documents.push({
   ],
 })
 
+/**
+ * Events (tests/e2e/events.spec.ts). Two sets:
+ *  - The gallery's events are fixed, in 2099 and in the "Workshop" category, so the section gallery's
+ *    screenshots never change.
+ *  - The page's events are dated from the day the suite runs (the clock is the point: the list must
+ *    hide the past ones). Past: an open day a month ago, a fair two months ago. Coming up, in days:
+ *    a weekly club (Tuesdays, one of them skipped), a workshop (10), a sold-out dinner (12), a
+ *    cancelled concert (15), an online talk (20) and an all-day open day (30).
+ * Times are midnight UTC, which is 10 or 11 am in Sydney, so a Tuesday in UTC is a Tuesday there too.
+ */
+const DAY_MS = 86_400_000
+const HOUR_MS = 3_600_000
+const today = Math.floor(Date.now() / DAY_MS) * DAY_MS
+const inDays = (days, hours = 0) => new Date(today + days * DAY_MS + hours * HOUR_MS).toISOString()
+const dayKey = (ms) => new Date(ms).toISOString().slice(0, 10)
+
+/** Tuesdays at 00:00 UTC still to come when the fixture loads, from the next one on. */
+const upcomingTuesdays = Array.from({ length: 14 }, (_, week) => today + (week * 7 + 1) * DAY_MS)
+  .map((ms) => ms + ((2 - new Date(ms).getUTCDay() + 7) % 7) * DAY_MS)
+  .filter((ms) => ms > Date.now() + 3 * HOUR_MS)
+/** The series started 8 weeks before its first upcoming Tuesday, so it is already under way. */
+const seriesStart = (upcomingTuesdays[0] ?? today) - 56 * DAY_MS
+export const eventDates = {
+  /** Tuesdays (YYYY-MM-DD) the weekly club meets, from the first still to come. */
+  club: upcomingTuesdays.map(dayKey),
+  /** The Tuesday the club does not meet. */
+  skipped: dayKey(upcomingTuesdays[1] ?? today),
+  /** The last Tuesday of the series. */
+  until: dayKey(upcomingTuesdays[upcomingTuesdays.length - 1] ?? today),
+}
+
+const eventDoc = (id, title, start, extra = {}) => ({
+  _id: `event-${id}`,
+  _type: 'event',
+  title,
+  slug: { _type: 'slug', current: id },
+  start,
+  timeZone: 'Australia/Sydney',
+  status: 'scheduled',
+  ...extra,
+})
+const studio = {
+  _type: 'object',
+  kind: 'venue',
+  name: 'The Studio',
+  address: '12 Rose St\nNewtown NSW 2042',
+}
+
+documents.push(
+  { _id: 'eventCategory-workshop', _type: 'eventCategory', title: 'Workshop' },
+  { _id: 'eventCategory-class', _type: 'eventCategory', title: 'Class' },
+  { _id: 'eventCategory-talk', _type: 'eventCategory', title: 'Talk' },
+  { _id: 'eventCategory-empty', _type: 'eventCategory', title: 'Empty' },
+
+  // The gallery's events.
+  eventDoc('hand-building-workshop', 'Hand-building workshop', '2099-03-13T23:00:00Z', {
+    end: '2099-03-14T01:00:00Z',
+    category: ref('eventCategory-workshop'),
+    summary: 'Coil, pinch and slab: make a bowl and a small vase to take home.',
+    image: image('Hands shaping clay on a wheel'),
+    location: studio,
+  }),
+  eventDoc('evening-glazing', 'Evening glazing session', '2099-03-14T07:30:00Z', {
+    end: '2099-03-14T09:00:00Z',
+    category: ref('eventCategory-workshop'),
+    summary: 'Glaze the pieces from the morning workshop, with a glass of something.',
+    location: studio,
+  }),
+  eventDoc('open-studio-day', 'Open studio day', '2099-03-20T13:00:00Z', {
+    end: '2099-03-21T01:00:00Z',
+    allDay: true,
+    status: 'soldOut',
+    category: ref('eventCategory-workshop'),
+    summary: 'Meet the makers, watch a firing and browse the shelves.',
+    location: studio,
+  }),
+  eventDoc('glaze-chemistry-talk', 'Glaze chemistry talk', '2099-04-03T23:00:00Z', {
+    end: '2099-04-04T00:00:00Z',
+    status: 'cancelled',
+    category: ref('eventCategory-workshop'),
+    summary: 'Why glazes behave the way they do, with slides and test tiles.',
+    location: { _type: 'object', kind: 'online', url: 'https://meet.example.com/glaze' },
+  }),
+
+  // The events page's events.
+  eventDoc('past-open-day', 'Past open day', inDays(-30), {
+    end: inDays(-30, 2),
+    category: ref('eventCategory-class'),
+    location: studio,
+  }),
+  eventDoc('past-fair', 'Past winter fair', inDays(-60), {
+    end: inDays(-60, 6),
+    allDay: true,
+    location: studio,
+  }),
+  eventDoc('weekly-pottery-club', 'Weekly pottery club', new Date(seriesStart).toISOString(), {
+    end: new Date(seriesStart + 2 * HOUR_MS).toISOString(),
+    category: ref('eventCategory-class'),
+    summary: 'Drop in on a Tuesday morning: throw, trim and talk clay.',
+    location: studio,
+    recurrence: {
+      _type: 'object',
+      repeat: 'weekly',
+      until: eventDates.until,
+      skip: [eventDates.skipped],
+    },
+  }),
+  eventDoc('pottery-workshop', 'Pottery workshop', inDays(10), {
+    end: inDays(10, 2),
+    category: ref('eventCategory-class'),
+    summary: 'A relaxed morning on the wheel, no experience needed.',
+    image: image('Hands shaping clay on a wheel'),
+    location: studio,
+    body: [block(['Bring an apron; we provide the clay and the tea.'])],
+    registration: cta('Book a place', external('https://tickets.example.com/pottery')),
+    capacityNote: 'Limited to 12 people',
+  }),
+  eventDoc('sold-out-dinner', 'Sold-out supper night', inDays(12, 8), {
+    end: inDays(12, 11),
+    status: 'soldOut',
+    category: ref('eventCategory-class'),
+    summary: 'Supper served on the pieces you made.',
+    location: studio,
+    registration: cta('Buy tickets', external('https://tickets.example.com/supper')),
+  }),
+  eventDoc('cancelled-concert', 'Cancelled courtyard concert', inDays(15, 8), {
+    end: inDays(15, 10),
+    status: 'cancelled',
+    category: ref('eventCategory-talk'),
+    summary: 'An evening of acoustic music in the courtyard.',
+    location: studio,
+    registration: cta('Get tickets', external('https://tickets.example.com/concert')),
+  }),
+  eventDoc('online-talk', 'Online talk: firing schedules', inDays(20, 8), {
+    end: inDays(20, 9),
+    category: ref('eventCategory-talk'),
+    summary: 'How long, how hot and why, with questions at the end.',
+    location: { _type: 'object', kind: 'online', url: 'https://meet.example.com/firing' },
+    registration: cta('Save your seat', external('https://tickets.example.com/talk')),
+  }),
+  eventDoc('open-day', 'Spring open day', inDays(30), {
+    end: inDays(30, 6),
+    allDay: true,
+    summary: 'The whole studio is open all day.',
+    location: studio,
+  }),
+)
+
+/** The events page: a list of everything (with the calendar feed link), classes as an agenda, talks as a feature. */
+documents.push(
+  {
+    _id: 'page-events',
+    _type: 'page',
+    title: 'What’s on',
+    slug: { _type: 'slug', current: 'events' },
+    seo: { _type: 'seo', metaDescription: 'Workshops, classes and talks.' },
+    pageBuilder: [
+      { _key: 'events-hero', _type: 'hero', title: 'What’s on', description: 'Hero description.' },
+      {
+        _key: 'events-all',
+        _type: 'events',
+        title: 'Coming up',
+        text: 'Everything on the calendar.',
+        count: 20,
+        seeAllLink: external('https://example.com/everything'),
+        seeAllLabel: 'See everything',
+      },
+      {
+        _key: 'events-classes',
+        _type: 'events',
+        variant: 'agenda',
+        title: 'Classes',
+        category: ref('eventCategory-class'),
+        count: 12,
+      },
+      {
+        _key: 'events-talks',
+        _type: 'events',
+        variant: 'featured',
+        title: 'Talks',
+        category: ref('eventCategory-talk'),
+      },
+    ],
+  },
+  {
+    _id: 'page-quiet-events',
+    _type: 'page',
+    title: 'Quiet events',
+    slug: { _type: 'slug', current: 'quiet-events' },
+    seo: { _type: 'seo', metaDescription: 'An events page with nothing coming up.' },
+    pageBuilder: [
+      {
+        _key: 'quiet-hero',
+        _type: 'hero',
+        title: 'Quiet events',
+        description: 'Hero description.',
+      },
+      {
+        _key: 'quiet-events',
+        _type: 'events',
+        title: 'Nothing yet',
+        category: ref('eventCategory-empty'),
+      },
+    ],
+  },
+)
+
 // Tall enough that the scroll-linked line is part-drawn at some scroll positions (process.spec.ts).
 documents.push({
   _id: 'page-process',
@@ -2566,6 +2852,119 @@ documents.push({
   ],
   _updatedAt: UPDATED,
 })
+
+/**
+ * The Link page (tests/e2e/link-list.spec.ts): a minimal page (no header or footer) with a profile,
+ * custom social icons, a featured link with UTM tags, groups, and links that are hidden, not yet due,
+ * past their date, or in their window. Times are far from now, so the outcome never depends on the day.
+ */
+documents.push(
+  {
+    _id: 'page-links',
+    _type: 'page',
+    title: 'Links',
+    slug: { _type: 'slug', current: 'links' },
+    minimalLayout: true,
+    seo: { _type: 'seo', metaDescription: 'Where to find Test Co.' },
+    pageBuilder: [
+      {
+        _key: 'links-list',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        profile: {
+          _type: 'object',
+          name: 'Test Co',
+          bio: 'Small-batch ceramics from the Inner West.',
+        },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/testco',
+          },
+          {
+            _key: 'yt',
+            _type: 'socialLink',
+            platform: 'youtube',
+            url: 'https://youtube.com/@testco',
+          },
+        ],
+        links: [
+          linkItem('l-book', 'Book a consultation', external('https://example.com/book'), {
+            description: 'Thirty minutes, free of charge',
+            featured: true,
+            utmSource: 'instagram',
+            utmMedium: 'bio',
+            utmCampaign: 'spring',
+          }),
+          linkItem('l-journal', 'Read the journal', internal('page-about'), { icon: 'star' }),
+          linkItem('l-later', 'Opening soon', external('https://example.com/soon'), {
+            showFrom: '2099-01-01T00:00:00Z',
+          }),
+          linkItem('l-over', 'Last summer’s sale', external('https://example.com/old'), {
+            showUntil: '2020-01-01T00:00:00Z',
+          }),
+          linkItem('l-window', 'Spring offer', external('https://example.com/spring'), {
+            showFrom: '2020-01-01T00:00:00Z',
+            showUntil: '2099-01-01T00:00:00Z',
+          }),
+          linkItem('l-shop', 'Shop the range', external('https://example.com/shop'), {
+            group: 'Shop',
+          }),
+          linkItem('l-hidden', 'Secret link', external('https://example.com/secret'), {
+            visibility: 'hide',
+            group: 'Shop',
+          }),
+          linkItem('l-gift', 'Gift cards', external('https://example.com/gift'), { group: 'Shop' }),
+          linkItem('l-party', 'Launch party', external('https://example.com/party'), {
+            group: 'Coming up',
+            showFrom: '2099-01-01T00:00:00Z',
+          }),
+        ],
+      },
+      {
+        _key: 'links-note',
+        _type: 'richText',
+        body: [block(['© Test Co. Made in Newtown.'])],
+      },
+    ],
+  },
+  {
+    // A Link list inside an ordinary page (it keeps the header and footer), in two layouts.
+    _id: 'page-link-list',
+    _type: 'page',
+    title: 'Link list',
+    slug: { _type: 'slug', current: 'link-list' },
+    seo: { _type: 'seo', metaDescription: 'A page with link lists.' },
+    pageBuilder: [
+      {
+        _key: 'link-list-hero',
+        _type: 'hero',
+        title: 'Link list',
+        description: 'Hero description.',
+      },
+      {
+        _key: 'link-list-page-cards',
+        _type: 'linkList',
+        variant: 'cards',
+        title: 'Where to next',
+        socialSource: 'none',
+        links: galleryLinks('pc'),
+      },
+      {
+        _key: 'link-list-page-compact',
+        _type: 'linkList',
+        variant: 'compact',
+        title: 'Quick links',
+        socialSource: 'none',
+        links: galleryLinks('pq'),
+      },
+    ],
+  },
+)
 
 documents.push({
   _id: 'page-section-gallery',

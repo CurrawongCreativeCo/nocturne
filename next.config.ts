@@ -68,6 +68,9 @@ const nextConfig: NextConfig = {
     Promise.resolve([
       // generateSitemaps serves files at /sitemap/<id>.xml; keep the conventional /sitemap.xml for the first.
       { source: '/sitemap.xml', destination: '/sitemap/0.xml' },
+      // Calendar files live under /api/events; the feed first, so `feed` is not read as an event's slug.
+      { source: '/events/feed.ics', destination: '/api/events/feed' },
+      { source: '/events/:slug.ics', destination: '/api/events/:slug/ics' },
       // IndexNow key file at /<key>.txt (8-128 letters, digits, dashes); the route 404s unless it's INDEXNOW_KEY.
       { source: '/:key([A-Za-z0-9-]{8,128}).txt', destination: '/api/indexnow/:key' },
     ]),

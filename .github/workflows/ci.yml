@@ -57,6 +57,15 @@ jobs:
             exit 1
           }
 
+      # `npm run typegen` also rebuilds the Studio's editor guide from docs/editor-guide, the site
+      # profile and the schema, so the step above has just regenerated it.
+      - name: Editor guide is committed and current
+        run: |
+          git diff --exit-code src/features/studio/start-here/editor-guide.generated.json || {
+            echo "::error::The editor guide is stale. Run 'npm run typegen' and commit src/features/studio/start-here/editor-guide.generated.json."
+            exit 1
+          }
+
       - name: Next.js route types
         run: npx next typegen
 

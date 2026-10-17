@@ -23,10 +23,18 @@ const variants = {
 } as const
 
 /** One short transition (motion tokens) and a small press. None of it under reduced motion. */
-const feedback =
+export const buttonFeedback =
   'transition-[color,background-color,transform] duration-(--duration-fast) ease-out motion-safe:active:scale-[0.98] motion-reduce:transition-none'
 
 const sizes = { md: 'px-6 py-3', sm: 'px-4 py-2' } as const
+
+/** Just the colours of a button style, for a button that has its own shape (a link list's featured link). */
+export function ctaColours(
+  surface: keyof typeof variants,
+  variant: keyof (typeof variants)['dark'] = 'primary',
+) {
+  return variants[surface][variant]
+}
 
 /** The button classes of a CTA, for a plain `<a>` or `<button>` that isn't a Sanity link (e.g. Google Maps directions). */
 export function ctaClassName(
@@ -34,7 +42,7 @@ export function ctaClassName(
   variant: keyof (typeof variants)['dark'] = 'primary',
   size: keyof typeof sizes = 'md',
 ) {
-  return `inline-flex items-center justify-center rounded-button text-small font-semibold ${feedback} ${sizes[size]} ${variants[surface][variant]}`
+  return `inline-flex items-center justify-center rounded-button text-small font-semibold ${buttonFeedback} ${sizes[size]} ${ctaColours(surface, variant)}`
 }
 
 interface Props {

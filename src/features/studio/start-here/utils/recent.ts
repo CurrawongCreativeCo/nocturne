@@ -12,6 +12,8 @@ export const CLIENT_VISIBLE_TYPES: ReadonlySet<string> = new Set([
   'announcement',
   'businessInfo',
   'teamMember',
+  'event',
+  'eventCategory',
 ])
 
 export const RECENT_LIMIT = 8

@@ -42,7 +42,7 @@ describe('filterStructureItems', () => {
 
   it('lists exactly the client items', () => {
     expect([...CLIENT_STRUCTURE_IDS].sort()).toEqual(
-      ['blog', 'businessInfo', 'pages', 'startHere', 'team', 'websiteSettings'].sort(),
+      ['blog', 'businessInfo', 'events', 'pages', 'startHere', 'team', 'websiteSettings'].sort(),
     )
   })
 

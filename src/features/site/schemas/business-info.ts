@@ -9,6 +9,8 @@ import {
 
 import { DAYS, DEFAULT_TIME_ZONE, formatTime, isTime } from '@/lib/opening-hours'
 import { hiddenFromClients } from '@/lib/sanity/roles'
+import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
+import { TIME_ZONES } from '@/lib/time-zones'
 
 import { AbnInput } from '../components/abn-input'
 import { formatAbn, isValidAbn } from '../utils/abn'
@@ -29,29 +31,6 @@ export const BUSINESS_TYPES = [
 ] as const
 
 export const AU_STATES = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'] as const
-
-/** Mainland capitals plus Hobart; Australia/Sydney covers NSW, the ACT and (in effect) Canberra. */
-export const TIME_ZONES = [
-  { value: 'Australia/Sydney', title: 'Sydney (NSW, ACT)' },
-  { value: 'Australia/Melbourne', title: 'Melbourne (VIC)' },
-  { value: 'Australia/Brisbane', title: 'Brisbane (QLD, no daylight saving)' },
-  { value: 'Australia/Adelaide', title: 'Adelaide (SA)' },
-  { value: 'Australia/Darwin', title: 'Darwin (NT)' },
-  { value: 'Australia/Perth', title: 'Perth (WA)' },
-  { value: 'Australia/Hobart', title: 'Hobart (TAS)' },
-] as const
-
-export const SOCIAL_PLATFORMS = [
-  { value: 'facebook', title: 'Facebook' },
-  { value: 'instagram', title: 'Instagram' },
-  { value: 'linkedin', title: 'LinkedIn' },
-  { value: 'x', title: 'X (Twitter)' },
-  { value: 'youtube', title: 'YouTube' },
-  { value: 'tiktok', title: 'TikTok' },
-  { value: 'pinterest', title: 'Pinterest' },
-  { value: 'google', title: 'Google Business Profile' },
-  { value: 'other', title: 'Other' },
-] as const
 
 const TIME_HELP = '24-hour time, for example 08:00 or 17:30.'
 
@@ -372,7 +351,7 @@ export const businessInfo = defineType({
           preview: {
             select: { platform: 'platform', url: 'url' },
             prepare: ({ platform, url }: { platform?: string; url?: string }) => ({
-              title: SOCIAL_PLATFORMS.find(({ value }) => value === platform)?.title ?? 'Profile',
+              title: socialPlatformTitle(platform),
               subtitle: url,
             }),
           },

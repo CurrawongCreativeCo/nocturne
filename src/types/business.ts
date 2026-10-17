@@ -12,7 +12,14 @@ export type BusinessInfo = NonNullable<NonNullable<SETTINGS_QUERY_RESULT>['busin
  */
 export type LocationBusiness = Pick<
   BusinessInfo,
-  'tradingName' | 'phone' | 'publicEmail' | 'address' | 'geo' | 'openingHours' | 'specialHours'
+  | 'tradingName'
+  | 'phone'
+  | 'publicEmail'
+  | 'address'
+  | 'geo'
+  | 'openingHours'
+  | 'specialHours'
+  | 'socialLinks'
 > & {
   timeZone: string
   /** For a `tel:` link, or null when the phone number is empty or not a number we can dial. */

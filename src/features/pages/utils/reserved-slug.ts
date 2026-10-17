@@ -1,3 +1,4 @@
+import { EVENTS_SEGMENT } from '@/config/event-paths'
 import {
   BLOG_SEGMENT,
   EXPERIMENT_SEGMENT,
@@ -24,12 +25,13 @@ const RESERVED_SEGMENTS = new Set([
 ])
 
 /**
- * The first segment of `slug` when a route already uses it, else null. `team` is reserved only
- * *above* the profile pages (`team/ann-lee`): the route `/team/[slug]` would answer first. A page
- * called plain `team` has no route in its way, and is where a Team section usually lives.
+ * The first segment of `slug` when a route already uses it, else null. `team` and `events` are
+ * reserved only *above* their detail pages (`team/ann-lee`): the route `/team/[slug]` would answer
+ * first. A page called plain `team` or `events` has no route in its way, and is where a Team or
+ * Events section usually lives.
  */
 export function reservedSegment(slug: string): string | null {
   const [first = '', ...rest] = slug.split('/')
   if (RESERVED_SEGMENTS.has(first)) return first
-  return first === TEAM_SEGMENT && rest.length > 0 ? first : null
+  return (first === TEAM_SEGMENT || first === EVENTS_SEGMENT) && rest.length > 0 ? first : null
 }

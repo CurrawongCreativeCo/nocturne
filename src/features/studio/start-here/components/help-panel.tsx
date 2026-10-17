@@ -1,18 +1,20 @@
 import { CopyIcon } from '@sanity/icons/Copy'
 import { LaunchIcon } from '@sanity/icons/Launch'
 import { Button, Card, Flex, Heading, Stack, Text } from '@sanity/ui'
-import { forwardRef, useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState, type ReactNode } from 'react'
 
 interface Props {
   guideUrl?: string
   supportEmail?: string
+  /** Shown under the guide link and support address: the editor guide. */
+  children?: ReactNode
 }
 
 const COPIED_MS = 3000
 
-/** Where to learn more: the client's guide, and the support address to copy until the support form exists. */
+/** Where to learn more: the client's guide, the support address to copy until the support form exists, and the editor guide. */
 export const HelpPanel = forwardRef<HTMLHeadingElement, Props>(function HelpPanel(
-  { guideUrl, supportEmail },
+  { guideUrl, supportEmail, children },
   headingRef,
 ) {
   const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
@@ -109,6 +111,7 @@ export const HelpPanel = forwardRef<HTMLHeadingElement, Props>(function HelpPane
           )}
         </Stack>
       </Card>
+      {children}
     </Stack>
   )
 })

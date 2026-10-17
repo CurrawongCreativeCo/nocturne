@@ -435,6 +435,10 @@ src/
     studio/[[...tool]]/page.tsx
     (site)/blog/                     blog index, [slug] (post), category/[slug]
     (site)/team/[slug]/page.tsx      a team member's profile page
+    (site)/events/[slug]/page.tsx    an event's page
+    api/events/[slug]/ics/route.ts   one event's calendar file (served at /events/<slug>.ics)
+    api/events/feed/route.ts         every upcoming event as a calendar feed (served at /events/feed.ics)
+    api/og/events/[slug]/route.tsx   an event's branded share image
     (site)/site-shell.tsx            header, <main>, footer: shared by (site)/layout and ab/[code]/layout
     (site)/site-consent.tsx          cookie banner with its text from the Cookie banner singleton
     ab/[code]/[[...slug]]/           pages prerendered per A/B option (proxy rewrites visitors here)
@@ -483,15 +487,21 @@ src/
       api/                         handle-webhook.ts, write-prices.ts, checkout.ts (server action), queries.ts
       components/                  checkout-button (client form)
       utils/                       stripe-signature, map-stripe (event + price -> document), stripe-api (REST), config
+    events/                        events: the event schema, event pages, calendar files
+      api/                         event.ts (EVENT_QUERY, EVENTS_INDEX_QUERY, EVENTS_FEED_QUERY, metadata, sitemap)
+      components/                  event-view (server)
+      schemas/                     event.ts, event-category.ts
+      utils/                       json-ld, to-ics, location, registration-url, slug
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, Start here tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, slider (+ slider-lazy, slider-snap)
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
-  config/                          env.ts (validated), paths.ts (slug <-> URL),
+  config/                          env.ts (validated), paths.ts (slug <-> URL), event-paths.ts (/events URLs),
                                    tokens.generated.ts (GENERATED: token values for the OG image)
   config/studio-brand/             CMS brand: currawong.ts (defaults), resolve.ts, validate.ts, client.ts, types.ts
+  lib/events/                      time zones, recurrence, formatting, add-to-calendar links and .ics files (pure; shared by the Events section, event pages and Studio)
   lib/color/                       hex <-> OKLCH, WCAG contrast, lightness adjustment (shared with build-tokens)
   lib/sitemap-chunks.ts            sitemap split math (shared by pages and posts)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
@@ -631,7 +641,9 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **`/api/site-info`** adds none: it is prerendered and reads only environment variables.
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
+- **Link list** adds none: its links, profile and social icons are resolved inside `PAGE_QUERY` (the social icons come from the settings entry the footer already fetched), and which links are due is decided at request time from that cached data. The page option is one more field in `PAGE_QUERY`.
 - **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
+- **Events** add none to a page view: an Events section's events are resolved inside `PAGE_QUERY` (an `event` or `eventCategory` change expires the pages, tagged `event` and `eventCategory`; the business time zone comes from the same query). An event page adds `EVENT_QUERY`, one per event, and `EVENTS_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/events/…` URLs cost nothing. The calendar feed adds `EVENTS_FEED_QUERY`, one cached entry for the whole site; an event's `.ics` file reads the event's own entry. Which events are upcoming is decided per request from that cached data, so no visitor causes a Sanity request.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
   recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
@@ -667,7 +679,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "event", "eventCategory", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -781,6 +793,7 @@ Analytics are chosen per project by environment variable, and nothing that sets 
 
 These are public values, baked in at build time: redeploy after changing them. Set any combination.
 
+- **Custom events:** `window.trackEvent(name, props)` and `data-track-event` / `data-track-props` on an element (`src/lib/analytics/track-script.ts`, an inline script the shell adds when a provider is configured) send an event to whichever provider has loaded, so they need no consent logic of their own: before consent none is on the page and nothing happens. The Link list's `link_click` uses them (see [Link list](#link-list)).
 - **Vercel Analytics** (`@vercel/analytics`) is always on in the public site. It sets no cookies and stores nothing on the visitor's device, so it needs no consent. It does nothing off Vercel.
 - **Before consent:** no request to any provider and no provider `<script>` in the page. **Accept all** (or **Choose** with analytics ticked) mounts the `next/script` tags for each configured provider from `features/consent/components/analytics-scripts.tsx`; the choice is kept in `localStorage` (`consent`: analytics, marketing, version, time) and applies on later visits and in other tabs. **Reject all** keeps everything off and is remembered too. If storage is blocked the choice lasts until the page reloads.
 - **Google Analytics:** the inline script first sets Consent Mode v2 `ad_storage`, `ad_user_data`, `ad_personalization` and `analytics_storage` to `denied`, then updates them to the visitor's choice (the three advertising signals follow _Marketing_), all before `gtag.js` is requested.
@@ -1201,7 +1214,7 @@ export const siteProfileInput = defineSiteProfile({
 ```
 
 - **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo`,
-  `team` and `teamProfiles`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
+  `team`, `teamProfiles` and `events`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
 - **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;
   see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
   Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
@@ -1216,17 +1229,18 @@ export const siteProfileInput = defineSiteProfile({
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
 feature does:
 
-| Feature                      | When off                                                                                                                                                                                                       |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                       |
-| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                             |
-| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                           |
-| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                            |
-| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                       |
-| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                        |
-| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                               |
-| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form |
-| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                |
+| Feature                      | When off                                                                                                                                                                                                                                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                           |
+| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                 |
+| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                               |
+| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                |
+| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                           |
+| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                            |
+| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                   |
+| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                     |
+| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page) |
+| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                    |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
 import it). Page-builder sections that depend on a disabled feature (a form, pricing table or newsletter section)
@@ -1262,9 +1276,11 @@ history request for the author names, and, only when notices are set up, one cal
   images that have no description (alt text), and drafts last edited more than seven days ago. They reuse the detectors
   in `content-health/utils/detect.ts`; fixing the problem in a draft clears it. Shared sections are only checked for
   agency staff, because clients cannot open them. Each row has a **Fix it** link.
-- **Help:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
+- **Help tab:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
   selectable text and a **Copy email address** button. Each part is left out when the profile does not set it. The
-  support form replaces the address in a later release.
+  support form replaces the address in a later release. Under them is this site's **editor guide** (next section).
+  The **Help** shortcut card opens this tab.
+- **Tabs:** Start here has two, **Overview** (shortcuts, recent changes, things to check) and **Help**.
 - **Notices:** set `OPS_NOTICES_URL` (an https endpoint) and, if it needs one, `OPS_NOTICES_KEY`. The site's
   `/api/ops-notices` route asks `OPS_NOTICES_URL?site=<client.slug>` with `Authorization: Bearer <key>`, caches the answer
   for five minutes and passes on up to five notices; the key never reaches the browser. The endpoint answers
@@ -1288,7 +1304,7 @@ draft-only page.
    Edit a page and reload to see it jump to the top with a _Draft_ badge.
 6. Things to check lists the missing description, the unpublished link and the old draft in plain words, and **Fix it**
    opens the right document. Fix one, reload, and it disappears.
-7. Help: **Copy email address** copies the address (paste it somewhere to confirm) and says "Copied to your clipboard."
+7. Help: open the **Help** tab (or click the **Help** card). **Copy email address** copies the address (paste it somewhere to confirm) and says "Copied to your clipboard."
    The guide link opens in a new tab. Press Tab: every card, link and button shows a focus ring.
 8. Narrow the window to phone width: no sideways scrolling, and the cards stack in one column.
 9. Optional: point `OPS_NOTICES_URL` at a test endpoint that answers `{"notices":[{"title":"Test","tone":"caution"}]}`
@@ -1298,6 +1314,47 @@ Tests: `start-here/utils/*.test.ts` (relative time, wording, shortcut list from 
 history parsing), `src/lib/ops/notices.test.ts` (notice parsing and the endpoint check) and
 `tests/e2e/ops-notices.spec.ts` (the route answers 204 when unset). The tool itself needs a signed-in Studio, so it
 is checked by hand.
+
+#### Editor guide (Help tab)
+
+The Help tab shows short, plain-English task guides and a description of each section a client may add, and only
+what **this site** uses. It is built from files, not written per client.
+
+- **The guides** are markdown files in `docs/editor-guide/`, written once in the template: _Change a heading_, _Replace a photo_,
+  _Publish and undo_, _Write a blog post_, _Update opening hours_ and _Add a team member_. Each starts with frontmatter
+  (`title`, `summary`, `order`, and optionally `feature` and `requires`). A guide with `feature: blog` appears only when
+  `features.blog` is on, and `requires: post` also needs that document type in `schema.json`, so a client site that removes a type loses its guide.
+  Write them in Australian English, in short steps, and use only headings, paragraphs, lists, **bold** and `[links](https://…)`:
+  nothing else is rendered.
+- **The sections** come from `clientSections` in `site.profile.ts` (the default list when it is empty). For each, the guide lists the
+  fields a client edits, with the field's description, its **recommended picture size** (the sentence `imageField` adds, such as
+  "1600 × 1200 px, landscape") and its **length guidance** (the `max`/`min` limits in the field's validation, such as "Up to 60 characters"
+  or "Up to 2 items"). Agency-only fields (the Design tab and anything hidden from clients) are left out, and so is any field
+  `schema.json` does not store. `schema.json` holds only the shape of the data, so titles, descriptions and limits are read from the
+  section schemas themselves.
+- **Videos** are not baked in. Add `help.videos` to `site.profile.ts`, keyed by the guide's file name without `.md`:
+
+  ```ts
+  help: { videos: { 'change-a-heading': 'https://…', 'publish-and-undo': 'https://…' } },
+  ```
+
+  A guide with a video shows **Watch the video (new tab)**; one without shows nothing. Each guide file has a comment
+  marking where its video belongs.
+
+- **Generating it:** `scripts/build-editor-guide.mjs` writes `src/features/studio/start-here/editor-guide.generated.json` (committed).
+  `npm run typegen` runs it straight after `sanity schema extract`, and `npm run editor-guide` runs it alone
+  (`-- --check` reports whether the file is current without writing). CI runs typegen and fails when the committed file differs, so after
+  changing a guide, `site.profile.ts`, or a section's fields or descriptions, run `npm run typegen` and commit the result.
+- **Showing it:** `start-here/components/editor-guide.tsx` lists each guide and section in an expandable row (native `details`, so
+  it works by keyboard), and `markdown.tsx` renders the guide text from the small parser in `utils/markdown.ts`. Links must be
+  `https://`; anything else shows as plain text. No markup is ever injected.
+
+To add a guide, add a file to `docs/editor-guide/` and run `npm run typegen`. For a client site, edit `site.profile.ts` and run it again.
+
+Tests: `scripts/editor-guide-utils.test.mjs` (frontmatter, image advice, limits, feature filtering, section fields),
+`start-here/utils/markdown.test.ts` and `editor-guide.test.ts`. The tab itself needs a signed-in Studio, so check it by hand:
+open **Start here → Help**, expand a guide and a section, switch `features.blog` to `false`, run `npm run typegen`, reload,
+and confirm the blog guide is gone.
 
 ### Studio roles and permissions
 
@@ -1896,6 +1953,110 @@ profile pages, on their own page at `/team/<slug>`.
   The section gallery has `team-grid`, `team-slider` and `team-list`; their screenshot baselines need the **Update visual
   baselines** workflow (macOS skips visual tests).
 
+### Events
+
+A content calendar: what is on, when and where. Events are documents (`event`, in `src/features/events`), shown by the
+**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
+to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
+calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
+list and an agenda, which is what most clients need.
+
+**Default, presets, advanced.**
+
+- **Default:** add events, then _Add item → Events_. It shows the next six, soonest first, nicely, with nothing else to set.
+  Past events drop off by themselves.
+- **Presets** (the Layout picker, with pictures): _List_ (a row each: date badge, when and where, title, summary), _Agenda_
+  (grouped by day, times in a column) and _Featured_ (the next event large with its picture, the rest beside it).
+- **Advanced** (agency-only, Design tab → Advanced): _Only show one category_ and _Most to show_ (empty: six rows, ten agenda
+  entries, four featured; 24 at most). On an event, the collapsed **Repeats** group.
+
+**An event.** _Title_ and _Page address_ (a single path segment; `feed` is taken), _Start_, _End_ (optional), _All day_,
+_Time zone_ (starts as Business info's), _Summary_ (the cards and search results), _Description_ (rich text, stored as
+`body` like posts: a field called `description` that isn't text would change the type of every query that reads the site
+description), _Image_ (alt text required), _Where_ (_At a venue_: name and address, or _Online_ with the link to join),
+_Category_ (a reference to an _Event category_), _Registration button_ (a label and the shared **Goes to** action: a page, a
+website, and booking or a panel once those exist), _Status_ (_Scheduled_, _Cancelled_ or _Sold out_) and _Places note_ (text
+such as "Limited to 12 people"; it does not count bookings). Cancelled and sold-out events stay on the site with a label, and
+the registration button goes. Validation: the end must be after the start (an all-day event may end on its first day), a
+timed event needs a time zone, an online event needs its link, and the last date of a series can't precede its first.
+
+**Time zones.** Times are stored as instants and shown in the **event's** time zone for everyone ("Sat 14 Mar, 10:00 am –
+12:00 pm"; the event page also names the zone, "AEDT"), so a visitor in Perth sees Sydney's 10 am rather than a guess at
+their own. The picker offers the same zones as Business info (`TIME_ZONES`, `src/lib/time-zones.ts`). An all-day event is
+dates only, in that zone. An event saved with no zone (an all-day event) uses Business info's.
+
+**Repeats.** _Does not repeat_, _Every week_, _Every fortnight_ or _Every month, on the same weekday_ (the second Tuesday
+stays the second Tuesday; the fifth means "the last", so every month has one), with an optional **last date** and **days it
+doesn't happen** (public holidays, school breaks). Occurrences are worked out when they are needed, in a pure function
+(`expandOccurrences`, `src/lib/events/recurrence.ts`); nothing is stored per date. They keep the same wall-clock time across
+daylight saving changes: a Tuesday 10 am class in Sydney is 10 am before and after the clocks move, which is a different
+UTC instant. Without a last date a series never ends, so give classes one at the end of term. The List and Featured layouts
+show a series once, at its next date; the Agenda shows each of its next dates (at most eight per series).
+
+**The section.** _Section title_ (starts as "What’s on"), _Intro_, an optional **“See all events” link** (any **Goes to**
+action; usually your page with every event) and its text. A section also offers "Subscribe to the calendar" (the feed) unless
+it is filtered to one category, since the feed lists them all. A section with nothing coming up says so, and keeps its links.
+
+**How "upcoming" works without the clock.** Pages are cached, and the clock may not be read in a cached result. So the query
+returns events without looking at the date (it keeps the 200 that matter longest, ordered by `eventLastRelevant`, so a long
+history can't crowd out what is coming), and the list is worked out **per request**, in a small `<Suspense>` boundary of its
+own (`requestTime()`, `src/lib/request-time.ts`): the title, intro and links stay prerendered, and only the list streams in
+(a placeholder holds its place so nothing jumps). It adds no client JavaScript. Two consequences: the list needs JavaScript
+to appear in the page (React swaps the streamed list in; without it only the placeholder and the links show, and the events
+are still reachable through their pages, the feed and the sitemap), and an event disappears the moment it ends, with no
+rebuild. An event under way still counts, and an all-day event stays up to the end of its last day.
+
+**Event pages.** `/events/<slug>` has one `<h1>`, the summary, the image, the description and a details panel (when, where
+with a "Get directions" link or the online link, places note, the registration button, and Add to calendar). A series shows
+its next date, the next five dates and its repeat; those are worked out per request in their own `<Suspense>` boundary, so
+the page is otherwise prerendered like a post. The page has `Event` structured data (`schema.org`): `startDate` and
+`endDate` with the zone's offset (dates only for all-day events), `eventStatus` (`EventScheduled` or `EventCancelled`),
+`eventAttendanceMode`, `location` (a `Place` or a `VirtualLocation`), `offers` pointing at the registration address
+(`InStock`, or `SoldOut`; none for a cancelled event or a button with no address of its own) and the site's Organization as
+`organizer`. The share image is generated and branded (`/api/og/events/<slug>`: site name, the event's date or repeat, title,
+venue, in the brand colours), so it always carries the date. Metadata is the event's title and summary.
+
+**Add to calendar.** Each event page offers _Add to Google Calendar_ and _Add to Outlook_ (links built from the event: the
+next date of a series) and the file for Apple Calendar and others.
+
+- `/events/<slug>.ics` is one event as an iCalendar file (RFC 5545): `DTSTART;TZID=Australia/Sydney:20261105T100000`, a
+  `VTIMEZONE` generated from the zone's real daylight saving changes (so an app that doesn't know the zone still shows 10 am
+  as 10 am), text escaped (commas, semicolons, backslashes, line breaks) and lines folded at 75 bytes. A series is **one**
+  entry with an `RRULE` (`FREQ=WEEKLY;BYDAY=TU;UNTIL=…`, `FREQ=MONTHLY;BYDAY=2TU`, …) and `EXDATE`s for skipped days, so a
+  calendar keeps the whole series. A cancelled event is written `STATUS:CANCELLED`; all-day events are dates. The file is
+  prerendered and refreshed with the event.
+- `/events/feed.ics` is every upcoming event, for **Subscribe** in a calendar app (use the address, or `webcal://` in place
+  of `https://`). It renders per request so finished events fall out, asks calendars to refresh every 12 hours and sends
+  `s-maxage=600`. The calendar is named after the site ("Test Co events"). It costs no Sanity request.
+- `next.config.ts` rewrites both to handlers under `/api/events`; the feed first, so `feed` is never read as a slug. That is
+  why an event can't use `feed` as its address.
+
+**Studio.** _Events_ in the desk has _Upcoming_ (soonest first), _Past_ (latest first), _All events_ and _Categories_. The
+list subtitle reads "Sat 14 Mar, 10:00 am · Workshop" (the category is left out when unset, and "· Cancelled" or "· Sold
+out" is added). Presentation opens `/events/<slug>` on the event. Clients see _Events_ by default
+(`CLIENT_STRUCTURE_IDS`); _Add an event_ is a card on Start here.
+
+**Slugs.** An event's address is one path segment (`utils/slug.ts`). In the page schema `events/<anything>` is reserved
+(`/events/[slug]` would answer first), but a page called exactly `events` is allowed: that is where an Events section with
+every event usually lives. The proxy leaves `/events/…` out of A/B tests. Unknown events, drafts (the published perspective
+hides them) and every `/events/…` URL when the `events` feature is off answer a real 404, checked against the cached
+`EVENTS_INDEX_QUERY` first. Events are in the sitemap after pages, posts and team profiles.
+
+**Adding a field** means the schema (`src/features/events/schemas/event.ts`), the query (`eventCardFields` in
+`src/lib/sanity/fragments.ts` for lists, `EVENT_QUERY` for the page, `EVENTS_FEED_QUERY` for the feed), then
+`npm run typegen`. Keep anything that needs the date out of the queries: it belongs in the request-time step.
+
+**Tests.** Unit (Vitest): `src/lib/events/` (`time-zone`, `recurrence` including daylight saving changes in Australia/Sydney,
+`format`, `calendar-links`, `ics` escaping, folding, `VTIMEZONE`, `RRULE` and `EXDATE`), `src/features/events/` (schema
+validation and the Studio subtitle, `json-ld`, `to-ics`, `location`, `registration-url`, `slug`),
+`src/features/pages/utils/events.test.ts` (what a section shows at a given time), the Studio's desk filters
+(`event-lists.test.ts`, run with groq-js) and the reserved slug. End to end: `tests/e2e/events.spec.ts` (the list hides past
+events and orders the rest; labels; the agenda, featured and empty states; the event page, its JSON-LD, share image and
+calendar links; the `.ics` content type and body, and the feed; the sitemap; axe) and `accessibility.spec.ts` (`/events`,
+`/events/pottery-workshop`). The fixtures are dated from the day the suite runs, except the section gallery's four events
+(2099, category _Workshop_), so its screenshots never change. The gallery has `events-list`, `events-agenda` and
+`events-featured`; their baselines need the **Update visual baselines** workflow (macOS skips visual tests).
+
 ### Logo strip
 
 The **Logo strip** (_Add item → Logo strip_) has two layouts, chosen by agencies in the **Layout** picker (_Grid_ is the
@@ -2429,6 +2590,111 @@ compiler knows `hero.title` is a `string` and `hero.description` is `string | nu
 
 Data is typed `StegaBranded`: draft-mode strings carry invisible edit markers. They render normally,
 but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
+
+### Link list
+
+The **Link list** section (_Add item → Link list_) is a profile, social icons and a list of links, usable on any page. On its
+own page it is a link-in-bio page (the kind people open from an Instagram profile) built from the site's own design
+tokens, tones and section backgrounds, so it looks like part of the site. There is no separate page type and no duplicated
+rendering: the **Link page** template is a page with this section and one page option.
+
+**Five minutes for a new Link page.**
+
+1. _Pages → New → Link page_. It starts at `/links` with a profile, three links and a footer note, and **Minimal page** ticked.
+2. Fill in the profile (a picture or logo, a name, a bio of up to 160 characters). The social icons come from
+   [Business info](#business-info) by default.
+3. Give each link a label and a destination (**Goes to**, the same picker as every other link: a page, a website, a section, a
+   panel or booking). Drag to reorder.
+4. Publish. Add `https://yoursite.com.au/links` to the Instagram bio.
+
+**What a link has.**
+
+| Field            | What it does                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Label            | The button text. A warning past 40 characters.                                                                                                               |
+| Where it goes    | The shared link picker (see [Link actions](#link-actions)).                                                                                                  |
+| Description      | A line under the label. Not shown in the Compact layout.                                                                                                     |
+| Icon             | From the badge icon set. Not shown in Editorial.                                                                                                             |
+| Show large       | One link is drawn large: the first one ticked. A second tick is ignored (Studio warns). Not used by Compact.                                                 |
+| Heading above it | Optional group heading. Links under the same heading are grouped; a link with no heading joins the group above it.                                           |
+| Show or Hide     | Hide takes a link off the page without deleting it. A hidden link never leaves the Content Lake.                                                             |
+| Advanced         | A **thumbnail** (Minimal and Cards only), **Show from** / **Show until**, and **UTM** source, medium and campaign (shown for links to another website only). |
+
+Studio warns above 12 links. The link management (add, edit, reorder, hide, schedule) is open to clients.
+
+**Layouts.** The preset bar at the top of the section (agency only, like the hero's) offers five pictures:
+
+| Preset        | Looks like                                                                          | Stored as                                |
+| ------------- | ----------------------------------------------------------------------------------- | ---------------------------------------- |
+| Minimal       | Full-width buttons, one under the other. The large link is a filled, taller button. | `variant: stacked`                       |
+| Cards         | A small thumbnail (or icon) and the text on each card, two across from `md`.        | `variant: cards`                         |
+| Editorial     | Larger type, a ruled list, an arrow at the end of each row.                         | `variant: editorial`                     |
+| Compact       | Small pills that wrap; for tucking into another page.                               | `variant: compact`                       |
+| Image-focused | Cards with a big picture leading each card. Give every link a thumbnail.            | `variant: cards`, `thumbnailSize: large` |
+
+A section has at most four layouts (see [Section variants](#section-variants)), so Image-focused is Cards with large pictures
+rather than a fifth variant. A preset also sets the alignment that suits it (`style.align`), and leaves content and tone
+alone; every field stays editable afterwards and the bar shows _Custom_ once one no longer matches. Fields that a layout
+doesn't draw are hidden on the links (`enclosingOfArray` reads the section's layout from the document and the field's path).
+
+**Scheduling and hiding.** Pages are cached, so the server can't know the time while it builds one.
+
+- _Hide_ is applied in the query (`links[visibility != "hide"]`), so a hidden link is never in the page.
+- A list with no **Show from** / **Show until** dates is fully prerendered and costs nothing extra. A list with any is
+  split in two: the prerendered page shows the links that are always due, and a small `<Suspense>` boundary around the
+  list reads the clock at request time (`requestTime()` in `src/lib/request-time.ts`, which waits for a real request first)
+  and streams in the right set. Nothing reads the clock inside `'use cache'`, visitors cause no Sanity request (the data is
+  in the cached page), and it works without JavaScript.
+- A link that isn't due is not in the HTML at all, so its address isn't in the page source either. `isLinkVisible` is the
+  rule: _from_ is inclusive, _until_ exclusive, and an empty or unreadable date leaves that side open.
+- **Know the limits.** The boundary renders on the server for every visit to a page that has a dated link (the data comes from
+  the cache; the cost is rendering that list), so keep dated links to the pages that need them. A link with only a _Show
+  until_ date appears a moment after the rest on its first paint, because the prerendered page can't know it is still due.
+- Which link is large and every link's place follow what is drawn: the first ticked link that is due. If it expires, the next
+  ticked one takes over.
+
+**The Link page.** The **Minimal page (no header or footer)** option on a page (agency only) takes the announcement bar,
+header and footer away. The site shell is a layout, so it can't see which page it frames, and a client component to check the
+path would add to every page's JavaScript (the home page sits at its budget). Instead the page marks itself:
+`PAGE_QUERY` has a `minimal` flag, `PageView` renders a `<span hidden data-minimal-page>`, the shell wraps the header and
+announcement, and the footer, in `[data-site-chrome]` (`display: contents`, so the sticky header behaves as before), and
+`globals.css` hides them with `body:has([data-minimal-page]) [data-site-chrome]`. They are `display: none`, so they leave the
+accessibility tree and the tab order, but they are still in the HTML. Notes:
+
+- Next keeps the page you left in the DOM, hidden (it styles that page's top-level elements `display: none`), so the rule
+  only counts a marker that isn't hidden, and the marker has to be a top-level element of the page. If a Next upgrade changes
+  how hidden pages are marked, `tests/e2e/link-list.spec.ts` (leaving and returning to a minimal page) fails.
+- The cookie banner still appears, but its "Cookie settings" link lives in the footer, so a visitor on a Link page can't reopen it there.
+- An A/B variant (`/ab/...`) renders the same marker, so a minimal page stays minimal.
+
+**Analytics.** A click on a link sends a `link_click` event: `label`, `kind` (`page`, `external`, `anchor`, `panel`,
+`booking`), `outbound`, `position`, `group`, `page` and, for another website, `url` without its query string or tags. It adds
+no JavaScript to the bundle: the shell puts one small inline script in the page (`TRACK_SCRIPT`, `src/lib/analytics/track-script.ts`,
+only when an analytics provider is configured) that listens on the document for clicks inside an element with
+`data-track-event` and `data-track-props`, and sends the event to whichever of Plausible (`window.plausible`), PostHog
+(`posthog.capture`) and GA4 (`gtag('event')`) has loaded. Those load only after the visitor accepts analytics (see
+[Analytics and cookie consent](#analytics-and-cookie-consent)), so with no consent nothing is sent and the click is
+untouched. The script also defines `window.trackEvent(name, props)` for your own code. A listener on the document survives
+client navigations, which an inline script inside a page's markup would not. In Plausible, add a goal called `link_click`.
+UTM tags are added to the address by the server (`withUtm`: only `http` and `https`, and a tag already in the address wins),
+per link, in Advanced.
+
+**Headings.** The page's `<h1>` is the page title (hidden, as for any page that doesn't start with a hero). The profile name
+(or the section's heading) is an `<h2>`; group headings are one level under it.
+
+**Cost.** None in the JavaScript bundle: the layouts, icons, schedule and the page option are server components and CSS, the
+click tracking is an inline script, and the buttons use CSS transitions rather than Motion. The home page's JavaScript
+sits very close to its budget (`JS_BUDGET_KB` in `tests/e2e/performance.spec.ts`), so nothing here adds a client component
+to the shared layout; a client component imported by a server component that every page renders joins every page. `tests/e2e/performance.spec.ts` also holds `/links`
+to the same budget.
+
+**Tests.** Vitest: the scheduling rule, which links are drawn and which is large, grouping, UTM tags, the click props,
+headings, social sources, the tracking script, the template and the presets. `tests/e2e/link-list.spec.ts`: order, hidden and
+not-yet-due links (absent from the HTML, addresses included), the header and footer going away and coming back across client
+navigations, UTM tags, one large link, keyboard order and focus, 375 px layout and tap size, the analytics events (and none
+without a provider), Cards two across and stacked, and axe on the Link page, an ordinary page and all five presets. The
+section gallery has one entry per preset (`link-list-stacked`, `-cards`, `-editorial`, `-compact`, `-image-focused`), screenshot
+on desktop and mobile; macOS skips them, so refresh the baselines with the **Update visual baselines** workflow.
 
 ### Style guide
 

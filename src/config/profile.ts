@@ -28,6 +28,7 @@ export const FEATURE_NAMES = [
   'businessInfo',
   'team',
   'teamProfiles',
+  'events',
 ] as const
 export type FeatureName = (typeof FEATURE_NAMES)[number]
 
@@ -62,18 +63,9 @@ export interface SiteProfile {
 }
 
 /** Everything on: a site with no profile edits behaves as the template always has. */
-export const DEFAULT_FEATURES: Readonly<Features> = {
-  blog: true,
-  forms: true,
-  newsletter: true,
-  pricing: true,
-  members: true,
-  experiments: true,
-  search: true,
-  businessInfo: true,
-  team: true,
-  teamProfiles: true,
-}
+export const DEFAULT_FEATURES: Readonly<Features> = Object.fromEntries(
+  FEATURE_NAMES.map((name) => [name, true]),
+) as Features
 
 export const DEFAULT_TIER: Tier = 'custom'
 
@@ -216,4 +208,9 @@ export function isFeatureEnabled(name: FeatureName, profile: SiteProfile = siteP
  */
 export function hasTeamProfiles(profile: SiteProfile = siteProfile): boolean {
   return profile.features.team && profile.features.teamProfiles
+}
+
+/** Whether the site has events: event pages, the calendar files and the Events section's links. */
+export function hasEvents(profile: SiteProfile = siteProfile): boolean {
+  return profile.features.events
 }

@@ -4,8 +4,9 @@ import {
   type PresentationPluginOptions,
 } from 'sanity/presentation'
 
+import { eventPath, EVENTS_PATH } from '@/config/event-paths'
 import { BLOG_PATH, categoryPath, HOME_SLUG, postPath, slugToPath, teamPath } from '@/config/paths'
-import { hasTeamProfiles } from '@/config/profile'
+import { hasEvents, hasTeamProfiles } from '@/config/profile'
 
 /**
  * Two-way mapping between documents and URLs for the Presentation tool:
@@ -40,6 +41,13 @@ export const resolve: PresentationPluginOptions['resolve'] = {
               filter: `_type == "teamMember" && slug.current == $slug`,
               params: { slug: params.slug },
             }
+          : undefined,
+    },
+    {
+      route: '/events/:slug',
+      resolve: ({ params }) =>
+        params.slug
+          ? { filter: `_type == "event" && slug.current == $slug`, params: { slug: params.slug } }
           : undefined,
     },
     {
@@ -117,6 +125,21 @@ export const resolve: PresentationPluginOptions['resolve'] = {
           hasTeamProfiles() && doc?.slug
             ? undefined
             : 'Shown in Team sections. Give them a page address for their own page.',
+        tone: 'positive',
+      }),
+    }),
+    event: defineLocations({
+      select: { title: 'title', slug: 'slug.current' },
+      resolve: (doc: { title?: string; slug?: string } | null) => ({
+        // The event's own page; the Events sections that list it are placed on pages (no location to list).
+        locations:
+          hasEvents() && doc?.slug
+            ? [
+                { title: doc.title || 'Untitled', href: eventPath(doc.slug) },
+                { title: 'All events', href: EVENTS_PATH },
+              ]
+            : [],
+        message: 'Also listed in Events sections',
         tone: 'positive',
       }),
     }),
