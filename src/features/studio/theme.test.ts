@@ -95,9 +95,17 @@ describe('legacyThemeProperties', () => {
 
 describe('createStudioTheme', () => {
   it('hands the mapped properties to the builder and returns its theme', () => {
-    const builder = vi.fn(() => ({ theme: true }))
-    expect(createStudioTheme(currawongBrand, builder)).toEqual({ theme: true })
+    const builder = vi.fn(() => ({ color: { light: {}, dark: {} } }))
+    expect(createStudioTheme(currawongBrand, builder)).toEqual({ color: { light: {}, dark: {} } })
     expect(builder).toHaveBeenCalledWith(legacyThemeProperties(currawongBrand))
+  })
+
+  it('drops the legacy markers, so Studio offers Appearance instead of pinning one scheme', () => {
+    const builder = () => ({ __legacy: true, __dark: false, color: { light: {}, dark: {} } })
+    const theme = createStudioTheme(currawongBrand, builder)
+    expect(theme).not.toHaveProperty('__legacy')
+    expect(theme).not.toHaveProperty('__dark')
+    expect(theme).toHaveProperty('color.dark')
   })
 
   it('returns undefined, so Studio uses its default theme, when the builder is missing', () => {

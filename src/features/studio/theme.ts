@@ -25,6 +25,13 @@ import { adjustLightnessForContrast, contrastRatio } from '@/lib/color/contrast'
  * - Sanity picks the label colour on a solid button itself (the card background, paper or ink).
  *   Success, warning and danger have their own properties and are left alone here.
  *
+ * Why the markers are stripped (see `createStudioTheme`): `buildLegacyTheme` returns `__legacy: true` and
+ * `__dark`. In Sanity 6.18 `StudioThemeProvider` treats such a theme as pinned to one scheme (light or
+ * dark by the component background) and provides a scheme setter of `false`, which is what removes
+ * the Appearance section from the user menu and ignores the stored `sanityStudio:ui:colorScheme`. The
+ * `color` it builds has both schemes, so the markers are dropped and Studio handles it like any
+ * other theme: Appearance (System, Light, Dark) returns and System is the default.
+ *
  * Choices (see "CMS branding" in the README):
  * - Neutrals are branded in both modes: dark mode gets ink and paper through the navigation
  *   properties. Dark mode came out coherent, so the "brand only accent, focus and navigation"
@@ -99,7 +106,15 @@ export function createStudioTheme(
   builder: unknown,
 ): StudioThemeValue | undefined {
   if (typeof builder !== 'function') return undefined
-  return (builder as ThemeBuilder)(legacyThemeProperties(brand))
+  return withoutSchemeLock((builder as ThemeBuilder)(legacyThemeProperties(brand)))
+}
+
+/** Drops the markers that make Studio pin one scheme and hide Appearance; `color` and `fonts` keep both schemes. */
+function withoutSchemeLock(theme: StudioThemeValue): StudioThemeValue {
+  const unlocked: Record<string, unknown> = { ...theme }
+  delete unlocked.__legacy
+  delete unlocked.__dark
+  return unlocked as StudioThemeValue
 }
 
 /** The `theme` for sanity.config.ts: the branded legacy theme, or undefined if Sanity no longer has one. */

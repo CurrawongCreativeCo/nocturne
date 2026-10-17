@@ -10,9 +10,8 @@ type StudioThemeValue = NonNullable<ReturnType<typeof buildStudioTheme>>
  * default @sanity/ui theme, with the workspace theme's `v2`, `fonts` and `color` laid over it. The
  * brand preview page uses it to render Sanity UI exactly as Studio does for the same theme.
  *
- * Studio then pins one colour scheme for a `buildLegacyTheme` theme (light or dark by whether the
- * light component background is darker than its text) and hides the scheme switch, so the page
- * passes `scheme` itself to show both.
+ * The theme from `buildStudioTheme` has no legacy markers, so Studio follows the editor's Appearance
+ * choice; this page has no user menu, so it passes `scheme` itself to show both.
  */
 export function toUiTheme(theme: StudioThemeValue) {
   const base = buildTheme()
