@@ -57,6 +57,43 @@ export const pageTemplates: Template[] = [
       ],
     }),
   },
+  {
+    id: 'page-links',
+    title: 'Link page',
+    schemaType: 'page',
+    // A link-in-bio page: no header or footer, a profile, social icons and a list of links. The
+    // links have no address yet, so each one blocks publishing until it is filled in.
+    value: () => ({
+      title: 'Links',
+      slug: { _type: 'slug', current: 'links' },
+      minimalLayout: true,
+      pageBuilder: [
+        section('linkList', {
+          variant: 'stacked',
+          thumbnailSize: 'standard',
+          style: { _type: 'sectionStyle', align: 'center' },
+          profile: {
+            name: 'Your name or business',
+            bio: 'One short line about who you are and what you do.',
+          },
+          socialSource: 'business',
+          links: ['Book a consultation', 'Visit our website', 'Follow us on Instagram'].map(
+            (label, index) => ({
+              _key: key(),
+              _type: 'linkItem',
+              label,
+              link: { _type: 'link', linkType: 'external', openInNewTab: false },
+              visibility: 'show',
+              featured: index === 0,
+            }),
+          ),
+        }),
+        section('richText', {
+          body: [paragraph('A footer note, such as © Your business name.')],
+        }),
+      ],
+    }),
+  },
 ]
 
 function section(type: string, fields: Record<string, unknown>) {

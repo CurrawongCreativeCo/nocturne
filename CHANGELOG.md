@@ -34,6 +34,13 @@ you start a release.
   a panel on load and the address follows it while it is open. The panel form starts with an **Opened by** note listing the
   buttons and links that open it. New `panel` tag for the revalidation webhook. Unit tests, `tests/e2e/panels.spec.ts`
   (including axe with each panel open and a phone-width sheet) and a memory round that opens and closes panels.
+- **Editor guide in Studio:** a **Help** tab in Start here (beside **Overview**) with short task guides (_Change a heading_, _Replace a
+  photo_, _Publish and undo_, _Write a blog post_, _Update opening hours_, _Add a team member_) and a description of every section a client
+  may add, with its fields, recommended picture sizes and length limits. It shows only what the site uses: guides follow the profile's
+  features and the schema, and sections follow `clientSections`. The guides are markdown in `docs/editor-guide/`; training videos come
+  from `help.videos` in `site.profile.ts`. `scripts/build-editor-guide.mjs` builds the committed
+  `editor-guide.generated.json`, `npm run typegen` runs it, and CI fails when it is stale. Adds `jiti` as a dev dependency (already
+  installed through ESLint and Sanity). After merging, run `npm run typegen` and commit the result.
 - **Image design:** one shared treatment for a section's main picture (`FramedImage`): a still frame with the picture moving
   gently inside it (true image-only parallax), shapes (_Standard_, _Rounded_, _Circle_, _Arch_, _Framed_) and decorative frames
   that stay still while the picture drifts behind them. Agency only, in the Design tab of **Image + text**, the **Hero's Split
@@ -55,6 +62,20 @@ you start a release.
   GET form, so without JavaScript they go to a fallback URL. Section links scroll smoothly unless the visitor asks for
   reduced motion. Content health reports links to missing sections and unpublished panels. See README, _Link actions_.
 
+- **Link list section and Link page template:** _Add item → Link list_: an optional profile (picture or logo, name, bio up
+  to 160 characters), social icons (Business info's by default, or a custom set) and ordered links with a label, the shared
+  **Goes to** action, a description, an icon or thumbnail, a group heading, one large (featured) link, Show or Hide, and
+  Show from / Show until. Five layouts as pictures in the agency-only preset bar (Minimal, Cards, Editorial, Compact,
+  Image-focused; the last is Cards with large pictures, because a section has at most four layouts). Scheduling is decided
+  at request time in a small `<Suspense>` boundary, so pages stay cached and a link that isn't due isn't in the HTML. A click
+  sends a `link_click` event to the analytics providers the visitor has accepted (an inline script,
+  `src/lib/analytics/track-script.ts`, so no JavaScript is added to any page), and links to another website can carry UTM tags (Advanced).
+- **Minimal page option and Link page template:** an agency-only page option, _Minimal page (no header or footer)_, and a
+  _Link page_ new-page template (slug `links`, a profile, social icons, a Minimal list and a footer note). `PAGE_QUERY`
+  gains a `minimal` flag; the shell's header, announcement and footer are wrapped in `[data-site-chrome]`. See README, _Link list_.
+- `SocialIcon` (`components/ui/social-icon.tsx`) and the shared platform list (`lib/social-platforms.ts`); Business info's
+  social profiles are available to page sections through `LocationBusiness.socialLinks`.
+
 ### Changed
 
 - Quick search and the gallery lightbox now use `useModalDialog` for showing the dialog, the scroll lock and returning
@@ -70,7 +91,7 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None for content: existing links keep their stored values, and nothing is switched on until an editor adds a panel. After merging, run `npm run typegen`, add `"panel"` to your revalidation webhook's filter (webhook mode only), and note that header, footer and menu buttons can't open panels (they use their fallback link). Clients now see _Reusable content → Panels_ in the Studio. New screenshot baselines are not needed (no visual change to existing pages); the gallery lightbox is unchanged.
+None for content: existing links keep their stored values, and nothing is switched on until an editor adds a panel. After merging, run `npm run typegen` and commit the result, add `"panel"` to your revalidation webhook's filter (webhook mode only), and note that header, footer and menu buttons can't open panels (they use their fallback link). Clients now see _Reusable content → Panels_ in the Studio. Add `link_click` as a goal in Plausible if you use it. The gallery lightbox is unchanged. The new visual baselines (`link-list-*`) need the **Update visual baselines** workflow.
 
 ## [1.4.0] - 2026-10-16
 

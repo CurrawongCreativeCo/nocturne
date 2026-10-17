@@ -632,6 +632,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **`/api/site-info`** adds none: it is prerendered and reads only environment variables.
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
+- **Link list** adds none: its links, profile and social icons are resolved inside `PAGE_QUERY` (the social icons come from the settings entry the footer already fetched), and which links are due is decided at request time from that cached data. The page option is one more field in `PAGE_QUERY`.
 - **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
   recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
@@ -782,6 +783,7 @@ Analytics are chosen per project by environment variable, and nothing that sets 
 
 These are public values, baked in at build time: redeploy after changing them. Set any combination.
 
+- **Custom events:** `window.trackEvent(name, props)` and `data-track-event` / `data-track-props` on an element (`src/lib/analytics/track-script.ts`, an inline script the shell adds when a provider is configured) send an event to whichever provider has loaded, so they need no consent logic of their own: before consent none is on the page and nothing happens. The Link list's `link_click` uses them (see [Link list](#link-list)).
 - **Vercel Analytics** (`@vercel/analytics`) is always on in the public site. It sets no cookies and stores nothing on the visitor's device, so it needs no consent. It does nothing off Vercel.
 - **Before consent:** no request to any provider and no provider `<script>` in the page. **Accept all** (or **Choose** with analytics ticked) mounts the `next/script` tags for each configured provider from `features/consent/components/analytics-scripts.tsx`; the choice is kept in `localStorage` (`consent`: analytics, marketing, version, time) and applies on later visits and in other tabs. **Reject all** keeps everything off and is remembered too. If storage is blocked the choice lasts until the page reloads.
 - **Google Analytics:** the inline script first sets Consent Mode v2 `ad_storage`, `ad_user_data`, `ad_personalization` and `analytics_storage` to `denied`, then updates them to the visitor's choice (the three advertising signals follow _Marketing_), all before `gtag.js` is requested.
@@ -1263,9 +1265,11 @@ history request for the author names, and, only when notices are set up, one cal
   images that have no description (alt text), and drafts last edited more than seven days ago. They reuse the detectors
   in `content-health/utils/detect.ts`; fixing the problem in a draft clears it. Shared sections are only checked for
   agency staff, because clients cannot open them. Each row has a **Fix it** link.
-- **Help:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
+- **Help tab:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
   selectable text and a **Copy email address** button. Each part is left out when the profile does not set it. The
-  support form replaces the address in a later release.
+  support form replaces the address in a later release. Under them is this site's **editor guide** (next section).
+  The **Help** shortcut card opens this tab.
+- **Tabs:** Start here has two, **Overview** (shortcuts, recent changes, things to check) and **Help**.
 - **Notices:** set `OPS_NOTICES_URL` (an https endpoint) and, if it needs one, `OPS_NOTICES_KEY`. The site's
   `/api/ops-notices` route asks `OPS_NOTICES_URL?site=<client.slug>` with `Authorization: Bearer <key>`, caches the answer
   for five minutes and passes on up to five notices; the key never reaches the browser. The endpoint answers
@@ -1289,7 +1293,7 @@ draft-only page.
    Edit a page and reload to see it jump to the top with a _Draft_ badge.
 6. Things to check lists the missing description, the unpublished link and the old draft in plain words, and **Fix it**
    opens the right document. Fix one, reload, and it disappears.
-7. Help: **Copy email address** copies the address (paste it somewhere to confirm) and says "Copied to your clipboard."
+7. Help: open the **Help** tab (or click the **Help** card). **Copy email address** copies the address (paste it somewhere to confirm) and says "Copied to your clipboard."
    The guide link opens in a new tab. Press Tab: every card, link and button shows a focus ring.
 8. Narrow the window to phone width: no sideways scrolling, and the cards stack in one column.
 9. Optional: point `OPS_NOTICES_URL` at a test endpoint that answers `{"notices":[{"title":"Test","tone":"caution"}]}`
@@ -1299,6 +1303,47 @@ Tests: `start-here/utils/*.test.ts` (relative time, wording, shortcut list from 
 history parsing), `src/lib/ops/notices.test.ts` (notice parsing and the endpoint check) and
 `tests/e2e/ops-notices.spec.ts` (the route answers 204 when unset). The tool itself needs a signed-in Studio, so it
 is checked by hand.
+
+#### Editor guide (Help tab)
+
+The Help tab shows short, plain-English task guides and a description of each section a client may add, and only
+what **this site** uses. It is built from files, not written per client.
+
+- **The guides** are markdown files in `docs/editor-guide/`, written once in the template: _Change a heading_, _Replace a photo_,
+  _Publish and undo_, _Write a blog post_, _Update opening hours_ and _Add a team member_. Each starts with frontmatter
+  (`title`, `summary`, `order`, and optionally `feature` and `requires`). A guide with `feature: blog` appears only when
+  `features.blog` is on, and `requires: post` also needs that document type in `schema.json`, so a client site that removes a type loses its guide.
+  Write them in Australian English, in short steps, and use only headings, paragraphs, lists, **bold** and `[links](https://…)`:
+  nothing else is rendered.
+- **The sections** come from `clientSections` in `site.profile.ts` (the default list when it is empty). For each, the guide lists the
+  fields a client edits, with the field's description, its **recommended picture size** (the sentence `imageField` adds, such as
+  "1600 × 1200 px, landscape") and its **length guidance** (the `max`/`min` limits in the field's validation, such as "Up to 60 characters"
+  or "Up to 2 items"). Agency-only fields (the Design tab and anything hidden from clients) are left out, and so is any field
+  `schema.json` does not store. `schema.json` holds only the shape of the data, so titles, descriptions and limits are read from the
+  section schemas themselves.
+- **Videos** are not baked in. Add `help.videos` to `site.profile.ts`, keyed by the guide's file name without `.md`:
+
+  ```ts
+  help: { videos: { 'change-a-heading': 'https://…', 'publish-and-undo': 'https://…' } },
+  ```
+
+  A guide with a video shows **Watch the video (new tab)**; one without shows nothing. Each guide file has a comment
+  marking where its video belongs.
+
+- **Generating it:** `scripts/build-editor-guide.mjs` writes `src/features/studio/start-here/editor-guide.generated.json` (committed).
+  `npm run typegen` runs it straight after `sanity schema extract`, and `npm run editor-guide` runs it alone
+  (`-- --check` reports whether the file is current without writing). CI runs typegen and fails when the committed file differs, so after
+  changing a guide, `site.profile.ts`, or a section's fields or descriptions, run `npm run typegen` and commit the result.
+- **Showing it:** `start-here/components/editor-guide.tsx` lists each guide and section in an expandable row (native `details`, so
+  it works by keyboard), and `markdown.tsx` renders the guide text from the small parser in `utils/markdown.ts`. Links must be
+  `https://`; anything else shows as plain text. No markup is ever injected.
+
+To add a guide, add a file to `docs/editor-guide/` and run `npm run typegen`. For a client site, edit `site.profile.ts` and run it again.
+
+Tests: `scripts/editor-guide-utils.test.mjs` (frontmatter, image advice, limits, feature filtering, section fields),
+`start-here/utils/markdown.test.ts` and `editor-guide.test.ts`. The tab itself needs a signed-in Studio, so check it by hand:
+open **Start here → Help**, expand a guide and a section, switch `features.blog` to `false`, run `npm run typegen`, reload,
+and confirm the blog guide is gone.
 
 ### Studio roles and permissions
 
@@ -2380,6 +2425,111 @@ compiler knows `hero.title` is a `string` and `hero.description` is `string | nu
 
 Data is typed `StegaBranded`: draft-mode strings carry invisible edit markers. They render normally,
 but compare them to literals only after `stegaClean()` (see `cta-link.tsx`).
+
+### Link list
+
+The **Link list** section (_Add item → Link list_) is a profile, social icons and a list of links, usable on any page. On its
+own page it is a link-in-bio page (the kind people open from an Instagram profile) built from the site's own design
+tokens, tones and section backgrounds, so it looks like part of the site. There is no separate page type and no duplicated
+rendering: the **Link page** template is a page with this section and one page option.
+
+**Five minutes for a new Link page.**
+
+1. _Pages → New → Link page_. It starts at `/links` with a profile, three links and a footer note, and **Minimal page** ticked.
+2. Fill in the profile (a picture or logo, a name, a bio of up to 160 characters). The social icons come from
+   [Business info](#business-info) by default.
+3. Give each link a label and a destination (**Goes to**, the same picker as every other link: a page, a website, a section, a
+   panel or booking). Drag to reorder.
+4. Publish. Add `https://yoursite.com.au/links` to the Instagram bio.
+
+**What a link has.**
+
+| Field            | What it does                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Label            | The button text. A warning past 40 characters.                                                                                                               |
+| Where it goes    | The shared link picker (see [Link actions](#link-actions)).                                                                                                  |
+| Description      | A line under the label. Not shown in the Compact layout.                                                                                                     |
+| Icon             | From the badge icon set. Not shown in Editorial.                                                                                                             |
+| Show large       | One link is drawn large: the first one ticked. A second tick is ignored (Studio warns). Not used by Compact.                                                 |
+| Heading above it | Optional group heading. Links under the same heading are grouped; a link with no heading joins the group above it.                                           |
+| Show or Hide     | Hide takes a link off the page without deleting it. A hidden link never leaves the Content Lake.                                                             |
+| Advanced         | A **thumbnail** (Minimal and Cards only), **Show from** / **Show until**, and **UTM** source, medium and campaign (shown for links to another website only). |
+
+Studio warns above 12 links. The link management (add, edit, reorder, hide, schedule) is open to clients.
+
+**Layouts.** The preset bar at the top of the section (agency only, like the hero's) offers five pictures:
+
+| Preset        | Looks like                                                                          | Stored as                                |
+| ------------- | ----------------------------------------------------------------------------------- | ---------------------------------------- |
+| Minimal       | Full-width buttons, one under the other. The large link is a filled, taller button. | `variant: stacked`                       |
+| Cards         | A small thumbnail (or icon) and the text on each card, two across from `md`.        | `variant: cards`                         |
+| Editorial     | Larger type, a ruled list, an arrow at the end of each row.                         | `variant: editorial`                     |
+| Compact       | Small pills that wrap; for tucking into another page.                               | `variant: compact`                       |
+| Image-focused | Cards with a big picture leading each card. Give every link a thumbnail.            | `variant: cards`, `thumbnailSize: large` |
+
+A section has at most four layouts (see [Section variants](#section-variants)), so Image-focused is Cards with large pictures
+rather than a fifth variant. A preset also sets the alignment that suits it (`style.align`), and leaves content and tone
+alone; every field stays editable afterwards and the bar shows _Custom_ once one no longer matches. Fields that a layout
+doesn't draw are hidden on the links (`enclosingOfArray` reads the section's layout from the document and the field's path).
+
+**Scheduling and hiding.** Pages are cached, so the server can't know the time while it builds one.
+
+- _Hide_ is applied in the query (`links[visibility != "hide"]`), so a hidden link is never in the page.
+- A list with no **Show from** / **Show until** dates is fully prerendered and costs nothing extra. A list with any is
+  split in two: the prerendered page shows the links that are always due, and a small `<Suspense>` boundary around the
+  list reads the clock at request time (`requestTime()` in `src/lib/request-time.ts`, which waits for a real request first)
+  and streams in the right set. Nothing reads the clock inside `'use cache'`, visitors cause no Sanity request (the data is
+  in the cached page), and it works without JavaScript.
+- A link that isn't due is not in the HTML at all, so its address isn't in the page source either. `isLinkVisible` is the
+  rule: _from_ is inclusive, _until_ exclusive, and an empty or unreadable date leaves that side open.
+- **Know the limits.** The boundary renders on the server for every visit to a page that has a dated link (the data comes from
+  the cache; the cost is rendering that list), so keep dated links to the pages that need them. A link with only a _Show
+  until_ date appears a moment after the rest on its first paint, because the prerendered page can't know it is still due.
+- Which link is large and every link's place follow what is drawn: the first ticked link that is due. If it expires, the next
+  ticked one takes over.
+
+**The Link page.** The **Minimal page (no header or footer)** option on a page (agency only) takes the announcement bar,
+header and footer away. The site shell is a layout, so it can't see which page it frames, and a client component to check the
+path would add to every page's JavaScript (the home page sits at its budget). Instead the page marks itself:
+`PAGE_QUERY` has a `minimal` flag, `PageView` renders a `<span hidden data-minimal-page>`, the shell wraps the header and
+announcement, and the footer, in `[data-site-chrome]` (`display: contents`, so the sticky header behaves as before), and
+`globals.css` hides them with `body:has([data-minimal-page]) [data-site-chrome]`. They are `display: none`, so they leave the
+accessibility tree and the tab order, but they are still in the HTML. Notes:
+
+- Next keeps the page you left in the DOM, hidden (it styles that page's top-level elements `display: none`), so the rule
+  only counts a marker that isn't hidden, and the marker has to be a top-level element of the page. If a Next upgrade changes
+  how hidden pages are marked, `tests/e2e/link-list.spec.ts` (leaving and returning to a minimal page) fails.
+- The cookie banner still appears, but its "Cookie settings" link lives in the footer, so a visitor on a Link page can't reopen it there.
+- An A/B variant (`/ab/...`) renders the same marker, so a minimal page stays minimal.
+
+**Analytics.** A click on a link sends a `link_click` event: `label`, `kind` (`page`, `external`, `anchor`, `panel`,
+`booking`), `outbound`, `position`, `group`, `page` and, for another website, `url` without its query string or tags. It adds
+no JavaScript to the bundle: the shell puts one small inline script in the page (`TRACK_SCRIPT`, `src/lib/analytics/track-script.ts`,
+only when an analytics provider is configured) that listens on the document for clicks inside an element with
+`data-track-event` and `data-track-props`, and sends the event to whichever of Plausible (`window.plausible`), PostHog
+(`posthog.capture`) and GA4 (`gtag('event')`) has loaded. Those load only after the visitor accepts analytics (see
+[Analytics and cookie consent](#analytics-and-cookie-consent)), so with no consent nothing is sent and the click is
+untouched. The script also defines `window.trackEvent(name, props)` for your own code. A listener on the document survives
+client navigations, which an inline script inside a page's markup would not. In Plausible, add a goal called `link_click`.
+UTM tags are added to the address by the server (`withUtm`: only `http` and `https`, and a tag already in the address wins),
+per link, in Advanced.
+
+**Headings.** The page's `<h1>` is the page title (hidden, as for any page that doesn't start with a hero). The profile name
+(or the section's heading) is an `<h2>`; group headings are one level under it.
+
+**Cost.** None in the JavaScript bundle: the layouts, icons, schedule and the page option are server components and CSS, the
+click tracking is an inline script, and the buttons use CSS transitions rather than Motion. The home page's JavaScript
+sits very close to its budget (`JS_BUDGET_KB` in `tests/e2e/performance.spec.ts`), so nothing here adds a client component
+to the shared layout; a client component imported by a server component that every page renders joins every page. `tests/e2e/performance.spec.ts` also holds `/links`
+to the same budget.
+
+**Tests.** Vitest: the scheduling rule, which links are drawn and which is large, grouping, UTM tags, the click props,
+headings, social sources, the tracking script, the template and the presets. `tests/e2e/link-list.spec.ts`: order, hidden and
+not-yet-due links (absent from the HTML, addresses included), the header and footer going away and coming back across client
+navigations, UTM tags, one large link, keyboard order and focus, 375 px layout and tap size, the analytics events (and none
+without a provider), Cards two across and stacked, and axe on the Link page, an ordinary page and all five presets. The
+section gallery has one entry per preset (`link-list-stacked`, `-cards`, `-editorial`, `-compact`, `-image-focused`), screenshot
+on desktop and mobile; macOS skips them, so refresh the baselines with the **Update visual baselines** workflow.
 
 ### Style guide
 

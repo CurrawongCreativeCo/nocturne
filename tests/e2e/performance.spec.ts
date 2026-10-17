@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 
-import { expect, test } from '@playwright/test'
+import { expect, test, type APIRequestContext } from '@playwright/test'
 
 /**
  * Gzipped JavaScript the home page may load, in KB (1 KB = 1000 bytes). See README "Performance budgets".
@@ -12,14 +12,23 @@ const JS_BUDGET_KB = 220
 
 const STATIC_PREFIX = '/_next/static/'
 
-// The same HTML and chunks on every device, so run once.
-test('home page JavaScript stays within the gzip budget', async ({ request, isMobile }) => {
-  test.skip(isMobile, 'Desktop only')
+// The same HTML and chunks on every device, so run once. The Link page is a phone-first page people
+// open from an Instagram bio on a slow connection, so it keeps to the same budget as the home page.
+for (const [name, route] of [
+  ['home page', '/'],
+  ['Link page', '/links'],
+] as const) {
+  test(`${name} JavaScript stays within the gzip budget`, async ({ request, isMobile }) => {
+    test.skip(isMobile, 'Desktop only')
+    await checkBudget(request, route)
+  })
+}
 
-  const html = await (await request.get('/')).text()
+async function checkBudget(request: APIRequestContext, route: string) {
+  const html = await (await request.get(route)).text()
   const srcs = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((match) => match[1] ?? '')
   const chunks = [...new Set(srcs.map((src) => new URL(src, 'http://localhost').pathname))]
-  expect(chunks.length, 'no <script src> found in the home page HTML').toBeGreaterThan(0)
+  expect(chunks.length, 'no <script src> found in the HTML of ${route}').toBeGreaterThan(0)
 
   const sizes = await Promise.all(
     chunks.map(async (pathname) => {
@@ -46,6 +55,6 @@ test('home page JavaScript stays within the gzip budget', async ({ request, isMo
 
   expect(
     total,
-    `JavaScript is ${(total / 1000).toFixed(1)} KB gzipped, over the ${JS_BUDGET_KB} KB budget:\n${breakdown}`,
+    `JavaScript on ${route} is ${(total / 1000).toFixed(1)} KB gzipped, over the ${JS_BUDGET_KB} KB budget:\n${breakdown}`,
   ).toBeLessThanOrEqual(JS_BUDGET_KB * 1000)
-})
+}

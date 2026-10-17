@@ -1576,6 +1576,55 @@ const galleryImages = (id, count) =>
     ...(n % 2 === 0 ? { caption: `Caption for ${id} picture ${n + 1}` } : {}),
   }))
 
+/**
+ * Links for the Link list gallery entries and the /links page (tests/e2e/link-list.spec.ts). The
+ * featured one comes first; "Shop" and "Follow along" are groups; thumbnails only matter to the layouts
+ * that draw them.
+ */
+const linkItem = (id, label, link, extra = {}) => ({
+  _key: id,
+  _type: 'linkItem',
+  label,
+  link,
+  visibility: 'show',
+  ...extra,
+})
+const galleryLinks = (prefix) => [
+  linkItem(`${prefix}-book`, 'Book a consultation', external('https://example.com/book'), {
+    description: 'Thirty minutes, free of charge',
+    featured: true,
+    icon: 'clock',
+    thumbnail: image('Booking'),
+  }),
+  linkItem(`${prefix}-journal`, 'Read the journal', internal('page-about'), {
+    description: 'Notes from the studio',
+    icon: 'star',
+    thumbnail: image('Journal'),
+  }),
+  linkItem(`${prefix}-shop`, 'Shop the range', external('https://example.com/shop'), {
+    description: 'New this season',
+    icon: 'bolt',
+    group: 'Shop',
+    thumbnail: image('Shop'),
+  }),
+  linkItem(`${prefix}-gift`, 'Gift cards', external('https://example.com/gift'), {
+    icon: 'heart',
+    group: 'Shop',
+    thumbnail: image('Gift cards'),
+  }),
+  linkItem(`${prefix}-insta`, 'Follow on Instagram', external('https://instagram.com/testco'), {
+    icon: 'leaf',
+    group: 'Follow along',
+    thumbnail: image('Instagram'),
+  }),
+]
+const galleryProfile = {
+  _type: 'object',
+  name: 'Test Co',
+  bio: 'Small-batch ceramics from the Inner West. Orders ship Australia-wide.',
+  image: image('Test Co logo'),
+}
+
 const gallerySections = [
   {
     _key: 'hero',
@@ -2163,6 +2212,24 @@ const gallerySections = [
       image: image(name),
     })),
   },
+  // One entry per preset: Minimal, Cards, Editorial, Compact and Image-focused (Cards with large pictures).
+  // The fixed clock the visual tests pin (visual.spec.ts) is 16 Oct 2026, so schedules are stable.
+  ...[
+    ['stacked', 'standard', 'center'],
+    ['cards', 'standard', 'center'],
+    ['editorial', 'standard', 'start'],
+    ['compact', 'standard', 'start'],
+    ['image-focused', 'large', 'center'],
+  ].map(([name, thumbnailSize, align]) => ({
+    _key: `link-list-${name}`,
+    _type: 'linkList',
+    variant: name === 'image-focused' ? 'cards' : name,
+    thumbnailSize,
+    style: { _type: 'sectionStyle', align },
+    profile: galleryProfile,
+    socialSource: 'business',
+    links: galleryLinks(`ll-${name}`),
+  })),
   // new-section:gallery
 ]
 
@@ -2599,6 +2666,119 @@ documents.push({
   ],
   _updatedAt: UPDATED,
 })
+
+/**
+ * The Link page (tests/e2e/link-list.spec.ts): a minimal page (no header or footer) with a profile,
+ * custom social icons, a featured link with UTM tags, groups, and links that are hidden, not yet due,
+ * past their date, or in their window. Times are far from now, so the outcome never depends on the day.
+ */
+documents.push(
+  {
+    _id: 'page-links',
+    _type: 'page',
+    title: 'Links',
+    slug: { _type: 'slug', current: 'links' },
+    minimalLayout: true,
+    seo: { _type: 'seo', metaDescription: 'Where to find Test Co.' },
+    pageBuilder: [
+      {
+        _key: 'links-list',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        profile: {
+          _type: 'object',
+          name: 'Test Co',
+          bio: 'Small-batch ceramics from the Inner West.',
+        },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/testco',
+          },
+          {
+            _key: 'yt',
+            _type: 'socialLink',
+            platform: 'youtube',
+            url: 'https://youtube.com/@testco',
+          },
+        ],
+        links: [
+          linkItem('l-book', 'Book a consultation', external('https://example.com/book'), {
+            description: 'Thirty minutes, free of charge',
+            featured: true,
+            utmSource: 'instagram',
+            utmMedium: 'bio',
+            utmCampaign: 'spring',
+          }),
+          linkItem('l-journal', 'Read the journal', internal('page-about'), { icon: 'star' }),
+          linkItem('l-later', 'Opening soon', external('https://example.com/soon'), {
+            showFrom: '2099-01-01T00:00:00Z',
+          }),
+          linkItem('l-over', 'Last summer’s sale', external('https://example.com/old'), {
+            showUntil: '2020-01-01T00:00:00Z',
+          }),
+          linkItem('l-window', 'Spring offer', external('https://example.com/spring'), {
+            showFrom: '2020-01-01T00:00:00Z',
+            showUntil: '2099-01-01T00:00:00Z',
+          }),
+          linkItem('l-shop', 'Shop the range', external('https://example.com/shop'), {
+            group: 'Shop',
+          }),
+          linkItem('l-hidden', 'Secret link', external('https://example.com/secret'), {
+            visibility: 'hide',
+            group: 'Shop',
+          }),
+          linkItem('l-gift', 'Gift cards', external('https://example.com/gift'), { group: 'Shop' }),
+          linkItem('l-party', 'Launch party', external('https://example.com/party'), {
+            group: 'Coming up',
+            showFrom: '2099-01-01T00:00:00Z',
+          }),
+        ],
+      },
+      {
+        _key: 'links-note',
+        _type: 'richText',
+        body: [block(['© Test Co. Made in Newtown.'])],
+      },
+    ],
+  },
+  {
+    // A Link list inside an ordinary page (it keeps the header and footer), in two layouts.
+    _id: 'page-link-list',
+    _type: 'page',
+    title: 'Link list',
+    slug: { _type: 'slug', current: 'link-list' },
+    seo: { _type: 'seo', metaDescription: 'A page with link lists.' },
+    pageBuilder: [
+      {
+        _key: 'link-list-hero',
+        _type: 'hero',
+        title: 'Link list',
+        description: 'Hero description.',
+      },
+      {
+        _key: 'link-list-page-cards',
+        _type: 'linkList',
+        variant: 'cards',
+        title: 'Where to next',
+        socialSource: 'none',
+        links: galleryLinks('pc'),
+      },
+      {
+        _key: 'link-list-page-compact',
+        _type: 'linkList',
+        variant: 'compact',
+        title: 'Quick links',
+        socialSource: 'none',
+        links: galleryLinks('pq'),
+      },
+    ],
+  },
+)
 
 documents.push({
   _id: 'page-section-gallery',

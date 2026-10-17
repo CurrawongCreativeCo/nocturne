@@ -8,6 +8,9 @@ import { SectionRenderer } from './section-renderer'
 // A picture is not what these tests are about, and next-sanity's needs Next's runtime.
 vi.mock('next-sanity/image', () => ({ Image: () => null }))
 
+// The Link list reads the request's time through a server-only module; a unit test has no request.
+vi.mock('server-only', () => ({}))
+
 // The sections import the Sanity project's settings, which a unit test has no .env for.
 vi.mock('@/config/env', () => ({
   projectId: 'e2etest1',
