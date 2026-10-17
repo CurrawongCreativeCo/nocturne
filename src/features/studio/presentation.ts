@@ -93,10 +93,13 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     post: defineLocations({
       select: { title: 'title', slug: 'slug.current' },
       resolve: (doc: { title?: string; slug?: string } | null) => ({
-        locations: [
-          { title: doc?.title || 'Untitled', href: doc?.slug ? postPath(doc.slug) : BLOG_PATH },
-          { title: 'Blog', href: BLOG_PATH },
-        ],
+        // None until the post has an address, so a new post doesn't claim it is used on 2 pages.
+        locations: doc?.slug
+          ? [
+              { title: doc.title || 'Untitled', href: postPath(doc.slug) },
+              { title: 'Blog', href: BLOG_PATH },
+            ]
+          : [],
       }),
     }),
     category: defineLocations({
@@ -146,7 +149,10 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     page: defineLocations({
       select: { title: 'title', slug: 'slug.current' },
       resolve: (doc: { title?: string; slug?: string } | null) => ({
-        locations: [{ title: doc?.title || 'Untitled', href: slugToPath(doc?.slug) }],
+        // None until the page has an address, so a new page doesn't claim it is used on one page.
+        locations: doc?.slug
+          ? [{ title: doc.title || 'Untitled', href: slugToPath(doc.slug) }]
+          : [],
       }),
     }),
   },

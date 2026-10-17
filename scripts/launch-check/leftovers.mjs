@@ -75,7 +75,7 @@ function cdnIconProblems(icon) {
 /**
  * `icons` are the fetched icon links as `{ href, status, contentType, body, bytes }`.
  * - The old purple placeholder SVG fails.
- * - An icon from the Sanity CDN (the Browser icon in Website settings → Identity & search) must load as a PNG of the size
+ * - An icon from the Sanity CDN (the Browser icon in Website settings → Name, logo & icon) must load as a PNG of the size
  *   its URL asks for. That proves the CDN rasterised an SVG upload and applied the padding.
  * - Currawong's default icon, served byte for byte, warns: it is a fine fallback, not the client's.
  */
@@ -98,7 +98,7 @@ export function checkPlaceholderIcons({ icons, templateSvg, defaultHashes = DEFA
           placeholders.map((icon) => icon.href),
           3,
         )} is still the template's purple placeholder.`,
-        "Remove src/app/icon.svg and use src/app/icon.png (Currawong's default) or set the Browser icon in Website settings → Identity & search.",
+        "Remove src/app/icon.svg and use src/app/icon.png (Currawong's default) or set the Browser icon in Website settings → Name, logo & icon.",
       ),
     ]
   }
@@ -110,7 +110,7 @@ export function checkPlaceholderIcons({ icons, templateSvg, defaultHashes = DEFA
         id,
         title,
         `The Browser icon set in Studio is not served as expected: ${listSome(problems, 3)}.`,
-        'Open Website settings > Identity & search > Browser icon and check the preview. Use a square PNG at least 512 px wide, or an SVG.',
+        'Open Website settings > Name, logo & icon > Browser icon and check the preview. Use a square PNG at least 512 px wide, or an SVG.',
       ),
     ]
   }
@@ -121,7 +121,7 @@ export function checkPlaceholderIcons({ icons, templateSvg, defaultHashes = DEFA
         id,
         title,
         'The home page has no icon link.',
-        'Keep src/app/icon.png, or set the Browser icon in Website settings → Identity & search.',
+        'Keep src/app/icon.png, or set the Browser icon in Website settings → Name, logo & icon.',
       ),
     ]
   }
@@ -138,7 +138,7 @@ export function checkPlaceholderIcons({ icons, templateSvg, defaultHashes = DEFA
         id,
         title,
         "The site is still using Currawong's default favicon.",
-        'In Studio, open Website settings > Identity & search > Browser icon and upload an icon or use the site logo. Or replace src/app/icon.png and src/app/apple-icon.png.',
+        'In Studio, open Website settings > Name, logo & icon > Browser icon and upload an icon or use the site logo. Or replace src/app/icon.png and src/app/apple-icon.png.',
       ),
     ]
   }

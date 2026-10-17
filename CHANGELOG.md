@@ -20,8 +20,12 @@ you start a release.
 
 ### Added
 
+- **Setup wizard:** the starter content now also creates empty Brand colours, Announcement bar, Cookie banner and Business info documents (only when missing), so those Studio screens no longer open as "New …". An empty Business info counts as none on the site.
+
 ### Changed
 
+- **Studio:** the page section list names a hero's preset ("Hero · Split, image left") instead of the same "Hero · Split · Page" for both Split presets; a custom combination keeps the layout and background. Stored data is unchanged.
+- **Studio:** the _Identity & search_ screen is now _Name, logo & icon_ (with a description listing what is there), Business info has its own icon, and a new editor guide covers changing the logo or browser icon. Stored data is unchanged. The Presentation tool lists no locations for a page or post until it has a slug.
 - **Start here quick actions:** each action is now a bordered card with an icon, a chevron and hover and focus states, in three columns on wide screens, two at 1024 px and one on phones. _Edit your website_ comes first and is the stronger primary card.
 
 ### Fixed

@@ -57,6 +57,13 @@ export function seedDocuments(siteName) {
     footerText: `${siteName}. All rights reserved.`,
   }
 
+  // Empty on purpose: with no document, their Studio screens open as "New ...". The site shows
+  // nothing for them until they are filled in (an empty Business info counts as none).
+  const designSettings = { _id: 'designSettings', _type: 'designSettings' }
+  const announcement = { _id: 'announcement', _type: 'announcement' }
+  const cookieBanner = { _id: 'cookieBanner', _type: 'cookieBanner' }
+  const businessInfo = { _id: 'businessInfo', _type: 'businessInfo' }
+
   const aboutLinkKey = key()
   const home = {
     _id: 'page-home',
@@ -164,7 +171,7 @@ export function seedDocuments(siteName) {
             question: 'Where do I change the menu and footer?',
             answer: [
               block(
-                'In Studio, open Website settings in the sidebar. The menu and footer are in Navigation; the site name and default SEO are in Identity & search.',
+                'In Studio, open Website settings in the sidebar. The menu and footer are in Navigation; the site name and default SEO are in Name, logo & icon.',
               ),
             ],
           },
@@ -229,5 +236,14 @@ export function seedDocuments(siteName) {
     ],
   }
 
-  return [siteIdentity, siteNavigation, home, about]
+  return [
+    siteIdentity,
+    siteNavigation,
+    designSettings,
+    announcement,
+    cookieBanner,
+    businessInfo,
+    home,
+    about,
+  ]
 }

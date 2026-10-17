@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
 import { BellIcon } from '@sanity/icons/Bell'
 import { CalendarIcon } from '@sanity/icons/Calendar'
+import { CaseIcon } from '@sanity/icons/Case'
 import { CogIcon } from '@sanity/icons/Cog'
 import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { ComposeIcon } from '@sanity/icons/Compose'
@@ -9,7 +10,6 @@ import { DownloadIcon } from '@sanity/icons/Download'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { ExpandIcon } from '@sanity/icons/Expand'
 import { FolderIcon } from '@sanity/icons/Folder'
-import { HomeIcon } from '@sanity/icons/Home'
 import { InboxIcon } from '@sanity/icons/Inbox'
 import { LockIcon } from '@sanity/icons/Lock'
 import { MenuIcon } from '@sanity/icons/Menu'
@@ -193,7 +193,7 @@ export const structure: StructureResolver = (S, context) => {
 
   const websiteSettings = filterStructureItems(
     [
-      singletonItem(S, 'siteIdentity', 'Identity & search', SearchIcon),
+      singletonItem(S, 'siteIdentity', 'Name, logo & icon', SearchIcon),
       singletonItem(S, 'siteNavigation', 'Navigation', MenuIcon),
       singletonItem(S, 'announcement', 'Announcement bar', BellIcon),
       singletonItem(S, 'cookieBanner', 'Cookie banner', LockIcon),
@@ -222,7 +222,7 @@ export const structure: StructureResolver = (S, context) => {
           ]),
         ]
       : []),
-    singletonItem(S, 'businessInfo', 'Business info', HomeIcon),
+    singletonItem(S, 'businessInfo', 'Business info', CaseIcon),
     ...(hasType('teamMember') && isTypeVisible('teamMember')
       ? [
           S.listItem()

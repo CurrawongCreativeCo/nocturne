@@ -5,7 +5,7 @@ import {
   LINK_LIST_THUMBNAIL_SIZES,
   LINK_LIST_VARIANTS,
 } from '@/features/pages/schemas/sections/link-list'
-import { matchPreset } from '@/features/studio/components/preset-picker/presets'
+import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { SECTION_ALIGNS } from '@/lib/sanity/section-style-options'
 
 /**

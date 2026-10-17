@@ -1,4 +1,4 @@
-import { HomeIcon } from '@sanity/icons/Home'
+import { CaseIcon } from '@sanity/icons/Case'
 import {
   defineArrayMember,
   defineField,
@@ -72,7 +72,7 @@ export const businessInfo = defineType({
   name: 'businessInfo',
   title: 'Business info',
   type: 'document',
-  icon: HomeIcon,
+  icon: CaseIcon,
   description:
     'Your business details, written once and used in the footer, on contact details and in the information search engines show about you (name, address, phone, opening hours). Leave anything you do not want to publish empty.',
   fieldsets: [

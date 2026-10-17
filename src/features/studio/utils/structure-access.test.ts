@@ -10,17 +10,7 @@ import {
 const idOf = (item: string) => (item === '---' ? null : item)
 
 describe('filterStructureItems', () => {
-  const items = [
-    'startHere',
-    'pages',
-    'blog',
-    '---',
-    'reusable',
-    'websiteSettings',
-    'design',
-    '---',
-    'advanced',
-  ]
+  const items = ['pages', 'blog', '---', 'reusable', 'websiteSettings', 'design', '---', 'advanced']
 
   it('leaves agency staff with everything', () => {
     expect(filterStructureItems(items, 'agency', idOf)).toEqual(items)
@@ -28,7 +18,6 @@ describe('filterStructureItems', () => {
 
   it.each(['editor', 'contributor'] as const)('limits a %s to the client items', (audience) => {
     expect(filterStructureItems(items, audience, idOf)).toEqual([
-      'startHere',
       'pages',
       'blog',
       '---',
@@ -51,7 +40,6 @@ describe('filterStructureItems', () => {
         'events',
         'pages',
         'reusable',
-        'startHere',
         'team',
         'websiteSettings',
       ].sort(),
@@ -64,7 +52,7 @@ describe('filterStructureItems', () => {
     expect(filterStructureItems(reusable, 'agency', idOf, CLIENT_REUSABLE_IDS)).toEqual(reusable)
   })
 
-  it('limits clients to Identity, Navigation and Announcement bar inside Website settings', () => {
+  it('limits clients to Name, logo & icon, Navigation and Announcement bar inside Website settings', () => {
     const screens = ['siteIdentity', 'siteNavigation', 'announcement', 'cookieBanner', 'brand']
     expect(filterStructureItems(screens, 'editor', idOf, CLIENT_WEBSITE_SETTINGS_IDS)).toEqual([
       'siteIdentity',
