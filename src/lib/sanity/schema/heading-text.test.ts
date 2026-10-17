@@ -306,7 +306,7 @@ describe('headingField', () => {
   ]
 
   it('warns about a custom colour that is hard to read, naming it', async () => {
-    const pale = phrase({ gradient: 'custom', stops: ['#ffff99', '#ffffff'] })
+    const pale = phrase({ gradient: 'custom', stops: ['#102030', '#ffff99'] })
     const message = await contrast.run(pale, { parent: { style: { tone: 'surface' } } })
     expect(message).toEqual(expect.stringContaining('Custom gradient'))
     expect(message).toEqual(expect.stringContaining('#ffff99'))
