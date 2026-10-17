@@ -465,7 +465,7 @@ src/
       utils/                       pagination, feed (RSS XML), date formatting
     forms/                         editor-built forms: schema, the form UI, the submit action
       api/                         queries.ts (FORM_QUERY), submit-form.ts, subscribe-newsletter.ts (server actions), rate-limiter.ts
-      components/                  form-view, newsletter-view (server; env check), contact-form (client), turnstile-widget
+      components/                  form-view, newsletter-view (server; env check), contact-form (client), contact-form-lazy (the `next/dynamic` wrapper the views use, so only pages with a form download it), turnstile-widget
       utils/                       validate, build-email, resend, turnstile, rate-limit, client-ip, config,
                                    newsletter/ (provider modules: resend, loops, mailchimp)
     experiments/                   A/B tests: experiment schema, assignment logic, signed variant codes (flags)

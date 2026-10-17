@@ -106,6 +106,8 @@ you start a release.
 
 ### Fixed
 
+- The form island (`contact-form.tsx`, about 4.5 KB gzipped) was in every page's scripts because the shared page route imported it; forms and the newsletter signup now load it through `next/dynamic` (still server-rendered), so only pages with a form download it. This is what keeps the home and Link pages within the JavaScript budget once panels are on the route.
+
 ### Breaking changes / migration steps
 
 None for content: existing links keep their stored values, and nothing is switched on until an editor adds a panel or an event. After merging, run `npm run typegen` and commit the result. Add `link_click` as a goal in Plausible if you use it. The new visual baselines (`link-list-*`, `events-*`) need the **Update visual baselines** workflow (panels add none).
