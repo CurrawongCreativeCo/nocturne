@@ -2784,6 +2784,44 @@ client navigations, which an inline script inside a page's markup would not. In 
 UTM tags are added to the address by the server (`withUtm`: only `http` and `https`, and a tag already in the address wins),
 per link, in Advanced.
 
+**Seeing link clicks.** The site keeps no click data of its own: reports come from the analytics provider you switched on
+(see [Analytics and cookie consent](#analytics-and-cookie-consent)), and only for visitors who accepted analytics.
+
+| Provider  | Where to look                                                                                                                                                                 |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Plausible | Add a custom event **goal** called `link_click` in the site's settings, and the event's properties (`label`, `kind`, `group`, `page`) so the goal can be broken down by them. |
+| PostHog   | The Events list, or a Trends insight on `link_click`, broken down by `label`, `kind`, `group` or `page`. Nothing to set up.                                                   |
+| GA4       | `link_click` appears in the Events report. To report by `label` or `kind`, register them as event-scoped custom dimensions; they only fill from then on.                      |
+
+Each event carries the link's `label`, `kind`, `outbound`, `position`, `group`, the `page` it was on and, for another website,
+its `url` without query string or tags. A link-in-bio page usually has one job, so "clicks by `label` on `page` = `/links`" is
+the report to build. We do **not** run a click store of our own: it would be a second place for visitor data, with its own
+consent and retention to explain. Revisit this only if the Ops monthly report (task 52) needs numbers the provider can't give it.
+
+**Share helpers (pages).** Two actions on every page's **⋯** menu in Studio, open to clients and agency staff. Both use the
+page's _published_ address (`NEXT_PUBLIC_SITE_URL`, else the address Studio is opened from), so they are greyed out, with a
+reason, until the page is published.
+
+- **Copy link** puts the public address on the clipboard and confirms with a notice. If the browser blocks the clipboard, the
+  notice shows the address to copy by hand.
+- **Download QR code** opens a preview and two buttons: **Download SVG** (for print; sharp at any size) and **Download PNG**
+  (1024 px or just under, whole pixels per square, for screens and social posts). The code is the site's `ink` colour on its
+  `surface` colour (from `tokens.json`) with the four-square quiet zone scanners need. If a client's tokens would not scan
+  (the ink lighter than the surface, or less than 4.5:1 contrast), it falls back to black on white. A tick box, on by default,
+  adds `utm_source=qr` to the encoded address so scans show up as the source **qr** in analytics; a `utm_source` already in the
+  address is kept. The dialog shows the exact address the code opens. The code has the address inside it, so if the page's
+  slug changes, download a new one (the old code keeps working only while a redirect from the old address exists, which the
+  publish dialog offers to create).
+
+**Cost of the QR code.** None for visitors: `uqr` (MIT, no dependencies, under 8 KB gzipped for the whole library) is imported
+only by the Studio action (`src/features/studio/qr-code/qr-code.ts`), which only `sanity.config.ts` loads, so it ships with
+the Studio and never in a public page's JavaScript. We use it for one thing, the grid of squares for an address; the SVG, the PNG
+canvas drawing, the colours and the quiet zone are ours, so the output is under our control and the dependency stays small and
+replaceable. A Vitest test fails if anything outside Studio imports it. Tests: the payload (address, UTM added once, existing tag
+kept, non-web addresses untouched), the colours, the squares and the SVG in `qr-code.test.ts`, and that the actions are added to
+pages only. Studio needs a login, so there is no browser test for the dialog; `npm run test:e2e` still builds the whole site and
+holds the home page to its JavaScript budget.
+
 **Headings.** The page's `<h1>` is the page title (hidden, as for any page that doesn't start with a hero). The profile name
 (or the section's heading) is an `<h2>`; group headings are one level under it.
 
