@@ -125,7 +125,8 @@ Open http://localhost:3000/studio:
   - _Button text_, a _success message_ (shown in place of the form after sending) and _Send submissions to_, the address that receives each one. Replying to the email reaches the visitor if the form has an email field they filled in.
   - _How it behaves:_ every field is checked on the server against the published form, so a visitor can't send a field or a choice the form doesn't have. Problems appear in a summary above the form that takes focus (each item links to its field) and beside each field, and what was typed is kept. Long text allows line breaks and 5,000 characters; other fields are one line of up to 200 (email 254, phone 30). Email addresses are checked for shape only, and phone numbers for 5–15 digits.
   - _Spam:_ a Cloudflare Turnstile check on every send, plus a limit of 5 messages per IP address per 10 minutes on each server instance (serverless instances count separately, so it slows a spammer down rather than stopping one). The check needs JavaScript. Without it the form still posts and shows errors, but nothing is sent: the visitor is told to turn JavaScript on.
-  - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Datasets are private by default (see [Dataset privacy](#dataset-privacy)), so only the site's Viewer token and project members can read it; a shared inbox is still the safer choice. Submissions are emailed, not stored: if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
+  - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Datasets are private by default (see [Dataset privacy](#dataset-privacy)), so only the site's Viewer token and project members can read it; a shared inbox is still the safer choice. Submissions are emailed, and kept as enquiries only if the developer has switched that on (see [Enquiries](#enquiries)); if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
+  - _Enquiries:_ when the developer has switched on enquiry storage, every send is also kept under **Enquiries** in the sidebar, newest first, with the number of new ones in its title and on Start here. Open one to read the answers and set its status (_New_, _Read_, _Archived_); everything else is read-only. **Download CSV** (top of the list) saves them all as a spreadsheet. Delete an enquiry if someone asks you to remove their details. Enquiries older than the retention period are deleted automatically. Add a short privacy notice to the form section's _Intro_ (see [Enquiries](#enquiries)).
   - _Setup:_ it needs four environment variables (see _Forms setup_ below). Until they are set, a form section shows a setup message in development and "isn't available right now" to visitors. Pages read them at build time, so redeploy after changing them.
 - **Newsletter signup:** the _Newsletter signup_ section (_Add item → Newsletter signup_) is a heading, a line of text and an email box with a button. Set the _Heading_, _Text_, _Button label_ and _Success message_. The visitor sees the success message whether or not the address was already subscribed, so don't word it as "you are now subscribed"; if your provider emails a confirmation link (Mailchimp always does, Loops can), say "check your inbox to confirm". It sits in the page like any section and can be used on many pages (or as a shared section). The developer chooses the email service (see _Newsletter signup_ below); until then the section shows a setup message in development and "isn't available right now" to visitors. It has the same spam check and rate limit as forms (5 attempts per IP address per 10 minutes). Signups are not stored on the site: they go straight to the email service.
 - **Pricing table:** the _Pricing table_ section shows plans taken from Stripe prices, with a checkout button on each. Prices are not typed in: they are created in the Stripe dashboard and copied into _Stripe price_ documents (sidebar) automatically, so an amount can never differ between the site and what Stripe charges. In the section, add up to four _plans_; each one:
@@ -568,6 +569,7 @@ On a private dataset those requests need a token, and only the Viewer token the 
 - **The token stays on the server.** `lib/sanity/token.ts` imports `server-only`. The browser gets a token only as
   `browserToken`, when `<SanityLive includeDrafts />` renders in draft mode. `src/lib/sanity/token-import-guard.test.ts`
   fails `npm test` if any `'use client'` module imports `token.ts`, directly or through other modules.
+- **Enquiries need it.** With `ENQUIRIES_STORE=1` the dataset holds visitors' names and email addresses. The server refuses to write them to a dataset it can't confirm is private ([Enquiries](#enquiries)).
 - **Plan.** Sanity's Free plan offers only public datasets, so members-only content and forms with recipient addresses
   need a paid plan (check sanity.io/pricing). On the Free plan, keep only content that is fine to publish in the dataset.
 - **Switch an existing project to private:** sanity.io/manage → your project → API → Datasets → set the dataset to
@@ -646,7 +648,10 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
 - **Events** add none to a page view: an Events section's events are resolved inside `PAGE_QUERY` (an `event` or `eventCategory` change expires the pages, tagged `event` and `eventCategory`; the business time zone comes from the same query). An event page adds `EVENT_QUERY`, one per event, and `EVENTS_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/events/…` URLs cost nothing. The calendar feed adds `EVENTS_FEED_QUERY`, one cached entry for the whole site; an event's `.ics` file reads the event's own entry. Which events are upcoming is decided per request from that cached data, so no visitor causes a Sanity request.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
-  recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
+  recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes. With
+  `ENQUIRIES_STORE=1` a send also writes one document, and the first send per hour per server instance makes one
+  unauthenticated query to check the dataset is private (see [Enquiries](#enquiries)); neither is read through the cache,
+  and a page view still causes none.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
@@ -694,6 +699,103 @@ To switch a deployment to webhook mode:
 How a send works (`src/features/forms/api/submit-form.ts`, a server action that also handles a plain HTML POST): read the form's id from the request, **fetch the published form again** (`FORM_QUERY`, the only query that reads `recipientEmail`, tagged `form`), validate each of its fields (`utils/validate.ts`), rate-limit the IP (`x-real-ip`, else the first `x-forwarded-for` entry, so it only means something behind a proxy that sets them itself, as Vercel does), verify the Turnstile token with Cloudflare, then send through Resend's REST API (`utils/resend.ts`, no SDK). Cheap checks come first, so a mistake in a field never spends a token, a rate-limit slot or an email. Failures are logged on the server and shown to the visitor as a general message.
 
 `FORMS_TEST_MODE=1` replaces Turnstile and Resend with mocks that accept everything and send nothing; the end-to-end tests use it (the form then carries a fixed token instead of the widget, and the server accepts only that token). It is ignored when `VERCEL_ENV` is `production`, so it can't switch the spam check off there. To change the email, edit `utils/build-email.ts`: values are HTML-escaped and a subject can't contain line breaks.
+
+### Enquiries
+
+Off by default. Submissions are emailed and nothing else. With `ENQUIRIES_STORE=1` each accepted submission is also
+written to the dataset as an `enquiry` document, so clients can see what came in even if an email is lost. Both of these
+must be true, and both are the developer's job:
+
+1. **`ENQUIRIES_STORE=1`** in the deployment's environment variables (and `.env.local` to try it), plus a
+   **`SANITY_WRITE_TOKEN`** with the Editor role (the token the Stripe webhook uses, if the site has one; `.env.example`
+   lists both). Neither has a `NEXT_PUBLIC_` prefix. Pages bake in whether to collect the referrer and campaign
+   (below) at build time, so redeploy after changing the flag.
+2. **A private dataset** ([Dataset privacy](#dataset-privacy); `npm run check:dataset`). An enquiry holds a name, an email
+   address and whatever else the form asks for, so it must never sit in a dataset anyone can read with the project ID. The
+   server checks this itself: before the first write (then at most once an hour per server instance) it asks the dataset for
+   something without a token. A private dataset refuses; if it answers, or the check can't tell (a network error), nothing is
+   written and the server logs why. Visitors are not affected either way.
+
+**What is stored** (`src/features/forms/utils/build-enquiry.ts`, unit tested): a weak reference to the form (so a form can
+still be deleted) and its title at the time, every field as `{ label, value }` (checkboxes as _Yes_ or _No_, as in the
+email), the page path, `createdAt`, `status` (`new`, `read`, `archived`) and, when present, the **attribution**: the
+referrer (origin and path only; the query string and fragment are dropped, because they can carry search terms and tokens)
+and the five UTM values (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`). A small inline script
+next to the form fills hidden inputs when the page loads (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds
+nothing to the JavaScript budget); the server reads only those inputs, on one line and
+capped at 200 characters, because a visitor can forge anything. Attribution is the page's own address and referrer, not a
+visit history: a visitor who clicked a campaign link, browsed on and then wrote to you has none. Without JavaScript there
+is none either, and moving between pages on the site (client-side navigation) doesn't run the script. The page path comes from the `Referer` header.
+
+**How a write goes** (`api/store-enquiry.ts`): after Resend has accepted the message, in Next's `after()`, so it never
+delays the visitor. A failed write (no token, public or unreachable dataset, Sanity refusing) is logged with
+`console.error` and never fails or changes the visitor's submission. **Nothing from a submission is ever logged**: not
+the answers, not an email address, not even Sanity's error text (it can quote the document). The log line carries the form's id and an
+HTTP status or error name. The document has the id `enquiry-<uuid>` and `liveEdit`, so there are no drafts: changing the
+status saves at once and there is nothing to publish.
+
+**In Studio** (_Enquiries_ in the sidebar, for clients and agency alike; hidden, like Forms, when the profile's `forms`
+feature is off): a list ordered by `createdAt`, newest first, whose title carries the
+count (_Enquiries (3 new)_; it updates as enquiries arrive). Every field is read-only except _Status_ (which needs the
+Editor role: with `liveEdit` there is no draft for a Contributor to save). There is no
+_create_ button and no _Duplicate_; _Delete_ stays, because people may ask for their details to be removed. **Download CSV**
+builds the file in the browser from the signed-in editor's own read access (`studio/enquiries/csv.ts`, tested), so
+nothing passes through the site's server. It has one column per answer label (forms that share a label share a column),
+UTF-8 with a byte order mark so Excel reads it correctly, and times in the editor's own time zone (en-AU). Text that
+starts with `=`, `@` or `+`/`-` followed by anything but digits gets a leading apostrophe, so a visitor can't plant a
+spreadsheet formula (phone numbers such as `+61 400 000 000` are left alone). **Start here** shows
+_N new enquiries_ with a **View enquiries** button once any enquiry exists (it adds two `count()`s to
+`START_HERE_QUERY` and never fetches an enquiry). Pages never query enquiries, so they are not in `TAGS` or the
+revalidation webhook filter.
+
+**Retention** (`.github/workflows/enquiry-retention.yml`, selection logic in `scripts/enquiry-retention.mjs`, tested in
+`scripts/enquiry-retention.test.mjs`): every Monday at 04:00 UTC the workflow deletes enquiries older than
+`ENQUIRY_RETENTION_DAYS` (default **365**, a whole number of at least **30**: a typo of `1` can't wipe everything; anything
+else fails the run). Age is `createdAt`, else the document's creation time; one with no readable date is kept.
+
+- **Secret:** `SANITY_WRITE_TOKEN` (Editor role) in the repository's secrets. Variables: `NEXT_PUBLIC_SANITY_PROJECT_ID`,
+  optionally `NEXT_PUBLIC_SANITY_DATASET` (default `production`) and `ENQUIRY_RETENTION_DAYS`, as for the
+  [backup](#backups). With the secret or the project ID missing the run **skips with a notice and succeeds**.
+- **Dry run:** a pull request that changes the script or the workflow runs it with `--dry-run`: it reports how many would be
+  deleted and deletes nothing (pull requests from forks have no secrets, so they skip). A manual run
+  (_Actions → Enquiry retention → Run workflow_) is a dry run unless you untick _Dry run_. The write token is available to
+  that pull request's workflow, so only let people you trust open pull requests on a repository that holds it.
+- Output is counts only, never what an enquiry says. Delete in Studio, or lower the period, to remove sooner. GitHub pauses scheduled
+  workflows after 60 days without repository activity, so a quiet site should check _Actions_ now and then.
+- Backups hold enquiries too (an export includes every document), and they are kept as long as the backup is. Set the backup's
+  retention to match, or the policy below is not true.
+
+#### Privacy notes (Australia)
+
+Not legal advice; ask the client's adviser. Storing enquiries makes the site a holder of personal information, and
+the Australian Privacy Principles (APPs) in the _Privacy Act 1988_ bind most organisations with annual turnover over
+$3 million and some smaller ones (health service providers, businesses that trade in personal information, and others).
+Many small businesses are exempt, but a privacy policy and these habits are good practice anyway, and customers expect them.
+
+- **Collection notice (APP 5):** tell people what happens to their details at or before the moment they send them. Put it
+  in the form section's **Intro** (plain text, so name the page rather than hoping for a link), for example: _"We use these
+  details to reply to you, and keep your enquiry for up to 12 months. Our privacy policy at example.com.au/privacy explains
+  how to see or correct it."_ It should say who you are, why you collect the details, who else may receive them (here: the
+  email and hosting services below) and where to read the policy. Keep the retention wording in step with `ENQUIRY_RETENTION_DAYS`.
+- **Privacy policy (APP 1):** publish one, linked from the footer, and mention enquiries: what is kept, why, for how long,
+  who can see it (the client's staff with Studio access) and how to ask for access, correction or deletion.
+- **Collect only what you need (APP 3):** each field you add to a form is personal information you will hold. Don't ask
+  for a phone number or date of birth you won't use. Campaign and referrer details are collected only when enquiries are stored.
+- **Overseas services (APP 8):** the dataset is hosted by Sanity, the email goes through Resend, and the site runs on Vercel,
+  all of which may handle the data outside Australia. The policy should say so, and the providers should be chosen with that in mind.
+- **Security and destruction (APP 11):** the dataset is private and only people the client has added to the Sanity project
+  can open Enquiries; remove former staff. Treat `SANITY_WRITE_TOKEN` as a secret (it can change content). Retention
+  above is how enquiries are destroyed when no longer needed; delete a person's enquiry in Studio on request.
+- **Access and correction (APPs 12 and 13):** someone can ask to see or correct their details. Enquiries are read-only in
+  Studio because they record what was sent: answer an access request from the enquiry, and record a correction in the
+  client's own system or delete the enquiry. Respond within a reasonable time (commonly 30 days).
+- **If something leaks:** covered organisations must follow the Notifiable Data Breaches scheme. A leaked write token or a
+  dataset made public by mistake is a candidate: revoke the token, make the dataset private and ask the adviser.
+
+For developers: `tests/e2e/enquiries.spec.ts` runs a second server on the same build with the flag off (port 3101,
+`APP_PORT_ENQUIRIES_OFF`), reads writes from the fake Content Lake's `/__fixture/mutations` and checks a send writes an
+enquiry when the flag is on and nothing when it is off. The fake lake answers unauthenticated reads with 401, like a
+private dataset, which is what the privacy check looks for.
 
 ### Newsletter signup
 
@@ -1273,6 +1375,7 @@ history request for the author names, and, only when notices are set up, one cal
   show a _Draft_ badge. Clients only see the types in their sidebar (pages, posts, authors, categories, Identity &
   search, Navigation, Announcement bar, Business info, team); agency staff see every type the profile has not hidden.
   Names come from Sanity's history API; if it fails the time still shows.
+- **Enquiries:** once any enquiry exists (the site stores form submissions; see [Enquiries](#enquiries)), a card with the number of new ones and a _View enquiries_ button. It comes from two counts in the one content query.
 - **Things to check:** at most five, in this order: pages or menus that link to a page that is not published, pages with
   images that have no description (alt text), and drafts last edited more than seven days ago. They reuse the detectors
   in `content-health/utils/detect.ts`; fixing the problem in a draft clears it. Shared sections are only checked for
@@ -1380,6 +1483,7 @@ convenience. Someone with the Editor role who knows the API can still do what th
 | Vision, AI settings, Content health                                                                             | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
 | Sidebar                                                                                                         | Everything                        | Start here, Pages, Blog, Reusable content (Panels only), Website settings (Identity & search, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
 | Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections                               | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| Enquiries (read; status, Download CSV, delete)                                                                  | Yes                               | Yes                                                                                                                                                                        | Read only           | Studio                                         |
 | Cookie banner, and _Allow AI crawlers_ in Identity & search                                                     | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
 | _Who can see this_ (members-only) fields                                                                        | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
 | Section **Layout** picker, **Design** tab (background, animation, more layout options) and **Advanced** options | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
@@ -2723,7 +2827,8 @@ drift from the schemas). A new colour pair worth checking goes in `CONTRAST_PAIR
 that the committed Sanity types and design token files are current, runs `npm run check`, proves the section generator's
 output passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
 weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
-each release before proposing it.
+each release before proposing it. Two scheduled workflows run beside CI: [Backups](#backups) and the
+weekly [enquiry retention](#enquiries) clean-up.
 
 | Command                   | Does                                                                       |
 | ------------------------- | -------------------------------------------------------------------------- |

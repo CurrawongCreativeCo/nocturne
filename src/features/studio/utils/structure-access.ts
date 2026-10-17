@@ -13,6 +13,7 @@ export const CLIENT_STRUCTURE_IDS: ReadonlySet<string> = new Set([
   'websiteSettings',
   'team',
   'events',
+  'enquiries',
   'businessInfo',
 ])
 

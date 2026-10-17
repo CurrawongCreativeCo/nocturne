@@ -27,6 +27,8 @@ const siteFrameHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // Test-only: lets a second server run from a copy of the build (playwright.config.ts).
+  ...(process.env.NEXT_DIST_DIR && { distDir: process.env.NEXT_DIST_DIR }),
   poweredByHeader: false,
 
   // One SENTRY_DSN configures the server and the browser (see src/lib/sentry/config.ts).

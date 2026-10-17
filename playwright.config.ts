@@ -1,8 +1,16 @@
 import { defineConfig, devices } from '@playwright/test'
 
-import { APP_ENV, APP_PORT, FAKE_SANITY_PORT, REJECTED_CONSENT } from './tests/e2e/constants'
+import {
+  APP_ENV,
+  APP_PORT,
+  APP_PORT_ENQUIRIES_OFF,
+  FAKE_SANITY_PORT,
+  REJECTED_CONSENT,
+} from './tests/e2e/constants'
 
 const CI = Boolean(process.env.CI)
+// node_modules/.cache is ignored by git, ESLint and Prettier.
+const OFF_DIST_DIR = 'node_modules/.cache/e2e-enquiries-off'
 const EXPERIMENTS_SPEC = /experiments\.spec\.ts/
 // Switch the colours the whole fake site is served in, so each runs alone (see the projects below).
 const DESIGN_SPEC = /design-settings\.spec\.ts/
@@ -84,6 +92,21 @@ export default defineConfig({
       reuseExistingServer: !CI,
       // E2E_GALLERY switches on /section-gallery, which visual.spec.ts screenshots.
       env: { ...APP_ENV, E2E_GALLERY: '1' },
+    },
+    {
+      // The same build with enquiry storage off, to show a send then writes nothing. Playwright starts
+      // the servers in order, so the build above has finished by now. It runs from its own copy: two
+      // servers sharing one .next directory broke each other's pages.
+      command: `rm -rf ${OFF_DIST_DIR} && mkdir -p node_modules/.cache && cp -R .next ${OFF_DIST_DIR} && npx next start -p ${APP_PORT_ENQUIRIES_OFF}`,
+      port: APP_PORT_ENQUIRIES_OFF,
+      timeout: 120_000,
+      reuseExistingServer: !CI,
+      env: {
+        ...APP_ENV,
+        E2E_GALLERY: '1',
+        ENQUIRIES_STORE: '0',
+        NEXT_DIST_DIR: OFF_DIST_DIR,
+      },
     },
   ],
 })

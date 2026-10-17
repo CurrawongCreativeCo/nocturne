@@ -47,6 +47,7 @@ describe('filterStructureItems', () => {
       [
         'blog',
         'businessInfo',
+        'enquiries',
         'events',
         'pages',
         'reusable',
