@@ -3,10 +3,10 @@ import type { Audience } from '../roles'
 /**
  * Desk items clients see, by item id. Allow-list on purpose: a document type added later stays
  * agency-only until it is added here. Ids with no matching item (Team, Business info on sites
- * that don't have them) are simply never shown.
+ * that don't have them) are simply never shown. Start here is a tool, not a desk item, so it is
+ * not listed.
  */
 export const CLIENT_STRUCTURE_IDS: ReadonlySet<string> = new Set([
-  'startHere',
   'pages',
   'blog',
   'reusable',
