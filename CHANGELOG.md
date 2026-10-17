@@ -129,6 +129,13 @@ you start a release.
 - The webhook filter gains `"panel"` (README, Webhook mode): add it to existing webhooks.
 - The link fragment (`linkFields`) also returns `anchor`, `panel` (id and title), `fallbackUrl` and `bookingUrl`.
   **Open in a new tab** moved into a collapsed Advanced area and shows for _Another website_ only.
+- **Studio wording and order (audit quick fixes, `docs/studio-audit/2026-10-17/report.md`).** No stored data changes.
+  Call-to-action _Variant_ is now **Button style** with _Filled_ and _Outline_ (stored `primary` and `secondary`). The hero
+  and Image + text show _Image left_ and _Image right_ instead of the raw values, and Image + text's list subtitle names the
+  side. The blog post editor puts the body straight after the main image, then categories, author and date, as the editor
+  guide describes; the post list shows the date and author instead of the URL. Navigation gets help text, and _Footer
+  text_ is now **Copyright line**. Field help and warnings say **Brand colours** (the sidebar's name) instead of _Design
+  settings_.
 
 ### Fixed
 
