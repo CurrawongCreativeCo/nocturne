@@ -7,6 +7,7 @@ import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 import { adjustLightnessForContrast } from '@/lib/color/contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 
+import { defaultColourFor } from '../utils/default-colour'
 import {
   resolveDesignTokens,
   type ContrastCheck,
@@ -18,6 +19,15 @@ function toHex(text: string): string | null {
   const hex = `#${text.trim().replace(/^#/, '')}`.toLowerCase()
   return HEX_PATTERN.test(hex) ? hex : null
 }
+
+const visuallyHidden = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+} as const
 
 function CheckBadge({ check }: { check: ContrastCheck }) {
   return (
@@ -57,11 +67,13 @@ function CheckBadge({ check }: { check: ContrastCheck }) {
 export function ColourInput(props: StringInputProps) {
   const { value, onChange, elementProps, path, readOnly } = props
   const [draft, setDraft] = useState<string | null>(null)
+  const [cleared, setCleared] = useState(false)
   const document = useFormValue([]) as DesignOverrides | undefined
   const [first] = path
   const field = path.length === 1 && typeof first === 'string' ? first : null
   const hex = value && HEX_PATTERN.test(value) ? value.toLowerCase() : null
   const shown = draft ?? value ?? ''
+  const defaultHex = hex ? null : defaultColourFor(field, document)
   const invalid = draft !== null && draft.trim() !== '' && toHex(draft) === null
 
   const checks = field
@@ -72,10 +84,15 @@ export function ColourInput(props: StringInputProps) {
     hex && fixable ? adjustLightnessForContrast(hex, fixable.background, fixable.required) : null
 
   const commit = (text: string) => {
-    if (text.trim() === '') onChange(unset())
-    else {
+    if (text.trim() === '') {
+      onChange(unset())
+      if (value) setCleared(true)
+    } else {
       const next = toHex(text)
-      if (next) onChange(set(next))
+      if (next) {
+        setCleared(false)
+        onChange(set(next))
+      }
     }
   }
 
@@ -85,10 +102,11 @@ export function ColourInput(props: StringInputProps) {
         <input
           type="color"
           aria-label={`${props.schemaType.title ?? 'Colour'}: colour picker`}
-          value={hex ?? '#000000'}
+          value={hex ?? defaultHex ?? '#000000'}
           disabled={readOnly}
           onChange={(event) => {
             setDraft(null)
+            setCleared(false)
             onChange(set(event.currentTarget.value.toLowerCase()))
           }}
           style={{ width: 44, height: 36, padding: 0, border: 'none', background: 'none' }}
@@ -97,7 +115,7 @@ export function ColourInput(props: StringInputProps) {
           <TextInput
             {...elementProps}
             value={shown}
-            placeholder="#3266e4"
+            placeholder={defaultHex ?? '#3266e4'}
             maxLength={7}
             spellCheck={false}
             readOnly={readOnly}
@@ -113,6 +131,11 @@ export function ColourInput(props: StringInputProps) {
             }}
           />
         </div>
+        {defaultHex && !draft && (
+          <Badge tone="default" fontSize={1}>
+            Default
+          </Badge>
+        )}
         {value && !readOnly && (
           <Button
             mode="bleed"
@@ -122,10 +145,20 @@ export function ColourInput(props: StringInputProps) {
             onClick={() => {
               setDraft(null)
               onChange(unset())
+              setCleared(true)
             }}
           />
         )}
       </Flex>
+      {/* Announced to screen readers; the "Default" label shows the same thing visually. */}
+      <div role="status" aria-live="polite" style={visuallyHidden}>
+        {cleared && defaultHex ? `Cleared. The site uses the default, ${defaultHex}.` : ''}
+      </div>
+      {defaultHex && (
+        <Text size={1} muted>
+          {cleared ? 'Cleared: ' : 'Nothing set: '}the site uses the default {defaultHex}.
+        </Text>
+      )}
       {invalid && (
         <Text size={1} style={{ color: 'var(--card-badge-critical-fg-color)' }}>
           Use a six-digit hex colour such as #3266e4.

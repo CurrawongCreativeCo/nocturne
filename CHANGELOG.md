@@ -24,6 +24,11 @@ you start a release.
 
 ### Fixed
 
+- Studio → Design → Brand colours: an empty colour now shows the site's real default in the swatch and as the
+  placeholder, with a "Default" label, instead of a black swatch and an example hex. Clearing a colour says it has
+  returned to the default, and Primary's description explains that buttons stay near-black until a Primary is set.
+  No stored data changes.
+
 ### Breaking changes / migration steps
 
 ## [1.5.0] - 2026-10-17

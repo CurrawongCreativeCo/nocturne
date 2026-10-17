@@ -75,7 +75,7 @@ export const designSettings = defineType({
     colourField(
       'primary',
       'Primary',
-      'The main brand colour: buttons, links and the accent sections. Text on it is chosen automatically.',
+      'The main brand colour: buttons, links and the accent sections. Text on it is chosen automatically. Until a Primary is set, buttons use the near-black default and accent sections use the default blue shown here.',
     ),
     colourField(
       'secondary',
