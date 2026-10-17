@@ -173,6 +173,7 @@ you start a release.
 
 ### Fixed
 
+- **Studio dark mode:** the Studio was always light and the user menu had no **Appearance** choice, because `buildLegacyTheme` marks its theme as legacy and Sanity 6 pins such a theme to one scheme. `theme.ts` now removes those markers, so editors can pick System (the default), Light or Dark.
 - The form island (`contact-form.tsx`, about 4.5 KB gzipped) was in every page's scripts because the shared page route imported it; forms and the newsletter signup now load it through `next/dynamic` (still server-rendered), so only pages with a form download it. This is what keeps the home and Link pages within the JavaScript budget once panels are on the route.
 
 ### Breaking changes / migration steps

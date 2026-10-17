@@ -171,6 +171,14 @@ describe('createStudioTheme', () => {
     expect(theme.color.dark.from).toEqual(legacyThemeProperties(currawongBrand.dark, 'dark'))
   })
 
+  it('drops the legacy markers, so Studio offers Appearance instead of pinning one scheme', () => {
+    const builder = () => ({ __legacy: true, __dark: false, color: { light: {}, dark: {} } })
+    const theme = createStudioTheme(currawongBrand, builder)
+    expect(theme).not.toHaveProperty('__legacy')
+    expect(theme).not.toHaveProperty('__dark')
+    expect(theme).toHaveProperty('color.dark')
+  })
+
   it('returns undefined, so Studio uses its default theme, when the builder is missing', () => {
     expect(createStudioTheme(currawongBrand, undefined)).toBeUndefined()
     expect(createStudioTheme(currawongBrand, { not: 'a function' })).toBeUndefined()

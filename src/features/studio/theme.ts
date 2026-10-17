@@ -26,6 +26,13 @@ import { hexToRgb, rgbToHex, type Rgb } from '@/lib/color/oklch'
  *   the "info" state colour (`--brand-primary`): 20% of it mixed into the background, then blended
  *   with the background again. A button colour that is not set falls back to Sanity's slate grey.
  *
+ * Why the markers are stripped (see `createStudioTheme`): `buildLegacyTheme` returns `__legacy: true` and
+ * `__dark`. In Sanity 6.18 `StudioThemeProvider` treats such a theme as pinned to one scheme (light or
+ * dark by the component background) and provides a scheme setter of `false`, which is what removes
+ * the Appearance section from the user menu and ignores the stored `sanityStudio:ui:colorScheme`. The
+ * `color` it builds has both schemes, so the markers are dropped and Studio handles it like any
+ * other theme: Appearance (System, Light, Dark) returns and System is the default.
+ *
  * Choices (see "CMS branding" in the README):
  * - The builder runs once per scheme, each time with that scheme's roles as both the component and
  *   the navigation colours, and the theme takes `color.light` from the first and `color.dark` from
@@ -175,8 +182,19 @@ export function createStudioTheme(
   const build = builder as ThemeBuilder
   const light = build(legacyThemeProperties(brand.light, 'light'))
   const dark = build(legacyThemeProperties(brand.dark, 'dark'))
-  if (!light.color || !dark.color) return light
-  return { ...light, color: { light: light.color.light, dark: dark.color.dark } }
+  if (!light.color || !dark.color) return withoutSchemeLock(light)
+  return withoutSchemeLock({
+    ...light,
+    color: { light: light.color.light, dark: dark.color.dark },
+  })
+}
+
+/** Drops the markers that make Studio pin one scheme and hide Appearance; `color` and `fonts` keep both schemes. */
+function withoutSchemeLock(theme: StudioThemeValue): StudioThemeValue {
+  const unlocked: Record<string, unknown> = { ...theme }
+  delete unlocked.__legacy
+  delete unlocked.__dark
+  return unlocked
 }
 
 /** The `theme` for sanity.config.ts: the branded legacy theme, or undefined if Sanity no longer has one. */

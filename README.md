@@ -1213,6 +1213,13 @@ Only supported Sanity APIs are used, in four places:
   in upcoming major version"), so `theme.ts` is the only file that touches them. If a future Sanity removes
   `buildLegacyTheme`, `buildStudioTheme` returns `undefined`, Studio uses its default theme, and the logo,
   icon and name keep the brand. When upgrading Sanity, check that comment block in `theme.ts` first.
+- **Light, dark and Appearance.** Editors choose _System_ (the default: follows the device), _Light_ or
+  _Dark_ under **Appearance** in the Studio user menu (their avatar, top right); the choice is remembered
+  in their browser. Both schemes are built from the one theme and both are tested: the brand preview page
+  (`/studio-brand-preview`) renders every brand case in light and dark, with the contrast assertions
+  (text 4.5:1, focus ring 3:1) and visual baselines for each. `buildLegacyTheme` marks its result as
+  "legacy", and Studio pins a legacy theme to one scheme and hides Appearance, so `theme.ts` removes
+  those markers. Never set a `scheme` in code. The Brand colours preview keeps the site's own colours.
 - **What the theme sets.** `buildLegacyTheme` takes one accent and one grey ramp for both colour schemes, so
   `theme.ts` calls it **once per scheme**, each time with that scheme's roles as both the component and the
   navigation colours, and builds the theme from `color.light` of the first and `color.dark` of the second.
