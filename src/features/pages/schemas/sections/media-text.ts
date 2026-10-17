@@ -8,6 +8,8 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { IMAGE_SIDE_TITLES, imageSideOptions } from './image-side'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2 in half the content width.
@@ -49,9 +51,12 @@ export const mediaText = defineType({
       imageDesignField(),
       defineField({
         name: 'imagePosition',
+        title: 'Image side',
+        description:
+          'Which side the picture sits on wide screens. On phones it sits below the text.',
         type: 'string',
         initialValue: 'right',
-        options: { list: ['left', 'right'], layout: 'radio', direction: 'horizontal' },
+        options: imageSideOptions,
         validation: (rule) => rule.required(),
       }),
       accessField,
@@ -61,18 +66,21 @@ export const mediaText = defineType({
     { rules: { type: 'mediaText', hasPicture: () => true } },
   ),
   preview: {
-    select: { title: 'title', media: 'image', tone: 'style.tone' },
+    select: { title: 'title', media: 'image', side: 'imagePosition', tone: 'style.tone' },
     prepare: ({
       title,
       media,
+      side,
       tone,
     }: {
       title?: string
       media?: PreviewValue['media']
+      side?: string
       tone?: string
     }) => ({
       title: title || 'Untitled',
-      subtitle: joinSubtitle('Image + text', toneTitle(tone)),
+      // "Image + text · Image left · Soft": the side is the one layout choice editors make here.
+      subtitle: joinSubtitle('Image + text', IMAGE_SIDE_TITLES[side ?? 'right'], toneTitle(tone)),
       media,
     }),
   },
