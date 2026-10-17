@@ -1,7 +1,9 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -80,12 +82,15 @@ export const process = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'intro',
         type: 'text',
@@ -147,9 +152,19 @@ export const process = defineType({
     { align: 'start', motion: 'stagger' },
   ),
   preview: {
-    select: { title: 'title', variant: 'variant', tone: 'style.tone' },
-    prepare: ({ title, variant, tone }: { title?: string; variant?: string; tone?: string }) => ({
-      title: title || 'Process',
+    select: { heading: 'heading', title: 'title', variant: 'variant', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      variant,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      variant?: string
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Process',
       subtitle: variantSubtitle('Process', PROCESS_VARIANTS, variant, tone),
     }),
   },

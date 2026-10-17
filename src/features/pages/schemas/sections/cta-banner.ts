@@ -1,7 +1,9 @@
 import { BulbOutlineIcon } from '@sanity/icons/BulbOutline'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
@@ -23,11 +25,14 @@ export const ctaBanner = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
-        type: 'string',
-        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+      headingField({
+        name: 'heading',
+        title: 'Title',
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'text',
         type: 'text',
@@ -61,9 +66,17 @@ export const ctaBanner = defineType({
     { spacing: 'compact', align: 'center' },
   ),
   preview: {
-    select: { title: 'title', tone: 'style.tone' },
-    prepare: ({ title, tone }: { title?: string; tone?: string }) => ({
-      title: title || 'Untitled',
+    select: { heading: 'heading', title: 'title', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Untitled',
       subtitle: joinSubtitle('Call to action banner', toneTitle(tone)),
     }),
   },

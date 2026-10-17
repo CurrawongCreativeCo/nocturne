@@ -1,7 +1,9 @@
 import { ImagesIcon } from '@sanity/icons/Images'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
@@ -79,12 +81,15 @@ export const gallery = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'intro',
         type: 'text',
@@ -124,19 +129,27 @@ export const gallery = defineType({
     },
   ),
   preview: {
-    select: { title: 'title', images: 'images', variant: 'variant', tone: 'style.tone' },
+    select: {
+      heading: 'heading',
+      title: 'title',
+      images: 'images',
+      variant: 'variant',
+      tone: 'style.tone',
+    },
     prepare: ({
+      heading,
       title,
       images,
       variant,
       tone,
     }: {
+      heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       images?: unknown[]
       variant?: string
       tone?: string
     }) => ({
-      title: title || 'Gallery',
+      title: headingPlainText(heading) || title || 'Gallery',
       subtitle: joinSubtitle(
         variantSubtitle('Gallery', GALLERY_VARIANTS, variant, tone),
         `${images?.length ?? 0} images`,

@@ -2,12 +2,14 @@ import { stegaClean } from 'next-sanity'
 import { Fragment, Suspense, type ReactNode } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { SocialIcon } from '@/components/ui/social-icon'
 import { trackAttributes } from '@/lib/analytics/track-script'
 import { requestTime } from '@/lib/request-time'
+import { sectionTitle } from '@/lib/sanity/section-title'
 import { socialPlatformTitle } from '@/lib/social-platforms'
 import type { SanityImageData } from '@/types/sanity'
 
@@ -270,7 +272,7 @@ export function LinkListView({
   const surface = ctaSurfaceFor(traits.tone)
   const prepared = prepareLinks(data.links)
   const socials = resolveSocials(data.socialSource, data.socialLinks, business?.socialLinks)
-  const title = clean(data.title)
+  const title = clean(sectionTitle(data))
   const hasName = Boolean(clean(data.profile?.name))
   const levels = headingLevels({ hasProfileName: hasName, hasTitle: Boolean(title) })
   const Title = levels.title
@@ -296,11 +298,12 @@ export function LinkListView({
         nameLevel={levels.top}
       />
       {title && (
-        <Title
+        <RichHeading
+          as={Title}
+          blocks={data.heading}
+          fallback={title}
           className={`mb-8 text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
-        >
-          {title}
-        </Title>
+        />
       )}
       <Socials profiles={socials} justify={traits.justify} />
       {prepared.some((link) => link.scheduled) ? (

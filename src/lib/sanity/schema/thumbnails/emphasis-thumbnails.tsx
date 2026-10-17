@@ -31,6 +31,30 @@ export const EmphasisBrandThumbnail = (_props: PresetThumbnailProps) => (
   </Wireframe>
 )
 
+export const EmphasisColourThumbnail = (_props: PresetThumbnailProps) => (
+  <Wireframe label="emphasis-colour">
+    <Words
+      treated={(x, y, w) => (
+        <rect x={x} y={y} width={w} height={11} rx={2} fill="var(--card-badge-caution-fg-color)" />
+      )}
+    />
+  </Wireframe>
+)
+
+/** Bold or italic only: the word keeps its colour but is drawn heavier and slanted. */
+export const EmphasisPlainThumbnail = (_props: PresetThumbnailProps) => (
+  <Wireframe label="emphasis-plain">
+    <Words
+      treated={(x, y, w) => (
+        <>
+          <rect x={x} y={y - 1} width={w} height={13} rx={2} fill={FG} opacity={0.95} />
+          <path d={`M${x + w - 6} ${y - 1} l6 0 l-4 13 l-6 0 z`} fill="var(--card-bg-color)" />
+        </>
+      )}
+    />
+  </Wireframe>
+)
+
 export const EmphasisGradientThumbnail = (_props: PresetThumbnailProps) => (
   <Wireframe label="emphasis-gradient">
     <defs>
@@ -70,6 +94,23 @@ export const EmphasisUnderlineThumbnail = (_props: PresetThumbnailProps) => (
         </>
       )}
     />
+  </Wireframe>
+)
+
+/** Custom: three colour swatches on a bar, in the Studio's own colours since the editor picks the real ones. */
+export const EmphasisCustomGradientThumbnail = (_props: PresetThumbnailProps) => (
+  <Wireframe label="gradient-custom">
+    <defs>
+      <linearGradient id="gradient-thumb-custom" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stopColor="var(--card-link-color)" />
+        <stop offset="0.5" stopColor="var(--card-badge-caution-fg-color)" />
+        <stop offset="1" stopColor="var(--card-badge-positive-fg-color)" />
+      </linearGradient>
+    </defs>
+    <rect x={24} y={44} width={112} height={32} rx={6} fill="url(#gradient-thumb-custom)" />
+    {[34, 80, 126].map((cx) => (
+      <circle key={cx} cx={cx} cy={60} r={5} fill="var(--card-bg-color)" opacity={0.9} />
+    ))}
   </Wireframe>
 )
 

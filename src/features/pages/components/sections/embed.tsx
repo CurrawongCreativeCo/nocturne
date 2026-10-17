@@ -1,8 +1,10 @@
 import { stegaClean } from 'next-sanity'
 
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { embedHeight, embedNotes, resolveEmbed } from '@/config/embed-providers'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import { LazyFacade } from './lazy-facade'
 import type { SectionProps } from '../../types'
@@ -17,7 +19,8 @@ const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
  * An address that doesn't resolve (the Studio blocks it, but stale content happens) renders nothing.
  */
 export function Embed({ data, isFirst }: SectionProps<'embed'>) {
-  const { title, text } = data
+  const { heading, text } = data
+  const title = sectionTitle(data)
   const { text: textAlign } = sectionTraits(data.style, DEFAULTS)
   const embed = resolveEmbed(stegaClean(data.provider), stegaClean(data.url))
   if (!embed) return null
@@ -30,7 +33,12 @@ export function Embed({ data, isFirst }: SectionProps<'embed'>) {
       isFirst={isFirst}
       containerClassName={textAlign}
     >
-      <h2 className="text-h2 font-semibold text-balance">{title}</h2>
+      <RichHeading
+        as="h2"
+        blocks={heading}
+        fallback={title}
+        className="text-h2 font-semibold text-balance"
+      />
       {text && (
         <p className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted">{text}</p>
       )}
@@ -39,7 +47,7 @@ export function Embed({ data, isFirst }: SectionProps<'embed'>) {
           embed={{
             src: embed.src,
             openUrl: embed.openUrl,
-            title: stegaClean(title),
+            title: stegaClean(title) ?? 'Embedded content',
             provider: provider.label,
             sandbox: provider.sandbox.join(' '),
             allow: provider.allow,

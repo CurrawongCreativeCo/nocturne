@@ -66,6 +66,8 @@ export const mediaTextFragment = /* groq */ `
     style { ${sectionStyleFields} },
     eyebrow,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     body[] { ${portableTextFields} },
     ctas[] { ${ctaFields} },
     image { ${imageFields} },
@@ -78,6 +80,8 @@ export const featuresGridFragment = /* groq */ `
   _type == "featuresGrid" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     intro,
     columns,
     items[] {
@@ -95,6 +99,8 @@ export const logoCloudFragment = /* groq */ `
     variant,
     logoColour,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     logos[] {
       _key,
       name,
@@ -109,6 +115,8 @@ export const testimonialsFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     items[] {
       _key,
       quote,
@@ -123,6 +131,8 @@ export const faqFragment = /* groq */ `
   _type == "faq" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     intro,
     items[] {
       _key,
@@ -136,6 +146,8 @@ export const ctaBannerFragment = /* groq */ `
   _type == "ctaBanner" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     text,
     ctas[] { ${ctaFields} },
     tone
@@ -146,6 +158,8 @@ export const formSectionFragment = /* groq */ `
   _type == "formSection" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     text,
     form-> { _id, ${formFields} }
   }
@@ -155,6 +169,8 @@ export const pricingTableFragment = /* groq */ `
   _type == "pricingTable" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     intro,
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
     plans[defined(price->priceId) && price->active == true] {
@@ -172,6 +188,8 @@ export const newsletterSignupFragment = /* groq */ `
   _type == "newsletterSignup" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     text,
     submitLabel,
     successMessage
@@ -183,6 +201,8 @@ export const statsFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     intro,
     items[] { ${statItemFields} }
   }
@@ -193,6 +213,8 @@ export const galleryFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     intro,
     columns,
     imageDesign { ${imageDesignFields} },
@@ -204,6 +226,8 @@ export const locationFragment = /* groq */ `
   _type == "location" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     intro,
     mapImage { ${imageFields} },
     showHours,
@@ -238,6 +262,8 @@ export const teamFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     text,
     imageDesign { ${imageDesignFields} },
     "members": select(
@@ -252,6 +278,8 @@ export const videoFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     text,
     source,
     url,
@@ -267,6 +295,8 @@ export const processFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     intro,
     steps[] {
       _key,
@@ -282,6 +312,8 @@ export const embedFragment = /* groq */ `
   _type == "embed" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     text,
     provider,
     url,
@@ -296,6 +328,8 @@ export const linkListFragment = /* groq */ `
     variant,
     thumbnailSize,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     profile { name, bio, image { ${imageFields} } },
     socialSource,
     "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),
@@ -331,6 +365,8 @@ export const eventsFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     title,
+    heading,
+    "headingPlain": pt::text(heading),
     text,
     count,
     "hasCategoryFilter": defined(category),

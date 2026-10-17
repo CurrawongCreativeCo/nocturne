@@ -1,7 +1,8 @@
 import { stegaClean } from 'next-sanity'
 import type { CSSProperties, ElementType, ReactNode } from 'react'
 
-import { gradientCss, gradientFor } from '@/config/heading-gradients'
+import { gradientCssFor, type GradientChoice } from '@/config/heading-gradients'
+import { validColour } from '@/lib/color/heading-gradient'
 import {
   EMPHASIS_TREATMENTS,
   hasHeadingText,
@@ -34,20 +35,36 @@ function emphasisOf(block: HeadingBlock, marks: readonly string[] | null | undef
     )
     if (def?._type !== 'emphasis') continue
     const treatment = stegaClean(def.treatment) ?? undefined
-    if (isTreatment(treatment))
-      return { key: def._key, treatment, gradient: stegaClean(def.gradient) }
+    if (isTreatment(treatment)) {
+      return {
+        key: def._key,
+        treatment,
+        choice: {
+          gradient: stegaClean(def.gradient),
+          stops: stegaClean(def.stops),
+          angle: stegaClean(def.angle),
+        },
+        colour: validColour(stegaClean(def.colour)),
+        bold: stegaClean(def.bold) === true,
+        italic: stegaClean(def.italic) === true,
+      }
+    }
   }
   return undefined
 }
 
 function styleFor(
   treatment: Treatment,
-  gradient: string | null | undefined,
+  choice: GradientChoice,
+  colour: string | null,
 ): CSSProperties | undefined {
-  // Resolved here, from the preset list, so the stored value never reaches the CSS directly.
-  return treatment === 'gradient'
-    ? ({ '--emphasis-gradient': gradientCss(gradientFor(gradient)) } as CSSProperties)
-    : undefined
+  // Built from the preset list, validated hex colours and an integer angle, so free text from the
+  // content never reaches the CSS. A solid colour that is not valid is not drawn (the words keep
+  // the section's ink).
+  if (treatment === 'gradient')
+    return { '--emphasis-gradient': gradientCssFor(choice) } as CSSProperties
+  if (treatment === 'colour' && colour) return { '--emphasis-colour': colour } as CSSProperties
+  return undefined
 }
 
 /**
@@ -86,7 +103,9 @@ export function RichHeading({ as: Heading, blocks, fallback, className, id }: Pr
           <span
             key={key}
             data-emphasis={emphasis.treatment}
-            style={styleFor(emphasis.treatment, emphasis.gradient)}
+            data-bold={emphasis.bold ? '' : undefined}
+            data-italic={emphasis.italic ? '' : undefined}
+            style={styleFor(emphasis.treatment, emphasis.choice, emphasis.colour)}
           >
             {text}
           </span>

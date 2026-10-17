@@ -1,8 +1,10 @@
 import { stegaClean } from 'next-sanity'
 
 import { CtaGroup } from '@/components/ui/cta-link'
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import type { SectionProps } from '../../types'
 
@@ -24,7 +26,8 @@ const cards = {
 } as const
 
 export function CtaBanner({ data, isFirst }: SectionProps<'ctaBanner'>) {
-  const { title, text, ctas } = data
+  const { heading, text, ctas } = data
+  const title = sectionTitle(data)
   const card = cards[stegaClean(data.tone)]
   const { block, text: textAlign, justify } = sectionTraits(data.style, DEFAULTS)
 
@@ -34,7 +37,12 @@ export function CtaBanner({ data, isFirst }: SectionProps<'ctaBanner'>) {
         data-tone={card.tone}
         className={`rounded-panel px-8 py-section-compact text-ink sm:px-16 ${textAlign}`}
       >
-        <h2 className="text-h2 font-semibold text-balance">{title}</h2>
+        <RichHeading
+          as="h2"
+          blocks={heading}
+          fallback={title}
+          className="text-h2 font-semibold text-balance"
+        />
         {text && (
           <p className={`mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`}>
             {text}

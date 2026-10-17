@@ -69,10 +69,17 @@
           "length": "Up to 30 characters"
         },
         {
-          "name": "title",
+          "name": "heading",
           "title": "Title",
+          "kind": "Formatted text",
+          "required": false,
+          "description": "Select words to make them stand out."
+        },
+        {
+          "name": "title",
+          "title": "Title (old)",
           "kind": "Short text",
-          "required": true,
+          "required": false,
           "length": "Up to 60 characters"
         },
         {
@@ -113,8 +120,15 @@
       "title": "Testimonials",
       "fields": [
         {
-          "name": "title",
+          "name": "heading",
           "title": "Section title",
+          "kind": "Formatted text",
+          "required": false,
+          "description": "Select words to make them stand out."
+        },
+        {
+          "name": "title",
+          "title": "Title (old)",
           "kind": "Short text",
           "required": false,
           "length": "Up to 60 characters"
@@ -160,8 +174,15 @@
       "title": "FAQ",
       "fields": [
         {
-          "name": "title",
+          "name": "heading",
           "title": "Section title",
+          "kind": "Formatted text",
+          "required": false,
+          "description": "Select words to make them stand out."
+        },
+        {
+          "name": "title",
+          "title": "Title (old)",
           "kind": "Short text",
           "required": false,
           "length": "Up to 70 characters"
@@ -200,10 +221,17 @@
       "title": "Call to action banner",
       "fields": [
         {
-          "name": "title",
+          "name": "heading",
           "title": "Title",
+          "kind": "Formatted text",
+          "required": false,
+          "description": "Select words to make them stand out."
+        },
+        {
+          "name": "title",
+          "title": "Title (old)",
           "kind": "Short text",
-          "required": true,
+          "required": false,
           "length": "Up to 70 characters"
         },
         {

@@ -1,9 +1,10 @@
 import { CommentIcon } from '@sanity/icons/Comment'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
-import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import {
@@ -45,12 +46,15 @@ export const testimonials = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'items',
         title: 'Testimonials',
@@ -82,9 +86,19 @@ export const testimonials = defineType({
     { tone: 'alt', align: 'center' },
   ),
   preview: {
-    select: { title: 'title', variant: 'variant', tone: 'style.tone' },
-    prepare: ({ title, variant, tone }: { title?: string; variant?: string; tone?: string }) => ({
-      title: title || 'Testimonials',
+    select: { heading: 'heading', title: 'title', variant: 'variant', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      variant,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      variant?: string
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Testimonials',
       subtitle: variantSubtitle('Testimonials', TESTIMONIALS_VARIANTS, variant, tone),
     }),
   },

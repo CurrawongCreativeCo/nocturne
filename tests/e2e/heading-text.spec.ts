@@ -101,6 +101,123 @@ test('a long gradient heading wraps without losing words', async ({ page, isMobi
   await expect(span).toHaveText('grow with your business')
 })
 
+const CUSTOM_PAGE = '/custom-gradient'
+const CUSTOM_GRADIENT = 'linear-gradient(45deg, #1d4ed8, #7c3aed, #be185d)'
+
+test.describe('custom gradient colours', () => {
+  test('the hero is the one h1, named by its words, with the editor’s colours and angle', async ({
+    page,
+  }) => {
+    await page.goto(CUSTOM_PAGE)
+    await expect(page.locator('h1')).toHaveCount(1)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Colours in your own words' }),
+    ).toBeVisible()
+    const span = page.locator('h1 [data-emphasis="gradient"]')
+    await expect(span).toHaveText('in your own words')
+    const style = await span.evaluate((element) => {
+      const computed = getComputedStyle(element)
+      return {
+        variable: element.style.getPropertyValue('--emphasis-gradient'),
+        image: computed.backgroundImage,
+        clip: computed.backgroundClip,
+        decorationBreak: computed.getPropertyValue('box-decoration-break'),
+      }
+    })
+    // Stored upper case, drawn lower case: only validated hex colours reach the CSS.
+    expect(style.variable).toBe(CUSTOM_GRADIENT)
+    expect(style.image).toContain('linear-gradient')
+    expect(style.clip).toBe('text')
+    expect(style.decorationBreak).toBe('clone')
+  })
+
+  test('is plain spans in the server HTML, with the colours in the style attribute only', async ({
+    request,
+  }) => {
+    const html = await (await request.get(CUSTOM_PAGE)).text()
+    const h1 = /<h1[^>]*>(.*?)<\/h1>/s.exec(html)?.[1] ?? ''
+    expect(h1).toContain('data-emphasis="gradient"')
+    expect(h1).toContain(CUSTOM_GRADIENT)
+    expect(h1).not.toMatch(/<(em|strong|mark|b|i)[ >]/)
+  })
+
+  test('a Brand colours gradient is drawn by name, and a removed one falls back to the default', async ({
+    page,
+  }) => {
+    await page.goto(CUSTOM_PAGE)
+    const heading = page.getByRole('heading', { level: 2 })
+    const [named, removed] = await heading.locator('[data-emphasis="gradient"]').all()
+    expect(await named?.evaluate((el) => el.style.getPropertyValue('--emphasis-gradient'))).toBe(
+      'var(--gradient-forest-dusk, linear-gradient(90deg, var(--color-accent), var(--color-ink)))',
+    )
+    // The variable is undefined, so the fallback inside var() draws: never transparent text on nothing.
+    const image = await removed?.evaluate((el) => getComputedStyle(el).backgroundImage)
+    expect(image).toContain('linear-gradient')
+  })
+
+  test('a section title that is not the hero is rich too: solid colour, bold and italic', async ({
+    page,
+  }) => {
+    await page.goto(CUSTOM_PAGE)
+    const cta = page.getByRole('heading', { level: 2, name: 'Ready for colour and weight?' })
+    await expect(cta).toBeVisible()
+    const colour = cta.locator('[data-emphasis="colour"]')
+    await expect(colour).toHaveText('colour')
+    expect(await colour.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(124, 58, 237)')
+    const plain = cta.locator('[data-emphasis="plain"]')
+    expect(
+      await plain.evaluate((el) => {
+        const computed = getComputedStyle(el)
+        return { weight: Number(computed.fontWeight), style: computed.fontStyle }
+      }),
+    ).toEqual({ weight: 800, style: 'italic' })
+    // Still just words: no <em> or <strong> to change what a screen reader announces.
+    expect(await cta.evaluate((el) => el.querySelectorAll('em, strong, b, i').length)).toBe(0)
+  })
+
+  test('a section that has not been migrated still shows its old title', async ({ page }) => {
+    await page.goto(CUSTOM_PAGE)
+    await expect(page.getByRole('heading', { level: 2, name: 'Old string title' })).toBeVisible()
+  })
+
+  test('under forced colours the custom gradient gives way to a solid system colour', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ forcedColors: 'active' })
+    await page.goto(CUSTOM_PAGE)
+    const style = await page.locator('h1 [data-emphasis="gradient"]').evaluate((element) => ({
+      image: getComputedStyle(element).backgroundImage,
+      fill: getComputedStyle(element).getPropertyValue('-webkit-text-fill-color'),
+    }))
+    expect(style.image).toBe('none')
+    expect(style.fill).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
+  })
+
+  test('a long custom gradient heading wraps on a phone without losing words', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'wrapping is the phone case')
+    await page.goto('/section-gallery')
+    const span = page.locator(
+      '[data-gallery-section="hero-heading-custom-gradient"] [data-emphasis="gradient"]',
+    )
+    await span.scrollIntoViewIfNeeded()
+    expect(await span.evaluate((element) => element.getClientRects().length)).toBeGreaterThan(1)
+    await expect(span).toHaveText('colours of your own choosing')
+  })
+
+  test(`${CUSTOM_PAGE} has no WCAG 2.2 AA violations`, async ({ page }) => {
+    await page.goto(CUSTOM_PAGE)
+    const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze()
+    expect(
+      violations.map(
+        ({ id, nodes }) => `${id}: ${nodes.map((n) => n.target.join(' ')).join(', ')}`,
+      ),
+    ).toEqual([])
+  })
+})
+
 test(`${PAGE} has no WCAG 2.2 AA violations`, async ({ page }) => {
   await page.goto(PAGE)
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze()

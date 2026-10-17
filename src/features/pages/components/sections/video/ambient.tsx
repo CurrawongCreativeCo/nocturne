@@ -1,9 +1,11 @@
 import { stegaClean } from 'next-sanity'
 
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import { LazyAmbientPlayer } from './ambient-player-lazy'
 import type { SectionProps } from '../../../types'
@@ -18,7 +20,8 @@ const DEFAULTS: SectionDefaults = {
 
 /** Words over a silent looping video (the poster under reduced motion or without JavaScript), with a Pause button. */
 export function VideoAmbient({ data, isFirst }: SectionProps<'video'>) {
-  const { title, text, poster } = data
+  const { heading, text, poster } = data
+  const title = sectionTitle(data)
   const src = stegaClean(data.fileUrl)
   const { text: textAlign } = sectionTraits(data.style, DEFAULTS)
 
@@ -44,7 +47,12 @@ export function VideoAmbient({ data, isFirst }: SectionProps<'video'>) {
         ) : undefined
       }
     >
-      <h2 className="text-h2 font-semibold text-balance">{title}</h2>
+      <RichHeading
+        as="h2"
+        blocks={heading}
+        fallback={title}
+        className="text-h2 font-semibold text-balance"
+      />
       {text && <p className="mt-4 text-lead text-pretty text-ink-muted">{text}</p>}
     </SectionFrame>
   )

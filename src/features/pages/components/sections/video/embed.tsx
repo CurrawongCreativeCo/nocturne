@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -12,6 +13,7 @@ import {
 } from '@/features/pages/utils/video-source'
 import { urlFor } from '@/lib/sanity/image'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import type { SectionProps } from '../../../types'
 import { LazyFacade } from '../lazy-facade'
@@ -27,7 +29,8 @@ const FRAME = 'relative overflow-hidden rounded-card bg-surface-alt'
  * an uploaded MP4 is a native <video> that fetches nothing until played.
  */
 export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
-  const { title, text, poster, fileUrl, captionsUrl } = data
+  const { heading, text, poster, fileUrl, captionsUrl } = data
+  const title = sectionTitle(data)
   const source = stegaClean(data.source) ?? 'youtube'
   const { text: textAlign } = sectionTraits(data.style, DEFAULTS)
   const frameClass = `${FRAME} ${aspectClass(stegaClean(data.aspectRatio))}`
@@ -83,7 +86,9 @@ export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
       const provider = PROVIDER_NAMES[video.provider]
       frame = (
         <div className={frameClass}>
-          <LazyFacade video={{ src: embedUrl(video), title, provider }}>{image}</LazyFacade>
+          <LazyFacade video={{ src: embedUrl(video), title: title ?? 'Video', provider }}>
+            {image}
+          </LazyFacade>
         </div>
       )
       // Without JavaScript the button does nothing; a link to the video's own page still works.
@@ -104,7 +109,12 @@ export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
       isFirst={isFirst}
       containerClassName={textAlign}
     >
-      <h2 className="text-h2 font-semibold text-balance">{title}</h2>
+      <RichHeading
+        as="h2"
+        blocks={heading}
+        fallback={title}
+        className="text-h2 font-semibold text-balance"
+      />
       {text && (
         <p className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted">{text}</p>
       )}

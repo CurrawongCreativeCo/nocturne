@@ -5,7 +5,9 @@ import { useState } from 'react'
 import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 
 import { adjustLightnessForContrast } from '@/lib/color/contrast'
+import { stopContrast } from '@/lib/color/heading-contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
+import { headingSectionPath, headingTone } from '@/lib/sanity/heading-text'
 
 import { defaultColourFor } from '../utils/default-colour'
 import {
@@ -28,6 +30,22 @@ const visuallyHidden = {
   clip: 'rect(0 0 0 0)',
   whiteSpace: 'nowrap',
 } as const
+
+/** One gradient colour read as large text (3:1) on the tone's background. */
+function headingStopCheck(hex: string, tone: string | undefined): ContrastCheck {
+  const { background, ratio, pass } = stopContrast(tone, hex)
+  return {
+    id: 'heading-stop',
+    fields: [],
+    label: "Heading text on the section's background",
+    foreground: hex,
+    background,
+    ratio,
+    required: 3,
+    pass,
+    adjustable: true,
+  }
+}
 
 function CheckBadge({ check }: { check: ContrastCheck }) {
   return (
@@ -62,7 +80,9 @@ function CheckBadge({ check }: { check: ContrastCheck }) {
 /**
  * A colour as a native picker plus a hex field, stored as "#rrggbb". Below it, contrast badges for
  * the colours it sits on (from resolveDesignTokens, the same code the site runs), and a button that
- * suggests the nearest accessible shade by moving OKLCH lightness.
+ * suggests the nearest accessible shade by moving OKLCH lightness. With `options.headingStop` (a
+ * colour of a heading highlight's custom gradient) the badge is large text, 3:1, on the section's
+ * background; a failing colour is only a warning, never blocked.
  */
 export function ColourInput(props: StringInputProps) {
   const { value, onChange, elementProps, path, readOnly } = props
@@ -76,9 +96,23 @@ export function ColourInput(props: StringInputProps) {
   const defaultHex = hex ? null : defaultColourFor(field, document)
   const invalid = draft !== null && draft.trim() !== '' && toHex(draft) === null
 
-  const checks = field
-    ? resolveDesignTokens(document).checks.filter((check) => check.fields.includes(field))
-    : []
+  // A colour of a heading highlight's custom gradient is checked against its section's background.
+  const headingStop = props.schemaType.options?.headingStop === true
+  const section = headingStop ? headingSectionPath(path) : null
+  const sectionValue = useFormValue(section ?? ['_type'])
+  const headingCheck =
+    headingStop && hex
+      ? headingStopCheck(
+          hex,
+          section ? headingTone(sectionValue as Parameters<typeof headingTone>[0]) : undefined,
+        )
+      : null
+
+  const checks = headingCheck
+    ? [headingCheck]
+    : field
+      ? resolveDesignTokens(document).checks.filter((check) => check.fields.includes(field))
+      : []
   const fixable = hex ? checks.find((check) => check.adjustable && !check.pass) : undefined
   const suggestion =
     hex && fixable ? adjustLightnessForContrast(hex, fixable.background, fixable.required) : null

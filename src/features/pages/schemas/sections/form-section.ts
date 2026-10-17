@@ -1,7 +1,9 @@
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
@@ -23,12 +25,15 @@ export const formSection = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'text',
         title: 'Intro',
@@ -48,9 +53,19 @@ export const formSection = defineType({
     { align: 'start' },
   ),
   preview: {
-    select: { title: 'title', form: 'form.title', tone: 'style.tone' },
-    prepare: ({ title, form, tone }: { title?: string; form?: string; tone?: string }) => ({
-      title: title || form || 'Form',
+    select: { heading: 'heading', title: 'title', form: 'form.title', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      form,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      form?: string
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || form || 'Form',
       subtitle: joinSubtitle('Form', form ?? 'none chosen', toneTitle(tone)),
     }),
   },

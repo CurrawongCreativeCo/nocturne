@@ -1,7 +1,9 @@
 import { PinIcon } from '@sanity/icons/Pin'
 import { defineField, defineType, type PreviewValue } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -29,12 +31,15 @@ export const location = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
-        type: 'string',
-        initialValue: 'Visit us',
-        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+      headingField({
+        name: 'heading',
+        title: 'Title',
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        initialText: 'Visit us',
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'intro',
         type: 'text',
@@ -101,17 +106,19 @@ export const location = defineType({
     },
   ),
   preview: {
-    select: { title: 'title', media: 'mapImage', tone: 'style.tone' },
+    select: { heading: 'heading', title: 'title', media: 'mapImage', tone: 'style.tone' },
     prepare: ({
+      heading,
       title,
       media,
       tone,
     }: {
+      heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       media?: PreviewValue['media']
       tone?: string
     }) => ({
-      title: title || 'Location',
+      title: headingPlainText(heading) || title || 'Location',
       media,
       subtitle: joinSubtitle('Location', toneTitle(tone)),
     }),

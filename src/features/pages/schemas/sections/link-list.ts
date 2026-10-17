@@ -7,7 +7,9 @@ import {
 } from 'sanity'
 
 import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
@@ -314,13 +316,15 @@ export const linkList = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Heading',
-        type: 'string',
         description: 'Optional. Leave empty when the profile already says who this is.',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'profile',
         type: 'object',
@@ -450,19 +454,27 @@ export const linkList = defineType({
     // No design option depends on the layout: no picture, and each layout accepts any alignment.
   ),
   preview: {
-    select: { title: 'title', name: 'profile.name', variant: 'variant', tone: 'style.tone' },
+    select: {
+      heading: 'heading',
+      title: 'title',
+      name: 'profile.name',
+      variant: 'variant',
+      tone: 'style.tone',
+    },
     prepare: ({
+      heading,
       title,
       name,
       variant,
       tone,
     }: {
+      heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       name?: string
       variant?: string
       tone?: string
     }) => ({
-      title: title || name || 'Link list',
+      title: headingPlainText(heading) || title || name || 'Link list',
       subtitle: variantSubtitle('Link list', LINK_LIST_VARIANTS, variant, tone),
     }),
   },
