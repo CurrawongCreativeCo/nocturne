@@ -1,8 +1,8 @@
 import { defineQuery } from 'next-sanity'
 
-import { seoFields } from '@/lib/sanity/fragments'
+import { panelFields, seoFields } from '@/lib/sanity/fragments'
 
-import { pageBuilderFragment } from './sections'
+import { pageBuilderFragment, panelRefsFragment } from './sections'
 
 /**
  * Full queries. Every query is wrapped in `defineQuery` so TypeGen emits a
@@ -10,7 +10,8 @@ import { pageBuilderFragment } from './sections'
  *
  * Kept deliberately few: each distinct query is a separate cache entry and a
  * separate CDN request whenever its content changes. The page and its metadata
- * share PAGE_QUERY (`$members` stays false for every public read: see `sections.ts`); static params, the sitemap and breadcrumbs share PAGE_INDEX_QUERY; REDIRECTS_QUERY
+ * share PAGE_QUERY (`$members` stays false for every public read: see `sections.ts`), which also
+ * carries the panels its buttons open, so opening one never costs a request; static params, the sitemap and breadcrumbs share PAGE_INDEX_QUERY; REDIRECTS_QUERY
  * is only read for URLs that match no page, and when a redirect is published to rebuild the
  * Edge Config map.
  */
@@ -26,6 +27,10 @@ export const PAGE_QUERY = defineQuery(/* groq */ `
     "pageBuilder": select(
       access == "members" && !$members => [],
       pageBuilder[] { ${pageBuilderFragment} }[_type != "reference"]
+    ),
+    "panels": select(
+      access == "members" && !$members => [],
+      *[_type == "panel" && _id in (${panelRefsFragment})] { ${panelFields} }
     )
   }
 `)

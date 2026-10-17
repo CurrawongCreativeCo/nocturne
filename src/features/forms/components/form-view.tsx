@@ -1,6 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
-import { ContactForm } from './contact-form'
+import { ContactForm } from './contact-form-lazy'
 import type { FormDefinition } from '../types'
 import { getFormsConfig } from '../utils/config'
 

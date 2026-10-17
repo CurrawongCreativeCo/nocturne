@@ -25,6 +25,24 @@ const renderNewsletter: ComponentProps<typeof PageView>['renderNewsletter'] = (r
   <NewsletterView {...request} />
 )
 
+/** Panels are their own feature too: the page hands over the panels its buttons open. */
+/**
+ * Imported on demand, so the overlay's client code is referenced only by pages that render panels:
+ * a static import here puts it in every page's scripts (the home page's JavaScript budget).
+ */
+async function PanelsView({
+  panels,
+}: {
+  panels: Parameters<NonNullable<ComponentProps<typeof PageView>['renderPanels']>>[0]
+}) {
+  const { PanelHost } = await import('@/features/panels/components/panel-host')
+  return <PanelHost panels={panels} renderForm={(form) => <FormView form={form} />} />
+}
+
+const renderPanels: ComponentProps<typeof PageView>['renderPanels'] = (panels) => (
+  <PanelsView panels={panels} />
+)
+
 /** Payments are their own feature too: each pricing table plan gets its checkout button from it. */
 const renderCheckout: ComponentProps<typeof PageView>['renderCheckout'] = (request) => (
   <CheckoutButton {...request} />
@@ -72,6 +90,7 @@ export default async function ExperimentPage({ params }: Props) {
       renderForm={renderForm}
       renderCheckout={renderCheckout}
       renderNewsletter={renderNewsletter}
+      renderPanels={renderPanels}
       business={await getLocationBusiness(PUBLISHED)}
       renderMembersGate={renderMembersGate}
       variant={resolved?.variant}

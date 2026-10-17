@@ -10,6 +10,7 @@ import { PresetBarInput } from './preset-bar-input'
 import { PresetPickerInput } from './preset-picker-input'
 import { AnchorPickerInput } from '../anchor-picker/anchor-picker-input'
 import { GradientPickerInput } from '../gradient-picker/gradient-picker-input'
+import { PanelUsageInput } from '../panel-usage-input'
 import { SlotInput } from '../slot-input'
 
 /**
@@ -30,6 +31,13 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
     }
     if (isArrayOfObjectsInputProps(props) && props.schemaType.options?.slot === true) {
       return <SlotInput {...props} />
+    }
+    if (
+      isObjectInputProps(props) &&
+      props.path.length === 0 &&
+      (props.schemaType.options as { usedByButtons?: boolean } | undefined)?.usedByButtons === true
+    ) {
+      return <PanelUsageInput {...props} />
     }
     if (
       isObjectInputProps(props) &&

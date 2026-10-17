@@ -20,6 +20,20 @@ you start a release.
 
 ### Added
 
+- **Panels and a shared overlay:** one small overlay layer on the native `<dialog>` (`src/components/ui/overlay/`:
+  `useModalDialog` and `<Overlay>`) with five presentations (centred window, right and left drawers, bottom sheet, full
+  screen), a scroll lock that doesn't shift the page (`scrollbar-gutter: stable`), focus returned to what opened it, an
+  entrance from the motion tokens (none under reduced motion) and swipe-to-dismiss for drawers and sheets. On top of it, a
+  new **`panel` document** (Studio → Reusable content → Panels; agency creates, clients edit content): a title (the
+  dialog's accessible name), content of _Text_ (rich text with an optional picture) and _Form_ blocks, **How it appears**
+  as four pictures (_Auto_, _Centred window_, _Side panel_, _Full screen_) and an Advanced area (width, swipe to close,
+  link name) that shows only what the choice uses. _Auto_ is a centred window on a computer and a bottom sheet on a phone.
+  _Open a panel_ is now switched on in the **Goes to** picker (`LINK_ACTIONS.panel`). Pages fetch the panels their buttons
+  open inside `PAGE_QUERY` (no extra request) and render each once, server-side, as a closed `<dialog>`; the overlay code
+  loads only on pages that have a panel, and a form inside one mounts when the panel first opens. `#panel-<name>` opens
+  a panel on load and the address follows it while it is open. The panel form starts with an **Opened by** note listing the
+  buttons and links that open it. New `panel` tag for the revalidation webhook. Unit tests, `tests/e2e/panels.spec.ts`
+  (including axe with each panel open and a phone-width sheet) and a memory round that opens and closes panels.
 - **Editor guide in Studio:** a **Help** tab in Start here (beside **Overview**) with short task guides (_Change a heading_, _Replace a
   photo_, _Publish and undo_, _Write a blog post_, _Update opening hours_, _Add a team member_) and a description of every section a client
   may add, with its fields, recommended picture sizes and length limits. It shows only what the site uses: guides follow the profile's
@@ -81,18 +95,23 @@ you start a release.
 
 ### Changed
 
+- Quick search and the gallery lightbox now use `useModalDialog` for showing the dialog, the scroll lock and returning
+  focus; they look and behave as before (quick search now also locks the page's scroll while it is open).
+- **Client view of the Studio:** _Reusable content_ now appears for clients with _Panels_ only (shared sections and forms stay
+  agency-only), and panels can't be deleted or duplicated by clients. `CLIENT_STRUCTURE_IDS`, `CLIENT_REUSABLE_IDS` and
+  `CLIENT_PROTECTED_TYPES` changed accordingly.
+- The webhook filter gains `"panel"` (README, Webhook mode): add it to existing webhooks.
 - The link fragment (`linkFields`) also returns `anchor`, `panel` (id and title), `fallbackUrl` and `bookingUrl`.
   **Open in a new tab** moved into a collapsed Advanced area and shows for _Another website_ only.
 
 ### Fixed
 
+- The form island (`contact-form.tsx`, about 4.5 KB gzipped) was in every page's scripts because the shared page route imported it; forms and the newsletter signup now load it through `next/dynamic` (still server-rendered), so only pages with a form download it. This is what keeps the home and Link pages within the JavaScript budget once panels are on the route.
+
 ### Breaking changes / migration steps
 
-None. Existing links keep their stored values. Run `npm run typegen` after merging. Add `link_click` as a goal in Plausible
-if you use it. The new visual baselines (`link-list-*`, `events-*`) need the **Update visual baselines** workflow.
-For Events: add `"event"` and `"eventCategory"` to the Sanity webhook filter if you use webhook mode (README, _Live mode vs.
-webhook mode_). `events` is a new feature switch (on by default); a client who doesn't want events sets `events: false` in
-`site.profile.ts`. Nothing in your content changes.
+None for content: existing links keep their stored values, and nothing is switched on until an editor adds a panel or an event. After merging, run `npm run typegen` and commit the result. Add `link_click` as a goal in Plausible if you use it. The new visual baselines (`link-list-*`, `events-*`) need the **Update visual baselines** workflow (panels add none).
+Webhook mode: add `"panel"`, `"event"` and `"eventCategory"` to the Sanity webhook filter (README, _Live mode vs. webhook mode_). Header, footer and menu buttons can't open panels (they use their fallback link). Clients now see _Reusable content → Panels_ in the Studio. `events` is a new feature switch (on by default); a client who doesn't want events sets `events: false` in `site.profile.ts`.
 
 ## [1.4.0] - 2026-10-16
 
