@@ -1395,7 +1395,7 @@ history request for the author names, and, only when notices are set up, one cal
 
 - **Greeting:** the first word of the person's Sanity name ("Hello, Ben"; just "Hello" if the name is blank or an email
   address) and the site name from `site.profile.ts` (`client.name`).
-- **Shortcut cards**, built from the site profile by `buildQuickActions`: _Edit your website_ (Presentation at `/`),
+- **Shortcut cards** (bordered, with an icon and a chevron; the first, _Edit your website_, is the primary card; icons are mapped by action id in `start-here-tool.tsx`), built from the site profile by `buildQuickActions`: _Edit your website_ (Presentation at `/`),
   _Write a blog post_ (opens a new post; needs `features.blog`), _Update the team_ (needs `features.team` **and** a
   `teamMember` document type, which the template does not have yet, so the card stays hidden until a project adds
   one), _Business info and opening hours_ (needs `features.businessInfo`) and _Help_ (scrolls to the Help panel).

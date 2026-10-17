@@ -1,3 +1,10 @@
+import { CalendarIcon } from '@sanity/icons/Calendar'
+import { ChevronRightIcon } from '@sanity/icons/ChevronRight'
+import { CogIcon } from '@sanity/icons/Cog'
+import { DesktopIcon } from '@sanity/icons/Desktop'
+import { EditIcon } from '@sanity/icons/Edit'
+import { HelpCircleIcon } from '@sanity/icons/HelpCircle'
+import { UsersIcon } from '@sanity/icons/Users'
 import {
   Badge,
   Box,
@@ -13,7 +20,7 @@ import {
   TabPanel,
   Text,
 } from '@sanity/ui'
-import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { type ComponentType, type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useClient, useCurrentUser, useSchema, useUser } from 'sanity'
 import { IntentLink, useRouter } from 'sanity/router'
 
@@ -57,8 +64,18 @@ type State =
 const ACTION_GRID_STYLE = {
   display: 'grid',
   gap: '0.75rem',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 15rem), 1fr))',
+  // 20rem columns: one on phones, two in a 1024 px window, three on wide screens.
+  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 20rem), 1fr))',
 } as const
+
+const ACTION_ICONS: Record<QuickAction['id'], ComponentType> = {
+  website: DesktopIcon,
+  blog: EditIcon,
+  events: CalendarIcon,
+  team: UsersIcon,
+  business: CogIcon,
+  help: HelpCircleIcon,
+}
 
 const LIST_STYLE = { listStyle: 'none', margin: 0, padding: 0 } as const
 
@@ -141,7 +158,7 @@ export function StartHereTool() {
 
   return (
     <Box padding={[3, 4, 5]} style={{ height: '100%', overflow: 'auto' }}>
-      <Container width={2}>
+      <Container width={3}>
         <Stack gap={[5, 5, 6]}>
           <Stack gap={3}>
             <Heading as="h1" size={3}>
@@ -184,10 +201,11 @@ export function StartHereTool() {
                       What would you like to do?
                     </Heading>
                     <div role="list" style={ACTION_GRID_STYLE}>
-                      {actions.map((action) => (
+                      {actions.map((action, index) => (
                         <div key={action.id} role="listitem">
                           <ActionCard
                             action={action}
+                            primary={index === 0}
                             resolveIntent={router.resolveIntentLink}
                             navigate={(path) => {
                               router.navigateUrl({ path })
@@ -260,11 +278,13 @@ function studioClick(event: MouseEvent<HTMLAnchorElement>, go: () => void) {
 
 function ActionCard({
   action,
+  primary,
   resolveIntent,
   navigate,
   onHelp,
 }: {
   action: QuickAction
+  primary: boolean
   resolveIntent: (intent: string, params: { type: string; id?: string }) => string
   navigate: (path: string) => void
   onHelp: () => void
@@ -276,6 +296,7 @@ function ActionCard({
       else navigate(href)
     })
   }
+  const Icon = ACTION_ICONS[action.id]
   return (
     <Card
       as="a"
@@ -283,19 +304,29 @@ function ActionCard({
       onClick={onClick}
       padding={4}
       radius={3}
-      shadow={1}
+      border
+      shadow={primary ? 2 : undefined}
+      tone={primary ? 'primary' : 'default'}
       height="fill"
       style={{ display: 'block', textDecoration: 'none', cursor: 'pointer' }}
       __unstable_focusRing
     >
-      <Stack gap={3}>
-        <Text size={2} weight="semibold">
-          {action.title}
+      <Flex align="center" gap={3}>
+        <Text size={primary ? 4 : 3} aria-hidden>
+          <Icon />
         </Text>
-        <Text size={1} muted>
-          {action.description}
+        <Stack flex={1} gap={3}>
+          <Text size={primary ? 3 : 2} weight="semibold">
+            {action.title}
+          </Text>
+          <Text size={1} muted>
+            {action.description}
+          </Text>
+        </Stack>
+        <Text size={2} muted aria-hidden>
+          <ChevronRightIcon />
         </Text>
-      </Stack>
+      </Flex>
     </Card>
   )
 }
