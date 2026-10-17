@@ -5,9 +5,12 @@ import { CogIcon } from '@sanity/icons/Cog'
 import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { ComposeIcon } from '@sanity/icons/Compose'
 import { DocumentsIcon } from '@sanity/icons/Documents'
+import { DownloadIcon } from '@sanity/icons/Download'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
+import { ExpandIcon } from '@sanity/icons/Expand'
 import { FolderIcon } from '@sanity/icons/Folder'
 import { HomeIcon } from '@sanity/icons/Home'
+import { InboxIcon } from '@sanity/icons/Inbox'
 import { LockIcon } from '@sanity/icons/Lock'
 import { MenuIcon } from '@sanity/icons/Menu'
 import { SearchIcon } from '@sanity/icons/Search'
@@ -26,6 +29,10 @@ import type {
   StructureResolverContext,
 } from 'sanity/structure'
 
+import { apiVersion } from '@/config/env'
+
+import { downloadEnquiriesCsv } from './enquiries/download-csv'
+import { enquiriesTitle } from './enquiries/wording'
 import { currentAudience } from './roles'
 import { SINGLETON_TYPES } from './singletons'
 import { TeamOrderPane } from './team-order/team-order-pane'
@@ -37,7 +44,11 @@ import {
 } from './utils/event-lists'
 import { isTypeVisible } from './utils/feature-visibility'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
-import { CLIENT_WEBSITE_SETTINGS_IDS, filterStructureItems } from './utils/structure-access'
+import {
+  CLIENT_REUSABLE_IDS,
+  CLIENT_WEBSITE_SETTINGS_IDS,
+  filterStructureItems,
+} from './utils/structure-access'
 // new-singleton:import
 
 const PAGES_QUERY = `*[_type == "page"]{ _id, "slug": slug.current }`
@@ -81,6 +92,45 @@ const pagesTree = (S: StructureBuilder, { documentStore }: StructureResolverCont
       ),
     )
 
+const NEW_ENQUIRIES_QUERY = `count(*[_type == "enquiry" && status == "new"])`
+
+/**
+ * Enquiries, newest first. The count of new ones is a listener-backed query, so the pane title
+ * ("Enquiries (3 new)") follows it as enquiries arrive or are marked read. "Download CSV" builds
+ * the file in the browser (enquiries/download-csv.ts). Nobody creates an enquiry by hand, so the
+ * list has no "create" button.
+ */
+const enquiriesList = (
+  S: StructureBuilder,
+  { documentStore, getClient }: StructureResolverContext,
+) =>
+  S.listItem()
+    .title('Enquiries')
+    .id('enquiries')
+    .icon(InboxIcon)
+    .child(
+      documentStore.listenQuery(NEW_ENQUIRIES_QUERY, {}, {}).pipe(
+        map((count: number | null) =>
+          S.documentList()
+            .id('enquiries')
+            .title(enquiriesTitle(count ?? 0))
+            .schemaType('enquiry')
+            .filter('_type == "enquiry"')
+            .defaultOrdering([{ field: 'createdAt', direction: 'desc' }])
+            .initialValueTemplates([])
+            .menuItems([
+              S.menuItem()
+                .title('Download CSV')
+                .icon(DownloadIcon)
+                .showAsAction(true)
+                .action(() => {
+                  void downloadEnquiriesCsv(getClient({ apiVersion }))
+                }),
+            ]),
+        ),
+      ),
+    )
+
 /** Document types with their own place in the structure below; the catch-all list skips them. */
 const LISTED_TYPES = new Set([
   'page',
@@ -96,6 +146,8 @@ const LISTED_TYPES = new Set([
   'event',
   'eventCategory',
   'frame',
+  'enquiry',
+  'panel',
   // new-document:listed
 ])
 
@@ -212,14 +264,30 @@ export const structure: StructureResolver = (S, context) => {
           ]),
         ]
       : []),
+    ...(hasType('enquiry') && isTypeVisible('enquiry') ? [enquiriesList(S, context)] : []),
     // new-document:list
     S.divider(),
-    group(S, 'reusable', 'Reusable content', StackIcon, [
-      S.documentTypeListItem('sharedSection').title('Shared sections'),
-      ...(isTypeVisible('form')
-        ? [S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon)]
-        : []),
-    ]),
+    group(
+      S,
+      'reusable',
+      'Reusable content',
+      StackIcon,
+      // Clients edit panels' content; the rest stays with the agency (CLIENT_REUSABLE_IDS).
+      filterStructureItems(
+        [
+          S.documentTypeListItem('sharedSection').title('Shared sections'),
+          ...(isTypeVisible('form')
+            ? [S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon)]
+            : []),
+          ...(hasType('panel')
+            ? [S.documentTypeListItem('panel').title('Panels').icon(ExpandIcon)]
+            : []),
+        ],
+        audience,
+        idOf,
+        CLIENT_REUSABLE_IDS,
+      ),
+    ),
     group(S, 'websiteSettings', 'Website settings', CogIcon, websiteSettings),
     ...(design.length > 0 ? [group(S, 'design', 'Design', ColorWheelIcon, design)] : []),
     S.divider(),

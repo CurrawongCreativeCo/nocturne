@@ -19,10 +19,12 @@ import { blogSchemaTypes } from './src/features/blog/schemas'
 import { eventsSchemaTypes } from './src/features/events/schemas'
 import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
+import { hideEnquiriesFromNewMenu, withoutEnquiryDuplicate } from './src/features/forms/studio'
 import { framesSchemaTypes } from './src/features/frames/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { sectionTypes } from './src/features/pages/schemas/sections'
 import { pageTemplates } from './src/features/pages/schemas/templates'
+import { panelsSchemaTypes } from './src/features/panels/schemas'
 import { pricingSchemaTypes } from './src/features/pricing/schemas'
 import { hidePricesFromNewMenu } from './src/features/pricing/studio'
 import { siteSchemaTypes } from './src/features/site/schemas'
@@ -100,6 +102,7 @@ export default defineConfig({
       ...teamSchemaTypes,
       ...eventsSchemaTypes,
       ...framesSchemaTypes,
+      ...panelsSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,
     ],
@@ -109,23 +112,28 @@ export default defineConfig({
     actions: (prev, context) =>
       filterDocumentActions(
         confirmDeletePageActions(
-          confirmPublishActions(singletonDocumentActions(prev, context), context),
+          confirmPublishActions(
+            singletonDocumentActions(withoutEnquiryDuplicate(prev, context), context),
+            context,
+          ),
           context,
         ),
         currentAudience(context.currentUser),
         PROTECTED_TYPES.has(context.schemaType) || SINGLETON_TYPES.has(context.schemaType),
       ),
-    newDocumentOptions: (prev, context) =>
-      context.creationContext.type === 'document'
-        ? prev
+    newDocumentOptions: (prev, context) => {
+      const options = hideEnquiriesFromNewMenu(prev, context)
+      return context.creationContext.type === 'document'
+        ? options
         : filterNewDocumentOptions(
             hidePricesFromNewMenu(
-              hideDisabledFromNewMenu(hideSingletonsFromNewMenu(prev, context), context),
+              hideDisabledFromNewMenu(hideSingletonsFromNewMenu(options, context), context),
               context,
             ),
             currentAudience(context.currentUser),
             CLIENT_NEW_DOCUMENT_IDS,
-          ),
+          )
+    },
   },
   // Vision, AI settings and Content health are agency-only; clients open on Start here, then Presentation.
   tools: (prev, context) => filterTools(prev, currentAudience(context.currentUser)),

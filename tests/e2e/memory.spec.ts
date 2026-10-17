@@ -53,9 +53,9 @@ async function sample(cdp: CDPSession): Promise<Sample> {
 }
 
 /** The lower of two samples one round apart: jitter shows in at most one, a leak in both. */
-async function settledSample(cdp: CDPSession, page: Page, isMobile: boolean): Promise<Sample> {
+async function settledSample(cdp: CDPSession, run: () => Promise<void>): Promise<Sample> {
   const first = await sample(cdp)
-  await round(page, isMobile)
+  await run()
   const second = await sample(cdp)
   return {
     heapMB: Math.min(first.heapMB, second.heapMB),
@@ -109,18 +109,17 @@ async function round(page: Page, isMobile: boolean) {
   await navigate(page, isMobile, HOME)
 }
 
-test('client-side work leaves no listeners, nodes or memory behind', async ({ page, isMobile }) => {
-  test.setTimeout(180_000)
+/** Warms up, then measures the same round repeated: nothing may grow round after round. */
+async function expectNoLeak(page: Page, again: () => Promise<void>, ready: () => Promise<void>) {
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Performance.enable')
 
-  await page.goto('/')
-  await expect(page.getByRole('heading', { name: HOME.lastHeading, level: 2 })).toBeVisible()
+  await ready()
   // Warm-up fills what is meant to fill once: lazy chunks, the router cache, the search dialog.
-  for (let i = 0; i < WARM_UP_ROUNDS; i++) await round(page, isMobile)
-  const before = await settledSample(cdp, page, isMobile)
-  for (let i = 0; i < MEASURED_ROUNDS; i++) await round(page, isMobile)
-  const after = await settledSample(cdp, page, isMobile)
+  for (let i = 0; i < WARM_UP_ROUNDS; i++) await again()
+  const before = await settledSample(cdp, again)
+  for (let i = 0; i < MEASURED_ROUNDS; i++) await again()
+  const after = await settledSample(cdp, again)
 
   test.info().annotations.push({
     type: 'memory',
@@ -134,5 +133,46 @@ test('client-side work leaves no listeners, nodes or memory behind', async ({ pa
   expect(after.nodes - before.nodes, `DOM nodes grew ${leak}`).toBeLessThanOrEqual(MAX_NODE_GROWTH)
   expect(after.heapMB - before.heapMB, `JS heap grew ${leak}`).toBeLessThanOrEqual(
     MAX_HEAP_GROWTH_MB,
+  )
+}
+
+test('client-side work leaves no listeners, nodes or memory behind', async ({ page, isMobile }) => {
+  test.setTimeout(180_000)
+  await expectNoLeak(
+    page,
+    () => round(page, isMobile),
+    async () => {
+      await page.goto('/')
+      await expect(page.getByRole('heading', { name: HOME.lastHeading, level: 2 })).toBeVisible()
+    },
+  )
+})
+
+/**
+ * The overlay: opening and closing panels (a document click listener, a hashchange listener, the
+ * dialog's close handler, a lazily loaded form and the address changes) must leave nothing behind.
+ */
+test('opening and closing panels leaves no listeners, nodes or memory behind', async ({ page }) => {
+  test.setTimeout(180_000)
+  await expectNoLeak(
+    page,
+    async () => {
+      await page.getByRole('button', { name: /Open enquiry/ }).click()
+      const enquire = page.getByRole('dialog', { name: 'Enquire now' })
+      await expect(enquire).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(enquire).toBeHidden()
+
+      // The form's code loads once, on first open; later opens reuse it.
+      await page.getByRole('button', { name: /Message us/ }).click()
+      const message = page.getByRole('dialog', { name: 'Send us a message' })
+      await expect(message.getByLabel('Your name')).toBeVisible()
+      await message.getByRole('button', { name: 'Close' }).click()
+      await expect(message).toBeHidden()
+    },
+    async () => {
+      await page.goto('/panels')
+      await expect(page.getByRole('heading', { level: 1, name: 'Panels' })).toBeVisible()
+    },
   )
 })

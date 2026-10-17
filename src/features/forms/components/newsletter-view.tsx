@@ -1,4 +1,4 @@
-import { ContactForm } from './contact-form'
+import { ContactForm } from './contact-form-lazy'
 import { subscribeNewsletter } from '../api/subscribe-newsletter'
 import { getNewsletterConfig } from '../utils/newsletter/config'
 import { EMAIL_FIELD } from '../utils/newsletter/email-field'

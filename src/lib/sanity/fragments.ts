@@ -217,3 +217,28 @@ export const stripePriceFields = /* groq */ `
   interval,
   intervalCount
 `
+
+/**
+ * A panel as the page needs it to render (schema: features/panels/schemas). Pages fetch the panels
+ * their buttons and links open inside PAGE_QUERY, so opening one never costs a request. Its form
+ * is `formFields` again: without `recipientEmail`, like every form on a page.
+ */
+export const panelFields = /* groq */ `
+  _id,
+  title,
+  "slug": slug.current,
+  presentation,
+  width,
+  swipeToClose,
+  content[] {
+    _key,
+    _type,
+    _type == "panelText" => {
+      image { ${imageFields} },
+      body[] { ${portableTextFields} }
+    },
+    _type == "panelForm" => {
+      form-> { _id, ${formFields} }
+    }
+  }
+`

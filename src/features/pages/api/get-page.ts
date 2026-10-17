@@ -51,6 +51,7 @@ export async function getPage({
       TAGS.event,
       TAGS.eventCategory,
       TAGS.businessInfo,
+      TAGS.panel,
     ],
   })
   return data

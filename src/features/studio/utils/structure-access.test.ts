@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  CLIENT_REUSABLE_IDS,
   CLIENT_STRUCTURE_IDS,
   CLIENT_WEBSITE_SETTINGS_IDS,
   filterStructureItems,
@@ -31,19 +32,36 @@ describe('filterStructureItems', () => {
       'pages',
       'blog',
       '---',
+      'reusable',
       'websiteSettings',
     ])
   })
 
-  it('hides reusable content, design and advanced from clients', () => {
+  it('hides design and advanced from clients', () => {
     const shown = filterStructureItems(items, 'editor', idOf)
-    for (const hidden of ['reusable', 'design', 'advanced']) expect(shown).not.toContain(hidden)
+    for (const hidden of ['design', 'advanced']) expect(shown).not.toContain(hidden)
   })
 
   it('lists exactly the client items', () => {
     expect([...CLIENT_STRUCTURE_IDS].sort()).toEqual(
-      ['blog', 'businessInfo', 'events', 'pages', 'startHere', 'team', 'websiteSettings'].sort(),
+      [
+        'blog',
+        'businessInfo',
+        'enquiries',
+        'events',
+        'pages',
+        'reusable',
+        'startHere',
+        'team',
+        'websiteSettings',
+      ].sort(),
     )
+  })
+
+  it('limits clients to Panels inside Reusable content, which they edit but the agency creates', () => {
+    const reusable = ['sharedSection', 'form', 'panel']
+    expect(filterStructureItems(reusable, 'editor', idOf, CLIENT_REUSABLE_IDS)).toEqual(['panel'])
+    expect(filterStructureItems(reusable, 'agency', idOf, CLIENT_REUSABLE_IDS)).toEqual(reusable)
   })
 
   it('limits clients to Identity, Navigation and Announcement bar inside Website settings', () => {
