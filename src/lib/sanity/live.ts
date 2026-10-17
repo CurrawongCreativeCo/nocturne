@@ -94,6 +94,7 @@ export const TAGS = {
   teamMember: 'teamMember',
   event: 'event',
   eventCategory: 'eventCategory',
+  frame: 'frame',
   // new-document:tag
 } as const
 

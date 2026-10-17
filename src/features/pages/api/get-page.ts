@@ -47,6 +47,7 @@ export async function getPage({
       TAGS.sharedSection,
       TAGS.form,
       TAGS.teamMember,
+      TAGS.frame,
       TAGS.event,
       TAGS.eventCategory,
       TAGS.businessInfo,

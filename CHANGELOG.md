@@ -20,6 +20,20 @@ you start a release.
 
 ### Added
 
+- **Image design:** one shared treatment for a section's main picture (`FramedImage`): a still frame with the picture moving
+  gently inside it (true image-only parallax), shapes (_Standard_, _Rounded_, _Circle_, _Arch_, _Framed_) and decorative frames
+  that stay still while the picture drifts behind them. Agency only, in the Design tab of **Image + text**, the **Hero's Split
+  layout**, **Gallery** (Grid and Slider) and **Team**: three pictures (shape, motion, frame) and a collapsed **More image
+  options** (travel distance, direction, scale, frame colour token, frame inset) that shows only what the choices use. Frames are
+  five built-in inline SVGs (Simple line, Double line, Offset border, Organic brush, Corner brackets; `currentColor`, non-scaling
+  strokes) or an **approved custom frame**: a new agency-only `frame` document (Studio → Design → Image frames) holding an SVG
+  checked on save (an SVG with a viewBox, under 50 KB, no scripts), used by its CDN URL as a CSS mask on a token-coloured `div`,
+  never inlined. The picture is scaled by twice its travel plus a 1 % slack, held to 1.05–1.15 so no edge shows; phones get half the travel;
+  reduced motion and no JavaScript get the still, unscaled picture with its frame. Nothing is switched on in existing content, and
+  a picture with no design renders exactly as before. The hero's split shapes now use the same component (its older **Image shape**
+  field is hidden and its value shows as the Image design's shape until changed). New fixtures, section-gallery entries for every
+  shape and frame, `/framed-images`, `tests/e2e/framed-image.spec.ts` and unit tests. Add the new screenshot baselines with the
+  **Update visual baselines** workflow.
 - **Typed link actions:** a link now has a **Goes to** picker: _A page on this site_ and _Another website_ (stored exactly as
   before), plus _A section on this page_ (pick from the page's anchors or type one; renders `#id`). _Open a panel_ and
   _Book_ are built into the schema, renderer and Content health but switched off in `src/config/link-actions.ts` until
@@ -363,6 +377,11 @@ webhook mode_). `events` is a new feature switch (on by default); a client who d
 
 ### Changed
 
+- **Image + text parallax (visual change):** the _Parallax_ animation preset on Image + text now moves **only the picture inside
+  its still frame**. Before, the whole framed picture (its corners and all) drifted with the scroll. The stored values are
+  unchanged, and Subtle, Medium and Strong keep their strengths (Strong is held to a 1.15 scale so the picture stays sharp). The
+  picture is drawn up to 15 % larger than its frame while it moves, and still and unscaled for reduced motion and without
+  JavaScript. Refresh the Image + text baselines with the **Update visual baselines** workflow.
 - **CI:** the e2e shards now split `desktop` and `mobile` only; before, shard 1 ran every test and shards 2–4 none (Playwright keeps a project with its dependencies in one shard). The A/B, design and design-screenshot projects run in their own `e2e (isolated)` job, and the five generator smoke tests are parallel `generator (…)` jobs instead of steps in `check`. If branch protection lists required checks, add `e2e (isolated)` and the `generator (…)` jobs.
 - **Sitemap:** the pages count and slice queries (`PAGE_COUNT_QUERY`, `PAGE_SITEMAP_QUERY`) skip the reserved
   `section-gallery` slug, so the style guide's fixture page can never be listed. Run `npm run typegen` after merging.
@@ -392,6 +411,13 @@ webhook mode_). `events` is a new feature switch (on by default); a client who d
   background).
 
 ### Breaking changes / migration steps
+
+**Image design:** run `npm run typegen` after merging (`imageDesign` is new in the Image + text, hero, gallery and team
+fragments, and the `frame` document type is new). Add `"frame"` to the revalidation webhook filter if you use webhook mode
+(README, "Live mode vs. webhook mode"). A hero's `imageShape` field is now hidden in the Studio: its value still renders, and shows
+as the Image design's shape until changed, so no content migration is needed. A client site that edited `hero-picture.tsx`,
+`hero-split.ts` (the `splitImage*Class` helpers now return only layout classes) or `team-card.tsx` should take the template's
+versions and re-apply its changes. Add the new gallery entries' baselines with the **Update visual baselines** workflow.
 
 **Process section:** run `npm run typegen` after merging (`process` is a new section type and fragment). No content
 migration: nothing existing changes. Add screenshot baselines for the two new gallery entries (`process-vertical`,

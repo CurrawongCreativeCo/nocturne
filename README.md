@@ -90,7 +90,7 @@ Open http://localhost:3000/studio:
 - **Section forms:** a section's form has three levels, so the common choices are pictures and the rare ones stay out of the way. Agency staff only: clients see just the **Content** tab (see _Studio roles and permissions_; this is the Studio view, not a lock).
   - **Content tab.** The **Layout** picker comes first for sections with more than one layout, because the layout decides which fields matter. The hero is the exception: its picker is a row of six named presets (_Full background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with panel_; see _Hero presets_), which set the layout, the image side and the background together. Then the content, showing only what the chosen layout uses: the hero's _Image side_ appears for _Split_ only, its _Small picture_ for _Editorial_ only, and _Image_ for every layout but _Editorial_. A field that is hidden keeps whatever was typed in it, so switching layout back brings it back.
   - **Design tab.** _Background_ (_Surface_, _Soft_, _Dark_, _Accent_) is a row of swatches drawn with the site's real colours. _Animation_ is a picture picker with gently moving previews (still for anyone who asks for less motion): _None_, _Fade up_, _Subtle entrance_, _Fade_, _Slide in_, _Staggered_, _Float_ and _Parallax_ in three strengths (_Subtle_, _Medium_, _Strong_). Sections start on the right one for what they are (content fades up; the hero's text enters by itself; logo strips stay still), so most never need touching. _Float_ and _Parallax_ move a picture, so they are only offered where a section has one. A collapsed **More animation options** appears under the picker and shows only what the chosen animation uses (intensity, duration, delay, direction, when it plays, or exact values). The first section on a page stays still so its heading and main image appear immediately, unless you choose _On load_, which slides or rises it without ever fading it in; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still. See [Section animation](#section-animation).
-    - _Float_ and _Parallax_ are only offered where a section has a picture to move: the hero's _Full background_ and _Image with panel_ layouts, and _Image + text_. If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
+    - _Float_ and _Parallax_ are only offered where a section has a picture to move: the hero's _Full background_ and _Image with panel_ layouts, and _Image + text_ (where _Parallax_ moves the picture inside its still frame: see _Image design_). If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
     - **More layout options** (collapsed): _Space above and below_ (_Compact_, _Default_ or _Spacious_; _Default_ is the section's usual spacing), _Content width_ (_Narrow_, _Default_, _Wide_, or _Full width_ edge to edge), _Alignment_ (_Start_ or _Centre_ for headings, intro text and buttons) and _Anchor_ (a short name such as `pricing`, so a link to `/#pricing` jumps to the section; lowercase letters, numbers and hyphens, each once per page). _Alignment_ is left out on layouts that set their own (the hero's _Split_ and _Editorial_); a value left over from another layout stays visible with a warning, and **Reset value** in the field's menu clears it.
   - **Advanced** (collapsed, in the Design tab): extra controls for the few sections that have them. It does not appear when the chosen layout has none. Today that is the hero's _Proportion_ and _Image shape_, for _Split_ only.
 
@@ -679,7 +679,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "event", "eventCategory", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "event", "eventCategory", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1636,6 +1636,77 @@ the parts ending whole, reduced motion, no JavaScript, axe, `/hero-parts-later` 
 `hero-parts-*` entries. The visual baselines for `hero-parts-*` are rendered under reduced motion, so they show the
 parts at rest and prove the wrappers change nothing about the layout. `/hero-parts` is also in `lighthouserc.json`
 (LCP at most 2.5 s, like the home page).
+
+### Image design
+
+One treatment for a section's main picture: a **still frame with the picture moving gently inside it**, a handful of
+**shapes**, and **decorative frames** that stay put while the picture drifts behind them. It lives on **Image + text**,
+the **Hero's Split layout**, **Gallery** (Grid and Slider) and **Team** portraits. Not on logos, icons, Masonry pictures
+or the small testimonial avatars, where it would not make sense. It is one component (`FramedImage`,
+`src/components/ui/framed-image.tsx`) used by all of them, so there is one implementation.
+
+**For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and
+the picture looks exactly as it always did.
+
+1. **Image shape:** _Standard_ (the site's corners), _Rounded_, _Circle_ (always square), _Arch_ (a tall picture with a rounded top)
+   or _Framed_. A hero that already had an "Image shape" keeps it and shows it here until it is changed
+   (_Square corners_ is offered where a section already used it).
+2. **Picture motion:** _None_, _Subtle parallax_ or _Medium parallax_. The picture moves inside its frame; the frame never does.
+3. **Frame** (only for _Framed_): _No frame_, _Simple line_, _Double line_, _Offset border_, _Organic brush_, _Corner brackets_ or
+   an **approved custom frame**.
+
+A collapsed **More image options** holds the exact values, and shows only those the choices above use:
+_Set exact motion values_ (parallax only) reveals **Travel distance** (2–7 % of the picture's height each way; phones get half),
+**Direction** (down drifts with the scroll, up goes against it) and **Picture scale** (1.05–1.15; empty uses just enough for the
+travel). A frame has a **Frame colour** (a design token: accent, second accent, highlight or text colour) and a **Frame inset**
+(how far it sits in from the edge, 0–12 %; for the offset border, how far it sticks out). Hidden fields keep their values, but the
+site ignores a value the current choices do not use (a frame on a circle, a travel on a still picture).
+
+**Image + text and the section's own Parallax.** Choosing the _Parallax_ animation preset on Image + text still works and the
+stored values are unchanged, but it now moves **only the picture inside its still frame** (before, the whole framed picture
+drifted). Subtle, Medium and Strong keep their strengths (Strong is held to the 1.15 scale limit). A picture whose own _Picture motion_
+is not _None_ uses that instead.
+
+**Approved custom frames.** An agency-uploaded SVG in a **Frame** document (Studio → Design → Image frames; agency only: clients
+never see or create them, and an image design can only point at one). The file must be an SVG with a `viewBox`, under 50 KB, with no
+scripts, event handlers or `foreignObject` (checked on save by `checkFrameSvg`, `src/features/frames/utils/frame-svg.ts`). The site
+**never inlines it**: it uses the file's CDN URL (and only a `cdn.sanity.io` URL) as a CSS `mask-image` on a `div` filled with the
+chosen colour token, so it recolours with the theme, scales to the picture and, loaded as an image, cannot run a script. Design it as
+a single-colour outline; the transparent middle shows the picture. A frame document is tagged `frame`, so editing one refreshes the
+pages that use it (add `"frame"` to the webhook filter in webhook mode: the filter above includes it).
+
+**How it is built.**
+
+```
+box        aspect ratio and place in the layout (the corners of a plain picture)
+  clip     the shape; overflow hidden
+    picture  scaled up by exactly twice its travel, moved by Parallax: the only moving part
+  frame    an SVG (or the mask div) over it: still, pointer-events none, aria-hidden
+```
+
+- **No edge ever shows.** `Parallax` moves its content by `speed × 0.2` of its height each way (`× 0.1` below `md`), and the
+  picture is scaled by `1 + 2 × travel + 0.01` (a 1 % slack for rounding), held to 1.05–1.15 (`src/components/motion/image-travel.ts`, unit tested). Travel is
+  therefore 2–7 %, and with a chosen scale the travel is held to what that scale covers.
+- **Plain stays plain.** With no motion and no frame the output is exactly the `<img>` (with its shape), so a default picture is
+  untouched. The picture keeps its alt text, `sizes`, hotspot (`object-position`) and preload.
+- **Cost.** Transform only (the frame and clip never animate), `will-change` only while the picture is in view (Parallax), no
+  new library, no scroll listener of ours, and the Parallax chunk is still downloaded only by pages that use it. Phones get half the
+  travel. The scale applies only with `prefers-reduced-motion: no-preference` **and** `@media (scripting: enabled)`, so reduced motion
+  and no-JavaScript visitors get the still, unscaled picture with its frame. The box has a fixed ratio, so there is no layout shift.
+- **Frames.** The built-in ones are inline SVGs (`image-frames.tsx`) in a 0–100 box with `preserveAspectRatio="none"`,
+  `currentColor` and `vector-effect: non-scaling-stroke`, so lines stay the same width however the picture stretches.
+
+**Adding a shape, frame or preset.** Add the value to `IMAGE_APPEARANCES`, `IMAGE_FRAME_PRESETS` or `IMAGE_MOTIONS` and its title
+(`src/lib/sanity/image-design-options.ts`), its drawing (`image-frames.tsx`), a thumbnail (`image-design-thumbnails.tsx` and
+`registry.ts`) and a class (`SHAPE_CLASS`). Tests fail until each table has a row. **Adding it to another section:** add
+`imageDesignField()` to its schema, `imageDesign { ${imageDesignFields} }` to its fragment, and render the picture with `FramedImage`.
+
+**Tests.** `image-travel.test.ts` (scale from travel, phones, range), `image-design-options.test.ts` (shape and frame rules, what
+is ignored), `image-design.test.ts` (which fields the Studio shows), `framed-image.test.ts` (markup: layers, scale classes, frames,
+masks), `frame-svg.test.ts`, and `tests/e2e/framed-image.spec.ts` on the `/framed-images` fixture page (the frame's position does not
+change while the picture's transform does, the picture always covers its box, scale by viewport, custom frame mask, reduced motion, no
+JavaScript, axe). The section gallery has an entry for every shape and frame and for parallax on and off; the baselines are Linux-only,
+so refresh them with the **Update visual baselines** workflow after changing a look.
 
 ### Slider
 

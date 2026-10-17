@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { IMAGE_APPEARANCES } from '@/lib/sanity/image-design-options'
+
 import {
-  SPLIT_IMAGE_SHAPES,
   SPLIT_PROPORTIONS,
   splitColumns,
   splitImageClass,
@@ -37,17 +38,23 @@ describe('hero split options', () => {
     expect(splitImageShare('image')).toBeGreaterThan(splitImageShare('text'))
   })
 
-  it('keeps the circle square and every shape cropped to fit', () => {
-    expect(splitImageClass('circle')).toContain('aspect-square')
-    expect(splitImageClass('circle')).toContain('rounded-full')
-    for (const shape of SPLIT_IMAGE_SHAPES) {
-      expect(splitImageClass(shape)).toContain('object-cover')
+  it('centres and caps the circle and the arch, and gives the rest the full column at a limited height', () => {
+    expect(splitImageClass('circle')).toContain('max-w-xl')
+    expect(splitImageClass('arch')).toContain('max-w-lg')
+    for (const shape of ['standard', 'rounded', 'square', 'framed'] as const) {
+      expect(splitImageClass(shape)).toBe('w-full max-h-96 lg:max-h-none')
+    }
+  })
+
+  it('leaves the shape itself (corners, ratio, crop) to the shared framed image', () => {
+    for (const shape of IMAGE_APPEARANCES) {
+      expect(splitImageClass(shape)).not.toMatch(/rounded|aspect|object-cover/)
     }
   })
 })
 
 describe('the animated picture’s classes', () => {
-  it.each(SPLIT_IMAGE_SHAPES)(
+  it.each(IMAGE_APPEARANCES)(
     '%s: frame and shape together are the still picture’s classes',
     (shape) => {
       const together = `${splitImageFrameClass(shape)} ${splitImageShapeClass(shape)}`.split(' ')

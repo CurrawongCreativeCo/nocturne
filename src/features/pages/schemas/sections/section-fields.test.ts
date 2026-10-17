@@ -20,9 +20,11 @@ describe('every section', () => {
       expect(own.at(-1)?.name).toBe('style')
       expect(fields.find((f) => f.name === 'style')?.group).toBe('design')
       if (fields.some((f) => f.name === 'variant')) expect(fields[0]?.name).toBe('variant')
-      // Nothing but the style (and Advanced fields) lives in the Design tab.
+      // Nothing but the style, the picture's design (shared `imageDesign`) and Advanced fields lives in the Design tab.
       for (const field of fields.filter((f) => f.group === 'design')) {
-        expect(['style'].includes(field.name) || field.fieldset === 'advanced').toBe(true)
+        expect(['style', 'imageDesign'].includes(field.name) || field.fieldset === 'advanced').toBe(
+          true,
+        )
       }
     },
   )
@@ -51,8 +53,8 @@ describe('hero', () => {
     expect(field('variant')?.hidden).toBe(true)
   })
 
-  it('offers Proportion and Image shape in Advanced, for Split only', () => {
-    for (const name of ['proportion', 'imageShape']) {
+  it('offers Proportion in Advanced, for Split only', () => {
+    for (const name of ['proportion']) {
       const advanced = field(name) as { group?: string; fieldset?: string } | undefined
       expect(advanced?.group).toBe('design')
       expect(advanced?.fieldset).toBe('advanced')
@@ -71,6 +73,27 @@ describe('hero', () => {
       const asClient = field(name)?.hidden as (c: unknown) => boolean
       expect(asClient({ parent: { variant: 'split' }, currentUser: { roles: [] } })).toBe(true)
     }
+  })
+
+  it('offers the Image design in the Design tab for Split only, agency only', () => {
+    const design = field('imageDesign') as { group?: string; fieldset?: string } | undefined
+    expect(design?.group).toBe('design')
+    expect(design?.fieldset).toBeUndefined()
+    const hidden = (variant: string | undefined, currentUser: unknown = AGENCY) =>
+      (field('imageDesign')?.hidden as (c: unknown) => boolean)({
+        parent: { variant },
+        currentUser,
+      })
+    expect(hidden('split')).toBe(false)
+    for (const other of [undefined, 'overlay', 'editorial', 'full-bleed']) {
+      expect(hidden(other)).toBe(true)
+    }
+    expect(hidden('split', { roles: [] })).toBe(true)
+  })
+
+  it('keeps the older Image shape hidden: the Image design’s Appearance replaces it, showing its value', () => {
+    const hidden = field('imageShape')?.hidden as (c: unknown) => boolean
+    expect(hidden({ parent: { variant: 'split' }, currentUser: AGENCY })).toBe(true)
   })
 
   it('shows the small picture only in Editorial, and the big image in every other layout', () => {

@@ -39,6 +39,7 @@ const features = [
   'styleguide',
   'team',
   'events',
+  'frames',
   // new-feature:register
 ]
 

@@ -4,6 +4,7 @@ import {
   eventLastRelevant,
   formFields,
   heroSupportingFields,
+  imageDesignFields,
   imageFields,
   linkFields,
   portableTextFields,
@@ -36,6 +37,7 @@ export const heroFragment = /* groq */ `
     imagePosition,
     proportion,
     imageShape,
+    imageDesign { ${imageDesignFields} },
     secondaryImage { ${imageFields} },
     supporting[] { ${heroSupportingFields} },
     showGreeting,
@@ -67,6 +69,7 @@ export const mediaTextFragment = /* groq */ `
     body[] { ${portableTextFields} },
     ctas[] { ${ctaFields} },
     image { ${imageFields} },
+    imageDesign { ${imageDesignFields} },
     imagePosition
   }
 `
@@ -192,6 +195,7 @@ export const galleryFragment = /* groq */ `
     title,
     intro,
     columns,
+    imageDesign { ${imageDesignFields} },
     images[] { _key, caption, ${imageFields} }
   }
 `
@@ -235,6 +239,7 @@ export const teamFragment = /* groq */ `
     variant,
     title,
     text,
+    imageDesign { ${imageDesignFields} },
     "members": select(
       selection == "picked" => members[defined(@->_id)]->{ ${teamCardFields} },
       *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { ${teamCardFields} }

@@ -21,6 +21,7 @@ export function TeamGrid({ data, isFirst }: SectionProps<'team'>) {
           <li key={member._id}>
             <TeamCard
               member={member}
+              design={data.imageDesign}
               headingLevel={headingLevelFor(data)}
               eager={isFirst && index === 0}
             />

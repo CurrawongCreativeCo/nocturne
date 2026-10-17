@@ -32,6 +32,24 @@ describe('sectionLabel', () => {
     ).toBe('mediaText (no image)')
   })
 
+  it('adds the picture design an editor chose, so the gallery tells the pictures apart', () => {
+    const image = { asset: { _id: 'image-1' } }
+    const media = (imageDesign: object) =>
+      sectionLabel(
+        section({ _key: 'a', _type: 'mediaText', imagePosition: 'right', image, imageDesign }),
+      )
+    expect(media({ appearance: 'circle' })).toBe('mediaText (image right, circle picture)')
+    expect(media({ appearance: 'framed', frame: 'double-line', motion: 'medium' })).toBe(
+      'mediaText (image right, framed picture, double-line frame, medium picture motion)',
+    )
+    // The defaults add nothing.
+    expect(media({ appearance: 'standard', motion: 'none' })).toBe('mediaText (image right)')
+    // A frame is named only for the Framed appearance.
+    expect(media({ appearance: 'arch', frame: 'thin-line' })).toBe(
+      'mediaText (image right, arch picture)',
+    )
+  })
+
   it('adds the Design options an editor set, joined to the other variants', () => {
     expect(
       sectionLabel(

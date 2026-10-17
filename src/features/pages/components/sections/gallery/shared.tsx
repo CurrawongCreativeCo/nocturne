@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { FramedImage } from '@/components/ui/framed-image'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 
@@ -55,6 +56,7 @@ export function Thumbnail({
   eager,
   sizes,
   fill,
+  design,
 }: {
   image: GalleryImage
   index: number
@@ -63,8 +65,9 @@ export function Thumbnail({
   /** Above the fold: skip lazy loading. */
   eager?: boolean
   sizes: string
-  /** Fill a box the button gives it (cropped); otherwise the picture keeps its own shape. */
+  /** Crop to a 4:3 box (the shape, motion and frame of the section's `imageDesign`); otherwise the picture keeps its own shape. */
   fill?: boolean
+  design?: GalleryData['imageDesign']
 }) {
   const alt = stegaClean(image.alt)
   const label = `Open image ${index + 1} of ${total}${alt ? `: ${alt}` : ''}`
@@ -73,13 +76,16 @@ export function Thumbnail({
   return (
     <OpenImageButton index={index} label={label} className={className}>
       {fill ? (
-        <SanityImage
+        // `clip` keeps the hover zoom inside the picture's shape, even with no design set.
+        <FramedImage
           image={image}
           alt=""
-          fill
+          design={design}
+          clip
+          aspect="4/3"
           sizes={sizes}
           loading={loading}
-          className="object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-105"
+          imageClassName="motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-105"
         />
       ) : (
         <SanityImage

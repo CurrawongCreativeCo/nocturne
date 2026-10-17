@@ -2,6 +2,7 @@ import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -44,6 +45,8 @@ export const mediaText = defineType({
         validation: (rule) => rule.max(2),
       }),
       imageField({ name: 'image', aspect: '4:3', minWidth: 1600 }),
+      // Shape, motion inside the frame and decorative frames: agency only, in the Design tab.
+      imageDesignField(),
       defineField({
         name: 'imagePosition',
         type: 'string',

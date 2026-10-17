@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 
+import type { ImageAppearance, ImageFrame, ImageMotionPreset } from '../../image-design-options'
 import type { SECTION_EDGES, SECTION_MOTIONS, SECTION_TONES } from '../../section-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
 import {
@@ -47,6 +48,21 @@ import {
   HeroSplitLeftThumbnail,
   HeroSplitThumbnail,
 } from './hero-thumbnails'
+import {
+  FrameCornerBracketsThumbnail,
+  FrameCustomThumbnail,
+  FrameDoubleLineThumbnail,
+  FrameNoneThumbnail,
+  FrameOffsetBorderThumbnail,
+  FrameOrganicBrushThumbnail,
+  FrameThinLineThumbnail,
+  ImageArchThumbnail,
+  ImageCircleThumbnail,
+  ImageFramedThumbnail,
+  ImageRoundedThumbnail,
+  ImageSquareThumbnail,
+  ImageStandardThumbnail,
+} from './image-design-thumbnails'
 import {
   LinkListCardsThumbnail,
   LinkListCompactThumbnail,
@@ -170,4 +186,30 @@ export const edgeThumbnails: Record<(typeof SECTION_EDGES)[number], Thumbnail> =
   curve: EdgeCurveThumbnail,
   arch: EdgeArchThumbnail,
   layered: EdgeLayeredThumbnail,
+}
+
+/** The shared `imageDesign` object's three pickers: Appearance, Motion and Frame. */
+export const imageAppearanceThumbnails: Record<ImageAppearance, Thumbnail> = {
+  standard: ImageStandardThumbnail,
+  rounded: ImageRoundedThumbnail,
+  square: ImageSquareThumbnail,
+  circle: ImageCircleThumbnail,
+  arch: ImageArchThumbnail,
+  framed: ImageFramedThumbnail,
+}
+
+export const imageMotionThumbnails: Record<ImageMotionPreset, Thumbnail> = {
+  none: MotionNoneThumbnail,
+  subtle: MotionParallaxThumbnail,
+  medium: MotionParallaxMediumThumbnail,
+}
+
+export const imageFrameThumbnails: Record<ImageFrame, Thumbnail> = {
+  none: FrameNoneThumbnail,
+  'thin-line': FrameThinLineThumbnail,
+  'double-line': FrameDoubleLineThumbnail,
+  'offset-border': FrameOffsetBorderThumbnail,
+  'organic-brush': FrameOrganicBrushThumbnail,
+  'corner-brackets': FrameCornerBracketsThumbnail,
+  custom: FrameCustomThumbnail,
 }

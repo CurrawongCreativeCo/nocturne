@@ -3,7 +3,7 @@ import { Children, Fragment, type CSSProperties, type ReactNode } from 'react'
 import { LazyFloat } from '@/components/motion/float-lazy'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
-import { enterProps, revealChild } from '@/components/motion/presets'
+import { enterProps, revealChild, type ParallaxPlan } from '@/components/motion/presets'
 
 import { SectionBackground } from './section-background'
 import {
@@ -37,9 +37,14 @@ interface Props {
   background?: ReactNode
   /**
    * The section's picture, when it has one beside its text: rendered after `children`. With the
-   * `parallax` preset it drifts gently as the page scrolls; other presets treat it like any child.
+   * `parallax` preset the whole node drifts gently as the page scrolls; other presets treat it like
+   * any child.
+   *
+   * A function takes over the parallax: it is called with the section's Parallax plan (undefined for any
+   * other preset) and moves only the picture inside its still frame, as FramedImage does, so the frame
+   * itself never drifts.
    */
-  media?: ReactNode
+  media?: ReactNode | ((parallax: ParallaxPlan | undefined) => ReactNode)
   'aria-labelledby'?: string
   children: ReactNode
 }
@@ -105,7 +110,15 @@ export function SectionFrame({
   })
   const containerClass = `${resolved.containerClass} ${containerClassName}`.trim()
   const mediaNode =
-    media && plan.kind === 'parallax' ? (
+    typeof media === 'function' ? (
+      plan.kind === 'float' ? (
+        <LazyFloat distancePx={plan.distancePx} durationMs={plan.durationMs}>
+          {media(undefined)}
+        </LazyFloat>
+      ) : (
+        media(plan.kind === 'parallax' ? plan : undefined)
+      )
+    ) : media && plan.kind === 'parallax' ? (
       <LazyParallax speed={plan.speed} from={plan.from}>
         {media}
       </LazyParallax>

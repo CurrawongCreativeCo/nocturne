@@ -19,6 +19,24 @@ export const imageFields = /* groq */ `
 `
 
 /**
+ * A section's `imageDesign` (schema: lib/sanity/schema/image-design.ts): project it as
+ * `imageDesign { ${imageDesignFields} }`. The approved custom frame is resolved to its SVG's CDN URL
+ * here, so a page needs no second request (it is tagged `frame`, so editing a frame expires the pages).
+ */
+export const imageDesignFields = /* groq */ `
+  appearance,
+  motion,
+  custom,
+  travel,
+  direction,
+  scale,
+  frame,
+  frameColour,
+  frameInset,
+  "customFrameUrl": customFrame->svg.asset->url
+`
+
+/**
  * Resolves internal references to a slug, so the frontend never needs a second query. A panel
  * resolves to its id and title only; the panel's content is rendered by the panel feature.
  */

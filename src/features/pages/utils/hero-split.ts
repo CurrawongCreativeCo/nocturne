@@ -4,6 +4,8 @@
  * An unset or unknown value gets the first of its list, which is the layout's original look.
  */
 
+import type { ImageAppearance } from '@/lib/sanity/image-design-options'
+
 export const SPLIT_PROPORTIONS = ['even', 'text', 'image'] as const
 export type SplitProportion = (typeof SPLIT_PROPORTIONS)[number]
 
@@ -44,29 +46,29 @@ export function splitImageShare(proportion: SplitProportion): number {
 }
 
 /**
- * The picture's shape. Rounded and square keep a 4:3 frame, and stop at 24rem tall below the two-column
- * layout so a tablet doesn't get a picture as big as its screen; circle is always 1:1 and arch 4:5, and
- * both are capped and centred in their column so they never grow into a tall slab.
+ * Where the picture sits in the column and how big it may get; its shape, crop and corners are the
+ * shared FramedImage's (components/ui/framed-image.tsx), by the resolved appearance. Standard, rounded,
+ * square and framed pictures are 4:3 and stop at 24rem tall below the two-column layout so a tablet
+ * doesn't get a picture as big as its screen; a circle (1:1) and an arch (4:5) are capped and centred
+ * in their column so they never grow into a tall slab.
  */
-export function splitImageClass(shape: SplitImageShape): string {
+export function splitImageClass(shape: ImageAppearance): string {
   switch (shape) {
-    case 'square':
-      return 'aspect-[4/3] max-h-96 w-full object-cover lg:max-h-none'
     case 'circle':
-      return 'aspect-square w-full max-w-xl justify-self-center rounded-full object-cover'
+      return 'w-full max-w-xl justify-self-center'
     case 'arch':
-      return 'aspect-[4/5] w-full max-w-lg justify-self-center rounded-t-full object-cover'
+      return 'w-full max-w-lg justify-self-center'
     default:
-      return 'aspect-[4/3] max-h-96 w-full rounded-card object-cover lg:max-h-none'
+      return 'w-full max-h-96 lg:max-h-none'
   }
 }
 
 /**
  * `splitImageClass` in two halves, for a picture that animates inside a frame (the hero's `image` part):
- * where it sits in the column (on the frame) and what it looks like (on the <img>). Together they are
- * the same classes, so an animated picture has the shape of a still one.
+ * where it sits in the column (on the frame) and the size limits (on the picture's own box). Together
+ * they are the same classes, so an animated picture is placed like a still one.
  */
-export function splitImageFrameClass(shape: SplitImageShape): string {
+export function splitImageFrameClass(shape: ImageAppearance): string {
   switch (shape) {
     case 'circle':
       return 'w-full max-w-xl justify-self-center'
@@ -77,15 +79,6 @@ export function splitImageFrameClass(shape: SplitImageShape): string {
   }
 }
 
-export function splitImageShapeClass(shape: SplitImageShape): string {
-  switch (shape) {
-    case 'square':
-      return 'aspect-[4/3] max-h-96 w-full object-cover lg:max-h-none'
-    case 'circle':
-      return 'aspect-square w-full rounded-full object-cover'
-    case 'arch':
-      return 'aspect-[4/5] w-full rounded-t-full object-cover'
-    default:
-      return 'aspect-[4/3] max-h-96 w-full rounded-card object-cover lg:max-h-none'
-  }
+export function splitImageShapeClass(shape: ImageAppearance): string {
+  return shape === 'circle' || shape === 'arch' ? 'w-full' : 'w-full max-h-96 lg:max-h-none'
 }

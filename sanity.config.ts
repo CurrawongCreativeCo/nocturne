@@ -19,6 +19,7 @@ import { blogSchemaTypes } from './src/features/blog/schemas'
 import { eventsSchemaTypes } from './src/features/events/schemas'
 import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
+import { framesSchemaTypes } from './src/features/frames/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { sectionTypes } from './src/features/pages/schemas/sections'
 import { pageTemplates } from './src/features/pages/schemas/templates'
@@ -98,6 +99,7 @@ export default defineConfig({
       ...siteSchemaTypes,
       ...teamSchemaTypes,
       ...eventsSchemaTypes,
+      ...framesSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,
     ],

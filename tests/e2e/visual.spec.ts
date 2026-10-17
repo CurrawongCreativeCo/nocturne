@@ -27,6 +27,8 @@ const PLACEHOLDER_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" 
   <rect width="1200" height="630" fill="url(#g)"/>
 </svg>`
 
+const FRAME_FILE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill-rule="evenodd" d="M0 0H100V100H0Z M4 4V96H96V4Z"/></svg>`
+
 test.use({ reducedMotion: 'reduce' })
 
 /** Location's "Open now" badge reads the clock: pin it so the badge text is the same on every run. */
@@ -36,6 +38,10 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(FRIDAY_MORNING)
   await page.route('https://cdn.sanity.io/**', (route) =>
     route.fulfill({ contentType: 'image/svg+xml', body: PLACEHOLDER_IMAGE }),
+  )
+  // An approved custom frame is a mask: serve an outline, not the placeholder, which would cover the picture.
+  await page.route('https://cdn.sanity.io/files/**/*.svg', (route) =>
+    route.fulfill({ contentType: 'image/svg+xml', body: FRAME_FILE }),
   )
   await page.goto(GALLERY)
   await settle(page)
