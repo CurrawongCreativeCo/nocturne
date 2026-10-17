@@ -10,7 +10,7 @@ import { FEATURE_NAMES, type FeatureName, type Features, siteProfile } from '@/c
  */
 export const FEATURE_DOCUMENT_TYPES: Partial<Record<FeatureName, readonly string[]>> = {
   blog: ['post', 'author', 'category'],
-  forms: ['form'],
+  forms: ['form', 'enquiry'],
   experiments: ['experiment'],
   pricing: ['stripePrice'],
   team: ['team', 'teamMember'],

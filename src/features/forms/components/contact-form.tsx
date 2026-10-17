@@ -30,6 +30,12 @@ interface Props {
   submitLabel: string
   fields: Field[]
   check: { kind: 'turnstile'; siteKey: string } | { kind: 'test' }
+  /**
+   * Hidden inputs for the referrer and UTM values, which `submitForm` stores with an enquiry, and the
+   * inline script that fills them in (`ATTRIBUTION_SCRIPT`). Rendered by the server (`FormView`), so
+   * none of it is in the client bundle, which the home page's size budget has no room for.
+   */
+  children?: ReactNode
 }
 
 const control =
@@ -50,6 +56,7 @@ export function ContactForm({
   submitLabel,
   fields,
   check,
+  children,
 }: Props) {
   const [state, formAction, pending] = useActionState(action, IDLE_STATE)
   const prefix = useId()
@@ -59,6 +66,8 @@ export function ContactForm({
   // The success message replaces the form; this keeps its height so nothing below moves.
   const [height, setHeight] = useState<number>()
 
+  // Without JavaScript the inputs stay empty and the enquiry simply has no attribution. Setting a
+  // hidden input's value sets its default, so it survives the form reset after a failed send.
   useEffect(() => {
     if (state.status === 'error') summary.current?.focus()
     if (state.status === 'success') success.current?.focus()
@@ -97,6 +106,7 @@ export function ContactForm({
       className="grid gap-6"
     >
       {formId && <input type="hidden" name="_formId" value={formId} />}
+      {children}
 
       {state.status === 'error' && (state.message || failed.length > 0) && (
         <div

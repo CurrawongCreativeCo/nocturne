@@ -1,0 +1,73 @@
+# Weekly: deletes stored form enquiries older than ENQUIRY_RETENTION_DAYS (default 365, minimum 30)
+# so personal details aren't kept longer than the privacy policy says. The selection logic is
+# scripts/enquiry-retention.mjs (unit-tested). Documented in the README ("Enquiries").
+# Skips with a notice, and succeeds, when the SANITY_WRITE_TOKEN secret or the project ID is missing.
+# On pull requests (and when started by hand with "Dry run" ticked) it only reports what it would delete.
+name: Enquiry retention
+
+on:
+  schedule:
+    # Mondays 04:00 UTC. GitHub pauses scheduled runs after 60 days without repository activity.
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Only report what would be deleted
+        type: boolean
+        default: true
+  # A dry run, so a change to the script or this workflow is checked against real data without deleting any.
+  # Pull requests from forks get no secrets, so they skip.
+  pull_request:
+    paths:
+      - scripts/enquiry-retention.mjs
+      - .github/workflows/enquiry-retention.yml
+
+permissions:
+  contents: read
+
+# One run at a time; a manual run waits for the scheduled one instead of cancelling it.
+concurrency:
+  group: enquiry-retention-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+      NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET || 'production' }}
+      # Editor role: deleting needs write access. The same secret the Stripe webhook and enquiry storage use.
+      SANITY_WRITE_TOKEN: ${{ secrets.SANITY_WRITE_TOKEN }}
+      ENQUIRY_RETENTION_DAYS: ${{ vars.ENQUIRY_RETENTION_DAYS }}
+      DRY_RUN: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
+    steps:
+      - name: Check configuration
+        id: gate
+        run: |
+          if [ -z "$SANITY_WRITE_TOKEN" ] || [ -z "$NEXT_PUBLIC_SANITY_PROJECT_ID" ]; then
+            echo "::notice title=Enquiry retention skipped::Set the SANITY_WRITE_TOKEN secret (Editor role) and the NEXT_PUBLIC_SANITY_PROJECT_ID variable to delete enquiries older than ${ENQUIRY_RETENTION_DAYS:-365} days."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          node-version-file: .nvmrc
+
+      # No `npm ci`: the script uses only Node's built-ins.
+      - name: Delete expired enquiries
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            node scripts/enquiry-retention.mjs --dry-run
+          else
+            node scripts/enquiry-retention.mjs
+          fi

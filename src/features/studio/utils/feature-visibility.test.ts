@@ -23,6 +23,7 @@ describe('hiddenDocumentTypes', () => {
       'author',
       'category',
       'form',
+      'enquiry',
       'experiment',
       'stripePrice',
       'team',

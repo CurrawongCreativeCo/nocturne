@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- **Enquiries:** with `ENQUIRIES_STORE=1` (and `SANITY_WRITE_TOKEN`) a form submission accepted by Resend is also stored as an
+  `enquiry` document: the form (weak reference and title), every answer as `{ label, value }`, the page path, `createdAt`, a
+  `status` (new, read, archived) and the referrer and UTM values from hidden inputs. It only writes to a dataset it can confirm is
+  private. A failed write is logged (never with submission contents or addresses) and never fails the visitor's send. Studio gets
+  an **Enquiries** list (newest first, the new count in its title, read-only except status, **Download CSV** built in the browser
+  with spreadsheet-formula protection), and **Start here** shows the number of new enquiries with a link. A weekly GitHub Actions
+  workflow (`enquiry-retention.yml`, logic in `scripts/enquiry-retention.mjs`) deletes enquiries older than
+  `ENQUIRY_RETENTION_DAYS` (default 365, minimum 30); it skips without the secret and dry-runs on pull requests. README: new
+  _Enquiries_ section with Australian privacy notes. End-to-end tests run a second server with the flag off.
 - **Image design:** one shared treatment for a section's main picture (`FramedImage`): a still frame with the picture moving
   gently inside it (true image-only parallax), shapes (_Standard_, _Rounded_, _Circle_, _Arch_, _Framed_) and decorative frames
   that stay still while the picture drifts behind them. Agency only, in the Design tab of **Image + text**, the **Hero's Split
@@ -86,6 +95,9 @@ if you use it. The new visual baselines (`link-list-*`, `events-*`) need the **U
 For Events: add `"event"` and `"eventCategory"` to the Sanity webhook filter if you use webhook mode (README, _Live mode vs.
 webhook mode_). `events` is a new feature switch (on by default); a client who doesn't want events sets `events: false` in
 `site.profile.ts`. Nothing in your content changes.
+For Enquiries: nothing happens until you set `ENQUIRIES_STORE=1`; then see README, _Enquiries_ (private dataset, `SANITY_WRITE_TOKEN`,
+the repository secret for the retention workflow, and the collection notice in the form's _Intro_). The `enquiry` type is new in the schema,
+so run `npm run typegen` after merging. No visual baselines change.
 
 ## [1.4.0] - 2026-10-16
 

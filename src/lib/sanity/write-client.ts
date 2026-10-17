@@ -4,7 +4,7 @@ import { client } from './client'
 
 /**
  * A client that can write, for server code that mirrors outside data into the dataset (the Stripe
- * webhook). The token needs the Editor role and lives in `SANITY_WRITE_TOKEN`, server-side only:
+ * webhook, stored form enquiries). The token needs the Editor role and lives in `SANITY_WRITE_TOKEN`, server-side only:
  * never give it a `NEXT_PUBLIC_` prefix, and never import this from a client component (the
  * `server-only` import above makes that a build error). Reads still go through `cachedSanityFetch`.
  */
