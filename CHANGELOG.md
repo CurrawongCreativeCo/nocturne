@@ -43,6 +43,18 @@ you start a release.
   placeholder, with a "Default" label, instead of a black swatch and an example hex. Clearing a colour says it has
   returned to the default, and Primary's description explains that buttons stay near-black until a Primary is set.
   No stored data changes.
+- **Section backgrounds:** a picture set to _Stays put while scrolling_ is clipped to its own section again on
+  large screens; a missing space had dropped the clip, so it could show through other sections.
+- **Webhook mode:** the README's webhook filter now includes `experiment`. Without it, starting or stopping an A/B
+  test never reached a site in webhook mode until its next deploy. **Add `"experiment"` to the filter of each
+  existing webhook** (sanity.io/manage → API → Webhooks).
+- **Tests:** Vitest now runs `*.test.tsx` files (33 component tests were being skipped), and the "stays put"
+  end-to-end test turns motion on, so it passes (locally its failure also stopped the 53 tests in the projects
+  that run after it).
+- `next.config.ts` sets `partialPrefetching: false` explicitly. That is what an unset value already did; it stops
+  Next.js 16 warning on every build.
+- Code audit: `docs/code-audit/2026-10-18/report.md` records the state of the template, its findings and proposed
+  tasks.
 
 ### Breaking changes / migration steps
 
