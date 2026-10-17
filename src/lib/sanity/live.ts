@@ -93,6 +93,7 @@ export const TAGS = {
   experiment: 'experiment',
   teamMember: 'teamMember',
   frame: 'frame',
+  panel: 'panel',
   // new-document:tag
 } as const
 

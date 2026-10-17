@@ -17,6 +17,7 @@ import {
   imageAppearanceThumbnails,
   imageFrameThumbnails,
   imageMotionThumbnails,
+  panelPresentationThumbnails,
   sectionVariantThumbnails,
   toneThumbnails,
   type Thumbnail,
@@ -143,6 +144,7 @@ const everything: [string, Thumbnail][] = [
       ['image-appearance', imageAppearanceThumbnails],
       ['image-motion', imageMotionThumbnails],
       ['image-frame', imageFrameThumbnails],
+      ['panel-presentation', panelPresentationThumbnails],
     ] as const
   ).flatMap(([group, thumbnails]) =>
     Object.entries(thumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [

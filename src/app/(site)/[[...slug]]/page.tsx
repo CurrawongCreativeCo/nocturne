@@ -28,6 +28,27 @@ const renderCheckout: ComponentProps<typeof PageView>['renderCheckout'] = (reque
   <CheckoutButton {...request} />
 )
 
+/**
+ * Panels are their own feature too: the page hands over the panels its buttons open, and a panel's
+ * form comes from the forms feature.
+ */
+/**
+ * Imported on demand, so the overlay's client code is referenced only by pages that render panels:
+ * a static import here puts it in every page's scripts (the home page's JavaScript budget).
+ */
+async function PanelsView({
+  panels,
+}: {
+  panels: Parameters<NonNullable<ComponentProps<typeof PageView>['renderPanels']>>[0]
+}) {
+  const { PanelHost } = await import('@/features/panels/components/panel-host')
+  return <PanelHost panels={panels} renderForm={(form) => <FormView form={form} />} />
+}
+
+const renderPanels: ComponentProps<typeof PageView>['renderPanels'] = (panels) => (
+  <PanelsView panels={panels} />
+)
+
 /** Auth is its own feature too: members-only pages and sections check the session through it. */
 const renderMembersGate: ComponentProps<typeof PageView>['renderMembersGate'] = (props) => (
   <MembersOnly {...props} />
@@ -71,6 +92,7 @@ export default async function Page({ params }: Props) {
       renderForm={renderForm}
       renderCheckout={renderCheckout}
       renderNewsletter={renderNewsletter}
+      renderPanels={renderPanels}
       // Location sections show Business info; it is the settings entry the footer already fetched.
       business={await getLocationBusiness(PUBLISHED)}
       renderMembersGate={renderMembersGate}
@@ -88,6 +110,7 @@ async function DraftPage({ params }: Pick<Props, 'params'>) {
       renderForm={renderForm}
       renderCheckout={renderCheckout}
       renderNewsletter={renderNewsletter}
+      renderPanels={renderPanels}
       business={business}
       renderMembersGate={renderMembersGate}
     />

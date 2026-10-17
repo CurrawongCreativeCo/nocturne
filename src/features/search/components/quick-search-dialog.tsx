@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useId, useRef, useState } from 'react'
 
+import { useModalDialog } from '@/components/ui/overlay/use-modal-dialog'
 import { SEARCH_API_PATH, SEARCH_PATH } from '@/config/paths'
 
 import type { SearchResult } from '../types/search-result'
@@ -17,8 +18,9 @@ interface Outcome {
 }
 
 /**
- * Quick search in a native modal <dialog>: the browser traps focus, makes the page behind it inert,
- * closes on Escape and returns focus to what opened it. Typing queries /api/search after a
+ * Quick search in a native modal <dialog> (useModalDialog): the browser traps focus, makes the page
+ * behind it inert and closes on Escape; the hook locks the page's scroll and returns focus to what
+ * opened it. Typing queries /api/search after a
  * pause; the count and states are announced through a polite live region. Keyboard: type, then
  * Arrow Down / Tab into the results (Arrow Up returns to the box), Enter follows a result, or
  * Enter in the box opens the full results page.
@@ -32,11 +34,13 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
   const parsed = parseQuery(query)
   const current = parsed.ok && outcome?.q === parsed.q ? outcome : null
 
+  // Mounted open: the hook shows it (its effect runs before the one below) and calls `onClose`.
+  useModalDialog(dialogRef, true, onClose)
+
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
 
-    if (!dialog.open) dialog.showModal()
     // showModal() focuses the first control, which is Close; typing starts in the box.
     dialog.querySelector('input')?.focus()
 
@@ -107,7 +111,6 @@ export function QuickSearchDialog({ onClose }: { onClose: () => void }) {
     <dialog
       ref={dialogRef}
       aria-labelledby={`${inputId}-title`}
-      onClose={onClose}
       className="mx-auto mt-[10vh] mb-auto max-h-[80vh] w-[min(40rem,calc(100vw-2rem))] overflow-y-auto rounded-card bg-surface p-0 text-ink shadow-raised backdrop:bg-surface-inverse/50"
     >
       <div className="p-5 sm:p-6">

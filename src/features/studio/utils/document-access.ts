@@ -1,7 +1,7 @@
 import type { Audience } from '../roles'
 
 /** Document types clients may edit but never delete or duplicate. Singletons are added by the caller. */
-export const CLIENT_PROTECTED_TYPES = ['page', 'post'] as const
+export const CLIENT_PROTECTED_TYPES = ['page', 'post', 'panel'] as const
 
 const CLIENT_BLOCKED_ACTIONS = new Set(['delete', 'duplicate'])
 const CONTRIBUTOR_BLOCKED_ACTIONS = new Set(['publish', 'unpublish'])

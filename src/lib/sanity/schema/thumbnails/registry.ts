@@ -59,6 +59,12 @@ import {
   ImageStandardThumbnail,
 } from './image-design-thumbnails'
 import { LogoCloudGridThumbnail, LogoCloudMarqueeThumbnail } from './logo-cloud-thumbnails'
+import {
+  PanelAutoThumbnail,
+  PanelCentredThumbnail,
+  PanelFullscreenThumbnail,
+  PanelSideThumbnail,
+} from './panel-thumbnails'
 import { StatsCardsThumbnail, StatsInlineThumbnail } from './stats-thumbnails'
 import { TestimonialsGridThumbnail, TestimonialsSliderThumbnail } from './testimonials-thumbnails'
 import {
@@ -180,4 +186,15 @@ export const imageFrameThumbnails: Record<ImageFrame, Thumbnail> = {
   'organic-brush': FrameOrganicBrushThumbnail,
   'corner-brackets': FrameCornerBracketsThumbnail,
   custom: FrameCustomThumbnail,
+}
+
+/** A panel's presentation (the Panels picker). */
+export const panelPresentationThumbnails: Record<
+  'auto' | 'centred' | 'side' | 'fullscreen',
+  Thumbnail
+> = {
+  auto: PanelAutoThumbnail,
+  centred: PanelCentredThumbnail,
+  side: PanelSideThumbnail,
+  fullscreen: PanelFullscreenThumbnail,
 }
