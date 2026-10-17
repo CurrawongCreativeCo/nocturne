@@ -1,7 +1,8 @@
 /**
  * Publish confirmation for pages and posts. Wraps Sanity's own Publish action (so validation,
- * labels and progress stay Sanity's) behind a dialog naming the address that goes live. When the
- * published slug and the draft's differ, the dialog offers to leave a redirect from the old address.
+ * labels and progress stay Sanity's) behind a dialog naming the address that goes live, shown for a
+ * first publish and for an address change only (needsPublishConfirmation). When the published slug
+ * and the draft's differ, the dialog offers to leave a redirect from the old address.
  */
 import { Box, Button, Card, Checkbox, Flex, Spinner, Stack, Text } from '@sanity/ui'
 import { useToast } from '@sanity/ui/toast'
@@ -23,6 +24,7 @@ import {
   detectAddressChange,
   documentPath,
   joinUrl,
+  needsPublishConfirmation,
   planRedirect,
   readSlug,
   type AddressChange,
@@ -133,6 +135,11 @@ export function withConfirmPublish(Publish: DocumentActionComponent): DocumentAc
       label: original.label,
       // Sanity's own state (validation errors, nothing to publish) still decides whether it can run.
       onHandle: () => {
+        // An edit to a live page at the same address has nothing to confirm.
+        if (!needsPublishConfirmation(Boolean(published), change)) {
+          original.onHandle?.()
+          return
+        }
         setCreateRedirect(true)
         setOpen(true)
       },

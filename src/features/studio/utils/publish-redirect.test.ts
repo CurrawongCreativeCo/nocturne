@@ -5,6 +5,7 @@ import {
   detectAddressChange,
   documentPath,
   joinUrl,
+  needsPublishConfirmation,
   planRedirect,
   readSlug,
 } from './publish-redirect'
@@ -58,6 +59,20 @@ describe('detectAddressChange', () => {
   })
   it('handles moving to or from the home page', () => {
     expect(detectAddressChange('page', 'home', 'welcome')).toEqual({ from: '/', to: '/welcome' })
+  })
+})
+
+describe('needsPublishConfirmation', () => {
+  it('asks before a first publish', () => {
+    expect(needsPublishConfirmation(false, null)).toBe(true)
+  })
+
+  it('asks when the address changes', () => {
+    expect(needsPublishConfirmation(true, { from: '/old', to: '/new' })).toBe(true)
+  })
+
+  it('publishes an edit at the same address straight away', () => {
+    expect(needsPublishConfirmation(true, null)).toBe(false)
   })
 })
 
