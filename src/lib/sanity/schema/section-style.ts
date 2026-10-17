@@ -187,7 +187,7 @@ export const sectionStyle = defineType({
       name: 'gradient',
       title: 'Gradient',
       description:
-        'A brand gradient behind the content, from Design settings. The background above still sets the text colours. A picture, if you add one, covers it.',
+        'A brand gradient behind the content, from Design → Brand colours. The background above still sets the text colours. A picture, if you add one, covers it.',
       type: 'string',
       // The picker is hidden altogether while Design settings has no gradients.
       options: { gradientPicker: true },
@@ -199,7 +199,7 @@ export const sectionStyle = defineType({
             const gradients = await fetchBrandGradients(getClient({ apiVersion: '2025-01-01' }))
             const chosen = gradients.find((gradient) => gradient.slug === value)
             if (!chosen) {
-              return 'This gradient is no longer in Design settings, so the section shows no gradient. Choose another, or clear it.'
+              return 'This gradient is no longer in Brand colours, so the section shows no gradient. Choose another, or clear it.'
             }
             return (
               backgroundContrastProblem({

@@ -53,7 +53,8 @@ async function Tokens({
           <h1 className="text-h1 font-semibold text-ink">Design tokens</h1>
           <p className="mt-3 max-w-measure-narrow text-lead text-ink-muted">
             The colour, type, spacing, shape and motion every section is built from. Edit them in{' '}
-            <code className="font-mono">src/styles/tokens.json</code> and Studio’s Design settings.
+            <code className="font-mono">src/styles/tokens.json</code> and the Studio’s Brand
+            colours.
           </p>
         </header>
         <TokensColours colours={colours} />

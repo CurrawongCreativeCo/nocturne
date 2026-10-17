@@ -76,7 +76,7 @@ export function TokensColours({ colours }: { colours: Colours }) {
       <p className="mt-3 max-w-measure-narrow text-lead text-ink-muted">
         Each role by its class name (<code className="font-mono">bg-surface</code>,{' '}
         <code className="font-mono">text-ink-muted</code>). These are the colours in use, so any
-        change in Design settings shows here.
+        change in the Studio’s Brand colours shows here.
       </p>
 
       {GROUPS.map((group) => (
@@ -106,7 +106,7 @@ export function TokensColours({ colours }: { colours: Colours }) {
           ? 'Every pair meets WCAG 2.2 AA.'
           : `${failing} ${failing === 1 ? 'pair does' : 'pairs do'} not meet WCAG 2.2 AA. Fix ${
               failing === 1 ? 'it' : 'them'
-            } in Design settings before launch.`}
+            } in the Studio’s Brand colours before launch.`}
       </p>
       {/* Scrolls sideways on a phone, so keyboard users can focus it to scroll (WCAG 2.1.1). */}
       <div

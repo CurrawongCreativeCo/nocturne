@@ -2431,7 +2431,7 @@ _Background_ (agency only). Editors choose; nothing is configured by default, so
 - **Gradient** (optional): a list of swatches, one per gradient in Studio → Design → Brand colours → Gradients. It is
   stored as the gradient's slug (`forest-dusk`) and drawn as `var(--gradient-forest-dusk)`, the variable the site
   already defines, so a re-skin changes it everywhere. The field disappears while there are no gradients. If a gradient
-  is renamed or removed, the section shows no gradient and the picker marks it _Not in Design settings_.
+  is renamed or removed, the section shows no gradient and the picker marks it _Not in Brand colours_.
 - **Background image** (optional): an image with a hotspot, which keeps the subject in view as the section crops it. It
   is decoration, so it needs no alt text (the page gives it an empty one). **Overlay** appears once there is a picture:
   None, Light, Medium or Strong (45%, 70% and 88% of the tone's background colour laid over the picture). An unset
@@ -2463,7 +2463,7 @@ gradient is measured at each of its colours. Notes for agencies:
 
 **Keeping the Studio list in step with the page.** `brandGradients` (`src/lib/color/gradients.ts`) decides which gradients
 are usable and their slugs; `resolveDesignTokens` writes the CSS variables from it and the Studio picker lists from it,
-so they cannot disagree. The Studio reads the _published_ Design settings (the site draws what is published), shared for
+so they cannot disagree. The Studio reads the _published_ Brand colours (the site draws what is published), shared for
 three seconds between the fields of a form (`fetchBrandGradients`).
 
 **Tests.** `section-style.test.ts`, `background-contrast.test.ts`, `gradients.test.ts`, `section-background.test.ts` and the
@@ -2860,7 +2860,7 @@ on desktop and mobile; macOS skips them, so refresh the baselines with the **Upd
   **contrast ratio** of each pair sections draw (text needs 4.5:1, borders and focus rings 3:1, per WCAG 2.2 AA; ratios are
   cut, not rounded, so 4.496 never reads as 4.50), the **type scale** (each step set in its class, fluid sizes shown as a
   pixel range), the three font families, **spacing**, **radii**, **shadows** and the **motion** tokens with samples to
-  play. The colours are the ones in use: `tokens.json` with the Studio's Design settings applied, so a client's palette
+  play. The colours are the ones in use: `tokens.json` with the Studio's Brand colours applied, so a client's palette
   that fails AA says so here. The motion samples animate only scale and opacity on the tokens' own durations and easing;
   with `prefers-reduced-motion` they are drawn already finished, the Play button is replaced by a note, and nothing moves.
 
