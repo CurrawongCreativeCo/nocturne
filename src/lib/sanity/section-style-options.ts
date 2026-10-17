@@ -137,6 +137,81 @@ export const SECTION_OVERLAY_OPACITY: Record<(typeof SECTION_OVERLAYS)[number], 
 }
 
 /**
+ * How a background image sits in its section (README, "Section backgrounds"). `cover` is today's
+ * behaviour and the default: the picture fills the section, the hotspot keeps the subject in view.
+ */
+export const SECTION_IMAGE_SIZES = ['cover', 'contain', 'actual'] as const
+export const SECTION_IMAGE_SIZE_TITLES: Record<(typeof SECTION_IMAGE_SIZES)[number], string> = {
+  cover: 'Fill the section',
+  contain: 'Show the whole picture',
+  actual: 'Actual size',
+}
+
+export const SECTION_IMAGE_VERTICALS = ['top', 'middle', 'bottom'] as const
+export const SECTION_IMAGE_HORIZONTALS = ['left', 'center', 'right'] as const
+export const SECTION_IMAGE_VERTICAL_TITLES: Record<
+  (typeof SECTION_IMAGE_VERTICALS)[number],
+  string
+> = { top: 'Top', middle: 'Middle', bottom: 'Bottom' }
+export const SECTION_IMAGE_HORIZONTAL_TITLES: Record<
+  (typeof SECTION_IMAGE_HORIZONTALS)[number],
+  string
+> = { left: 'Left', center: 'Centre', right: 'Right' }
+
+export const SECTION_IMAGE_REPEATS = ['none', 'x', 'y', 'both'] as const
+export const SECTION_IMAGE_REPEAT_TITLES: Record<(typeof SECTION_IMAGE_REPEATS)[number], string> = {
+  none: 'No repeat',
+  x: 'Repeat across',
+  y: 'Repeat down',
+  both: 'Tile',
+}
+
+/** How much of the picture shows through, before the overlay. */
+export const SECTION_IMAGE_STRENGTHS = ['full', 'soft', 'faint'] as const
+export const SECTION_IMAGE_STRENGTH_TITLES: Record<
+  (typeof SECTION_IMAGE_STRENGTHS)[number],
+  string
+> = { full: 'Full', soft: 'Soft', faint: 'Faint' }
+export const SECTION_IMAGE_STRENGTH_OPACITY: Record<
+  (typeof SECTION_IMAGE_STRENGTHS)[number],
+  number
+> = { full: 1, soft: 0.6, faint: 0.3 }
+/** The exact strength an editor may type instead, as a percentage. */
+export const SECTION_IMAGE_STRENGTH_CUSTOM = { min: 5, max: 100 } as const
+
+/** The picture's opacity, 0 to 1: an exact percentage (kept within its range) wins over the named strength. */
+export function imageStrengthOpacity(
+  strength: string | null | undefined,
+  percent: number | null | undefined,
+): number {
+  if (typeof percent === 'number' && Number.isFinite(percent)) {
+    const { min, max } = SECTION_IMAGE_STRENGTH_CUSTOM
+    return Math.min(max, Math.max(min, percent)) / 100
+  }
+  const named = SECTION_IMAGE_STRENGTHS.find((option) => option === strength)
+  return SECTION_IMAGE_STRENGTH_OPACITY[named ?? 'full']
+}
+
+/** The overlay's colour: the section's own background (today), or a light or dark wash whatever the tone. */
+export const SECTION_WASHES = ['background', 'light', 'dark'] as const
+export const SECTION_WASH_TITLES: Record<(typeof SECTION_WASHES)[number], string> = {
+  background: 'Background colour',
+  light: 'Light wash',
+  dark: 'Dark wash',
+}
+/**
+ * The two fixed washes, as plain colours. They stay light or dark whatever the tone or the brand
+ * colours are (the point of a wash), so they are not tokens; the values equal the default
+ * `surface` and `surface-inverse`, and the contrast check measures these same values.
+ */
+export const SECTION_WASH_COLOURS = { light: '#ffffff', dark: '#030712' } as const
+
+/** Position and Repeat apply only to some sizes; Fill the section keeps using the hotspot. */
+export const imageSizeUsesPosition = (size: string | null | undefined) =>
+  size === 'contain' || size === 'actual'
+export const imageSizeUsesRepeat = (size: string | null | undefined) => size === 'actual'
+
+/**
  * The overlay an image gets when none is chosen: Medium on the dark tones, where a bright photo
  * would swallow the light text, and Light on the others.
  */

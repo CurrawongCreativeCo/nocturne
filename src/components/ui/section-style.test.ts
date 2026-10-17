@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   ctaSurfaceFor,
   motionAdvancedOf,
+  resolveBackgroundImage,
   resolveEdge,
   resolveSectionStyle,
   sectionMotion,
@@ -21,6 +22,17 @@ describe('resolveSectionStyle', () => {
         gradient: undefined,
         image: undefined,
         overlay: 'light',
+        backgroundImage: {
+          size: 'cover',
+          position: undefined,
+          alignClass: '',
+          repeat: 'none',
+          repeatCss: 'no-repeat',
+          strength: 1,
+          wash: 'background',
+          fixed: false,
+          tiled: false,
+        },
         edge: undefined,
         spacing: 'default',
         sectionClass: 'relative isolate py-section px-gutter',
@@ -277,5 +289,114 @@ describe('motionAdvancedOf', () => {
       easing: 'linear',
       thresholdPercent: 40,
     })
+  })
+})
+
+describe('resolveBackgroundImage', () => {
+  it('is today’s picture when nothing is set: fills the section, full strength, background colour', () => {
+    expect(resolveBackgroundImage(undefined)).toMatchObject({
+      size: 'cover',
+      position: undefined,
+      strength: 1,
+      wash: 'background',
+      fixed: false,
+      tiled: false,
+    })
+  })
+
+  it('maps all nine positions for Show the whole picture', () => {
+    const expected = {
+      'top left': '0% 0%',
+      'top center': '50% 0%',
+      'top right': '100% 0%',
+      'middle left': '0% 50%',
+      'middle center': '50% 50%',
+      'middle right': '100% 50%',
+      'bottom left': '0% 100%',
+      'bottom center': '50% 100%',
+      'bottom right': '100% 100%',
+    }
+    for (const [name, position] of Object.entries(expected)) {
+      const [imageVertical, imageHorizontal] = name.split(' ')
+      expect(
+        resolveBackgroundImage({ imageSize: 'contain', imageVertical, imageHorizontal }).position,
+      ).toBe(position)
+    }
+  })
+
+  it('maps the nine positions to flex alignment for Actual size', () => {
+    expect(
+      resolveBackgroundImage({
+        imageSize: 'actual',
+        imageVertical: 'bottom',
+        imageHorizontal: 'center',
+      }),
+    ).toMatchObject({ position: '50% 100%', alignClass: 'items-end justify-center' })
+    expect(resolveBackgroundImage({ imageSize: 'actual' }).alignClass).toBe(
+      'items-center justify-center',
+    )
+    expect(resolveBackgroundImage({ imageSize: 'contain' }).alignClass).toBe('')
+  })
+
+  it('ignores Position for Fill the section, which keeps the hotspot', () => {
+    expect(
+      resolveBackgroundImage({ imageSize: 'cover', imageVertical: 'bottom' }).position,
+    ).toBeUndefined()
+    expect(resolveBackgroundImage({ imageVertical: 'bottom' }).position).toBeUndefined()
+  })
+
+  it('repeats only at Actual size, and only a repeating picture is tiled', () => {
+    const repeats = { none: 'no-repeat', x: 'repeat-x', y: 'repeat-y', both: 'repeat' }
+    for (const [imageRepeat, css] of Object.entries(repeats)) {
+      const resolved = resolveBackgroundImage({ imageSize: 'actual', imageRepeat })
+      expect(resolved.repeatCss).toBe(css)
+      expect(resolved.tiled).toBe(imageRepeat !== 'none')
+    }
+    for (const imageSize of ['cover', 'contain', undefined]) {
+      expect(resolveBackgroundImage({ imageSize, imageRepeat: 'both' })).toMatchObject({
+        repeat: 'none',
+        tiled: false,
+      })
+    }
+  })
+
+  it('maps each size', () => {
+    for (const size of ['cover', 'contain', 'actual']) {
+      expect(resolveBackgroundImage({ imageSize: size }).size).toBe(size)
+    }
+    expect(resolveBackgroundImage({ imageSize: 'stretch' }).size).toBe('cover')
+  })
+
+  it('maps the strengths, with an exact percentage winning and kept in range', () => {
+    expect(resolveBackgroundImage({ imageStrength: 'full' }).strength).toBe(1)
+    expect(resolveBackgroundImage({ imageStrength: 'soft' }).strength).toBe(0.6)
+    expect(resolveBackgroundImage({ imageStrength: 'faint' }).strength).toBe(0.3)
+    expect(
+      resolveBackgroundImage({ imageStrength: 'faint', imageStrengthPercent: 45 }).strength,
+    ).toBe(0.45)
+    expect(resolveBackgroundImage({ imageStrengthPercent: 500 }).strength).toBe(1)
+    expect(resolveBackgroundImage({ imageStrengthPercent: 0 }).strength).toBe(0.05)
+  })
+
+  it('maps the wash and falls back to the background colour', () => {
+    for (const wash of ['background', 'light', 'dark']) {
+      expect(resolveBackgroundImage({ overlayColor: wash }).wash).toBe(wash)
+    }
+    expect(resolveBackgroundImage({ overlayColor: 'pink' }).wash).toBe('background')
+  })
+
+  it('stays put only when asked', () => {
+    expect(resolveBackgroundImage({ imageFixed: true }).fixed).toBe(true)
+    expect(resolveBackgroundImage({ imageFixed: false }).fixed).toBe(false)
+  })
+})
+
+describe('Fill the screen', () => {
+  it('makes the section at least the viewport tall, and only when asked', () => {
+    expect(resolveSectionStyle({ fillScreen: true }).sectionClass).toContain(
+      'min-h-dvh flex flex-col justify-center',
+    )
+    expect(resolveSectionStyle({ fillScreen: false }).sectionClass).not.toContain('min-h-dvh')
+    expect(resolveSectionStyle({}).sectionClass).not.toContain('min-h-dvh')
   })
 })

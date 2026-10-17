@@ -2,6 +2,8 @@ import { colorHex } from '@/config/tokens.generated'
 import {
   SECTION_OVERLAY_OPACITY,
   SECTION_OVERLAY_TITLES,
+  SECTION_WASH_COLOURS,
+  SECTION_WASH_TITLES,
   defaultOverlayFor,
 } from '@/lib/sanity/section-style-options'
 
@@ -50,6 +52,10 @@ export interface BackgroundInput {
   tone: string | null | undefined
   hasImage: boolean
   overlay?: string | null
+  /** The overlay's colour: 'background' (the default), 'light' or 'dark'. */
+  wash?: string | null
+  /** How much of the picture shows, 0 to 1 (1 when left out). */
+  strength?: number | null
   /** The chosen gradient's colours, when one is set. */
   gradientStops?: readonly string[]
 }
@@ -61,6 +67,8 @@ export function backgroundContrastProblem({
   tone,
   hasImage,
   overlay,
+  wash,
+  strength,
   gradientStops = [],
 }: BackgroundInput): BackgroundProblem | null {
   const text = textColours(tone)
@@ -69,17 +77,24 @@ export function backgroundContrastProblem({
     const level = overlay && overlay in SECTION_OVERLAY_OPACITY ? overlay : defaultOverlayFor(tone)
     const opacity = SECTION_OVERLAY_OPACITY[level as keyof typeof SECTION_OVERLAY_OPACITY]
     const { background } = tonePalette(tone)
-    const worstAreas = ['#000000', '#ffffff'].map((area) => composite(background, area, opacity))
+    const washColour = wash === 'light' || wash === 'dark' ? SECTION_WASH_COLOURS[wash] : background
+    // A picture below full strength lets the section's own background through before the overlay.
+    const shown = typeof strength === 'number' ? Math.min(1, Math.max(0, strength)) : 1
+    const worstAreas = ['#000000', '#ffffff'].map((area) =>
+      composite(washColour, composite(area, background, shown), opacity),
+    )
     const measures = (['body', 'secondary'] as const).map((kind) => ({
       kind,
       ratio: Math.min(...worstAreas.map((area) => contrastRatio(text[kind], area))),
     }))
     const worst = measures.reduce((a, b) => (b.ratio < a.ratio ? b : a))
     if (worst.ratio >= BODY_TEXT_RATIO) return null
+    const washNote =
+      wash === 'light' || wash === 'dark' ? ` (${SECTION_WASH_TITLES[wash].toLowerCase()})` : ''
     const name = SECTION_OVERLAY_TITLES[level as keyof typeof SECTION_OVERLAY_TITLES]
     return {
       ratio: worst.ratio,
-      message: `${worst.kind === 'body' ? 'Text' : 'Secondary text'} may be hard to read on this picture: with the ${name.toLowerCase()} overlay, the lightest or darkest part of a photo could drop it to ${pct(worst.ratio)} (text needs ${BODY_TEXT_RATIO}:1). Choose a stronger overlay, or a calmer picture.`,
+      message: `${worst.kind === 'body' ? 'Text' : 'Secondary text'} may be hard to read on this picture: with the ${name.toLowerCase()} overlay${washNote}, the lightest or darkest part of a photo could drop it to ${pct(worst.ratio)} (text needs ${BODY_TEXT_RATIO}:1). Choose a stronger overlay, or a calmer picture.`,
     }
   }
 

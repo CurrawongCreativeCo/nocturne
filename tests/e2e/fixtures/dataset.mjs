@@ -110,6 +110,9 @@ const abHero = (title) => ({ _key: key(), _type: 'hero', title, description: 'He
 const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
+// A small transparent pattern (tests/e2e/section-background-image.spec.ts); the spec serves its pixels.
+const PATTERN_ASSET_ID = 'image-fedcba9876543210fedcba9876543210fedcba98-160x120-png'
+const pattern = () => ({ _type: 'image', alt: '', asset: ref(PATTERN_ASSET_ID) })
 
 /** Four steps with labels, in a fixed order the tests check. The first has a picture. */
 const processSteps = (id) => [
@@ -1059,6 +1062,12 @@ export const documents = [
     _type: 'sanity.imageAsset',
     url: 'https://cdn.sanity.io/images/test/test/0123456789abcdef0123456789abcdef01234567-1200x630.png',
     metadata: { dimensions: { width: 1200, height: 630 } },
+  },
+  {
+    _id: PATTERN_ASSET_ID,
+    _type: 'sanity.imageAsset',
+    url: 'https://cdn.sanity.io/images/test/test/fedcba9876543210fedcba9876543210fedcba98-160x120.png',
+    metadata: { dimensions: { width: 160, height: 120 } },
   },
   {
     _id: VIDEO_ASSET_ID,
@@ -3101,6 +3110,72 @@ documents.push(
       },
     ],
   },
+  ...[
+    // Link pages with a background that fills the screen (README, "Section backgrounds"): a full-screen
+    // photo with a dark wash, and a faint transparent pattern sitting at the bottom, not cropped.
+    [
+      'links-photo',
+      'Links with a photo',
+      {
+        tone: 'inverse',
+        image: image(''),
+        overlay: 'medium',
+        overlayColor: 'dark',
+        fillScreen: true,
+      },
+    ],
+    [
+      'links-pattern',
+      'Links with a pattern',
+      {
+        tone: 'surface',
+        image: pattern(),
+        imageSize: 'actual',
+        imageVertical: 'bottom',
+        imageHorizontal: 'center',
+        imageStrength: 'faint',
+        overlay: 'none',
+        fillScreen: true,
+      },
+    ],
+    [
+      'links-tiled',
+      'Links with a tiled pattern',
+      {
+        tone: 'surface',
+        image: pattern(),
+        imageSize: 'actual',
+        imageRepeat: 'both',
+        imageStrengthPercent: 20,
+        overlay: 'none',
+        imageFixed: true,
+        fillScreen: true,
+      },
+    ],
+  ].map(([slug, title, style]) => ({
+    _id: `page-${slug}`,
+    _type: 'page',
+    title,
+    slug: { _type: 'slug', current: slug },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: `${slug}-list`,
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', ...style },
+        profile: { _type: 'object', name: 'Test Co', bio: 'Small-batch ceramics.' },
+        socialSource: 'custom',
+        socialLinks: [],
+        links: [
+          linkItem(`${slug}-book`, 'Book a consultation', external('https://example.com/book')),
+          linkItem(`${slug}-shop`, 'Shop the range', external('https://example.com/shop')),
+        ],
+      },
+    ],
+  })),
   {
     // Glass rows over a background photo, on a minimal page (tests/e2e/link-list-glass.spec.ts).
     _id: 'page-link-glass',

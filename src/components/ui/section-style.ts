@@ -9,6 +9,14 @@ import {
 import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
 import {
   SECTION_ALIGNS,
+  SECTION_IMAGE_HORIZONTALS,
+  SECTION_IMAGE_REPEATS,
+  SECTION_IMAGE_SIZES,
+  imageStrengthOpacity,
+  SECTION_IMAGE_VERTICALS,
+  SECTION_WASHES,
+  imageSizeUsesPosition,
+  imageSizeUsesRepeat,
   SECTION_EDGES,
   SECTION_EDGE_ACCENTS,
   SECTION_EDGE_HEIGHTS,
@@ -39,6 +47,9 @@ export type SectionWidth = (typeof SECTION_WIDTHS)[number]
 export type SectionAlign = (typeof SECTION_ALIGNS)[number]
 export type SectionMotion = (typeof SECTION_MOTIONS)[number]
 export type SectionOverlay = (typeof SECTION_OVERLAYS)[number]
+export type SectionImageSize = (typeof SECTION_IMAGE_SIZES)[number]
+export type SectionImageRepeat = (typeof SECTION_IMAGE_REPEATS)[number]
+export type SectionWash = (typeof SECTION_WASHES)[number]
 
 /** A section's `style` as a query returns it: every field optional, possibly with edit markers. */
 export interface SectionStyleInput {
@@ -64,6 +75,18 @@ export interface SectionStyleInput {
   /** A picture behind the content, with `overlay` laying the tone's colour over it. */
   image?: SanityImageData | null
   overlay?: string | null
+  /** How the picture sits (README, "Section backgrounds"); each applies only to the sizes that use it. */
+  imageSize?: string | null
+  imageVertical?: string | null
+  imageHorizontal?: string | null
+  imageRepeat?: string | null
+  imageStrength?: string | null
+  /** An exact strength in percent; wins over `imageStrength`. */
+  imageStrengthPercent?: number | null
+  overlayColor?: string | null
+  imageFixed?: boolean | null
+  /** The section is at least as tall as the screen. */
+  fillScreen?: boolean | null
   /** The shape of the bottom edge (section dividers); unset or 'none' for a straight one. */
   edge?: string | null
   edgeHeight?: string | null
@@ -99,6 +122,8 @@ export interface ResolvedSectionStyle {
   image: SanityImageData | undefined
   /** How strongly the tone covers the picture; meaningful only with an `image`. */
   overlay: SectionOverlay
+  /** How the picture is placed, sized and washed (see `resolveBackgroundImage`). */
+  backgroundImage: ResolvedBackgroundImage
   /** The bottom edge; undefined for a straight one. */
   edge: ResolvedEdge | undefined
   /** Which spacing choice the section uses, so the edge's padding maths can follow it. */
@@ -123,6 +148,91 @@ const WIDTH_CLASSES: Record<Exclude<SectionWidth, 'default'>, string> = {
 }
 
 const DEFAULT_CONTAINER = 'max-w-content'
+
+/** "Fill the screen": at least the viewport tall (dvh, so a phone's address bar does not cut it), content centred. */
+const FILL_SCREEN_CLASS = 'min-h-dvh flex flex-col justify-center'
+
+/** Where each choice puts the picture: CSS positions for object-position and background-position. */
+const VERTICAL_POSITION: Record<(typeof SECTION_IMAGE_VERTICALS)[number], string> = {
+  top: '0%',
+  middle: '50%',
+  bottom: '100%',
+}
+const HORIZONTAL_POSITION: Record<(typeof SECTION_IMAGE_HORIZONTALS)[number], string> = {
+  left: '0%',
+  center: '50%',
+  right: '100%',
+}
+/** The same nine places as flex alignment, for a picture drawn at its own size inside the layer. */
+const VERTICAL_ALIGN_CLASS: Record<(typeof SECTION_IMAGE_VERTICALS)[number], string> = {
+  top: 'items-start',
+  middle: 'items-center',
+  bottom: 'items-end',
+}
+const HORIZONTAL_ALIGN_CLASS: Record<(typeof SECTION_IMAGE_HORIZONTALS)[number], string> = {
+  left: 'justify-start',
+  center: 'justify-center',
+  right: 'justify-end',
+}
+const REPEAT_CSS: Record<SectionImageRepeat, 'no-repeat' | 'repeat-x' | 'repeat-y' | 'repeat'> = {
+  none: 'no-repeat',
+  x: 'repeat-x',
+  y: 'repeat-y',
+  both: 'repeat',
+}
+
+export interface ResolvedBackgroundImage {
+  size: SectionImageSize
+  /** `object-position` / `background-position`; undefined for Fill the section, where the hotspot decides. */
+  position: string | undefined
+  /** Flex alignment of a picture drawn at its own size; empty unless the size is Actual size. */
+  alignClass: string
+  repeat: SectionImageRepeat
+  /** `background-repeat` for the tiled layer. */
+  repeatCss: (typeof REPEAT_CSS)[SectionImageRepeat]
+  /** The picture's opacity, 0 to 1. */
+  strength: number
+  wash: SectionWash
+  /** Stays put while the page scrolls (large screens, no reduced motion). */
+  fixed: boolean
+  /** Drawn as a CSS background so it can repeat; every other mode uses SanityImage. */
+  tiled: boolean
+}
+
+/**
+ * The background picture's placement, strength and wash. Options that don't apply to the chosen
+ * size (Position for Fill the section, Repeat for anything but Actual size) are ignored, so a value
+ * left behind after the editor changed size cannot produce a nonsensical background. Unset, it is
+ * today's picture: Fill the section, the hotspot, Full, the background colour.
+ */
+export function resolveBackgroundImage(
+  style: SectionStyleInput | null | undefined,
+): ResolvedBackgroundImage {
+  const size = pick(SECTION_IMAGE_SIZES, style?.imageSize) ?? 'cover'
+  const vertical = pick(SECTION_IMAGE_VERTICALS, style?.imageVertical) ?? 'middle'
+  const horizontal = pick(SECTION_IMAGE_HORIZONTALS, style?.imageHorizontal) ?? 'center'
+  const positioned = imageSizeUsesPosition(size)
+  const repeat = imageSizeUsesRepeat(size)
+    ? (pick(SECTION_IMAGE_REPEATS, style?.imageRepeat) ?? 'none')
+    : 'none'
+
+  return {
+    size,
+    position: positioned
+      ? `${HORIZONTAL_POSITION[horizontal]} ${VERTICAL_POSITION[vertical]}`
+      : undefined,
+    alignClass:
+      size === 'actual'
+        ? `${VERTICAL_ALIGN_CLASS[vertical]} ${HORIZONTAL_ALIGN_CLASS[horizontal]}`
+        : '',
+    repeat,
+    repeatCss: REPEAT_CSS[repeat],
+    strength: imageStrengthOpacity(style?.imageStrength, style?.imageStrengthPercent),
+    wash: pick(SECTION_WASHES, style?.overlayColor) ?? 'background',
+    fixed: style?.imageFixed === true,
+    tiled: repeat !== 'none',
+  }
+}
 
 function pick<T extends string>(
   allowed: readonly T[],
@@ -212,11 +322,12 @@ export function resolveSectionStyle(
     gradient: gradient && GRADIENT_SLUG_PATTERN.test(gradient) ? gradient : undefined,
     image: style?.image?.asset ? style.image : undefined,
     overlay: pick(SECTION_OVERLAYS, style?.overlay) ?? defaultOverlayFor(tone),
+    backgroundImage: resolveBackgroundImage(style),
     edge: resolveEdge(style),
     spacing: resolvedSpacing,
     // A full-width section runs edge to edge, so it keeps no gutters of its own.
     // The site header is sticky, so a linked-to section needs room above it.
-    sectionClass: `relative isolate ${SPACING_CLASSES[resolvedSpacing]}${width === 'full' ? '' : ' px-gutter'}${anchorId ? ' scroll-mt-24' : ''}`,
+    sectionClass: `relative isolate ${SPACING_CLASSES[resolvedSpacing]}${width === 'full' ? '' : ' px-gutter'}${anchorId ? ' scroll-mt-24' : ''}${style?.fillScreen === true ? ` ${FILL_SCREEN_CLASS}` : ''}`,
     containerClass: `mx-auto w-full ${container}`,
   }
 }

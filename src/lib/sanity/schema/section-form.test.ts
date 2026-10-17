@@ -4,6 +4,8 @@ import {
   allowsAlignment,
   allowsParallax,
   alignmentHidden,
+  imageOptionHidden,
+  staleImageOptionMessage,
   registerSectionRules,
   sectionAtStylePath,
   staleAlignmentMessage,
@@ -143,5 +145,43 @@ describe('Float and Parallax need a picture', () => {
       expect(pictureless).not.toContain(preset)
       expect(staleMotionMessage(preset, inPage({ _type: 'unregistered' }))).toMatch(/has none/)
     }
+  })
+})
+
+describe('background image options', () => {
+  const hidden = (option: 'position' | 'repeat' | 'any', parent: object, value?: unknown) => {
+    const { document, path } = inPage({ _type: 'richText' }, 'imageVertical')
+    return imageOptionHidden(option)({ document, path, parent, value } as never)
+  }
+  const picture = { asset: { _ref: 'image-abc-10x10-png' } }
+
+  it('are hidden until there is a picture', () => {
+    for (const option of ['position', 'repeat', 'any'] as const) {
+      expect(hidden(option, { imageSize: 'actual' })).toBe(true)
+    }
+    expect(hidden('any', { image: picture })).toBe(false)
+  })
+
+  it('show Position for Show the whole picture and Actual size only', () => {
+    expect(hidden('position', { image: picture })).toBe(true)
+    expect(hidden('position', { image: picture, imageSize: 'cover' })).toBe(true)
+    expect(hidden('position', { image: picture, imageSize: 'contain' })).toBe(false)
+    expect(hidden('position', { image: picture, imageSize: 'actual' })).toBe(false)
+  })
+
+  it('show Repeat for Actual size only', () => {
+    expect(hidden('repeat', { image: picture, imageSize: 'contain' })).toBe(true)
+    expect(hidden('repeat', { image: picture, imageSize: 'actual' })).toBe(false)
+  })
+
+  it('keep a stale value visible, with a warning that says why', () => {
+    const parent = { image: picture, imageSize: 'cover' }
+    expect(hidden('position', parent, 'bottom')).toBe(false)
+    expect(staleImageOptionMessage('position', 'bottom', { parent })).toMatch(/hotspot/)
+    expect(staleImageOptionMessage('repeat', 'both', { parent })).toMatch(/Actual size/)
+    expect(staleImageOptionMessage('position', 'bottom', { parent: { imageSize: 'actual' } })).toBe(
+      true,
+    )
+    expect(staleImageOptionMessage('repeat', undefined, { parent })).toBe(true)
   })
 })

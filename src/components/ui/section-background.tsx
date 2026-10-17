@@ -1,8 +1,14 @@
 import { SanityImage } from '@/components/ui/sanity-image'
+import { urlFor } from '@/lib/sanity/image'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
-import { SECTION_OVERLAY_OPACITY } from '@/lib/sanity/section-style-options'
+import { SECTION_OVERLAY_OPACITY, SECTION_WASH_COLOURS } from '@/lib/sanity/section-style-options'
 
-import type { ResolvedSectionStyle, SectionTone } from './section-style'
+import {
+  type ResolvedBackgroundImage,
+  type ResolvedSectionStyle,
+  type SectionTone,
+  resolveBackgroundImage,
+} from './section-style'
 
 /** The tone's own background colour, which the overlay lays over the picture (`alt` paints with surface-alt). */
 const OVERLAY_CLASS: Record<SectionTone, string> = {
@@ -12,7 +18,19 @@ const OVERLAY_CLASS: Record<SectionTone, string> = {
   accent: 'bg-surface',
 }
 
+const DEFAULT_PLACEMENT = resolveBackgroundImage(undefined)
+
+/**
+ * Stays put while scrolling: the layer is fixed to the viewport and the layer around it clips it to
+ * the section (`clip-path: inset(0)`, set on the wrapper below), because `background-attachment:
+ * fixed` does not apply to an image element. Large screens only, and not for visitors who ask for
+ * less motion; elsewhere the layer simply scrolls with the section.
+ */
+const FIXED_LAYER_CLASS = 'lg:motion-safe:fixed'
+
 type Props = Pick<ResolvedSectionStyle, 'tone' | 'gradient' | 'image' | 'overlay'> & {
+  /** Placement, strength and wash; unset is the default picture (fills the section, full strength, background colour). */
+  placement?: ResolvedBackgroundImage
   /** The first section holds the page's LCP candidates, so its picture loads at once; others are lazy. */
   isFirst: boolean
 }
@@ -24,7 +42,14 @@ type Props = Pick<ResolvedSectionStyle, 'tone' | 'gradient' | 'image' | 'overlay
  * so they take no space and cannot shift the layout. Purely decorative, hence hidden from assistive
  * technology, and the picture has empty alt text. Renders nothing for a section with neither.
  */
-export function SectionBackground({ tone, gradient, image, overlay, isFirst }: Props) {
+export function SectionBackground({
+  tone,
+  gradient,
+  image,
+  overlay,
+  placement = DEFAULT_PLACEMENT,
+  isFirst,
+}: Props) {
   if (!gradient && !image) return null
   const opacity = SECTION_OVERLAY_OPACITY[overlay]
 
@@ -32,7 +57,7 @@ export function SectionBackground({ tone, gradient, image, overlay, isFirst }: P
     <div
       aria-hidden="true"
       data-section-background=""
-      className="absolute inset-0 -z-10 overflow-hidden"
+      className={`absolute inset-0 -z-10 overflow-hidden${placement.fixed ? '[clip-path:inset(0)]' : ''}`}
     >
       {gradient ? (
         <div
@@ -44,24 +69,89 @@ export function SectionBackground({ tone, gradient, image, overlay, isFirst }: P
       ) : null}
       {image ? (
         <>
-          <SanityImage
-            image={image}
-            alt=""
-            fill
-            preload={isFirst}
-            sizes="100vw"
-            className="object-cover"
-            style={{ objectPosition: hotspotObjectPosition(image) }}
-          />
+          <div
+            data-section-image={placement.size}
+            data-image-fixed={placement.fixed ? '' : undefined}
+            // The picture's strength: it lets the section's own background show through.
+            style={placement.strength < 1 ? { opacity: placement.strength } : undefined}
+            className={`absolute inset-0 ${placement.fixed ? FIXED_LAYER_CLASS : ''}`.trim()}
+          >
+            <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
+          </div>
           {opacity > 0 ? (
             <div
               data-section-overlay={overlay}
-              className={`absolute inset-0 ${OVERLAY_CLASS[tone]}`}
-              style={{ opacity }}
+              data-overlay-colour={placement.wash}
+              className={`absolute inset-0 ${placement.wash === 'background' ? OVERLAY_CLASS[tone] : ''}`.trim()}
+              style={{
+                opacity,
+                ...(placement.wash === 'background'
+                  ? {}
+                  : { backgroundColor: SECTION_WASH_COLOURS[placement.wash] }),
+              }}
             />
           ) : null}
         </>
       ) : null}
     </div>
+  )
+}
+
+/**
+ * The picture itself. Fill the section crops to the hotspot; Show the whole picture fits inside and
+ * sits where Position says; Actual size draws it at its own size (a SanityImage at the asset's
+ * dimensions, aligned by flex) or, with Repeat, as a CSS background, because an <img> cannot tile.
+ */
+function BackgroundPicture({
+  image,
+  placement,
+  isFirst,
+}: {
+  image: NonNullable<Props['image']>
+  placement: ResolvedBackgroundImage
+  isFirst: boolean
+}) {
+  if (placement.tiled) {
+    const asset = image.asset
+    const url = asset
+      ? urlFor({
+          asset: { _ref: asset._id },
+          crop: image.crop ?? undefined,
+          hotspot: image.hotspot ?? undefined,
+        }).url()
+      : undefined
+    return (
+      <div
+        data-section-tile={placement.repeat}
+        className="absolute inset-0"
+        style={{
+          backgroundImage: url ? `url("${url}")` : undefined,
+          backgroundRepeat: placement.repeatCss,
+          backgroundPosition: placement.position,
+        }}
+      />
+    )
+  }
+
+  if (placement.size === 'actual') {
+    return (
+      <div className={`absolute inset-0 flex overflow-hidden ${placement.alignClass}`}>
+        <SanityImage image={image} alt="" preload={isFirst} className="max-w-none shrink-0" />
+      </div>
+    )
+  }
+
+  return (
+    <SanityImage
+      image={image}
+      alt=""
+      fill
+      preload={isFirst}
+      sizes="100vw"
+      className={placement.size === 'contain' ? 'object-contain' : 'object-cover'}
+      style={{
+        objectPosition: placement.position ?? hotspotObjectPosition(image),
+      }}
+    />
   )
 }

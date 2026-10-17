@@ -69,7 +69,15 @@ describe('sectionStyle', () => {
       'tone',
       'gradient',
       'image',
+      'imageSize',
+      'imageStrength',
       'overlay',
+      'overlayColor',
+      'imageVertical',
+      'imageHorizontal',
+      'imageRepeat',
+      'imageStrengthPercent',
+      'imageFixed',
       'motion',
       'motionIntensity',
       'motionDuration',
@@ -93,6 +101,7 @@ describe('sectionStyle', () => {
       'spacing',
       'width',
       'align',
+      'fillScreen',
       'anchorId',
     ])
   })
@@ -104,13 +113,18 @@ describe('sectionStyle', () => {
     >
     expect(byName.tone?.fieldset).toBeUndefined()
     expect(byName.motion?.fieldset).toBeUndefined()
-    for (const name of ['spacing', 'width', 'align', 'anchorId']) {
+    for (const name of ['spacing', 'width', 'align', 'fillScreen', 'anchorId']) {
       expect(byName[name]?.fieldset).toBe('layoutOptions')
     }
     expect(sectionStyle.fieldsets).toEqual([
       expect.objectContaining({
         name: 'motionAdvanced',
         title: 'Advanced: animation',
+        options: { collapsible: true, collapsed: true },
+      }),
+      expect.objectContaining({
+        name: 'backgroundAdvanced',
+        title: 'Advanced: background',
         options: { collapsible: true, collapsed: true },
       }),
       expect.objectContaining({
@@ -124,6 +138,26 @@ describe('sectionStyle', () => {
         options: { collapsible: true, collapsed: true },
       }),
     ])
+  })
+
+  it('puts the background image options in Advanced: background, and the presets outside it', () => {
+    const byName = Object.fromEntries(styleFields.map((f) => [f.name, f])) as Record<
+      string,
+      LooseField
+    >
+    for (const name of [
+      'imageVertical',
+      'imageHorizontal',
+      'imageRepeat',
+      'imageStrengthPercent',
+      'imageFixed',
+    ]) {
+      expect(byName[name]?.fieldset).toBe('backgroundAdvanced')
+    }
+    for (const name of ['imageSize', 'imageStrength', 'overlayColor']) {
+      expect(byName[name]?.fieldset).toBeUndefined()
+      expect(byName[name]?.options?.presetPicker).toBe(true)
+    }
   })
 
   it('has no box of its own', () => {
