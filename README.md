@@ -721,7 +721,7 @@ still be deleted) and its title at the time, every field as `{ label, value }` (
 email), the page path, `createdAt`, `status` (`new`, `read`, `archived`) and, when present, the **attribution**: the
 referrer (origin and path only; the query string and fragment are dropped, because they can carry search terms and tokens)
 and the five UTM values (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`). A small inline script
-next to the form fills hidden inputs when the page loads (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds
+next to the form fills hidden inputs when the page loads and again just before a send, in case React replaced them while hydrating (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds
 nothing to the JavaScript budget); the server reads only those inputs, on one line and
 capped at 200 characters, because a visitor can forge anything. Attribution is the page's own address and referrer, not a
 visit history: a visitor who clicked a campaign link, browsed on and then wrote to you has none. Without JavaScript there
@@ -954,12 +954,12 @@ Set `AUTH_ALLOWED_EMAILS` unless your provider already limits who can sign in: "
 
 ### IndexNow
 
-Search engines that support [IndexNow](https://www.indexnow.org) (Bing, Yandex and others) hear about a published page right away instead of waiting to crawl it. It runs from the webhook, so it needs webhook mode (above) with the projection `{_type, "slug": slug.current}`.
+Search engines that support [IndexNow](https://www.indexnow.org) (Bing, Yandex and others) hear about a published page or blog post right away instead of waiting to crawl it. It runs from the webhook, so it needs webhook mode (above) with the projection `{_type, "slug": slug.current}`.
 
 1. Generate a key: `openssl rand -hex 16` (8–128 letters, digits and dashes).
 2. Set `INDEXNOW_KEY` to it in the deployment's environment variables and redeploy. The site then serves the key at `/<key>.txt`, which is how search engines check the site is yours. Without the variable that URL is a 404 and nothing is sent.
 
-After each valid `page` webhook the route POSTs the page's URL to `api.indexnow.org` once the response has been sent, so a slow or failing IndexNow never delays or fails the webhook (failures are logged with `console.error`). Only pages are sent, not blog posts or other types. Nothing is sent when the site URL is localhost. The URL is the site URL plus the page's slug.
+After each valid `page` or `post` webhook the route POSTs the document's URL to `api.indexnow.org` once the response has been sent, so a slow or failing IndexNow never delays or fails the webhook (failures are logged with `console.error`). Only pages and blog posts are sent, not other types. Nothing is sent when the site URL is localhost. A page's URL is the site URL plus its slug (`home` is the root); a post's is the site URL plus `/blog/<slug>`. The standard projection `{_type, "slug": slug.current}` already carries a post's slug.
 
 ### Edge Config redirects
 

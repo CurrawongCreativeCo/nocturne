@@ -45,6 +45,10 @@ describe('pathFromReferer', () => {
 describe('ATTRIBUTION_SCRIPT', () => {
   /** Runs the script against stand-ins for the form, its inputs and the page. */
   function run(search: string, referrer: string) {
+    return setUp(search, referrer).values()
+  }
+
+  function setUp(search: string, referrer: string) {
     const inputs = ['referrer', 'utm_source', 'utm_medium'].map((name) => ({
       dataset: { attribution: name },
       value: '',
@@ -61,8 +65,24 @@ describe('ATTRIBUTION_SCRIPT', () => {
         }),
       },
     }
-    runInNewContext(ATTRIBUTION_SCRIPT, { document, location: { search }, URLSearchParams })
-    return Object.fromEntries(inputs.map((i) => [i.dataset.attribution, i.value]))
+    const listeners: ((event: { target: unknown }) => void)[] = []
+    const window: Record<string, unknown> = {
+      addEventListener: (_type: string, listener: (event: { target: unknown }) => void) => {
+        listeners.push(listener)
+      },
+    }
+    runInNewContext(ATTRIBUTION_SCRIPT, {
+      document,
+      location: { search },
+      URLSearchParams,
+      window,
+    })
+    return {
+      listeners,
+      form: document.currentScript.closest(),
+      inputs,
+      values: () => Object.fromEntries(inputs.map((i) => [i.dataset.attribution, i.value])),
+    }
   }
 
   it('puts the referrer and the page’s UTM values in the inputs', () => {
@@ -75,5 +95,18 @@ describe('ATTRIBUTION_SCRIPT', () => {
 
   it('leaves them empty when there is nothing to report', () => {
     expect(run('', '')).toEqual({ referrer: '', utm_source: '', utm_medium: '' })
+  })
+
+  it('refills the inputs when the form is submitted, even if they were replaced', () => {
+    const page = setUp('?utm_source=news', 'https://www.google.com/')
+    expect(page.listeners).toHaveLength(1)
+
+    for (const input of page.inputs) input.value = ''
+    page.listeners[0]?.({ target: page.form })
+    expect(page.values()).toEqual({
+      referrer: 'https://www.google.com/',
+      utm_source: 'news',
+      utm_medium: '',
+    })
   })
 })

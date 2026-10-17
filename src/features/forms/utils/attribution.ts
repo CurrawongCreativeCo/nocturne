@@ -23,9 +23,14 @@ const MAX_LENGTH = 200
  * `document.referrer`, the others from the page address. It runs while the page loads, so it only
  * helps a visitor who arrived with a full page load, which is who a referrer or campaign link
  * describes; moving between pages on the site (client-side) renders it without running it.
+ *
+ * React can replace the server-rendered inputs with new, empty ones while it hydrates (seen on slow
+ * runners), which would drop the values. So the script also remembers them and, once per page, refills
+ * the inputs of any form just before it is submitted (a capturing listener on `window` runs before
+ * React reads the form).
  */
 export const ATTRIBUTION_SCRIPT =
-  "var q=new URLSearchParams(location.search);document.currentScript.closest('form').querySelectorAll('[data-attribution]').forEach(function(i){var n=i.dataset.attribution;i.value=n==='referrer'?document.referrer:q.get(n)||''})"
+  "var q=new URLSearchParams(location.search),r=document.referrer,f=function(form){form.querySelectorAll('[data-attribution]').forEach(function(i){var n=i.dataset.attribution;i.value=n==='referrer'?r:q.get(n)||''})};f(document.currentScript.closest('form'));if(!window.__attribution){window.__attribution=1;window.addEventListener('submit',function(e){f(e.target)},true)}"
 
 /** `https://example.com/path` for a referrer URL, or nothing for an empty or non-web one. */
 function referrerOrigin(referrer: string) {
