@@ -41,6 +41,20 @@ you start a release.
   GET form, so without JavaScript they go to a fallback URL. Section links scroll smoothly unless the visitor asks for
   reduced motion. Content health reports links to missing sections and unpublished panels. See README, _Link actions_.
 
+- **Link list section and Link page template:** _Add item → Link list_: an optional profile (picture or logo, name, bio up
+  to 160 characters), social icons (Business info's by default, or a custom set) and ordered links with a label, the shared
+  **Goes to** action, a description, an icon or thumbnail, a group heading, one large (featured) link, Show or Hide, and
+  Show from / Show until. Five layouts as pictures in the agency-only preset bar (Minimal, Cards, Editorial, Compact,
+  Image-focused; the last is Cards with large pictures, because a section has at most four layouts). Scheduling is decided
+  at request time in a small `<Suspense>` boundary, so pages stay cached and a link that isn't due isn't in the HTML. A click
+  sends a `link_click` event to the analytics providers the visitor has accepted (an inline script,
+  `src/lib/analytics/track-script.ts`, so no JavaScript is added to any page), and links to another website can carry UTM tags (Advanced).
+- **Minimal page option and Link page template:** an agency-only page option, _Minimal page (no header or footer)_, and a
+  _Link page_ new-page template (slug `links`, a profile, social icons, a Minimal list and a footer note). `PAGE_QUERY`
+  gains a `minimal` flag; the shell's header, announcement and footer are wrapped in `[data-site-chrome]`. See README, _Link list_.
+- `SocialIcon` (`components/ui/social-icon.tsx`) and the shared platform list (`lib/social-platforms.ts`); Business info's
+  social profiles are available to page sections through `LocationBusiness.socialLinks`.
+
 ### Changed
 
 - The link fragment (`linkFields`) also returns `anchor`, `panel` (id and title), `fallbackUrl` and `bookingUrl`.
@@ -50,7 +64,8 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None. Existing links keep their stored values. Run `npm run typegen` after merging.
+None. Existing links keep their stored values. Run `npm run typegen` after merging. Add `link_click` as a goal in Plausible
+if you use it. The new visual baselines (`link-list-*`) need the **Update visual baselines** workflow.
 
 ## [1.4.0] - 2026-10-16
 

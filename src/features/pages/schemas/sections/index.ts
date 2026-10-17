@@ -4,6 +4,7 @@ import { featuresGrid } from './features-grid'
 import { formSection } from './form-section'
 import { gallery } from './gallery'
 import { hero } from './hero'
+import { linkList } from './link-list'
 import { location } from './location'
 import { logoCloud } from './logo-cloud'
 import { mediaText } from './media-text'
@@ -48,5 +49,6 @@ export const sectionTypes = [
   team,
   video,
   process,
+  linkList,
   // new-section:register
 ]

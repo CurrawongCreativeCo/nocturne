@@ -4,6 +4,7 @@ import {
   heroSupportingFields,
   imageDesignFields,
   imageFields,
+  linkFields,
   portableTextFields,
   sectionStyleFields,
   statItemFields,
@@ -275,6 +276,35 @@ export const processFragment = /* groq */ `
   }
 `
 
+export const linkListFragment = /* groq */ `
+  _type == "linkList" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    thumbnailSize,
+    title,
+    profile { name, bio, image { ${imageFields} } },
+    socialSource,
+    "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),
+    // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due
+    // (the page is cached and can't know the time), see LINK_SCHEDULE_SCRIPT.
+    "links": links[visibility != "hide"] {
+      _key,
+      label,
+      description,
+      icon,
+      featured,
+      group,
+      showFrom,
+      showUntil,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      thumbnail { ${imageFields} },
+      link { ${linkFields} }
+    }
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -297,6 +327,7 @@ const sectionsFragment = /* groq */ `
   ${teamFragment},
   ${videoFragment},
   ${processFragment},
+  ${linkListFragment},
   _type
 `
 

@@ -16,6 +16,7 @@ import { FeaturesGrid } from './sections/features-grid'
 import { FormSection } from './sections/form-section'
 import { Gallery } from './sections/gallery'
 import { Hero } from './sections/hero'
+import { LinkList } from './sections/link-list'
 import { Location } from './sections/location'
 import { LogoCloud } from './sections/logo-cloud'
 import { MediaText } from './sections/media-text'
@@ -52,6 +53,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   team: Team,
   video: Video,
   process: Process,
+  linkList: LinkList,
   // new-section:register
 }
 

@@ -57,11 +57,16 @@ export async function PageView({
 
   const callbackUrl = slugToPath(slug)
   const breadcrumbs = <Breadcrumbs items={await getBreadcrumbs(slug)} />
+  // A "Minimal page" marks itself, and globals.css hides the site's header, announcement and footer
+  // while the marker is on screen. It must be a top-level element: Next keeps the page you left in
+  // the DOM, hidden, by styling its top-level elements `display: none`.
+  const minimal = page.minimal ? <span hidden data-minimal-page="" /> : null
 
   // A members-only page has no content here (see PAGE_QUERY): it is fetched once the session is checked.
   if (isMembersOnly(page.access) && !preview) {
     return (
       <>
+        {minimal}
         {breadcrumbs}
         <Suspense fallback={null}>
           {renderMembersGate({
@@ -93,6 +98,7 @@ export async function PageView({
 
   return (
     <>
+      {minimal}
       {breadcrumbs}
       <PageContent
         title={page.title}
