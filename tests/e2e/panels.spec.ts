@@ -51,6 +51,9 @@ test.describe('opening and closing', () => {
     page,
   }) => {
     await page.goto(PAGE)
+    // The controller is a lazy chunk. A click waits for the button to be actionable, but Enter would
+    // not: pressed before the chunk's click listener is attached, it submits the fallback form instead.
+    await page.waitForLoadState('networkidle')
     await enquireButton(page).focus()
     await page.keyboard.press('Enter')
     const dialog = dialogNamed(page, 'Enquire now')
