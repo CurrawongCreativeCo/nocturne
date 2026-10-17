@@ -38,7 +38,8 @@ are a good touch. The friction is in four places:
   (now fixed).
 - **Two places for one thing:** gradients, parallax strength and the hero's background.
 
-Five Small fixes are done (_Quick fixes made now_). Scenario G can't be done yet because task 07 hasn't shipped.
+Five Small fixes are done (_Quick fixes made now_), and three more followed your decisions (issues 5, 6 and 7;
+see _Decisions_). Scenario G can't be done yet because task 07 hasn't shipped.
 
 ## The ten highest-impact issues
 
@@ -234,45 +235,28 @@ labels, field order and preview subtitles. Screens 12 and 17 already show fixes 
    **Brand colours**, as the sidebar does. (`section-style.ts`, `background-contrast.ts`, gradient picker, styleguide,
    README)
 
-## More quick fixes, not made
+## Decisions (answered 17 October 2026)
 
-Small and safe, but over the five-fix limit or waiting on a decision:
+| #   | Question                           | Answer                                                            | What happened                                                  |
+| --- | ---------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------- |
+| 1   | Do clients need variants?          | Yes, for marketing content                                        | Variants bar and tool stay for clients (issues 2 and 9 closed) |
+| 2   | Do clients schedule with Releases? | Yes                                                               | Releases stays for clients                                     |
+| 3   | Dark mode?                         | Prefer dark, but offer both                                       | Task 106 (`plan-tasks.md`)                                     |
+| 4   | "More options" naming              | _Advanced_ everywhere                                             | Done: _Advanced: animation / edge / layout / image_ (issue 5)  |
+| 5   | Background names                   | _Page_, _Tinted_, _Contrast_, _Brand_                             | Done (issue 6)                                                 |
+| 6   | Publish confirmation               | Only first publish and address changes                            | Done: `needsPublishConfirmation` (issue 7)                     |
+| 7   | Heading gradients                  | Editors pick their own colours, even non-brand                    | Task 107                                                       |
+| 8   | Parallax strength                  | One preset plus strength, and a direction (up, down, left, right) | Task 108, with a design for direction and a migration          |
 
-- **Default colours on Brand colours** (issue 3): swatch and placeholder show the resolved default. Studio code, no
-  stored data.
-- **Hide the variants tool from clients** (issue 9), once you confirm.
-- **Icons:** _Start here_, _Business info_ and the homepage's list icon all use the Home icon (`start-here/plugin.ts`,
-  `structure.ts`, `page.ts`; Seen in 02). Give Business info its own.
-- **Background tone names** (issue 6) and **collapsed area names** (issue 5), once you choose them.
-- **Identity & search** title and description.
-- Housekeeping: `CLIENT_STRUCTURE_IDS` lists `startHere`, which is a tool, not a desk item, so it matches nothing
-  (`src/features/studio/utils/structure-access.ts`).
+On 4: several of these areas share one Design tab, so each leads with _Advanced_ and names what it tunes; areas that
+hold one control's options stay plain _Advanced_. Dropping the qualifiers is a one-line change if you want the bare word.
 
-## Decisions for you
+## Still open
 
-1. **Variants bar (issue 2):** do clients ever need content variants, or only the agency on sites with an A/B test?
-2. **Client tools (issue 9):** do clients schedule posts with Releases?
-3. **Dark mode (issue 10):** bring the Studio's dark scheme back, or go light-only?
-4. **"More options" naming (issue 5):** _More … options_ under a control and _Advanced_ for the agency-only area at the
-   end of a tab, or _Advanced_ everywhere?
-5. **Background names (issue 6):** proposed _Page_, _Tinted_, _Contrast_, _Brand_.
-6. **Publish confirmation (issue 7):** on every publish, or only on first publish and address changes?
-7. **Heading gradients (issue 8):** one list or two?
-8. **Parallax strength:** one _Parallax_ preset plus Intensity, or three presets and no Intensity?
-
-## Proposed new plan tasks
-
-- **Studio chrome for clients (S):** decisions 1 and 2: the variants bar and tools only where needed.
-- **Brand colours defaults (S):** issue 3.
-- **Start here cards (S–M):** issue 4, with Sanity UI cards, icons and a primary action.
-- **Studio dark scheme (M):** decision 3, investigate and restore or remove.
-- **Studio naming pass (S):** decisions 4 and 5, the icons and _Identity & search_; update the README hero preset table
-  and the editor guide.
-- **Publish without a dialog when nothing risky changed (S–M):** decision 6, keeping the redirect offer.
-- **Unified gradients (M):** decision 7.
-- **One parallax strength (M):** decision 8, with a migration only if presets merge.
-- **Hero subtitle from its preset (S–M)**, **empty-singleton setup (S)** and **locations only once a slug exists (S)**.
-- Already planned and confirmed by this audit: **task 88** (theme contrast, issue 1) and **task 07** (mobile menu).
+Small follow-ups (tasks 109–112 in `plan-tasks.md`): Brand colours defaults (issue 3), Start here cards (issue 4), Studio
+housekeeping (Business info icon, _Identity & search_ name, `startHere` in `CLIENT_STRUCTURE_IDS`, locations only once a
+slug exists, no "New …" on empty settings) and the hero subtitle from its preset. Already planned: **task 88** (theme
+contrast, issue 1) and **task 07** (mobile menu, scenario G).
 
 ## Screenshots
 
