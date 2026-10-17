@@ -7,6 +7,7 @@ import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 import { adjustLightnessForContrast } from '@/lib/color/contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 
+import { defaultColour } from '../utils/default-colour'
 import {
   resolveDesignTokens,
   type ContrastCheck,
@@ -57,11 +58,14 @@ function CheckBadge({ check }: { check: ContrastCheck }) {
 export function ColourInput(props: StringInputProps) {
   const { value, onChange, elementProps, path, readOnly } = props
   const [draft, setDraft] = useState<string | null>(null)
+  const [cleared, setCleared] = useState(false)
   const document = useFormValue([]) as DesignOverrides | undefined
   const [first] = path
   const field = path.length === 1 && typeof first === 'string' ? first : null
   const hex = value && HEX_PATTERN.test(value) ? value.toLowerCase() : null
   const shown = draft ?? value ?? ''
+  const fallback = defaultColour(field, document)
+  const showingDefault = !hex && draft === null && fallback !== null
   const invalid = draft !== null && draft.trim() !== '' && toHex(draft) === null
 
   const checks = field
@@ -72,10 +76,15 @@ export function ColourInput(props: StringInputProps) {
     hex && fixable ? adjustLightnessForContrast(hex, fixable.background, fixable.required) : null
 
   const commit = (text: string) => {
-    if (text.trim() === '') onChange(unset())
-    else {
+    if (text.trim() === '') {
+      if (value) setCleared(true)
+      onChange(unset())
+    } else {
       const next = toHex(text)
-      if (next) onChange(set(next))
+      if (next) {
+        setCleared(false)
+        onChange(set(next))
+      }
     }
   }
 
@@ -85,10 +94,11 @@ export function ColourInput(props: StringInputProps) {
         <input
           type="color"
           aria-label={`${props.schemaType.title ?? 'Colour'}: colour picker`}
-          value={hex ?? '#000000'}
+          value={hex ?? fallback ?? '#000000'}
           disabled={readOnly}
           onChange={(event) => {
             setDraft(null)
+            setCleared(false)
             onChange(set(event.currentTarget.value.toLowerCase()))
           }}
           style={{ width: 44, height: 36, padding: 0, border: 'none', background: 'none' }}
@@ -97,7 +107,7 @@ export function ColourInput(props: StringInputProps) {
           <TextInput
             {...elementProps}
             value={shown}
-            placeholder="#3266e4"
+            placeholder={fallback ?? '#3266e4'}
             maxLength={7}
             spellCheck={false}
             readOnly={readOnly}
@@ -121,11 +131,26 @@ export function ColourInput(props: StringInputProps) {
             fontSize={1}
             onClick={() => {
               setDraft(null)
+              setCleared(true)
               onChange(unset())
             }}
           />
         )}
+        {showingDefault && (
+          <Badge tone="default" fontSize={1}>
+            Default
+          </Badge>
+        )}
       </Flex>
+      {/* Always rendered so screen readers announce the change when a colour is cleared. */}
+      <div role="status">
+        {showingDefault && (
+          <Text size={1} muted>
+            {cleared ? 'Cleared. ' : ''}Using the default colour {fallback}. Nothing is saved until
+            you pick a colour.
+          </Text>
+        )}
+      </div>
       {invalid && (
         <Text size={1} style={{ color: 'var(--card-badge-critical-fg-color)' }}>
           Use a six-digit hex colour such as #3266e4.

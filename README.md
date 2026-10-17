@@ -1096,6 +1096,11 @@ Studio access; see _Studio roles and permissions_).
   eyebrows, the share image), _Secondary_ (a new `accent-2` role, available as `bg-accent-2 text-accent-2-ink` and
   in gradients) and _Highlight_ (optional, `bg-highlight text-highlight-ink`). Dark swaps the surface and ink pairs
   (the page goes dark, the inverse tone goes light) and sets `color-scheme: dark`.
+- **Empty colours show the real default.** A colour left empty shows the colour the site uses for it (resolved by
+  `resolveDesignTokens`, so Dark Appearance gives the dark defaults) in the swatch and as the hex placeholder, with a
+  "Default" label; clearing a colour says it has returned to the default. Nothing is stored until a colour is picked.
+  Until a Primary is set, buttons use the near-black `cta` colour while accent sections and links use the `accent`
+  colour, so the Primary swatch (the accent) can differ from the buttons in the preview.
 - **Advanced** (collapsed): _Background_, _Alternate background_, _Inverse background_, _Text_, _Muted text_ and
   _Borders_, and **gradients**: a name, an angle and two or three colours each. Each gradient becomes a CSS variable
   `--gradient-<name>` (for example `--gradient-forest-dusk`) for headings and backgrounds to use.

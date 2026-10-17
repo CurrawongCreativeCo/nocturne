@@ -20,6 +20,9 @@ you start a release.
 
 ### Added
 
+- **Brand colours show the real defaults (Studio):** an empty colour now shows the colour the site actually uses (in the swatch and as the
+  hex placeholder) with a "Default" label, instead of a black swatch and an example hex. Clearing a colour says it has returned
+  to the default, and Primary's description explains that buttons stay near-black until a Primary is set. Nothing new is stored.
 - **Link-in-bio extras (Studio):** two actions on pages, **Copy link** and **Download QR code**. The QR dialog previews the
   code and downloads it as SVG or PNG in the site's ink and surface colours, with a quiet zone, falling back to black on white
   if the colours would not scan, and an optional `utm_source=qr` so scans show in analytics. Both use the published address.
