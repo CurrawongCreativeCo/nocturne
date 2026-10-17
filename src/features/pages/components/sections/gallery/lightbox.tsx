@@ -2,8 +2,9 @@
 
 import type { PanInfo } from 'motion/react'
 import * as m from 'motion/react-m'
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
 
+import { useModalDialog } from '@/components/ui/overlay/use-modal-dialog'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { Slider, type SliderHandle } from '@/components/ui/slider'
 import { shouldDismiss } from '@/components/ui/swipe-dismiss'
@@ -35,20 +36,8 @@ export function Lightbox({ images, label, initialIndex, onClose }: Props) {
   const sliderRef = useRef<SliderHandle>(null)
   const [current, setCurrent] = useState(initialIndex)
 
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    if (!dialog.open) dialog.showModal()
-
-    // The page behind is inert but can still scroll under a wheel or a swipe.
-    const root = document.documentElement
-    const overflow = root.style.overflow
-    root.style.overflow = 'hidden'
-    return () => {
-      root.style.overflow = overflow
-      if (dialog.open) dialog.close()
-    }
-  }, [])
+  // Mounted open: the hook shows it and calls `onClose` however it closes.
+  useModalDialog(dialogRef, true, onClose)
 
   // The slider moves itself when focus is inside it; this is for the rest (the Close button, the dialog).
   const onKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
@@ -77,7 +66,6 @@ export function Lightbox({ images, label, initialIndex, onClose }: Props) {
     <dialog
       ref={dialogRef}
       aria-label={`${label}: image viewer`}
-      onClose={onClose}
       onKeyDown={onKeyDown}
       className="fixed inset-0 m-0 size-full max-h-none max-w-none overflow-hidden overscroll-contain bg-surface p-0 text-ink"
     >

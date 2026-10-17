@@ -9,12 +9,19 @@ export const CLIENT_STRUCTURE_IDS: ReadonlySet<string> = new Set([
   'startHere',
   'pages',
   'blog',
+  'reusable',
   'websiteSettings',
   'team',
   'events',
   'enquiries',
   'businessInfo',
 ])
+
+/**
+ * What clients see inside Reusable content: the panels' content, which they edit. Shared sections
+ * and forms stay with the agency.
+ */
+export const CLIENT_REUSABLE_IDS: ReadonlySet<string> = new Set(['panel'])
 
 /**
  * What clients see inside Website settings: the cookie banner (legal wording) stays with the

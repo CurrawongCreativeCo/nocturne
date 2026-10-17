@@ -7,6 +7,7 @@ import { ComposeIcon } from '@sanity/icons/Compose'
 import { DocumentsIcon } from '@sanity/icons/Documents'
 import { DownloadIcon } from '@sanity/icons/Download'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
+import { ExpandIcon } from '@sanity/icons/Expand'
 import { FolderIcon } from '@sanity/icons/Folder'
 import { HomeIcon } from '@sanity/icons/Home'
 import { InboxIcon } from '@sanity/icons/Inbox'
@@ -43,7 +44,11 @@ import {
 } from './utils/event-lists'
 import { isTypeVisible } from './utils/feature-visibility'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
-import { CLIENT_WEBSITE_SETTINGS_IDS, filterStructureItems } from './utils/structure-access'
+import {
+  CLIENT_REUSABLE_IDS,
+  CLIENT_WEBSITE_SETTINGS_IDS,
+  filterStructureItems,
+} from './utils/structure-access'
 // new-singleton:import
 
 const PAGES_QUERY = `*[_type == "page"]{ _id, "slug": slug.current }`
@@ -142,6 +147,7 @@ const LISTED_TYPES = new Set([
   'eventCategory',
   'frame',
   'enquiry',
+  'panel',
   // new-document:listed
 ])
 
@@ -261,12 +267,27 @@ export const structure: StructureResolver = (S, context) => {
     ...(hasType('enquiry') && isTypeVisible('enquiry') ? [enquiriesList(S, context)] : []),
     // new-document:list
     S.divider(),
-    group(S, 'reusable', 'Reusable content', StackIcon, [
-      S.documentTypeListItem('sharedSection').title('Shared sections'),
-      ...(isTypeVisible('form')
-        ? [S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon)]
-        : []),
-    ]),
+    group(
+      S,
+      'reusable',
+      'Reusable content',
+      StackIcon,
+      // Clients edit panels' content; the rest stays with the agency (CLIENT_REUSABLE_IDS).
+      filterStructureItems(
+        [
+          S.documentTypeListItem('sharedSection').title('Shared sections'),
+          ...(isTypeVisible('form')
+            ? [S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon)]
+            : []),
+          ...(hasType('panel')
+            ? [S.documentTypeListItem('panel').title('Panels').icon(ExpandIcon)]
+            : []),
+        ],
+        audience,
+        idOf,
+        CLIENT_REUSABLE_IDS,
+      ),
+    ),
     group(S, 'websiteSettings', 'Website settings', CogIcon, websiteSettings),
     ...(design.length > 0 ? [group(S, 'design', 'Design', ColorWheelIcon, design)] : []),
     S.divider(),

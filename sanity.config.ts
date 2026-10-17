@@ -24,6 +24,7 @@ import { framesSchemaTypes } from './src/features/frames/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { sectionTypes } from './src/features/pages/schemas/sections'
 import { pageTemplates } from './src/features/pages/schemas/templates'
+import { panelsSchemaTypes } from './src/features/panels/schemas'
 import { pricingSchemaTypes } from './src/features/pricing/schemas'
 import { hidePricesFromNewMenu } from './src/features/pricing/studio'
 import { siteSchemaTypes } from './src/features/site/schemas'
@@ -101,6 +102,7 @@ export default defineConfig({
       ...teamSchemaTypes,
       ...eventsSchemaTypes,
       ...framesSchemaTypes,
+      ...panelsSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,
     ],

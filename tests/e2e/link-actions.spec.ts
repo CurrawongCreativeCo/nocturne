@@ -72,26 +72,35 @@ test.describe('panel and booking buttons', () => {
     )
   })
 
-  test('nothing claims the click, so they go to their fallback URL', async ({ page }) => {
+  test('a panel button opens its panel instead of following its fallback link', async ({
+    page,
+  }) => {
     await page.goto(PAGE)
     await page.getByRole('button', { name: /Open enquiry/ }).click()
+    await expect(page.getByRole('dialog', { name: 'Enquire now' })).toBeVisible()
+    await expect(page).toHaveURL(/\/link-actions#panel-enquire$/)
+  })
+
+  test('a booking button nothing claims goes to its fallback URL', async ({ page }) => {
+    await page.goto(PAGE)
+    await page.getByRole('button', { name: 'Book a visit' }).click()
     await expect(page).toHaveURL(/\/about\??$/)
   })
 
-  test('stay out of the way when an overlay claims the click', async ({ page }) => {
+  test('stays out of the way when an overlay claims the click', async ({ page }) => {
     await page.goto(PAGE)
-    // What the overlay will do: one delegated listener on the trigger attributes.
+    // What a booking overlay will do: one delegated listener on the trigger attributes.
     await page.evaluate(() => {
       document.addEventListener('click', (event) => {
         const trigger = (event.target as Element).closest<HTMLElement>('[data-overlay-kind]')
-        if (!trigger) return
+        if (trigger?.dataset.overlayKind !== 'booking') return
         event.preventDefault()
-        document.body.dataset.opened = trigger.dataset.overlayId
+        document.body.dataset.opened = 'booking'
       })
     })
-    await page.getByRole('button', { name: /Open enquiry/ }).click()
+    await page.getByRole('button', { name: 'Book a visit' }).click()
     await expect(page).toHaveURL(/\/link-actions$/)
-    await expect(page.locator('body')).toHaveAttribute('data-opened', 'panel-enquire')
+    await expect(page.locator('body')).toHaveAttribute('data-opened', 'booking')
   })
 
   test.describe('without JavaScript', () => {
