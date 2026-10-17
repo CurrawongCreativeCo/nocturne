@@ -20,6 +20,15 @@ you start a release.
 
 ### Added
 
+- **Embed section:** an approved third-party form, map or player (Typeform, Google Maps, Spotify) behind a click-to-load card.
+  Editors pick a service and paste its public address, checked against that service's pattern (no embed code, HTML or
+  script ever); _Height_ is a Short, Medium or Tall picker that follows the service when unset, with an agency-only exact
+  height in Advanced. Nothing loads before the click; a service that sets cookies says so first and waits for the
+  **marketing** consent category (cookie settings and a link to the service stand in while it is off). The iframe gets the
+  section heading as its `title`, `loading="lazy"` and the narrowest sandbox the service works with. Adds the shared provider
+  registry `src/config/embed-providers.ts` that booking reuses, and moves the consent store (`consent-state`,
+  `consent-store`) from `src/features/consent/utils/` to `src/lib/consent/` so other features can read the visitor's choice.
+  See README, _Embed_.
 - **Image design:** one shared treatment for a section's main picture (`FramedImage`): a still frame with the picture moving
   gently inside it (true image-only parallax), shapes (_Standard_, _Rounded_, _Circle_, _Arch_, _Framed_) and decorative frames
   that stay still while the picture drifts behind them. Agency only, in the Design tab of **Image + text**, the **Hero's Split
@@ -50,7 +59,8 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None. Existing links keep their stored values. Run `npm run typegen` after merging.
+None for content: existing links keep their stored values. Run `npm run typegen` after merging. A project that imports
+`consent-state` or `consent-store` from `src/features/consent/utils/` must now import them from `@/lib/consent/`.
 
 ## [1.4.0] - 2026-10-16
 

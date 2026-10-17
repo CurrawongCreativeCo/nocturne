@@ -11,6 +11,7 @@ import { dataAttr } from '@/lib/sanity/data-attribute'
 
 import type { PageSection, SectionGate, SectionProps, SectionType } from '../types'
 import { CtaBanner } from './sections/cta-banner'
+import { Embed } from './sections/embed'
 import { Faq } from './sections/faq'
 import { FeaturesGrid } from './sections/features-grid'
 import { FormSection } from './sections/form-section'
@@ -52,6 +53,7 @@ const SECTION_COMPONENTS: { [K in SectionType]: ComponentType<SectionProps<K>> }
   team: Team,
   video: Video,
   process: Process,
+  embed: Embed,
   // new-section:register
 }
 

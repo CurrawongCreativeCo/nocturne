@@ -13,8 +13,8 @@ import {
 import { urlFor } from '@/lib/sanity/image'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 
-import { LazyVideoFacade } from './video-facade-lazy'
 import type { SectionProps } from '../../../types'
+import { LazyFacade } from '../lazy-facade'
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
@@ -83,9 +83,7 @@ export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
       const provider = PROVIDER_NAMES[video.provider]
       frame = (
         <div className={frameClass}>
-          <LazyVideoFacade src={embedUrl(video)} title={title} provider={provider}>
-            {image}
-          </LazyVideoFacade>
+          <LazyFacade video={{ src: embedUrl(video), title, provider }}>{image}</LazyFacade>
         </div>
       )
       // Without JavaScript the button does nothing; a link to the video's own page still works.

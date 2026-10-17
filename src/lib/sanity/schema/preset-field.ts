@@ -70,8 +70,8 @@ interface PresetFieldConfig {
   description?: string
   group?: string
   options: readonly PresetOption[]
-  /** Defaults to the first option. */
-  initialValue?: string
+  /** Defaults to the first option; null stores nothing until the editor picks (pair it with `defaultValue`). */
+  initialValue?: string | null
   required?: boolean
   fieldset?: string
   hidden?: ConditionalProperty
@@ -109,7 +109,7 @@ export function presetField({
     fieldset,
     hidden,
     type: 'string',
-    initialValue: initialValue ?? options[0]?.value,
+    initialValue: initialValue === null ? undefined : (initialValue ?? options[0]?.value),
     options: {
       presetPicker: true,
       // `description` and `thumbnail` ride along on each entry; Sanity ignores what it doesn't know.

@@ -1,4 +1,5 @@
 import { ctaBanner } from './cta-banner'
+import { embed } from './embed'
 import { faq } from './faq'
 import { featuresGrid } from './features-grid'
 import { formSection } from './form-section'
@@ -48,5 +49,6 @@ export const sectionTypes = [
   team,
   video,
   process,
+  embed,
   // new-section:register
 ]

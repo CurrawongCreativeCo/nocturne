@@ -1,6 +1,6 @@
 'use client'
 
-import { reopenConsent } from '../utils/consent-store'
+import { reopenConsent } from '@/lib/consent/consent-store'
 
 /** Id of the button, so the banner can hand focus back to it when it closes. */
 export const COOKIE_SETTINGS_ID = 'cookie-settings'

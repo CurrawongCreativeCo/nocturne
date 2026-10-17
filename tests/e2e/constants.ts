@@ -4,7 +4,7 @@ export const FAKE_SANITY_PORT = 9999
 export const SITE_URL = 'https://example.com'
 export const REVALIDATE_SECRET = 'e2e-webhook-secret'
 export const INDEXNOW_KEY = 'e2eindexnowkey1234'
-/** The stored consent of a visitor who rejected everything (see src/features/consent/utils/consent-state.ts). */
+/** The stored consent of a visitor who rejected everything (see src/lib/consent/consent-state.ts). */
 export const REJECTED_CONSENT = JSON.stringify({
   version: 1,
   necessary: true,
