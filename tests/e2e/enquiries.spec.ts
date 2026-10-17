@@ -7,6 +7,7 @@ import {
   REJECTED_CONSENT,
   SANITY_WRITE_TOKEN,
 } from './constants'
+import { waitForHydration } from './hydration'
 
 /**
  * Stored enquiries (README, "Enquiries"). The main server runs with ENQUIRIES_STORE=1 and a second
@@ -44,6 +45,7 @@ async function send(page: Page, url: string, name: string, referer?: string) {
     }
   }, REJECTED_CONSENT)
   await page.goto(url, { referer })
+  await waitForHydration(page.getByLabel('Your name'))
   await page.getByLabel('Your name').fill(name)
   await page.getByLabel('Email address').fill('ann@example.com')
   await page.getByLabel('Topic').selectOption('Support')

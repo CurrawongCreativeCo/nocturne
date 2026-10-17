@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 
+import { waitForHydration } from './hydration'
+
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const SUCCESS = 'Thanks, Ann! We will reply within two days.'
 
@@ -18,7 +20,9 @@ test.beforeEach(async ({ context }, testInfo) => {
   await context.setExtraHTTPHeaders({ 'x-forwarded-for': fakeIp(testInfo) })
 })
 
-async function fillValid(page: Page) {
+/** Fills the contact form. Waits for hydration first, unless the test runs without JavaScript. */
+async function fillValid(page: Page, { hydrates = true } = {}) {
+  if (hydrates) await waitForHydration(page.getByLabel('Your name'))
   await page.getByLabel('Your name').fill('Ann Author')
   await page.getByLabel('Email address').fill('ann@example.com')
   await page.getByLabel('Topic').selectOption('Support')
@@ -240,7 +244,7 @@ test.describe('without JavaScript', () => {
     await expect(page.getByLabel('Email address')).toHaveAttribute('aria-invalid', 'true')
     await expect(page.getByLabel('Your name')).toHaveValue('Ann Author')
 
-    await fillValid(page)
+    await fillValid(page, { hydrates: false })
     await submit(page)
     await expect(page.getByRole('status').filter({ hasText: SUCCESS })).toBeVisible()
   })

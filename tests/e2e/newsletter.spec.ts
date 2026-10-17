@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 
+import { waitForHydration } from './hydration'
+
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const SUCCESS = 'Thanks! Check your inbox to confirm.'
 
@@ -17,6 +19,12 @@ test.beforeEach(async ({ context }, testInfo) => {
   await context.setExtraHTTPHeaders({ 'x-forwarded-for': fakeIp(testInfo) })
 })
 
+/** Opens the signup and waits for it to hydrate: a field filled earlier is lost when the form hydrates. */
+async function openSignup(page: Page) {
+  await page.goto('/newsletter')
+  await waitForHydration(page.getByLabel('Email address'))
+}
+
 const subscribe = (page: Page) => page.getByRole('button', { name: 'Subscribe' }).click()
 // Next.js adds its own empty role=alert (the route announcer), so match ours by name.
 const summary = (page: Page) => page.getByRole('alert', { name: /Please fix|weren’t signed up/ })
@@ -29,7 +37,7 @@ async function expectNoViolations(page: Page) {
 }
 
 test('renders an email field in a form named by the section heading', async ({ page }) => {
-  await page.goto('/newsletter')
+  await openSignup(page)
   await expect(page.getByRole('heading', { level: 2, name: 'Stay in the loop' })).toBeVisible()
   const form = page.getByRole('form', { name: 'Stay in the loop' })
   await expect(form.getByRole('textbox', { name: 'Email address' })).toHaveAttribute(
@@ -40,7 +48,7 @@ test('renders an email field in a form named by the section heading', async ({ p
 })
 
 test('an empty email is announced in a summary that takes focus', async ({ page }) => {
-  await page.goto('/newsletter')
+  await openSignup(page)
   await subscribe(page)
 
   await expect(summary(page)).toBeFocused()
@@ -54,7 +62,7 @@ test('an empty email is announced in a summary that takes focus', async ({ page 
 })
 
 test('a malformed email names the problem and keeps what was typed', async ({ page }) => {
-  await page.goto('/newsletter')
+  await openSignup(page)
   await page.getByLabel('Email address').fill('not-an-email')
   await subscribe(page)
 
@@ -67,7 +75,7 @@ test('a malformed email names the problem and keeps what was typed', async ({ pa
 })
 
 test('a valid email shows the section’s success message in place of the form', async ({ page }) => {
-  await page.goto('/newsletter')
+  await openSignup(page)
   await page.getByLabel('Email address').fill('ann@example.com')
   await subscribe(page)
 
@@ -80,7 +88,7 @@ test('a valid email shows the section’s success message in place of the form',
 
 test('signing up twice with the same address looks identical', async ({ page }) => {
   for (let attempt = 0; attempt < 2; attempt++) {
-    await page.goto('/newsletter')
+    await openSignup(page)
     await page.getByLabel('Email address').fill('ann@example.com')
     await subscribe(page)
     await expect(page.getByRole('status').filter({ hasText: SUCCESS })).toBeVisible()
@@ -88,7 +96,7 @@ test('signing up twice with the same address looks identical', async ({ page }) 
 })
 
 test('a failed spam check signs nobody up and asks to try again', async ({ page }) => {
-  await page.goto('/newsletter')
+  await openSignup(page)
   await page.getByLabel('Email address').fill('ann@example.com')
   await page.locator('input[name="cf-turnstile-response"]').evaluate((input: HTMLInputElement) => {
     input.value = 'forged-token'
@@ -100,12 +108,12 @@ test('a failed spam check signs nobody up and asks to try again', async ({ page 
 
 test('the sixth signup from one address in ten minutes is refused', async ({ page }) => {
   for (let sent = 1; sent <= 5; sent++) {
-    await page.goto('/newsletter')
+    await openSignup(page)
     await page.getByLabel('Email address').fill(`ann${sent}@example.com`)
     await subscribe(page)
     await expect(page.getByRole('status').filter({ hasText: SUCCESS })).toBeVisible()
   }
-  await page.goto('/newsletter')
+  await openSignup(page)
   await page.getByLabel('Email address').fill('ann6@example.com')
   await subscribe(page)
   await expect(summary(page)).toContainText('several times in a short while')

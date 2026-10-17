@@ -32,7 +32,7 @@ test.describe('content releases', () => {
       },
     ])
     await page.goto('/about')
-    await expect(page.locator('h1')).toHaveText('About (Summer release)')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('About (Summer release)')
     await expect(
       page.getByRole('heading', { name: 'Only in the Summer release.', level: 2 }),
     ).toBeVisible()
