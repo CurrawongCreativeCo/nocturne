@@ -2143,12 +2143,6 @@ const gallerySections = [
       image: image(name),
     })),
   },
-  embedSection('embed', {
-    title: 'Book a consultation',
-    text: 'Tell us about your project and we will be in touch.',
-    provider: 'typeform',
-    url: EMBED_URL.typeform,
-  }),
   // One entry per preset: Minimal, Cards, Editorial, Compact and Image-focused (Cards with large pictures).
   // The fixed clock the visual tests pin (visual.spec.ts) is 16 Oct 2026, so schedules are stable.
   ...[
@@ -2179,6 +2173,12 @@ const gallerySections = [
     seeAllLink: external('https://example.com/events'),
     seeAllLabel: 'See all events',
   })),
+  embedSection('embed', {
+    title: 'Book a consultation',
+    text: 'Tell us about your project and we will be in touch.',
+    provider: 'typeform',
+    url: EMBED_URL.typeform,
+  }),
   // new-section:gallery
 ]
 

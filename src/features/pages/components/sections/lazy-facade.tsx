@@ -9,4 +9,4 @@ import dynamic from 'next/dynamic'
  * both because each wrapper is itself shared JavaScript on every page. The server still renders the
  * poster, the card and their buttons.
  */
-export const LazyFacade = dynamic(() => import('./facade').then((mod) => mod.Facade))
+export const LazyFacade = dynamic(() => import('./facade'))

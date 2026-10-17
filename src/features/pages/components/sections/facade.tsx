@@ -14,7 +14,7 @@ interface Props {
 }
 
 /** Both click-to-load facades behind one lazy wrapper (`lazy-facade.tsx`): give it `video` or `embed`. */
-export function Facade({ video, embed, children }: Props) {
+export default function Facade({ video, embed, children }: Props) {
   if (embed) return <EmbedFacade {...embed} />
   if (video) return <VideoFacade {...video}>{children}</VideoFacade>
   return null
