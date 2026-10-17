@@ -23,6 +23,17 @@ you start a release.
 - **Brand colours show the real defaults (Studio):** an empty colour now shows the colour the site actually uses (in the swatch and as the
   hex placeholder) with a "Default" label, instead of a black swatch and an example hex. Clearing a colour says it has returned
   to the default, and Primary's description explains that buttons stay near-black until a Primary is set. Nothing new is stored.
+
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.5.0] - 2026-10-17
+
+### Added
+
 - **Link-in-bio extras (Studio):** two actions on pages, **Copy link** and **Download QR code**. The QR dialog previews the
   code and downloads it as SVG or PNG in the site's ink and surface colours, with a quiet zone, falling back to black on white
   if the colours would not scan, and an optional `utm_source=qr` so scans show in analytics. Both use the published address.
@@ -145,6 +156,13 @@ you start a release.
   and _Advanced: image_ (were _More … options_).
 - **Publishing a live page or post no longer opens a dialog** unless it is the first publish or the address changed (where
   the dialog offers the redirect). The rule is `needsPublishConfirmation` in `src/features/studio/utils/publish-redirect.ts`.
+- **Dependencies:** `sanity` and `@sanity/vision` 6.19.0, `@sanity/ui` 4.4.9, `next` and `eslint-config-next` 16.4.2,
+  `react` and `react-dom` 19.3.1, `motion` 14.3.0 (minor and patch updates, no changes needed in our code).
+  `npm audit --omit=dev` still reports 16 findings (12 high, 4 moderate), all from two packages with no patched
+  release, `braces` (3.0.3) and `sprintf-js` (1.1.3), pulled in by the Sanity CLI (`sanity` → `@sanity/cli` →
+  codegen and `@vercel/frameworks`). That is build-time tooling that runs on your own files, not code the site loads.
+  The only fix npm offers is `npm audit fix --force`, which downgrades `sanity` to 5.7.0; do not run it. The
+  `overrides` in `package.json` (js-yaml, smol-toml, uuid) are still needed: removing them brings back three more findings.
 
 ### Fixed
 
@@ -159,6 +177,11 @@ For Enquiries: nothing happens until you set `ENQUIRIES_STORE=1`; then see READM
 the repository secret for the retention workflow, and the collection notice in the form's _Intro_). The `enquiry` type is new in the schema.
 A project that imports `consent-state` or `consent-store` from `src/features/consent/utils/` must now import them from `@/lib/consent/`.
 **Link-in-bio extras:** run `npm install` (new dependency `uqr`). No schema or content change, no typegen needed, nothing for the webhook. Pages gain two Studio actions, Copy link and Download QR code.
+
+**Dependencies:** run `npm install`. Nothing else changes and `overrides` stays as it is. This release has no migration of its
+own; a site that skipped earlier ones should run `migrations/split-site-settings` (1.3.0) and
+`migrations/hero-title-to-heading-text` (1.4.0) on every dataset, one release at a time. The home page JavaScript budget
+(`JS_BUDGET_KB`) is 220 KB, raised from 200 KB in 1.2.0 to pay for the lazy motion provider.
 
 ## [1.4.0] - 2026-10-16
 
@@ -866,7 +889,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...v1.2.0
