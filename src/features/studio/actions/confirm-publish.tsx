@@ -28,6 +28,7 @@ import {
   type AddressChange,
   type RedirectPlan,
 } from '../utils/publish-redirect'
+import { siteOrigin } from '../utils/site-origin'
 
 const REDIRECTS_QUERY = '*[_type == "redirect"]{_id, source, destination}'
 
@@ -37,11 +38,6 @@ type Plan = { status: 'loading' } | { status: 'error' } | { status: 'ready'; pla
 interface Lookup {
   key: string
   result: { error: true } | { plan: RedirectPlan }
-}
-
-/** The site's address: the configured public URL, else the origin Studio is served from (it's embedded in the site). */
-function siteOrigin(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
 }
 
 export function withConfirmPublish(Publish: DocumentActionComponent): DocumentActionComponent {

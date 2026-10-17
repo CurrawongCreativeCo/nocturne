@@ -20,6 +20,12 @@ you start a release.
 
 ### Added
 
+- **Link-in-bio extras (Studio):** two actions on pages, **Copy link** and **Download QR code**. The QR dialog previews the
+  code and downloads it as SVG or PNG in the site's ink and surface colours, with a quiet zone, falling back to black on white
+  if the colours would not scan, and an optional `utm_source=qr` so scans show in analytics. Both use the published address.
+  The README's Link list section now says how to see `link_click` events in Plausible, PostHog and GA4. Adds the dependency
+  `uqr` (MIT, no dependencies, under 8 KB gzipped), used by Studio only; the public site's JavaScript is unchanged.
+
 - **Embed section:** an approved third-party form, map or player (Typeform, Google Maps, Spotify) behind a click-to-load card.
   Editors pick a service and paste its public address, checked against that service's pattern (no embed code, HTML or
   script ever); _Height_ is a Short, Medium or Tall picker that follows the service when unset, with an agency-only exact
@@ -135,6 +141,7 @@ Webhook mode: add `"panel"`, `"event"` and `"eventCategory"` to the Sanity webho
 For Enquiries: nothing happens until you set `ENQUIRIES_STORE=1`; then see README, _Enquiries_ (private dataset, `SANITY_WRITE_TOKEN`,
 the repository secret for the retention workflow, and the collection notice in the form's _Intro_). The `enquiry` type is new in the schema.
 A project that imports `consent-state` or `consent-store` from `src/features/consent/utils/` must now import them from `@/lib/consent/`.
+**Link-in-bio extras:** run `npm install` (new dependency `uqr`). No schema or content change, no typegen needed, nothing for the webhook. Pages gain two Studio actions, Copy link and Download QR code.
 
 ## [1.4.0] - 2026-10-16
 
