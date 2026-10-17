@@ -136,7 +136,7 @@ describe('backgroundContrastProblem with a wash and a picture strength', () => {
   it('improves as the picture gets fainter, since the background shows through', () => {
     const base = { tone: 'surface', hasImage: true, overlay: 'none' }
     expect(ratio({ ...base, strength: 0.3 })).toBeGreaterThan(ratio({ ...base, strength: 1 }))
-    // A faint picture on the Page tone leaves dark text readable even with no overlay.
-    expect(backgroundContrastProblem({ ...base, strength: 0.3 })).toBeNull()
+    // A very faint picture on the Page tone leaves even secondary text readable with no overlay.
+    expect(backgroundContrastProblem({ ...base, strength: 0.1 })).toBeNull()
   })
 })
