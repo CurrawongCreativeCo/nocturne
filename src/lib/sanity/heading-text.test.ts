@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { emphasisPhrases, hasHeadingText, headingPlainText } from './heading-text'
+import {
+  emphasisPhrases,
+  hasHeadingText,
+  headingPlainText,
+  headingSectionPath,
+  headingTone,
+} from './heading-text'
 
 const block = {
   _type: 'block',
@@ -53,5 +59,46 @@ describe('emphasisPhrases', () => {
         },
       ]),
     ).toEqual([])
+  })
+})
+
+describe('headingSectionPath', () => {
+  it('finds the section from the path of one of an annotation’s fields', () => {
+    const path = [
+      'body',
+      { _key: 's1' },
+      'heading',
+      { _key: 'b1' },
+      'markDefs',
+      { _key: 'm1' },
+      'stops',
+      0,
+    ]
+    expect(headingSectionPath(path)).toEqual(['body', { _key: 's1' }])
+  })
+
+  it('is null outside a heading', () => {
+    expect(headingSectionPath(['title'])).toBeNull()
+    expect(headingSectionPath(['markDefs', 'x'])).toBeNull()
+  })
+})
+
+describe('headingTone', () => {
+  it('reads the section’s tone, else the type’s default, else the surface', () => {
+    expect(headingTone({ _type: 'faq', style: { tone: 'alt' } })).toBe('alt')
+    expect(headingTone({ _type: 'faq' })).toBe('surface')
+    expect(headingTone({ _type: 'hero' })).toBe('inverse')
+    expect(headingTone({ _type: 'hero', style: { tone: 'accent' } })).toBe('accent')
+    expect(headingTone(undefined)).toBe('surface')
+    expect(headingTone(undefined, 'inverse')).toBe('inverse')
+  })
+
+  it('uses the card’s tone for a call to action banner, whatever the section style says', () => {
+    expect(headingTone({ _type: 'ctaBanner', tone: 'brand' })).toBe('accent')
+    expect(headingTone({ _type: 'ctaBanner', tone: 'dark', style: { tone: 'surface' } })).toBe(
+      'inverse',
+    )
+    expect(headingTone({ _type: 'ctaBanner', tone: 'light' })).toBe('alt')
+    expect(headingTone({ _type: 'ctaBanner' })).toBe('accent')
   })
 })

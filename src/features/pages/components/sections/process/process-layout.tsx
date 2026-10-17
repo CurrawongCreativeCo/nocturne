@@ -1,5 +1,7 @@
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionMotion, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import { ProcessStep } from './process-step'
 import { LazyProcessTimeline } from './process-timeline-lazy'
@@ -21,7 +23,8 @@ interface Props extends SectionProps<'process'> {
 
 /** What both variants share: the header, the scroll-linked line and the ordered list of steps. */
 export function ProcessLayout({ data, isFirst, lineClassName, sideOf }: Props) {
-  const { title, intro, steps } = data
+  const { heading, intro, steps } = data
+  const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
   // The steps play the animation themselves (each as it arrives), so the frame stays still.
   const plan = sectionMotion(data.style, DEFAULTS, { isFirst: Boolean(isFirst), hasMedia: false })
@@ -30,7 +33,14 @@ export function ProcessLayout({ data, isFirst, lineClassName, sideOf }: Props) {
     <SectionFrame style={{ ...data.style, motion: 'none' }} defaults={DEFAULTS} isFirst={isFirst}>
       {(title || intro) && (
         <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
-          {title && <h2 className="text-h2 font-semibold text-balance">{title}</h2>}
+          {title && (
+            <RichHeading
+              as="h2"
+              blocks={heading}
+              fallback={title}
+              className="text-h2 font-semibold text-balance"
+            />
+          )}
           {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
         </header>
       )}

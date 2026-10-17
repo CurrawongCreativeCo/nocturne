@@ -3,11 +3,13 @@ import type { ReactNode } from 'react'
 import { ctaClassName } from '@/components/ui/cta-link'
 import { OpenNowBadge } from '@/components/ui/open-now-badge'
 import { OpeningHours } from '@/components/ui/opening-hours'
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { groupOpeningHours } from '@/lib/opening-hours'
+import { sectionTitle } from '@/lib/sanity/section-title'
 import type { LocationBusiness } from '@/types/business'
 
 import { MapEmbed } from './map-embed'
@@ -35,7 +37,8 @@ const LINK =
  * optional interactive map (agency setting) loads only after a click.
  */
 export function Location({ data, isFirst, business }: SectionProps<'location'>) {
-  const { title, intro, mapImage, directionsLabel } = data
+  const { heading, intro, mapImage, directionsLabel } = data
+  const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
   const { tone } = sectionTraits(data.style, DEFAULTS)
   if (!business) return null
@@ -74,7 +77,12 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
 
   const header = (
     <header className={`max-w-measure-narrow lg:col-span-2 ${block} ${text}`}>
-      <h2 className="text-h2 font-semibold text-balance">{title}</h2>
+      <RichHeading
+        as="h2"
+        blocks={heading}
+        fallback={title}
+        className="text-h2 font-semibold text-balance"
+      />
       {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
     </header>
   )

@@ -2,7 +2,9 @@ import { CreditCardIcon } from '@sanity/icons/CreditCard'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { formatInterval, formatPrice } from '@/lib/format-price'
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
@@ -28,12 +30,15 @@ export const pricingTable = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'intro',
         type: 'text',
@@ -143,9 +148,19 @@ export const pricingTable = defineType({
     { align: 'center' },
   ),
   preview: {
-    select: { title: 'title', plans: 'plans', tone: 'style.tone' },
-    prepare: ({ title, plans, tone }: { title?: string; plans?: unknown[]; tone?: string }) => ({
-      title: title || 'Pricing table',
+    select: { heading: 'heading', title: 'title', plans: 'plans', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      plans,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      plans?: unknown[]
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Pricing table',
       subtitle: joinSubtitle('Pricing table', `${plans?.length ?? 0} plans`, toneTitle(tone)),
     }),
   },

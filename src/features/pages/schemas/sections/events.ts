@@ -1,7 +1,9 @@
 import { CalendarIcon } from '@sanity/icons/Calendar'
 import { defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
@@ -55,14 +57,16 @@ export const events = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
         description: 'e.g. “What’s on”.',
-        initialValue: 'What’s on',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        max: LIMITS.title,
+        optional: true,
+        initialText: 'What’s on',
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({ name: 'text', type: 'text', rows: 3 }),
       defineField({
         name: 'seeAllLink',
@@ -107,9 +111,19 @@ export const events = defineType({
     },
   ),
   preview: {
-    select: { title: 'title', variant: 'variant', tone: 'style.tone' },
-    prepare: ({ title, variant, tone }: { title?: string; variant?: string; tone?: string }) => ({
-      title: title || 'Events',
+    select: { heading: 'heading', title: 'title', variant: 'variant', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      variant,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      variant?: string
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Events',
       subtitle: variantSubtitle('Events', EVENTS_VARIANTS, variant, tone),
     }),
   },

@@ -1,6 +1,8 @@
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { StatFigure } from '@/components/ui/stat-figure'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import type { SectionProps } from '../../../types'
 
@@ -19,7 +21,8 @@ const columnClasses: Record<number, string> = {
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'center', motion: 'reveal' }
 
 export function StatsCards({ data, isFirst }: SectionProps<'stats'>) {
-  const { title, intro, items } = data
+  const { heading, intro, items } = data
+  const title = sectionTitle(data)
   const { block, text, align, motion } = sectionTraits(data.style, DEFAULTS)
   const animate = motion !== 'none' && !isFirst
 
@@ -27,7 +30,14 @@ export function StatsCards({ data, isFirst }: SectionProps<'stats'>) {
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       {(title || intro) && (
         <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
-          {title && <h2 className="text-h2 font-semibold text-balance">{title}</h2>}
+          {title && (
+            <RichHeading
+              as="h2"
+              blocks={heading}
+              fallback={title}
+              className="text-h2 font-semibold text-balance"
+            />
+          )}
           {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
         </header>
       )}

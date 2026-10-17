@@ -9,7 +9,8 @@
  */
 import { assist } from '@sanity/assist'
 import { visionTool } from '@sanity/vision'
-import { defineConfig } from 'sanity'
+import { createElement } from 'react'
+import { defineConfig, isStringInputProps, type InputProps } from 'sanity'
 import { presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
@@ -27,6 +28,7 @@ import { pageTemplates } from './src/features/pages/schemas/templates'
 import { panelsSchemaTypes } from './src/features/panels/schemas'
 import { pricingSchemaTypes } from './src/features/pricing/schemas'
 import { hidePricesFromNewMenu } from './src/features/pricing/studio'
+import { ColourInput } from './src/features/site/components/colour-input'
 import { siteSchemaTypes } from './src/features/site/schemas'
 import { confirmDeletePageActions } from './src/features/studio/actions/confirm-delete-page'
 import { confirmPublishActions } from './src/features/studio/actions/confirm-publish'
@@ -71,9 +73,15 @@ const CLIENT_NEW_DOCUMENT_IDS = new Set([
 ])
 const PROTECTED_TYPES = new Set<string>(CLIENT_PROTECTED_TYPES)
 // Role-aware section menus, then the picture picker and preset bar for fields that ask for them.
-const StudioInput = withPresetPicker(
+const PresetAwareInput = withPresetPicker(
   createRoleAwareInput(new Set(sectionTypes.map(({ name }) => name))),
 )
+// A heading highlight's custom gradient colours reuse the Brand colours input (features/site), which
+// a studio or shared module may not import: composed here.
+const StudioInput = (props: InputProps) =>
+  isStringInputProps(props) && props.schemaType.options?.headingStop === true
+    ? createElement(ColourInput, props)
+    : createElement(PresetAwareInput, props)
 
 export default defineConfig({
   basePath: studioUrl,

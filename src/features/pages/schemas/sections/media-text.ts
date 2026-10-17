@@ -1,7 +1,9 @@
 import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
@@ -33,11 +35,14 @@ export const mediaText = defineType({
         description: 'Small label above the title.',
         validation: (rule) => lengthWarning(rule, LIMITS.eyebrow, 'Labels'),
       }),
-      defineField({
-        name: 'title',
-        type: 'string',
-        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+      headingField({
+        name: 'heading',
+        title: 'Title',
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({ name: 'body', type: 'blockContent' }),
       defineField({
         name: 'ctas',
@@ -66,19 +71,27 @@ export const mediaText = defineType({
     { rules: { type: 'mediaText', hasPicture: () => true } },
   ),
   preview: {
-    select: { title: 'title', media: 'image', side: 'imagePosition', tone: 'style.tone' },
+    select: {
+      heading: 'heading',
+      title: 'title',
+      media: 'image',
+      side: 'imagePosition',
+      tone: 'style.tone',
+    },
     prepare: ({
+      heading,
       title,
       media,
       side,
       tone,
     }: {
+      heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       media?: PreviewValue['media']
       side?: string
       tone?: string
     }) => ({
-      title: title || 'Untitled',
+      title: headingPlainText(heading) || title || 'Untitled',
       // "Image + text · Image left · Tinted": the side is the one layout choice editors make here.
       subtitle: joinSubtitle('Image + text', IMAGE_SIDE_TITLES[side ?? 'right'], toneTitle(tone)),
       media,

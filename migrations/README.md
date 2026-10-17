@@ -33,6 +33,8 @@ twice. Read it as an example of moving data between documents; delete it once it
 Portable Text) inside page sections: it adds the new field with a keyed patch, keeps the old one for the code's fallback
 and derives its block keys from the section's key, which is what makes it idempotent. It is self-contained, because the
 CLI bundles a migration on its own.
+[`section-titles-to-heading-text`](section-titles-to-heading-text/index.ts) does the same for the title of every other
+section (never the items inside them).
 
 - Make it **idempotent**: skip documents already migrated, so a second run changes nothing.
 - Return `[]`/nothing for documents you don't change. Select with `documentTypes` to keep requests down.

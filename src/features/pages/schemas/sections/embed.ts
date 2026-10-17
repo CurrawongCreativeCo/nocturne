@@ -9,7 +9,9 @@ import {
   getEmbedProvider,
   resolveEmbed,
 } from '@/config/embed-providers'
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
@@ -41,13 +43,15 @@ export const embed = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
-        type: 'string',
+      headingField({
+        name: 'heading',
+        title: 'Title',
         description:
           'The heading above the embed. It also names the embedded content for screen readers, so say what it is: “Book a consultation”.',
-        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+        max: LIMITS.title,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'text',
         title: 'Description',
@@ -137,9 +141,19 @@ export const embed = defineType({
     },
   ),
   preview: {
-    select: { title: 'title', provider: 'provider', tone: 'style.tone' },
-    prepare: ({ title, provider, tone }: { title?: string; provider?: string; tone?: string }) => ({
-      title: title || 'Untitled',
+    select: { heading: 'heading', title: 'title', provider: 'provider', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      provider,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      provider?: string
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Untitled',
       subtitle: joinSubtitle('Embed', getEmbedProvider(provider)?.label, toneTitle(tone)),
     }),
   },

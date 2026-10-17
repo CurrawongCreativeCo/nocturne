@@ -1,6 +1,8 @@
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import type { SectionProps } from '../../types'
 
@@ -14,14 +16,22 @@ const columnClasses = {
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'center' }
 
 export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
-  const { title, intro, columns, items } = data
+  const { heading, intro, columns, items } = data
+  const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       {(title || intro) && (
         <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
-          {title && <h2 className="text-h2 font-semibold text-balance">{title}</h2>}
+          {title && (
+            <RichHeading
+              as="h2"
+              blocks={heading}
+              fallback={title}
+              className="text-h2 font-semibold text-balance"
+            />
+          )}
           {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
         </header>
       )}

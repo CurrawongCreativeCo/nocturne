@@ -4,6 +4,7 @@ import { Suspense, type ReactNode } from 'react'
 
 import { ctaClassName } from '@/components/ui/cta-link'
 import { resolveLink } from '@/components/ui/resolve-link'
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -12,6 +13,7 @@ import { hasEvents } from '@/config/profile'
 import { dayBadge, formatWhen, timeAttribute } from '@/lib/events/format'
 import { repeatLabel } from '@/lib/events/recurrence'
 import { requestTime } from '@/lib/request-time'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import type { SectionProps } from '../../../types'
 import { eventsLimit, upcomingEntries, type UpcomingEntry } from '../../../utils/events'
@@ -138,11 +140,19 @@ export function EventTitle({
 }
 
 function Header({ data, classes }: { data: EventsData; classes: string }) {
-  const { title, text } = data
+  const { heading, text } = data
+  const title = sectionTitle(data)
   if (!title && !text) return null
   return (
     <div className={`mb-12 max-w-measure-narrow ${classes}`}>
-      {title && <h2 className="text-h2 font-semibold text-balance">{title}</h2>}
+      {title && (
+        <RichHeading
+          as="h2"
+          blocks={heading}
+          fallback={title}
+          className="text-h2 font-semibold text-balance"
+        />
+      )}
       {text && (
         <p className={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}>{text}</p>
       )}
@@ -228,7 +238,7 @@ export function EventsView({
   layout,
 }: SectionProps<'events'> & { layout: EventsLayout }) {
   const { block, text, justify, tone } = sectionTraits(data.style, layout.defaults)
-  const context: EventsContext = { level: data.title ? 'h3' : 'h2' }
+  const context: EventsContext = { level: sectionTitle(data) ? 'h3' : 'h2' }
 
   return (
     <SectionFrame style={data.style} defaults={layout.defaults} isFirst={isFirst}>

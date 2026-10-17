@@ -1,9 +1,10 @@
 import { UsersIcon } from '@sanity/icons/Users'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
-import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import {
@@ -56,13 +57,15 @@ export const team = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
         description: 'e.g. "Meet the team".',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({ name: 'text', type: 'text', rows: 3 }),
       defineField({
         name: 'selection',
@@ -103,9 +106,19 @@ export const team = defineType({
     // No design option depends on the layout: no picture, and each layout accepts any alignment.
   ),
   preview: {
-    select: { title: 'title', variant: 'variant', tone: 'style.tone' },
-    prepare: ({ title, variant, tone }: { title?: string; variant?: string; tone?: string }) => ({
-      title: title || 'Team',
+    select: { heading: 'heading', title: 'title', variant: 'variant', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      variant,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      variant?: string
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Team',
       subtitle: variantSubtitle('Team', TEAM_VARIANTS, variant, tone),
     }),
   },
