@@ -15,7 +15,7 @@ entries or the extra pages checked, and all 62 sitemap URLs have exactly one `<h
 The problems found are mostly **in the seams**: a cache tag missing from one fetch, a webhook filter that drifted from
 `TAGS`, a "Try again" button that can't retry, a Prettier plugin that silently glued two classes together, and tests
 that weren't running or couldn't pass. **CI's end-to-end job was red on main**: one test always failed (and, in a
-local run, kept 53 tests in three dependent projects from running), and 10 visual baselines are missing.
+local run, kept 53 tests in three dependent projects from running), and 13 visual baselines are missing.
 
 ### Top 10
 
@@ -26,7 +26,7 @@ local run, kept 53 tests in three dependent projects from running), and 10 visua
 | 3   | High     | [C-2](#c-2) Webhook mode: A/B tests never start or stop (README webhook filter lacked `experiment`)                         | **Fixed** (docs); guard test proposed     |
 | 4   | High     | [T-1](#t-1) CI e2e red on main: the "stays put" background test always failed                                               | **Fixed**                                 |
 | 5   | High     | [T-2](#t-2) Real bug behind it: a "stays put" background was never clipped to its section                                   | **Fixed** (one-character fix)             |
-| 6   | High     | [T-3](#t-3) Ten visual baselines are missing (custom gradient, Glass rows), so the Linux visual tests fail                  | **Manual**: run "Update visual baselines" |
+| 6   | High     | [T-3](#t-3) Thirteen visual baselines are missing (custom gradient, Glass rows), so the Linux visual tests fail             | **Manual**: run "Update visual baselines" |
 | 7   | High     | [T-4](#t-4) Three unit test files (33 tests) never ran; one had gone stale                                                  | **Fixed**                                 |
 | 8   | Medium   | [E-1](#e-1) "Try again" on the error pages calls `reset()`, which doesn't refetch, so it can't recover from a Sanity outage | Open, small                               |
 | 9   | Medium   | [D-1](#d-1) AI Assist "Write meta description" points at a field that doesn't exist (`sections`, not `pageBuilder`)         | Open, 1-word fix                          |
@@ -37,7 +37,7 @@ local run, kept 53 tests in three dependent projects from running), and 10 visua
 1. **Today, small:** fix S-1 (use the existing `safePath`), C-1 (add `TAGS.stripePrice`), E-1 (`retry`) and D-1
    (`pageBuilder`). Each is a one-to-three-line change with a test; they were left as findings because they change
    behaviour.
-2. **Make CI green:** merge this branch, then run the **Update visual baselines** workflow for the 10 missing
+2. **Make CI green:** merge this branch, then run the **Update visual baselines** workflow for the 13 missing
    baselines (T-3).
 3. **Guard the drift:** a unit test that the README webhook filter lists every `TAGS` value (C-2), and the Prettier
    pitfall in [Q-1](#q-1).
@@ -458,12 +458,12 @@ Fix (done, `fd6e30d`): restore the space. The unit test (`section-background.tes
 stands alone. This is the audit's only product-code change: it was the cause of a failing test, it is one character,
 and it restores the documented behaviour. Visual baselines are unaffected (they run with reduced motion).
 
-<a id="t-3"></a>**T-3 · High · Ten visual baselines are missing**
+<a id="t-3"></a>**T-3 · High · Thirteen visual baselines are missing**
 Evidence: no Linux baseline for gallery entries `hero-heading-custom-gradient` and `link-list-glass-rows`
 (desktop and mobile, `tests/e2e/visual.spec.ts:94-99`), nor for `{light,dark}-link-glass-{375,768,1280}`
-(`tests/e2e/design-settings-visual.spec.ts:96-105`). Every other gallery id has both baselines; none is orphaned.
+(`tests/e2e/design-settings-visual.spec.ts:96-105`). `tests/e2e/link-list-glass.spec.ts:176-189` also needs `link-glass-{375,768,1280}-desktop-linux.png`; the first version of this audit missed that fourth visual spec, and CI shard 1 shows it failing. Every other gallery id has both baselines; none is orphaned.
 Why: on Linux CI, `toHaveScreenshot` fails when there is no baseline.
-Fix: **manual**, run the **Update visual baselines** workflow on this branch (or after merging), then check the 10
+Fix: **manual**, run the **Update visual baselines** workflow on this branch (or after merging), then check the 13
 new images.
 
 <a id="t-4"></a>**T-4 · High · Fixed · Three unit test files never ran**
