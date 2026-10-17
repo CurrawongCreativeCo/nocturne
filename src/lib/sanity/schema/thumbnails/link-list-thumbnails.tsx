@@ -166,3 +166,36 @@ export function LinkListImageThumbnail(_props: PresetThumbnailProps) {
     </Wireframe>
   )
 }
+
+/** Glass rows: frosted rows over a photo, each a flush picture, a round icon, two lines and a round arrow. */
+export function LinkListGlassThumbnail(_props: PresetThumbnailProps) {
+  return (
+    <Wireframe label="link-list-glass">
+      <rect width={160} height={120} style={{ fill: FG, fillOpacity: 0.16 }} />
+      <circle cx={122} cy={26} r={14} style={{ fill: FG, fillOpacity: 0.12 }} />
+      <Profile y={5} size={11} />
+      {[40, 64, 88].map((y) => (
+        <g key={y}>
+          <clipPath id={`link-list-glass-${String(y)}`}>
+            <rect x={16} y={y} width={128} height={20} rx={5} />
+          </clipPath>
+          <rect
+            x={16}
+            y={y}
+            width={128}
+            height={20}
+            rx={5}
+            style={{ ...outline, fillOpacity: 0.3 }}
+          />
+          <g clipPath={`url(#link-list-glass-${String(y)})`}>
+            <rect x={16} y={y} width={36} height={20} style={{ fill: FG, fillOpacity: 0.3 }} />
+          </g>
+          <circle cx={63} cy={y + 10} r={5} style={{ ...outline, fillOpacity: 0.2 }} />
+          <Heading x={73} y={y + 5.5} w={34} h={4} />
+          <Line x={73} y={y + 12} w={24} />
+          <circle cx={131} cy={y + 10} r={5} style={{ ...outline, fillOpacity: 0.2 }} />
+        </g>
+      ))}
+    </Wireframe>
+  )
+}

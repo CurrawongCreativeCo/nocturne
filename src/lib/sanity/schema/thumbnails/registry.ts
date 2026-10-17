@@ -67,6 +67,7 @@ import {
   LinkListCardsThumbnail,
   LinkListCompactThumbnail,
   LinkListEditorialThumbnail,
+  LinkListGlassThumbnail,
   LinkListImageThumbnail,
   LinkListMinimalThumbnail,
 } from './link-list-thumbnails'
@@ -139,6 +140,7 @@ export const linkListPresetThumbnails: Record<string, Thumbnail> = {
   editorial: LinkListEditorialThumbnail,
   compact: LinkListCompactThumbnail,
   'image-focused': LinkListImageThumbnail,
+  'glass-rows': LinkListGlassThumbnail,
 }
 
 /** Hero preset value -> its drawing (the preset bar at the top of the hero's Content tab). */

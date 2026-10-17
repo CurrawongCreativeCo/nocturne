@@ -12,7 +12,7 @@ import { expect, test, type Page } from '@playwright/test'
  */
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
-const PRESETS = ['stacked', 'cards', 'editorial', 'compact', 'image-focused']
+const PRESETS = ['stacked', 'cards', 'editorial', 'compact', 'image-focused', 'glass-rows']
 
 const main = (page: Page) => page.locator('#main-content')
 // A link's name is its label, then its description when it has one ("Book a consultation. Thirty minutes").
@@ -409,7 +409,7 @@ test.describe('a Link list on an ordinary page', () => {
   })
 })
 
-test.describe('the five presets in the section gallery', () => {
+test.describe('the six presets in the section gallery', () => {
   for (const preset of PRESETS) {
     test(`${preset} has no accessibility violations and uses Business info’s social icons`, async ({
       page,

@@ -441,3 +441,38 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
     display: none;
   }
 }
+
+/*
+ * Glass rows (the Link list's Glass rows preset, README "Link list"): frosted rows over a photo. The
+ * colours come from the glass tokens (tokens.generated.css), which follow the section's tone. Where the
+ * browser can't blur, or the visitor asks for less transparency, the row is a nearly solid surface:
+ * text keeps its contrast without relying on the photo behind. The Studio contrast check measures
+ * the see-through strengths (lib/color/glass-contrast.ts). The focus ring is the shared one above.
+ */
+@layer components {
+  .glass-row {
+    background-color: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+  }
+
+  .glass-row:hover {
+    border-color: var(--glass-border-hover);
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass-row {
+      background-color: var(--glass-solid);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-row {
+      background-color: var(--glass-solid);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}

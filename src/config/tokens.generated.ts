@@ -89,6 +89,13 @@ export const emphasis = {
   "highlightStrength": 0.22
 } as const
 
+/** How much of the page colour each Glass rows strength keeps (0-1), for the Studio contrast check (the CSS reads the variables). */
+export const glass = {
+  "light": 0.55,
+  "medium": 0.7,
+  "strong": 0.85
+} as const
+
 /** Colours for the generated share image (src/app/api/og): hex, as next/og needs. */
 export const ogImage = {
   "background": "#3266e4",
