@@ -1019,6 +1019,10 @@ the same check as `src/types/sanity.types.ts`.
 | `shadow` | `card`, `raised`                                                                                                                                            | `shadow-card`, `shadow-raised`                                                                                |
 | `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`, `marquee-per-logo` (seconds per logo, optional)                 | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS             |
 
+Two optional groups sit beside these: `emphasis` (heading emphasis) and `glass` (frosted rows, see
+[Link list](#link-list)). A `tokens.json` without them gets the shipped values, so updating the template never
+breaks `npm run tokens`.
+
 Each colour has an `oklch` value (what the CSS uses) and a `hex` fallback, because `next/og` cannot
 parse `oklch()`. The generator checks that the two agree (within 2/255 per channel), so a stale hex is an
 error, not a silent mismatch. Type sizes such as `h4`, `lead`, `body` and `small` are written as
@@ -2849,20 +2853,20 @@ rendering: the **Link page** template is a page with this section and one page o
 
 **What a link has.**
 
-| Field            | What it does                                                                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Label            | The button text. A warning past 40 characters.                                                                                                               |
-| Where it goes    | The shared link picker (see [Link actions](#link-actions)).                                                                                                  |
-| Description      | A line under the label. Not shown in the Compact layout.                                                                                                     |
-| Icon             | From the badge icon set. Not shown in Editorial.                                                                                                             |
-| Show large       | One link is drawn large: the first one ticked. A second tick is ignored (Studio warns). Not used by Compact.                                                 |
-| Heading above it | Optional group heading. Links under the same heading are grouped; a link with no heading joins the group above it.                                           |
-| Show or Hide     | Hide takes a link off the page without deleting it. A hidden link never leaves the Content Lake.                                                             |
-| Advanced         | A **thumbnail** (Minimal and Cards only), **Show from** / **Show until**, and **UTM** source, medium and campaign (shown for links to another website only). |
+| Field            | What it does                                                                                                                                                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Label            | The button text. A warning past 40 characters.                                                                                                                                                                                    |
+| Where it goes    | The shared link picker (see [Link actions](#link-actions)).                                                                                                                                                                       |
+| Description      | A line under the label. Not shown in the Compact layout.                                                                                                                                                                          |
+| Icon             | From the badge icon set (the same sixteen icons as badge rows, including Care, Community, Person, Location, Email, Calendar, Phone and Sun). Not shown in Editorial.                                                              |
+| Show large       | One link is drawn large: the first one ticked. A second tick is ignored (Studio warns). Not used by Compact.                                                                                                                      |
+| Heading above it | Optional group heading. Links under the same heading are grouped; a link with no heading joins the group above it.                                                                                                                |
+| Show or Hide     | Hide takes a link off the page without deleting it. A hidden link never leaves the Content Lake.                                                                                                                                  |
+| Advanced         | A **thumbnail** (Minimal and Cards only; Glass rows draw it beside the icon, the other layouts instead of it), **Show from** / **Show until**, and **UTM** source, medium and campaign (shown for links to another website only). |
 
 Studio warns above 12 links. The link management (add, edit, reorder, hide, schedule) is open to clients.
 
-**Layouts.** The preset bar at the top of the section (agency only, like the hero's) offers five pictures:
+**Layouts.** The preset bar at the top of the section (agency only, like the hero's) offers six pictures:
 
 | Preset        | Looks like                                                                          | Stored as                                |
 | ------------- | ----------------------------------------------------------------------------------- | ---------------------------------------- |
@@ -2871,11 +2875,45 @@ Studio warns above 12 links. The link management (add, edit, reorder, hide, sche
 | Editorial     | Larger type, a ruled list, an arrow at the end of each row.                         | `variant: editorial`                     |
 | Compact       | Small pills that wrap; for tucking into another page.                               | `variant: compact`                       |
 | Image-focused | Cards with a big picture leading each card. Give every link a thumbnail.            | `variant: cards`, `thumbnailSize: large` |
+| Glass rows    | Frosted-glass rows over a background photo: thumbnail, icon, text and an arrow.     | `variant: stacked`, `rowStyle: glass`    |
 
 A section has at most four layouts (see [Section variants](#section-variants)), so Image-focused is Cards with large pictures
-rather than a fifth variant. A preset also sets the alignment that suits it (`style.align`), and leaves content and tone
+and Glass rows is Minimal with the glass row style, rather than a fifth and sixth variant. A preset also sets the alignment that suits it (`style.align`), and leaves content and tone
 alone; every field stays editable afterwards and the bar shows _Custom_ once one no longer matches. Fields that a layout
 doesn't draw are hidden on the links (`enclosingOfArray` reads the section's layout from the document and the field's path).
+
+**Glass rows.** Choose the **Glass rows** preset for a Link page that sits over a full-page photo (give the
+section a **Background image** in its Design tab; leave the overlay on _None_ or _Light_ so the photo shows).
+Each link is one row on a frosted-glass card, left to right: a **thumbnail** that fills the row's height (rounded
+on the outer corners only, about 30% of the row on a phone), a round **icon** badge, the **title and description**,
+and a round **arrow** badge (untick **Arrow on each row** to leave it off). Unlike the other layouts, a link can
+have an icon _and_ a thumbnail; either, both or neither works, and the row holds together. The whole row is one
+link, so there is one Tab stop per row, and every row is at least 44 px tall.
+
+- **Glass strength** (Light, Medium or Strong; Medium by default) chooses how see-through the rows are. It only
+  shows for Glass rows. The glass is made from the page colour, so it follows Brand colours, the Appearance
+  (light or dark) and the section's background tone with no extra setting.
+- **Readability.** The photo behind is unknown, so Studio measures the worst case, as it does for a section's
+  background picture (`src/lib/color/glass-contrast.ts`): the glass laid over pure black and pure white. Title and
+  description both use the tone's main text colour and must reach 4.5:1. Medium and Strong pass on the Surface, Soft
+  and Dark tones; Light passes on Surface and Soft but can fall just short on Dark, and no strength passes on the
+  Brand colour tone (light text on the brand colour over a white photo). Studio warns on **Glass strength** when the
+  chosen one can fail, and says whether a stronger one would pass. It is a warning, never a block.
+- **Tokens.** `glass` in `src/styles/tokens.json`: `light`, `medium`, `strong` (how much of the page colour each
+  strength keeps, 0 to 1, increasing), `solid` (the nearly opaque surface), `blur` (12 to 16 px), `border` and
+  `border-hover` (how strong the light edge is) and `shadow`. `npm run tokens` writes them as `.glass-row` variables
+  in `tokens.generated.css`, defined per element, not at `:root`, so a dark or brand-coloured section's own surface
+  colour is the one the glass reads. The rules that use them are `.glass-row` in `src/styles/globals.css`.
+- **Fallbacks.** A browser that can't blur (`@supports not (backdrop-filter: blur(1px))`) and a visitor who asks
+  for less transparency (`prefers-reduced-transparency: reduce`) both get the nearly solid surface, which reads
+  better than the measured glass, so only the see-through strengths are checked.
+- **Hover and focus.** The row uses the shared button feedback (`buttonFeedback`) and its edge brightens on hover;
+  the focus ring is the one `globals.css` draws for everything.
+- **Cost.** None in JavaScript: a server component (`glass-row.tsx`) and CSS. `stacked.tsx` picks it when
+  `rowStyle` is `glass`; existing content has no `rowStyle` and renders exactly as before. The Link page template
+  still starts as Minimal.
+- **Icons.** The shared set gained Care, Sun, Community, Person, Location, Email, Calendar and Phone, so badge rows
+  (the hero slot) offer them too. A new one is a line in `BADGE_ICONS` and a drawing in `badge-icon.tsx`.
 
 **Scheduling and hiding.** Pages are cached, so the server can't know the time while it builds one.
 
@@ -2970,9 +3008,14 @@ to the same budget.
 headings, social sources, the tracking script, the template and the presets. `tests/e2e/link-list.spec.ts`: order, hidden and
 not-yet-due links (absent from the HTML, addresses included), the header and footer going away and coming back across client
 navigations, UTM tags, one large link, keyboard order and focus, 375 px layout and tap size, the analytics events (and none
-without a provider), Cards two across and stacked, and axe on the Link page, an ordinary page and all five presets. The
-section gallery has one entry per preset (`link-list-stacked`, `-cards`, `-editorial`, `-compact`, `-image-focused`), screenshot
-on desktop and mobile; macOS skips them, so refresh the baselines with the **Update visual baselines** workflow.
+without a provider), Cards two across and stacked, and axe on the Link page, an ordinary page and all six presets.
+`tests/e2e/link-list-glass.spec.ts` covers Glass rows on `/link-glass` (a Link page over a background photo): the
+row's parts, the blurred surface and its fallbacks, one Tab stop per row, hover, axe at desktop and 375 px, the
+page rendering without JavaScript, the thumbnail's share of the row and the 44 px height, and screenshots at 375, 768
+and 1280 px; `design-settings-visual.spec.ts` repeats them in the Light and Dark Brand colours. Vitest covers the preset
+table, which fields show for which layout, the icon list and drawings, the glass tokens and the contrast check at each
+strength. The section gallery has one entry per preset (`link-list-stacked`, `-cards`, `-editorial`, `-compact`,
+`-image-focused`, `-glass-rows`), screenshot on desktop and mobile; macOS skips them, so refresh the baselines with the **Update visual baselines** workflow.
 
 ### Style guide
 

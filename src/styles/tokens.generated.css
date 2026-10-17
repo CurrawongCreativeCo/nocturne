@@ -99,6 +99,9 @@
   --edge-height-small: clamp(1.5rem, 1rem + 2vw, 2.5rem);
   --edge-height-medium: clamp(2.5rem, 1.5rem + 4vw, 5rem);
   --edge-height-large: clamp(4rem, 2rem + 8vw, 9rem);
+
+  --glass-blur: 14px;
+  --glass-shadow: 0 8px 32px 0 rgb(0 0 0 / 0.12);
 }
 
 :root {
@@ -138,5 +141,22 @@
     --color-focus: var(--tone-accent-ink);
     background-color: var(--color-surface);
     color: var(--color-ink);
+  }
+}
+
+@layer base {
+  .glass-row {
+    --glass-solid: color-mix(in oklch, var(--color-surface) 95%, transparent);
+    --glass-border: color-mix(in oklch, var(--color-ink-inverse) 40%, transparent);
+    --glass-border-hover: color-mix(in oklch, var(--color-ink-inverse) 75%, transparent);
+    --glass-surface: color-mix(in oklch, var(--color-surface) 70%, transparent);
+  }
+
+  .glass-row-light {
+    --glass-surface: color-mix(in oklch, var(--color-surface) 55%, transparent);
+  }
+
+  .glass-row-strong {
+    --glass-surface: color-mix(in oklch, var(--color-surface) 85%, transparent);
   }
 }

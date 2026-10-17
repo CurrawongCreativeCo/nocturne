@@ -13,6 +13,14 @@ export const BADGE_ICONS = [
   { value: 'bolt', title: 'Lightning bolt' },
   { value: 'leaf', title: 'Leaf' },
   { value: 'award', title: 'Award' },
+  { value: 'care', title: 'Care' },
+  { value: 'sun', title: 'Sun' },
+  { value: 'community', title: 'Community' },
+  { value: 'person', title: 'Person' },
+  { value: 'location', title: 'Location' },
+  { value: 'email', title: 'Email' },
+  { value: 'calendar', title: 'Calendar' },
+  { value: 'phone', title: 'Phone' },
 ] as const
 
 export type BadgeIconName = (typeof BADGE_ICONS)[number]['value']

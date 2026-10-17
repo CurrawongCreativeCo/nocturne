@@ -33,6 +33,7 @@ const SECTIONS = [
   'features-grid-style-alt',
   'features-grid-style-inverse',
   'features-grid-style-accent',
+  'link-list-glass-rows',
 ] as const
 
 async function usePalette(request: APIRequestContext, palette: 'off' | 'light' | 'dark') {
@@ -88,6 +89,19 @@ for (const palette of ['light', 'dark'] as const) {
         const section = page.locator(`[data-gallery-section="${id}"]`)
         await section.scrollIntoViewIfNeeded()
         await expect(section).toHaveScreenshot(`${palette}-${id}.png`)
+      })
+    }
+
+    // Glass rows over a photo take their colours from the palette: Light and Dark Brand colours, at a phone, tablet and laptop width.
+    for (const width of [375, 768, 1280]) {
+      test(`looks the same: Glass rows page at ${String(width)} px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 })
+        await page.goto('/link-glass')
+        await settle(page)
+        await expect(page).toHaveScreenshot(`${palette}-link-glass-${String(width)}.png`, {
+          fullPage: true,
+          maxDiffPixelRatio: 0.01,
+        })
       })
     }
 
