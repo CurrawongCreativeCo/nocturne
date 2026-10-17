@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { HERO_PRESETS, HERO_VARIANTS, hero } from '@/features/pages/schemas/sections/hero'
-import { matchPreset } from '@/features/studio/components/preset-picker/presets'
+import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { SECTION_TONES } from '@/lib/sanity/section-style-options'
 
 /**

@@ -4,9 +4,10 @@ import { Card, Stack, Text } from '@sanity/ui'
 import { useState } from 'react'
 
 import type { PresetDefinition, PresetThumbnailProps } from '@/lib/sanity/schema/preset-field'
+import { getAtPath, matchPreset } from '@/lib/sanity/schema/preset-match'
 
 import { PickerView } from '../components/preset-picker/picker-view'
-import { buildPresetOperations, getAtPath, matchPreset } from '../components/preset-picker/presets'
+import { buildPresetOperations } from '../components/preset-picker/presets'
 
 /** Sample artwork: inline SVG that follows the scheme (`currentColor`), so both modes are covered. */
 function Bars({ rows, selected }: PresetThumbnailProps & { rows: number[] }) {

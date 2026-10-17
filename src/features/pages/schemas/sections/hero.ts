@@ -10,8 +10,9 @@ import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
+import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
-import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import {
   HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
@@ -123,6 +124,28 @@ export const HERO_PRESETS = [
     set: { variant: 'full-bleed', 'style.tone': 'inverse' },
   },
 ] as const
+
+/** What an unset field means, so a hero that was never touched still matches its preset (Full background image). */
+const HERO_DEFAULTS = { variant: 'overlay', imagePosition: 'right', 'style.tone': 'inverse' }
+
+/**
+ * The list subtitle: "Hero · Split, image left" when the fields match a preset, otherwise the layout
+ * and tone ("Hero · Split · Contrast") for a custom combination.
+ */
+export function heroSubtitle(fields: { variant?: string; imagePosition?: string; tone?: string }) {
+  const preset = matchPreset(
+    HERO_PRESETS,
+    {
+      variant: fields.variant,
+      imagePosition: fields.imagePosition,
+      style: { tone: fields.tone },
+    },
+    HERO_DEFAULTS,
+  )
+  return preset
+    ? joinSubtitle('Hero', preset.title)
+    : variantSubtitle('Hero', HERO_VARIANTS, fields.variant, fields.tone)
+}
 
 /** Split only: how the width is shared (the first is the default, an even split). */
 const SPLIT_PROPORTION_OPTIONS = [
@@ -346,6 +369,7 @@ export const hero = defineType({
       title: 'title',
       media: 'backgroundImage',
       variant: 'variant',
+      imagePosition: 'imagePosition',
       tone: 'style.tone',
     },
     prepare: ({
@@ -353,16 +377,18 @@ export const hero = defineType({
       title,
       media,
       variant,
+      imagePosition,
       tone,
     }: {
       heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       media?: PreviewValue['media']
       variant?: string
+      imagePosition?: string
       tone?: string
     }) => ({
       title: headingPlainText(heading) || title || 'Untitled',
-      subtitle: variantSubtitle('Hero', HERO_VARIANTS, variant, tone),
+      subtitle: heroSubtitle({ variant, imagePosition, tone }),
       media,
     }),
   },

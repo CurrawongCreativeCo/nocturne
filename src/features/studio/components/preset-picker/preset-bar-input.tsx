@@ -9,10 +9,11 @@ import {
 } from 'sanity'
 
 import { isClientView } from '@/lib/sanity/roles'
+import { getAtPath, matchPreset, splitPath } from '@/lib/sanity/schema/preset-match'
 
 import { normalisePresets } from './options'
 import { PickerView } from './picker-view'
-import { buildPresetOperations, getAtPath, matchPreset, splitPath } from './presets'
+import { buildPresetOperations } from './presets'
 
 /** The schema type name of the object at `path` below `schemaType`, for creating it with a `_type`. */
 function typeNameAt(schemaType: ObjectSchemaType, path: readonly string[]): string | undefined {
