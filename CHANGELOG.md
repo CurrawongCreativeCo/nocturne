@@ -136,6 +136,12 @@ you start a release.
   guide describes; the post list shows the date and author instead of the URL. Navigation gets help text, and _Footer
   text_ is now **Copyright line**. Field help and warnings say **Brand colours** (the sidebar's name) instead of _Design
   settings_.
+- **Section backgrounds are named by role:** _Page_, _Tinted_, _Contrast_ and _Brand_ (were _Surface_, _Soft_, _Dark_,
+  _Accent_), in the picker and in list subtitles ("Hero · Split · Contrast"). Stored values are unchanged.
+- **Collapsed fine-tuning areas are all called Advanced:** _Advanced: animation_, _Advanced: edge_, _Advanced: layout_
+  and _Advanced: image_ (were _More … options_).
+- **Publishing a live page or post no longer opens a dialog** unless it is the first publish or the address changed (where
+  the dialog offers the redirect). The rule is `needsPublishConfirmation` in `src/features/studio/utils/publish-redirect.ts`.
 
 ### Fixed
 
