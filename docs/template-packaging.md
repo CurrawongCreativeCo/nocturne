@@ -43,7 +43,7 @@ a stable surface:
 | `config`: env validation, `paths`, site URL                                                           | Pure logic with unit tests                             |
 | `lib`: redirects, edge-config sync, IndexNow, sitemap chunks                                          | Self-contained, no UI                                  |
 | `components/ui`: `SanityImage`, `SanityLink`, `CtaLink`, `RichText`, `JsonLd`                         | Accessibility fixes should reach every site            |
-| Feature logic without design: blog queries and utils, forms validation / Turnstile / Resend / limiter | Behavior and security, not appearance                  |
+| Feature logic without design: blog queries and utils, forms validation / Turnstile / Resend / limiter | Behaviour and security, not appearance                 |
 | Studio: structure helpers, content-health, Presentation resolvers, AI settings                        | Plugins are already registered from `sanity.config.ts` |
 | Config presets: ESLint (including the import boundaries), Prettier, tsconfig, Vitest, Playwright base | One place to tighten rules                             |
 | `bin/new-section` scaffolder and a `check` script                                                     | Replaces `scripts/`                                    |

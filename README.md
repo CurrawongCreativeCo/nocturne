@@ -111,7 +111,7 @@ Open http://localhost:3000/studio:
     _Write alt text automatically_. It's off by default, each run spends credits, and the choice is
     saved per browser, so each editor decides for themselves (reload open Studio tabs to apply it).
   - _Meta description:_ in a page's SEO group, open the sparkle (AI Assist) menu on "Meta description" and
-    run **Write meta description**. It summarizes the page title and sections in one sentence under 155
+    run **Write meta description**. It summarises the page title and sections in one sentence under 155
     characters. Review before publishing.
 - **Blog:** _Blog_ in the sidebar holds _Posts_, _Authors_ and _Categories_. A post needs a title, slug, summary, main image (with alt text), published date, author and body; give it at least one category, because related posts are chosen by shared categories. The slug becomes `/blog/<slug>`, so `blog` is reserved and a page can't use it. Details:
   - _Index:_ `/blog` shows 12 posts per page, newest first by _Published at_, with Previous / Next links (`?page=2`) and a filter of the categories that have a post. `/blog/category/<slug>` lists one category the same way. Page 1 has no `?page`, and every page is its own canonical URL.
@@ -3821,7 +3821,7 @@ the template, so they merge cleanly unless you changed them.
 | Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                                                                                                                 | Clean                               |
 | Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                                                                                                                    | Take either side, regenerate        |
 
-Keep customizations out of core files where you can: add a section, a page template or a fixture
+Keep customisations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design
 tweaks to feature components (`src/features/*/components`) conflict like customize files. Where several
 projects keep editing the same core file, see [docs/template-packaging.md](docs/template-packaging.md)

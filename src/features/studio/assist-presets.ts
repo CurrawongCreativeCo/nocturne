@@ -27,7 +27,7 @@ export const assistPresets: Presets = {
                   {
                     _type: 'span',
                     _key: 's1',
-                    text: 'Summarize this page in one sentence under 155 characters for search results. Page title: ',
+                    text: 'Summarise this page in one sentence under 155 characters for search results. Page title: ',
                     marks: [],
                   },
                   { _type: 'sanity.assist.instruction.fieldRef', _key: 'title-ref', path: 'title' },
