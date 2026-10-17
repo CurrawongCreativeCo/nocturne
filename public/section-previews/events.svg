@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="600" height="450"><style>
+:root{--bg:#f6f6f8;--fg:#1f2430;--line:#c9ccd4;--accent:#5f2bd4}
+@media (prefers-color-scheme:dark){:root{--bg:#16181d;--fg:#e8eaee;--line:#3a3f4b;--accent:#9f80e5}}
+rect.bg{fill:var(--bg)}
+.h{fill:var(--fg);opacity:.85}.l{fill:var(--fg);opacity:.35}.a{fill:var(--accent)}
+.f{fill:none;stroke:var(--fg);stroke-opacity:.4}.p{fill:var(--fg);fill-opacity:.1;stroke:var(--fg);stroke-opacity:.4}
+.g{fill:var(--fg);opacity:.3}.g2{fill:var(--fg);opacity:.22}.c{fill:var(--fg);fill-opacity:.06;stroke:var(--fg);stroke-opacity:.3}
+.s{fill:none;stroke:var(--accent);stroke-width:1.2}.band{fill:var(--accent);opacity:.9}.k{fill:var(--bg)}
+text{font:600 8px system-ui,sans-serif;fill:var(--fg);opacity:.6}
+</style><rect class="bg" width="160" height="120"/><rect class="h" x="10" y="12" width="60" height="7" rx="2"/><rect class="c" x="10" y="34" width="22" height="22" rx="3"/><rect class="a" x="15" y="38" width="12" height="2.5" rx="1.25"/><rect class="h" x="16" y="44" width="10" height="7" rx="2"/><rect class="h" x="40" y="36" width="62" height="4" rx="2"/><rect class="l" x="40" y="44" width="92" height="3" rx="1.5"/><rect class="l" x="40" y="50" width="64" height="3" rx="1.5"/><rect class="c" x="10" y="62" width="22" height="22" rx="3"/><rect class="a" x="15" y="66" width="12" height="2.5" rx="1.25"/><rect class="h" x="16" y="72" width="10" height="7" rx="2"/><rect class="h" x="40" y="64" width="62" height="4" rx="2"/><rect class="l" x="40" y="72" width="92" height="3" rx="1.5"/><rect class="l" x="40" y="78" width="64" height="3" rx="1.5"/><rect class="c" x="10" y="90" width="22" height="22" rx="3"/><rect class="a" x="15" y="94" width="12" height="2.5" rx="1.25"/><rect class="h" x="16" y="100" width="10" height="7" rx="2"/><rect class="h" x="40" y="92" width="62" height="4" rx="2"/><rect class="l" x="40" y="100" width="92" height="3" rx="1.5"/><rect class="l" x="40" y="106" width="64" height="3" rx="1.5"/></svg>

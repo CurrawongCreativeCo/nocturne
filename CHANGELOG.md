@@ -76,6 +76,23 @@ you start a release.
 - `SocialIcon` (`components/ui/social-icon.tsx`) and the shared platform list (`lib/social-platforms.ts`); Business info's
   social profiles are available to page sections through `LocationBusiness.socialLinks`.
 
+- **Events:** an `event` document (title, page address, start and end, all day, a time zone that starts as Business info's,
+  summary, description, image, venue or online link, category, a registration button using the shared **Goes to** action,
+  status _Scheduled_ / _Cancelled_ / _Sold out_, a places note) and an _Event category_ document, in a new `events` feature
+  (switch: `features.events` in `site.profile.ts`). Simple repeats: weekly, fortnightly, or monthly on the same weekday, with
+  a last date and skipped days, expanded at request time by a pure, unit-tested function (nothing stored per date; the wall
+  clock holds across daylight saving). The **Events** section (_Add item → Events_) has List, Agenda and Featured layouts as
+  pictures, shows what is upcoming by default, and has an agency-only category filter and count; "upcoming" is decided per
+  request in a small `<Suspense>` boundary (no clock in a cached result, no client JavaScript). Event pages at
+  `/events/<slug>` (`Event` JSON-LD, a branded share image at `/api/og/events/<slug>`, Presentation resolvers, sitemap),
+  add-to-calendar files at `/events/<slug>.ics` and a subscribable feed at `/events/feed.ics` (RFC 5545 with a generated
+  `VTIMEZONE`, escaping, folding, `RRULE` and `EXDATE`), plus Google Calendar and Outlook links. Studio: _Events_ with
+  Upcoming, Past and All lists, the subtitle "Sat 14 Mar, 10:00 am · Workshop", validation, and an _Add an event_ card on
+  Start here. See README, _Events_.
+- `src/lib/events/` (time zones, recurrence, formatting, calendar links, `.ics`), `eventCardFields` and `eventLastRelevant`
+  in `src/lib/sanity/fragments.ts`, `TIME_ZONES` in `src/lib/time-zones.ts` (moved from Business info's schema so other
+  features can use it) and `hasEvents()` in `src/config/profile.ts`.
+
 ### Changed
 
 - Quick search and the gallery lightbox now use `useModalDialog` for showing the dialog, the scroll lock and returning
@@ -91,7 +108,8 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None for content: existing links keep their stored values, and nothing is switched on until an editor adds a panel. After merging, run `npm run typegen` and commit the result, add `"panel"` to your revalidation webhook's filter (webhook mode only), and note that header, footer and menu buttons can't open panels (they use their fallback link). Clients now see _Reusable content → Panels_ in the Studio. Add `link_click` as a goal in Plausible if you use it. The gallery lightbox is unchanged. The new visual baselines (`link-list-*`) need the **Update visual baselines** workflow.
+None for content: existing links keep their stored values, and nothing is switched on until an editor adds a panel or an event. After merging, run `npm run typegen` and commit the result. Add `link_click` as a goal in Plausible if you use it. The new visual baselines (`link-list-*`, `events-*`) need the **Update visual baselines** workflow (panels add none).
+Webhook mode: add `"panel"`, `"event"` and `"eventCategory"` to the Sanity webhook filter (README, _Live mode vs. webhook mode_). Header, footer and menu buttons can't open panels (they use their fallback link). Clients now see _Reusable content → Panels_ in the Studio. `events` is a new feature switch (on by default); a client who doesn't want events sets `events: false` in `site.profile.ts`.
 
 ## [1.4.0] - 2026-10-16
 

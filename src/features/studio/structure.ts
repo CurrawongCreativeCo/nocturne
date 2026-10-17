@@ -1,5 +1,6 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
 import { BellIcon } from '@sanity/icons/Bell'
+import { CalendarIcon } from '@sanity/icons/Calendar'
 import { CogIcon } from '@sanity/icons/Cog'
 import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { ComposeIcon } from '@sanity/icons/Compose'
@@ -29,6 +30,12 @@ import type {
 import { currentAudience } from './roles'
 import { SINGLETON_TYPES } from './singletons'
 import { TeamOrderPane } from './team-order/team-order-pane'
+import {
+  PAST_EVENTS_FILTER,
+  PAST_EVENTS_ORDER,
+  UPCOMING_EVENTS_FILTER,
+  UPCOMING_EVENTS_ORDER,
+} from './utils/event-lists'
 import { isTypeVisible } from './utils/feature-visibility'
 import { groupPagePaths, type PageRef } from './utils/group-page-paths'
 import {
@@ -91,6 +98,8 @@ const LISTED_TYPES = new Set([
   'category',
   'stripePrice',
   'teamMember',
+  'event',
+  'eventCategory',
   'frame',
   'panel',
   // new-document:listed
@@ -175,6 +184,38 @@ export const structure: StructureResolver = (S, context) => {
             .id('team')
             .icon(UsersIcon)
             .child(S.component(TeamOrderPane).id('team').title('Team')),
+        ]
+      : []),
+    ...(hasType('event') && isTypeVisible('event')
+      ? [
+          group(S, 'events', 'Events', CalendarIcon, [
+            S.listItem()
+              .title('Upcoming')
+              .id('events-upcoming')
+              .icon(CalendarIcon)
+              .child(
+                S.documentList()
+                  .id('events-upcoming')
+                  .title('Upcoming events')
+                  .schemaType('event')
+                  .filter(UPCOMING_EVENTS_FILTER)
+                  .defaultOrdering([...UPCOMING_EVENTS_ORDER]),
+              ),
+            S.listItem()
+              .title('Past')
+              .id('events-past')
+              .icon(CalendarIcon)
+              .child(
+                S.documentList()
+                  .id('events-past')
+                  .title('Past events')
+                  .schemaType('event')
+                  .filter(PAST_EVENTS_FILTER)
+                  .defaultOrdering([...PAST_EVENTS_ORDER]),
+              ),
+            S.documentTypeListItem('event').title('All events').icon(CalendarIcon),
+            S.documentTypeListItem('eventCategory').title('Categories').icon(TagIcon),
+          ]),
         ]
       : []),
     // new-document:list

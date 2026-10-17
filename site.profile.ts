@@ -19,6 +19,7 @@ export const siteProfileInput = defineSiteProfile({
     businessInfo: true,
     team: true,
     teamProfiles: true,
+    events: true,
   },
   // Section types clients may add. Empty: the Studio's default list (see DEFAULT_CLIENT_SECTIONS).
   clientSections: [],

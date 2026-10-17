@@ -435,6 +435,10 @@ src/
     studio/[[...tool]]/page.tsx
     (site)/blog/                     blog index, [slug] (post), category/[slug]
     (site)/team/[slug]/page.tsx      a team member's profile page
+    (site)/events/[slug]/page.tsx    an event's page
+    api/events/[slug]/ics/route.ts   one event's calendar file (served at /events/<slug>.ics)
+    api/events/feed/route.ts         every upcoming event as a calendar feed (served at /events/feed.ics)
+    api/og/events/[slug]/route.tsx   an event's branded share image
     (site)/site-shell.tsx            header, <main>, footer: shared by (site)/layout and ab/[code]/layout
     (site)/site-consent.tsx          cookie banner with its text from the Cookie banner singleton
     ab/[code]/[[...slug]]/           pages prerendered per A/B option (proxy rewrites visitors here)
@@ -483,6 +487,11 @@ src/
       api/                         handle-webhook.ts, write-prices.ts, checkout.ts (server action), queries.ts
       components/                  checkout-button (client form)
       utils/                       stripe-signature, map-stripe (event + price -> document), stripe-api (REST), config
+    events/                        events: the event schema, event pages, calendar files
+      api/                         event.ts (EVENT_QUERY, EVENTS_INDEX_QUERY, EVENTS_FEED_QUERY, metadata, sitemap)
+      components/                  event-view (server)
+      schemas/                     event.ts, event-category.ts
+      utils/                       json-ld, to-ics, location, registration-url, slug
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
@@ -490,9 +499,10 @@ src/
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, slider (+ slider-lazy, slider-snap)
   components/ui/overlay/           the shared overlay: useModalDialog, Overlay (modal, drawers, sheet, full screen)
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
-  config/                          env.ts (validated), paths.ts (slug <-> URL),
+  config/                          env.ts (validated), paths.ts (slug <-> URL), event-paths.ts (/events URLs),
                                    tokens.generated.ts (GENERATED: token values for the OG image)
   config/studio-brand/             CMS brand: currawong.ts (defaults), resolve.ts, validate.ts, client.ts, types.ts
+  lib/events/                      time zones, recurrence, formatting, add-to-calendar links and .ics files (pure; shared by the Events section, event pages and Studio)
   lib/color/                       hex <-> OKLCH, WCAG contrast, lightness adjustment (shared with build-tokens)
   lib/sitemap-chunks.ts            sitemap split math (shared by pages and posts)
   lib/sanity/                      client (singleton), live, live-action, image, token, data-attribute,
@@ -634,6 +644,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
 - **Link list** adds none: its links, profile and social icons are resolved inside `PAGE_QUERY` (the social icons come from the settings entry the footer already fetched), and which links are due is decided at request time from that cached data. The page option is one more field in `PAGE_QUERY`.
 - **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
+- **Events** add none to a page view: an Events section's events are resolved inside `PAGE_QUERY` (an `event` or `eventCategory` change expires the pages, tagged `event` and `eventCategory`; the business time zone comes from the same query). An event page adds `EVENT_QUERY`, one per event, and `EVENTS_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/events/…` URLs cost nothing. The calendar feed adds `EVENTS_FEED_QUERY`, one cached entry for the whole site; an event's `.ics` file reads the event's own entry. Which events are upcoming is decided per request from that cached data, so no visitor causes a Sanity request.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
   recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
@@ -669,7 +680,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1204,7 +1215,7 @@ export const siteProfileInput = defineSiteProfile({
 ```
 
 - **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo`,
-  `team` and `teamProfiles`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
+  `team`, `teamProfiles` and `events`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
 - **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;
   see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
   Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
@@ -1219,17 +1230,18 @@ export const siteProfileInput = defineSiteProfile({
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
 feature does:
 
-| Feature                      | When off                                                                                                                                                                                                       |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                       |
-| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                             |
-| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                           |
-| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                            |
-| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                       |
-| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                        |
-| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                               |
-| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form |
-| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                |
+| Feature                      | When off                                                                                                                                                                                                                                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                           |
+| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                 |
+| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                               |
+| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                |
+| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                           |
+| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                            |
+| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                   |
+| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                     |
+| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page) |
+| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                    |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
 import it). Page-builder sections that depend on a disabled feature (a form, pricing table or newsletter section)
@@ -1941,6 +1953,110 @@ profile pages, on their own page at `/team/<slug>`.
   slug and a member with no address; the sitemap; axe) and `accessibility.spec.ts` (`/team`, `/team/ann-lee`).
   The section gallery has `team-grid`, `team-slider` and `team-list`; their screenshot baselines need the **Update visual
   baselines** workflow (macOS skips visual tests).
+
+### Events
+
+A content calendar: what is on, when and where. Events are documents (`event`, in `src/features/events`), shown by the
+**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
+to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
+calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
+list and an agenda, which is what most clients need.
+
+**Default, presets, advanced.**
+
+- **Default:** add events, then _Add item → Events_. It shows the next six, soonest first, nicely, with nothing else to set.
+  Past events drop off by themselves.
+- **Presets** (the Layout picker, with pictures): _List_ (a row each: date badge, when and where, title, summary), _Agenda_
+  (grouped by day, times in a column) and _Featured_ (the next event large with its picture, the rest beside it).
+- **Advanced** (agency-only, Design tab → Advanced): _Only show one category_ and _Most to show_ (empty: six rows, ten agenda
+  entries, four featured; 24 at most). On an event, the collapsed **Repeats** group.
+
+**An event.** _Title_ and _Page address_ (a single path segment; `feed` is taken), _Start_, _End_ (optional), _All day_,
+_Time zone_ (starts as Business info's), _Summary_ (the cards and search results), _Description_ (rich text, stored as
+`body` like posts: a field called `description` that isn't text would change the type of every query that reads the site
+description), _Image_ (alt text required), _Where_ (_At a venue_: name and address, or _Online_ with the link to join),
+_Category_ (a reference to an _Event category_), _Registration button_ (a label and the shared **Goes to** action: a page, a
+website, and booking or a panel once those exist), _Status_ (_Scheduled_, _Cancelled_ or _Sold out_) and _Places note_ (text
+such as "Limited to 12 people"; it does not count bookings). Cancelled and sold-out events stay on the site with a label, and
+the registration button goes. Validation: the end must be after the start (an all-day event may end on its first day), a
+timed event needs a time zone, an online event needs its link, and the last date of a series can't precede its first.
+
+**Time zones.** Times are stored as instants and shown in the **event's** time zone for everyone ("Sat 14 Mar, 10:00 am –
+12:00 pm"; the event page also names the zone, "AEDT"), so a visitor in Perth sees Sydney's 10 am rather than a guess at
+their own. The picker offers the same zones as Business info (`TIME_ZONES`, `src/lib/time-zones.ts`). An all-day event is
+dates only, in that zone. An event saved with no zone (an all-day event) uses Business info's.
+
+**Repeats.** _Does not repeat_, _Every week_, _Every fortnight_ or _Every month, on the same weekday_ (the second Tuesday
+stays the second Tuesday; the fifth means "the last", so every month has one), with an optional **last date** and **days it
+doesn't happen** (public holidays, school breaks). Occurrences are worked out when they are needed, in a pure function
+(`expandOccurrences`, `src/lib/events/recurrence.ts`); nothing is stored per date. They keep the same wall-clock time across
+daylight saving changes: a Tuesday 10 am class in Sydney is 10 am before and after the clocks move, which is a different
+UTC instant. Without a last date a series never ends, so give classes one at the end of term. The List and Featured layouts
+show a series once, at its next date; the Agenda shows each of its next dates (at most eight per series).
+
+**The section.** _Section title_ (starts as "What’s on"), _Intro_, an optional **“See all events” link** (any **Goes to**
+action; usually your page with every event) and its text. A section also offers "Subscribe to the calendar" (the feed) unless
+it is filtered to one category, since the feed lists them all. A section with nothing coming up says so, and keeps its links.
+
+**How "upcoming" works without the clock.** Pages are cached, and the clock may not be read in a cached result. So the query
+returns events without looking at the date (it keeps the 200 that matter longest, ordered by `eventLastRelevant`, so a long
+history can't crowd out what is coming), and the list is worked out **per request**, in a small `<Suspense>` boundary of its
+own (`requestTime()`, `src/lib/request-time.ts`): the title, intro and links stay prerendered, and only the list streams in
+(a placeholder holds its place so nothing jumps). It adds no client JavaScript. Two consequences: the list needs JavaScript
+to appear in the page (React swaps the streamed list in; without it only the placeholder and the links show, and the events
+are still reachable through their pages, the feed and the sitemap), and an event disappears the moment it ends, with no
+rebuild. An event under way still counts, and an all-day event stays up to the end of its last day.
+
+**Event pages.** `/events/<slug>` has one `<h1>`, the summary, the image, the description and a details panel (when, where
+with a "Get directions" link or the online link, places note, the registration button, and Add to calendar). A series shows
+its next date, the next five dates and its repeat; those are worked out per request in their own `<Suspense>` boundary, so
+the page is otherwise prerendered like a post. The page has `Event` structured data (`schema.org`): `startDate` and
+`endDate` with the zone's offset (dates only for all-day events), `eventStatus` (`EventScheduled` or `EventCancelled`),
+`eventAttendanceMode`, `location` (a `Place` or a `VirtualLocation`), `offers` pointing at the registration address
+(`InStock`, or `SoldOut`; none for a cancelled event or a button with no address of its own) and the site's Organization as
+`organizer`. The share image is generated and branded (`/api/og/events/<slug>`: site name, the event's date or repeat, title,
+venue, in the brand colours), so it always carries the date. Metadata is the event's title and summary.
+
+**Add to calendar.** Each event page offers _Add to Google Calendar_ and _Add to Outlook_ (links built from the event: the
+next date of a series) and the file for Apple Calendar and others.
+
+- `/events/<slug>.ics` is one event as an iCalendar file (RFC 5545): `DTSTART;TZID=Australia/Sydney:20261105T100000`, a
+  `VTIMEZONE` generated from the zone's real daylight saving changes (so an app that doesn't know the zone still shows 10 am
+  as 10 am), text escaped (commas, semicolons, backslashes, line breaks) and lines folded at 75 bytes. A series is **one**
+  entry with an `RRULE` (`FREQ=WEEKLY;BYDAY=TU;UNTIL=…`, `FREQ=MONTHLY;BYDAY=2TU`, …) and `EXDATE`s for skipped days, so a
+  calendar keeps the whole series. A cancelled event is written `STATUS:CANCELLED`; all-day events are dates. The file is
+  prerendered and refreshed with the event.
+- `/events/feed.ics` is every upcoming event, for **Subscribe** in a calendar app (use the address, or `webcal://` in place
+  of `https://`). It renders per request so finished events fall out, asks calendars to refresh every 12 hours and sends
+  `s-maxage=600`. The calendar is named after the site ("Test Co events"). It costs no Sanity request.
+- `next.config.ts` rewrites both to handlers under `/api/events`; the feed first, so `feed` is never read as a slug. That is
+  why an event can't use `feed` as its address.
+
+**Studio.** _Events_ in the desk has _Upcoming_ (soonest first), _Past_ (latest first), _All events_ and _Categories_. The
+list subtitle reads "Sat 14 Mar, 10:00 am · Workshop" (the category is left out when unset, and "· Cancelled" or "· Sold
+out" is added). Presentation opens `/events/<slug>` on the event. Clients see _Events_ by default
+(`CLIENT_STRUCTURE_IDS`); _Add an event_ is a card on Start here.
+
+**Slugs.** An event's address is one path segment (`utils/slug.ts`). In the page schema `events/<anything>` is reserved
+(`/events/[slug]` would answer first), but a page called exactly `events` is allowed: that is where an Events section with
+every event usually lives. The proxy leaves `/events/…` out of A/B tests. Unknown events, drafts (the published perspective
+hides them) and every `/events/…` URL when the `events` feature is off answer a real 404, checked against the cached
+`EVENTS_INDEX_QUERY` first. Events are in the sitemap after pages, posts and team profiles.
+
+**Adding a field** means the schema (`src/features/events/schemas/event.ts`), the query (`eventCardFields` in
+`src/lib/sanity/fragments.ts` for lists, `EVENT_QUERY` for the page, `EVENTS_FEED_QUERY` for the feed), then
+`npm run typegen`. Keep anything that needs the date out of the queries: it belongs in the request-time step.
+
+**Tests.** Unit (Vitest): `src/lib/events/` (`time-zone`, `recurrence` including daylight saving changes in Australia/Sydney,
+`format`, `calendar-links`, `ics` escaping, folding, `VTIMEZONE`, `RRULE` and `EXDATE`), `src/features/events/` (schema
+validation and the Studio subtitle, `json-ld`, `to-ics`, `location`, `registration-url`, `slug`),
+`src/features/pages/utils/events.test.ts` (what a section shows at a given time), the Studio's desk filters
+(`event-lists.test.ts`, run with groq-js) and the reserved slug. End to end: `tests/e2e/events.spec.ts` (the list hides past
+events and orders the rest; labels; the agenda, featured and empty states; the event page, its JSON-LD, share image and
+calendar links; the `.ics` content type and body, and the feed; the sitemap; axe) and `accessibility.spec.ts` (`/events`,
+`/events/pottery-workshop`). The fixtures are dated from the day the suite runs, except the section gallery's four events
+(2099, category _Workshop_), so its screenshots never change. The gallery has `events-list`, `events-agenda` and
+`events-featured`; their baselines need the **Update visual baselines** workflow (macOS skips visual tests).
 
 ### Logo strip
 
