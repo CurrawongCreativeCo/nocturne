@@ -164,7 +164,7 @@ export function seedDocuments(siteName) {
             question: 'Where do I change the menu and footer?',
             answer: [
               block(
-                'In Studio, open Website settings in the sidebar. The menu and footer are in Navigation; the site name and default SEO are in Identity & search.',
+                'In Studio, open Website settings in the sidebar. The menu and footer are in Navigation; the site name and default SEO are in Name, logo & icon.',
               ),
             ],
           },

@@ -9,9 +9,11 @@ import { browserIconField } from './browser-icon'
 /** A singleton: the one document has `_id === 'siteIdentity'` (see SINGLETON_TYPES and the desk structure). */
 export const siteIdentity = defineType({
   name: 'siteIdentity',
-  title: 'Identity & search',
+  title: 'Name, logo & icon',
   type: 'document',
   icon: SearchIcon,
+  description:
+    'The site name, short description, logo, default share image and browser icon (the small picture in the browser tab). The site name and description are also what search engines show.',
   fieldsets: [
     {
       name: 'advanced',
@@ -63,5 +65,5 @@ export const siteIdentity = defineType({
       initialValue: true,
     }),
   ],
-  preview: { prepare: () => ({ title: 'Identity & search' }) },
+  preview: { prepare: () => ({ title: 'Name, logo & icon' }) },
 })

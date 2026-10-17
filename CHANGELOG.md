@@ -22,6 +22,7 @@ you start a release.
 
 ### Changed
 
+- **Studio:** the _Identity & search_ screen is now _Name, logo & icon_ (with a description listing what is there), Business info has its own icon, and a new editor guide covers changing the logo or browser icon. Stored data is unchanged.
 ### Fixed
 
 - Studio → Design → Brand colours: an empty colour now shows the site's real default in the swatch and as the

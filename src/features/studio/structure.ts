@@ -193,7 +193,7 @@ export const structure: StructureResolver = (S, context) => {
 
   const websiteSettings = filterStructureItems(
     [
-      singletonItem(S, 'siteIdentity', 'Identity & search', SearchIcon),
+      singletonItem(S, 'siteIdentity', 'Name, logo & icon', SearchIcon),
       singletonItem(S, 'siteNavigation', 'Navigation', MenuIcon),
       singletonItem(S, 'announcement', 'Announcement bar', BellIcon),
       singletonItem(S, 'cookieBanner', 'Cookie banner', LockIcon),

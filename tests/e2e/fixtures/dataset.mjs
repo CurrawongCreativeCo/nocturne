@@ -1304,7 +1304,7 @@ export const designSettingsVariants = {
 }
 
 /**
- * Field changes the fake Content Lake can apply to the published Identity & search document while it runs
+ * Field changes the fake Content Lake can apply to the published Name, logo & icon document while it runs
  * (tests/e2e/ai-crawlers.spec.ts): the fixture above allows AI crawlers, this one switches them off.
  */
 export const aiCrawlersBlocked = { allowAiCrawlers: false }

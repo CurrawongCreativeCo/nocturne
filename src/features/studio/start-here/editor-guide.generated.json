@@ -35,6 +35,12 @@
       "title": "Add a team member",
       "summary": "Add a person to the team section, with a photo.",
       "body": "## Steps\n\n1. Open **Team** in the left-hand menu, then click **Create new**.\n2. Fill in their **name** and **role**.\n3. Upload their **portrait** and fill in its alternative text. Use the same shape for everyone so the cards line up. See \"Replace a photo\".\n4. Add a **short bio**. Two or three sentences is plenty.\n5. Click **Publish**.\n\n## Change the order\n\nDrag people up or down in the Team list. The site follows the same order.\n\n## Remove someone\n\nOpen their entry, open the menu next to **Publish** and choose **Unpublish** to hide them, or **Delete** to remove them for good."
+    },
+    {
+      "id": "change-your-logo-and-icon",
+      "title": "Change your logo or browser icon",
+      "summary": "Update the logo, site name and the small picture in browser tabs.",
+      "body": "The logo and site name show in the header. The browser icon is the small picture in browser tabs and bookmarks.\n\n## Steps\n\n1. In the sidebar, open **Website settings**, then **Name, logo & icon**.\n2. To change the logo, upload a new one in the **Logo** field. An SVG or a transparent PNG works best.\n3. To change the browser icon, find **Browser icon**. Choose **Upload an icon** and add a square picture, or choose **Use the site logo** and crop it square.\n4. Check the preview below the icon. At the smallest size, a plain mark reads better than small text.\n5. Click **Publish**.\n\n## Good to know\n\n- The browser icon works best as a square PNG or SVG, at least 512 px wide.\n- Browsers keep old icons for a while. If you still see the old one, close the tab and reopen the site.\n- The site name and description on this screen are also what search engines show."
     }
   ],
   "sections": [
