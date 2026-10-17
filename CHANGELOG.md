@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **IndexNow for blog posts:** publishing a post now pings IndexNow with `/blog/<slug>`, as pages already did. No webhook change
+  needed. `buildIndexNowRequest` takes a `path` instead of a `slug`; update any project code that calls it.
 - **Editor guide in Studio:** a **Help** tab in Start here (beside **Overview**) with short task guides (_Change a heading_, _Replace a
   photo_, _Publish and undo_, _Write a blog post_, _Update opening hours_, _Add a team member_) and a description of every section a client
   may add, with its fields, recommended picture sizes and length limits. It shows only what the site uses: guides follow the profile's

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { postPath, slugToPath } from '@/config/paths'
+
 import { buildIndexNowRequest, keyFilePath } from './indexnow'
 
 interface Payload {
@@ -19,8 +21,8 @@ const key = 'abcd1234efgh5678'
 const base = { key, siteUrl: 'https://example.com' }
 
 describe('buildIndexNowRequest', () => {
-  it('builds the URL list from the site URL and the slug', () => {
-    const request = buildIndexNowRequest({ ...base, slug: 'services/web-design' })
+  it('builds the URL list from the site URL and the path', () => {
+    const request = buildIndexNowRequest({ ...base, path: '/services/web-design' })
     expect(payload(request)).toEqual({
       host: 'example.com',
       key,
@@ -30,25 +32,30 @@ describe('buildIndexNowRequest', () => {
   })
 
   it('maps the home slug to the root', () => {
-    const request = buildIndexNowRequest({ ...base, slug: 'home' })
+    const request = buildIndexNowRequest({ ...base, path: slugToPath('home') })
     expect(payload(request).urlList).toEqual(['https://example.com/'])
+  })
+
+  it('builds a blog post URL from postPath', () => {
+    const request = buildIndexNowRequest({ ...base, path: postPath('hello-world') })
+    expect(payload(request).urlList).toEqual(['https://example.com/blog/hello-world'])
   })
 
   it('keeps a port in the host', () => {
     const request = buildIndexNowRequest({
       ...base,
       siteUrl: 'https://example.com:8443',
-      slug: 'a',
+      path: '/a',
     })
     expect(payload(request).host).toBe('example.com:8443')
   })
 
-  it('skips without a key, with an invalid key, or without a slug', () => {
-    expect(buildIndexNowRequest({ ...base, key: undefined, slug: 'a' })).toBeNull()
-    expect(buildIndexNowRequest({ ...base, key: '', slug: 'a' })).toBeNull()
-    expect(buildIndexNowRequest({ ...base, key: 'short', slug: 'a' })).toBeNull()
-    expect(buildIndexNowRequest({ ...base, slug: undefined })).toBeNull()
-    expect(buildIndexNowRequest({ ...base, slug: '' })).toBeNull()
+  it('skips without a key, with an invalid key, or without a path', () => {
+    expect(buildIndexNowRequest({ ...base, key: undefined, path: '/a' })).toBeNull()
+    expect(buildIndexNowRequest({ ...base, key: '', path: '/a' })).toBeNull()
+    expect(buildIndexNowRequest({ ...base, key: 'short', path: '/a' })).toBeNull()
+    expect(buildIndexNowRequest({ ...base, path: undefined })).toBeNull()
+    expect(buildIndexNowRequest({ ...base, path: '' })).toBeNull()
   })
 
   it('skips localhost sites', () => {
@@ -57,7 +64,7 @@ describe('buildIndexNowRequest', () => {
       'http://127.0.0.1:3000',
       'http://app.localhost',
     ]) {
-      expect(buildIndexNowRequest({ ...base, siteUrl, slug: 'a' })).toBeNull()
+      expect(buildIndexNowRequest({ ...base, siteUrl, path: '/a' })).toBeNull()
     }
   })
 })
