@@ -51,8 +51,17 @@ export interface SectionGate {
   load: (key: string) => Promise<FullSection | undefined>
 }
 
+/** A panel one of the page's buttons or links opens, as PAGE_QUERY returns it. */
+export type PagePanel = NonNullable<PageData['panels']>[number]
+
 /** A form a `formSection` references. */
 export type SectionForm = NonNullable<SectionOf<'formSection'>['form']>
+
+/**
+ * Draws the page's panels, closed, once each. Panels are another feature, which this one can't
+ * import, so the route supplies it. Only called when the page has panels.
+ */
+export type RenderPanels = (panels: PagePanel[]) => ReactNode
 
 /** What a pricing table plan asks the route's checkout button to draw. */
 export interface CheckoutRequest {

@@ -40,6 +40,7 @@ const features = [
   'team',
   'events',
   'frames',
+  'panels',
   // new-feature:register
 ]
 

@@ -58,6 +58,13 @@ declare module 'sanity' {
      */
     defaultValue?: (context: PresetOptionsContext) => string | undefined
   }
+  interface DocumentOptions {
+    /**
+     * Shows which buttons and links open this document above its form (panels). The Studio input is
+     * in features/studio/components/panel-usage.
+     */
+    usedByButtons?: boolean
+  }
   interface ObjectOptions {
     /** Presets shown in a bar above the object's fields (features/studio/components/preset-picker). */
     presets?: PresetDefinition[]

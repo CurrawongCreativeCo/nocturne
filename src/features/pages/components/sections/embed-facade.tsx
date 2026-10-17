@@ -45,9 +45,11 @@ export function EmbedFacade({
   const consent = useConsentState()
   const frame = useRef<HTMLIFrameElement>(null)
   const noteId = useId()
-  // The server and hydration can't know the choice (undefined); the button waits for the browser's answer.
+  // The server and hydration can't know the choice (undefined), so until the browser has answered the card
+  // shows the same thing as a visitor who hasn't allowed marketing: the page renders identically before and
+  // after hydration for them, and no provider can load before consent is known.
   const known = consent !== undefined
-  const blocked = needsMarketing && known && !consent.consent?.marketing
+  const blocked = needsMarketing && !consent?.consent?.marketing
 
   useEffect(() => {
     if (loaded && !blocked) frame.current?.focus()

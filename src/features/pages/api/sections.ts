@@ -386,3 +386,24 @@ export const pageBuilderFragment = /* groq */ `
     "sharedSectionId": ^._ref
   }
 `
+
+/**
+ * The panels a page's buttons and links open, as ids, read from the page's own sections and from
+ * the shared sections it uses (members-only ones only once `$members` is true, so the cached public
+ * result never carries a panel that only a members-only section opens). A link can sit in a
+ * section's `ctas`, in rich text (`body`, or a FAQ `answer`); a section type that gets links
+ * anywhere else must add its path here: sections.test.ts fails until it does. Used inside
+ * PAGE_QUERY as `_id in (${panelRefsFragment})`, where `^` is the page. It lists paths because
+ * GROQ's recursive descent (`..`) isn't available in the fake Content Lake the tests run on.
+ */
+const pageSections = `^.pageBuilder[access != "members" || $members]`
+const sharedSections = `^.pageBuilder[_type == "reference"]->section[access != "members" || $members]`
+
+export const panelRefsFragment = /* groq */ `
+  coalesce(${pageSections}.ctas[].link.panel._ref, [])
+  + coalesce(${pageSections}.body[].markDefs[].panel._ref, [])
+  + coalesce(${pageSections}.items[].answer[].markDefs[].panel._ref, [])
+  + coalesce(${sharedSections}.ctas[].link.panel._ref, [])
+  + coalesce(${sharedSections}.body[].markDefs[].panel._ref, [])
+  + coalesce(${sharedSections}.items[].answer[].markDefs[].panel._ref, [])
+`

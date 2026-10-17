@@ -24,6 +24,7 @@ import type { START_HERE_QUERY_RESULT } from '@/types/sanity.types'
 import { EditorGuide } from './editor-guide'
 import { HelpPanel } from './help-panel'
 import { OpsNotices, useOpsNotices } from './ops-notices'
+import { newEnquiriesMessage } from '../../enquiries/wording'
 import { currentAudience } from '../../roles'
 import { isTypeVisible } from '../../utils/feature-visibility'
 import { fetchLastChanges } from '../api/last-changes'
@@ -45,6 +46,7 @@ interface Data {
   recent: RecentChange[]
   changes: Map<string, LastChange>
   checks: ThingsToCheck
+  enquiries: { new: number; total: number }
 }
 
 type TabName = 'overview' | 'help'
@@ -108,7 +110,10 @@ export function StartHereTool() {
           shown,
           typeTitle,
         })
-        setState({ status: 'ready', data: { recent, changes, checks } })
+        setState({
+          status: 'ready',
+          data: { recent, changes, checks, enquiries: result.enquiries },
+        })
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return
@@ -209,6 +214,12 @@ export function StartHereTool() {
                   )}
                   {state.status === 'ready' && (
                     <>
+                      {/* Only once there is something to show: a site that doesn't store enquiries sees nothing. */}
+                      {state.data.enquiries.total > 0 &&
+                        schemaTypes.has('enquiry') &&
+                        isTypeVisible('enquiry') && (
+                          <EnquiriesSummary newCount={state.data.enquiries.new} />
+                        )}
                       <RecentChanges
                         recent={state.data.recent}
                         changes={state.data.changes}
@@ -301,6 +312,39 @@ function actionHref(
     case 'help':
       return '#start-here-help'
   }
+}
+
+function EnquiriesSummary({ newCount }: { newCount: number }) {
+  const router = useRouter()
+  const href = toolHref({ kind: 'tool', tool: 'structure', path: '/enquiries' }, studioUrl)
+  return (
+    <Stack as="section" gap={4} aria-labelledby="start-here-enquiries">
+      <Heading as="h2" size={1} id="start-here-enquiries">
+        Enquiries
+      </Heading>
+      <Card padding={3} radius={2} border tone={newCount > 0 ? 'primary' : 'default'}>
+        <Flex align="center" justify="space-between" gap={3} wrap="wrap">
+          <Box flex={1} style={{ minWidth: '12rem' }}>
+            <Text size={1} weight="medium">
+              {newEnquiriesMessage(newCount)}
+            </Text>
+          </Box>
+          <Button
+            as="a"
+            href={href}
+            onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+              studioClick(event, () => {
+                router.navigateUrl({ path: href })
+              })
+            }}
+            text="View enquiries"
+            mode="ghost"
+            fontSize={1}
+          />
+        </Flex>
+      </Card>
+    </Stack>
+  )
 }
 
 function RecentChanges({

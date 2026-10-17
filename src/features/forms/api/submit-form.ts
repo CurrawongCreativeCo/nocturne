@@ -1,13 +1,16 @@
 'use server'
 
 import { headers } from 'next/headers'
+import { after } from 'next/server'
 import { stegaClean } from 'next-sanity'
 
 import { cachedSanityFetch, PUBLISHED, TAGS } from '@/lib/sanity/live'
 
 import { FORM_QUERY } from './queries'
 import { submissionLimiter } from './rate-limiter'
+import { storeEnquiry } from './store-enquiry'
 import type { FormState } from '../types'
+import { pathFromReferer } from '../utils/attribution'
 import { buildEmail } from '../utils/build-email'
 import { getClientIp } from '../utils/client-ip'
 import { getFormsConfig } from '../utils/config'
@@ -56,7 +59,8 @@ export async function submitForm(_previous: FormState, formData: FormData): Prom
     return { status: 'error', fieldErrors: errors, values }
   }
 
-  const ip = getClientIp(await headers())
+  const requestHeaders = await headers()
+  const ip = getClientIp(requestHeaders)
   const limit = submissionLimiter.take(ip)
   if (!limit.allowed) {
     const minutes = Math.ceil(limit.retryAfterMs / 60_000)
@@ -100,6 +104,20 @@ export async function submitForm(_previous: FormState, formData: FormData): Prom
       values,
     }
   }
+
+  // After the response, so a slow or failing write never delays or fails the visitor's submission.
+  // `storeEnquiry` does nothing unless ENQUIRIES_STORE=1 and never throws.
+  const pagePath = pathFromReferer(requestHeaders.get('referer'))
+  after(() =>
+    storeEnquiry({
+      formId: form._id,
+      formTitle: form.title,
+      fields: form.fields,
+      values,
+      submission: formData,
+      pagePath,
+    }),
+  )
 
   return { status: 'success', message: form.successMessage }
 }

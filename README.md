@@ -125,7 +125,8 @@ Open http://localhost:3000/studio:
   - _Button text_, a _success message_ (shown in place of the form after sending) and _Send submissions to_, the address that receives each one. Replying to the email reaches the visitor if the form has an email field they filled in.
   - _How it behaves:_ every field is checked on the server against the published form, so a visitor can't send a field or a choice the form doesn't have. Problems appear in a summary above the form that takes focus (each item links to its field) and beside each field, and what was typed is kept. Long text allows line breaks and 5,000 characters; other fields are one line of up to 200 (email 254, phone 30). Email addresses are checked for shape only, and phone numbers for 5–15 digits.
   - _Spam:_ a Cloudflare Turnstile check on every send, plus a limit of 5 messages per IP address per 10 minutes on each server instance (serverless instances count separately, so it slows a spammer down rather than stopping one). The check needs JavaScript. Without it the form still posts and shows errors, but nothing is sent: the visitor is told to turn JavaScript on.
-  - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Datasets are private by default (see [Dataset privacy](#dataset-privacy)), so only the site's Viewer token and project members can read it; a shared inbox is still the safer choice. Submissions are emailed, not stored: if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
+  - _Privacy:_ the recipient address is never sent to the browser and no page query selects it. It is still a field in your dataset, so anyone who can read your dataset can read it. Datasets are private by default (see [Dataset privacy](#dataset-privacy)), so only the site's Viewer token and project members can read it; a shared inbox is still the safer choice. Submissions are emailed, and kept as enquiries only if the developer has switched that on (see [Enquiries](#enquiries)); if delivery fails the visitor is told and nothing is kept. Editing a form updates every page that uses it (live mode: right away; webhook mode: after the webhook).
+  - _Enquiries:_ when the developer has switched on enquiry storage, every send is also kept under **Enquiries** in the sidebar, newest first, with the number of new ones in its title and on Start here. Open one to read the answers and set its status (_New_, _Read_, _Archived_); everything else is read-only. **Download CSV** (top of the list) saves them all as a spreadsheet. Delete an enquiry if someone asks you to remove their details. Enquiries older than the retention period are deleted automatically. Add a short privacy notice to the form section's _Intro_ (see [Enquiries](#enquiries)).
   - _Setup:_ it needs four environment variables (see _Forms setup_ below). Until they are set, a form section shows a setup message in development and "isn't available right now" to visitors. Pages read them at build time, so redeploy after changing them.
 - **Newsletter signup:** the _Newsletter signup_ section (_Add item → Newsletter signup_) is a heading, a line of text and an email box with a button. Set the _Heading_, _Text_, _Button label_ and _Success message_. The visitor sees the success message whether or not the address was already subscribed, so don't word it as "you are now subscribed"; if your provider emails a confirmation link (Mailchimp always does, Loops can), say "check your inbox to confirm". It sits in the page like any section and can be used on many pages (or as a shared section). The developer chooses the email service (see _Newsletter signup_ below); until then the section shows a setup message in development and "isn't available right now" to visitors. It has the same spam check and rate limit as forms (5 attempts per IP address per 10 minutes). Signups are not stored on the site: they go straight to the email service.
 - **Pricing table:** the _Pricing table_ section shows plans taken from Stripe prices, with a checkout button on each. Prices are not typed in: they are created in the Stripe dashboard and copied into _Stripe price_ documents (sidebar) automatically, so an amount can never differ between the site and what Stripe charges. In the section, add up to four _plans_; each one:
@@ -465,7 +466,7 @@ src/
       utils/                       pagination, feed (RSS XML), date formatting
     forms/                         editor-built forms: schema, the form UI, the submit action
       api/                         queries.ts (FORM_QUERY), submit-form.ts, subscribe-newsletter.ts (server actions), rate-limiter.ts
-      components/                  form-view, newsletter-view (server; env check), contact-form (client), turnstile-widget
+      components/                  form-view, newsletter-view (server; env check), contact-form (client), contact-form-lazy (the `next/dynamic` wrapper the views use, so only pages with a form download it), turnstile-widget
       utils/                       validate, build-email, resend, turnstile, rate-limit, client-ip, config,
                                    newsletter/ (provider modules: resend, loops, mailchimp)
     experiments/                   A/B tests: experiment schema, assignment logic, signed variant codes (flags)
@@ -497,6 +498,7 @@ src/
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, Start here tool, AI Assist presets
   components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, slider (+ slider-lazy, slider-snap)
+  components/ui/overlay/           the shared overlay: useModalDialog, Overlay (modal, drawers, sheet, full screen)
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
   config/                          env.ts (validated), paths.ts (slug <-> URL), event-paths.ts (/events URLs),
                                    tokens.generated.ts (GENERATED: token values for the OG image)
@@ -567,6 +569,7 @@ On a private dataset those requests need a token, and only the Viewer token the 
 - **The token stays on the server.** `lib/sanity/token.ts` imports `server-only`. The browser gets a token only as
   `browserToken`, when `<SanityLive includeDrafts />` renders in draft mode. `src/lib/sanity/token-import-guard.test.ts`
   fails `npm test` if any `'use client'` module imports `token.ts`, directly or through other modules.
+- **Enquiries need it.** With `ENQUIRIES_STORE=1` the dataset holds visitors' names and email addresses. The server refuses to write them to a dataset it can't confirm is private ([Enquiries](#enquiries)).
 - **Plan.** Sanity's Free plan offers only public datasets, so members-only content and forms with recipient addresses
   need a paid plan (check sanity.io/pricing). On the Free plan, keep only content that is fine to publish in the dataset.
 - **Switch an existing project to private:** sanity.io/manage → your project → API → Datasets → set the dataset to
@@ -645,7 +648,10 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
 - **Events** add none to a page view: an Events section's events are resolved inside `PAGE_QUERY` (an `event` or `eventCategory` change expires the pages, tagged `event` and `eventCategory`; the business time zone comes from the same query). An event page adds `EVENT_QUERY`, one per event, and `EVENTS_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/events/…` URLs cost nothing. The calendar feed adds `EVENTS_FEED_QUERY`, one cached entry for the whole site; an event's `.ics` file reads the event's own entry. Which events are upcoming is decided per request from that cached data, so no visitor causes a Sanity request.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
-  recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes.
+  recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes. With
+  `ENQUIRIES_STORE=1` a send also writes one document, and the first send per hour per server instance makes one
+  unauthenticated query to check the dataset is private (see [Enquiries](#enquiries)); neither is read through the cache,
+  and a page view still causes none.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
@@ -679,7 +685,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "event", "eventCategory", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -693,6 +699,103 @@ To switch a deployment to webhook mode:
 How a send works (`src/features/forms/api/submit-form.ts`, a server action that also handles a plain HTML POST): read the form's id from the request, **fetch the published form again** (`FORM_QUERY`, the only query that reads `recipientEmail`, tagged `form`), validate each of its fields (`utils/validate.ts`), rate-limit the IP (`x-real-ip`, else the first `x-forwarded-for` entry, so it only means something behind a proxy that sets them itself, as Vercel does), verify the Turnstile token with Cloudflare, then send through Resend's REST API (`utils/resend.ts`, no SDK). Cheap checks come first, so a mistake in a field never spends a token, a rate-limit slot or an email. Failures are logged on the server and shown to the visitor as a general message.
 
 `FORMS_TEST_MODE=1` replaces Turnstile and Resend with mocks that accept everything and send nothing; the end-to-end tests use it (the form then carries a fixed token instead of the widget, and the server accepts only that token). It is ignored when `VERCEL_ENV` is `production`, so it can't switch the spam check off there. To change the email, edit `utils/build-email.ts`: values are HTML-escaped and a subject can't contain line breaks.
+
+### Enquiries
+
+Off by default. Submissions are emailed and nothing else. With `ENQUIRIES_STORE=1` each accepted submission is also
+written to the dataset as an `enquiry` document, so clients can see what came in even if an email is lost. Both of these
+must be true, and both are the developer's job:
+
+1. **`ENQUIRIES_STORE=1`** in the deployment's environment variables (and `.env.local` to try it), plus a
+   **`SANITY_WRITE_TOKEN`** with the Editor role (the token the Stripe webhook uses, if the site has one; `.env.example`
+   lists both). Neither has a `NEXT_PUBLIC_` prefix. Pages bake in whether to collect the referrer and campaign
+   (below) at build time, so redeploy after changing the flag.
+2. **A private dataset** ([Dataset privacy](#dataset-privacy); `npm run check:dataset`). An enquiry holds a name, an email
+   address and whatever else the form asks for, so it must never sit in a dataset anyone can read with the project ID. The
+   server checks this itself: before the first write (then at most once an hour per server instance) it asks the dataset for
+   something without a token. A private dataset refuses; if it answers, or the check can't tell (a network error), nothing is
+   written and the server logs why. Visitors are not affected either way.
+
+**What is stored** (`src/features/forms/utils/build-enquiry.ts`, unit tested): a weak reference to the form (so a form can
+still be deleted) and its title at the time, every field as `{ label, value }` (checkboxes as _Yes_ or _No_, as in the
+email), the page path, `createdAt`, `status` (`new`, `read`, `archived`) and, when present, the **attribution**: the
+referrer (origin and path only; the query string and fragment are dropped, because they can carry search terms and tokens)
+and the five UTM values (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`). A small inline script
+next to the form fills hidden inputs when the page loads (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds
+nothing to the JavaScript budget); the server reads only those inputs, on one line and
+capped at 200 characters, because a visitor can forge anything. Attribution is the page's own address and referrer, not a
+visit history: a visitor who clicked a campaign link, browsed on and then wrote to you has none. Without JavaScript there
+is none either, and moving between pages on the site (client-side navigation) doesn't run the script. The page path comes from the `Referer` header.
+
+**How a write goes** (`api/store-enquiry.ts`): after Resend has accepted the message, in Next's `after()`, so it never
+delays the visitor. A failed write (no token, public or unreachable dataset, Sanity refusing) is logged with
+`console.error` and never fails or changes the visitor's submission. **Nothing from a submission is ever logged**: not
+the answers, not an email address, not even Sanity's error text (it can quote the document). The log line carries the form's id and an
+HTTP status or error name. The document has the id `enquiry-<uuid>` and `liveEdit`, so there are no drafts: changing the
+status saves at once and there is nothing to publish.
+
+**In Studio** (_Enquiries_ in the sidebar, for clients and agency alike; hidden, like Forms, when the profile's `forms`
+feature is off): a list ordered by `createdAt`, newest first, whose title carries the
+count (_Enquiries (3 new)_; it updates as enquiries arrive). Every field is read-only except _Status_ (which needs the
+Editor role: with `liveEdit` there is no draft for a Contributor to save). There is no
+_create_ button and no _Duplicate_; _Delete_ stays, because people may ask for their details to be removed. **Download CSV**
+builds the file in the browser from the signed-in editor's own read access (`studio/enquiries/csv.ts`, tested), so
+nothing passes through the site's server. It has one column per answer label (forms that share a label share a column),
+UTF-8 with a byte order mark so Excel reads it correctly, and times in the editor's own time zone (en-AU). Text that
+starts with `=`, `@` or `+`/`-` followed by anything but digits gets a leading apostrophe, so a visitor can't plant a
+spreadsheet formula (phone numbers such as `+61 400 000 000` are left alone). **Start here** shows
+_N new enquiries_ with a **View enquiries** button once any enquiry exists (it adds two `count()`s to
+`START_HERE_QUERY` and never fetches an enquiry). Pages never query enquiries, so they are not in `TAGS` or the
+revalidation webhook filter.
+
+**Retention** (`.github/workflows/enquiry-retention.yml`, selection logic in `scripts/enquiry-retention.mjs`, tested in
+`scripts/enquiry-retention.test.mjs`): every Monday at 04:00 UTC the workflow deletes enquiries older than
+`ENQUIRY_RETENTION_DAYS` (default **365**, a whole number of at least **30**: a typo of `1` can't wipe everything; anything
+else fails the run). Age is `createdAt`, else the document's creation time; one with no readable date is kept.
+
+- **Secret:** `SANITY_WRITE_TOKEN` (Editor role) in the repository's secrets. Variables: `NEXT_PUBLIC_SANITY_PROJECT_ID`,
+  optionally `NEXT_PUBLIC_SANITY_DATASET` (default `production`) and `ENQUIRY_RETENTION_DAYS`, as for the
+  [backup](#backups). With the secret or the project ID missing the run **skips with a notice and succeeds**.
+- **Dry run:** a pull request that changes the script or the workflow runs it with `--dry-run`: it reports how many would be
+  deleted and deletes nothing (pull requests from forks have no secrets, so they skip). A manual run
+  (_Actions → Enquiry retention → Run workflow_) is a dry run unless you untick _Dry run_. The write token is available to
+  that pull request's workflow, so only let people you trust open pull requests on a repository that holds it.
+- Output is counts only, never what an enquiry says. Delete in Studio, or lower the period, to remove sooner. GitHub pauses scheduled
+  workflows after 60 days without repository activity, so a quiet site should check _Actions_ now and then.
+- Backups hold enquiries too (an export includes every document), and they are kept as long as the backup is. Set the backup's
+  retention to match, or the policy below is not true.
+
+#### Privacy notes (Australia)
+
+Not legal advice; ask the client's adviser. Storing enquiries makes the site a holder of personal information, and
+the Australian Privacy Principles (APPs) in the _Privacy Act 1988_ bind most organisations with annual turnover over
+$3 million and some smaller ones (health service providers, businesses that trade in personal information, and others).
+Many small businesses are exempt, but a privacy policy and these habits are good practice anyway, and customers expect them.
+
+- **Collection notice (APP 5):** tell people what happens to their details at or before the moment they send them. Put it
+  in the form section's **Intro** (plain text, so name the page rather than hoping for a link), for example: _"We use these
+  details to reply to you, and keep your enquiry for up to 12 months. Our privacy policy at example.com.au/privacy explains
+  how to see or correct it."_ It should say who you are, why you collect the details, who else may receive them (here: the
+  email and hosting services below) and where to read the policy. Keep the retention wording in step with `ENQUIRY_RETENTION_DAYS`.
+- **Privacy policy (APP 1):** publish one, linked from the footer, and mention enquiries: what is kept, why, for how long,
+  who can see it (the client's staff with Studio access) and how to ask for access, correction or deletion.
+- **Collect only what you need (APP 3):** each field you add to a form is personal information you will hold. Don't ask
+  for a phone number or date of birth you won't use. Campaign and referrer details are collected only when enquiries are stored.
+- **Overseas services (APP 8):** the dataset is hosted by Sanity, the email goes through Resend, and the site runs on Vercel,
+  all of which may handle the data outside Australia. The policy should say so, and the providers should be chosen with that in mind.
+- **Security and destruction (APP 11):** the dataset is private and only people the client has added to the Sanity project
+  can open Enquiries; remove former staff. Treat `SANITY_WRITE_TOKEN` as a secret (it can change content). Retention
+  above is how enquiries are destroyed when no longer needed; delete a person's enquiry in Studio on request.
+- **Access and correction (APPs 12 and 13):** someone can ask to see or correct their details. Enquiries are read-only in
+  Studio because they record what was sent: answer an access request from the enquiry, and record a correction in the
+  client's own system or delete the enquiry. Respond within a reasonable time (commonly 30 days).
+- **If something leaks:** covered organisations must follow the Notifiable Data Breaches scheme. A leaked write token or a
+  dataset made public by mistake is a candidate: revoke the token, make the dataset private and ask the adviser.
+
+For developers: `tests/e2e/enquiries.spec.ts` runs a second server on the same build with the flag off (port 3101,
+`APP_PORT_ENQUIRIES_OFF`), reads writes from the fake Content Lake's `/__fixture/mutations` and checks a send writes an
+enquiry when the flag is on and nothing when it is off. The fake lake answers unauthenticated reads with 401, like a
+private dataset, which is what the privacy check looks for.
 
 ### Newsletter signup
 
@@ -1272,6 +1375,7 @@ history request for the author names, and, only when notices are set up, one cal
   show a _Draft_ badge. Clients only see the types in their sidebar (pages, posts, authors, categories, Identity &
   search, Navigation, Announcement bar, Business info, team); agency staff see every type the profile has not hidden.
   Names come from Sanity's history API; if it fails the time still shows.
+- **Enquiries:** once any enquiry exists (the site stores form submissions; see [Enquiries](#enquiries)), a card with the number of new ones and a _View enquiries_ button. It comes from two counts in the one content query.
 - **Things to check:** at most five, in this order: pages or menus that link to a page that is not published, pages with
   images that have no description (alt text), and drafts last edited more than seven days ago. They reuse the detectors
   in `content-health/utils/detect.ts`; fixing the problem in a draft clears it. Shared sections are only checked for
@@ -1370,24 +1474,25 @@ Administrator sees the agency view, can manage members, tokens, CORS and dataset
 **Two kinds of limit.** Sanity's roles are enforced by Sanity's servers; hiding things in the Studio is a
 convenience. Someone with the Editor role who knows the API can still do what the Studio hides.
 
-| What                                                                                                            | Agency (Administrator, Developer) | Editor                                                                                                                                     | Contributor         | Enforced by                                    |
-| --------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- | ---------------------------------------------- |
-| Publish, unpublish                                                                                              | Yes                               | Yes                                                                                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
-| Project settings, members, API tokens, CORS, datasets                                                           | Administrator only                | No                                                                                                                                         | No                  | **Sanity**                                     |
-| Edit, create and delete content through the API or Vision                                                       | Yes                               | Yes (any document)                                                                                                                         | Drafts only         | **Sanity**                                     |
-| Studio tools                                                                                                    | All                               | Start here (first), Presentation, Structure                                                                                                | Same as Editor      | Studio                                         |
-| Vision, AI settings, Content health                                                                             | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| Sidebar                                                                                                         | Everything                        | Start here, Pages, Blog, Website settings (Identity & search, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
-| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections                               | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| Cookie banner, and _Allow AI crawlers_ in Identity & search                                                     | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| _Who can see this_ (members-only) fields                                                                        | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| Section **Layout** picker, **Design** tab (background, animation, more layout options) and **Advanced** options | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| SEO _Hide from search engines_                                                                                  | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| A page's slug once it has a value                                                                               | Editable                          | Read-only                                                                                                                                  | Read-only           | Studio                                         |
-| Sections in the _Add item_ menu                                                                                 | All                               | Approved list below                                                                                                                        | Approved list below | Studio                                         |
-| Delete, Duplicate on pages, posts and singletons                                                                | Yes                               | Hidden                                                                                                                                     | Hidden              | Studio                                         |
-| _New document_ menu                                                                                             | Everything                        | Page templates, Post, Author, Category                                                                                                     | Same as Editor      | Studio                                         |
-| "Agency view" badge and client-view preview                                                                     | Yes                               | No                                                                                                                                         | No                  | Studio                                         |
+| What                                                                                                            | Agency (Administrator, Developer) | Editor                                                                                                                                                                     | Contributor         | Enforced by                                    |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------- |
+| Publish, unpublish                                                                                              | Yes                               | Yes                                                                                                                                                                        | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
+| Project settings, members, API tokens, CORS, datasets                                                           | Administrator only                | No                                                                                                                                                                         | No                  | **Sanity**                                     |
+| Edit, create and delete content through the API or Vision                                                       | Yes                               | Yes (any document)                                                                                                                                                         | Drafts only         | **Sanity**                                     |
+| Studio tools                                                                                                    | All                               | Start here (first), Presentation, Structure                                                                                                                                | Same as Editor      | Studio                                         |
+| Vision, AI settings, Content health                                                                             | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| Sidebar                                                                                                         | Everything                        | Start here, Pages, Blog, Reusable content (Panels only), Website settings (Identity & search, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
+| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections                               | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| Enquiries (read; status, Download CSV, delete)                                                                  | Yes                               | Yes                                                                                                                                                                        | Read only           | Studio                                         |
+| Cookie banner, and _Allow AI crawlers_ in Identity & search                                                     | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| _Who can see this_ (members-only) fields                                                                        | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| Section **Layout** picker, **Design** tab (background, animation, more layout options) and **Advanced** options | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| SEO _Hide from search engines_                                                                                  | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| A page's slug once it has a value                                                                               | Editable                          | Read-only                                                                                                                                                                  | Read-only           | Studio                                         |
+| Sections in the _Add item_ menu                                                                                 | All                               | Approved list below                                                                                                                                                        | Approved list below | Studio                                         |
+| Delete, Duplicate on pages, posts, panels and singletons                                                        | Yes                               | Hidden                                                                                                                                                                     | Hidden              | Studio                                         |
+| _New document_ menu                                                                                             | Everything                        | Page templates, Post, Author, Category                                                                                                                                     | Same as Editor      | Studio                                         |
+| "Agency view" badge and client-view preview                                                                     | Yes                               | No                                                                                                                                                                         | No                  | Studio                                         |
 
 Because the Studio-only limits can be bypassed, don't rely on them to protect secrets. Form recipient
 addresses, for example, stay readable to any Editor through the API. Real enforcement needs custom roles
@@ -1416,7 +1521,7 @@ view** undoes it.
   with `readOnly: lockedForClientsOnceSet`. For a field group use `hidden: hiddenFromClients` on the group.
   A section's **Design** group, `style` field, **Layout** picker and Advanced fields already use it (`sectionFields` in `src/lib/sanity/schema/section-style.ts`), so every section, and the ones `npm run new:section` writes, hide them from clients without any extra code.
 - New tools are visible to clients unless added to `AGENCY_ONLY_TOOLS` (`utils/tool-access.ts`).
-- Delete and Duplicate are removed on `CLIENT_PROTECTED_TYPES` (`utils/document-access.ts`) and singletons.
+- Delete and Duplicate are removed on `CLIENT_PROTECTED_TYPES` (`utils/document-access.ts`: pages, posts and panels) and singletons. Inside _Reusable content_ clients see only the ids in `CLIENT_REUSABLE_IDS` (Panels); clients can't create panels, because _New document_ lists only `CLIENT_NEW_DOCUMENT_IDS`.
 
 Test it by hand with [the manual test script](docs/studio-roles-test-script.md), using a throwaway project
 and three accounts (Administrator, Editor, Contributor).
@@ -1824,7 +1929,7 @@ get a warning; more than 60 is an error (a page of that many is slow, and reads 
   gallery that opens the page loads eagerly.
 - **Thumbnails are buttons** named "Open image 3 of 12: <alt text>" (`aria-haspopup="dialog"`); the picture inside has an
   empty `alt` so it is not read twice.
-- **The lightbox** (`lightbox.tsx`) is a native modal `<dialog>`, so the browser traps focus, makes the page behind it
+- **The lightbox** (`lightbox.tsx`) is a native modal `<dialog>` shown by `useModalDialog` (see _Panels and the overlay_), so the browser traps focus, makes the page behind it
   inert, closes on Escape and returns focus. It holds the shared `Slider` at full size (Previous and Next buttons, Left and
   Right arrow keys, drag), a counter ("3 of 12") and each picture's caption in its `<figcaption>`. Arrow keys also work
   while focus is on the Close button (the dialog hands them to the slider through its `ref`). Dragging down closes it:
@@ -2155,7 +2260,7 @@ address, and the page rebuilds the iframe address from the ids in it.
   (`src/features/consent`; the store itself is shared, in `src/lib/consent/`). While marketing is off, or the visitor
   hasn't chosen, the card says so, offers **Cookie settings** (which reopens the banner) and the link to the service
   instead of the button. Accepting marketing in the banner brings the button back with no reload, and withdrawing it
-  removes an iframe that is already showing. A provider with `consent: null` in the registry skips the gate.
+  removes an iframe that is already showing. Until the browser has read the choice the card shows the same note as for a visitor who hasn't allowed marketing, so the page looks identical before and after hydration (which keeps the screenshot stable); a returning visitor who allowed marketing sees the button a moment later. A provider with `consent: null` in the registry skips the gate.
 - **Sandbox.** The iframe's `sandbox` is the narrowest token list its provider works with, kept in the registry
   (`allow-scripts allow-same-origin` plus what that service needs: forms, popups that escape the sandbox so the
   service's own links work, presentation for Spotify). Never `allow-top-navigation` or `allow-modals`; a test fails if a
@@ -2772,7 +2877,8 @@ drift from the schemas). A new colour pair worth checking goes in `CONTRAST_PAIR
 that the committed Sanity types and design token files are current, runs `npm run check`, proves the section generator's
 output passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
 weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
-each release before proposing it.
+each release before proposing it. Two scheduled workflows run beside CI: [Backups](#backups) and the
+weekly [enquiry retention](#enquiries) clean-up.
 
 | Command                   | Does                                                                       |
 | ------------------------- | -------------------------------------------------------------------------- |
@@ -2802,11 +2908,49 @@ Every link (CTAs, menus, rich text) is a typed action, chosen with the **Goes to
 
 **Sections.** A section link needs an anchor on a section of the same page (_Layout options → Anchor_). It only works on the page the link sits on, so use it in page content rather than the menu. The target's `scroll-margin` leaves room for the sticky header and the section edge. Scrolling is smooth unless the visitor prefers reduced motion.
 
-**Panels and booking.** The _Open a panel_ and _Book_ choices stay out of the Studio until panels (task 93) and booking (task 95) exist; switch them on in `src/config/link-actions.ts` and add the `panel` document type. The button is plain server markup (`<button data-overlay-kind="panel|booking" data-overlay-id="...">`), so it adds no JavaScript. The overlay adds one delegated `click` listener, finds the trigger with `event.target.closest('[data-overlay-kind]')` (`OVERLAY_TRIGGER_SELECTOR`) and calls `event.preventDefault()` before opening its dialog, which also stops the fallback form submitting. If JavaScript hasn't loaded, or nothing claims the click, the form submits to the fallback URL (for booking, the override or the booking page). The panel reference resolves to an id and title only; its content is the panel feature's. The title is added to the button's accessible name ("Enquire (opens Enquire now)").
+**Panels and booking.** _Open a panel_ is on (`LINK_ACTIONS.panel` in `src/config/link-actions.ts`): see _Panels and the overlay_ below. _Book_ stays out of the Studio until booking (task 95) exists; switch it on in the same file. The button is plain server markup (`<button data-overlay-kind="panel|booking" data-overlay-id="...">`), so it adds no JavaScript. The panel controller adds one delegated `click` listener, finds the trigger with `event.target.closest('[data-overlay-kind]')` (`OVERLAY_TRIGGER_SELECTOR`) and calls `event.preventDefault()` before opening its dialog, which also stops the fallback form submitting. If JavaScript hasn't loaded, or nothing claims the click (a booking button, or a panel button in the header or footer, which the page's panels don't cover), the form submits to the fallback URL (for booking, the override or the booking page). The panel reference resolves to an id and title only; its content comes from the page's `panels` (below). The title is added to the button's accessible name ("Enquire (opens Enquire now)").
 
 **Content health** reports section links whose anchor no section on the page has (shared sections the page uses count) and buttons for panels with no published version. Links inside shared sections and the menu can't be checked against a single page, so they are skipped.
 
-**Tests.** Vitest covers the resolver and the health checks; `tests/e2e/link-actions.spec.ts` covers section scrolling, the dialog attributes, an overlay claiming the click, and the no-JavaScript fallback.
+**Tests.** Vitest covers the resolver and the health checks; `tests/e2e/link-actions.spec.ts` covers section scrolling, the dialog attributes, a panel opening, an overlay claiming a booking click, and the no-JavaScript fallback.
+
+### Panels and the overlay
+
+A **panel** is a pop-up an editor opens from any button or link: choose **Goes to → Open a panel**, pick a panel, done. Panels are one small, deliberate feature, not "anything in a modal": only the content types listed below are designed for them. Two layers:
+
+- **The overlay** (`src/components/ui/overlay/`, shared) is the one dialog the site uses for anything that opens over the page. `useModalDialog(ref, open, onClose)` wraps a native `<dialog>`: `showModal()` (the browser traps focus, makes the page behind inert and closes on Escape), a scroll lock that doesn't shift the page, focus returned to what opened it, and one `onClose` for every way it can close. `<Overlay>` adds the presentation (`modal`, `drawer-right`, `drawer-left`, `sheet`, `fullscreen`), a heading that names the dialog and takes focus, a Close button, a click on the backdrop to close, an entrance from the motion tokens (it simply appears under reduced motion), and swipe-to-dismiss for drawers and sheets using the shared `shouldDismiss`. Quick search and the gallery lightbox use the hook; the navigation drawer (task 07) uses `<Overlay presentation="drawer-left">`.
+- **Panels** (`src/features/panels/`) are a `panel` document the page renders through that overlay.
+
+**For editors.** _Reusable content → Panels_ lists them; agency staff create them, clients edit their content. At the top of a panel, **Opened by** lists the buttons and links that open it, page by page, so you know what you are about to change; a button in a menu is listed with a note that it uses its fallback link (see _Limits_). A panel has:
+
+| Field                         | Who                                  | What                                                                                                                |
+| ----------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Title                         | Everyone                             | Shown at the top, and the dialog's accessible name                                                                  |
+| Content                       | Everyone                             | Up to four blocks, shown in order: _Text_ (rich text with an optional picture) and _Form_ (one of the site's forms) |
+| How it appears                | Agency                               | Four pictures: **Auto** (default), **Centred window**, **Side panel**, **Full screen**                              |
+| Advanced → Width              | Agency, not for _Full screen_        | _Narrow_, _Medium_ (default), _Wide_                                                                                |
+| Advanced → Close with a swipe | Agency, only _Auto_ and _Side panel_ | On by default. Close, Escape and a click beside the panel always work                                               |
+| Advanced → Link name          | Agency                               | The name in the deep link `/page#panel-<link name>`; empty uses the title                                           |
+
+**Auto** is a centred window on a computer and a bottom sheet on a phone (below 40 rem); a panel holding a booking embed takes the whole screen on a phone. The other three are what you chose on every screen. The rules are pure and unit tested (`resolvePresentation`, `src/features/panels/utils/presentation.ts`).
+
+**How it renders.** `PAGE_QUERY` returns the panels the page's buttons open as `panels`, in the same request as the page (`panelFields` in `lib/sanity/fragments.ts`, `panelRefsFragment` in `pages/api/sections.ts`), so opening one costs nothing. `PageView` takes a `renderPanels` render prop (features can't import each other), and the route supplies `PanelHost`, which renders each panel **once** per page as a closed `<dialog>` with its content built on the server. Only a page that has a panel loads any overlay code: `PanelController` and `Overlay` are client components behind that wrapper, downloaded only when `renderPanels` is called, so the home page's JavaScript doesn't grow. What is heavy waits until the panel first opens: a block marked `deferred` (a form) is mounted by the controller on first open and kept mounted after, so a half-written form survives closing and reopening. A booking iframe will be deferred the same way. The route is shared by every page, so the controller is reached only through `lazy-panel-controller.tsx`, a thin `next/dynamic` wrapper: importing the controller (or `PanelHost`'s client parts) statically anywhere in the route's graph, even through an async `import()` in a server file, puts the overlay's code in every page's scripts.
+
+**Opening.** One delegated click listener (see _Link actions_) opens the panel a button names; it ignores modified clicks on a button that has a fallback link (open in a new tab) and leaves booking buttons alone. `#panel-<name>` in the address opens a panel on load (and when the hash changes), the address shows it while it is open (`history.replaceState`, so Back still leaves the page), and closing puts back the address from before, dropping the panel's hash but keeping any section anchor. Two panels that would share a name get `-2`, `-3` (`assignPanelSlugs`). Without JavaScript the panels stay closed and each button goes to its fallback link.
+
+**Accessibility.** The dialog is named by its heading (`aria-labelledby`), which takes focus on opening (the first control is one Tab away); focus returns to the button on closing; the page behind is inert; Escape and a visible Close button always close it; the scrolling body is a labelled, keyboard-focusable region; a swipe is only an extra, and starts from anywhere on a drawer but only from the top bar of a sheet, so long content still scrolls.
+
+**Limits.**
+
+- Panels open from buttons and links in **page content** and **shared sections**. A button in the header, footer or menu can't (the site shell doesn't fetch panels), so it uses its fallback link; set one. A button in a members-only _section_ also uses its fallback link: its panel isn't in the cached public result.
+- A panel's own rich text can't open another panel (its links aren't collected).
+- A new section type with links in a place the query doesn't read must add the path to `panelRefsFragment`; `sections.test.ts` fails until it does. The list is explicit because GROQ's recursive descent (`..`) isn't available in the fake Content Lake the tests use.
+
+**Adding a content type** (booking embed, event details, link list): add an object type in `src/features/panels/schemas/`, register it in `schemas/index.ts` and in the panel's `content` (`// new-panel-content: member`), project it in `panelFields`, add its kind to `PanelContentKind` and `KIND_OF` in `panel-host.tsx`, and render it in `PanelBlockView`; mark anything heavy `deferred` in `PanelHost`'s `blocks`. Run `npm run typegen`.
+
+**Adding the overlay elsewhere.** Render `<Overlay open onClose presentation title>` and keep `open` in state, or call `useModalDialog` on your own `<dialog>` as quick search does. Keep heavy children behind your own "has been open" flag.
+
+**Tests.** Vitest: the hook's core (`modal-dialog.test.ts`, `scroll-lock.test.ts`), Auto and the other presentation rules, deep-link and slug helpers, the schema's agency-only and conditional fields, the usage note, the query's coverage of every place a section keeps links. `tests/e2e/panels.spec.ts`: opening from a button, keyboard, Escape, focus return, backdrop and Close, deep links, each presentation, a phone-width sheet, the form waiting for first open, no JavaScript, and axe with each panel open; `memory.spec.ts` opens and closes panels 30 times.
 
 ### Preset picker (Studio)
 

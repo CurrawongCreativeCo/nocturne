@@ -5,6 +5,7 @@ import { defineQuery } from 'next-sanity'
  * come back beside published documents. `recent` is a generous slice of the newest documents
  * (a document and its draft are two rows, and some types are filtered out in the browser).
  * Pages and shared sections are fetched whole because links and images are found by walking them.
+ * `enquiries` are two counts, never the enquiries themselves: they hold personal details.
  */
 export const START_HERE_QUERY = defineQuery(/* groq */ `{
   "recent": *[!(_type match "system.**") && !(_type match "sanity.**") && !(_type match "assist.**")]
@@ -30,6 +31,10 @@ export const START_HERE_QUERY = defineQuery(/* groq */ `{
     _id,
     title,
     section
+  },
+  "enquiries": {
+    "new": count(*[_type == "enquiry" && status == "new"]),
+    "total": count(*[_type == "enquiry"])
   },
   "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {
     _id,

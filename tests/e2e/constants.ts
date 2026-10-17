@@ -1,5 +1,7 @@
 /** Shared by playwright.config.ts and the specs. */
 export const APP_PORT = 3100
+/** A second server on the same build with ENQUIRIES_STORE off; the main one has it on (enquiries.spec.ts). */
+export const APP_PORT_ENQUIRIES_OFF = 3101
 export const FAKE_SANITY_PORT = 9999
 export const SITE_URL = 'https://example.com'
 export const REVALIDATE_SECRET = 'e2e-webhook-secret'
@@ -57,6 +59,9 @@ export const APP_ENV = {
   STRIPE_API_HOST: `http://localhost:${FAKE_SANITY_PORT}/__stripe`,
   STRIPE_SUCCESS_URL: '/thanks?session_id={CHECKOUT_SESSION_ID}',
   STRIPE_CANCEL_URL: '/pricing',
+  // Enquiries: stored when a form is sent. The fake Content Lake behaves like a private dataset, and
+  // the write goes through its mutate endpoint (with SANITY_WRITE_TOKEN above).
+  ENQUIRIES_STORE: '1',
   // Analytics providers: all three on, so the consent banner shows and the consent spec can watch each load.
   NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
   NEXT_PUBLIC_POSTHOG_KEY: 'phc_e2e',

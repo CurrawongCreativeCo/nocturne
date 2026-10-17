@@ -33,6 +33,12 @@ const cta = (label, link, variant = 'primary') => ({
   variant,
   link,
 })
+/** Panel content: text, one paragraph per argument. */
+const panelText = (...paragraphs) => ({
+  _key: key(),
+  _type: 'panelText',
+  body: paragraphs.map((text) => block([text])),
+})
 const navItem = (label, id) => ({ _key: key(), _type: 'navItem', label, link: internal(id) })
 const block = (children, extra = {}) => ({
   _key: key(),
@@ -599,10 +605,81 @@ export const documents = [
     ],
   },
   {
-    // Typed link actions (link-actions.spec.ts): a section on this page, a panel, booking.
+    // Panels (panels.spec.ts, link-actions.spec.ts). Enquire is Auto with nothing configured: the default.
     _id: 'panel-enquire',
     _type: 'panel',
     title: 'Enquire now',
+    slug: { _type: 'slug', current: 'enquire' },
+    content: [panelText('Tell us what you need and we will reply within two days.')],
+  },
+  {
+    _id: 'panel-hours',
+    _type: 'panel',
+    title: 'Opening hours',
+    presentation: 'side',
+    width: 'narrow',
+    content: [panelText('Monday to Friday, 9 am to 5 pm.')],
+  },
+  {
+    _id: 'panel-story',
+    _type: 'panel',
+    title: 'Our story',
+    presentation: 'fullscreen',
+    content: [
+      panelText(
+        ...Array.from({ length: 10 }, () =>
+          'A paragraph of the story, long enough to scroll. '.repeat(8),
+        ),
+      ),
+    ],
+  },
+  {
+    _id: 'panel-message',
+    _type: 'panel',
+    title: 'Send us a message',
+    presentation: 'centred',
+    content: [
+      panelText('We read every message.'),
+      { _key: key(), _type: 'panelForm', form: ref('form-contact') },
+    ],
+  },
+  {
+    _id: 'page-panels',
+    _type: 'page',
+    title: 'Panels',
+    slug: { _type: 'slug', current: 'panels' },
+    seo: { _type: 'seo', metaDescription: 'Buttons that open panels over the page.' },
+    pageBuilder: [
+      {
+        _key: 'panels-hero',
+        _type: 'hero',
+        title: 'Panels',
+        description: 'Buttons that open a pop-up over the page.',
+        ctas: [
+          cta('Open enquiry', panel('panel-enquire', '/about')),
+          cta('Opening hours', panel('panel-hours', '/about'), 'secondary'),
+          cta('Our story', panel('panel-story', '/about'), 'secondary'),
+          cta('Message us', panel('panel-message', '/contact'), 'secondary'),
+        ],
+      },
+      {
+        _key: 'panels-text',
+        _type: 'richText',
+        body: [
+          block(
+            [
+              'Prefer words? ',
+              { _key: key(), _type: 'span', text: 'Enquire in the text', marks: ['panel-link'] },
+              '.',
+            ],
+            { markDefs: [{ _key: 'panel-link', ...panel('panel-enquire', '/about') }] },
+          ),
+          ...Array.from({ length: 14 }, () =>
+            block(['A paragraph of copy so the page is long enough to scroll. '.repeat(12)]),
+          ),
+        ],
+      },
+    ],
   },
   {
     _id: 'page-link-actions',
