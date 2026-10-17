@@ -18,11 +18,11 @@ const dialogNamed = (page: Page, name: string) => page.getByRole('dialog', { nam
 const box = (dialog: Locator) => dialog.locator(':scope > div > div')
 
 /**
- * The width the page has to lay out in. A locked page keeps its scrollbar's room
- * (`scrollbar-gutter: stable`), so where scrollbars take space (Linux CI) it is narrower than the
- * viewport; on macOS and phones it is the same.
+ * The space the dialog covers. A locked page keeps its scrollbar's room (`scrollbar-gutter: stable`),
+ * so where scrollbars take space (Linux CI) the dialog is narrower than the viewport; on macOS and
+ * phones it is the same. Panels are measured against it, not against the viewport.
  */
-const pageWidth = (page: Page) => page.evaluate(() => document.documentElement.clientWidth)
+const frame = (dialog: Locator) => bounds(dialog)
 
 async function bounds(locator: Locator) {
   const rect = await locator.boundingBox()
@@ -168,7 +168,8 @@ test.describe('presentation', () => {
     const dialog = dialogNamed(page, 'Enquire now')
     await expect(dialog).toHaveAttribute('data-presentation', 'modal')
     const rect = await bounds(box(dialog))
-    expect(Math.abs(rect.x + rect.width / 2 - (await pageWidth(page)) / 2)).toBeLessThan(2)
+    const area = await frame(dialog)
+    expect(Math.abs(rect.x + rect.width / 2 - (area.x + area.width / 2))).toBeLessThan(2)
     expect(Math.abs(rect.y + rect.height / 2 - 400)).toBeLessThan(2)
     expect(rect.width).toBeLessThanOrEqual(576)
   })
@@ -179,7 +180,7 @@ test.describe('presentation', () => {
     const dialog = dialogNamed(page, 'Opening hours')
     await expect(dialog).toHaveAttribute('data-presentation', 'drawer-right')
     const rect = await bounds(box(dialog))
-    expect(Math.round(rect.x + rect.width)).toBe(await pageWidth(page))
+    expect(Math.round(rect.x + rect.width)).toBe(Math.round((await frame(dialog)).width))
     expect(Math.round(rect.height)).toBe(800)
     // Narrow: 20 rem at most.
     expect(rect.width).toBeLessThanOrEqual(320)
@@ -192,7 +193,10 @@ test.describe('presentation', () => {
     await expect(dialog).toHaveAttribute('data-presentation', 'fullscreen')
     const rect = await bounds(box(dialog))
     expect([Math.round(rect.x), Math.round(rect.y)]).toEqual([0, 0])
-    expect([Math.round(rect.width), Math.round(rect.height)]).toEqual([await pageWidth(page), 800])
+    expect([Math.round(rect.width), Math.round(rect.height)]).toEqual([
+      Math.round((await frame(dialog)).width),
+      800,
+    ])
     const scrolls = await dialog.evaluate((element) =>
       [...element.querySelectorAll('div')].some(
         (div) => div.scrollHeight > div.clientHeight && getComputedStyle(div).overflowY === 'auto',
@@ -212,7 +216,7 @@ test.describe('presentation', () => {
       await expect(dialog).toHaveAttribute('data-presentation', 'sheet')
       const rect = await bounds(box(dialog))
       expect(Math.round(rect.y + rect.height)).toBe(800)
-      expect(Math.round(rect.width)).toBe(await pageWidth(page))
+      expect(Math.round(rect.width)).toBe(Math.round((await frame(dialog)).width))
       expect(rect.y).toBeGreaterThan(0)
       await dialog.getByRole('button', { name: 'Close' }).click()
       await expect(dialog).toBeHidden()
