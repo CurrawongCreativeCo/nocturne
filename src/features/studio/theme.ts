@@ -114,7 +114,7 @@ function withoutSchemeLock(theme: StudioThemeValue): StudioThemeValue {
   const unlocked: Record<string, unknown> = { ...theme }
   delete unlocked.__legacy
   delete unlocked.__dark
-  return unlocked as StudioThemeValue
+  return unlocked
 }
 
 /** The `theme` for sanity.config.ts: the branded legacy theme, or undefined if Sanity no longer has one. */
