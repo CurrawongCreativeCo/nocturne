@@ -112,3 +112,31 @@ describe('backgroundContrastProblem with a gradient', () => {
     ).toBeNull()
   })
 })
+
+describe('backgroundContrastProblem with a wash and a picture strength', () => {
+  const ratio = (input: Parameters<typeof backgroundContrastProblem>[0]) =>
+    backgroundContrastProblem(input)?.ratio ?? Infinity
+
+  it('is unchanged for the background colour at full strength', () => {
+    const base = { tone: 'surface', hasImage: true, overlay: 'strong' }
+    expect(ratio({ ...base, wash: 'background', strength: 1 })).toBe(ratio(base))
+  })
+
+  it('judges a light wash against dark text and a dark wash against light text', () => {
+    // A Contrast section has light text: a light wash undermines it, a dark wash supports it.
+    const dark = { tone: 'inverse', hasImage: true, overlay: 'strong' }
+    expect(backgroundContrastProblem({ ...dark, wash: 'dark' })).toBeNull()
+    expect(backgroundContrastProblem({ ...dark, wash: 'light' })?.message).toMatch(/light wash/)
+    // A Page section has dark text: the other way round.
+    const light = { tone: 'surface', hasImage: true, overlay: 'strong' }
+    expect(backgroundContrastProblem({ ...light, wash: 'light' })).toBeNull()
+    expect(backgroundContrastProblem({ ...light, wash: 'dark' })?.message).toMatch(/dark wash/)
+  })
+
+  it('improves as the picture gets fainter, since the background shows through', () => {
+    const base = { tone: 'surface', hasImage: true, overlay: 'none' }
+    expect(ratio({ ...base, strength: 0.3 })).toBeGreaterThan(ratio({ ...base, strength: 1 }))
+    // A faint picture on the Page tone leaves dark text readable even with no overlay.
+    expect(backgroundContrastProblem({ ...base, strength: 0.3 })).toBeNull()
+  })
+})

@@ -36,7 +36,19 @@ import {
   SECTION_EDGE_LAYERS,
   SECTION_EDGE_LAYER_TITLES,
   SECTION_EDGE_TITLES,
+  imageStrengthOpacity,
+  SECTION_IMAGE_HORIZONTAL_TITLES,
+  SECTION_IMAGE_HORIZONTALS,
+  SECTION_IMAGE_REPEAT_TITLES,
+  SECTION_IMAGE_REPEATS,
+  SECTION_IMAGE_SIZE_TITLES,
+  SECTION_IMAGE_STRENGTH_CUSTOM,
+  SECTION_IMAGE_STRENGTH_OPACITY,
+  SECTION_IMAGE_STRENGTH_TITLES,
+  SECTION_IMAGE_VERTICAL_TITLES,
+  SECTION_IMAGE_VERTICALS,
   SECTION_OVERLAY_TITLES,
+  SECTION_WASH_TITLES,
   defaultOverlayFor,
   SECTION_SPACINGS,
   SECTION_TONE_TITLES,
@@ -48,6 +60,8 @@ import { presetField } from './preset-field'
 import {
   alignmentHidden,
   backgroundImageHidden,
+  imageOptionHidden,
+  staleImageOptionMessage,
   edgeFlipHidden,
   edgeInvertHidden,
   edgeLayerHidden,
@@ -62,6 +76,17 @@ import {
   visibleMotions,
   type SectionFormRules,
 } from './section-form'
+import {
+  ImageSizeActualThumbnail,
+  ImageSizeContainThumbnail,
+  ImageSizeCoverThumbnail,
+  ImageStrengthFaintThumbnail,
+  ImageStrengthFullThumbnail,
+  ImageStrengthSoftThumbnail,
+  WashBackgroundThumbnail,
+  WashDarkThumbnail,
+  WashLightThumbnail,
+} from './thumbnails/background-image-thumbnails'
 import {
   EdgeArchThumbnail,
   EdgeCurveThumbnail,
@@ -134,6 +159,13 @@ export const sectionStyle = defineType({
       name: 'motionAdvanced',
       title: 'Advanced: animation',
       description: 'Fine-tune the chosen animation. Only the options it uses are shown.',
+      options: { collapsible: true, collapsed: true },
+    },
+    {
+      name: 'backgroundAdvanced',
+      title: 'Advanced: background',
+      description:
+        'Where the picture sits, whether it repeats, an exact strength, and keeping it still while the page scrolls. Only the options that apply are shown.',
       options: { collapsible: true, collapsed: true },
     },
     {
@@ -225,17 +257,86 @@ export const sectionStyle = defineType({
       validation: (rule) =>
         rule
           .custom((value, { parent }) => {
-            const style = parent as { tone?: string; overlay?: string } | undefined
+            const style = parent as
+              | {
+                  tone?: string
+                  overlay?: string
+                  overlayColor?: string
+                  imageStrength?: string
+                  imageStrengthPercent?: number
+                }
+              | undefined
             if (!(value as { asset?: unknown } | undefined)?.asset) return true
             return (
               backgroundContrastProblem({
                 tone: style?.tone,
                 hasImage: true,
                 overlay: style?.overlay,
+                wash: style?.overlayColor,
+                strength: imageStrengthOpacity(style?.imageStrength, style?.imageStrengthPercent),
               })?.message ?? true
             )
           })
           .warning(),
+    }),
+    presetField({
+      name: 'imageSize',
+      title: 'Picture size',
+      description:
+        'Fill the section crops the picture to the section; Show the whole picture fits all of it in; Actual size draws it at its own size, for small patterns.',
+      required: false,
+      options: [
+        {
+          value: 'cover',
+          title: SECTION_IMAGE_SIZE_TITLES.cover,
+          description: 'Cropped to fill, the hotspot kept in view.',
+          thumbnail: ImageSizeCoverThumbnail,
+        },
+        {
+          value: 'contain',
+          title: SECTION_IMAGE_SIZE_TITLES.contain,
+          description: 'All of it, with space around if the shapes differ.',
+          thumbnail: ImageSizeContainThumbnail,
+        },
+        {
+          value: 'actual',
+          title: SECTION_IMAGE_SIZE_TITLES.actual,
+          description: 'Not scaled. Can repeat.',
+          thumbnail: ImageSizeActualThumbnail,
+        },
+      ],
+      initialValue: null,
+      hidden: overlayHidden,
+      defaultValue: () => 'cover',
+    }),
+    presetField({
+      name: 'imageStrength',
+      title: 'Picture strength',
+      description: 'How much of the picture shows. Less lets the background colour through.',
+      required: false,
+      options: [
+        {
+          value: 'full',
+          title: SECTION_IMAGE_STRENGTH_TITLES.full,
+          description: 'The picture as it is.',
+          thumbnail: ImageStrengthFullThumbnail,
+        },
+        {
+          value: 'soft',
+          title: SECTION_IMAGE_STRENGTH_TITLES.soft,
+          description: `${SECTION_IMAGE_STRENGTH_OPACITY.soft * 100}% of the picture.`,
+          thumbnail: ImageStrengthSoftThumbnail,
+        },
+        {
+          value: 'faint',
+          title: SECTION_IMAGE_STRENGTH_TITLES.faint,
+          description: `${SECTION_IMAGE_STRENGTH_OPACITY.faint * 100}%, for a quiet pattern.`,
+          thumbnail: ImageStrengthFaintThumbnail,
+        },
+      ],
+      initialValue: null,
+      hidden: overlayHidden,
+      defaultValue: () => 'full',
     }),
     presetField({
       name: 'overlay',
@@ -275,6 +376,98 @@ export const sectionStyle = defineType({
         defaultOverlayFor(
           (sectionAtStylePath(document, path)?.style as { tone?: string } | undefined)?.tone,
         ),
+    }),
+    presetField({
+      name: 'overlayColor',
+      title: 'Overlay colour',
+      description:
+        'The colour laid over the picture at the strength above. The text colours still follow the background.',
+      required: false,
+      options: [
+        {
+          value: 'background',
+          title: SECTION_WASH_TITLES.background,
+          description: 'The section’s own colour.',
+          thumbnail: WashBackgroundThumbnail,
+        },
+        {
+          value: 'light',
+          title: SECTION_WASH_TITLES.light,
+          description: 'White, whatever the background.',
+          thumbnail: WashLightThumbnail,
+        },
+        {
+          value: 'dark',
+          title: SECTION_WASH_TITLES.dark,
+          description: 'Near black, whatever the background.',
+          thumbnail: WashDarkThumbnail,
+        },
+      ],
+      initialValue: null,
+      hidden: overlayHidden,
+      defaultValue: () => 'background',
+    }),
+    defineField({
+      name: 'imageVertical',
+      title: 'Position: up and down',
+      description: 'Middle if left empty.',
+      type: 'string',
+      fieldset: 'backgroundAdvanced',
+      options: radio(SECTION_IMAGE_VERTICALS, SECTION_IMAGE_VERTICAL_TITLES),
+      hidden: imageOptionHidden('position'),
+      validation: (rule) =>
+        rule
+          .custom((value, context) => staleImageOptionMessage('position', value, context))
+          .warning(),
+    }),
+    defineField({
+      name: 'imageHorizontal',
+      title: 'Position: left and right',
+      description: 'Centre if left empty.',
+      type: 'string',
+      fieldset: 'backgroundAdvanced',
+      options: radio(SECTION_IMAGE_HORIZONTALS, SECTION_IMAGE_HORIZONTAL_TITLES),
+      hidden: imageOptionHidden('position'),
+      validation: (rule) =>
+        rule
+          .custom((value, context) => staleImageOptionMessage('position', value, context))
+          .warning(),
+    }),
+    defineField({
+      name: 'imageRepeat',
+      title: 'Repeat',
+      description: 'Tile a small picture across the section. No repeat if left empty.',
+      type: 'string',
+      fieldset: 'backgroundAdvanced',
+      options: radio(SECTION_IMAGE_REPEATS, SECTION_IMAGE_REPEAT_TITLES),
+      hidden: imageOptionHidden('repeat'),
+      validation: (rule) =>
+        rule
+          .custom((value, context) => staleImageOptionMessage('repeat', value, context))
+          .warning(),
+    }),
+    defineField({
+      name: 'imageStrengthPercent',
+      title: 'Exact strength (%)',
+      description: `Instead of the picture strength above, ${SECTION_IMAGE_STRENGTH_CUSTOM.min} to ${SECTION_IMAGE_STRENGTH_CUSTOM.max}. Leave empty to use it.`,
+      type: 'number',
+      fieldset: 'backgroundAdvanced',
+      hidden: imageOptionHidden('any'),
+      validation: (rule) =>
+        rule
+          .integer()
+          .min(SECTION_IMAGE_STRENGTH_CUSTOM.min)
+          .max(SECTION_IMAGE_STRENGTH_CUSTOM.max),
+    }),
+    defineField({
+      name: 'imageFixed',
+      title: 'Stays put while scrolling',
+      description:
+        'The picture holds still as the page moves over it. Large screens only, and not for visitors who ask for less motion.',
+      type: 'boolean',
+      fieldset: 'backgroundAdvanced',
+      initialValue: false,
+      hidden: imageOptionHidden('any'),
     }),
     presetField({
       name: 'motion',
@@ -617,6 +810,15 @@ export const sectionStyle = defineType({
       hidden: alignmentHidden,
       validation: (rule) =>
         rule.custom((value, context) => staleAlignmentMessage(value, context)).warning(),
+    }),
+    defineField({
+      name: 'fillScreen',
+      title: 'Fill the screen',
+      description:
+        'At least as tall as the screen, with the content in the middle. For a Minimal page, so its background covers the whole window.',
+      type: 'boolean',
+      fieldset: 'layoutOptions',
+      initialValue: false,
     }),
     defineField({
       name: 'anchorId',

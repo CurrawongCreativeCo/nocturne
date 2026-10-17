@@ -149,6 +149,7 @@ export function SectionFrame({
         gradient={resolved.gradient}
         image={resolved.image}
         overlay={resolved.overlay}
+        placement={resolved.backgroundImage}
         isFirst={isFirst}
       />
       {background}

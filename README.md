@@ -2490,13 +2490,59 @@ gradient is measured at each of its colours. Notes for agencies:
   colours; check those with the warnings on the Brand colours document.
 - When both are set the picture covers the gradient, so only the picture is checked.
 
+**Picture placement, strength and overlay colour.** With a background image, three more named choices appear (each with a
+thumbnail), and a collapsed _Advanced: background_ holds the fine-tuning. Unset, every picture looks exactly as it always
+did: Fill the section, the hotspot, Full, the background colour.
+
+- **Picture size**: _Fill the section_ (the default: crops to the section, the hotspot kept in view), _Show the whole
+  picture_ (all of it, `object-fit: contain`) or _Actual size_ (not scaled, for small patterns).
+- **Picture strength**: _Full_ (default), _Soft_ (60%) or _Faint_ (30%). The picture's layer is made see-through, so the
+  section's own background shows through; the overlay then lies on top, as before.
+- **Overlay colour**: _Background colour_ (default, the tone's own colour), _Light wash_ (white) or _Dark wash_ (near
+  black), at the existing Overlay strengths (Light 45%, Medium 70%, Strong 88%). A wash stays light or dark whatever the
+  tone or brand colours, so it is a plain colour (`SECTION_WASH_COLOURS`), not a token. Text colours still follow the tone,
+  so pair a Dark wash with Contrast and a Light wash with Page.
+- **Advanced: background** (shown only where they apply): _Position_ (up and down: Top, Middle, Bottom; left and right: Left,
+  Centre, Right; for Show the whole picture and Actual size only, since Fill the section uses the hotspot), _Repeat_ (Actual
+  size only: No repeat, Repeat across, Repeat down, Tile), _Exact strength (%)_ (5 to 100, wins over the named strength) and
+  _Stays put while scrolling_ (off by default).
+- A Position or Repeat left over from another size stays visible with a warning saying it is ignored, as Alignment does.
+- **Fill the screen** (in _Advanced: layout_ on every section): the section is at least the screen tall (`min-h-dvh`) with
+  its content centred. This is a per-section option rather than a page-level background, so the background travels with
+  the section (reordering, shared sections), the page needs no second background field, and the section's tone, overlay
+  and contrast check all stay in one place. It is explicit rather than automatic for single-section Minimal pages
+  because a Link page is also fine as a short band, and `SectionFrame` cannot see the page. Turn it on for a Link page
+  that should have a full-window photo or pattern.
+
+**How they are drawn.** All choices map through fixed lookups in `resolveBackgroundImage`
+(`src/components/ui/section-style.ts`, unit tested): nine positions to `x% y%` for `object-position` and
+`background-position` (Bottom + Centre is `50% 100%`), the same nine to flex alignment classes, each repeat to a
+`background-repeat` value, each strength to an opacity. No class name is built from a string.
+
+- _Fill the section_ and _Show the whole picture_ use `SanityImage` with `fill` (`object-cover` or `object-contain`).
+- _Actual size_ without repeat uses `SanityImage` at the asset's own width and height (`max-w-none`), placed by flex
+  alignment. It cannot use `fill`: the CDN would resize it to the screen, not the picture.
+- _Repeat_ draws a CSS `background-image` (the same Sanity URL, `auto=format`), because an `<img>` cannot tile. A CSS
+  background cannot be lazy-loaded, so it loads with the page.
+- Transparency survives: `.auto('format')` serves WebP or AVIF (both have alpha) and an SVG stays an SVG. The picture is
+  decoration, so `alt=""`; it is lazy unless the section is first, where it keeps `preload` as a likely LCP.
+- _Stays put while scrolling_ is a `position: fixed` layer inside a wrapper with `clip-path: inset(0)`, because
+  `background-attachment: fixed` does not apply to an image element. It applies at 1024 px and wider
+  (`lg:motion-safe:fixed`) and not for visitors who ask for less motion; elsewhere the layer scrolls with the section.
+  **Not yet measured:** scrolling cost has not been profiled. Before relying on it, scroll a long page with it on in
+  Chrome's Performance panel and Safari; if it janks, remove the option rather than shipping it.
+
+**Contrast with a wash and a faint picture.** `backgroundContrastProblem` measures the worst case: the picture at its
+strength over a pure black or white area on the tone's background, then the wash at the overlay opacity. Fainter pictures
+therefore pass more easily; a wash of the wrong colour for the tone warns, naming the wash.
+
 **Keeping the Studio list in step with the page.** `brandGradients` (`src/lib/color/gradients.ts`) decides which gradients
 are usable and their slugs; `resolveDesignTokens` writes the CSS variables from it and the Studio picker lists from it,
 so they cannot disagree. The Studio reads the _published_ Brand colours (the site draws what is published), shared for
 three seconds between the fields of a form (`fetchBrandGradients`).
 
 **Tests.** `section-style.test.ts`, `background-contrast.test.ts`, `gradients.test.ts`, `section-background.test.ts` and the
-hero rule in `sections/section-form.test.ts` cover the logic; `tests/e2e/section-background.spec.ts` checks the layers on
+hero rule in `sections/section-form.test.ts` cover the logic; `tests/e2e/section-background-image.spec.ts` covers placement on three Link page fixtures (`links-photo`, `links-pattern`, `links-tiled`) at 375, 768 and 1280 px; `tests/e2e/section-background.spec.ts` checks the layers on
 the `style-background` fixture page (position, `aria-hidden`, empty alt, lazy and first-section loading, a removed gradient,
 server rendering) and runs axe over the gallery entries `features-grid-gradient-*` and `media-text-background-*` (one per
 overlay, plus the unset defaults on a light and a dark tone). The fixture's `designSettings` holds two gradients and no

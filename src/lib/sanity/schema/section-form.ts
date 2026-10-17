@@ -9,7 +9,13 @@ import {
   type MotionOption,
 } from '@/components/motion/presets'
 
-import { SECTION_MOTIONS, edgeAllowsFlip, edgeAllowsInvert } from '../section-style-options'
+import {
+  SECTION_MOTIONS,
+  edgeAllowsFlip,
+  edgeAllowsInvert,
+  imageSizeUsesPosition,
+  imageSizeUsesRepeat,
+} from '../section-style-options'
 
 /**
  * Which of a section's shared design options make sense for the layout it is on. The options live in
@@ -125,6 +131,43 @@ export const backgroundImageHidden: ConditionalPropertyCallback = ({ document, p
 export const overlayHidden: ConditionalPropertyCallback = ({ document, path, parent }) =>
   !(parent as { image?: { asset?: unknown } } | undefined)?.image?.asset ||
   !allowsBackgroundImage(sectionAtStylePath(document, path))
+
+type ImageOption = 'position' | 'repeat' | 'any'
+
+const imageOptionApplies = (option: ImageOption, size: unknown) =>
+  option === 'position'
+    ? imageSizeUsesPosition(size as string)
+    : option === 'repeat'
+      ? imageSizeUsesRepeat(size as string)
+      : true
+
+/**
+ * A background-image option is shown only with a picture, and Position and Repeat only for the sizes
+ * that use them. A value left over from another size keeps its field visible, so the editor can see
+ * the warning below and clear it.
+ */
+export const imageOptionHidden =
+  (option: ImageOption): ConditionalPropertyCallback =>
+  ({ document, path, parent, value }) => {
+    const style = parent as { image?: { asset?: unknown }; imageSize?: string } | undefined
+    if (!style?.image?.asset || !allowsBackgroundImage(sectionAtStylePath(document, path))) {
+      return true
+    }
+    return !value && !imageOptionApplies(option, style.imageSize)
+  }
+
+/** The warning for a Position or Repeat value the chosen size ignores; true when there is nothing to say. */
+export function staleImageOptionMessage(
+  option: Exclude<ImageOption, 'any'>,
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  const size = (context.parent as { imageSize?: string } | undefined)?.imageSize
+  if (!value || imageOptionApplies(option, size)) return true
+  return option === 'position'
+    ? 'Fill the section uses the picture’s hotspot, so this position is ignored. Choose Show the whole picture or Actual size, or clear it.'
+    : 'Only Actual size can repeat, so this is ignored. Choose Actual size, or clear it.'
+}
 
 /** The warning for an Alignment value the chosen layout ignores; true when there is nothing to say. */
 export function staleAlignmentMessage(value: unknown, context: FieldContext): string | true {
