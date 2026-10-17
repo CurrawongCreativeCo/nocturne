@@ -721,7 +721,7 @@ still be deleted) and its title at the time, every field as `{ label, value }` (
 email), the page path, `createdAt`, `status` (`new`, `read`, `archived`) and, when present, the **attribution**: the
 referrer (origin and path only; the query string and fragment are dropped, because they can carry search terms and tokens)
 and the five UTM values (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`). A small inline script
-next to the form fills hidden inputs when the page loads (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds
+next to the form fills hidden inputs when the page loads and again just before a send, in case React replaced them while hydrating (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds
 nothing to the JavaScript budget); the server reads only those inputs, on one line and
 capped at 200 characters, because a visitor can forge anything. Attribution is the page's own address and referrer, not a
 visit history: a visitor who clicked a campaign link, browsed on and then wrote to you has none. Without JavaScript there
