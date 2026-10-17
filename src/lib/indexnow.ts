@@ -1,5 +1,3 @@
-import { slugToPath } from '@/config/paths'
-
 export const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow'
 
 /** IndexNow keys are 8-128 letters, digits and dashes. */
@@ -20,16 +18,17 @@ function isLocalhost(origin: string): boolean {
 }
 
 /**
- * The IndexNow request for one published page, or null when there's nothing to send: no (valid)
- * key, no slug, or a localhost site that search engines couldn't reach anyway.
+ * The IndexNow request for one published URL, or null when there's nothing to send: no (valid)
+ * key, no path, or a localhost site that search engines couldn't reach anyway. `path` is the
+ * site-relative path ("/about", "/blog/hello"): build it with slugToPath or postPath.
  */
 export function buildIndexNowRequest(options: {
   key: string | undefined
   siteUrl: string
-  slug: string | null | undefined
+  path: string | null | undefined
 }): { url: string; body: string } | null {
-  const { key, siteUrl, slug } = options
-  if (!key || !INDEXNOW_KEY_PATTERN.test(key) || !slug || isLocalhost(siteUrl)) return null
+  const { key, siteUrl, path } = options
+  if (!key || !INDEXNOW_KEY_PATTERN.test(key) || !path || isLocalhost(siteUrl)) return null
 
   const origin = new URL(siteUrl)
   return {
@@ -38,12 +37,12 @@ export function buildIndexNowRequest(options: {
       host: origin.host,
       key,
       keyLocation: new URL(keyFilePath(key), origin).toString(),
-      urlList: [new URL(slugToPath(slug), origin).toString()],
+      urlList: [new URL(path, origin).toString()],
     }),
   }
 }
 
-/** Tells search engines a page changed. Never throws: IndexNow must not fail a webhook. */
+/** Tells search engines a URL changed. Never throws: IndexNow must not fail a webhook. */
 export async function pingIndexNow(request: { url: string; body: string }): Promise<void> {
   try {
     const response = await fetch(request.url, {

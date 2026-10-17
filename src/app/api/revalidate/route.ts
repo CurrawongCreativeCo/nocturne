@@ -2,6 +2,7 @@ import { revalidateTag } from 'next/cache'
 import { after, NextResponse, type NextRequest } from 'next/server'
 import { parseBody } from 'next-sanity/webhook'
 
+import { postPath, slugToPath } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
 import { getRedirects } from '@/features/pages/api/get-page'
 import { canSyncRedirects, writeRedirectMap } from '@/lib/edge-config-sync'
@@ -20,7 +21,7 @@ const KNOWN_TAGS = new Set<string>(Object.values(TAGS))
  * (when EDGE_CONFIG_ID and VERCEL_API_TOKEN are set). It's expired immediately so the rebuild
  * reads the new list; a failed write returns 502 so Sanity retries the webhook.
  *
- * A published "page" also pings IndexNow (when INDEXNOW_KEY is set and the site isn't localhost),
+ * A published "page" or "post" also pings IndexNow (when INDEXNOW_KEY is set and the site isn't localhost),
  * after the response is sent. A failed ping is logged and never fails the webhook.
  */
 export async function POST(request: NextRequest) {
@@ -61,11 +62,11 @@ export async function POST(request: NextRequest) {
   }
 
   revalidateTag(type, 'max')
-  if (type === TAGS.page) {
+  if ((type === TAGS.page || type === TAGS.post) && body.slug) {
     const indexNow = buildIndexNowRequest({
       key: process.env.INDEXNOW_KEY,
       siteUrl,
-      slug: body.slug,
+      path: type === TAGS.post ? postPath(body.slug) : slugToPath(body.slug),
     })
     if (indexNow) after(() => pingIndexNow(indexNow))
   }
