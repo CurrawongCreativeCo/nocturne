@@ -58,6 +58,42 @@ export const ctaFields = /* groq */ `
   link { ${linkFields} }
 `
 
+/**
+ * An event as a list or card shows it: when, where in a word, what kind, and its state. Timing is
+ * returned raw (`start`, `end`, `recurrence`): a cached result can't know today's date, so
+ * occurrences are worked out at request time (lib/events). The registration button, description and
+ * address are left for the event's own page.
+ */
+export const eventCardFields = /* groq */ `
+  _id,
+  "slug": slug.current,
+  title,
+  start,
+  end,
+  allDay,
+  timeZone,
+  summary,
+  status,
+  capacityNote,
+  image { ${imageFields} },
+  "category": category->title,
+  location { kind, name },
+  recurrence { repeat, until, skip }
+`
+
+/**
+ * The latest moment an event can still matter, as a sortable string: a series with no end date
+ * never stops mattering ("9999"), a series with one matters until it, and any other event until its
+ * end (or its start). `order(${eventLastRelevant} desc)[0...n]` keeps what is coming, however long
+ * the history, without reading the clock (a cached result can't): everything not finished sorts
+ * ahead of everything that is.
+ */
+export const eventLastRelevant = /* groq */ `select(
+  recurrence.repeat in ["weekly", "fortnightly", "monthly"] && !defined(recurrence.until) => "9999-12-31",
+  recurrence.repeat in ["weekly", "fortnightly", "monthly"] => recurrence.until,
+  coalesce(end, start)
+)`
+
 /** One `statItem` (schema: lib/sanity/schema/stats.ts), for the Stats section and the hero's statistics bar. */
 export const statItemFields = /* groq */ `
   _key,

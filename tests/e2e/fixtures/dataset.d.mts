@@ -7,3 +7,4 @@ export const releaseVersions: Record<string, unknown>[]
 export const variantDocuments: Record<string, Record<string, unknown>[]>
 export const SAMPLE_PRIMARY: string
 export const designSettingsVariants: Record<'light' | 'dark', Record<string, unknown>>
+export const eventDates: { club: string[]; skipped: string; until: string }

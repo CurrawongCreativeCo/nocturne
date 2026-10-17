@@ -4,18 +4,21 @@ import { DEFAULT_FEATURES } from '@/config/profile'
 
 import { buildQuickActions, toolHref } from './quick-actions'
 
-const ALL_TYPES = new Set(['post', 'teamMember', 'businessInfo'])
+const ALL_TYPES = new Set(['post', 'event', 'teamMember', 'businessInfo'])
 const ids = (features = DEFAULT_FEATURES, types: ReadonlySet<string> = ALL_TYPES) =>
   buildQuickActions({ features }, types).map(({ id }) => id)
 
 describe('buildQuickActions', () => {
   it('offers every card when the site has every feature and type', () => {
-    expect(ids()).toEqual(['website', 'blog', 'team', 'business', 'help'])
+    expect(ids()).toEqual(['website', 'blog', 'events', 'team', 'business', 'help'])
   })
 
   it('always offers editing the website and help', () => {
     expect(
-      ids({ ...DEFAULT_FEATURES, blog: false, team: false, businessInfo: false }, new Set()),
+      ids(
+        { ...DEFAULT_FEATURES, blog: false, events: false, team: false, businessInfo: false },
+        new Set(),
+      ),
     ).toEqual(['website', 'help'])
   })
 

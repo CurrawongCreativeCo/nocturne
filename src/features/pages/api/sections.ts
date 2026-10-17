@@ -1,5 +1,7 @@
 import {
   ctaFields,
+  eventCardFields,
+  eventLastRelevant,
   formFields,
   heroSupportingFields,
   imageDesignFields,
@@ -305,6 +307,30 @@ export const linkListFragment = /* groq */ `
   }
 `
 
+/**
+ * The events are resolved here, so a page needs no second request. The result is cached and can't
+ * know today's date, so past events are not filtered out here: the component drops them at request
+ * time (see `upcomingEntries`). To keep a long history from crowding out what is coming, events are
+ * ordered by the last moment they can matter, latest first (`eventLastRelevant`), and the first 200
+ * kept. `^.category` is the section's own category filter.
+ */
+export const eventsFragment = /* groq */ `
+  _type == "events" && (access != "members" || $members) => {
+    style { ${sectionStyleFields} },
+    variant,
+    title,
+    text,
+    count,
+    "hasCategoryFilter": defined(category),
+    seeAllLabel,
+    seeAllLink { ${linkFields} },
+    "events": *[_type == "event" && defined(start) && defined(slug.current) && (!defined(^.category) || category._ref == ^.category._ref)]
+      | order(${eventLastRelevant} desc) [0...200] { ${eventCardFields} },
+    // The zone for an event saved without one (an all-day event).
+    "businessTimeZone": *[_id == "businessInfo"][0].timeZone
+  }
+`
+
 // new-section:fragment
 
 /** Every section's projection. Register new section fragments here, above `_type`. */
@@ -328,6 +354,7 @@ const sectionsFragment = /* groq */ `
   ${videoFragment},
   ${processFragment},
   ${linkListFragment},
+  ${eventsFragment},
   _type
 `
 

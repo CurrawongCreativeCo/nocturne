@@ -16,6 +16,7 @@ import { structureTool } from 'sanity/structure'
 import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
 import { studioBrand } from './src/config/studio-brand/client'
 import { blogSchemaTypes } from './src/features/blog/schemas'
+import { eventsSchemaTypes } from './src/features/events/schemas'
 import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
 import { framesSchemaTypes } from './src/features/frames/schemas'
@@ -97,6 +98,7 @@ export default defineConfig({
       ...experimentSchemaTypes,
       ...siteSchemaTypes,
       ...teamSchemaTypes,
+      ...eventsSchemaTypes,
       ...framesSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,

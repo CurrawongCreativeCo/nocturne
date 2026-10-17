@@ -32,6 +32,11 @@ describe('hiddenDocumentTypes', () => {
     expect(hidden.has('page')).toBe(false)
   })
 
+  it('hides events and their categories when the events feature is off', () => {
+    const hidden = hiddenDocumentTypes({ ...DEFAULT_FEATURES, events: false })
+    expect([...hidden].sort()).toEqual(['event', 'eventCategory'])
+  })
+
   it('hides only what was switched off', () => {
     const hidden = hiddenDocumentTypes({ ...DEFAULT_FEATURES, pricing: false })
     expect([...hidden]).toEqual(['stripePrice'])

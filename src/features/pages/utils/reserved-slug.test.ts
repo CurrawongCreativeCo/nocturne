@@ -16,6 +16,12 @@ describe('reservedSegment', () => {
     expect(reservedSegment('team')).toBeNull()
   })
 
+  it('reserves events only above the event pages', () => {
+    expect(reservedSegment('events/open-day')).toBe('events')
+    expect(reservedSegment('events/a/b')).toBe('events')
+    expect(reservedSegment('events')).toBeNull()
+  })
+
   it('leaves other paths alone, including ones that merely contain a reserved word', () => {
     expect(reservedSegment('about')).toBeNull()
     expect(reservedSegment('about/team')).toBeNull()
