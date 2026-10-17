@@ -86,7 +86,7 @@ import {
 
 /**
  * Layout and style options every page-builder section shares, set by the agency in the section's
- * "Design" tab: Background and Animation as pictures, then a collapsed "More layout options" (space,
+ * "Design" tab: Background and Animation as pictures, then a collapsed "Advanced: layout" (space,
  * width, alignment, anchor). The tab and its fields are hidden from clients. SectionFrame (components/ui/section-frame.tsx) turns them into classes; the
  * value lists below are the contract with `resolveSectionStyle` (components/ui/section-style.ts).
  * An empty style renders each section as it always has, so existing content needs no migration.
@@ -132,19 +132,19 @@ export const sectionStyle = defineType({
   fieldsets: [
     {
       name: 'motionAdvanced',
-      title: 'More animation options',
+      title: 'Advanced: animation',
       description: 'Fine-tune the chosen animation. Only the options it uses are shown.',
       options: { collapsible: true, collapsed: true },
     },
     {
       name: 'layoutOptions',
-      title: 'More layout options',
+      title: 'Advanced: layout',
       description: 'Space, width, alignment and anchor. The defaults suit most sections.',
       options: { collapsible: true, collapsed: true },
     },
     {
       name: 'edgeAdvanced',
-      title: 'More edge options',
+      title: 'Advanced: edge',
       description: 'Turn the shape inside out, or set the height for each screen size.',
       options: { collapsible: true, collapsed: true },
     },

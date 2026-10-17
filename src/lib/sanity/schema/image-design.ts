@@ -31,7 +31,7 @@ import {
 
 /**
  * The shared `imageDesign` object: how a section's picture looks and moves (README, "Image design").
- * Three pictures to choose from, then a collapsed "More image options" for the exact values:
+ * Three pictures to choose from, then a collapsed "Advanced: image" for the exact values:
  *
  *   Appearance  Standard, Rounded, Circle, Arch or Framed (Square corners where a section already had it)
  *   Motion      None, Subtle parallax or Medium parallax; the exact values are Custom, in Advanced
@@ -87,7 +87,7 @@ export const imageDesign = defineType({
   fieldsets: [
     {
       name: 'more',
-      title: 'More image options',
+      title: 'Advanced: image',
       description: 'Fine-tune the chosen motion and frame. Only the options they use are shown.',
       options: { collapsible: true, collapsed: true },
     },
