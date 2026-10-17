@@ -79,7 +79,7 @@ export const mediaText = defineType({
       tone?: string
     }) => ({
       title: title || 'Untitled',
-      // "Image + text · Image left · Soft": the side is the one layout choice editors make here.
+      // "Image + text · Image left · Tinted": the side is the one layout choice editors make here.
       subtitle: joinSubtitle('Image + text', IMAGE_SIDE_TITLES[side ?? 'right'], toneTitle(tone)),
       media,
     }),

@@ -89,12 +89,12 @@ Open http://localhost:3000/studio:
 - **Members-only content:** a page has a _Who can see this page_ field and every section a _Who can see this_ field (_Everyone_ or _Members only (signed in)_; empty means everyone). A members-only page asks visitors to sign in and shows nothing else, is left out of the sitemap, `/llms.txt` and search, and tells search engines not to index it. A members-only section on a public page is replaced by a "Members only" sign-in prompt for visitors who aren't signed in; the rest of the page is unchanged. A shared section is members-only when the section inside it is. The page's title is replaced by "Members only" until the visitor signs in; its URL, and any menu entry an editor adds for it, are not hidden. In Presentation and draft previews editors see everything. Who counts as a member is set by the developer (see _Members-only content_ below). `sign-in` and `sign-out` are reserved first slug segments; link to `/sign-out` (a button link or a footer menu item with a custom URL) wherever members should find it.
 - **Section forms:** a section's form has three levels, so the common choices are pictures and the rare ones stay out of the way. Agency staff only: clients see just the **Content** tab (see _Studio roles and permissions_; this is the Studio view, not a lock).
   - **Content tab.** The **Layout** picker comes first for sections with more than one layout, because the layout decides which fields matter. The hero is the exception: its picker is a row of six named presets (_Full background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with panel_; see _Hero presets_), which set the layout, the image side and the background together. Then the content, showing only what the chosen layout uses: the hero's _Image side_ appears for _Split_ only, its _Small picture_ for _Editorial_ only, and _Image_ for every layout but _Editorial_. A field that is hidden keeps whatever was typed in it, so switching layout back brings it back.
-  - **Design tab.** _Background_ (_Surface_, _Soft_, _Dark_, _Accent_) is a row of swatches drawn with the site's real colours. _Animation_ is a picture picker with gently moving previews (still for anyone who asks for less motion): _None_, _Fade up_, _Subtle entrance_, _Fade_, _Slide in_, _Staggered_, _Float_ and _Parallax_ in three strengths (_Subtle_, _Medium_, _Strong_). Sections start on the right one for what they are (content fades up; the hero's text enters by itself; logo strips stay still), so most never need touching. _Float_ and _Parallax_ move a picture, so they are only offered where a section has one. A collapsed **More animation options** appears under the picker and shows only what the chosen animation uses (intensity, duration, delay, direction, when it plays, or exact values). The first section on a page stays still so its heading and main image appear immediately, unless you choose _On load_, which slides or rises it without ever fading it in; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still. See [Section animation](#section-animation).
+  - **Design tab.** _Background_ (_Page_, _Tinted_, _Contrast_, _Brand_) is a row of swatches drawn with the site's real colours. They are named by role, not colour, because Brand colours can make any of them light or dark (_Contrast_ is light text on dark, or dark on light on a dark site). _Animation_ is a picture picker with gently moving previews (still for anyone who asks for less motion): _None_, _Fade up_, _Subtle entrance_, _Fade_, _Slide in_, _Staggered_, _Float_ and _Parallax_ in three strengths (_Subtle_, _Medium_, _Strong_). Sections start on the right one for what they are (content fades up; the hero's text enters by itself; logo strips stay still), so most never need touching. _Float_ and _Parallax_ move a picture, so they are only offered where a section has one. A collapsed **More animation options** appears under the picker and shows only what the chosen animation uses (intensity, duration, delay, direction, when it plays, or exact values). The first section on a page stays still so its heading and main image appear immediately, unless you choose _On load_, which slides or rises it without ever fading it in; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still. See [Section animation](#section-animation).
     - _Float_ and _Parallax_ are only offered where a section has a picture to move: the hero's _Full background_ and _Image with panel_ layouts, and _Image + text_ (where _Parallax_ moves the picture inside its still frame: see _Image design_). If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
     - **More layout options** (collapsed): _Space above and below_ (_Compact_, _Default_ or _Spacious_; _Default_ is the section's usual spacing), _Content width_ (_Narrow_, _Default_, _Wide_, or _Full width_ edge to edge), _Alignment_ (_Start_ or _Centre_ for headings, intro text and buttons) and _Anchor_ (a short name such as `pricing`, so a link to `/#pricing` jumps to the section; lowercase letters, numbers and hyphens, each once per page). _Alignment_ is left out on layouts that set their own (the hero's _Split_ and _Editorial_); a value left over from another layout stays visible with a warning, and **Reset value** in the field's menu clears it.
   - **Advanced** (collapsed, in the Design tab): extra controls for the few sections that have them. It does not appear when the chosen layout has none. Today that is the hero's _Proportion_ and _Image shape_, for _Split_ only.
 
-  Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Dark_, testimonials _Soft_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Dark".
+  Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Contrast_, testimonials _Tinted_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Contrast".
 
 - **Start here** (toolbar, first for clients) is the first screen: a greeting, shortcut cards (_Edit your website_, _Write a blog post_, _Update the team_, _Business info and opening hours_, _Help_), your eight most recent changes with who made them and when, and up to five things to check in plain words. See [Start here](#start-here-studio-home-screen).
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, links to missing sections or unpublished panels, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
@@ -2360,7 +2360,7 @@ picker's `visibleOptions` (the stored value is always shown), Alignment with `hi
 from a previous layout is left behind. For fields that depend on the chosen layout, hide them with the layout
 (`hidden: ({ parent }) => parent?.variant !== 'split'`). `advanced` fields are agency-only (their own `hidden` is
 combined with `hiddenFromClients`) and the fieldset vanishes when none of them apply. Previews read as a sentence
-with `joinSubtitle` / `variantSubtitle` ("Hero · Split · Dark"). The rules are unit tested per section and layout
+with `joinSubtitle` / `variantSubtitle` ("Hero · Split · Contrast"). The rules are unit tested per section and layout
 (`section-form.test.ts`, `sections/section-form.test.ts`, `sections/section-fields.test.ts`).
 
 | Field      | Values                                                                                                                   | What it does                                                                                              |
@@ -2426,7 +2426,7 @@ rich text.
 Beyond its tone, a section can have a **brand gradient** and a **background image**, both in the Design tab under
 _Background_ (agency only). Editors choose; nothing is configured by default, so a section keeps its tone.
 
-- **Tone** (as before): Surface, Soft, Dark, Accent, as swatches. It sets the text colours, so text always follows the
+- **Tone** (as before): Page, Tinted, Contrast, Brand, as swatches. It sets the text colours, so text always follows the
   tone, not the picture.
 - **Gradient** (optional): a list of swatches, one per gradient in Studio → Design → Brand colours → Gradients. It is
   stored as the gradient's slug (`forest-dusk`) and drawn as `var(--gradient-forest-dusk)`, the variable the site
@@ -2435,7 +2435,7 @@ _Background_ (agency only). Editors choose; nothing is configured by default, so
 - **Background image** (optional): an image with a hotspot, which keeps the subject in view as the section crops it. It
   is decoration, so it needs no alt text (the page gives it an empty one). **Overlay** appears once there is a picture:
   None, Light, Medium or Strong (45%, 70% and 88% of the tone's background colour laid over the picture). An unset
-  overlay is **Medium on the dark tones (Dark, Accent) and Light on the others**; the picker shows that default as chosen
+  overlay is **Medium on the dark tones (Contrast, Brand) and Light on the others**; the picker shows that default as chosen
   and nothing is stored until the editor picks.
 - **Not for the hero.** The hero has its own Image, so its Design tab offers the gradient but not the background image
   (`hasOwnBackgroundImage` in its section rules).
@@ -2453,12 +2453,12 @@ text and secondary text reach **4.5:1** and shows a warning (never a block) on t
 A picture is unknown, so it is measured at its worst: the overlay laid over a pure black and a pure white area. A
 gradient is measured at each of its colours. Notes for agencies:
 
-- _None_ always warns: a photo can be any colour. _Medium_ passes on Dark; on Surface and Soft it passes for body text but
-  warns for secondary text; _Strong_ passes on Surface, Soft and Dark.
-- _Accent_ with a picture warns at every strength, because its white-on-brand text has little contrast to spare before
-  any picture. Prefer Dark for pictures.
-- The check uses the colours in `tokens.json`, as the heading emphasis check does, not custom brand colours from Design
-  settings; check those with the warnings on the Brand colours document.
+- _None_ always warns: a photo can be any colour. _Medium_ passes on Contrast; on Page and Tinted it passes for body text but
+  warns for secondary text; _Strong_ passes on Page, Tinted and Contrast.
+- _Brand_ with a picture warns at every strength, because its white-on-brand text has little contrast to spare before
+  any picture. Prefer Contrast for pictures.
+- The check uses the colours in `tokens.json`, as the heading emphasis check does, not custom colours from Brand
+  colours; check those with the warnings on the Brand colours document.
 - When both are set the picture covers the gradient, so only the picture is checked.
 
 **Keeping the Studio list in step with the page.** `brandGradients` (`src/lib/color/gradients.ts`) decides which gradients
@@ -3385,7 +3385,7 @@ look per use and every layout reads the same fields; use a new section when the 
   `src/lib/sanity/schema/section-variant.ts`). Give each variant a `description` and a `thumbnail` (an inline SVG
   component like `hero-thumbnails.tsx`, or a static file); without one the card shows only the title. The first variant is the default and reproduces the section's
   original look, so content saved before variants existed renders as it always did. The Studio list subtitle
-  shows the choice and the background (`variantSubtitle`: "Hero · Split · Dark").
+  shows the choice and the background (`variantSubtitle`: "Hero · Split · Contrast").
 - **The folder.** `components/sections/hero/` holds `index.tsx` (the dispatcher, a `switch` on
   `stegaClean(data.variant)` whose `default` is the first variant, so an unknown value falls back safely) and one
   component per variant. `section-renderer.tsx` still imports `./sections/hero`. Shared markup (the hero's
@@ -3425,18 +3425,18 @@ bar at the top of its Content tab offers six pictures, each setting the layout, 
 one click (preset mode, see _Preset picker (Studio)_). Every field stays editable afterwards, and the bar shows
 _Custom_ once one no longer matches.
 
-| Preset                 | Layout (`variant`) | Also sets                      |
-| ---------------------- | ------------------ | ------------------------------ |
-| Full background image  | `overlay`          | Background _Dark_ (a new hero) |
-| Split, image right     | `split`            | _Image side_ right, _Surface_  |
-| Split, image left      | `split`            | _Image side_ left, _Surface_   |
-| Centred text, no image | `overlay`          | Background _Surface_           |
-| Editorial              | `editorial`        | _Surface_                      |
-| Image with panel       | `full-bleed`       | _Dark_                         |
+| Preset                 | Layout (`variant`) | Also sets                          |
+| ---------------------- | ------------------ | ---------------------------------- |
+| Full background image  | `overlay`          | Background _Contrast_ (a new hero) |
+| Split, image right     | `split`            | _Image side_ right, _Page_         |
+| Split, image left      | `split`            | _Image side_ left, _Page_          |
+| Centred text, no image | `overlay`          | Background _Page_                  |
+| Editorial              | `editorial`        | _Page_                             |
+| Image with panel       | `full-bleed`       | _Contrast_                         |
 
 The four layouts are unchanged (the rule of four variants stands: `overlay`, `split`, `editorial`, `full-bleed`), and
 the stored values are the same, so no migration is needed. Only the names editors read changed: _Overlay_ is
-_Full background_ and _Full bleed_ is _Image with panel_ (in the Studio list too: "Hero · Full background · Dark").
+_Full background_ and _Full bleed_ is _Image with panel_ (in the Studio list too: "Hero · Full background · Contrast").
 The old **Layout** picker is hidden, because the presets are the one picker. The presets are `HERO_PRESETS` in
 `src/features/pages/schemas/sections/hero.ts`, with thumbnails in `hero-thumbnails.tsx`.
 

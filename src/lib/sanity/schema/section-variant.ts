@@ -28,20 +28,20 @@ export function variantField(variants: readonly SectionVariant[]) {
   })
 }
 
-/** Joins the parts of a list preview's subtitle ("Hero · Split · Dark"), skipping empty ones. */
+/** Joins the parts of a list preview's subtitle ("Hero · Split · Contrast"), skipping empty ones. */
 export function joinSubtitle(...parts: (string | number | null | undefined | false)[]): string {
   return parts
     .filter((part) => part !== null && part !== undefined && part !== false && part !== '')
     .join(' · ')
 }
 
-/** The tone's editor-facing name ("Dark"), or nothing for an unset or unknown tone. */
+/** The tone's editor-facing name ("Contrast"), or nothing for an unset or unknown tone. */
 export function toneTitle(tone: string | null | undefined): string | undefined {
   return tone ? (SECTION_TONE_TITLES as Record<string, string | undefined>)[tone] : undefined
 }
 
 /**
- * The Studio list subtitle: "Hero · Split · Dark". An unset or unknown variant shows the default's
+ * The Studio list subtitle: "Hero · Split · Contrast". An unset or unknown variant shows the default's
  * name; an unset tone is left out.
  */
 export function variantSubtitle(

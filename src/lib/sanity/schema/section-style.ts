@@ -165,19 +165,20 @@ export const sectionStyle = defineType({
         {
           value: 'alt',
           title: SECTION_TONE_TITLES.alt,
-          description: 'A light grey band.',
+          description: 'A gentle tint of the page colour, for bands and cards.',
           thumbnail: ToneAltThumbnail,
         },
         {
           value: 'inverse',
           title: SECTION_TONE_TITLES.inverse,
-          description: 'Light text on dark.',
+          description:
+            'The opposite of the page: light text on dark, or dark on light on a dark site.',
           thumbnail: ToneInverseThumbnail,
         },
         {
           value: 'accent',
           title: SECTION_TONE_TITLES.accent,
-          description: 'The brand colour.',
+          description: 'The Primary brand colour.',
           thumbnail: ToneAccentThumbnail,
         },
       ],
