@@ -3090,23 +3090,23 @@ drift from the schemas). A new colour pair worth checking goes in `CONTRAST_PAIR
 ## Code quality
 
 **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It checks
-that the committed Sanity types and design token files are current, runs `npm run check`, proves the section generator's
-output passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
+that the committed Sanity types and design token files are current, runs `npm run check`, proves each generator's
+output (section, feature, document, singleton) passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
 weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
 each release before proposing it. Two scheduled workflows run beside CI: [Backups](#backups) and the
 weekly [enquiry retention](#enquiries) clean-up.
 
-| Command                   | Does                                                                       |
-| ------------------------- | -------------------------------------------------------------------------- |
-| `npm run check`           | Typecheck, lint, format and unit tests, read-only. Run it before pushing.  |
-| `npm run tokens`          | Regenerate the design token CSS and TypeScript from `tokens.json`          |
-| `npm run typecheck`       | TypeScript, strict mode                                                    |
-| `npm run lint`            | ESLint, zero warnings allowed (`lint:fix` to autofix)                      |
-| `npm run format:check`    | Prettier (`format` to apply)                                               |
-| `npm test`                | Unit tests (Vitest; `test:watch` while working)                            |
-| `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`) |
-| `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)       |
-| `npm run test:lighthouse` | Lighthouse budgets on `/` and `/about` (needs Chrome installed)            |
+| Command                   | Does                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `npm run check`           | Typecheck, lint, format and unit tests, read-only. Run it before pushing.      |
+| `npm run tokens`          | Regenerate the design token CSS and TypeScript from `tokens.json`              |
+| `npm run typecheck`       | TypeScript, strict mode                                                        |
+| `npm run lint`            | ESLint, zero warnings allowed (`lint:fix` to autofix)                          |
+| `npm run format:check`    | Prettier (`format` to apply)                                                   |
+| `npm test`                | Unit tests (Vitest; `test:watch` while working)                                |
+| `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`)     |
+| `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)           |
+| `npm run test:lighthouse` | Lighthouse budgets on `/`, `/about`, `/hero-parts` and `/links` (needs Chrome) |
 
 ### Link actions
 
@@ -3455,7 +3455,7 @@ Content Lake as the end-to-end tests.
 
 - **JavaScript:** the test fetches `/`, takes every `<script src>` in the HTML, gzips each file from
   `.next/static` (level 9) and adds them up (1 KB = 1000 bytes). Over budget, it lists every chunk, largest
-  first. The total is about 216 KB today (200 KB before Motion, which adds 16.5 KB), so a new client-side dependency of even 5 KB trips it. Look first
+  first. The total is about 218.5 KB today (200 KB before Motion, which adds 16.5 KB), so a new client-side dependency of even 2 KB trips it. Look first
   for a client component that can be a server component, or an import that can be lazy-loaded (as
   `draft-mode-tools.tsx` does).
 - **Client memory:** in one page session, the test repeats what a visitor does (client navigations, quick
