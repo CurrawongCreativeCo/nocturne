@@ -136,6 +136,17 @@ you start a release.
 
 ### Changed
 
+- **Studio theme (light and dark):** primary buttons were a pale violet with low-contrast labels in light mode, the
+  default button was Sanity's cool slate, selected tabs and tools were a dusty pink, and the primary badge text was
+  pale. `buildLegacyTheme` takes one accent for both schemes and `theme.ts` gave it the dark one. It now builds the
+  theme once per scheme and takes each half, so every scheme has its own accent, focus ring, grey and neutral button.
+  Primary buttons are exactly the accent fill (`#5f2bd4` / `#9f80e5` for Currawong), neutral buttons are warm
+  greys from the ink and paper range, and selection is a clear 35% tint of the accent. Fills are moved only as far as
+  needed to keep Sanity's own button label at 4.6:1 (a client's yellow in light mode is darkened). The brand preview
+  test now measures text contrast (4.5:1) and the focus ring (3:1) for every brand in both schemes, and its list of
+  known contrast gaps is gone. `legacyThemeProperties` now takes one scheme's roles and the scheme name. The
+  brand preview baselines need refreshing with the "Update visual baselines" workflow.
+
 - Quick search and the gallery lightbox now use `useModalDialog` for showing the dialog, the scroll lock and returning
   focus; they look and behave as before (quick search now also locks the page's scroll while it is open).
 - **Client view of the Studio:** _Reusable content_ now appears for clients with _Panels_ only (shared sections and forms stay
@@ -167,6 +178,7 @@ you start a release.
 
 ### Fixed
 
+- **Studio dark mode:** the Studio was always light and the user menu had no **Appearance** choice, because `buildLegacyTheme` marks its theme as legacy and Sanity 6 pins such a theme to one scheme. `theme.ts` now removes those markers, so editors can pick System (the default), Light or Dark.
 - The form island (`contact-form.tsx`, about 4.5 KB gzipped) was in every page's scripts because the shared page route imported it; forms and the newsletter signup now load it through `next/dynamic` (still server-rendered), so only pages with a form download it. This is what keeps the home and Link pages within the JavaScript budget once panels are on the route.
 
 ### Breaking changes / migration steps
