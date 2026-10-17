@@ -12,6 +12,41 @@ import {
   validateTokens,
 } from './build-tokens.mjs'
 
+describe('glass tokens', () => {
+  it('are in the shipped tokens.json and become per-element variables that follow the tone', () => {
+    const css = buildCss(readTokens())
+    expect(css).toContain('--glass-blur: 14px;')
+    expect(css).toContain(
+      '--glass-surface: color-mix(in oklch, var(--color-surface) 70%, transparent);',
+    )
+    expect(css).toContain(
+      '.glass-row-light {\n    --glass-surface: color-mix(in oklch, var(--color-surface) 55%',
+    )
+    expect(css).toContain(
+      '.glass-row-strong {\n    --glass-surface: color-mix(in oklch, var(--color-surface) 85%',
+    )
+    // Not at :root: a tone redefines --color-surface lower down, and :root would have fixed it already.
+    expect(css).not.toMatch(/:root \{[^}]*--glass-surface/)
+  })
+
+  it('are optional, so a client file without them still builds', () => {
+    const { glass: _glass, ...tokens } = readTokens()
+    expect(validateTokens(tokens)).toEqual([])
+    expect(buildCss(tokens)).toContain('.glass-row')
+  })
+
+  it('reject strengths out of order, a blur outside 12-16px and unknown names', () => {
+    const tokens = readTokens()
+    const errors = validateTokens({
+      ...tokens,
+      glass: { ...tokens.glass, light: '0.9', blur: '30px', frost: '1' },
+    })
+    expect(errors).toContain('glass: light, medium and strong must increase')
+    expect(errors).toContain('glass.blur must be 12px to 16px (px or rem)')
+    expect(errors).toContain('glass.frost is not a known token')
+  })
+})
+
 describe('design token generator', () => {
   it('writes files equal to the committed ones (run `npm run tokens` if this fails)', () => {
     const { css, ts } = build()

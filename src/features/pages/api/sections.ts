@@ -294,6 +294,9 @@ export const linkListFragment = /* groq */ `
   _type == "linkList" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
     variant,
+    rowStyle,
+    glassStrength,
+    showArrows,
     thumbnailSize,
     title,
     profile { name, bio, image { ${imageFields} } },

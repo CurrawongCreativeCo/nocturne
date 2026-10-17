@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Link list: Glass rows preset.** A sixth preset in the Link list's preset bar (Minimal with a new `rowStyle: 'glass'`) draws each link as a frosted-glass row over a background photo: a flush thumbnail, a round icon, the title and description and an optional round arrow, as one link per row. Glass rows can show an icon and a thumbnail together. **Glass strength** (Light, Medium, Strong) and **Arrow on each row** appear for Glass rows only, and Studio warns when a strength can drop text under 4.5:1 on the lightest or darkest photo. New `glass` design tokens (`tokens.json`, optional) follow Brand colours, Appearance and the section's tone, with solid fallbacks for browsers that can't blur and visitors who ask for less transparency. No client JavaScript. Existing link lists look exactly as before.
+- **Icons:** eight new line icons in the shared badge icon set (Care, Sun, Community, Person, Location, Email, Calendar, Phone), also offered to badge rows.
 - **Setup wizard:** the starter content now also creates empty Brand colours, Announcement bar, Cookie banner and Business info documents (only when missing), so those Studio screens no longer open as "New …". An empty Business info counts as none on the site.
 
 ### Changed
@@ -36,6 +38,8 @@ you start a release.
   No stored data changes.
 
 ### Breaking changes / migration steps
+
+None. Run `npm run tokens` and `npm run typegen` after merging (new `glass` tokens and the Link list's `rowStyle`, `glassStrength` and `showArrows` fields); a `tokens.json` without a `glass` group still builds.
 
 ## [1.5.0] - 2026-10-17
 

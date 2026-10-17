@@ -25,7 +25,7 @@ interface TextColours {
   secondary: string
 }
 
-function textColours(tone: string | null | undefined): TextColours {
+export function textColours(tone: string | null | undefined): TextColours {
   switch (tone) {
     case 'inverse':
       return { body: colorHex.inkInverse, secondary: colorHex.inkInverseMuted }
@@ -36,7 +36,7 @@ function textColours(tone: string | null | undefined): TextColours {
   }
 }
 
-function composite(colour: string, background: string, alpha: number): string {
+export function composite(colour: string, background: string, alpha: number): string {
   const [top, bottom] = [hexToRgb(colour), hexToRgb(background)]
   return rgbToHex(top.map((channel, i) => channel * alpha + (bottom[i] ?? 0) * (1 - alpha)))
 }

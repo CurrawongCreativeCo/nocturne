@@ -6,6 +6,11 @@ import {
   type ConditionalPropertyCallback,
 } from 'sanity'
 
+import {
+  GLASS_STRENGTHS,
+  GLASS_STRENGTH_TITLES,
+  glassContrastProblem,
+} from '@/lib/color/glass-contrast'
 import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -17,6 +22,7 @@ import {
   LinkListCardsThumbnail,
   LinkListCompactThumbnail,
   LinkListEditorialThumbnail,
+  LinkListGlassThumbnail,
   LinkListImageThumbnail,
   LinkListMinimalThumbnail,
 } from '@/lib/sanity/schema/thumbnails/link-list-thumbnails'
@@ -37,8 +43,8 @@ const LIMITS = {
 
 /**
  * One component per variant in components/sections/link-list/. The first is the default: what
- * content without a variant renders. The picture-led layout is a preset of Cards (see
- * LINK_LIST_PRESETS), not a fifth variant: a section has at most four.
+ * content without a variant renders. The picture-led layout is a preset of Cards, and Glass rows a
+ * preset of Minimal (see LINK_LIST_PRESETS), not a fifth and sixth variant: a section has at most four.
  */
 export const LINK_LIST_VARIANTS = [
   {
@@ -70,10 +76,14 @@ export const LINK_LIST_VARIANTS = [
 /** How big Cards draw their pictures: the second is what the Image-focused preset sets. */
 export const LINK_LIST_THUMBNAIL_SIZES = ['standard', 'large'] as const
 
+/** How Minimal draws its rows: the plain buttons, or frosted glass (the Glass rows preset). */
+export const LINK_LIST_ROW_STYLES = ['solid', 'glass'] as const
+
 /**
- * The picker at the top of the Content tab: five pictures, four layouts. Image-focused is Cards with
- * large pictures leading each card. Every preset sets the layout and the alignment that goes with it, and leaves the content and the tone alone, so trying
- * one loses nothing. The first is a new section's look.
+ * The picker at the top of the Content tab: six pictures, four layouts. Image-focused is Cards with
+ * large pictures leading each card; Glass rows is Minimal with `rowStyle: 'glass'`. Every preset sets
+ * the layout, the row style and the alignment that goes with them, and leaves the content and the tone
+ * alone, so trying one loses nothing. The first is a new section's look.
  */
 export const LINK_LIST_PRESETS = [
   {
@@ -81,54 +91,115 @@ export const LINK_LIST_PRESETS = [
     title: 'Minimal',
     description: 'Full-width buttons, one under the other.',
     thumbnail: LinkListMinimalThumbnail,
-    set: { variant: 'stacked', thumbnailSize: 'standard', 'style.align': 'center' },
+    set: {
+      variant: 'stacked',
+      rowStyle: 'solid',
+      thumbnailSize: 'standard',
+      'style.align': 'center',
+    },
   },
   {
     value: 'cards',
     title: 'Cards',
     description: 'Thumbnails in cards, two across from tablet width.',
     thumbnail: LinkListCardsThumbnail,
-    set: { variant: 'cards', thumbnailSize: 'standard', 'style.align': 'center' },
+    set: {
+      variant: 'cards',
+      rowStyle: 'solid',
+      thumbnailSize: 'standard',
+      'style.align': 'center',
+    },
   },
   {
     value: 'editorial',
     title: 'Editorial',
     description: 'Larger type, links as a list with arrows.',
     thumbnail: LinkListEditorialThumbnail,
-    set: { variant: 'editorial', thumbnailSize: 'standard', 'style.align': 'start' },
+    set: {
+      variant: 'editorial',
+      rowStyle: 'solid',
+      thumbnailSize: 'standard',
+      'style.align': 'start',
+    },
   },
   {
     value: 'compact',
     title: 'Compact',
     description: 'Small pills, for tucking into another page.',
     thumbnail: LinkListCompactThumbnail,
-    set: { variant: 'compact', thumbnailSize: 'standard', 'style.align': 'start' },
+    set: {
+      variant: 'compact',
+      rowStyle: 'solid',
+      thumbnailSize: 'standard',
+      'style.align': 'start',
+    },
   },
   {
     value: 'image-focused',
     title: 'Image-focused',
     description: 'Big pictures lead each card. Add a thumbnail to every link.',
     thumbnail: LinkListImageThumbnail,
-    set: { variant: 'cards', thumbnailSize: 'large', 'style.align': 'center' },
+    set: {
+      variant: 'cards',
+      rowStyle: 'solid',
+      thumbnailSize: 'large',
+      'style.align': 'center',
+    },
+  },
+  {
+    value: 'glass-rows',
+    title: 'Glass rows',
+    description: 'Frosted-glass rows to sit over a full-page photo. Add a thumbnail and an icon.',
+    thumbnail: LinkListGlassThumbnail,
+    set: {
+      variant: 'stacked',
+      rowStyle: 'glass',
+      thumbnailSize: 'standard',
+      'style.align': 'center',
+    },
   },
 ] as const
 
-/** The layout of the section a link sits in; an unset one is the default, Minimal. */
-const layoutOfLink = ({ document, path }: Parameters<ConditionalPropertyCallback>[0]): string => {
+/** The layout and row style of the section a link sits in; unset ones are the defaults (Minimal, solid). */
+const looksOfLink = ({ document, path }: Parameters<ConditionalPropertyCallback>[0]) => {
   const section = enclosingOfArray(document, path, 'links')
-  return typeof section?.variant === 'string' ? section.variant : LINK_LIST_VARIANTS[0].value
+  return {
+    layout: typeof section?.variant === 'string' ? section.variant : LINK_LIST_VARIANTS[0].value,
+    rowStyle: typeof section?.rowStyle === 'string' ? section.rowStyle : 'solid',
+  }
 }
 
-/** What each layout draws for a link, so the form only asks for what shows. */
-const usesIcon = (layout: string) => layout !== 'editorial'
-const usesThumbnail = (layout: string) => layout === 'stacked' || layout === 'cards'
-const usesDescription = (layout: string) => layout !== 'compact'
-const usesFeatured = (layout: string) => layout !== 'compact'
+/** Glass rows are Minimal with the glass row style; no other layout has one. */
+export const isGlassRows = (layout: string, rowStyle = 'solid') =>
+  layout === 'stacked' && rowStyle === 'glass'
+
+/**
+ * What each layout draws for a link, so the form only asks for what shows. Glass rows draw the icon
+ * and the thumbnail together; every other layout draws one or the other (a thumbnail replaces the icon).
+ */
+export const usesIcon = (layout: string, rowStyle = 'solid') =>
+  isGlassRows(layout, rowStyle) || layout !== 'editorial'
+export const usesThumbnail = (layout: string, rowStyle = 'solid') =>
+  isGlassRows(layout, rowStyle) || layout === 'stacked' || layout === 'cards'
+export const usesDescription = (layout: string) => layout !== 'compact'
+export const usesFeatured = (layout: string) => layout !== 'compact'
 
 const hiddenUnlessLayout =
-  (uses: (layout: string) => boolean): ConditionalPropertyCallback =>
-  (context) =>
-    !uses(layoutOfLink(context))
+  (uses: (layout: string, rowStyle: string) => boolean): ConditionalPropertyCallback =>
+  (context) => {
+    const { layout, rowStyle } = looksOfLink(context)
+    return !uses(layout, rowStyle)
+  }
+
+const GLASS_STRENGTH_HELP = {
+  light: 'More of the photo shows through. Best over a calm, even photo.',
+  medium: 'A balance of photo and readability.',
+  strong: 'Easiest to read. The photo shows through least.',
+} as const
+
+/** The glass options belong to Glass rows only. */
+const notGlassRows = ({ parent }: { parent?: { variant?: string; rowStyle?: string } }) =>
+  !isGlassRows(parent?.variant ?? LINK_LIST_VARIANTS[0].value, parent?.rowStyle)
 
 /** Tracking tags only make sense on a link to another website. */
 const notExternal: ConditionalPropertyCallback = ({ parent }) =>
@@ -169,7 +240,8 @@ const linkItem = defineArrayMember({
     defineField({
       name: 'icon',
       type: 'string',
-      description: 'A small icon beside the label. Optional.',
+      description:
+        'A small icon beside the label. Optional. In Glass rows it sits beside the picture; in the other layouts a picture replaces it.',
       options: {
         list: BADGE_ICONS.map(({ value, title }) => ({ value, title })),
         layout: 'dropdown',
@@ -210,7 +282,8 @@ const linkItem = defineArrayMember({
     {
       ...imageField({
         name: 'thumbnail',
-        description: 'Shown instead of the icon. Optional.',
+        description:
+          'A picture for this link. Optional. Glass rows show it down the left of the row, beside the icon; Minimal and Cards show it in place of the icon.',
         hidden: hiddenUnlessLayout(usesThumbnail),
         aspect: '4:3',
         minWidth: 600,
@@ -440,10 +513,51 @@ export const linkList = defineType({
         ],
         hidden: ({ parent }: { parent?: { variant?: string } }) => parent?.variant !== 'cards',
       }),
+      presetField({
+        name: 'glassStrength',
+        title: 'Glass strength',
+        description:
+          'How see-through the rows are. Stronger glass is easier to read over a busy photo.',
+        options: GLASS_STRENGTHS.map((value) => ({
+          value,
+          title: GLASS_STRENGTH_TITLES[value],
+          description: GLASS_STRENGTH_HELP[value],
+        })),
+        initialValue: 'medium',
+        hidden: notGlassRows,
+        validation: (rule) => [
+          rule.required(),
+          rule
+            .custom((value, { parent }) => {
+              const section = parent as { style?: { tone?: string } } | undefined
+              return (
+                glassContrastProblem({ tone: section?.style?.tone, strength: value })?.message ??
+                true
+              )
+            })
+            .warning(),
+        ],
+      }),
+      defineField({
+        name: 'showArrows',
+        title: 'Arrow on each row',
+        description: 'A round arrow at the end of every row.',
+        type: 'boolean',
+        initialValue: true,
+        hidden: notGlassRows,
+      }),
       accessField,
       // Set by the presets above the form; the stored value is the layout the section renders. Hidden
       // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.
       { ...variantField(LINK_LIST_VARIANTS), hidden: true },
+      // Also set by the presets: Minimal draws solid buttons (what content without it gets) or glass.
+      defineField({
+        name: 'rowStyle',
+        type: 'string',
+        initialValue: 'solid',
+        options: { list: LINK_LIST_ROW_STYLES.map((value) => ({ value, title: value })) },
+        hidden: true,
+      }),
     ],
     // How this section starts when added. Keep it equal to DEFAULTS in the components.
     { align: 'center' },

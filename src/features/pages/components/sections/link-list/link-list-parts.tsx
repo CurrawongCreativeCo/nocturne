@@ -7,6 +7,7 @@ import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { SocialIcon } from '@/components/ui/social-icon'
 import { trackAttributes } from '@/lib/analytics/track-script'
+import { glassStrengthOf, type GlassStrength } from '@/lib/color/glass-contrast'
 import { requestTime } from '@/lib/request-time'
 import { socialPlatformTitle } from '@/lib/social-platforms'
 import type { SanityImageData } from '@/types/sanity'
@@ -42,6 +43,11 @@ export interface LinkContext {
   /** Whether the section's background is dark, which decides the button colours. */
   surface: 'dark' | 'light'
   thumbnailSize: 'standard' | 'large'
+  /** Minimal only: plain buttons, or the frosted rows of the Glass rows preset. */
+  rowStyle: 'solid' | 'glass'
+  glassStrength: GlassStrength
+  /** Glass rows only: whether each row ends in a round arrow. */
+  showArrows: boolean
 }
 
 const clean = (value: string | null | undefined) => (value ? stegaClean(value).trim() : '')
@@ -194,7 +200,7 @@ export function hasThumbnail(link: ListLink): boolean {
   return Boolean((link.item.thumbnail as SanityImageData | null | undefined)?.asset)
 }
 
-/** The shared arrow of the editorial list; it points out of the page for another website. */
+/** The shared arrow of the editorial list and of Glass rows; it points out of the page for another website. */
 export function ArrowIcon({ out, className = '' }: { out: boolean; className?: string }) {
   return (
     <svg
@@ -277,7 +283,13 @@ export function LinkListView({
   const thumbnailSize = stegaClean(data.thumbnailSize) === 'large' ? 'large' : 'standard'
   const shared = {
     layout,
-    context: { surface, thumbnailSize } satisfies LinkContext,
+    context: {
+      surface,
+      thumbnailSize,
+      rowStyle: stegaClean(data.rowStyle) === 'glass' ? 'glass' : 'solid',
+      glassStrength: glassStrengthOf(clean(data.glassStrength)),
+      showArrows: data.showArrows !== false,
+    } satisfies LinkContext,
     groupHeading: levels.group,
   }
 

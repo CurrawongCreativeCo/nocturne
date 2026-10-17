@@ -2220,7 +2220,8 @@ const gallerySections = [
       image: image(name),
     })),
   },
-  // One entry per preset: Minimal, Cards, Editorial, Compact and Image-focused (Cards with large pictures).
+  // One entry per preset: Minimal, Cards, Editorial, Compact, Image-focused (Cards with large pictures)
+  // and Glass rows (Minimal with the glass row style, over a background photo).
   // The fixed clock the visual tests pin (visual.spec.ts) is 16 Oct 2026, so schedules are stable.
   ...[
     ['stacked', 'standard', 'center'],
@@ -2228,12 +2229,20 @@ const gallerySections = [
     ['editorial', 'standard', 'start'],
     ['compact', 'standard', 'start'],
     ['image-focused', 'large', 'center'],
+    ['glass-rows', 'standard', 'center'],
   ].map(([name, thumbnailSize, align]) => ({
     _key: `link-list-${name}`,
     _type: 'linkList',
-    variant: name === 'image-focused' ? 'cards' : name,
+    variant: ['image-focused', 'glass-rows'].includes(name)
+      ? { 'image-focused': 'cards', 'glass-rows': 'stacked' }[name]
+      : name,
+    ...(name === 'glass-rows' && { rowStyle: 'glass', glassStrength: 'medium', showArrows: true }),
     thumbnailSize,
-    style: { _type: 'sectionStyle', align },
+    style: {
+      _type: 'sectionStyle',
+      align,
+      ...(name === 'glass-rows' && { image: image(''), overlay: 'none' }),
+    },
     profile: galleryProfile,
     socialSource: 'business',
     links: galleryLinks(`ll-${name}`),
@@ -3006,6 +3015,62 @@ documents.push(
         _key: 'links-note',
         _type: 'richText',
         body: [block(['© Test Co. Made in Newtown.'])],
+      },
+    ],
+  },
+  {
+    // Glass rows over a background photo, on a minimal page (tests/e2e/link-list-glass.spec.ts).
+    _id: 'page-link-glass',
+    _type: 'page',
+    title: 'Glass links',
+    slug: { _type: 'slug', current: 'link-glass' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'glass-list',
+        _type: 'linkList',
+        variant: 'stacked',
+        rowStyle: 'glass',
+        glassStrength: 'medium',
+        showArrows: true,
+        thumbnailSize: 'standard',
+        style: {
+          _type: 'sectionStyle',
+          align: 'center',
+          spacing: 'spacious',
+          image: image(''),
+          overlay: 'none',
+        },
+        profile: {
+          _type: 'object',
+          name: 'Sunrise Community Care',
+          bio: 'Support, connection and a warm welcome.',
+        },
+        socialSource: 'none',
+        links: [
+          linkItem('g-care', 'Our care services', external('https://example.com/care'), {
+            description: 'Home help, respite and support at every stage of life',
+            icon: 'care',
+            thumbnail: image('Care'),
+          }),
+          linkItem('g-community', 'Join the community', external('https://example.com/join'), {
+            description: 'Groups, walks and shared lunches',
+            icon: 'community',
+            thumbnail: image('Community'),
+          }),
+          linkItem('g-book', 'Book a visit', internal('page-about'), {
+            icon: 'calendar',
+            thumbnail: image('Calendar'),
+          }),
+          // No picture and no icon: the row still holds together.
+          linkItem('g-plain', 'Call us on 1300 000 000', external('https://example.com/call'), {
+            description: 'Weekdays, 8 am to 5 pm',
+          }),
+          linkItem('g-icon', 'Find us', external('https://example.com/find'), {
+            icon: 'location',
+          }),
+        ],
       },
     ],
   },
