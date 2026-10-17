@@ -30,6 +30,7 @@ const business: LocationBusiness = {
     { _key: 'a', days: ['mon', 'tue'], opens: '08:00', closes: '17:30', closed: null },
   ],
   specialHours: null,
+  socialLinks: null,
   specialDays: [],
 }
 

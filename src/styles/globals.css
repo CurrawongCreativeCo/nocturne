@@ -50,6 +50,21 @@
     font-family: var(--font-display);
   }
 
+  /*
+   * "Minimal page (no header or footer)", e.g. the Link page. The site shell wraps its header,
+   * announcement bar and footer in [data-site-chrome], which takes no box of its own (so the sticky
+   * header behaves as before); a page that asks for a minimal frame renders [data-minimal-page], and
+   * the chrome goes (display: none leaves the accessibility tree and the tab order too). Next keeps
+   * the page you left in the DOM, hidden, and styles its top-level elements `display: none`, so only a
+   * marker that isn't hidden counts: tests/e2e/link-list.spec.ts navigates away from a minimal page.
+   */
+  [data-site-chrome] {
+    display: contents;
+  }
+  body:has([data-minimal-page]:not([style*='display: none'])) [data-site-chrome] {
+    display: none;
+  }
+
   /* Programmatic focus targets (the skip link's <main>) aren't controls: no ring. */
   [tabindex='-1']:focus {
     outline: none;
@@ -381,7 +396,7 @@
   background-color: var(--color-surface-alt);
 }
 
-main:has([data-edge-backdrop]) ~ footer {
+main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
   border-top-color: transparent;
 }
 
