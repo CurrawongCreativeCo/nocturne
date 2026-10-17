@@ -20,6 +20,13 @@ you start a release.
 
 ### Added
 
+- **Editor guide in Studio:** a **Help** tab in Start here (beside **Overview**) with short task guides (_Change a heading_, _Replace a
+  photo_, _Publish and undo_, _Write a blog post_, _Update opening hours_, _Add a team member_) and a description of every section a client
+  may add, with its fields, recommended picture sizes and length limits. It shows only what the site uses: guides follow the profile's
+  features and the schema, and sections follow `clientSections`. The guides are markdown in `docs/editor-guide/`; training videos come
+  from `help.videos` in `site.profile.ts`. `scripts/build-editor-guide.mjs` builds the committed
+  `editor-guide.generated.json`, `npm run typegen` runs it, and CI fails when it is stale. Adds `jiti` as a dev dependency (already
+  installed through ESLint and Sanity). After merging, run `npm run typegen` and commit the result.
 - **Image design:** one shared treatment for a section's main picture (`FramedImage`): a still frame with the picture moving
   gently inside it (true image-only parallax), shapes (_Standard_, _Rounded_, _Circle_, _Arch_, _Framed_) and decorative frames
   that stay still while the picture drifts behind them. Agency only, in the Design tab of **Image + text**, the **Hero's Split
