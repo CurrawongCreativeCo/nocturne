@@ -20,9 +20,12 @@ you start a release.
 
 ### Added
 
+- **Setup wizard:** the starter content now also creates empty Brand colours, Announcement bar, Cookie banner and Business info documents (only when missing), so those Studio screens no longer open as "New …". An empty Business info counts as none on the site.
+
 ### Changed
 
-- **Studio:** the _Identity & search_ screen is now _Name, logo & icon_ (with a description listing what is there), Business info has its own icon, and a new editor guide covers changing the logo or browser icon. Stored data is unchanged.
+- **Studio:** the _Identity & search_ screen is now _Name, logo & icon_ (with a description listing what is there), Business info has its own icon, and a new editor guide covers changing the logo or browser icon. Stored data is unchanged. The Presentation tool lists no locations for a page or post until it has a slug.
+
 ### Fixed
 
 - Studio → Design → Brand colours: an empty colour now shows the site's real default in the swatch and as the

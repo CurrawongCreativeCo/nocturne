@@ -26,10 +26,12 @@ npm run dev
 
 The first `npm run dev` opens a setup form at http://localhost:3333. It can create a new Sanity project
 with a **private** dataset (or connect an existing one; make that private too, see [Dataset privacy](#dataset-privacy)), create a Viewer token, allow the site in CORS, and import starter content
-(Home and About pages, Site settings with a menu and footer). It writes `.env.local`, deletes itself
+(Home and About pages, Site settings with a menu and footer, and empty Brand colours, Announcement bar, Cookie banner and Business info documents so those Studio screens don't open as "New …"; existing documents are never overwritten). It writes `.env.local`, deletes itself
 (`scripts/setup/`, the `predev`/`setup` scripts, and this section), then starts the site and links you
 to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
 or future projects lose the wizard.
+
+A project set up without the wizard has no documents for those four screens, so each opens as _New Brand colours_ (and so on) until someone publishes it. Open each once in Studio and press **Publish** (nothing changes on the site). An empty Business info shows nothing on the site.
 
 The CMS (Studio) uses Currawong Creative's branding with no setup: `studio-brand.json` ships as an empty
 brand. The wizard only sets the Studio title from the site name. To brand the CMS for the client, see
