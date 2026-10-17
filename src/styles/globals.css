@@ -205,6 +205,20 @@
     color: var(--color-accent);
   }
 
+  /* A solid colour of the editor's choosing; --emphasis-colour is set only from a validated hex. */
+  [data-emphasis='colour'] {
+    color: var(--emphasis-colour, currentcolor);
+  }
+
+  /* Weight and slant go with any look. The weight is heavier than the headings' semibold. */
+  [data-bold] {
+    font-weight: 800;
+  }
+
+  [data-italic] {
+    font-style: italic;
+  }
+
   [data-emphasis='highlight'] {
     padding-inline: 0.18em;
     border-radius: var(--radius-sm);

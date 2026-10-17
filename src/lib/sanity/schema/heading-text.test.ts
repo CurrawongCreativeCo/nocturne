@@ -2,9 +2,15 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { HEADING_GRADIENTS } from '@/config/heading-gradients'
+import { OFFERED_GRADIENTS } from '@/config/heading-gradients'
 
-import { EMPHASIS_OPTIONS, MAX_EMPHASIS_PHRASES, headingField, headingText } from './heading-text'
+import {
+  EMPHASIS_OPTIONS,
+  GRADIENT_OPTIONS,
+  MAX_EMPHASIS_PHRASES,
+  headingField,
+  headingText,
+} from './heading-text'
 
 /** A stand-in for Sanity's validation Rule that records what was asked of it. */
 interface Recorded {
@@ -35,12 +41,19 @@ type Thumbnail = (props: { scheme: 'light' | 'dark'; selected: boolean }) => Rea
 interface PickerField {
   name: string
   fieldset?: string
-  initialValue?: string
-  hidden?: (context: { parent?: { treatment?: string } }) => boolean
-  options: { presetPicker: boolean; list: { value: string; thumbnail: Thumbnail }[] }
+  initialValue?: string | number
+  hidden?: (context: { parent?: { treatment?: string; gradient?: string } }) => boolean
+  validation?: (rule: unknown) => unknown
+  options: {
+    presetPicker: boolean
+    headingGradientPicker?: boolean
+    headingStop?: boolean
+    list: { value: string; thumbnail: Thumbnail }[]
+  }
 }
 interface Annotation {
   name: string
+  validation?: (rule: unknown) => unknown
   fieldsets: { options: { collapsed: boolean } }[]
   fields: PickerField[]
 }
@@ -61,7 +74,11 @@ const arrayMember = must((headingText.of as unknown as BlockMember[])[0])
 const emphasis = must(arrayMember.marks.annotations[0])
 const treatmentField = must(emphasis.fields.find((field) => field.name === 'treatment'))
 const gradientField = must(emphasis.fields.find((field) => field.name === 'gradient'))
+const stopsField = must(emphasis.fields.find((field) => field.name === 'stops'))
+const angleField = must(emphasis.fields.find((field) => field.name === 'angle'))
 const hiddenFor = (treatment: string) => must(gradientField.hidden)({ parent: { treatment } })
+const hiddenIn = (field: PickerField, treatment: string, gradient?: string) =>
+  must(field.hidden)({ parent: { treatment, gradient } })
 
 describe('headingText type', () => {
   it('is an array of one block type: normal style, no lists, no decorators', () => {
@@ -77,12 +94,14 @@ describe('headingText type', () => {
     expect(arrayMember.marks.annotations.map((annotation) => annotation.name)).toEqual(['emphasis'])
   })
 
-  it('offers the four treatments, each with a picture, Brand colour first', () => {
+  it('offers the looks, each with a picture, Brand colour first', () => {
     expect(EMPHASIS_OPTIONS.map((option) => option.title)).toEqual([
       'Brand colour',
+      'Solid colour',
       'Gradient',
       'Highlight colour',
       'Underline',
+      'Bold or italic only',
     ])
     expect(treatmentField.options.presetPicker).toBe(true)
     expect(treatmentField.initialValue).toBe('brand')
@@ -93,24 +112,111 @@ describe('headingText type', () => {
     }
   })
 
-  it('puts the gradient choice in a collapsed Advanced area, shown only for Gradient', () => {
-    expect(must(emphasis.fieldsets[0]).options.collapsed).toBe(true)
-    expect(gradientField.fieldset).toBe('advanced')
+  it('shows the gradient picker only for the Gradient treatment, outside Advanced', () => {
+    expect(gradientField.fieldset).toBeUndefined()
+    expect(gradientField.options.headingGradientPicker).toBe(true)
     expect(hiddenFor('brand')).toBe(true)
     expect(hiddenFor('underline')).toBe(true)
     expect(hiddenFor('gradient')).toBe(false)
   })
 
-  it('lists the gradient presets, the first as the default, each with a picture', () => {
-    expect(gradientField.options.list.map((entry: { value: string }) => entry.value)).toEqual(
-      HEADING_GRADIENTS.map((gradient) => gradient.value),
-    )
-    expect(gradientField.initialValue).toBe(HEADING_GRADIENTS[0].value)
+  it('offers Brand to ink then Custom, and no longer Brand to green or red', () => {
+    const values = gradientField.options.list.map((entry: { value: string }) => entry.value)
+    expect(values).toEqual([...OFFERED_GRADIENTS.map((gradient) => gradient.value), 'custom'])
+    expect(values).toEqual(['brand', 'custom'])
+    expect(values).not.toContain('brand-green')
+    expect(values).not.toContain('brand-red')
+    expect(gradientField.initialValue).toBe('brand')
+    expect(GRADIENT_OPTIONS.at(-1)?.title).toBe('Custom')
     for (const entry of gradientField.options.list) {
       expect(
         renderToStaticMarkup(createElement(entry.thumbnail, { scheme: 'dark', selected: true })),
       ).toContain('<linearGradient')
     }
+  })
+
+  it('shows the solid colour only for that look, and bold and italic for every look', () => {
+    const colourField = must(emphasis.fields.find((field) => field.name === 'colour'))
+    expect(hiddenIn(colourField, 'brand')).toBe(true)
+    expect(hiddenIn(colourField, 'gradient')).toBe(true)
+    expect(hiddenIn(colourField, 'colour')).toBe(false)
+    expect(colourField.options.headingStop).toBe(true)
+    for (const name of ['bold', 'italic']) {
+      const toggle = must(emphasis.fields.find((field) => field.name === name))
+      expect(toggle.hidden).toBeUndefined()
+    }
+  })
+
+  it('needs a valid colour for Solid colour, as an error', () => {
+    const colourField = must(emphasis.fields.find((field) => field.name === 'colour'))
+    const { rule, rules } = recorder()
+    ;(colourField.validation as (rule: unknown) => unknown)(rule)
+    const check = must(rules[0])
+    const solid = { parent: { treatment: 'colour' } }
+    expect(check.level).toBe('error')
+    expect(check.run('#3266E4', solid)).toBe(true)
+    expect(check.run(undefined, solid)).toEqual(expect.stringContaining('Choose a colour'))
+    expect(check.run('blue', solid)).toEqual(expect.stringContaining('Choose a colour'))
+    expect(check.run(undefined, { parent: { treatment: 'brand' } })).toBe(true)
+  })
+
+  it('does not allow the bold-or-italic look with neither switched on', () => {
+    const { rule, rules } = recorder()
+    ;(emphasis.validation as (rule: unknown) => unknown)(rule)
+    const check = must(rules[0])
+    expect(check.run({ treatment: 'plain' }, {})).toEqual(expect.stringContaining('Bold or Italic'))
+    expect(check.run({ treatment: 'plain', bold: true }, {})).toBe(true)
+    expect(check.run({ treatment: 'plain', italic: true }, {})).toBe(true)
+    expect(check.run({ treatment: 'brand' }, {})).toBe(true)
+  })
+
+  it('shows the colours and angle only for a Custom gradient, the angle in Advanced', () => {
+    expect(hiddenIn(stopsField, 'gradient', 'brand')).toBe(true)
+    expect(hiddenIn(stopsField, 'gradient', 'brand-colours:sunrise')).toBe(true)
+    expect(hiddenIn(stopsField, 'brand', 'custom')).toBe(true)
+    expect(hiddenIn(stopsField, 'gradient', 'custom')).toBe(false)
+    expect(hiddenIn(angleField, 'gradient', 'brand')).toBe(true)
+    expect(hiddenIn(angleField, 'gradient', 'custom')).toBe(false)
+    expect(angleField.fieldset).toBe('advanced')
+    expect(must(emphasis.fieldsets[0]).options.collapsed).toBe(true)
+    expect(angleField.initialValue).toBe(90)
+  })
+
+  describe('custom colours', () => {
+    const { rule, rules } = recorder()
+    ;(stopsField.validation as (rule: unknown) => unknown)(rule)
+    const check = must(rules[0])
+    const custom = { parent: { gradient: 'custom' } }
+
+    it('needs two or three valid six-digit hex colours', () => {
+      expect(check.level).toBe('error')
+      expect(check.run(['#112233', '#abcdef'], custom)).toBe(true)
+      expect(check.run(['#112233', '#abcdef', '#FFFFFF'], custom)).toBe(true)
+      expect(check.run(['#112233'], custom)).toEqual(expect.stringContaining('2 or 3'))
+      expect(check.run(undefined, custom)).toEqual(expect.stringContaining('2 or 3'))
+      expect(check.run(['#1', '#2', '#3', '#4'], custom)).toEqual(expect.stringContaining('2 or 3'))
+      expect(check.run(['#112233', 'red'], custom)).toEqual(expect.stringContaining('hex'))
+      expect(check.run(['#112233', '#abc'], custom)).toEqual(expect.stringContaining('hex'))
+    })
+
+    it('asks nothing of the other gradients', () => {
+      expect(check.run(undefined, { parent: { gradient: 'brand' } })).toBe(true)
+    })
+
+    it('marks each colour for the Brand colours input', () => {
+      const item = (stopsField as unknown as { of: { options: { headingStop: boolean } }[] }).of[0]
+      expect(item?.options.headingStop).toBe(true)
+    })
+  })
+
+  it('keeps the angle a whole number of degrees from 0 to 360', () => {
+    const calls: unknown[][] = []
+    const chain: Record<string, (...args: unknown[]) => unknown> = {}
+    for (const name of ['integer', 'min', 'max']) {
+      chain[name] = (...args) => (calls.push([name, ...args]), chain)
+    }
+    ;(angleField.validation as (rule: unknown) => unknown)(chain)
+    expect(calls).toEqual([['integer'], ['min', 0], ['max', 360]])
   })
 
   describe('validation', () => {
@@ -178,15 +284,49 @@ describe('headingField', () => {
     expect(length.run(words('x'.repeat(21)), {})).toEqual(expect.stringContaining('20 characters'))
   })
 
-  it("warns about contrast on the section's tone, or the default tone when the style is unset", () => {
+  it("warns about contrast on the section's tone, or the default tone when the style is unset", async () => {
     expect(contrast.level).toBe('warning')
     const green = words('shine', 'gradient')
-    expect(contrast.run(green, { parent: { style: { tone: 'surface' } } })).toBe(true)
-    expect(contrast.run(green, { parent: { style: { tone: 'accent' } } })).toEqual(
+    expect(await contrast.run(green, { parent: { style: { tone: 'surface' } } })).toBe(true)
+    expect(await contrast.run(green, { parent: { style: { tone: 'accent' } } })).toEqual(
       expect.stringContaining('hard to read'),
     )
     // No style: the hero starts on the inverse tone, where this gradient also fails.
-    expect(contrast.run(green, { parent: {} })).toEqual(expect.stringContaining('hard to read'))
-    expect(contrast.run(words('plain'), { parent: {} })).toBe(true)
+    expect(await contrast.run(green, { parent: {} })).toEqual(
+      expect.stringContaining('hard to read'),
+    )
+    expect(await contrast.run(words('plain'), { parent: {} })).toBe(true)
+  })
+
+  const phrase = (def: Record<string, unknown>) => [
+    {
+      markDefs: [{ _key: 'm', _type: 'emphasis', treatment: 'gradient', ...def }],
+      children: [{ text: 'shine', marks: ['m'] }],
+    },
+  ]
+
+  it('warns about a custom colour that is hard to read, naming it', async () => {
+    const pale = phrase({ gradient: 'custom', stops: ['#102030', '#ffff99'] })
+    const message = await contrast.run(pale, { parent: { style: { tone: 'surface' } } })
+    expect(message).toEqual(expect.stringContaining('Custom gradient'))
+    expect(message).toEqual(expect.stringContaining('#ffff99'))
+    const dark = phrase({ gradient: 'custom', stops: ['#102030', '#003366'] })
+    expect(await contrast.run(dark, { parent: { style: { tone: 'surface' } } })).toBe(true)
+  })
+
+  it('reads a Brand colours gradient from Design settings, only when one is picked', async () => {
+    let asked = 0
+    const getClient = () => ({
+      fetch: () => {
+        asked++
+        return Promise.resolve([{ name: 'Pale dawn', stops: ['#ffffcc', '#ffffff'] }])
+      },
+    })
+    const named = phrase({ gradient: 'brand-colours:pale-dawn' })
+    const message = await contrast.run(named, { getClient, parent: { style: { tone: 'surface' } } })
+    expect(message).toEqual(expect.stringContaining('Pale dawn'))
+    expect(asked).toBe(1)
+    await contrast.run(words('plain'), { getClient, parent: {} })
+    expect(asked).toBe(1)
   })
 })

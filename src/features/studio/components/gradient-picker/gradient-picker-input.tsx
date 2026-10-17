@@ -12,7 +12,7 @@ import { PickerView } from '../preset-picker/picker-view'
 const NONE = ''
 
 /** A swatch of the gradient itself, drawn from the same CSS the page uses. */
-function gradientThumbnail(css: string) {
+export function gradientThumbnail(css: string) {
   return function GradientSwatch(_props: PresetThumbnailProps) {
     return <div aria-hidden="true" style={{ width: '100%', height: '100%', background: css }} />
   }

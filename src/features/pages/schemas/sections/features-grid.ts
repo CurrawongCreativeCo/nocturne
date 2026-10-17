@@ -1,7 +1,9 @@
 import { ThLargeIcon } from '@sanity/icons/ThLarge'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -24,12 +26,15 @@ export const featuresGrid = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
+      headingField({
+        name: 'heading',
         title: 'Section title',
-        type: 'string',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        description: 'Select words to make them stand out.',
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'intro',
         type: 'text',
@@ -71,9 +76,19 @@ export const featuresGrid = defineType({
     { align: 'center' },
   ),
   preview: {
-    select: { title: 'title', items: 'items', tone: 'style.tone' },
-    prepare: ({ title, items, tone }: { title?: string; items?: unknown[]; tone?: string }) => ({
-      title: title || 'Features grid',
+    select: { heading: 'heading', title: 'title', items: 'items', tone: 'style.tone' },
+    prepare: ({
+      heading,
+      title,
+      items,
+      tone,
+    }: {
+      heading?: Parameters<typeof headingPlainText>[0]
+      title?: string
+      items?: unknown[]
+      tone?: string
+    }) => ({
+      title: headingPlainText(heading) || title || 'Features grid',
       subtitle: joinSubtitle('Features grid', `${items?.length ?? 0} items`, toneTitle(tone)),
     }),
   },

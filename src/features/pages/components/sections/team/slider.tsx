@@ -1,6 +1,7 @@
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits } from '@/components/ui/section-style'
 import { LazySlider } from '@/components/ui/slider-lazy'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import { DEFAULTS } from './grid'
 import { TeamCard } from './team-card'
@@ -15,7 +16,7 @@ export function TeamSlider({ data, isFirst }: SectionProps<'team'>) {
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       <TeamHeader data={data} classes={`${block} ${text}`} />
-      <LazySlider label={data.title || 'Our team'} perView={{ base: 1, sm: 2, lg: 3 }} gap>
+      <LazySlider label={sectionTitle(data) ?? 'Our team'} perView={{ base: 1, sm: 2, lg: 3 }} gap>
         {members.map((member, index) => (
           <TeamCard
             key={member._id}

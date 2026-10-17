@@ -1,8 +1,10 @@
 import { stegaClean } from 'next-sanity'
 import type { CSSProperties } from 'react'
 
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits } from '@/components/ui/section-style'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import { LOGO_CLOUD_DEFAULTS } from './grid'
 import { LogoItem } from './logo-item'
@@ -16,7 +18,8 @@ import type { SectionProps } from '../../../types'
  * first list is the static wrapped grid and the copy is not shown.
  */
 export function LogoCloudMarquee({ data, isFirst }: SectionProps<'logoCloud'>) {
-  const { title, logos } = data
+  const { heading, logos } = data
+  const title = sectionTitle(data)
   const { text, justify, align } = sectionTraits(data.style, LOGO_CLOUD_DEFAULTS)
   const colour = stegaClean(data.logoColour) === 'colour' ? 'colour' : 'grey'
 
@@ -29,7 +32,14 @@ export function LogoCloudMarquee({ data, isFirst }: SectionProps<'logoCloud'>) {
 
   return (
     <SectionFrame style={data.style} defaults={LOGO_CLOUD_DEFAULTS} isFirst={isFirst}>
-      {title && <h2 className={`text-small font-semibold text-ink-muted ${text}`}>{title}</h2>}
+      {title && (
+        <RichHeading
+          as="h2"
+          blocks={heading}
+          fallback={title}
+          className={`text-small font-semibold text-ink-muted ${text}`}
+        />
+      )}
       <div data-marquee style={track}>
         <div data-marquee-viewport className="mt-8 overflow-x-clip">
           <div data-marquee-track className="flex w-max">

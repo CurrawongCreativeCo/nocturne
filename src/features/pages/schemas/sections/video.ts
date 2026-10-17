@@ -1,7 +1,9 @@
 import { PlayIcon } from '@sanity/icons/Play'
 import { defineField, defineType, type PreviewValue } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -66,12 +68,14 @@ export const video = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
-        type: 'string',
+      headingField({
+        name: 'heading',
+        title: 'Title',
         description: 'Also names the Play button for screen readers: “Play video: <title>”.',
-        validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.title, 'Headings')],
+        max: LIMITS.title,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'text',
         title: 'Description',
@@ -182,19 +186,27 @@ export const video = defineType({
     // No design option depends on the layout: the poster sits inside the frame or behind the words, and each layout accepts any alignment.
   ),
   preview: {
-    select: { title: 'title', media: 'poster', variant: 'variant', tone: 'style.tone' },
+    select: {
+      heading: 'heading',
+      title: 'title',
+      media: 'poster',
+      variant: 'variant',
+      tone: 'style.tone',
+    },
     prepare: ({
+      heading,
       title,
       media,
       variant,
       tone,
     }: {
+      heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       media?: PreviewValue['media']
       variant?: string
       tone?: string
     }) => ({
-      title: title || 'Untitled',
+      title: headingPlainText(heading) || title || 'Untitled',
       subtitle: variantSubtitle('Video', VIDEO_VARIANTS, variant, tone),
       media,
     }),

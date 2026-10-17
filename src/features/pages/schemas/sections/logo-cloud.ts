@@ -1,9 +1,10 @@
 import { ImagesIcon } from '@sanity/icons/Images'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
-import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
@@ -54,12 +55,15 @@ export const logoCloud = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'title',
-        type: 'string',
+      headingField({
+        name: 'heading',
+        title: 'Title',
         description: 'e.g. "Trusted by teams at"',
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
+        max: LIMITS.title,
+        optional: true,
+        requiredUnless: 'title',
       }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'logos',
         type: 'array',
@@ -103,19 +107,27 @@ export const logoCloud = defineType({
     },
   ),
   preview: {
-    select: { title: 'title', logos: 'logos', variant: 'variant', tone: 'style.tone' },
+    select: {
+      heading: 'heading',
+      title: 'title',
+      logos: 'logos',
+      variant: 'variant',
+      tone: 'style.tone',
+    },
     prepare: ({
+      heading,
       title,
       logos,
       variant,
       tone,
     }: {
+      heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       logos?: unknown[]
       variant?: string
       tone?: string
     }) => ({
-      title: title || 'Logo strip',
+      title: headingPlainText(heading) || title || 'Logo strip',
       subtitle: `${variantSubtitle('Logo strip', LOGO_CLOUD_VARIANTS, variant, tone)} · ${logos?.length ?? 0} logos`,
     }),
   },

@@ -72,6 +72,7 @@ describe('embed section', () => {
 
   it('has no field for markup, scripts or embed code', () => {
     expect(fields.map((f) => f.name)).toEqual([
+      'heading',
       'title',
       'text',
       'provider',

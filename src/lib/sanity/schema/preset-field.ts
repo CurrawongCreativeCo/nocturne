@@ -45,6 +45,10 @@ declare module 'sanity' {
   interface StringOptions {
     /** Show the options as a grid of pictures. The Studio input is in features/studio/components/preset-picker. */
     presetPicker?: boolean
+    /** A heading highlight's gradient: Brand colours gradients, Brand to ink, Custom (features/studio/components/gradient-picker/heading-gradient-input). */
+    headingGradientPicker?: boolean
+    /** One colour of a heading highlight's custom gradient: the Brand colours input plus a contrast check on the section's background. */
+    headingStop?: boolean
     /** Offer the anchors of the document's sections beside a text box (features/studio/components/anchor-picker). */
     anchorPicker?: boolean
     /**

@@ -1,10 +1,12 @@
 import { stegaClean } from 'next-sanity'
 import { useId } from 'react'
 
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { siteLanguage } from '@/config/env'
 import { formatInterval, formatPrice } from '@/lib/format-price'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import type { SectionProps } from '../../types'
 
@@ -25,7 +27,8 @@ const columnClasses = {
  * button comes from the route (`renderCheckout`), since payments are a feature of their own.
  */
 export function PricingTable({ data, isFirst, renderCheckout }: SectionProps<'pricingTable'>) {
-  const { title, intro, plans } = data
+  const { heading, intro, plans } = data
+  const title = sectionTitle(data)
   const headingId = useId()
   const { block, text } = sectionTraits(data.style, DEFAULTS)
 
@@ -42,9 +45,13 @@ export function PricingTable({ data, isFirst, renderCheckout }: SectionProps<'pr
       {(title || intro) && (
         <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
           {title && (
-            <h2 id={headingId} className="text-h2 font-semibold text-balance">
-              {title}
-            </h2>
+            <RichHeading
+              as="h2"
+              id={headingId}
+              blocks={heading}
+              fallback={title}
+              className="text-h2 font-semibold text-balance"
+            />
           )}
           {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
         </header>

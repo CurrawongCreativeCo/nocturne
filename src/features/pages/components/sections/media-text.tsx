@@ -3,14 +3,17 @@ import { stegaClean } from 'next-sanity'
 import { travelForSpeed } from '@/components/motion/image-travel'
 import { CtaGroup } from '@/components/ui/cta-link'
 import { FramedImage } from '@/components/ui/framed-image'
+import { RichHeading } from '@/components/ui/rich-heading'
 import { RichText } from '@/components/ui/rich-text'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import type { SectionProps } from '../../types'
 
 export function MediaText({ data, isFirst }: SectionProps<'mediaText'>) {
-  const { eyebrow, title, body, ctas, image, imagePosition } = data
+  const { eyebrow, heading, body, ctas, image, imagePosition } = data
+  const title = sectionTitle(data)
   const imageFirst = stegaClean(imagePosition) === 'left'
   // Without an image, a two-column grid would squeeze the text into one half.
   const hasImage = Boolean(image?.asset)
@@ -49,7 +52,12 @@ export function MediaText({ data, isFirst }: SectionProps<'mediaText'>) {
             {eyebrow}
           </p>
         )}
-        <h2 className="mt-2 text-h2 font-semibold text-balance">{title}</h2>
+        <RichHeading
+          as="h2"
+          blocks={heading}
+          fallback={title}
+          className="mt-2 text-h2 font-semibold text-balance"
+        />
         <RichText value={body} className="mt-4 text-lead text-ink-muted" />
         <CtaGroup ctas={ctas} surface={ctaSurfaceFor(tone)} className={`mt-8 ${justify}`} />
       </div>

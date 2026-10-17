@@ -1,8 +1,10 @@
 import { stegaClean } from 'next-sanity'
 
 import { FramedImage } from '@/components/ui/framed-image'
+import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { sectionTitle } from '@/lib/sanity/section-title'
 
 import { OpenImageButton } from './lightbox-provider'
 import type { SectionProps } from '../../../types'
@@ -15,7 +17,7 @@ export type GalleryImage = GalleryData['images'][number]
 
 /** Names the gallery for screen readers: the carousel, the lightbox and every thumbnail's button. */
 export function galleryLabel(data: GalleryData): string {
-  return stegaClean(data.title) || 'Image gallery'
+  return sectionTitle(data) ?? 'Image gallery'
 }
 
 /** Columns the editor chose, kept within what the layouts have classes for (3 if unset). */
@@ -32,13 +34,21 @@ export function columnSizes(columns: number): string {
 }
 
 export function GalleryHeader({ data }: { data: GalleryData }) {
-  const { title, intro } = data
+  const { heading, intro } = data
+  const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
   if (!title && !intro) return null
 
   return (
     <header className={`mb-12 max-w-measure-narrow ${block} ${text}`}>
-      {title && <h2 className="text-h2 font-semibold text-balance">{title}</h2>}
+      {title && (
+        <RichHeading
+          as="h2"
+          blocks={heading}
+          fallback={title}
+          className="text-h2 font-semibold text-balance"
+        />
+      )}
       {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
     </header>
   )

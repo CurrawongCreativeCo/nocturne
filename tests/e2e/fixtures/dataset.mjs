@@ -52,20 +52,22 @@ const block = (children, extra = {}) => ({
 })
 
 /**
- * A `headingText` value: a single block whose parts are plain strings or [text, treatment, gradient]
- * (a highlighted phrase). Keys are derived from the heading's own, so documents stay stable.
+ * A `headingText` value: a single block whose parts are plain strings or [text, treatment, gradient,
+ * extra] (a highlighted phrase; `extra` adds fields such as a custom gradient's `stops` and `angle`).
+ * Keys are derived from the heading's own, so documents stay stable.
  */
 const headingText = (id, parts) => {
   const markDefs = []
   const children = parts.map((part, index) => {
     if (typeof part === 'string')
       return { _key: `${id}-s${index}`, _type: 'span', text: part, marks: [] }
-    const [text, treatment, gradient] = part
+    const [text, treatment, gradient, extra] = part
     markDefs.push({
       _key: `${id}-m${index}`,
       _type: 'emphasis',
       treatment,
       ...(gradient && { gradient }),
+      ...extra,
     })
     return { _key: `${id}-s${index}`, _type: 'span', text, marks: [`${id}-m${index}`] }
   })
@@ -1749,6 +1751,23 @@ const gallerySections = [
       ' and look the part',
     ]),
   }),
+  // A custom gradient (README, "Custom gradient colours"): three of the editor's own colours at 45
+  // degrees, on a heading that wraps on a phone.
+  galleryHero('heading-custom-gradient', {
+    variant: 'overlay',
+    backgroundImage: undefined,
+    title: undefined,
+    heading: headingText('hero-heading-custom-gradient', [
+      'Stand out with ',
+      [
+        'colours of your own choosing',
+        'gradient',
+        'custom',
+        { stops: ['#1d4ed8', '#7c3aed', '#be185d'], angle: 45 },
+      ],
+      ' in every heading',
+    ]),
+  }),
   styled(
     'hero-heading-highlight',
     galleryHero('heading-highlight', {
@@ -2934,6 +2953,70 @@ documents.push({
         ' hero is an ',
         ['h2', 'brand'],
       ]),
+    },
+  ],
+  _updatedAt: UPDATED,
+})
+
+/**
+ * Custom gradient colours in a heading (tests/e2e/heading-text.spec.ts): the hero is the page's one h1
+ * with a three-colour gradient at 45 degrees; a later hero uses the Brand colours gradient "Forest dusk"
+ * (designSettings above) by name, and one that has since left Design settings.
+ */
+documents.push({
+  _id: 'page-custom-gradient',
+  _type: 'page',
+  title: 'Custom gradient',
+  slug: { _type: 'slug', current: 'custom-gradient' },
+  seo: { _type: 'seo', metaDescription: 'A heading with a custom gradient.' },
+  pageBuilder: [
+    {
+      _key: 'custom-gradient-hero',
+      _type: 'hero',
+      style: { _type: 'sectionStyle', tone: 'surface' },
+      heading: headingText('custom-gradient-hero', [
+        'Colours ',
+        [
+          'in your own words',
+          'gradient',
+          'custom',
+          { stops: ['#1D4ED8', '#7c3aed', '#be185d'], angle: 45 },
+        ],
+      ]),
+      description: 'Hero description.',
+    },
+    {
+      _key: 'custom-gradient-named',
+      _type: 'hero',
+      style: { _type: 'sectionStyle', tone: 'surface' },
+      heading: headingText('custom-gradient-named', [
+        'A named ',
+        ['brand gradient', 'gradient', 'brand-colours:forest-dusk'],
+        ' and one that is ',
+        ['gone', 'gradient', 'brand-colours:removed'],
+      ]),
+    },
+    {
+      // Not a hero: a section title is rich too, on the card's own tone (README, "Highlighting words in a heading").
+      _key: 'custom-gradient-cta',
+      _type: 'ctaBanner',
+      tone: 'light',
+      heading: headingText('custom-gradient-cta', [
+        'Ready for ',
+        ['colour', 'colour', undefined, { colour: '#7C3AED' }],
+        ' and ',
+        ['weight', 'plain', undefined, { bold: true, italic: true }],
+        '?',
+      ]),
+      ctas: [cta('Get started', internal('page-about'))],
+    },
+    {
+      // A migrated section still shows its old string title.
+      _key: 'custom-gradient-features',
+      _type: 'featuresGrid',
+      title: 'Old string title',
+      columns: 3,
+      items: [1, 2, 3].map((i) => ({ _key: `cg-f${i}`, title: `Feature ${i}`, text: 'Text.' })),
     },
   ],
   _updatedAt: UPDATED,

@@ -25,6 +25,7 @@ for (const path of [
   '/members',
   '/mixed',
   '/highlights',
+  '/custom-gradient',
   '/sign-in',
   '/sign-out',
 ]) {

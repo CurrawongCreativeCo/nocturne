@@ -2,10 +2,10 @@ import { BlockContentIcon } from '@sanity/icons/BlockContent'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
 import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
-import { headingPlainText } from '@/lib/sanity/heading-text'
+import { DEFAULT_HEADING_TONES, headingPlainText } from '@/lib/sanity/heading-text'
 import { isClientView } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
-import { headingField } from '@/lib/sanity/schema/heading-text'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
@@ -226,21 +226,10 @@ export const hero = defineType({
         title: 'Title',
         description: 'Select words to make them stand out.',
         max: LIMITS.title,
-        defaultTone: 'inverse',
+        defaultTone: DEFAULT_HEADING_TONES.hero,
         requiredUnless: 'title',
       }),
-      defineField({
-        name: 'title',
-        title: 'Title (old)',
-        type: 'string',
-        deprecated: {
-          reason: 'Replaced by Title above. Kept until the content migration has run.',
-        },
-        readOnly: true,
-        // Only content not yet migrated still has one.
-        hidden: ({ parent }: { parent?: { title?: string } }) => !parent?.title,
-        validation: (rule) => lengthWarning(rule, LIMITS.title, 'Headings'),
-      }),
+      legacyTitleField(LIMITS.title),
       defineField({
         name: 'description',
         type: 'text',

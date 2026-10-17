@@ -2580,18 +2580,78 @@ below has a key ending `--below` and is drawn in the same frame); their visual b
 
 ### Highlighting words in a heading
 
-Editors select words in a heading and choose how they stand out. The hero's _Title_ is the first heading to use it;
-media + text, CTA banner and features grid follow in a small separate change.
+Editors select words in a heading and choose how they stand out. Every section's title uses it: the hero, CTA banner,
+media + text, features grid, FAQ, form, newsletter, pricing, process, stats, team, testimonials, gallery, logo strip,
+location, events, video, embed and link list. Item titles inside a section (a feature, a plan, a step) stay plain text.
 
-**For editors.** Select the words in _Title_ and click **Highlight**, then pick one of four looks: _Brand colour_,
-_Gradient_, _Highlight colour_ (a soft marker behind the words) or _Underline_. With no highlight the heading looks as
-it always did. Gradient also has a collapsed _Advanced_ area to pick which gradient. Studio warns, and never blocks
+**For editors.** Select the words in the title and click **Highlight**, then pick one of six looks: _Brand colour_,
+_Solid colour_ (any colour you choose), _Gradient_, _Highlight colour_ (a soft marker behind the words), _Underline_ or
+_Bold or italic only_. **Bold** and **Italic** are switches that go with any look, so "bold brand colour" is one
+highlight. Studio checks a solid colour against the section's background like a gradient colour (3:1, a warning only),
+and a call to action banner is checked against its own card. With no highlight the heading looks as it always did. Gradient shows one picker: the gradients from **Design → Brand colours** by name (the same names a
+section's background offers), then _Brand to ink_ (the default), then _Custom_. See
+[Custom gradient colours](#custom-gradient-colours). Studio warns, and never blocks
 publishing, when more than two phrases are highlighted, the title is longer than the design handles, or a look is hard to
 read on the section's background (large text needs 3:1, and every gradient stop is checked). On the _Brand_ background a
 brand colour is the same as the text colour, so it shows no difference: pick another look or background.
 
+#### Custom gradient colours
+
+Choose **Gradient → Custom** to blend your own colours across the words.
+
+**For editors.** Custom shows two or three colours (a swatch and a hex code, like Brand colours: type `3266e4` or use
+the picker) and, in the collapsed _Advanced_ area, the **Angle** (90 is left to right, the default; 180 is top to
+bottom). Any colour is allowed: Studio never blocks one. Instead each colour shows a contrast badge against the
+section's background (large text needs 3:1), the field warns when a colour is hard to read, and **Suggest an accessible
+shade** moves the colour's lightness (OKLCH, as Brand colours does) to the nearest shade that reaches 3:1. Changing the
+section's background (its tone) changes the check. A gradient from Brand colours is checked the same way, stop by stop.
+
+**Custom colours bypass the brand palette on purpose.** A heading can use colours that are not in Design → Brand
+colours, and a re-skin does not change them. Anyone who can highlight words can do this; there is no separate
+permission. If a client should only use their brand colours, create their gradients in Brand colours and tell editors to
+pick from the list.
+
 **For developers.**
 
+- **Stored on the `emphasis` annotation:** `gradient` is `brand` (Brand to ink, the default), `custom`, or
+  `brand-colours:<slug>` (a Brand colours gradient; the slug is the one `--gradient-<slug>` uses). `custom` also uses
+  `stops` (two or three `#rrggbb` strings) and `angle` (an integer, default 90). `brand-green` and `brand-red` are no
+  longer offered (they use the success and danger colours) but content that stored them is drawn and checked as before,
+  so no content changes. The heading is queried whole (`heading`), so the new fields arrive without changing the
+  fragments; `npm run typegen` updates the types.
+- **Nothing from the content is free CSS.** `gradientCssFor` (`src/config/heading-gradients.ts`) builds the gradient:
+  presets from the list, custom gradients from `validStops` / `validAngle` (`src/lib/color/heading-gradient.ts`: six-digit
+  hex only, an integer angle wrapped to 0-359), and Brand colours gradients as `var(--gradient-<slug>, <default>)` with
+  a slug that must match `GRADIENT_SLUG_PATTERN`. A half-filled Custom, or a slug that is not valid, draws the default.
+  A Brand colours gradient deleted from Design settings falls back to the default through that `var()` fallback, so the
+  words never turn transparent over nothing.
+- **Rendering** is unchanged apart from the value of `--emphasis-gradient`: `background-clip: text`,
+  `box-decoration-break: clone`, a solid accent where that is unsupported and `CanvasText` under forced colours.
+- **Contrast:** `emphasisContrastProblems(tone, phrases, brandGradients)` and `stopContrast(tone, hex)` in
+  `src/lib/color/heading-contrast.ts`. The field validation fetches the Brand colours gradients only when a phrase picked
+  one by name. The colour input is the Brand colours input (`ColourInput`) with `options.headingStop`; it reads the
+  section's tone from the form (`headingSectionPath`) and is composed in `sanity.config.ts`, because a shared or studio
+  module may not import a feature.
+- **Studio picker:** `heading-gradient-input.tsx` (features/studio) lists Brand colours, then the field's own list
+  (Brand to ink, Custom). A stored value that is no longer offered stays visible so it can be changed.
+
+**For developers.**
+
+- **Adding it to a section:** in the schema use `headingField({ name: 'heading', max, requiredUnless: 'title' })` plus
+  `legacyTitleField(max)` (the old string, shown only on content not yet migrated); in the fragment add
+  `heading, "headingPlain": pt::text(heading)` next to `title`; in the component
+  `const title = sectionTitle(data)` (`src/lib/sanity/section-title.ts`: the heading's words, else the old title; use it
+  for "has a title?", labels and accessible names) and
+  `<RichHeading as="h2" blocks={data.heading} fallback={title} className=... />`. The check reads the background with
+  `headingTone` (`src/lib/sanity/heading-text.ts`), which knows the CTA banner's card.
+- **Solid colour, bold, italic:** `treatment: 'colour'` stores `colour` (a `#rrggbb` string; only a validated hex reaches
+  the `--emphasis-colour` custom property). `bold` and `italic` are booleans on the annotation, drawn as
+  `data-bold` / `data-italic` on the same `<span>` (heavier weight 800, `font-style: italic`), not `<strong>` or `<em>`,
+  so the accessible name is still just the words. `plain` is the look with nothing but bold or italic, and the schema
+  requires one of them.
+- **Migration:** `npx sanity migration run section-titles-to-heading-text` (dry run first, then `--no-dry-run`) copies each
+  section's `title` into `heading`. It is safe to run twice, keeps `title` so the page still reads it until the run, and
+  skips the hero (its own migration, below). Run it on every dataset, then remove the old `title` fields in a later release.
 - **Type:** `headingText` (`src/lib/sanity/schema/heading-text.ts`) is a Portable Text array limited to one block, the
   normal style, no lists and no decorators, with one `emphasis` annotation (`treatment`, and `gradient` for Gradient).
   Add it to a section with `headingField({ name, max, defaultTone })`, which adds the length and contrast warnings (the
@@ -2605,9 +2665,9 @@ brand colour is the same as the text colour, so it shows no difference: pick ano
   Gradients: `background-clip: text` with a transparent fill and `box-decoration-break: clone`, so wrapped lines keep the
   whole gradient; a solid accent where that isn't supported and `CanvasText` under forced colours.
 - **Tokens and presets:** underline thickness and offset and the highlight strength are `emphasis` tokens in
-  `tokens.json` (optional). Gradient presets are in `src/config/heading-gradients.ts`: stops are colour tokens (so they
-  follow a re-skin and the tone), the first is the default, and a stored value is never renamed. When design settings can
-  hold gradients, replace that constant and keep its shape.
+  `tokens.json` (optional). The built-in gradient presets are in `src/config/heading-gradients.ts`: stops are colour
+  tokens (so they follow a re-skin and the tone), the first is the default, and a stored value is never renamed. Named
+  gradients come from Brand colours and custom ones from the annotation (below).
 - **Contrast:** `src/lib/color/heading-contrast.ts` resolves the colours the way `[data-tone]` does and checks each
   treatment at 3:1. Keep it in step with the CSS if you change the highlight or the tone rules.
 - **Old title:** the hero reads `heading` first and falls back to the plain `title`. Run the migration on every dataset,
