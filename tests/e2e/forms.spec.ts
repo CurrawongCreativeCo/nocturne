@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
 
+import { waitForHydration } from './hydration'
+
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const SUCCESS = 'Thanks, Ann! We will reply within two days.'
 
@@ -19,6 +21,7 @@ test.beforeEach(async ({ context }, testInfo) => {
 })
 
 async function fillValid(page: Page) {
+  await waitForHydration(page.getByLabel('Your name'))
   await page.getByLabel('Your name').fill('Ann Author')
   await page.getByLabel('Email address').fill('ann@example.com')
   await page.getByLabel('Topic').selectOption('Support')
