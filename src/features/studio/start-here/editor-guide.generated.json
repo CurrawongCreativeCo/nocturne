@@ -91,12 +91,13 @@
         },
         {
           "name": "imagePosition",
-          "title": "Image position",
+          "title": "Image side",
           "kind": "Choice",
           "required": true,
+          "description": "Which side the picture sits on wide screens. On phones it sits below the text.",
           "choices": [
-            "Left",
-            "Right"
+            "Image left",
+            "Image right"
           ]
         }
       ]
