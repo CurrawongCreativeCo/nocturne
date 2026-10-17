@@ -1096,11 +1096,10 @@ Studio access; see _Studio roles and permissions_).
   eyebrows, the share image), _Secondary_ (a new `accent-2` role, available as `bg-accent-2 text-accent-2-ink` and
   in gradients) and _Highlight_ (optional, `bg-highlight text-highlight-ink`). Dark swaps the surface and ink pairs
   (the page goes dark, the inverse tone goes light) and sets `color-scheme: dark`.
-- **Empty colours show the real default.** A colour left empty shows the colour the site uses for it (resolved by
-  `resolveDesignTokens`, so Dark Appearance gives the dark defaults) in the swatch and as the hex placeholder, with a
-  "Default" label; clearing a colour says it has returned to the default. Nothing is stored until a colour is picked.
-  Until a Primary is set, buttons use the near-black `cta` colour while accent sections and links use the `accent`
-  colour, so the Primary swatch (the accent) can differ from the buttons in the preview.
+- An empty colour shows the site's resolved default (from `tokens.json`, and following Appearance) in the swatch
+  and as the placeholder, with a "Default" label; nothing is stored until a colour is picked, and **Clear** returns
+  to the default. Buttons use the near-black `cta` colour until a Primary is set, while Primary's default swatch
+  shows the blue `accent` used by accent sections.
 - **Advanced** (collapsed): _Background_, _Alternate background_, _Inverse background_, _Text_, _Muted text_ and
   _Borders_, and **gradients**: a name, an angle and two or three colours each. Each gradient becomes a CSS variable
   `--gradient-<name>` (for example `--gradient-forest-dusk`) for headings and backgrounds to use.
@@ -1225,17 +1224,32 @@ Only supported Sanity APIs are used, in four places:
   (text 4.5:1, focus ring 3:1) and visual baselines for each. `buildLegacyTheme` marks its result as
   "legacy", and Studio pins a legacy theme to one scheme and hides Appearance, so `theme.ts` removes
   those markers. Never set a `scheme` in code. The Brand colours preview keeps the site's own colours.
-- **What the theme sets.** Light mode: background and text (`--component-bg`, `--component-text-color`,
-  `--white`, `--black`) and the grey the neutral tints come from (`--gray-base`). Dark mode: background and
-  text, through `--main-navigation-color` and its inverted value (Sanity builds its dark scheme from these;
-  the real navbar is an ordinary card in the current scheme, so it is paper in light mode and ink in dark).
-  Accent (`--brand-primary`, `--default-button-primary-color`) and focus ring (`--focus-color`) are single
-  values shared by both modes. Success, warning and danger colours, and the font, stay Sanity's.
-- **The shared accent.** The legacy theme cannot give light and dark mode different accents. It uses the
-  dark-scheme accent (`#9f80e5` for Currawong) because violet on ink is only 2.5:1. The cost: in light mode
-  `#9f80e5` is 2.7:1 on paper, so a solid primary button's label (Sanity picks paper) is low contrast there.
-  The focus ring is lifted just enough to reach 3:1 on both backgrounds (`#9878dd` for Currawong).
-  A client colour the guard has already made contrast-safe for dark mode carries the same trade-off.
+- **What the theme sets.** `buildLegacyTheme` takes one accent and one grey ramp for both colour schemes, so
+  `theme.ts` calls it **once per scheme**, each time with that scheme's roles as both the component and the
+  navigation colours, and builds the theme from `color.light` of the first and `color.dark` of the second.
+  Each scheme therefore gets its own background and text (`--component-bg`, `--component-text-color`,
+  `--main-navigation-color` and its inverted value), grey (`--gray-base`), primary fill
+  (`--default-button-primary-color`), neutral button (`--default-button-color`), selection colour
+  (`--brand-primary`) and focus ring (`--focus-color`). Success, warning and danger colours, and the font,
+  stay Sanity's.
+- **How a fill becomes the brand colour.** Sanity draws a solid button as the card background multiplied (light)
+  or screened (dark) with the colour you give it, so passing `#5f2bd4` unchanged came out as `#5b28bf`. `theme.ts`
+  works the blend backwards, so a primary button is exactly the scheme's accent fill (`#5f2bd4` in light mode,
+  `#9f80e5` in dark for Currawong). Sanity picks the label itself, the card background blended with itself
+  (`#e9e0cf` on Currawong's violet, 5.8:1), not `onAccent`, so a fill is moved only as far as it takes to reach
+  4.6:1 against that label. Currawong's accents need no move; a client's yellow in light mode is darkened to
+  `#856d00`, and a dark green in dark mode is lightened.
+- **Neutral buttons and greys.** Sanity's default button colour is a slate grey. The default button is now the
+  text colour pulled 65% toward the background (a warm grey in Currawong's case), nudged if needed to reach 4.6:1
+  against its label, so neutrals stay in the ink and paper range.
+- **Selection.** Selected tabs and tools use Sanity's "info" colour, which is `--brand-primary`, mixed 20% into
+  the background and blended again. Left alone that gives a dusty pink on Currawong's paper, so `theme.ts` solves
+  for the colour that makes the selected background 35% accent on the background (`#c0b3d4` in light mode,
+  `#423750` in dark). The cost is that the primary badge and links drawn in that info colour lean a little
+  toward the nearest saturated hue (Currawong's violet reads slightly bluer in light mode); the badge text is
+  still above 11:1.
+- **Focus ring.** Each scheme uses its own `focus` role, so the ring is the brand colour exactly (it used to be
+  one colour lifted to suit both backgrounds).
 - **Logo.** A client logo file is shown alone, the on-light or on-dark variant to match the colour scheme.
   If a client supplies only one file, it is never recoloured: on the other scheme it sits on a small
   background in the colour it was drawn for. With no logo file, the navbar shows a mark (the client's
@@ -1301,14 +1315,14 @@ adjustment the contrast guard made (so the yellow case visibly shows its darkene
   `tests/e2e/studio-brand-visual.spec.ts`: one screenshot per case and scheme, desktop only, Linux only. Its name
   contains "visual", so `npm run test:e2e:update` and the **Update visual baselines** workflow refresh it with the
   section gallery's. Baselines live in `tests/e2e/studio-brand-visual.spec.ts-snapshots/`.
-- **Known contrast gaps.** The legacy theme has one accent and one grey ramp for both schemes, so some labels Sanity
-  UI draws miss 4.5:1: the default button in every case, and the primary button label wherever the shared accent
-  suits the other scheme (for example Currawong in light mode, 2.7:1). `KNOWN_CONTRAST_GAPS` in the spec lists them
-  exactly, and the test fails when a gap appears or is fixed, so the list can only shrink on purpose. Every other axe
-  rule is enforced without exceptions. Closing the gaps means moving off `buildLegacyTheme` (see "How the Studio
-  applies the brand").
+- **Contrast.** `studio-brand-visual.spec.ts` measures computed colours in every case and scheme (it runs on any
+  system, unlike the screenshots in the same file): text on the default, primary, ghost and bleed buttons, the
+  selected tool and tab, the selected card and all five badges must reach 4.5:1, and the focus ring on the primary
+  button and the input must be the brand focus colour at 3:1 or more against the page. axe's `color-contrast`
+  rule runs over each case as well and must find nothing. Neither has an exceptions list; if a new brand case
+  fails, fix the mapping in `theme.ts` (or the brand roles), not the test.
 - **Adding a case.** Add it to `brandPreviewCases` in `src/features/studio/brand-preview/cases.ts`, run the spec, add
-  any contrast gap to `KNOWN_CONTRAST_GAPS`, and refresh the baselines.
+  and refresh the baselines.
 
 **Colour helpers.** `src/lib/color/` holds hex <-> OKLCH conversion, WCAG contrast and the lightness
 adjustment. `scripts/build-tokens.mjs` uses the same conversion, so there is one implementation.
@@ -3048,7 +3062,7 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 **What editors see.** Once something is chosen the picker collapses to one row (picture, title, description and a **Change** button) so long forms stay short. **Change** opens the cards; choosing one closes them again and returns focus to the button. The cards are a `radiogroup`: Tab reaches the chosen card (or the first), the arrow keys, Home and End move focus, and Enter or Space choose. It uses Sanity UI, so it follows the CMS brand theme in light and dark.
 
-**Tests.** Vitest covers option normalisation, preset-to-patch building, preset matching and the keyboard order. `/studio-brand-preview` shows the grid, the collapsed row and a preset bar in light and dark, so the end-to-end tests run axe and keyboard checks over them, and `studio-brand-visual.spec.ts` takes screenshots (Linux baselines: refresh with the "Update visual baselines" workflow). Colour contrast on the picker is not asserted, matching the rest of that page (see _Known contrast gaps_).
+**Tests.** Vitest covers option normalisation, preset-to-patch building, preset matching and the keyboard order. `/studio-brand-preview` shows the grid, the collapsed row and a preset bar in light and dark, so the end-to-end tests run axe and keyboard checks over them, and `studio-brand-visual.spec.ts` takes screenshots (Linux baselines: refresh with the "Update visual baselines" workflow). Colour contrast on the picker's own cards is not asserted separately; the page's buttons, tabs and badges are (see _Contrast_ under the brand preview).
 
 #### Thumbnails
 

@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
 import { brandPreviewCases } from '../../src/features/studio/brand-preview/cases'
+import { hexToOklch } from '../../src/lib/color/oklch'
 
 /**
  * CMS branding, tested through /studio-brand-preview (Studio itself needs a login): Sanity UI under
@@ -14,23 +15,6 @@ const PATH = '/studio-brand-preview'
 const CURRAWONG_VIOLET = 'rgb(95, 43, 212)'
 const SCHEMES = ['light', 'dark'] as const
 
-/**
- * Elements whose text fails 4.5:1 today, by case and scheme (found by this page; see "Known contrast
- * gaps" in the README). The legacy theme gives both schemes one accent and one grey ramp, so a label
- * Sanity UI draws in the scheme's own paper or ink cannot reach 4.5:1 on both. The test below
- * expects exactly this list: a new failure fails it, and so does a fix, until the list is updated.
- */
-const KNOWN_CONTRAST_GAPS: Record<string, string[]> = {
-  'currawong-light': ['Default', 'Primary', 'Publish'],
-  'currawong-dark': ['Default'],
-  'green-cream-light': ['Default'],
-  'green-cream-dark': ['Default', 'Primary', 'Publish'],
-  'partial-light': ['Default'],
-  'partial-dark': ['Default', 'Primary', 'Publish'],
-  'low-contrast-light': ['Default', 'Primary', 'Publish', 'primary'],
-  'low-contrast-dark': ['Default'],
-}
-
 const hexToRgb = (hex: string) => {
   const value = Number.parseInt(hex.slice(1), 16)
   return `rgb(${value >> 16}, ${(value >> 8) & 255}, ${value & 255})`
@@ -42,7 +26,20 @@ const channelDistance = (a: string, b: string) => {
   const [left, right] = [channels(a), channels(b)]
   return Math.max(...left.map((value, i) => Math.abs(value - (right[i] ?? 0))))
 }
-const ACCENT_TOLERANCE = 40
+/**
+ * Currawong's primary fill must be its accent exactly (2 per channel for rounding). A client's accent
+ * may be moved in lightness, just far enough for Sanity's own label to reach 4.5:1 on it
+ * (theme.ts), so a client's fill must keep the accent's hue (within 12 degrees) and nothing else.
+ */
+const CURRAWONG_TOLERANCE = 2
+const CLIENT_HUE_TOLERANCE = 12
+
+const hueDistance = (a: string, b: string) => {
+  const difference = Math.abs(hexToOklch(a).h - hexToOklch(b).h) % 360
+  return Math.min(difference, 360 - difference)
+}
+const rgbToHexString = (rgb: string) =>
+  `#${(rgb.match(/\d+/g) ?? []).map((v) => Number(v).toString(16).padStart(2, '0')).join('')}`
 
 test.beforeEach(async ({ page }) => {
   await page.goto(PATH)
@@ -289,15 +286,15 @@ test.describe('Studio brand preview', () => {
           ).toEqual([])
         })
 
-        test('colour contrast matches the known gaps', async ({ page }) => {
+        test('has no colour contrast failures', async ({ page }) => {
           const { violations } = await new AxeBuilder({ page })
             .include(`[data-case="${item.id}"][data-scheme="${scheme}"]`)
             .withRules('color-contrast')
             .analyze()
-          const failing = violations
-            .flatMap(({ nodes }) => nodes.map((node) => node.html.replace(/<[^>]*>/g, '')))
-            .toSorted()
-          expect(failing).toEqual((KNOWN_CONTRAST_GAPS[`${item.id}-${scheme}`] ?? []).toSorted())
+          const failing = violations.flatMap(({ nodes }) =>
+            nodes.map((node) => node.html.replace(/<[^>]*>/g, '')),
+          )
+          expect(failing, 'elements below 4.5:1').toEqual([])
         })
 
         test('shows keyboard focus on buttons and inputs', async ({ page }) => {
@@ -315,12 +312,20 @@ test.describe('Studio brand preview', () => {
         test('primary button uses the brand accent, never Currawong violet', async ({ page }) => {
           const button = section(page, item.id, scheme).locator('[data-kit-button="primary"]')
           const background = await button.evaluate((el) => getComputedStyle(el).backgroundColor)
-          // Studio has one accent, the dark-scheme fill (src/features/studio/theme.ts); Sanity UI
-          // tints the button's fill a little from it, so compare with a margin, not exactly.
-          expect(
-            channelDistance(background, hexToRgb(item.brand.dark.accentFill)),
-            `${background} is not the brand accent`,
-          ).toBeLessThanOrEqual(ACCENT_TOLERANCE)
+          // Each scheme has its own accent (src/features/studio/theme.ts builds the theme once per
+          // scheme), so the fill is this scheme's accent fill, not the other one's.
+          const accent = item.brand[scheme].accentFill
+          if (item.brand.source === 'client') {
+            expect(
+              hueDistance(rgbToHexString(background), accent),
+              `${background} is not the ${scheme} brand accent's hue`,
+            ).toBeLessThanOrEqual(CLIENT_HUE_TOLERANCE)
+          } else {
+            expect(
+              channelDistance(background, hexToRgb(accent)),
+              `${background} is not the ${scheme} brand accent`,
+            ).toBeLessThanOrEqual(CURRAWONG_TOLERANCE)
+          }
           if (item.brand.source === 'client') expect(background).not.toBe(CURRAWONG_VIOLET)
         })
       })

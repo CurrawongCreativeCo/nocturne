@@ -1,9 +1,11 @@
-import { colorHex } from '@/config/tokens.generated'
+import {
+  resolveDesignTokens,
+  type BaseColours,
+  type DesignOverrides,
+} from './resolve-design-tokens'
 
-import { resolveDesignTokens, type DesignOverrides } from './resolve-design-tokens'
-
-/** The role each Brand colours field paints (Primary is the accent role; see README, Colour systems). */
-const ROLE: Readonly<Record<string, keyof typeof colorHex>> = {
+/** The Brand colours fields that hold a single colour, and the resolved token each one stands for. */
+const FIELD_TOKENS = {
   primary: 'accent',
   secondary: 'accent2',
   highlight: 'highlight',
@@ -13,17 +15,18 @@ const ROLE: Readonly<Record<string, keyof typeof colorHex>> = {
   ink: 'ink',
   inkMuted: 'inkMuted',
   line: 'line',
-}
+} as const satisfies Record<string, keyof BaseColours>
 
 /**
- * The colour a Brand colours field shows when it is empty: what the site really uses for it, given the
- * other settings (so a dark Appearance gives the dark defaults). Null for fields that are not colour roles.
+ * The colour the site uses for `field` while it is empty: the resolved value with that field left
+ * out, so the other settings (such as a dark Appearance) still apply. Null for fields with no
+ * single default (gradient stops).
  */
-export function defaultColour(
+export function defaultColourFor(
   field: string | null,
   document: DesignOverrides | null | undefined,
 ): string | null {
-  const role = field ? ROLE[field] : undefined
-  if (!field || !role) return null
-  return resolveDesignTokens({ ...document, [field]: null }).colours[role]
+  if (!field || !Object.hasOwn(FIELD_TOKENS, field)) return null
+  const token = FIELD_TOKENS[field as keyof typeof FIELD_TOKENS]
+  return resolveDesignTokens({ ...document, [field]: null }).colours[token]
 }

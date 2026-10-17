@@ -7,7 +7,7 @@ import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 import { adjustLightnessForContrast } from '@/lib/color/contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 
-import { defaultColour } from '../utils/default-colour'
+import { defaultColourFor } from '../utils/default-colour'
 import {
   resolveDesignTokens,
   type ContrastCheck,
@@ -19,6 +19,15 @@ function toHex(text: string): string | null {
   const hex = `#${text.trim().replace(/^#/, '')}`.toLowerCase()
   return HEX_PATTERN.test(hex) ? hex : null
 }
+
+const visuallyHidden = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+} as const
 
 function CheckBadge({ check }: { check: ContrastCheck }) {
   return (
@@ -64,8 +73,7 @@ export function ColourInput(props: StringInputProps) {
   const field = path.length === 1 && typeof first === 'string' ? first : null
   const hex = value && HEX_PATTERN.test(value) ? value.toLowerCase() : null
   const shown = draft ?? value ?? ''
-  const fallback = defaultColour(field, document)
-  const showingDefault = !hex && draft === null && fallback !== null
+  const defaultHex = hex ? null : defaultColourFor(field, document)
   const invalid = draft !== null && draft.trim() !== '' && toHex(draft) === null
 
   const checks = field
@@ -77,8 +85,8 @@ export function ColourInput(props: StringInputProps) {
 
   const commit = (text: string) => {
     if (text.trim() === '') {
-      if (value) setCleared(true)
       onChange(unset())
+      if (value) setCleared(true)
     } else {
       const next = toHex(text)
       if (next) {
@@ -94,7 +102,7 @@ export function ColourInput(props: StringInputProps) {
         <input
           type="color"
           aria-label={`${props.schemaType.title ?? 'Colour'}: colour picker`}
-          value={hex ?? fallback ?? '#000000'}
+          value={hex ?? defaultHex ?? '#000000'}
           disabled={readOnly}
           onChange={(event) => {
             setDraft(null)
@@ -107,7 +115,7 @@ export function ColourInput(props: StringInputProps) {
           <TextInput
             {...elementProps}
             value={shown}
-            placeholder={fallback ?? '#3266e4'}
+            placeholder={defaultHex ?? '#3266e4'}
             maxLength={7}
             spellCheck={false}
             readOnly={readOnly}
@@ -123,6 +131,11 @@ export function ColourInput(props: StringInputProps) {
             }}
           />
         </div>
+        {defaultHex && !draft && (
+          <Badge tone="default" fontSize={1}>
+            Default
+          </Badge>
+        )}
         {value && !readOnly && (
           <Button
             mode="bleed"
@@ -131,26 +144,21 @@ export function ColourInput(props: StringInputProps) {
             fontSize={1}
             onClick={() => {
               setDraft(null)
-              setCleared(true)
               onChange(unset())
+              setCleared(true)
             }}
           />
         )}
-        {showingDefault && (
-          <Badge tone="default" fontSize={1}>
-            Default
-          </Badge>
-        )}
       </Flex>
-      {/* Always rendered so screen readers announce the change when a colour is cleared. */}
-      <div role="status">
-        {showingDefault && (
-          <Text size={1} muted>
-            {cleared ? 'Cleared. ' : ''}Using the default colour {fallback}. Nothing is saved until
-            you pick a colour.
-          </Text>
-        )}
+      {/* Announced to screen readers; the "Default" label shows the same thing visually. */}
+      <div role="status" aria-live="polite" style={visuallyHidden}>
+        {cleared && defaultHex ? `Cleared. The site uses the default, ${defaultHex}.` : ''}
       </div>
+      {defaultHex && (
+        <Text size={1} muted>
+          {cleared ? 'Cleared: ' : 'Nothing set: '}the site uses the default {defaultHex}.
+        </Text>
+      )}
       {invalid && (
         <Text size={1} style={{ color: 'var(--card-badge-critical-fg-color)' }}>
           Use a six-digit hex colour such as #3266e4.

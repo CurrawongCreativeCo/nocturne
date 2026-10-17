@@ -76,6 +76,8 @@ test.describe('the Events section', () => {
 
   test('shows only dates still to come', async ({ page }) => {
     await page.goto('/events')
+    // evaluateAll doesn't wait, so wait for the list to be there before reading it.
+    await expect(section(page, 'Coming up').locator('time').first()).toBeVisible()
     const dates = await section(page, 'Coming up')
       .locator('time')
       .evaluateAll((times) => times.map((time) => time.getAttribute('datetime') ?? ''))

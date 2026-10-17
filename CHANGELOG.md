@@ -20,13 +20,14 @@ you start a release.
 
 ### Added
 
-- **Brand colours show the real defaults (Studio):** an empty colour now shows the colour the site actually uses (in the swatch and as the
-  hex placeholder) with a "Default" label, instead of a black swatch and an example hex. Clearing a colour says it has returned
-  to the default, and Primary's description explains that buttons stay near-black until a Primary is set. Nothing new is stored.
-
 ### Changed
 
 ### Fixed
+
+- Studio → Design → Brand colours: an empty colour now shows the site's real default in the swatch and as the
+  placeholder, with a "Default" label, instead of a black swatch and an example hex. Clearing a colour says it has
+  returned to the default, and Primary's description explains that buttons stay near-black until a Primary is set.
+  No stored data changes.
 
 ### Breaking changes / migration steps
 
@@ -134,6 +135,17 @@ you start a release.
   features can use it) and `hasEvents()` in `src/config/profile.ts`.
 
 ### Changed
+
+- **Studio theme (light and dark):** primary buttons were a pale violet with low-contrast labels in light mode, the
+  default button was Sanity's cool slate, selected tabs and tools were a dusty pink, and the primary badge text was
+  pale. `buildLegacyTheme` takes one accent for both schemes and `theme.ts` gave it the dark one. It now builds the
+  theme once per scheme and takes each half, so every scheme has its own accent, focus ring, grey and neutral button.
+  Primary buttons are exactly the accent fill (`#5f2bd4` / `#9f80e5` for Currawong), neutral buttons are warm
+  greys from the ink and paper range, and selection is a clear 35% tint of the accent. Fills are moved only as far as
+  needed to keep Sanity's own button label at 4.6:1 (a client's yellow in light mode is darkened). The brand preview
+  test now measures text contrast (4.5:1) and the focus ring (3:1) for every brand in both schemes, and its list of
+  known contrast gaps is gone. `legacyThemeProperties` now takes one scheme's roles and the scheme name. The
+  brand preview baselines need refreshing with the "Update visual baselines" workflow.
 
 - Quick search and the gallery lightbox now use `useModalDialog` for showing the dialog, the scroll lock and returning
   focus; they look and behave as before (quick search now also locks the page's scroll while it is open).
