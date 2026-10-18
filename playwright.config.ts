@@ -5,6 +5,8 @@ import {
   APP_PORT,
   APP_PORT_ENQUIRIES_OFF,
   APP_PORT_PRELAUNCH,
+  PRELAUNCH_PREVIEW_TOKEN,
+  PREVIEW_ACCESS_SECRET,
   FAKE_SANITY_PORT,
   REJECTED_CONSENT,
 } from './tests/e2e/constants'
@@ -121,6 +123,8 @@ export default defineConfig({
         ...APP_ENV,
         E2E_GALLERY: '1',
         SITE_LAUNCH_OVERRIDE: 'prelaunch',
+        PREVIEW_ACCESS_SECRET,
+        PRELAUNCH_PREVIEW_TOKEN,
         NEXT_DIST_DIR: PRELAUNCH_DIST_DIR,
       },
     },

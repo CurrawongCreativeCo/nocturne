@@ -374,6 +374,8 @@ It still needs the CORS step below.
    | `OPS_NOTICES_KEY`                | optional: bearer key sent to that endpoint from the server; never reaches the browser   |
    | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                      |
    | `STYLEGUIDE_PREVIEW_TOKEN`       | optional: opens the style guide on Vercel preview deployments (see Style guide)         |
+   | `PREVIEW_ACCESS_SECRET`          | optional: signs the pre-launch preview pass (see Pre-launch and launch); 16+ characters |
+   | `PRELAUNCH_PREVIEW_TOKEN`        | optional: the client preview link's token (see Pre-launch and launch); 16+ characters   |
    | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                             |
    | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                            |
    | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                             |
@@ -1491,6 +1493,45 @@ can serve a gated answer to the wrong visitor, or the live page after launch. Us
 request, including the `Next-Action` header, to the bare view, which holds the same actions, so the newsletter signup on
 `/` works (`tests/e2e/prelaunch-gate.spec.ts` submits it with and without JavaScript). Note that the proxy is not an
 authorisation layer for Server Functions: they check their own inputs.
+
+**Private access before launch.** Three ways to see the whole site while the gate is on:
+
+1. **Presentation (the agency and editors).** Opening a page in Studio's Presentation tool turns on draft mode through
+   `/api/draft-mode/enable`. That route also sets the signed **preview pass** (cookie `site_preview`: HttpOnly,
+   SameSite=Lax, Secure on https, 8 hours) when the site is pre-launch. The gate lets a request with a valid pass through
+   untouched, with `noindex` and `Cache-Control: private, no-store`. **Draft mode alone opens nothing**: anyone can set a
+   cookie called `__prerender_bypass`, so only the signed pass counts. Exit preview (`/api/draft-mode/disable`) clears both.
+2. **The client preview link.** Set `PRELAUNCH_PREVIEW_TOKEN` (16+ characters) and send the client
+   `https://their-domain.com.au/api/preview-access?token=<token>`. It sets the pass and goes to `/`. A missing, wrong or
+   unset token, an unset `PREVIEW_ACCESS_SECRET` and too many tries (ten per address per ten minutes, per server instance)
+   all answer a plain 404, so the route doesn't confirm it exists. `/api/preview-access/exit` clears the pass.
+3. **Vercel preview deployments.** A preview deployment is its own URL, so it can show the unfinished site without
+   touching the real domain. Turn on Standard Protection (or Shareable Links) for it in Vercel's project settings. This is
+   Vercel's access control, separate from the pass above.
+
+The link is a **convenience, not a staging environment**: it shows the real site, with the real content, on the real
+domain, to anyone holding the link. Treat the URL like a password. **To revoke it**, change `PRELAUNCH_PREVIEW_TOKEN`
+(stops new links) and, to end passes already issued, change `PREVIEW_ACCESS_SECRET`; then redeploy, because both are read from the
+environment. A pass is never valid after the secret changes, and it expires by itself after 8 hours. Without
+`PREVIEW_ACCESS_SECRET` no pass is ever valid: the gate stays closed, and Presentation still works for pages the gate
+already shows (the console says so once).
+
+- **What the pass is.** `v1.<expiry>.<HMAC-SHA256 of that, keyed by PREVIEW_ACCESS_SECRET>`
+  (`src/lib/preview-pass.ts`). It holds no user data. It's verified in constant time, a 60-second clock skew is allowed,
+  and a malformed, expired, unsigned or differently signed value is refused. Neither secret has a `NEXT_PUBLIC_` prefix, is
+  imported by Studio or is ever logged.
+- **On a live site** the pass is ignored (the gate isn't running) and `/api/draft-mode/enable` doesn't issue one.
+- **Presentation in Studio** is same-origin (`/studio`), so SameSite=Lax cookies are sent.
+- **The cache.** A passed request is marked `private, no-store` by the proxy. On Vercel, Routing Middleware runs before the
+  CDN cache, so the decision is made on every request. Whether Next.js keeps that header on a prerendered page in a
+  production build is checked by `tests/e2e/prelaunch-gate.spec.ts`; if a future Next.js changes it, that test fails.
+  Check the real deployment's headers with `curl -I` before relying on it.
+- **No "Previewing before launch · Exit" notice.** It was optional and would need either a cookie read on public pages
+  (a request-time read on every page of a live site, or a Suspense island that depends on the launch state, which would
+  break the caching rule above because the override can hide a site that was built live) or JavaScript on every page. Pass
+  holders can exit with `/api/preview-access/exit` or Studio's Exit preview.
+- **Open redirect fixed.** `/api/draft-mode/disable?redirect=` now goes through `safePath`, which also refuses
+  `/\evil.example` and `/<tab>/evil.example` (audit finding S-1).
 
 **Route inventory.** `src/app/route-inventory.test.ts` lists every `page.tsx`, `route.ts`, `robots.ts` and `sitemap.ts`
 under `src/app` and fails unless each has a classification and a reason:

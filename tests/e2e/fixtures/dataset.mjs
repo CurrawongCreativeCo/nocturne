@@ -3265,6 +3265,14 @@ function launchDatePages() {
 
 documents.push(
   {
+    // The Presentation secret /api/draft-mode/enable validates (next-sanity reads this shared-access
+    // document, which does not expire); used by tests/e2e/prelaunch-gate.spec.ts.
+    _id: 'sanity-preview-url-secret.share-access',
+    _type: 'sanity.previewUrlShareAccess',
+    secret: 'e2e-draft-mode-secret',
+    studioUrl: 'http://localhost:3102/studio',
+  },
+  {
     _id: 'page-links',
     _type: 'page',
     title: 'Links',

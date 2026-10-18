@@ -68,6 +68,11 @@ export const ROUTES: Record<string, [Classification, string]> = {
     'Studio Presentation; needs a signed secret.',
   ],
   'api/draft-mode/disable/route.ts': ['infrastructure', 'Studio Presentation.'],
+  'api/preview-access/route.ts': [
+    'infrastructure',
+    'The client preview link: a constant-time token check, rate limited, 404 on any failure; sets the signed pass.',
+  ],
+  'api/preview-access/exit/route.ts': ['infrastructure', 'Clears the preview pass.'],
   'api/revalidate/route.ts': ['infrastructure', 'Sanity webhook; verifies its signature.'],
   'api/stripe/webhook/route.ts': ['infrastructure', 'Stripe webhook; verifies its signature.'],
   'api/site-info/route.ts': [

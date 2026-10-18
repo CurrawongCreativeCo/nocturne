@@ -27,11 +27,15 @@ you start a release.
 
 - **Pre-launch gate:** while `launch.status` is `'prelaunch'`, `src/proxy.ts` serves the `homepage` page at `/` and the listed `publicPages` through a bare view (`/prelaunch-view/<slug>`: no header, footer, menu or announcement in the HTML), and answers 404 (or, with `unknownPaths: 'homepage'`, a 307 to `/`) to everything else, with `noindex` and `Cache-Control: private, no-store`. Live sites are unchanged. `SiteShell` gains a `chrome` prop. A route inventory test (`src/app/route-inventory.test.ts`) fails when a new page or route has no pre-launch classification. The machine-readable routes (sitemap, robots, feeds, search, share images) are not gated yet. The e2e fixture Link page gains a newsletter signup, and Playwright starts a third server (port 3102) for the gate.
 
+- **Pre-launch preview pass:** a signed, expiring cookie (`site_preview`, HMAC-SHA256 keyed by `PREVIEW_ACCESS_SECRET`) that lets the gate show the whole site to the team and the client. `/api/draft-mode/enable` issues it when the site is pre-launch; the optional client link `/api/preview-access?token=…` (`PRELAUNCH_PREVIEW_TOKEN`; 404 on any failure, rate limited) issues it too, and `/api/preview-access/exit` clears it. Without `PREVIEW_ACCESS_SECRET` no pass is valid. A forged `__prerender_bypass` opens nothing. New optional env vars `PREVIEW_ACCESS_SECRET` and `PRELAUNCH_PREVIEW_TOKEN`.
+
 ### Changed
 
 - `reservedSegment` moved from `src/features/pages/utils/reserved-slug.ts` to `src/config/reserved-slug.ts` (the site profile validates against it). Update the import if a project uses it.
 
 ### Fixed
+
+- **Open redirect in `/api/draft-mode/disable`** (audit finding S-1): `?redirect=/%5Cevil.example` could send visitors to another site. The route now uses `safePath`, and also clears the preview pass.
 
 ### Breaking changes / migration steps
 

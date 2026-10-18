@@ -29,6 +29,7 @@ import {
   PRELAUNCH_NOT_FOUND_PATH,
   prelaunchViewPath,
 } from '@/lib/prelaunch-gate'
+import { PREVIEW_COOKIE, verifyPreviewPass } from '@/lib/preview-pass'
 import { EDGE_REDIRECTS_KEY, lookupRedirect, type EdgeRedirect } from '@/lib/redirects'
 import {
   currentStyleguideEnv,
@@ -69,12 +70,13 @@ export async function proxy(request: NextRequest) {
 const launchState = getLaunchState()
 
 /**
- * Whether the request carries a verified pre-launch preview pass (task 118). Until that exists, never.
- * It must be a signed value we issued: the presence of `__prerender_bypass` proves nothing, because
- * anyone can set a cookie with that name.
+ * Whether the request carries a valid pre-launch preview pass: a signed, unexpired `site_preview` cookie
+ * (`src/lib/preview-pass.ts`). Without PREVIEW_ACCESS_SECRET none is ever valid. The presence of
+ * `__prerender_bypass` proves nothing, because anyone can set a cookie with that name, so draft mode
+ * alone never opens the site: the enable route issues the pass.
  */
-function hasValidPreviewPass(_request: NextRequest) {
-  return false
+function hasValidPreviewPass(request: NextRequest) {
+  return verifyPreviewPass(request.cookies.get(PREVIEW_COOKIE)?.value, Date.now())
 }
 
 /**
