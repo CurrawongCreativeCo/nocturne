@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
 import {
+  SITE_URL,
   APP_PORT,
   APP_PORT_PRELAUNCH,
   DRAFT_MODE_SECRET,
@@ -276,7 +277,98 @@ test.describe('the preview pass', () => {
   })
 })
 
+test.describe('machine-readable files before launch', () => {
+  const get = (path: string, headers: Record<string, string> = {}) =>
+    html(`${PRELAUNCH}${path}`, { headers })
+
+  test('/sitemap.xml lists only /links, and nothing else', async () => {
+    const { response, body } = await get('/sitemap.xml')
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toContain('xml')
+    const locs = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+    expect(locs).toEqual([`${SITE_URL}/links`])
+  })
+
+  test('/sitemap/0.xml is the same file; the other numbers answer 404', async () => {
+    expect((await get('/sitemap/0.xml')).body).toContain(`${SITE_URL}/links`)
+    expect((await get('/sitemap/1.xml')).response.status).toBe(404)
+  })
+
+  test('/robots.txt keeps the rules and points at /sitemap.xml', async () => {
+    const { response, body } = await get('/robots.txt')
+    expect(response.status).toBe(200)
+    expect(body).toContain('Disallow: /studio')
+    expect(body).toContain('Disallow: /api/')
+    expect(body).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`)
+    expect(body).not.toContain('/sitemap/0.xml')
+  })
+
+  test('/llms.txt lists only the public pages', async () => {
+    const { response, body } = await get('/llms.txt')
+    expect(response.status).toBe(200)
+    expect(body).toContain(`(${SITE_URL}/links)`)
+    expect(body).not.toContain('/about')
+    expect(body).not.toContain('/blog')
+  })
+
+  test('the feed, search and an event calendar file answer 404', async () => {
+    for (const path of [
+      '/feed.xml',
+      '/api/search?q=a',
+      '/events/pottery-workshop.ics',
+      '/events/feed.ics',
+      '/api/events/feed',
+      '/api/events/pottery-workshop/ics',
+    ]) {
+      expect((await get(path)).response.status, path).toBe(404)
+    }
+  })
+
+  test('share images: only for a public page', async () => {
+    expect((await get('/api/og/about')).response.status).toBe(404)
+    expect((await get('/api/og/events/pottery-workshop')).response.status).toBe(404)
+    expect((await get('/api/og')).response.status).toBe(404)
+    const links = await get('/api/og/links')
+    expect(links.response.status).toBe(200)
+    expect(links.response.headers.get('content-type')).toContain('image')
+  })
+
+  test('no unfinished page is named: structured data on "/" is the site-level business only', async () => {
+    const { body } = await get('/')
+    const blocks = [
+      ...body.matchAll(/<script type="application\/ld\+json"[^>]*>([^<]+)<\/script>/g),
+    ]
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0]?.[1]).not.toContain('BreadcrumbList')
+  })
+
+  test('a preview pass holder gets the normal files', async ({ request }) => {
+    const raw = await request.get(
+      `${PRELAUNCH}/api/preview-access?token=${PRELAUNCH_PREVIEW_TOKEN}`,
+      { maxRedirects: 0, headers: { 'x-forwarded-for': '10.88.0.20' } },
+    )
+    const pass = raw.headersArray().find(({ name }) => name.toLowerCase() === 'set-cookie')?.value
+    const cookie = (pass ?? '').split(';')[0] ?? ''
+    expect(cookie).toMatch(/^site_preview=/)
+
+    const sitemap = await get('/sitemap.xml', { cookie })
+    expect(sitemap.response.status).toBe(200)
+    expect(sitemap.body).toContain(`${SITE_URL}/about`)
+    expect((await get('/feed.xml', { cookie })).response.status).toBe(200)
+    expect((await get('/api/og/about', { cookie })).response.status).toBe(200)
+  })
+})
+
 test.describe('the live server', () => {
+  test('serves the normal machine-readable files', async () => {
+    const sitemap = await html(`${LIVE}/sitemap.xml`)
+    expect(sitemap.response.status).toBe(200)
+    expect(sitemap.body).toContain(`${SITE_URL}/about`)
+    expect((await html(`${LIVE}/feed.xml`)).response.status).toBe(200)
+    expect((await html(`${LIVE}/robots.txt`)).body).toContain('Sitemap:')
+    expect((await html(`${LIVE}/api/og/about`)).response.status).toBe(200)
+  })
+
   test('is unaffected: "/" is the real home page and /about opens', async () => {
     const home = await html(`${LIVE}/`)
     expect(home.response.status).toBe(200)

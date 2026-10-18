@@ -25,6 +25,8 @@ import { encodeOption } from '@/features/experiments/utils/experiment-flag'
 import { loadActiveExperiment } from '@/features/experiments/utils/experiment-source'
 import {
   decidePrelaunch,
+  decidePrelaunchFile,
+  isMachineFilePath,
   PRELAUNCH_HEADERS,
   PRELAUNCH_NOT_FOUND_PATH,
   prelaunchViewPath,
@@ -54,6 +56,10 @@ import {
  *     variant) and the request is rewritten to the page's prerendered copy for that option.
  */
 export async function proxy(request: NextRequest) {
+  // The files the matcher also lists for the gate (sitemap, robots, feeds, the search and events APIs,
+  // share images) are not pages: no redirect, A/B test or style guide rule applies to them. Live they
+  // go straight through untouched.
+  if (isMachineFilePath(request.nextUrl.pathname)) return prelaunch(request) ?? NextResponse.next()
   return (
     prelaunch(request) ??
     styleguide(request) ??
@@ -97,11 +103,6 @@ function prelaunch(request: NextRequest) {
   const { pathname } = request.nextUrl
   if (pathname === GALLERY_PATH || pathname.startsWith(`${GALLERY_PATH}/`)) return null
 
-  const decision = decidePrelaunch({
-    pathname,
-    hasValidPreviewPass: hasValidPreviewPass(request),
-    state: launchState,
-  })
   const rewriteTo = (path: string, { keepQuery }: { keepQuery: boolean }) => {
     const url = request.nextUrl.clone()
     url.pathname = path
@@ -110,6 +111,19 @@ function prelaunch(request: NextRequest) {
     return NextResponse.rewrite(url, { headers: PRELAUNCH_HEADERS })
   }
 
+  // Machine-readable files first. A holder of a valid pass gets the normal ones.
+  const passed = hasValidPreviewPass(request)
+  const file = passed ? null : decidePrelaunchFile(pathname, launchState)
+  if (file?.action === 'rewrite') return rewriteFile(request, file.to)
+  if (file?.action === 'pass') return NextResponse.next({ headers: PRELAUNCH_HEADERS })
+  // Never a redirect to the temporary page, even with unknownPaths: 'homepage': an API wants a status.
+  if (file?.action === 'not-found') return rewriteTo(PRELAUNCH_NOT_FOUND_PATH, { keepQuery: false })
+
+  const decision = decidePrelaunch({
+    pathname,
+    hasValidPreviewPass: passed,
+    state: launchState,
+  })
   switch (decision) {
     case 'pass':
       return NextResponse.next({ headers: PRELAUNCH_HEADERS })
@@ -123,6 +137,14 @@ function prelaunch(request: NextRequest) {
     case 'not-found':
       return rewriteTo(PRELAUNCH_NOT_FOUND_PATH, { keepQuery: false })
   }
+}
+
+/** Serves a pre-launch file's handler under the address that was asked for (no query string is needed). */
+function rewriteFile(request: NextRequest, path: string) {
+  const url = request.nextUrl.clone()
+  url.pathname = path
+  url.search = ''
+  return NextResponse.rewrite(url, { headers: PRELAUNCH_HEADERS })
 }
 
 /**
@@ -239,9 +261,23 @@ async function experiment(request: NextRequest) {
   return response
 }
 
-/** Skips Studio, API routes, Next.js internals and static assets. Legacy ".html" URLs still match. */
+/**
+ * Skips Studio, API routes, Next.js internals and static assets, except the files listed after the
+ * first pattern. Legacy ".html" URLs still match.
+ */
 export const config = {
   matcher: [
     '/((?!(?:studio|api|_next)(?:/|$)|.*\.(?:ico|png|jpe?g|gif|svg|webp|avif|css|js|map|txt|xml|json|webmanifest|woff2?)$).*)',
+    // The machine-readable files, which the pattern above skips, so the pre-launch gate can answer
+    // them (live, the proxy lets them straight through). Next.js needs these as literals; the test in
+    // prelaunch-gate.test.ts checks each is covered.
+    '/sitemap.xml',
+    '/sitemap/:path*',
+    '/robots.txt',
+    '/llms.txt',
+    '/feed.xml',
+    '/api/search',
+    '/api/og/:path*',
+    '/api/events/:path*',
   ],
 }

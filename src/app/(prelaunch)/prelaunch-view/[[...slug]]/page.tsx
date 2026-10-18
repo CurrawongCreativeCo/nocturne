@@ -78,6 +78,8 @@ export default async function PrelaunchPage({ params }: Props) {
       greeting={<ReturningVisitor />}
       business={await getLocationBusiness(PUBLISHED)}
       {...pageRenderProps}
+      // The trail would name (and mark up) the parent pages, which are private before launch.
+      breadcrumbs={false}
       {...PUBLISHED}
     />
   )
@@ -90,6 +92,7 @@ async function DraftPrelaunchPage({ slug }: { slug: string }) {
       greeting={<ReturningVisitor />}
       business={await getLocationBusiness(await getDraftFetchMode())}
       {...pageRenderProps}
+      breadcrumbs={false}
     />
   )
 }

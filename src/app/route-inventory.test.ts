@@ -10,8 +10,9 @@ import { describe, expect, it } from 'vitest'
  *
  *  - public-before-launch: visitors may open it while the site is pre-launch.
  *  - gated-by-proxy: `proxy.ts` answers 404 for it before launch (it never reaches the route).
- *  - prelaunch-aware: the route must itself hold back unfinished pages (task 119: files the proxy's
- *    matcher skips, such as the sitemap, feeds, search and share images).
+ *  - prelaunch-aware: machine-readable files that list or serve unfinished content (sitemap, robots,
+ *    llms.txt, feeds, search, share images, calendar files). The proxy answers them before launch
+ *    (src/lib/prelaunch-gate.ts) and its matcher lists each; src/proxy.test.ts checks that.
  *  - infrastructure: not a visitor's page: Studio, webhooks, auth and tools with their own access
  *    rules. It reveals no unfinished page.
  */
@@ -23,6 +24,18 @@ export const ROUTES: Record<string, [Classification, string]> = {
   '(prelaunch)/prelaunch-view/[[...slug]]/page.tsx': [
     'public-before-launch',
     'The bare view the gate rewrites "/" and the public pages to; the address itself answers 404.',
+  ],
+  '(prelaunch)/prelaunch-view/FILES/sitemap.xml/route.ts': [
+    'public-before-launch',
+    'The pre-launch sitemap: only the public, published, indexable pages. The proxy rewrites /sitemap.xml here.',
+  ],
+  '(prelaunch)/prelaunch-view/FILES/robots.txt/route.ts': [
+    'public-before-launch',
+    'The pre-launch robots.txt, pointing at the one sitemap. The proxy rewrites /robots.txt here.',
+  ],
+  '(prelaunch)/prelaunch-view/FILES/llms.txt/route.ts': [
+    'public-before-launch',
+    'The pre-launch llms.txt: the public pages only. The proxy rewrites /llms.txt here.',
   ],
   '(site)/[[...slug]]/page.tsx': [
     'gated-by-proxy',
@@ -85,24 +98,27 @@ export const ROUTES: Record<string, [Classification, string]> = {
     'The running A/B test, read by the proxy; no page content.',
   ],
   'api/indexnow/[key]/route.ts': ['infrastructure', 'Serves the IndexNow key file.'],
-  'api/search/route.ts': ['prelaunch-aware', 'Task 119: search must not return unfinished pages.'],
+  'api/search/route.ts': ['prelaunch-aware', 'Quick search results: 404 before launch.'],
   'api/og/[[...slug]]/route.tsx': [
     'prelaunch-aware',
-    'Task 119: share images name unfinished pages.',
+    'Share images: only for public pages before launch.',
   ],
-  'api/og/events/[slug]/route.tsx': [
+  'api/og/events/[slug]/route.tsx': ['prelaunch-aware', 'Event share images: 404 before launch.'],
+  'api/events/feed/route.ts': ['prelaunch-aware', 'The calendar feed: 404 before launch.'],
+  'api/events/[slug]/ics/route.ts': [
     'prelaunch-aware',
-    'Task 119: share images name unfinished events.',
+    'An event calendar file: 404 before launch.',
   ],
-  'api/events/feed/route.ts': [
+  'feed.xml/route.ts': ['prelaunch-aware', 'The RSS feed: 404 before launch.'],
+  'llms.txt/route.ts': [
     'prelaunch-aware',
-    'Task 119: the calendar feed lists unfinished events.',
+    'Rewritten to a public-pages-only version before launch.',
   ],
-  'api/events/[slug]/ics/route.ts': ['prelaunch-aware', 'Task 119: an event file.'],
-  'feed.xml/route.ts': ['prelaunch-aware', 'Task 119: the RSS feed lists unfinished posts.'],
-  'llms.txt/route.ts': ['prelaunch-aware', 'Task 119: lists pages for AI crawlers.'],
-  'robots.ts': ['prelaunch-aware', 'Task 119: robots rules and the sitemap line.'],
-  'sitemap.ts': ['prelaunch-aware', 'Task 119: lists every published page.'],
+  'robots.ts': [
+    'prelaunch-aware',
+    'Rewritten to a version pointing at the one pre-launch sitemap.',
+  ],
+  'sitemap.ts': ['prelaunch-aware', 'Rewritten to a public-pages-only sitemap before launch.'],
 }
 
 const ROUTE_FILE = /^(page\.tsx?|route\.tsx?|robots\.ts|sitemap\.ts)$/
@@ -147,8 +163,12 @@ describe('route inventory', () => {
     }
   })
 
-  it('makes the pre-launch view the only page visitors can open', () => {
-    const open = Object.entries(ROUTES).filter(([, [kind]]) => kind === 'public-before-launch')
-    expect(open.map(([file]) => file)).toEqual(['(prelaunch)/prelaunch-view/[[...slug]]/page.tsx'])
+  it('makes the pre-launch view and its files the only routes visitors can open', () => {
+    const open = Object.entries(ROUTES)
+      .filter(([, [kind]]) => kind === 'public-before-launch')
+      .map(([file]) => file)
+    // The bare view, and the three pre-launch files the proxy rewrites to.
+    expect(open.every((file) => file.startsWith('(prelaunch)/prelaunch-view/'))).toBe(true)
+    expect(open).toHaveLength(4)
   })
 })

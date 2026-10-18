@@ -37,6 +37,8 @@ interface ViewProps {
    * forget it: without one, members-only content would have nothing to check against.
    */
   renderMembersGate: RenderMembersGate
+  /** Draw the breadcrumb trail (and its structured data). Off in the pre-launch view: the trail names pages that are private. Default on. */
+  breadcrumbs?: boolean
 }
 
 export async function PageView({
@@ -48,6 +50,7 @@ export async function PageView({
   renderPanels,
   business,
   renderMembersGate,
+  breadcrumbs: showBreadcrumbs = true,
   ...mode
 }: ViewProps & FetchMode) {
   // Draft mode is only reachable by editors signed in to Studio, who preview members-only content too.
@@ -61,7 +64,7 @@ export async function PageView({
   }
 
   const callbackUrl = slugToPath(slug)
-  const breadcrumbs = <Breadcrumbs items={await getBreadcrumbs(slug)} />
+  const breadcrumbs = showBreadcrumbs ? <Breadcrumbs items={await getBreadcrumbs(slug)} /> : null
   // A "Minimal page" marks itself, and globals.css hides the site's header, announcement and footer
   // while the marker is on screen. It must be a top-level element: Next keeps the page you left in
   // the DOM, hidden, by styling its top-level elements `display: none`.
@@ -182,6 +185,7 @@ export async function DraftPageView({
   renderPanels,
   business,
   renderMembersGate,
+  breadcrumbs,
 }: ViewProps) {
   const mode = await getDraftFetchMode()
   return (
@@ -194,6 +198,7 @@ export async function DraftPageView({
       renderPanels={renderPanels}
       business={business}
       renderMembersGate={renderMembersGate}
+      breadcrumbs={breadcrumbs}
       {...mode}
     />
   )

@@ -4,8 +4,11 @@ import { getLaunchState } from '@/config/launch'
 import { resolveSiteProfile, type LaunchInput } from '@/config/profile'
 
 import {
+  PRELAUNCH_FILE_HANDLERS,
   PRELAUNCH_NOT_FOUND_PATH,
   decidePrelaunch,
+  decidePrelaunchFile,
+  isMachineFilePath,
   isHtmlPagePath,
   prelaunchViewPath,
 } from './prelaunch-gate'
@@ -150,5 +153,96 @@ describe('prelaunchViewPath', () => {
 
   it('has a not-found path no page slug can be', () => {
     expect(PRELAUNCH_NOT_FOUND_PATH).toBe('/prelaunch-view/__not-found__')
+  })
+})
+
+describe('decidePrelaunchFile', () => {
+  const file = (pathname: string) => decidePrelaunchFile(pathname, prelaunch)
+
+  it('is null for a page, so decidePrelaunch handles it', () => {
+    for (const path of ['/', '/about', '/links', '/events/open-day', '/sitemap-page']) {
+      expect(file(path), path).toBeNull()
+    }
+  })
+
+  it('rewrites the sitemap (one file only), robots.txt and llms.txt to the pre-launch handlers', () => {
+    expect(file('/sitemap.xml')).toEqual({ action: 'rewrite', to: PRELAUNCH_FILE_HANDLERS.sitemap })
+    expect(file('/sitemap/0.xml')).toEqual({
+      action: 'rewrite',
+      to: PRELAUNCH_FILE_HANDLERS.sitemap,
+    })
+    expect(file('/robots.txt')).toEqual({ action: 'rewrite', to: PRELAUNCH_FILE_HANDLERS.robots })
+    expect(file('/llms.txt')).toEqual({ action: 'rewrite', to: PRELAUNCH_FILE_HANDLERS.llms })
+  })
+
+  it('answers 404 to the other sitemap files', () => {
+    for (const path of [
+      '/sitemap/1.xml',
+      '/sitemap/12.xml',
+      '/sitemap/x.xml',
+      '/sitemap',
+      '/sitemap/',
+    ]) {
+      expect(file(path), path).toEqual({ action: 'not-found' })
+    }
+  })
+
+  it('answers 404 to the feed, search and the events API', () => {
+    for (const path of [
+      '/feed.xml',
+      '/api/search',
+      '/api/search/x',
+      '/api/events/feed',
+      '/api/events/open-day/ics',
+    ]) {
+      expect(file(path), path).toEqual({ action: 'not-found' })
+    }
+  })
+
+  it('allows a share image only for a visible slug', () => {
+    expect(file('/api/og/links')).toEqual({ action: 'pass' })
+    expect(file('/api/og/legal/terms')).toEqual({ action: 'pass' })
+    for (const path of [
+      '/api/og/about',
+      '/api/og',
+      '/api/og/',
+      '/api/og/events/open-day',
+      '/api/og/links/x',
+    ]) {
+      expect(file(path), path).toEqual({ action: 'not-found' })
+    }
+  })
+
+  it('has handlers no page slug can reach: capitals', () => {
+    for (const path of Object.values(PRELAUNCH_FILE_HANDLERS)) {
+      expect(path).toMatch(/^\/prelaunch-view\/FILES\//)
+    }
+  })
+})
+
+describe('isMachineFilePath', () => {
+  it('is true for the files and APIs, and false for pages and other APIs', () => {
+    for (const path of [
+      '/sitemap.xml',
+      '/sitemap/3.xml',
+      '/robots.txt',
+      '/llms.txt',
+      '/feed.xml',
+      '/api/search',
+      '/api/og/x',
+      '/api/events/feed',
+    ]) {
+      expect(isMachineFilePath(path), path).toBe(true)
+    }
+    for (const path of [
+      '/',
+      '/about',
+      '/sitemap-page',
+      '/api/revalidate',
+      '/api/site-info',
+      '/events/x.ics',
+    ]) {
+      expect(isMachineFilePath(path), path).toBe(false)
+    }
   })
 })

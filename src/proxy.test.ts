@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { proxy } from './proxy'
+import { config, proxy } from './proxy'
+
+// proxy.ts reaches a server-only module (the preview pass), which throws outside a server bundle.
+vi.mock('server-only', () => ({}))
 
 const TOKEN = 'a-long-enough-token-1234'
 
@@ -82,5 +85,52 @@ describe('proxy: the style guide on a preview deployment', () => {
     expect(response.headers.get('set-cookie')).toBeNull()
     expect(response.headers.get('x-middleware-rewrite')).toBeNull()
     expect(response.headers.get('cache-control')).toBeNull()
+  })
+})
+
+describe('the proxy matcher', () => {
+  // Next.js needs literals in `config.matcher`. A path is covered when an entry names it exactly or
+  // is a `/prefix/:path*` entry for it.
+  const covers = (path: string) =>
+    config.matcher.some((entry) =>
+      entry.endsWith('/:path*')
+        ? path === entry.slice(0, -'/:path*'.length) ||
+          path.startsWith(`${entry.slice(0, -'/:path*'.length)}/`)
+        : entry === path,
+    )
+
+  it.each([
+    '/sitemap.xml',
+    '/sitemap/0.xml',
+    '/sitemap/1.xml',
+    '/robots.txt',
+    '/llms.txt',
+    '/feed.xml',
+    '/api/search',
+    '/api/og/links',
+    '/api/og',
+    '/api/events/feed',
+    '/api/events/open-day/ics',
+  ])('covers %s, so the pre-launch gate sees it', (path) => {
+    expect(covers(path)).toBe(true)
+  })
+
+  it('still skips Studio, the other API routes and Next.js internals for pages', () => {
+    const pattern = new RegExp(`^${config.matcher[0] ?? ''}$`)
+    for (const path of ['/studio', '/api/revalidate', '/_next/static/x.js', '/logo.png']) {
+      expect(pattern.test(path), path).toBe(false)
+    }
+    expect(pattern.test('/about')).toBe(true)
+  })
+})
+
+describe('machine-readable files on a live site', () => {
+  it('go straight through: no A/B rewrite, no redirect', async () => {
+    for (const path of ['/sitemap.xml', '/robots.txt', '/llms.txt', '/feed.xml', '/api/search']) {
+      const response = await proxy(request(path))
+      expect(response.headers.get('x-middleware-rewrite'), path).toBeNull()
+      expect(response.headers.get('location'), path).toBeNull()
+      expect(response.headers.get('x-middleware-next'), path).toBe('1')
+    }
   })
 })

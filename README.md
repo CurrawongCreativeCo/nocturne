@@ -1536,18 +1536,44 @@ already shows (the console says so once).
 **Route inventory.** `src/app/route-inventory.test.ts` lists every `page.tsx`, `route.ts`, `robots.ts` and `sitemap.ts`
 under `src/app` and fails unless each has a classification and a reason:
 
-| Classification         | Meaning                                                                                                                                                           |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `public-before-launch` | Visitors may open it. Only the bare view.                                                                                                                         |
-| `gated-by-proxy`       | The proxy answers 404 before launch: the CMS pages, blog, events, team, search page, sign-in, A/B.                                                                |
-| `prelaunch-aware`      | Skipped by the proxy matcher, so it must hold back unfinished pages itself (task 119): sitemap, robots, feeds, `llms.txt`, search API, share images, event files. |
-| `infrastructure`       | Not a visitor's page: Studio, webhooks, auth, draft mode, Ops endpoints, the style guide.                                                                         |
+| Classification         | Meaning                                                                                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `public-before-launch` | Visitors may open it. Only the bare view.                                                                                                                                                  |
+| `gated-by-proxy`       | The proxy answers 404 before launch: the CMS pages, blog, events, team, search page, sign-in, A/B.                                                                                         |
+| `prelaunch-aware`      | Machine-readable files that list or serve unfinished content: sitemap, robots, feeds, `llms.txt`, search API, share images, event files. The proxy answers them before launch (see below). |
+| `infrastructure`       | Not a visitor's page: Studio, webhooks, auth, draft mode, Ops endpoints, the style guide.                                                                                                  |
 
-Add a new page or route and the test fails until it has a line. **The matcher is unchanged** for pages; the
-machine-readable routes (`/sitemap.xml`, `/robots.txt`, `/feed.xml`, `/llms.txt`, `/api/search`, `/api/og`, event files)
-are made pre-launch-aware in task 119, so until then they still list unfinished pages.
+Add a new page or route and the test fails until it has a line.
 
-**Tests.** Vitest: `src/lib/prelaunch-gate.test.ts` (every decision), `src/app/route-inventory.test.ts`.
+**Machine-readable files.** The sitemap, robots, feeds, search, share images and calendar files list or serve every
+published page, post, team member and event, so a page gate alone would still leak unfinished content. The normal routes
+are unchanged (so nothing cached depends on the launch state); before launch the proxy answers these paths itself. The
+proxy matcher (`config.matcher` in `src/proxy.ts`, which Next.js needs as literals) lists them beside the page pattern;
+live, the proxy lets them straight through (no redirect or A/B rule applies), and a test checks every path below is
+covered.
+
+| Path                                                      | Before launch                                                                                                                                                                                | Live (and with a preview pass)                               |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `/sitemap.xml`, `/sitemap/0.xml`                          | One file: the public pages that are published and not "Hide from search engines", at their real paths (`/links`, never `/`). Empty but valid if none qualifies (a noindex Coming soon page). | Every page, post, team member and event, in chunks of 45,000 |
+| `/sitemap/1.xml` and up                                   | 404                                                                                                                                                                                          | The next chunk                                               |
+| `/robots.txt`                                             | Today's rules (Studio and `/api/` disallowed, the AI-crawler setting from Site settings), pointing at `/sitemap.xml`                                                                         | The normal file (`robots.ts`)                                |
+| `/llms.txt`                                               | The site name, description and the public pages only; 404 if AI crawlers are off                                                                                                             | Pages and posts                                              |
+| `/feed.xml`                                               | 404                                                                                                                                                                                          | The RSS feed                                                 |
+| `/api/search`                                             | 404                                                                                                                                                                                          | Quick search results                                         |
+| `/api/og/<slug>`                                          | The share image for a public page; 404 for every other slug, `/api/og` and event images                                                                                                      | Every share image                                            |
+| `/api/events/*`, `/events/<slug>.ics`, `/events/feed.ics` | 404 (the `.ics` paths are page paths to the proxy, which answers 404; files never get the `unknownPaths` redirect)                                                                           | Calendar files                                               |
+
+The three rewritten files are served by `src/app/(prelaunch)/prelaunch-view/FILES/{sitemap.xml,robots.txt,llms.txt}`,
+built from the cached page index (no extra request) by `src/lib/prelaunch-files.ts`. The folder is `FILES`, in capitals,
+because no page slug can be (and a folder starting with `_` would not be a route at all). A homepage that isn't published,
+or is marked "Hide from search engines", is simply left out. A visitor with a valid preview pass gets the normal files.
+All of them are `prelaunch-aware` in the route inventory.
+
+**Structured data.** Pre-launch pages carry only the site-level Organization or LocalBusiness and WebSite data from the
+shell. The bare view draws no breadcrumbs (`PageView breadcrumbs={false}`), because the trail and its markup would name
+parent pages that are private. Content-level markup, such as a FAQ section's, is the page's own content and stays.
+
+**Tests.** Vitest: `src/lib/prelaunch-gate.test.ts` (every decision, including the files), `src/lib/prelaunch-files.test.ts` (the sitemap, robots and llms builders), `src/proxy.test.ts` (the matcher covers every file) and `src/app/route-inventory.test.ts`.
 `tests/e2e/prelaunch-gate.spec.ts` runs a third server from the same build with `SITE_LAUNCH_OVERRIDE=prelaunch` (a copy
 of `.next` in `node_modules/.cache/e2e-prelaunch`, port 3102): `/` serves the Link page fixture with status 200 and the
 canonical `/links`; `/about`, `/blog` and others answer 404 with `noindex` and no header, footer or menu in the raw HTML;
