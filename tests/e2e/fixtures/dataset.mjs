@@ -3331,6 +3331,15 @@ documents.push(
         ],
       },
       {
+        // Gives the pre-launch server a newsletter form on "/" (tests/e2e/prelaunch-gate.spec.ts).
+        _key: 'links-signup',
+        _type: 'newsletterSignup',
+        title: 'Be the first to know',
+        text: 'One email when the new website opens.',
+        submitLabel: 'Subscribe',
+        successMessage: 'Thanks! Check your inbox to confirm.',
+      },
+      {
         _key: 'links-note',
         _type: 'richText',
         body: [block(['© Test Co. Made in Newtown.'])],

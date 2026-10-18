@@ -92,6 +92,12 @@ export const STUDIO_BRAND_PREVIEW_PATH = `/${STUDIO_BRAND_PREVIEW_SEGMENT}`
  */
 export const PRELAUNCH_VIEW_SEGMENT = 'prelaunch-view'
 export const PRELAUNCH_VIEW_PATH = `/${PRELAUNCH_VIEW_SEGMENT}`
+/**
+ * What the pre-launch gate rewrites a refused request to (`/prelaunch-view/__not-found__`), so the
+ * bare layout's not-found page answers 404. Capitals and underscores can't be in a page slug, so no
+ * page can ever be called this.
+ */
+export const PRELAUNCH_NOT_FOUND_SEGMENT = '__not-found__'
 
 /**
  * Sign-in and sign-out pages (src/features/auth). A CMS page can't use these first segments, and

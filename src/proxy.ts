@@ -2,6 +2,7 @@ import { get } from '@vercel/edge-config'
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { EVENTS_PATH } from '@/config/event-paths'
+import { getLaunchState } from '@/config/launch'
 import {
   BLOG_PATH,
   EXPERIMENT_PATH,
@@ -22,6 +23,12 @@ import {
 } from '@/features/experiments/utils/assign'
 import { encodeOption } from '@/features/experiments/utils/experiment-flag'
 import { loadActiveExperiment } from '@/features/experiments/utils/experiment-source'
+import {
+  decidePrelaunch,
+  PRELAUNCH_HEADERS,
+  PRELAUNCH_NOT_FOUND_PATH,
+  prelaunchViewPath,
+} from '@/lib/prelaunch-gate'
 import { EDGE_REDIRECTS_KEY, lookupRedirect, type EdgeRedirect } from '@/lib/redirects'
 import {
   currentStyleguideEnv,
@@ -33,7 +40,10 @@ import {
 } from '@/lib/styleguide-access'
 
 /**
- * Runs before every page request, for three jobs:
+ * Runs before every page request, for four jobs:
+ *  -1. The pre-launch gate (see `prelaunch`): while the site profile says pre-launch, only the
+ *     temporary page and the listed public pages are served, and everything else answers 404. Live,
+ *     it does nothing. It runs first, so the other jobs only ever see a request the gate let through.
  *  0. The style guide's preview token (see `styleguide`): on a preview deployment it answers 404
  *     unless the request carries the token.
  *  1. Studio-managed redirects, answered before any page renders. The map is written to Edge
@@ -44,11 +54,73 @@ import {
  */
 export async function proxy(request: NextRequest) {
   return (
+    prelaunch(request) ??
     styleguide(request) ??
     (await redirect(request)) ??
     (await experiment(request)) ??
     NextResponse.next()
   )
+}
+
+/**
+ * The launch state, read once per server start: the profile is code and the override is an environment
+ * variable, so neither changes while the server runs (and a bad override warns once, not per request).
+ */
+const launchState = getLaunchState()
+
+/**
+ * Whether the request carries a verified pre-launch preview pass (task 118). Until that exists, never.
+ * It must be a signed value we issued: the presence of `__prerender_bypass` proves nothing, because
+ * anyone can set a cookie with that name.
+ */
+function hasValidPreviewPass(_request: NextRequest) {
+  return false
+}
+
+/**
+ * The pre-launch gate (README, "Pre-launch and launch"). Live: returns null and nothing changes.
+ * Before launch, `decidePrelaunch` picks one of four answers, and every gated response is marked
+ * `noindex` and `private, no-store`, so no cache between us and the visitor keeps a gated answer:
+ *  - "/" and the listed public pages are rewritten to the bare view, `/prelaunch-view/<slug>`
+ *    (no header, footer or menu), under the visitor's own address;
+ *  - anything else is rewritten to that view's not-found page, which answers a real 404 (a redirect
+ *    to the temporary page instead, for page paths, with `unknownPaths: 'homepage'`);
+ *  - a valid preview pass goes through untouched.
+ * The style guide keeps its own token rule, so it is left to `styleguide`. A/B tests are skipped by
+ * returning before they run. The gate stays correct under Cache Components because pages never read
+ * the launch state: the same cached page is served either way, and only this decides which.
+ */
+function prelaunch(request: NextRequest) {
+  if (launchState.status === 'live') return null
+  const { pathname } = request.nextUrl
+  if (pathname === GALLERY_PATH || pathname.startsWith(`${GALLERY_PATH}/`)) return null
+
+  const decision = decidePrelaunch({
+    pathname,
+    hasValidPreviewPass: hasValidPreviewPass(request),
+    state: launchState,
+  })
+  const rewriteTo = (path: string, { keepQuery }: { keepQuery: boolean }) => {
+    const url = request.nextUrl.clone()
+    url.pathname = path
+    // A page keeps its query string (campaign tags, a form's return value); a 404 has no use for one.
+    if (!keepQuery) url.search = ''
+    return NextResponse.rewrite(url, { headers: PRELAUNCH_HEADERS })
+  }
+
+  switch (decision) {
+    case 'pass':
+      return NextResponse.next({ headers: PRELAUNCH_HEADERS })
+    case 'rewrite-view':
+      return rewriteTo(prelaunchViewPath(pathname, launchState.homepage), { keepQuery: true })
+    case 'redirect-home':
+      return NextResponse.redirect(new URL('/', request.url), {
+        status: 307,
+        headers: PRELAUNCH_HEADERS,
+      })
+    case 'not-found':
+      return rewriteTo(PRELAUNCH_NOT_FOUND_PATH, { keepQuery: false })
+  }
 }
 
 /**

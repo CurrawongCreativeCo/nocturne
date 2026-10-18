@@ -38,13 +38,21 @@ export interface ExperimentAttributes {
 export async function SiteShell({
   children,
   experiment,
+  chrome = true,
 }: {
   children: React.ReactNode
   experiment?: ExperimentAttributes
+  /**
+   * Draw the announcement bar, header, menu and footer. The pre-launch view passes false: its pages
+   * must not carry a link to anywhere that is still private, so the chrome is left out of the HTML
+   * (the Link page's "Minimal page" only hides it with CSS). Fonts, design colours, consent, analytics,
+   * structured data and the motion provider stay.
+   */
+  chrome?: boolean
 }) {
   const { isEnabled: isDraftMode } = await draftMode()
-  const search = isFeatureEnabled('search') ? <QuickSearch /> : undefined
-  const cookieSettings = hasConsentProviders && (
+  const search = chrome && isFeatureEnabled('search') ? <QuickSearch /> : undefined
+  const cookieSettings = chrome && hasConsentProviders && (
     <CookieSettingsButton className="text-small text-ink-muted hover:text-ink" />
   )
 
@@ -84,23 +92,25 @@ export async function SiteShell({
         Skip to content
       </a>
       {/* Header and announcement step aside on a "Minimal page" (see globals.css). */}
-      <div data-site-chrome="">
-        {/* Always rendered hidden; a client component reveals it inside its date window. */}
-        {isDraftMode ? (
-          <Suspense fallback={null}>
-            <DraftSiteAnnouncement />
-          </Suspense>
-        ) : (
-          <SiteAnnouncement {...PUBLISHED} />
-        )}
-        {isDraftMode ? (
-          <Suspense fallback={null}>
-            <DraftSiteHeader search={search} />
-          </Suspense>
-        ) : (
-          <SiteHeader {...PUBLISHED} search={search} />
-        )}
-      </div>
+      {chrome && (
+        <div data-site-chrome="">
+          {/* Always rendered hidden; a client component reveals it inside its date window. */}
+          {isDraftMode ? (
+            <Suspense fallback={null}>
+              <DraftSiteAnnouncement />
+            </Suspense>
+          ) : (
+            <SiteAnnouncement {...PUBLISHED} />
+          )}
+          {isDraftMode ? (
+            <Suspense fallback={null}>
+              <DraftSiteHeader search={search} />
+            </Suspense>
+          ) : (
+            <SiteHeader {...PUBLISHED} search={search} />
+          )}
+        </div>
+      )}
       <main
         id="main-content"
         tabIndex={-1}
@@ -110,15 +120,17 @@ export async function SiteShell({
       >
         {children}
       </main>
-      <div data-site-chrome="">
-        {isDraftMode ? (
-          <Suspense fallback={null}>
-            <DraftSiteFooter extra={cookieSettings} />
-          </Suspense>
-        ) : (
-          <SiteFooter {...PUBLISHED} extra={cookieSettings} />
-        )}
-      </div>
+      {chrome && (
+        <div data-site-chrome="">
+          {isDraftMode ? (
+            <Suspense fallback={null}>
+              <DraftSiteFooter extra={cookieSettings} />
+            </Suspense>
+          ) : (
+            <SiteFooter {...PUBLISHED} extra={cookieSettings} />
+          )}
+        </div>
+      )}
       {/*
         Subscribes to Content Lake changes and expires matching cache tags. In webhook mode
         only editors need it (live previews); visitors' caches are expired by /api/revalidate.

@@ -1398,7 +1398,7 @@ The end-to-end fixtures run with everything on.
 
 A site is **pre-launch** (a temporary page at `/`, everything else private) or **live**. This block only _declares_
 the state and the helpers read it; the proxy that enforces it, the preview for the team and the launch checks are
-written in [Pre-launch and launch](#pre-launch-and-launch) (tasks 117 to 119).
+written in [Pre-launch and launch](#pre-launch-and-launch).
 
 ```ts
 launch: {
@@ -1441,6 +1441,77 @@ launch: {
 Tests: `src/config/launch.test.ts` (defaults, the override, `visibleSlugs`, `isPublicBeforeLaunch`),
 `src/config/profile.test.ts` (validation messages), `src/config/reserved-slug.test.ts` and `tests/e2e/site-info.spec.ts`
 (`launch.status` is `live` for the fixtures).
+
+### Pre-launch and launch
+
+While the profile says `launch.status: 'prelaunch'` (see [Launch state](#launch-state)), `src/proxy.ts` runs a gate
+**before anything else** (before the style guide, Edge Config redirects and A/B tests). Live, the gate returns
+immediately and nothing changes: a live site behaves exactly as it always has.
+
+**What the gate does.** For each page request it picks one answer (`decidePrelaunch`, `src/lib/prelaunch-gate.ts`):
+
+| Request                                            | Answer                                                                                                                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                                | The `homepage` page (default `links`), served under `/` by a rewrite to `/prelaunch-view/<homepage>`                                                                      |
+| A path in `publicPages`                            | That page, by a rewrite to `/prelaunch-view/<slug>`                                                                                                                       |
+| `/prelaunch-view/…` typed directly                 | 404                                                                                                                                                                       |
+| Anything else                                      | 404 (a rewrite to the bare view's not-found page, so the status is real), or with `unknownPaths: 'homepage'` a 307 to `/` for page paths (never for files such as `.ics`) |
+| A valid preview pass (task 118; never, until then) | Passes through untouched                                                                                                                                                  |
+
+Every gated response carries `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store`. The address stays
+what the visitor typed. Matching is exact and fails closed: `/links` and `/links/` are one page; `/links/more`, `/Links`
+and `//links` are not public. The presence of a `__prerender_bypass` cookie proves nothing (anyone can set one), so it
+never lets a request through. A/B tests are skipped before launch, and the style guide keeps its own token rule.
+
+**The bare view.** Pre-launch pages render in `src/app/(prelaunch)/prelaunch-view/`, through the same `PageView` and render
+props as the main route (`src/app/page-render-props.tsx`), in a layout that calls `SiteShell` with `chrome={false}`:
+**no announcement bar, header, menu or footer in the HTML** (the Link page's _Minimal page_ option only hides them with
+CSS, which is not enough here, because their links would still be in the source). Fonts, design colours, consent,
+analytics, the track script, structured data and the motion provider all stay. The page's metadata is the real page's, so
+its canonical is `/links`, never `/prelaunch-view/…` or `/`; it is marked `noindex`. `generateStaticParams` lists the
+profile's `visibleSlugs` (never empty), and any other slug answers 404 from the page itself too (a second lock, in case the
+proxy were skipped). The 404 page shows the site name, "This page isn’t open yet" and a link to `/`, with no navigation.
+
+**Listing public pages.** In `site.profile.ts`: `launch: { status: 'prelaunch', homepage: 'links', publicPages: ['privacy'] }`.
+Each slug is an exact page path. A page that is not published yet answers 404 until it is (`launch:check` will warn). A
+page under a public page (`/privacy/policy`) is not public unless it is listed. Open the site by changing `status` to
+`'live'`, in a reviewed commit, and deploying.
+
+**Caching rule.** Nothing cached may depend on the launch state. Pages, queries and feeds render the same either way;
+the proxy decides what to serve. That is what keeps it safe: on Vercel, Routing Middleware runs _before_ the CDN cache,
+so a gated request never reaches a cached page, and a cached page never has to know the site is pre-launch. A page that
+branched on the launch state would bake one state into the cache and serve it in the other. The one place that reads it
+is `generateStaticParams` and the slug check in the bare view, which only decide which slugs exist.
+
+**Not supported: Cloudflare proxying (the orange cloud) in front of Vercel.** The gate relies on Vercel's routing
+running first and on `Cache-Control: private, no-store` being honoured. A second CDN in front caches by its own rules and
+can serve a gated answer to the wrong visitor, or the live page after launch. Use DNS only (grey cloud) to Vercel.
+
+**Server actions.** A form on the temporary page posts to the address the visitor sees (`/`). The rewrite carries that
+request, including the `Next-Action` header, to the bare view, which holds the same actions, so the newsletter signup on
+`/` works (`tests/e2e/prelaunch-gate.spec.ts` submits it with and without JavaScript). Note that the proxy is not an
+authorisation layer for Server Functions: they check their own inputs.
+
+**Route inventory.** `src/app/route-inventory.test.ts` lists every `page.tsx`, `route.ts`, `robots.ts` and `sitemap.ts`
+under `src/app` and fails unless each has a classification and a reason:
+
+| Classification         | Meaning                                                                                                                                                           |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `public-before-launch` | Visitors may open it. Only the bare view.                                                                                                                         |
+| `gated-by-proxy`       | The proxy answers 404 before launch: the CMS pages, blog, events, team, search page, sign-in, A/B.                                                                |
+| `prelaunch-aware`      | Skipped by the proxy matcher, so it must hold back unfinished pages itself (task 119): sitemap, robots, feeds, `llms.txt`, search API, share images, event files. |
+| `infrastructure`       | Not a visitor's page: Studio, webhooks, auth, draft mode, Ops endpoints, the style guide.                                                                         |
+
+Add a new page or route and the test fails until it has a line. **The matcher is unchanged** for pages; the
+machine-readable routes (`/sitemap.xml`, `/robots.txt`, `/feed.xml`, `/llms.txt`, `/api/search`, `/api/og`, event files)
+are made pre-launch-aware in task 119, so until then they still list unfinished pages.
+
+**Tests.** Vitest: `src/lib/prelaunch-gate.test.ts` (every decision), `src/app/route-inventory.test.ts`.
+`tests/e2e/prelaunch-gate.spec.ts` runs a third server from the same build with `SITE_LAUNCH_OVERRIDE=prelaunch` (a copy
+of `.next` in `node_modules/.cache/e2e-prelaunch`, port 3102): `/` serves the Link page fixture with status 200 and the
+canonical `/links`; `/about`, `/blog` and others answer 404 with `noindex` and no header, footer or menu in the raw HTML;
+`/links` opens; the bare view can't be opened by address; a made-up cookie opens nothing; axe on `/` and on the 404; the
+newsletter signup submits; and the main (live) server is unaffected. Run `rm -rf .next` after changing fixtures.
 
 ### Start here (Studio home screen)
 
