@@ -1419,7 +1419,7 @@ launch: {
   (that is the real home page, which stays private until launch; the same goes for `publicPages`); none can start with
   a segment the site uses (`blog`, `api`, `studio`, `prelaunch-view` and so on, from `src/config/reserved-slug.ts`);
   `publicPages` cannot list a slug twice. A `publicPages` entry that repeats the `homepage` is allowed and ignored. A
-  `homepage` that is not published yet is allowed too: the gate answers 404 until it is, and `launch:check` will warn.
+  `homepage` that is not published yet is allowed too: the gate answers 404 until it is, and `launch:check --prelaunch` fails until it is published.
 - **Reading it.** `getLaunchState()` in `src/config/launch.ts` (shared code, so Studio can show it) returns `status`,
   `homepage`, `publicPages`, `unknownPaths` and `visibleSlugs` (`[homepage, ...publicPages]`, no repeats).
   `isPublicBeforeLaunch(pathname, state)` says whether a page path may be opened: live, always; pre-launch, `/` and the
@@ -1450,6 +1450,8 @@ While the profile says `launch.status: 'prelaunch'` (see [Launch state](#launch-
 **before anything else** (before the style guide, Edge Config redirects and A/B tests). Live, the gate returns
 immediately and nothing changes: a live site behaves exactly as it always has.
 
+**Checking it.** `npm run launch:check -- <url> --prelaunch` proves the gate holds on a deployed site (day one), and the default mode proves the launch worked (on the launch PR's preview with `--bypass`, then after merging). See [Launch check](#launch-check).
+
 **What the gate does.** For each page request it picks one answer (`decidePrelaunch`, `src/lib/prelaunch-gate.ts`):
 
 | Request                                            | Answer                                                                                                                                                                    |
@@ -1475,7 +1477,7 @@ profile's `visibleSlugs` (never empty), and any other slug answers 404 from the 
 proxy were skipped). The 404 page shows the site name, "This page isn’t open yet" and a link to `/`, with no navigation.
 
 **Listing public pages.** In `site.profile.ts`: `launch: { status: 'prelaunch', homepage: 'links', publicPages: ['privacy'] }`.
-Each slug is an exact page path. A page that is not published yet answers 404 until it is (`launch:check` will warn). A
+Each slug is an exact page path. A page that is not published yet answers 404 until it is (`launch:check --prelaunch` fails until it is). A
 page under a public page (`/privacy/policy`) is not public unless it is listed. Open the site by changing `status` to
 `'live'`, in a reviewed commit, and deploying.
 
@@ -3671,7 +3673,7 @@ The A/B test spec starts a site-wide experiment, which rewrites every page reque
 
 `npm run launch:check -- https://example.com` asks a **deployed** site whether it is ready to go live. It is
 dependency-free, makes only ordinary page requests plus the Sanity lookups below, and never changes anything. Run it
-against the production domain, not a preview, because it compares the site with its own address.
+against the production domain, not a preview, because it compares the site with its own address (to check a protected preview deployment, see `--bypass` and `--expect-origin` below).
 
 It prints one line per check (pass, warning or fail) with what to do about anything that isn't a pass, then exits `1`
 if any check failed. Warnings never fail the run; read them anyway. `--json` prints the same results as JSON (for the
@@ -3702,6 +3704,77 @@ future Ops dashboard), and `--max-urls=N` lowers the page cap.
   URL asks for, which also proves the CDN rasterised an SVG upload.
 - **Not covered.** Content and design quality, forms actually delivering email, analytics, and Stripe in live mode. Test
   those by hand.
+
+#### Launch state: `--prelaunch`, `--bypass` and the launch lines
+
+The check knows about [Pre-launch and launch](#pre-launch-and-launch). It reads the launch block from `/api/site-info`
+(the profile the build saw), so the mode you run must match the site.
+
+**Launch mode (the default)** gains three lines in the _Launch state_ area: `/api/site-info` says the site is **live**
+(fail if it still says pre-launch); the home page is the real one, with canonical `/`, not the temporary page; and the
+temporary page's own path (`/links`, or the profile's `homepage`) still answers 200 (a warning if not, because people
+have shared that address: keep it published or add a redirect).
+
+**`--prelaunch`** proves a pre-launch site is private:
+
+`npm run launch:check -- https://example.com.au --prelaunch [--expect-private=/about,/pricing] [--expect-public=/privacy]`
+
+| Check                           | Passes when                                                                                                                                                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/site-info` is pre-launch  | `launch.status` is `prelaunch` (it fails on a live site, and on a template older than the launch block). If it fails the rest are skipped                                                                                                                         |
+| Home page is the temporary page | `/` answers 200 with a canonical to the homepage slug (`https://example.com.au/links`), never `/`                                                                                                                                                                 |
+| The homepage is open            | `/links` (the profile's homepage) answers 200                                                                                                                                                                                                                     |
+| Unfinished pages are private    | Each `--expect-private` path (default `/about`, `/blog`, `/search`, `/team`) answers **404** with `noindex` (header or meta) and **no navigation markup** in the raw HTML (`<nav>`, `<header>`, `<footer>` or `data-site-chrome`; CSS-hidden chrome still counts) |
+| Sitemap lists only public pages | `/sitemap.xml` lists only the homepage and the `--expect-public` paths (match `launch.publicPages`)                                                                                                                                                               |
+| Feed and search are closed      | `/feed.xml` and `/api/search?q=a` answer 404                                                                                                                                                                                                                      |
+| Favicon isn't Currawong's       | The home page's icons aren't Currawong's default or the template placeholder (a **fail** here, because the client shares this page before launch)                                                                                                                 |
+| Share image                     | `/api/og/<homepage>` returns an image                                                                                                                                                                                                                             |
+
+- **`--bypass`** sends `x-vercel-protection-bypass` on every request to the site's own host, so a protected Vercel preview
+  deployment can be checked. The secret is `VERCEL_AUTOMATION_BYPASS_SECRET` from the environment or `.env.local`
+  (Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation). It is **never printed**, is
+  never sent to another host (a redirect elsewhere doesn't receive it), and the run stops with a message if it isn't set.
+- **`--expect-origin=https://example.com.au`.** A preview deployment's canonicals, sitemap and share images name the
+  production domain (`NEXT_PUBLIC_SITE_URL`), not the preview's address, so the canonical checks would fail. Pass the
+  production domain and they compare against it. The run adds a note saying which it used.
+- **`--expect-private`, `--expect-public`.** Comma-separated paths, repeatable, each starting with `/`.
+- Nothing is crawled in this mode: about a dozen requests.
+
+**When to run which.**
+
+1. **Day one**, once the real domain is attached and the temporary page is published, before the client shares her link:
+   `npm run launch:check -- https://example.com.au --prelaunch`. Replace the favicon if it fails.
+2. **On the launch pull request's preview** (`status: 'live'` in `site.profile.ts`): run the default mode with
+   `--bypass --expect-origin=https://example.com.au` against the preview URL. It must pass before you merge.
+3. **After merging and deploying**, against the real domain: `npm run launch:check -- https://example.com.au`.
+
+Sample output, from the saved fixtures (a site whose gate lets `/blog` open and whose sitemap lists too much):
+
+```text
+Pre-launch check for https://example.com.au
+
+  STATUS  AREA          CHECK
+  ✓ PASS  Launch state  /api/site-info says the site is pre-launch
+  ✓ PASS  Launch state  Home page shows the temporary page
+  ✓ PASS  Launch state  /links is open
+  ✗ FAIL  Launch state  Unfinished pages are private
+                        /blog answered 200, not 404.
+                        Fix: Check launch.status is 'prelaunch' in site.profile.ts and the proxy gate is deployed (README, 'Pre-launch and launch').
+  ✗ FAIL  Launch state  Sitemap lists only public pages
+                        It also lists https://example.com.au/about, https://example.com.au/blog/hello.
+                        Fix: The sitemap must come from the pre-launch handler. Check launch.status and redeploy.
+  ✓ PASS  Launch state  Feed and search are closed
+  ✓ PASS  Launch state  Favicon isn't Currawong's
+  ✓ PASS  Launch state  Temporary page has a share image
+
+Not private yet: 6 passed, 0 to review, 2 failed.
+```
+
+In launch mode the same area reads `✓ PASS  Launch state  /api/site-info says the site is live`, `Home page is the real
+home page` (canonical `https://example.com.au/`) and `/links still answers`, beside the checks above.
+
+The new checks are in `scripts/launch-check/prelaunch.mjs`, tested in `prelaunch.test.mjs` against saved HTML, header,
+site-info and sitemap fixtures (no network; the bypass header is tested with a stubbed `fetch`).
 
 For developers: each check is a pure function in `scripts/launch-check/*.mjs` (`http`, `seo`, `leftovers`, `sanity`,
 `psi`) that takes already-fetched data and returns result lines; `scripts/launch-check.mjs` does the fetching and the

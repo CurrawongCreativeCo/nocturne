@@ -1,0 +1,9 @@
+{
+  "templateVersion": "1.6.0",
+  "tier": "custom",
+  "enabled": { "blog": true },
+  "launch": { "status": "live", "homepage": "links" },
+  "features": {},
+  "commit": null,
+  "builtAt": null
+}

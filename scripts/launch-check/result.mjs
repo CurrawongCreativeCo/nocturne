@@ -62,7 +62,10 @@ export function formatTable(results, { colour = false } = {}) {
   return lines.join('\n')
 }
 
-export function formatSummary(summary) {
-  const verdict = summary.ok ? 'Ready to go live' : 'Not ready to go live'
+export function formatSummary(
+  summary,
+  { ready = 'Ready to go live', notReady = 'Not ready to go live' } = {},
+) {
+  const verdict = summary.ok ? ready : notReady
   return `${verdict}: ${summary.pass} passed, ${summary.warn} to review, ${summary.fail} failed.`
 }

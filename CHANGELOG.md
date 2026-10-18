@@ -31,6 +31,8 @@ you start a release.
 
 - **Pre-launch machine-readable files:** before launch the proxy answers `/sitemap.xml`, `/robots.txt` and `/llms.txt` with versions that name only the public pages (one sitemap file, `/sitemap/1.xml` and up are 404), and answers 404 to `/feed.xml`, `/api/search`, `/api/events/*` and calendar files; `/api/og/<slug>` works only for public pages. Preview-pass holders get the normal files. The proxy matcher gains these paths (live, they pass straight through). The pre-launch view draws no breadcrumbs.
 
+- **Launch check knows the launch state:** `npm run launch:check -- <url> --prelaunch` proves a pre-launch site is private (the temporary page at `/` with the right canonical, unfinished pages answering 404 with `noindex` and no navigation, a public-only sitemap, closed feed and search, the client's favicon, a working share image). `--bypass` sends `x-vercel-protection-bypass` (`VERCEL_AUTOMATION_BYPASS_SECRET`, never printed or sent to another host) so a protected preview deployment can be checked, with `--expect-origin` for its production canonicals; `--expect-private` and `--expect-public` set the paths. The default mode gains: `/api/site-info` says live, "/" is the real home page, and the temporary page still answers.
+
 ### Changed
 
 - `reservedSegment` moved from `src/features/pages/utils/reserved-slug.ts` to `src/config/reserved-slug.ts` (the site profile validates against it). Update the import if a project uses it.
