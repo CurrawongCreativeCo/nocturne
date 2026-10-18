@@ -33,6 +33,8 @@ you start a release.
 
 - **Launch check knows the launch state:** `npm run launch:check -- <url> --prelaunch` proves a pre-launch site is private (the temporary page at `/` with the right canonical, unfinished pages answering 404 with `noindex` and no navigation, a public-only sitemap, closed feed and search, the client's favicon, a working share image). `--bypass` sends `x-vercel-protection-bypass` (`VERCEL_AUTOMATION_BYPASS_SECRET`, never printed or sent to another host) so a protected preview deployment can be checked, with `--expect-origin` for its production canonicals; `--expect-private` and `--expect-public` set the paths. The default mode gains: `/api/site-info` says live, "/" is the real home page, and the temporary page still answers.
 
+- **Launch & visibility in Studio:** a read-only screen under Website settings (nothing stored, no fields) that shows the launch state from `site.profile.ts` in words, the pages visitors can open (Open and Edit), "Open the temporary page" and "Preview the full site", a live launch checklist (home page, temporary page and share image, menus, browser icon, contact details and social links, and a coming-soon note reminder) and three "How to launch" steps. Clients see one sentence and an **Edit your links** button. Start here gains a pre-launch banner and a **Your links** card (first for clients when a page uses the Link list). The brand preview shows the screen for axe and screenshots. Start here's query now also reads each page's slug; run `npm run typegen`.
+
 ### Changed
 
 - `reservedSegment` moved from `src/features/pages/utils/reserved-slug.ts` to `src/config/reserved-slug.ts` (the site profile validates against it). Update the import if a project uses it.

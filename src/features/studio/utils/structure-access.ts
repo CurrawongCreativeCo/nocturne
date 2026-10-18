@@ -25,12 +25,14 @@ export const CLIENT_REUSABLE_IDS: ReadonlySet<string> = new Set(['panel'])
 
 /**
  * What clients see inside Website settings: the cookie banner (legal wording) stays with the
- * agency, as do any screens added later.
+ * agency, as do any screens added later. Launch & visibility is read-only, and shows a client one
+ * sentence and a button.
  */
 export const CLIENT_WEBSITE_SETTINGS_IDS: ReadonlySet<string> = new Set([
   'siteIdentity',
   'siteNavigation',
   'announcement',
+  'launch',
 ])
 
 /**

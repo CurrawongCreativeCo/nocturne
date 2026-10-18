@@ -1582,6 +1582,47 @@ canonical `/links`; `/about`, `/blog` and others answer 404 with `noindex` and n
 `/links` opens; the bare view can't be opened by address; a made-up cookie opens nothing; axe on `/` and on the 404; the
 newsletter signup submits; and the main (live) server is unaffected. Run `rm -rf .next` after changing fixtures.
 
+### Launch & visibility (Studio)
+
+**Website settings → Launch & visibility** is a read-only screen: no fields, no document and nothing stored. It shows what
+visitors get today and, for agency staff, what is left before launch. The state itself is `launch` in `site.profile.ts`
+(see [Launch state](#launch-state)), read through `getLaunchState()`, which is bundled with the Studio and holds no secret.
+Changing it is a reviewed commit and a deployment, so a field here (which anyone who can edit documents could flip) would
+be the wrong place. It uses Sanity UI components and tones only, so the CMS brand and Studio dark mode apply.
+
+**Agency view**
+
+- **Status in words:** "Pre-launch: visitors see Links at /" or "Live".
+- **Pages visitors can open:** each page in `visibleSlugs`, with **Open** (the public address) and **Edit**; a slug with no
+  published page says "not published yet".
+- **Open the temporary page** (the public address of `/`) and **Preview the full site** (Presentation at `/`; draft mode
+  also issues the [preview pass](#pre-launch-and-launch), so the gate lets it through).
+- **Before launch**, a checklist worked out from published content (a draft doesn't count), each with a **Fix it** button:
+  the home page is published; the temporary page is published and has a share image and a description (the site defaults
+  count); the header and footer menus are published and none links to an unpublished page (the same detector Start here
+  uses); the browser icon is the client's, not the default; Business info has a phone or email; Business info has social
+  links; and, as a **reminder** rather than a failure, the temporary page still has the coming-soon note ("Our new website
+  is on its way", "Coming soon", "Replace:"). It updates live as content is published.
+- **How to launch:** three plain steps (finish the checklist and preview; open a pull request that sets `launch.status` to
+  `'live'` and run `launch:check` with `--bypass --expect-origin` on its preview; merge and run it on the real domain) and a
+  link to this README section.
+- Once live, the screen says **Live** and shows nothing to do.
+
+**Client view** (editors): one sentence, "Your website is in pre-launch. Visitors see your Link page at example.com.au.
+Currawong will launch the full site." (or "Your website is live."), and an **Edit your links** button to the page that uses
+the Link list. Domains are not shown beyond the site address; they are managed by Currawong. The screen is in the client's
+Website settings allow-list (`CLIENT_WEBSITE_SETTINGS_IDS`).
+
+**It reports the profile the Studio was built with.** `SITE_LAUNCH_OVERRIDE` is a server environment variable and does not
+reach the Studio bundle, so an emergency override shows as "Live" here until the profile changes.
+
+**Where it lives.** `src/features/studio/launch/`: `utils/launch-checklist.ts` (the checklist, the public pages, the Link
+page finder), `utils/launch-wording.ts` (every sentence), `utils/launch-view.ts` (the view model for each audience),
+`api/launch-query.ts` (one `raw`-perspective query plus a listener filter) and `components/` (the pane and the
+presentational `LaunchScreen`). The brand preview (`/studio-brand-preview`) shows the screen's static parts, agency and
+client, in light and dark, so axe and screenshots cover them. Tests: `launch-checklist.test.ts`, `launch-wording.test.ts`
+and `launch-view.test.ts`.
+
 ### Start here (Studio home screen)
 
 A Studio tool (`src/features/studio/start-here/`, registered in `sanity.config.ts` as `startHere()`). Clients land on
@@ -1591,6 +1632,7 @@ history request for the author names, and, only when notices are set up, one cal
 
 - **Greeting:** the first word of the person's Sanity name ("Hello, Ben"; just "Hello" if the name is blank or an email
   address) and the site name from `site.profile.ts` (`client.name`).
+- **Before launch** a banner under the greeting says what visitors get (the client sentence above); agency staff also get a **Launch & visibility** button. **Your links** is a card for the page that uses the Link list: first for clients, after _Edit your website_ for agency staff, and absent when no page has one.
 - **Shortcut cards** (bordered, with an icon and a chevron; the first, _Edit your website_, is the primary card; icons are mapped by action id in `start-here-tool.tsx`), built from the site profile by `buildQuickActions`: _Edit your website_ (Presentation at `/`),
   _Write a blog post_ (opens a new post; needs `features.blog`), _Update the team_ (needs `features.team` **and** a
   `teamMember` document type, which the template does not have yet, so the card stays hidden until a project adds

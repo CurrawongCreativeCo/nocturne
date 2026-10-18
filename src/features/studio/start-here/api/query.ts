@@ -25,6 +25,7 @@ export const START_HERE_QUERY = defineQuery(/* groq */ `{
   "pages": *[_type == "page"] {
     _id,
     title,
+    "slug": slug.current,
     pageBuilder
   },
   "sharedSections": *[_type == "sharedSection"] {

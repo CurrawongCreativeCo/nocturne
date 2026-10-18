@@ -4,6 +4,7 @@ import { CogIcon } from '@sanity/icons/Cog'
 import { DesktopIcon } from '@sanity/icons/Desktop'
 import { EditIcon } from '@sanity/icons/Edit'
 import { HelpCircleIcon } from '@sanity/icons/HelpCircle'
+import { LinkIcon } from '@sanity/icons/Link'
 import { UsersIcon } from '@sanity/icons/Users'
 import {
   Badge,
@@ -25,15 +26,20 @@ import { useClient, useCurrentUser, useSchema, useUser } from 'sanity'
 import { IntentLink, useRouter } from 'sanity/router'
 
 import { apiVersion, studioUrl } from '@/config/env'
+import { getLaunchState } from '@/config/launch'
 import { siteProfile } from '@/config/profile'
 import type { START_HERE_QUERY_RESULT } from '@/types/sanity.types'
 
 import { EditorGuide } from './editor-guide'
 import { HelpPanel } from './help-panel'
 import { OpsNotices, useOpsNotices } from './ops-notices'
+import { resolveVersions } from '../../content-health/utils/detect'
 import { newEnquiriesMessage } from '../../enquiries/wording'
+import { findLinkListPage } from '../../launch/utils/launch-checklist'
+import { domainOf, launchBanner } from '../../launch/utils/launch-wording'
 import { currentAudience } from '../../roles'
 import { isTypeVisible } from '../../utils/feature-visibility'
+import { siteOrigin } from '../../utils/site-origin'
 import { fetchLastChanges } from '../api/last-changes'
 import { START_HERE_QUERY } from '../api/query'
 import { editorGuide } from '../utils/editor-guide'
@@ -50,6 +56,8 @@ import type { LastChange } from '../utils/transactions'
 import { displayTitle, greeting, welcomeLine } from '../utils/wording'
 
 interface Data {
+  /** The published page that uses a Link list, for the "Your links" card. */
+  linkPage: { id: string } | null
   recent: RecentChange[]
   changes: Map<string, LastChange>
   checks: ThingsToCheck
@@ -69,6 +77,7 @@ const ACTION_GRID_STYLE = {
 } as const
 
 const ACTION_ICONS: Record<QuickAction['id'], ComponentType> = {
+  links: LinkIcon,
   website: DesktopIcon,
   blog: EditIcon,
   events: CalendarIcon,
@@ -98,7 +107,22 @@ export function StartHereTool() {
 
   const schemaTypes = useMemo(() => new Set(schema.getTypeNames()), [schema])
   const typeTitle = useMemo(() => (type: string) => schema.get(type)?.title ?? type, [schema])
-  const actions = useMemo(() => buildQuickActions(siteProfile, schemaTypes), [schemaTypes])
+  const launch = useMemo(() => getLaunchState(undefined, {}), [])
+  // "Your links" needs to know which page has a Link list, which arrives with the content query.
+  const linkPage = state.status === 'ready' ? state.data.linkPage : null
+  const actions = useMemo(
+    () =>
+      buildQuickActions(siteProfile, schemaTypes, {
+        audience: audience === 'agency' ? 'agency' : 'client',
+        linkPage,
+      }),
+    [schemaTypes, audience, linkPage],
+  )
+  const banner = launchBanner({
+    status: launch.status,
+    homepageTitle: launch.homepage,
+    domain: domainOf(siteOrigin()),
+  })
 
   useEffect(() => {
     const controller = new AbortController()
@@ -127,9 +151,16 @@ export function StartHereTool() {
           shown,
           typeTitle,
         })
+        const linkPage = findLinkListPage(resolveVersions(result.pages), launch.homepage)
         setState({
           status: 'ready',
-          data: { recent, changes, checks, enquiries: result.enquiries },
+          data: {
+            linkPage: linkPage ? { id: linkPage.id } : null,
+            recent,
+            changes,
+            checks,
+            enquiries: result.enquiries,
+          },
         })
       })
       .catch((error: unknown) => {
@@ -142,7 +173,7 @@ export function StartHereTool() {
     return () => {
       controller.abort()
     }
-  }, [client, audience, typeTitle])
+  }, [client, audience, typeTitle, launch.homepage])
 
   // The Help tab mounts after the click, so the heading is focused once it is there.
   useEffect(() => {
@@ -168,6 +199,8 @@ export function StartHereTool() {
               {welcomeLine(siteProfile.client.name)}
             </Text>
           </Stack>
+
+          {banner && <LaunchBanner message={banner} audience={audience} />}
 
           <OpsNotices notices={notices} />
 
@@ -343,6 +376,40 @@ function actionHref(
     case 'help':
       return '#start-here-help'
   }
+}
+
+/** Before launch, everyone sees what visitors get. Agency staff also get a way to the full screen. */
+function LaunchBanner({ message, audience }: { message: string; audience: string }) {
+  const router = useRouter()
+  const href = toolHref(
+    { kind: 'tool', tool: 'structure', path: '/websiteSettings;launch' },
+    studioUrl,
+  )
+  return (
+    <Card tone="caution" padding={4} radius={3} border role="status" data-launch-banner="">
+      <Flex align="center" justify="space-between" gap={3} wrap="wrap">
+        <Box flex={1} style={{ minWidth: '12rem' }}>
+          <Text size={1} weight="medium">
+            {message}
+          </Text>
+        </Box>
+        {audience === 'agency' && (
+          <Button
+            as="a"
+            href={href}
+            onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+              studioClick(event, () => {
+                router.navigateUrl({ path: href })
+              })
+            }}
+            text="Launch & visibility"
+            mode="ghost"
+            fontSize={1}
+          />
+        )}
+      </Flex>
+    </Card>
+  )
 }
 
 function EnquiriesSummary({ newCount }: { newCount: number }) {
