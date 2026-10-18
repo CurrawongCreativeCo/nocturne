@@ -3019,7 +3019,7 @@ existing sections, so every design choice is in the sections' own Design tabs, a
   one. It stays indexed, because `/links` is a page people keep.
 - **Coming soon** is a **Hero** on the _Centred text, no image_ preset that fills the screen, a **Newsletter signup** and a
   compact **Link list** of the social icons from [Business info](#business-info). The line "Replace: Opening [date]" is plain
-  text in the hero's intro; type the date by hand.
+  text in the hero's intro; type the date by hand, or add a [Launch date](#link-list) to the hero for a formatted one.
 - **Under construction** is a centred **Hero** with a short message, a **Location** section with no map and a **Form** section.
   The contact details come from Business info rather than a rich-text block, so they are typed once and stay in step with the
   footer when they change. The Form section has no form chosen, so Studio won't publish the page until you pick one.
@@ -3033,6 +3033,62 @@ existing sections, so every design choice is in the sections' own Design tabs, a
 **At launch**, on the Link page + coming soon: delete the first section (the coming-soon note), add a **Visit our website**
 link to the list (make it the large one) and, if the newsletter signup has done its job, delete that too. On Coming soon and
 Under construction, publish the real home page, then delete the page or redirect `/coming-soon` to `/` (_Redirects_).
+
+**Pre-launch looks.** Six one-click looks for **Link page + coming soon** and **Coming soon**, agency only. Pick one in
+_Pages → New_ ("Link page + coming soon: Dark and atmospheric", and so on; each has its thumbnail as the menu icon). A look is
+the base template with a handful of existing values set, so **it stores nothing of its own**: the page is an ordinary page
+afterwards, and every section keeps its preset bar and Design tab. The base templates are unchanged.
+
+| Look                     | Tone     | Link list preset            | Hero (Coming soon) | Also                                                              |
+| ------------------------ | -------- | --------------------------- | ------------------ | ----------------------------------------------------------------- |
+| **Minimal and elegant**  | Page     | Minimal                     | Full background    | The plain default.                                                |
+| **Dark and atmospheric** | Contrast | Glass rows, Medium strength | Full background    | Fills the screen, light dark wash. **Add the photo** (see below). |
+| **Editorial**            | Page     | Editorial                   | Editorial          | Aligned to the start.                                             |
+| **Bold and colourful**   | Brand    | Minimal                     | Full background    | The page in the Primary brand colour.                             |
+| **Image-led**            | Page     | Image-focused (Cards)       | Split              | Add a picture to every link.                                      |
+| **Soft and refined**     | Tinted   | Cards                       | Full background    | A gently tinted page.                                             |
+
+- **Why templates, not a preset bar on the page.** The presets bar works on one object's own fields (a section). A look spans
+  several sections, so a page-level bar would need either a new stored field or a new array-path mechanism, plus matching
+  ("Custom") across sections. Templates need neither. The trade-off: a look is chosen when the page is made. To change the look
+  later, use each section's own preset bar and tone.
+- **The photo.** Dark and atmospheric fills the screen (the hero on Coming soon, the Link list on the Link page) and sets a
+  light dark wash; upload the photo in that section's **Design → Background image**. Without one it is a plain dark page. The
+  Glass strength and contrast warnings are the Link list's (see [Glass rows](#link-list)).
+- **Coming soon's social list stays Compact.** It has no links of its own, so only its tone changes.
+- **Where it lives.** `PRELAUNCH_LOOKS` and `applyPrelaunchLook` in `src/features/pages/utils/prelaunch-looks.ts` (unit tested
+  against the Link list presets, tones and hero layouts, so a renamed preset fails the test); the templates are made in
+  `templates.ts`; the thumbnails are in `src/lib/sanity/schema/thumbnails/prelaunch-look-thumbnails.tsx`. A new look is one
+  entry in the table and one thumbnail.
+
+**Launch date.** A **Launch date** item for the hero's _Extra content under the heading_ (agency adds it; clients edit it).
+It draws one line, "Opening Monday 3 November" (en-AU, the label is yours: "Doors open", "Launching"), in the hero's tone.
+
+- **Fields.** _Label_ (default "Opening"), _Date_, and in a collapsed **Advanced**: _Time of day_ (24-hour; adds ", 9:30 am"
+  to the line) and _Live countdown_ (off). Studio warns when the date has already passed.
+- **Time zone.** The date and time are the wall clock in **Business info → Time zone**, read in the same query as the page (no
+  extra request; the page's cache tags already include Business info). Daylight saving is handled by the zone's rules for that
+  day (`zonedInstant` in `src/lib/launch-date.ts`): Sydney moves in October and April, Brisbane never.
+- **After the date.** A date with no time is shown all day and gone the next day in the business's zone; with a time it is gone
+  at that time. Pages are cached, so the clock can't be read while one is built. The line sits in a `<Suspense>` boundary of its
+  own that reads `requestTime()` and renders nothing once the date has passed, the same pattern as the Link list's dated links
+  (see _Scheduling and hiding_). The prerendered page holds the line as the boundary's fallback. Only that line renders per
+  visit; a page with no launch date has no boundary. A date that cannot be read draws nothing.
+- **No JavaScript** for the line: it is server text, and a screen reader hears it.
+- **Countdown (Advanced, off by default).** A tiny client island ("12 days 3 hours 5 minutes to go", then "42 minutes 10 seconds
+  to go" in the last hour) loaded with `next/dynamic` (`launch-countdown-lazy.tsx`) only on a page that turns it on, so other pages
+  (the Link page included) download none of it. It redraws once a minute, once a second in the last hour, stops while the tab is hidden and
+  catches up when it is shown, shows nothing under `prefers-reduced-motion` (the date line is all that remains), and clears its
+  timer and both listeners on unmount. It is `aria-hidden` so the date is announced once, and the server reserves its height so
+  nothing moves when it fills in. A whole-day date counts to the start of that day.
+- **Link page + coming soon has no hero**, so it has no slot for this; its note is plain text.
+- **Tests.** Vitest (`src/lib/launch-date.test.ts`): the line, the time zones across the clock changes in Sydney and Brisbane
+  (including the 23- and 25-hour days), before and after the date, the countdown text and its interval.
+  `tests/e2e/launch-date.spec.ts`: the line without JavaScript, nothing after the date, the island loaded only where it is on
+  (and not on `/links`), the tick by the minute and the second, the hidden tab, reduced motion and the reserved height;
+  `tests/e2e/prelaunch-looks.spec.ts`: every look on both pages at 375 and 1280 px with axe; `memory.spec.ts`: leaving and
+  returning to the countdown page leaves nothing behind. New gallery entries (`hero-slot-launch-*`) need the **Update visual
+  baselines** workflow.
 
 **Tests.** Vitest: the scheduling rule, which links are drawn and which is large, grouping, UTM tags, the click props,
 headings, social sources, the tracking script, the template and the presets. `tests/e2e/link-list.spec.ts`: order, hidden and

@@ -14,7 +14,7 @@ const GALLERY = '/section-gallery'
 const SLOT_PAGE = '/hero-slot'
 const PLACEHOLDER_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160"><rect width="400" height="160" fill="#6366f1"/></svg>`
 
-const TYPES = ['stats', 'badges', 'logos']
+const TYPES = ['stats', 'badges', 'logos', 'launch']
 const PRESETS = [
   'full-background',
   'split-right',

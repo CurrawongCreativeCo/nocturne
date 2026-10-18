@@ -5,6 +5,7 @@ import { blockContent } from './block-content'
 import { cta } from './cta'
 import { headingText } from './heading-text'
 import { imageDesign } from './image-design'
+import { launchDate } from './launch-date'
 import { link } from './link'
 import { logoRow } from './logo-row'
 import { sectionStyle } from './section-style'
@@ -23,5 +24,6 @@ export const sharedSchemaTypes: SchemaTypeDefinition[] = [
   statsBar,
   badgeRow,
   logoRow,
+  launchDate,
   imageDesign,
 ]

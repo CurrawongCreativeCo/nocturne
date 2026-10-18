@@ -117,10 +117,8 @@ describe('the pre-launch page templates', () => {
   })
 
   it('keeps Coming soon and Under construction away from clients', () => {
-    expect([...AGENCY_ONLY_TEMPLATE_IDS].sort()).toEqual([
-      'page-coming-soon',
-      'page-under-construction',
-    ])
+    const ids = [...AGENCY_ONLY_TEMPLATE_IDS].filter((id) => !id.includes('--'))
+    expect(ids.sort()).toEqual(['page-coming-soon', 'page-under-construction'])
     expect(AGENCY_ONLY_TEMPLATE_IDS.has('page-links-coming-soon')).toBe(false)
     expect(AGENCY_ONLY_TEMPLATE_IDS.has('page-links')).toBe(false)
   })

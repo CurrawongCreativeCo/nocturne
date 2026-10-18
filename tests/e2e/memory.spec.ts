@@ -176,3 +176,32 @@ test('opening and closing panels leaves no listeners, nodes or memory behind', a
     },
   )
 })
+
+/**
+ * The launch countdown (README, "Launch date"): a timer, a visibility listener and a reduced-motion
+ * listener. Leaving the page (a client navigation) and coming back must stop and restart them, not stack them.
+ */
+// Reduced motion is the suite's default, and the countdown shows nothing under it.
+test.describe('with motion', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('the launch countdown leaves no listeners, nodes or memory behind', async ({
+    page,
+    isMobile,
+  }) => {
+    test.setTimeout(180_000)
+    await expectNoLeak(
+      page,
+      async () => {
+        await navigate(page, isMobile, ABOUT)
+        await page.goBack()
+        await page.waitForURL((url) => url.pathname === '/launch-date')
+        await expect(page.locator('[data-launch-countdown-text]')).toBeVisible()
+      },
+      async () => {
+        await page.goto('/launch-date')
+        await expect(page.locator('[data-launch-countdown-text]')).toBeVisible()
+      },
+    )
+  })
+})

@@ -281,12 +281,14 @@ export const hero = defineType({
       defineField({
         name: 'supporting',
         title: 'Extra content under the heading',
-        description: 'A statistics bar, a row of badges or a row of logos. One at most.',
+        description:
+          'A statistics bar, a row of badges, a row of logos or a launch date. One at most.',
         type: 'array',
         of: [
           defineArrayMember({ type: 'statsBar' }),
           defineArrayMember({ type: 'badgeRow' }),
           defineArrayMember({ type: 'logoRow' }),
+          defineArrayMember({ type: 'launchDate' }),
         ],
         // A client cannot add one, so an empty slot would be a field with nothing to do.
         hidden: ({ currentUser, value }) =>

@@ -1,9 +1,17 @@
+import { createElement } from 'react'
 import type { Template } from 'sanity'
+
+import { PRELAUNCH_LOOKS, applyPrelaunchLook, type TemplateSection } from '../utils/prelaunch-looks'
 
 /** Templates only the agency may start from: clients never see them in the New document menu. */
 export const AGENCY_ONLY_TEMPLATE_IDS: ReadonlySet<string> = new Set([
   'page-coming-soon',
   'page-under-construction',
+  // The looks are design choices, so they are the agency's (see `prelaunchLookTemplates`).
+  ...PRELAUNCH_LOOKS.flatMap(({ value }) => [
+    `page-links-coming-soon--${value}`,
+    `page-coming-soon--${value}`,
+  ]),
 ])
 
 /**
@@ -212,6 +220,36 @@ export const pageTemplates: Template[] = [
     }),
   },
 ]
+
+/** The pre-launch templates that offer looks: the Link page's combined default, and Coming soon. */
+const LOOK_BASES = ['page-links-coming-soon', 'page-coming-soon']
+
+/**
+ * Each look of each base template, as a template of its own: "Link page + coming soon: Dark and
+ * atmospheric". The same page as the base with the look's values set (`applyPrelaunchLook`), so no
+ * field is stored for the look and the page edits like any other. The base templates are unchanged.
+ * Agency only. The thumbnail is the New menu's icon.
+ */
+function prelaunchLookTemplates(): Template[] {
+  return LOOK_BASES.flatMap((baseId) => {
+    const base = pageTemplates.find(({ id }) => id === baseId)
+    if (!base) return []
+    const baseValue = base.value as () => { pageBuilder: TemplateSection[] }
+    return PRELAUNCH_LOOKS.map((look) => ({
+      id: `${baseId}--${look.value}`,
+      title: `${base.title}: ${look.title}`,
+      description: look.description,
+      schemaType: 'page',
+      icon: () => createElement(look.thumbnail, { scheme: 'light', selected: false }),
+      value: () => {
+        const value = baseValue()
+        return { ...value, pageBuilder: applyPrelaunchLook(look, value.pageBuilder) }
+      },
+    }))
+  })
+}
+
+pageTemplates.push(...prelaunchLookTemplates())
 
 function section(type: string, fields: Record<string, unknown>) {
   return { _key: key(), _type: type, ...fields }

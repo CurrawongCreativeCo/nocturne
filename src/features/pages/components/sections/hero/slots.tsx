@@ -4,6 +4,7 @@ import type { ComponentType } from 'react'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { partProps, type PartPlan } from '@/components/motion/part-motion'
 import { BadgeRow } from '@/components/ui/badge-row'
+import { LaunchDateLine } from '@/components/ui/launch-date-line'
 import { LogoRow } from '@/components/ui/logo-row'
 import { StatsBar } from '@/components/ui/stats-bar'
 import {
@@ -42,6 +43,7 @@ const SLOTS: { [T in SlotType]: ComponentType<SlotProps<T>> } = {
   logoRow: ({ item, centred }) => (
     <LogoRow logos={item.logos} greyscale={item.greyscale !== false} centred={centred} />
   ),
+  launchDate: ({ item, centred }) => <LaunchDateLine item={item} centred={centred} />,
 }
 
 interface Props {

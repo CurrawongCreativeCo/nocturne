@@ -122,6 +122,19 @@ export const logoRowFields = /* groq */ `
 `
 
 /**
+ * A `launchDate` (schema: lib/sanity/schema/launch-date.ts): project it as `launchDate { ${launchDateFields} }`.
+ * The time zone is Business info's, read here so the page needs no second request; the page's cache
+ * tags include businessInfo, so changing the zone refreshes it.
+ */
+export const launchDateFields = /* groq */ `
+  label,
+  date,
+  time,
+  countdown,
+  "timeZone": *[_id == "businessInfo"][0].timeZone
+`
+
+/**
  * The hero's supporting slot: the one item of `supporting[]`, whichever approved type it is. A new
  * slot type adds its conditional projection here (README, "Adding a hero slot").
  */
@@ -130,7 +143,8 @@ export const heroSupportingFields = /* groq */ `
   _type,
   _type == "statsBar" => { ${statsBarFields} },
   _type == "badgeRow" => { ${badgeRowFields} },
-  _type == "logoRow" => { ${logoRowFields} }
+  _type == "logoRow" => { ${logoRowFields} },
+  _type == "launchDate" => { ${launchDateFields} }
 `
 
 /**

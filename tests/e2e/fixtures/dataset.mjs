@@ -1531,7 +1531,7 @@ const statItems = (key) => [
  * layout, the placement and the tone are all seen. The stats bar is three figures, the badges three
  * labels (two with icons) and the logos six, the most the slot holds.
  */
-const SLOT_TYPES = ['stats', 'badges', 'logos']
+const SLOT_TYPES = ['stats', 'badges', 'logos', 'launch']
 const slotItem = (type, id) => {
   const _key = `${id}-slot`
   if (type === 'stats') return { _key, _type: 'statsBar', items: statItems(id).slice(0, 3) }
@@ -1544,6 +1544,17 @@ const slotItem = (type, id) => {
         { _key: `${id}-b2`, _type: 'badge', label: 'Free delivery', icon: 'check' },
         { _key: `${id}-b3`, _type: 'badge', label: 'Five-year warranty' },
       ],
+    }
+  }
+  if (type === 'launch') {
+    // Without the countdown, so the gallery needs no client code; /launch-date has it.
+    return {
+      _key,
+      _type: 'launchDate',
+      label: 'Opening',
+      date: '2099-01-05',
+      time: '09:30',
+      countdown: false,
     }
   }
   return {
@@ -3036,6 +3047,222 @@ documents.push({
  * custom social icons, a featured link with UTM tags, groups, and links that are hidden, not yet due,
  * past their date, or in their window. Times are far from now, so the outcome never depends on the day.
  */
+/**
+ * The six pre-launch looks (src/features/pages/utils/prelaunch-looks.ts) applied to the Link page + coming soon
+ * and Coming soon templates, as pages (tests/e2e/prelaunch-looks.spec.ts). Keep the values in step with the table
+ * and the Link list presets.
+ */
+const PRELAUNCH_LOOK_FIXTURES = [
+  {
+    value: 'minimal',
+    tone: 'surface',
+    hero: 'overlay',
+    list: { variant: 'stacked', rowStyle: 'solid', thumbnailSize: 'standard' },
+    align: 'center',
+  },
+  {
+    value: 'dark',
+    tone: 'inverse',
+    hero: 'overlay',
+    photo: true,
+    list: {
+      variant: 'stacked',
+      rowStyle: 'glass',
+      thumbnailSize: 'standard',
+      glassStrength: 'medium',
+    },
+    align: 'center',
+  },
+  {
+    value: 'editorial',
+    tone: 'surface',
+    hero: 'editorial',
+    list: { variant: 'editorial', rowStyle: 'solid', thumbnailSize: 'standard' },
+    align: 'start',
+  },
+  {
+    value: 'bold',
+    tone: 'accent',
+    hero: 'overlay',
+    list: { variant: 'stacked', rowStyle: 'solid', thumbnailSize: 'standard' },
+    align: 'center',
+  },
+  {
+    value: 'image-led',
+    tone: 'surface',
+    hero: 'split',
+    list: { variant: 'cards', rowStyle: 'solid', thumbnailSize: 'large' },
+    align: 'center',
+  },
+  {
+    value: 'soft',
+    tone: 'alt',
+    hero: 'overlay',
+    list: { variant: 'cards', rowStyle: 'solid', thumbnailSize: 'standard' },
+    align: 'center',
+  },
+]
+function prelaunchLookPages() {
+  return PRELAUNCH_LOOK_FIXTURES.flatMap(({ value, tone, hero, photo, list, align }) => {
+    const photoStyle = photo
+      ? { fillScreen: true, overlay: 'light', overlayColor: 'dark', image: image('') }
+      : {}
+    const style = (extra = {}) => ({
+      _type: 'sectionStyle',
+      tone,
+      align,
+      spacing: 'compact',
+      ...extra,
+    })
+    const key = (name) => `look-${value}-${name}`
+    return [
+      {
+        _id: `page-look-links-${value}`,
+        _type: 'page',
+        title: `Look: ${value} (Link page)`,
+        slug: { _type: 'slug', current: `look-links-${value}` },
+        minimalLayout: true,
+        seo: { _type: 'seo', noIndex: true },
+        pageBuilder: [
+          {
+            _key: key('note'),
+            _type: 'richText',
+            style: style(),
+            body: [
+              {
+                _key: key('note-p'),
+                _type: 'block',
+                style: 'normal',
+                markDefs: [],
+                children: [
+                  {
+                    _key: key('note-s'),
+                    _type: 'span',
+                    text: 'Our new website is on its way. Until then, everything is here.',
+                    marks: [],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            _key: key('list'),
+            _type: 'linkList',
+            ...list,
+            style: style(photoStyle),
+            profile: { _type: 'object', name: 'Test Co', bio: 'Small-batch ceramics.' },
+            socialSource: 'custom',
+            socialLinks: [],
+            links: [
+              linkItem(key('book'), 'Book now', external('https://example.com/book'), {
+                featured: true,
+                icon: 'clock',
+                thumbnail: image('Booking'),
+              }),
+              linkItem(key('shop'), 'Shop the range', external('https://example.com/shop'), {
+                icon: 'bolt',
+                thumbnail: image('Shop'),
+              }),
+              linkItem(
+                key('insta'),
+                'Follow on Instagram',
+                external('https://instagram.com/testco'),
+                { icon: 'leaf', thumbnail: image('Instagram') },
+              ),
+            ],
+          },
+          {
+            _key: key('signup'),
+            _type: 'newsletterSignup',
+            title: 'Be the first to know',
+            text: 'Get one email when the new website launches.',
+            submitLabel: 'Subscribe',
+            successMessage: 'Thanks! Check your inbox for a message from us.',
+            style: style(),
+          },
+        ],
+      },
+      {
+        _id: `page-look-soon-${value}`,
+        _type: 'page',
+        title: `Look: ${value} (Coming soon)`,
+        slug: { _type: 'slug', current: `look-soon-${value}` },
+        minimalLayout: true,
+        seo: { _type: 'seo', noIndex: true },
+        pageBuilder: [
+          {
+            _key: key('hero'),
+            _type: 'hero',
+            variant: hero,
+            title: 'Something new is on its way',
+            description: 'A short line about what is coming.',
+            style: {
+              _type: 'sectionStyle',
+              tone,
+              fillScreen: true,
+              ...(photo ? { overlay: 'light', overlayColor: 'dark', image: image('') } : {}),
+            },
+            supporting: [
+              {
+                _key: key('date'),
+                _type: 'launchDate',
+                label: 'Opening',
+                date: '2099-01-05',
+                countdown: false,
+              },
+            ],
+          },
+          {
+            _key: key('soon-signup'),
+            _type: 'newsletterSignup',
+            title: 'Be the first to know',
+            text: 'Get one email when we open.',
+            submitLabel: 'Subscribe',
+            successMessage: 'Thanks! Check your inbox for a message from us.',
+            style: style(),
+          },
+        ],
+      },
+    ]
+  })
+}
+
+/**
+ * Hero pages with a launch date line (tests/e2e/launch-date.spec.ts): a far-off date with the live
+ * countdown, the same without it, and a date that has passed (nothing shows).
+ */
+function launchDatePages() {
+  const page = (slug, title, launchDate) => ({
+    _id: `page-${slug}`,
+    _type: 'page',
+    title,
+    slug: { _type: 'slug', current: slug },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: `${slug}-hero`,
+        _type: 'hero',
+        variant: 'overlay',
+        title,
+        description: 'Hero description.',
+        style: { _type: 'sectionStyle', tone: 'surface' },
+        supporting: [
+          { _key: `${slug}-date`, _type: 'launchDate', label: 'Opening', ...launchDate },
+        ],
+      },
+    ],
+  })
+  return [
+    page('launch-date', 'Launch date with countdown', { date: '2099-01-05', countdown: true }),
+    page('launch-date-plain', 'Launch date without countdown', {
+      date: '2099-01-05',
+      time: '09:30',
+      countdown: false,
+    }),
+    page('launch-date-past', 'Launch date in the past', { date: '2020-01-01', countdown: true }),
+  ]
+}
+
 documents.push(
   {
     _id: 'page-links',
@@ -3306,6 +3533,8 @@ documents.push(
       },
     ],
   },
+  ...prelaunchLookPages(),
+  ...launchDatePages(),
   {
     // A Link list inside an ordinary page (it keeps the header and footer), in two layouts.
     _id: 'page-link-list',

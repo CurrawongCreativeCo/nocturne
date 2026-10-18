@@ -21,6 +21,8 @@ you start a release.
 ### Added
 
 - Pre-launch page templates beside the Link page: **Link page + coming soon**, **Coming soon** and **Under construction**, built from existing sections. The last two are agency-only and hidden from search engines. No schema changes. See the README's _Pre-launch pages_.
+- **Pre-launch looks:** six one-click looks (Minimal and elegant, Dark and atmospheric, Editorial, Bold and colourful, Image-led, Soft and refined) for **Link page + coming soon** and **Coming soon**, as agency-only templates in _Pages → New_ with thumbnails. A look only sets existing values (tone, Link list preset, hero layout, fill the screen), so nothing new is stored and the base templates are unchanged.
+- **Launch date** for the hero's supporting slot: "Opening Monday 3 November" in en-AU, in the Business info time zone, rendered on the server and gone after the date (a request-time `<Suspense>` boundary, like dated links). An optional **Live countdown** (Advanced, off) is a small client island loaded only on pages that turn it on: it updates by the minute (by the second in the last hour), pauses in a hidden tab, and shows nothing under reduced motion. New `launchDate` object type and `launchDate` hero slot item; run `npm run typegen`. Adds the e2e pages `/launch-date`, `/launch-date-plain`, `/launch-date-past` and the `look-*` pages (new `hero-slot-launch-*` visual baselines need the "Update visual baselines" workflow).
 
 ### Changed
 
