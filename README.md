@@ -1,4 +1,4 @@
-# Sanity × Next.js Starter
+# Nocturne
 
 Next.js 16 (App Router, Cache Components) · next-sanity 13 · Sanity Studio 6 · Tailwind 4 · TypeScript strict.
 
