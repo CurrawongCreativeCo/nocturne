@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.6.0] - 2026-10-18
+
+### Added
+
 - **Background image placement:** a section's background image gains _Picture size_ (Fill the section, Show the whole picture, Actual size), _Picture strength_ (Full, Soft 60%, Faint 30%) and _Overlay colour_ (Background colour, Light wash, Dark wash), and a collapsed _Advanced: background_ with Position (nine places), Repeat (across, down, tile; Actual size only), an exact strength and _Stays put while scrolling_ (large screens, off for reduced motion). A **Fill the screen** switch in _Advanced: layout_ makes any section at least the screen tall, so a Link page can have a full-window photo or a faint pattern at the bottom. Existing backgrounds are unchanged; the Studio contrast warning accounts for the wash and strength. Adds the e2e pages `/links-photo`, `/links-pattern` and `/links-tiled` (new visual baselines, if added, need the "Update visual baselines" workflow).
 - **Link list: Glass rows preset.** A sixth preset in the Link list's preset bar (Minimal with a new `rowStyle: 'glass'`) draws each link as a frosted-glass row over a background photo: a flush thumbnail, a round icon, the title and description and an optional round arrow, as one link per row. Glass rows can show an icon and a thumbnail together. **Glass strength** (Light, Medium, Strong) and **Arrow on each row** appear for Glass rows only, and Studio warns when a strength can drop text under 4.5:1 on the lightest or darkest photo. New `glass` design tokens (`tokens.json`, optional) follow Brand colours, Appearance and the section's tone, with solid fallbacks for browsers that can't blur and visitors who ask for less transparency. No client JavaScript. Existing link lists look exactly as before.
 - **Icons:** eight new line icons in the shared badge icon set (Care, Sun, Community, Person, Location, Email, Calendar, Phone), also offered to badge rows.
@@ -58,7 +68,7 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None. Run `npm run tokens` and `npm run typegen` after merging (new `glass` tokens and the Link list's `rowStyle`, `glassStrength` and `showArrows` fields); a `tokens.json` without a `glass` group still builds.
+None. The template is now called **Nocturne** and the GitHub repo is `CurrawongCreativeCo/nocturne` (the old `sanity-starter` URLs redirect, but you can point a `template` remote at the new one with `git remote set-url template https://github.com/CurrawongCreativeCo/nocturne.git`). The package name is `nocturne`. Run `npm run tokens` and `npm run typegen` after merging (new `glass` tokens and the Link list's `rowStyle`, `glassStrength` and `showArrows` fields); a `tokens.json` without a `glass` group still builds.
 
 ## [1.5.0] - 2026-10-17
 
@@ -930,10 +940,11 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.5.0...HEAD
-[1.5.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.4.0...v1.5.0
-[1.4.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/CurrawongCreativeCo/sanity-starter/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/CurrawongCreativeCo/sanity-starter/releases/tag/v1.0.0
+[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/CurrawongCreativeCo/nocturne/releases/tag/v1.0.0

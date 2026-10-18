@@ -4,7 +4,7 @@ Next.js 16 (App Router, Cache Components) · next-sanity 13 · Sanity Studio 6 �
 
 <!-- setup-wizard:start -->
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCurrawongCreativeCo%2Fsanity-starter&env=NEXT_PUBLIC_SANITY_PROJECT_ID%2CNEXT_PUBLIC_SANITY_DATASET%2CSANITY_API_READ_TOKEN%2CNEXT_PUBLIC_SITE_URL&envDescription=Sanity%20project%20ID%2C%20dataset%2C%20a%20Viewer%20token%2C%20and%20the%20site%27s%20public%20URL&envLink=https%3A%2F%2Fgithub.com%2FCurrawongCreativeCo%2Fsanity-starter%23deploying-vercel&project-name=sanity-next-site&repository-name=sanity-next-site)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCurrawongCreativeCo%2Fnocturne&env=NEXT_PUBLIC_SANITY_PROJECT_ID%2CNEXT_PUBLIC_SANITY_DATASET%2CSANITY_API_READ_TOKEN%2CNEXT_PUBLIC_SITE_URL&envDescription=Sanity%20project%20ID%2C%20dataset%2C%20a%20Viewer%20token%2C%20and%20the%20site%27s%20public%20URL&envLink=https%3A%2F%2Fgithub.com%2FCurrawongCreativeCo%2Fnocturne%23deploying-vercel&project-name=sanity-next-site&repository-name=sanity-next-site)
 
 **Which path?** Use the button to put a site online fast: it copies this repo to your GitHub account and deploys it
 on Vercel. Follow the [deploy checklist](#deploying-vercel) afterwards (the CORS step is not optional). To work on
@@ -17,7 +17,7 @@ This repo is the clean template. Don't run the setup wizard in it; start each ne
 (or use GitHub's **Use this template** button):
 
 ```bash
-git clone https://github.com/CurrawongCreativeCo/sanity-starter.git my-new-site
+git clone https://github.com/CurrawongCreativeCo/nocturne.git my-new-site
 cd my-new-site
 npm install
 npx sanity login   # lets the wizard create the project, token, CORS origins and starter content
@@ -3770,7 +3770,7 @@ one in by merging the tag. Read the release's _Breaking changes / migration step
 tags one release at a time if you are several behind.
 
 ```bash
-git remote add template https://github.com/CurrawongCreativeCo/sanity-starter.git   # once
+git remote add template https://github.com/CurrawongCreativeCo/nocturne.git   # once
 git fetch template --tags
 git switch -c update-template-v1.2.0          # do the update on a branch
 git merge v1.2.0                              # first time only, see below: add --allow-unrelated-histories
