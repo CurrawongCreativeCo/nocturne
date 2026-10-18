@@ -43,7 +43,12 @@ describe('seedDocuments (prelaunch)', () => {
 
   it('publishes a Link page with the site name in the profile', () => {
     const page = ids['page-links']
-    expect(page).toMatchObject({ _type: 'page', slug: { current: 'links' }, minimalLayout: true })
+    expect(page).toMatchObject({
+      _type: 'page',
+      slug: { current: 'links' },
+      minimalLayout: true,
+      seo: { noIndex: true },
+    })
     const list = page.pageBuilder.find((s) => s._type === 'linkList')
     expect(list.profile.name).toBe('Acme')
     expect(page.pageBuilder.map((s) => s._type)).toEqual([

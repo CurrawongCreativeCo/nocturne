@@ -73,6 +73,15 @@ export function verifyPreviewPass(
   return Number(expiry) + PREVIEW_CLOCK_SKEW_MS >= now
 }
 
+/** The pass cookie's attributes, for `cookies().set()`; `previewCookieHeader` writes the same ones. */
+export const previewCookieOptions = ({ secure }: { secure: boolean }) => ({
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  path: '/',
+  maxAge: PREVIEW_TTL_MS / 1000,
+  secure,
+})
+
 /**
  * A `Set-Cookie` header value for the pass: HttpOnly, SameSite=Lax (Presentation in Studio is
  * same-origin, so it still sends it), Secure on https, for the whole site, for 8 hours. `null`

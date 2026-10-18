@@ -31,7 +31,7 @@ with a **private** dataset (or connect an existing one; make that private too, s
 to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
 or future projects lose the wizard.
 
-**Link page today, full site later.** The form asks "Start with a pre-launch Link page?" (on by default in a new client project; it needs starter content). Yes imports a published **Link page** (the _Link page + coming soon_ template with its Minimal look and the site name in the profile; the placeholder links are hidden until the client gives them addresses), saves **Home and About as drafts only** (never published; they link to each other with weak references), leaves the menus empty, and sets `launch: { status: 'prelaunch', homepage: 'links' }` in `site.profile.ts` (one line; the rest of the file is untouched). The site then shows the Link page at `/` and answers 404 to everything else (see [Pre-launch and launch](#pre-launch-and-launch)). No gives the live site above. The import uses `--missing`, so existing documents are never overwritten. To see what it would do without writing anything: `npm run setup -- --dry-run --name "Acme"` (add `--live` for the other mode). The final screen points to the domain runbook (_Pre-launch and launch_) and the launch checklist (Studio → Website settings → _Launch & visibility_).
+**Link page today, full site later.** The form asks "Start with a pre-launch Link page?" (on by default in a new client project; it needs starter content). Yes imports a published **Link page** (the _Link page + coming soon_ template with its Minimal look and the site name in the profile; the placeholder links are hidden until the client gives them addresses), saves **Home and About as drafts only** (never published; they link to each other with weak references), leaves the menus empty, and sets `launch: { status: 'prelaunch', homepage: 'links' }` in `site.profile.ts` (one line; the rest of the file is untouched). The site then shows the Link page at `/` and answers 404 to everything else (see [Pre-launch and launch](#pre-launch-and-launch)). No gives the live site above. The import uses `--missing`, so existing documents are never overwritten. To see what it would do without writing anything: `npm run setup -- --dry-run --name "Acme"` (add `--live` for the other mode). The final screen points to attaching the domain ([Deploying (Vercel)](#deploying-vercel)), `launch:check --prelaunch` and the launch checklist (Studio → Website settings → _Launch & visibility_).
 
 A project set up without the wizard has no documents for those four screens, so each opens as _New Brand colours_ (and so on) until someone publishes it. Open each once in Studio and press **Publish** (nothing changes on the site). An empty Business info shows nothing on the site.
 
@@ -1483,6 +1483,10 @@ Each slug is an exact page path. A page that is not published yet answers 404 un
 page under a public page (`/privacy/policy`) is not public unless it is listed. Open the site by changing `status` to
 `'live'`, in a reviewed commit, and deploying.
 
+**Redirects wait for launch.** The gate runs before Studio's redirects (Edge Config and the page route's fallback), so a
+published redirect from an old address answers 404 before launch, even one that points at a public page. Use
+`unknownPaths: 'homepage'` to send old addresses to the temporary page instead.
+
 **Caching rule.** Nothing cached may depend on the launch state. Pages, queries and feeds render the same either way;
 the proxy decides what to serve. That is what keeps it safe: on Vercel, Routing Middleware runs _before_ the CDN cache,
 so a gated request never reaches a cached page, and a cached page never has to know the site is pre-launch. A page that
@@ -1495,7 +1499,8 @@ can serve a gated answer to the wrong visitor, or the live page after launch. Us
 
 **Server actions.** A form on the temporary page posts to the address the visitor sees (`/`). The rewrite carries that
 request, including the `Next-Action` header, to the bare view, which holds the same actions, so the newsletter signup on
-`/` works (`tests/e2e/prelaunch-gate.spec.ts` submits it with and without JavaScript). Note that the proxy is not an
+`/` works (`tests/e2e/prelaunch-gate.spec.ts` submits it). Without JavaScript, a Link page with request-time parts (dated
+links, the launch date) answers the signup with Next's data only, live or pre-launch; that test is marked `fixme`. Note that the proxy is not an
 authorisation layer for Server Functions: they check their own inputs.
 
 **Private access before launch.** Three ways to see the whole site while the gate is on:
@@ -3245,14 +3250,18 @@ existing sections, so every design choice is in the sections' own Design tabs, a
 
 | Template                    | Use it when                                                                   | Starts at             | Search engines |
 | --------------------------- | ----------------------------------------------------------------------------- | --------------------- | -------------- |
-| **Link page**               | The business only needs a link-in-bio page, now or for good.                  | `/links`              | Allowed        |
-| **Link page + coming soon** | There is a link-in-bio page now and a new website is on its way. The default. | `/links`              | Allowed        |
+| **Link page**               | The business only needs a link-in-bio page, now or for good.                  | `/links`              | Hidden         |
+| **Link page + coming soon** | There is a link-in-bio page now and a new website is on its way. The default. | `/links`              | Hidden         |
 | **Coming soon**             | The domain points at the site but it opens on a date.                         | `/coming-soon`        | Hidden         |
 | **Under construction**      | A live site is being rebuilt and visitors still need to reach you.            | `/under-construction` | Hidden         |
 
 - **Link page + coming soon** is the Link page with a short note above the list ("Our new website is on its way. Until then,
   everything is here."), a compact **Newsletter signup** under it and a footer note. The first link, "Book now", is the large
-  one. It stays indexed, because `/links` is a page people keep.
+  one.
+- **Both Link page templates are hidden from search engines** (_Search & sharing → Hide from search engines_ is on). A
+  link-in-bio page is a list of links: it has little for a search engine to rank, and after launch it would compete with the
+  home page for the business's name. People reach it from bios and QR codes, not search. Before launch that leaves the
+  pre-launch sitemap empty (valid, with no URLs), which is expected. Turn the option off on a page that should be found.
 - **Coming soon** is a **Hero** on the _Centred text, no image_ preset that fills the screen, a **Newsletter signup** and a
   compact **Link list** of the social icons from [Business info](#business-info). The line "Replace: Opening [date]" is plain
   text in the hero's intro; type the date by hand, or add a [Launch date](#link-list) to the hero for a formatted one.
@@ -3772,7 +3781,7 @@ have shared that address: keep it published or add a redirect).
 | Sitemap lists only public pages | `/sitemap.xml` lists only the homepage and the `--expect-public` paths (match `launch.publicPages`)                                                                                                                                                               |
 | Feed and search are closed      | `/feed.xml` and `/api/search?q=a` answer 404                                                                                                                                                                                                                      |
 | Favicon isn't Currawong's       | The home page's icons aren't Currawong's default or the template placeholder (a **fail** here, because the client shares this page before launch)                                                                                                                 |
-| Share image                     | `/api/og/<homepage>` returns an image                                                                                                                                                                                                                             |
+| Share image                     | The `og:image` the temporary page names returns an image (the generated `/api/og/<homepage>` when it names none)                                                                                                                                                  |
 
 - **`--bypass`** sends `x-vercel-protection-bypass` on every request to the site's own host, so a protected Vercel preview
   deployment can be checked. The secret is `VERCEL_AUTOMATION_BYPASS_SECRET` from the environment or `.env.local`

@@ -11,6 +11,11 @@ export interface LaunchWordingInput {
   homepageTitle: string
   /** The address visitors use, without the scheme: "example.com.au". */
   domain: string
+  /**
+   * Whether the temporary page is a Link page (has a Link list). False for a Coming soon or Under
+   * construction page; left out (not known yet), the usual case is assumed.
+   */
+  homepageIsLinkPage?: boolean
 }
 
 /** The agency's one-line status. */
@@ -19,9 +24,14 @@ export function statusLine({ status, homepageTitle }: LaunchWordingInput): strin
 }
 
 /** What the client reads: one sentence, no jargon. */
-export function clientSentence({ status, domain }: LaunchWordingInput): string {
+export function clientSentence({
+  status,
+  domain,
+  homepageIsLinkPage = true,
+}: LaunchWordingInput): string {
+  const page = homepageIsLinkPage ? 'your Link page' : 'a temporary page'
   return status === 'prelaunch'
-    ? `Your website is in pre-launch. Visitors see your Link page at ${domain}. Currawong will launch the full site.`
+    ? `Your website is in pre-launch. Visitors see ${page} at ${domain}. Currawong will launch the full site.`
     : 'Your website is live.'
 }
 

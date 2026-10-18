@@ -77,7 +77,10 @@ describe('buildPrelaunchSitemap', () => {
     expect(buildPrelaunchSitemap([{ slug: 'a' }], 'https://example.com/?a=1&b=2')).toContain(
       'https://example.com/a',
     )
-    expect(buildPrelaunchSitemap([{ slug: 'a' }], "https://example.com/'<>")).toContain('&apos;')
+    // Slugs are validated in Studio, but a document written through the API can hold anything.
+    expect(buildPrelaunchSitemap([{ slug: "a&b'c" }], 'https://example.com')).toContain(
+      '<loc>https://example.com/a&amp;b&apos;c</loc>',
+    )
   })
 
   it('nests a path as written', () => {

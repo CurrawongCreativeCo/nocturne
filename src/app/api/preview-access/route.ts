@@ -1,9 +1,10 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { connection, NextResponse, type NextRequest } from 'next/server'
 
 import { getClientIp } from '@/features/forms/utils/client-ip'
 import { createRateLimiter } from '@/features/forms/utils/rate-limit'
 import {
   createPreviewPass,
+  MIN_PREVIEW_SECRET_LENGTH,
   previewCookieHeader,
   previewSecret,
   warnNoPreviewSecret,
@@ -22,12 +23,16 @@ const notFound = () =>
  * equal to PRELAUNCH_PREVIEW_TOKEN (compared in constant time) sets the signed preview pass and goes
  * to "/". It is a convenience for showing a client the site on the real domain, not a staging
  * environment, and anyone with the link has the same access. Unset token, unset PREVIEW_ACCESS_SECRET,
- * a wrong or missing token, and too many tries all answer 404. Revoke it by changing the token and
- * redeploying. The token is never logged or echoed.
+ * a wrong or missing token, and too many tries all answer 404. A token under 16 characters counts as
+ * unset, as a short secret does. Revoke it by changing the token and redeploying. The token is never
+ * logged or echoed.
  */
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
+  // Per request: without this the handler is prerendered at build, where the token is usually unset,
+  // and that 404 is served for good (Cache Components).
+  await connection()
   const expected = process.env.PRELAUNCH_PREVIEW_TOKEN
-  if (!expected) return notFound()
+  if (!expected || expected.length < MIN_PREVIEW_SECRET_LENGTH) return notFound()
   if (!limiter.take(getClientIp(request.headers)).allowed) return notFound()
   if (!tokenMatches(expected, request.nextUrl.searchParams.get('token'))) return notFound()
 

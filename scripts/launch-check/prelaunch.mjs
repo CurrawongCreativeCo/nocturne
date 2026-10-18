@@ -295,6 +295,22 @@ export function checkOwnFavicon({ icons, defaultHashes = DEFAULT_ICON_SHA256 }) 
   return [pass(area, id, title)]
 }
 
+/**
+ * The share image the temporary page advertises (its og:image, made absolute against the page), or
+ * the generated one at /api/og/<homepage> when it names none.
+ */
+export function shareImageUrl(html, origin, homepage) {
+  const declared = getMeta(html ?? '', 'og:image')
+  if (declared) {
+    try {
+      return new URL(declared, origin).toString()
+    } catch {
+      // An unreadable value: fall back to the generated image.
+    }
+  }
+  return `${origin}/api/og/${homepage}`
+}
+
 /** The share image of the temporary page returns an image. */
 export function checkShareImage({ response, path }) {
   const id = 'launch-share-image'

@@ -120,6 +120,7 @@ describe('resolveSiteProfile', () => {
       tier: 'custom',
       features: DEFAULT_FEATURES,
       clientSections: [],
+      launch: { status: 'live', homepage: 'links', publicPages: [], unknownPaths: 'not-found' },
       help: {},
       templateVersion,
     })

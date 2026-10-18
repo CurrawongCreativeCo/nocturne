@@ -48,6 +48,7 @@ import {
   DEFAULT_HOMEPAGE,
   parseSiteInfoLaunch,
   privatePathsFor,
+  shareImageUrl,
 } from './launch-check/prelaunch.mjs'
 import { evaluatePsi, psiEndpoint } from './launch-check/psi.mjs'
 import { fail, formatSummary, formatTable, summarise } from './launch-check/result.mjs'
@@ -319,14 +320,16 @@ export async function runPrelaunchChecks({
   const { homepage } = launch
 
   log('Fetching the temporary page…')
-  const [home, own, sitemap, feed, search, ogImage] = await Promise.all([
+  const [home, own, sitemap, feed, search] = await Promise.all([
     request(`${origin}/`, { follow: true }),
     request(`${origin}/${homepage}`),
     request(`${origin}/sitemap.xml`, { follow: true }),
     request(`${origin}/feed.xml`),
     request(`${origin}/api/search?q=a`),
-    request(`${origin}/api/og/${homepage}`, { follow: true }),
   ])
+  // The image the page itself names for sharing (it may be an uploaded one), not only the generated one.
+  const ogImageUrl = shareImageUrl(home.text, origin, homepage)
+  const ogImage = await request(ogImageUrl, { follow: true })
   results.push(...checkTemporaryHome({ response: home, origin, homepage, expectOrigin }))
   results.push(...checkHomepageOwnPath({ response: own, homepage }))
 
@@ -366,7 +369,12 @@ export async function runPrelaunchChecks({
     }
   })
   results.push(...checkOwnFavicon({ icons }))
-  results.push(...checkShareImage({ response: ogImage, path: `/api/og/${homepage}` }))
+  results.push(
+    ...checkShareImage({
+      response: ogImage,
+      path: ogImageUrl.startsWith(`${origin}/`) ? ogImageUrl.slice(origin.length) : ogImageUrl,
+    }),
+  )
   return { results, notes }
 }
 

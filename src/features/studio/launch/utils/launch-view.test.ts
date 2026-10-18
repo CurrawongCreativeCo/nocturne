@@ -50,6 +50,11 @@ describe('buildLaunchView', () => {
     expect(model.linkPage).toEqual({ id: 'links-id', title: 'Links' })
   })
 
+  it('calls the temporary page what it is when it has no Link list', () => {
+    const comingSoon: State = { ...pre, homepage: 'coming-soon', visibleSlugs: ['coming-soon'] }
+    expect(view('editor', comingSoon).headline).toContain('Visitors see a temporary page at')
+  })
+
   it('says Live, with nothing to do, once the site is live', () => {
     const live: State = { ...pre, status: 'live' }
     const agency = view('agency', live)

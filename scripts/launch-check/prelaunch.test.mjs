@@ -18,6 +18,7 @@ import {
   checkTemporaryStillUp,
   parseSiteInfoLaunch,
   privatePathsFor,
+  shareImageUrl,
 } from './prelaunch.mjs'
 import { makeNet } from '../launch-check.mjs'
 
@@ -321,6 +322,29 @@ describe('checkOwnFavicon', () => {
     ]
     expect(statuses(checkOwnFavicon({ icons }))).toEqual(['pass'])
     expect(statuses(checkOwnFavicon({ icons: [] }))).toEqual(['warn'])
+  })
+})
+
+describe('shareImageUrl', () => {
+  const origin = 'https://example.com.au'
+  it('uses the og:image the page names, made absolute', () => {
+    expect(
+      shareImageUrl(
+        '<meta property="og:image" content="https://cdn.sanity.io/images/p/d/a.png">',
+        origin,
+        'links',
+      ),
+    ).toBe('https://cdn.sanity.io/images/p/d/a.png')
+    expect(
+      shareImageUrl('<meta property="og:image" content="/api/og/links?v=2">', origin, 'links'),
+    ).toBe('https://example.com.au/api/og/links?v=2')
+  })
+
+  it('falls back to the generated image when the page names none', () => {
+    expect(shareImageUrl('<title>Links</title>', origin, 'links')).toBe(
+      'https://example.com.au/api/og/links',
+    )
+    expect(shareImageUrl(undefined, origin, 'links')).toBe('https://example.com.au/api/og/links')
   })
 })
 

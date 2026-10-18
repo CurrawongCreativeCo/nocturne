@@ -75,7 +75,16 @@ export function portableTextOf(value: unknown): string {
 /** Wording the pre-launch templates seed, which an editor removes at launch. */
 const NOTE_PATTERN = /new website is on its way|coming soon|under construction|Replace:/i
 
-const versions = (data: LaunchData) => resolveVersions(data.pages)
+/**
+ * The published documents only, as `resolveVersions` rows. That helper shows a draft's content when
+ * one exists (right for an edit target), but every checklist answer must be what visitors get, so
+ * drafts and release versions (`versions.<release>.<id>`, which the raw perspective also returns)
+ * are dropped first.
+ */
+const publishedVersions = <T extends { _id: string }>(docs: T[]) =>
+  resolveVersions(
+    docs.filter(({ _id }) => !_id.startsWith('drafts.') && !_id.startsWith('versions.')),
+  )
 
 /** Whether any section of the page is a Link list. */
 export function hasLinkList(pageBuilder: unknown): boolean {
@@ -113,9 +122,9 @@ export interface PublicPageRow {
 
 /** The pages a visitor can open before launch, in the profile's order, whether or not they are published yet. */
 export function publicPageRows(data: LaunchData, visibleSlugs: readonly string[]): PublicPageRow[] {
-  const published = versions(data).filter((page) => page.published)
+  const pages = publishedVersions(data.pages)
   return visibleSlugs.map((slug) => {
-    const page = published.find(({ doc }) => doc.slug === slug)
+    const page = pages.find(({ doc }) => doc.slug === slug)
     return {
       slug,
       title: page?.doc.title?.trim() || slug,
@@ -130,13 +139,12 @@ export function publicPageRows(data: LaunchData, visibleSlugs: readonly string[]
  * `done`, `todo` or (the leftover note) `reminder`.
  */
 export function evaluateChecklist(data: LaunchData, homepage: string): ChecklistItem[] {
-  const pages = versions(data)
-  const publishedPages = pages.filter(({ published }) => published)
+  const publishedPages = publishedVersions(data.pages)
   const publishedIds = new Set(publishedPages.map(({ id }) => id))
   const bySlug = (slug: string) => publishedPages.find(({ doc }) => doc.slug === slug)
-  const identity = resolveVersions(data.identity)[0]
-  const navigation = resolveVersions(data.navigation)[0]
-  const business = resolveVersions(data.business)[0]
+  const identity = publishedVersions(data.identity)[0]
+  const navigation = publishedVersions(data.navigation)[0]
+  const business = publishedVersions(data.business)[0]
 
   const items: ChecklistItem[] = []
 
@@ -179,7 +187,7 @@ export function evaluateChecklist(data: LaunchData, homepage: string): Checklist
     })
   }
 
-  const navigationPublished = navigation?.published === true
+  const navigationPublished = navigation !== undefined
   items.push({
     id: 'menus-published',
     label: 'The header and footer menus are published',
@@ -209,7 +217,7 @@ export function evaluateChecklist(data: LaunchData, homepage: string): Checklist
     })
   }
 
-  const icon = identity?.published ? identity.doc.browserIcon : null
+  const icon = identity?.doc.browserIcon
   const hasOwnIcon =
     (icon?.choice === 'upload' && Boolean(icon.image)) ||
     (icon?.choice === 'logo' && Boolean(identity?.doc.logo))
@@ -221,7 +229,7 @@ export function evaluateChecklist(data: LaunchData, homepage: string): Checklist
     fix: hasOwnIcon ? undefined : { intent: 'edit', type: 'siteIdentity', id: 'siteIdentity' },
   })
 
-  const info = business?.published ? business.doc : null
+  const info = business?.doc
   const hasContact = Boolean(info?.phone?.trim() || info?.publicEmail?.trim())
   items.push({
     id: 'contact',

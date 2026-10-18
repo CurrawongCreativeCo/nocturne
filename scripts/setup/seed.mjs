@@ -95,7 +95,8 @@ export function seedDocuments(siteName, { prelaunch = false } = {}) {
     title: 'Links',
     slug: { _type: 'slug', current: 'links' },
     minimalLayout: true,
-    seo: { _type: 'seo', noIndex: false },
+    // Hidden from search engines, as the template is: a list of links, not a page to rank.
+    seo: { _type: 'seo', noIndex: true },
     pageBuilder: [
       {
         _key: key(),

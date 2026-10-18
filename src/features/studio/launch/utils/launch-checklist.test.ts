@@ -142,6 +142,31 @@ describe('evaluateChecklist', () => {
     expect(statusOf(data, 'browser-icon')).toBe('todo')
   })
 
+  it('reads the published version when a draft beside it fixes something visitors cannot see yet', () => {
+    const data = ready()
+    data.identity = [
+      { _id: 'siteIdentity', browserIcon: { choice: 'default' } },
+      { _id: 'drafts.siteIdentity', browserIcon: { choice: 'upload', image: 'x' } },
+    ]
+    data.business = [
+      { _id: 'businessInfo', phone: null, publicEmail: null, socialCount: 0 },
+      { _id: 'drafts.businessInfo', phone: '02 5550 0000', publicEmail: null, socialCount: 2 },
+    ]
+    data.pages.push({ _id: 'drafts.links-id', slug: 'links', pageBuilder: [note('Coming soon')] })
+    expect(statusOf(data, 'browser-icon')).toBe('todo')
+    expect(statusOf(data, 'contact')).toBe('todo')
+    expect(statusOf(data, 'social')).toBe('todo')
+    // The draft's note is not on the published page, so there is nothing to remind about.
+    expect(statusOf(data, 'temporary-note')).toBeUndefined()
+  })
+
+  it('does not count a page scheduled in a release as published', () => {
+    const data = ready()
+    data.pages = data.pages.filter((page) => page.slug !== 'home')
+    data.pages.push({ _id: 'versions.r1.home-id', title: 'Home', slug: 'home', pageBuilder: [] })
+    expect(statusOf(data, 'home-page')).toBe('todo')
+  })
+
   it('needs a phone or an email, and a social link, in published Business info', () => {
     const data = ready()
     data.business = [
@@ -254,7 +279,9 @@ describe('small readers', () => {
 
   it('portableTextOf joins every span', () => {
     expect(
-      portableTextOf([note('one'), { _type: 'hero', title: 'ignored' }, note('two')]).trim(),
-    ).toBe('one  two')
+      portableTextOf([note('one'), { _type: 'hero', title: 'ignored' }, note('two')])
+        .replace(/\s+/g, ' ')
+        .trim(),
+    ).toBe('one two')
   })
 })

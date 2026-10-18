@@ -46,9 +46,12 @@ const isViewPath = (pathname: string) =>
 /**
  * Whether a path asks for a web page rather than a file (`/events/open-day.ics`, `/feed.xml`, an
  * image): only pages are worth sending to the temporary page. A legacy ".html" path counts as a page.
+ * Nothing under a dot folder is (`/.well-known/…`: app links, security.txt), whatever its name.
  */
 export function isHtmlPagePath(pathname: string): boolean {
-  const last = pathname.split('/').pop() ?? ''
+  const segments = pathname.split('/')
+  if (segments.some((segment) => segment.startsWith('.'))) return false
+  const last = segments.pop() ?? ''
   return !last.includes('.') || last.toLowerCase().endsWith('.html')
 }
 

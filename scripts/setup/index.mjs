@@ -460,7 +460,7 @@ function startServer(port = 3333, attemptsLeft = 10) {
           reportRemoval(outcome.removed)
           if (outcome.prelaunch) {
             console.log(
-              'Pre-launch: attach the domain with the runbook in the README ("Pre-launch and launch"), then work through the launch checklist in Studio (Website settings → Launch & visibility).\n',
+              'Pre-launch: attach the domain in Vercel (README, "Deploying (Vercel)"), run npm run launch:check -- <domain> --prelaunch, then work through the launch checklist in Studio (Website settings → Launch & visibility).\n',
             )
           }
           console.log(

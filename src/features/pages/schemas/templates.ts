@@ -76,11 +76,14 @@ export const pageTemplates: Template[] = [
     title: 'Link page',
     schemaType: 'page',
     // A link-in-bio page: no header or footer, a profile, social icons and a list of links. The
-    // links have no address yet, so each one blocks publishing until it is filled in.
+    // links have no address yet, so each one blocks publishing until it is filled in. Hidden from
+    // search engines: it is a list of links, and it would compete with the home page for the
+    // business's name.
     value: () => ({
       title: 'Links',
       slug: { _type: 'slug', current: 'links' },
       minimalLayout: true,
+      seo: { _type: 'seo', noIndex: true },
       pageBuilder: [
         section('linkList', {
           variant: 'stacked',
@@ -112,13 +115,14 @@ export const pageTemplates: Template[] = [
     id: 'page-links-coming-soon',
     title: 'Link page + coming soon',
     schemaType: 'page',
-    // The permanent /links page with a "new website on its way" note: remove the note at launch. It
-    // stays indexed, because /links is a page people keep. Every link blocks publishing until it has
-    // an address.
+    // The permanent /links page with a "new website on its way" note: remove the note at launch.
+    // Hidden from search engines, like the Link page. Every link blocks publishing until it has an
+    // address.
     value: () => ({
       title: 'Links',
       slug: { _type: 'slug', current: 'links' },
       minimalLayout: true,
+      seo: { _type: 'seo', noIndex: true },
       pageBuilder: [
         section('richText', {
           style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },

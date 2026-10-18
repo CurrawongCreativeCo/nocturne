@@ -52,7 +52,7 @@ export async function SiteShell({
 }) {
   const { isEnabled: isDraftMode } = await draftMode()
   const search = chrome && isFeatureEnabled('search') ? <QuickSearch /> : undefined
-  const cookieSettings = chrome && hasConsentProviders && (
+  const cookieSettings = hasConsentProviders && (
     <CookieSettingsButton className="text-small text-ink-muted hover:text-ink" />
   )
 
@@ -131,6 +131,8 @@ export async function SiteShell({
           )}
         </div>
       )}
+      {/* Without the footer, its cookie settings button still has to be somewhere: a visitor can always change their mind. */}
+      {!chrome && cookieSettings && <div className="py-6 text-center">{cookieSettings}</div>}
       {/*
         Subscribes to Content Lake changes and expires matching cache tags. In webhook mode
         only editors need it (live previews); visitors' caches are expired by /api/revalidate.

@@ -8,8 +8,8 @@ import { CheckoutButton } from '@/features/pricing/components/checkout-button'
 
 /**
  * Where the page builder meets the features it can't import itself (forms, payments, panels, auth):
- * `src/app` composes them and hands them to `PageView` as render props. The pre-launch view uses
- * this one set; the main page route and the A/B route still carry their own identical copies.
+ * `src/app` composes them and hands them to `PageView` as render props. The main page route, the A/B
+ * route and the pre-launch view all use this one set.
  */
 
 type Props = ComponentProps<typeof PageView>
@@ -25,8 +25,10 @@ const renderNewsletter: Props['renderNewsletter'] = (request) => <NewsletterView
 const renderCheckout: Props['renderCheckout'] = (request) => <CheckoutButton {...request} />
 
 /**
- * Panels are their own feature too. Imported on demand, so the overlay's client code is referenced
- * only by pages that render panels (the home page's JavaScript budget).
+ * Panels are their own feature too: the page hands over the panels its buttons open, and a panel's
+ * form comes from the forms feature. Imported on demand, so the overlay's client code is referenced
+ * only by pages that render panels: a static import here puts it in every page's scripts (the home
+ * page's JavaScript budget).
  */
 async function PanelsView({
   panels,

@@ -51,12 +51,13 @@ export function buildLaunchView({
 }): LaunchViewModel {
   const pages = resolveVersions(data.pages)
   const homepageRow = publicPageRows(data, [state.homepage])[0]
+  const linkPage = findLinkListPage(pages, state.homepage)
   const wording: LaunchWordingInput = {
     status: state.status,
     homepageTitle: homepageRow?.title ?? state.homepage,
     domain: domainOf(siteUrl),
+    homepageIsLinkPage: linkPage?.doc.slug === state.homepage,
   }
-  const linkPage = findLinkListPage(pages, state.homepage)
   const agency = seesChecklist(audience)
   const prelaunch = state.status === 'prelaunch'
   const checklist = agency && prelaunch ? evaluateChecklist(data, state.homepage) : []

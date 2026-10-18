@@ -42,7 +42,7 @@ export const ROUTES: Record<string, [Classification, string]> = {
     'Every CMS page; only the listed ones are rewritten to the bare view.',
   ],
   '(site)/blog/page.tsx': ['gated-by-proxy', 'Blog index: unfinished posts.'],
-  '(site)/blog/[slug]/page.tsx': ['gated-by-proxy', 'A post.'],
+  '(site)/blog/[slug]/page.tsx': ['gated-by-proxy', 'A blog post: unfinished content.'],
   '(site)/blog/category/[slug]/page.tsx': ['gated-by-proxy', 'A blog category.'],
   '(site)/events/[slug]/page.tsx': ['gated-by-proxy', 'An event page.'],
   '(site)/team/[slug]/page.tsx': ['gated-by-proxy', 'A team profile.'],

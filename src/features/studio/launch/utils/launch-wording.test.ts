@@ -25,6 +25,13 @@ describe('launch wording', () => {
     expect(clientSentence(live)).toBe('Your website is live.')
   })
 
+  it('does not call a Coming soon page a Link page', () => {
+    expect(clientSentence({ ...pre, homepageIsLinkPage: false })).toBe(
+      'Your website is in pre-launch. Visitors see a temporary page at example.com.au. Currawong will launch the full site.',
+    )
+    expect(clientSentence({ ...pre, homepageIsLinkPage: true })).toBe(clientSentence(pre))
+  })
+
   it('the Start here banner shows only before launch', () => {
     expect(launchBanner(pre)).toBe(clientSentence(pre))
     expect(launchBanner(live)).toBeNull()

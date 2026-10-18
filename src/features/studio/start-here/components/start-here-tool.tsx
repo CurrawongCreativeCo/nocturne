@@ -57,7 +57,7 @@ import { displayTitle, greeting, welcomeLine } from '../utils/wording'
 
 interface Data {
   /** The published page that uses a Link list, for the "Your links" card. */
-  linkPage: { id: string } | null
+  linkPage: { id: string; slug: string | null | undefined } | null
   recent: RecentChange[]
   changes: Map<string, LastChange>
   checks: ThingsToCheck
@@ -122,6 +122,8 @@ export function StartHereTool() {
     status: launch.status,
     homepageTitle: launch.homepage,
     domain: domainOf(siteOrigin()),
+    // Not known until the content has loaded; until then the usual wording.
+    homepageIsLinkPage: state.status === 'ready' ? linkPage?.slug === launch.homepage : undefined,
   })
 
   useEffect(() => {
@@ -155,7 +157,7 @@ export function StartHereTool() {
         setState({
           status: 'ready',
           data: {
-            linkPage: linkPage ? { id: linkPage.id } : null,
+            linkPage: linkPage ? { id: linkPage.id, slug: linkPage.doc.slug } : null,
             recent,
             changes,
             checks,
