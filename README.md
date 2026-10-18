@@ -3004,6 +3004,36 @@ sits very close to its budget (`JS_BUDGET_KB` in `tests/e2e/performance.spec.ts`
 to the shared layout; a client component imported by a server component that every page renders joins every page. `tests/e2e/performance.spec.ts` also holds `/links`
 to the same budget.
 
+**Pre-launch pages.** Four page templates (_Pages → New_) cover the weeks before a site is ready. They are made only of
+existing sections, so every design choice is in the sections' own Design tabs, and each starts as a **Minimal page**.
+
+| Template                    | Use it when                                                                   | Starts at             | Search engines |
+| --------------------------- | ----------------------------------------------------------------------------- | --------------------- | -------------- |
+| **Link page**               | The business only needs a link-in-bio page, now or for good.                  | `/links`              | Allowed        |
+| **Link page + coming soon** | There is a link-in-bio page now and a new website is on its way. The default. | `/links`              | Allowed        |
+| **Coming soon**             | The domain points at the site but it opens on a date.                         | `/coming-soon`        | Hidden         |
+| **Under construction**      | A live site is being rebuilt and visitors still need to reach you.            | `/under-construction` | Hidden         |
+
+- **Link page + coming soon** is the Link page with a short note above the list ("Our new website is on its way. Until then,
+  everything is here."), a compact **Newsletter signup** under it and a footer note. The first link, "Book now", is the large
+  one. It stays indexed, because `/links` is a page people keep.
+- **Coming soon** is a **Hero** on the _Centred text, no image_ preset that fills the screen, a **Newsletter signup** and a
+  compact **Link list** of the social icons from [Business info](#business-info). The line "Replace: Opening [date]" is plain
+  text in the hero's intro; type the date by hand.
+- **Under construction** is a centred **Hero** with a short message, a **Location** section with no map and a **Form** section.
+  The contact details come from Business info rather than a rich-text block, so they are typed once and stay in step with the
+  footer when they change. The Form section has no form chosen, so Studio won't publish the page until you pick one.
+- **Agency only.** Coming soon and Under construction are hidden from clients in _New_ (`AGENCY_ONLY_TEMPLATE_IDS` in
+  `src/features/pages/schemas/templates.ts`); clients can start either Link page. Both are saved with **Hide from search
+  engines** ticked, so they stay out of the sitemap and search results.
+- **Placeholders.** Copy the editor must change starts with "Replace:" (the profile, two of the three links, the date, the
+  footer note), so `npm run launch:check` reports any that reach the live site. Each link's address is empty, so Studio won't
+  publish until it is filled in.
+
+**At launch**, on the Link page + coming soon: delete the first section (the coming-soon note), add a **Visit our website**
+link to the list (make it the large one) and, if the newsletter signup has done its job, delete that too. On Coming soon and
+Under construction, publish the real home page, then delete the page or redirect `/coming-soon` to `/` (_Redirects_).
+
 **Tests.** Vitest: the scheduling rule, which links are drawn and which is large, grouping, UTM tags, the click props,
 headings, social sources, the tracking script, the template and the presets. `tests/e2e/link-list.spec.ts`: order, hidden and
 not-yet-due links (absent from the HTML, addresses included), the header and footer going away and coming back across client
@@ -3016,6 +3046,7 @@ and 1280 px; `design-settings-visual.spec.ts` repeats them in the Light and Dark
 table, which fields show for which layout, the icon list and drawings, the glass tokens and the contrast check at each
 strength. The section gallery has one entry per preset (`link-list-stacked`, `-cards`, `-editorial`, `-compact`,
 `-image-focused`, `-glass-rows`), screenshot on desktop and mobile; macOS skips them, so refresh the baselines with the **Update visual baselines** workflow.
+`tests/e2e/prelaunch-pages.spec.ts` checks the Coming soon and Under construction fixtures at 375 and 1280 px (one `h1`, axe, no header or footer, `noindex`, left out of the sitemap); Vitest (`templates.test.ts`) checks all three new templates.
 
 ### Style guide
 

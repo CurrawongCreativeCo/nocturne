@@ -24,7 +24,7 @@ import { hideEnquiriesFromNewMenu, withoutEnquiryDuplicate } from './src/feature
 import { framesSchemaTypes } from './src/features/frames/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { sectionTypes } from './src/features/pages/schemas/sections'
-import { pageTemplates } from './src/features/pages/schemas/templates'
+import { AGENCY_ONLY_TEMPLATE_IDS, pageTemplates } from './src/features/pages/schemas/templates'
 import { panelsSchemaTypes } from './src/features/panels/schemas'
 import { pricingSchemaTypes } from './src/features/pricing/schemas'
 import { hidePricesFromNewMenu } from './src/features/pricing/studio'
@@ -66,7 +66,7 @@ import { sharedSchemaTypes } from './src/lib/sanity/schema'
 
 /** Templates and types clients may create from "New document": page templates, posts and their authors and categories. */
 const CLIENT_NEW_DOCUMENT_IDS = new Set([
-  ...pageTemplates.map(({ id }) => id),
+  ...pageTemplates.map(({ id }) => id).filter((id) => !AGENCY_ONLY_TEMPLATE_IDS.has(id)),
   'post',
   'author',
   'category',

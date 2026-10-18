@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- Pre-launch page templates beside the Link page: **Link page + coming soon**, **Coming soon** and **Under construction**, built from existing sections. The last two are agency-only and hidden from search engines. No schema changes. See the README's _Pre-launch pages_.
+
 ### Changed
 
 ### Fixed

@@ -3233,6 +3233,80 @@ documents.push(
     ],
   },
   {
+    // The "Coming soon" page template (src/features/pages/schemas/templates.ts), as an editor would
+    // leave it (tests/e2e/prelaunch-pages.spec.ts). Keep it in step with the template.
+    _id: 'page-coming-soon',
+    _type: 'page',
+    title: 'Coming soon',
+    slug: { _type: 'slug', current: 'coming-soon' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'cs-hero',
+        _type: 'hero',
+        variant: 'overlay',
+        title: 'Something new is on its way',
+        description: 'Replace: Opening [date]',
+        style: { _type: 'sectionStyle', tone: 'surface', fillScreen: true },
+      },
+      {
+        _key: 'cs-signup',
+        _type: 'newsletterSignup',
+        title: 'Be the first to know',
+        text: 'Get one email when we open.',
+        submitLabel: 'Subscribe',
+        successMessage: 'Thanks! Check your inbox for a message from us.',
+        style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+      },
+      {
+        _key: 'cs-socials',
+        _type: 'linkList',
+        variant: 'compact',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+        socialSource: 'business',
+        links: [],
+      },
+    ],
+  },
+  {
+    // The "Under construction" page template, with a form chosen as publishing requires.
+    _id: 'page-under-construction',
+    _type: 'page',
+    title: 'Under construction',
+    slug: { _type: 'slug', current: 'under-construction' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'uc-hero',
+        _type: 'hero',
+        variant: 'overlay',
+        title: 'We’re updating our website',
+        description:
+          'Replace: A line or two on what is changing and when it will be back. In the meantime, get in touch below.',
+        style: { _type: 'sectionStyle', tone: 'surface' },
+      },
+      {
+        _key: 'uc-location',
+        _type: 'location',
+        title: 'Contact us',
+        showHours: true,
+        showOpenNow: true,
+        showContact: true,
+        directionsLabel: 'Get directions',
+      },
+      {
+        _key: 'uc-form',
+        _type: 'formSection',
+        title: 'Send us a message',
+        text: 'We’ll reply as soon as we can.',
+        form: ref('form-contact'),
+      },
+    ],
+  },
+  {
     // A Link list inside an ordinary page (it keeps the header and footer), in two layouts.
     _id: 'page-link-list',
     _type: 'page',
