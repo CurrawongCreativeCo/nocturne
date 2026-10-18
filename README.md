@@ -3366,6 +3366,9 @@ replaced by a fixed gradient, so no screenshot depends on the network. Baselines
 - **Baselines are Linux-only**: text renders slightly differently on every operating system. The visual tests
   skip themselves on macOS and Windows (`E2E_VISUAL_ANY_OS=1` compares anyway, against baselines you must
   not commit). CI runs on Linux, so it checks them.
+- **Which specs it refreshes:** those whose file name contains `visual`, plus `link-list-glass.spec.ts` (named in the
+  `test:e2e:update` script). A new spec that takes screenshots must be added to that script, or the workflow will
+  never create its baselines.
 - **Refreshing** after an intended design change: `npm run test:e2e:update` on Linux, or from any system in
   Docker (use the image tag that matches `@playwright/test` in `package.json`). CI's runner is the reference:
   if a Docker-made baseline differs from CI by a few pixels (system fonts), use the workflow below instead.
