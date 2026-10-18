@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { hasConsentProviders } from '@/config/analytics'
+import { getLaunchState } from '@/config/launch'
 import { siteProfile } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
 import { templateVersion } from '@/config/template-version'
@@ -19,11 +20,15 @@ import { sentryDsn } from '@/lib/sentry/config'
  * var, redeploy. `BUILT_AT` is stamped by next.config.ts.
  */
 export function GET() {
+  // The build's profile, not the runtime override: this is prerendered, so SITE_LAUNCH_OVERRIDE set
+  // on a running server (the proxy honours it) is not reflected here until the next build.
+  const { status, homepage } = getLaunchState(siteProfile, {})
   return NextResponse.json({
     templateVersion,
     tier: siteProfile.tier,
     // What the site profile (site.profile.ts) switches on; `features` below is what is configured.
     enabled: siteProfile.features,
+    launch: { status, homepage },
     features: {
       forms: getFormsConfig().ready,
       newsletter: getNewsletterConfig().ready,

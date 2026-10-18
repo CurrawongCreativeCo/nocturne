@@ -1,16 +1,20 @@
-import { EVENTS_SEGMENT } from '@/config/event-paths'
+import { EVENTS_SEGMENT } from './event-paths'
 import {
   BLOG_SEGMENT,
   EXPERIMENT_SEGMENT,
   GALLERY_SEGMENT,
+  PRELAUNCH_VIEW_SEGMENT,
   SEARCH_SEGMENT,
   SIGN_IN_SEGMENT,
   SIGN_OUT_SEGMENT,
   STUDIO_BRAND_PREVIEW_SEGMENT,
   TEAM_SEGMENT,
-} from '@/config/paths'
+} from './paths'
 
-/** First path segments taken by app routes: a page there could never be reached. */
+/**
+ * First path segments taken by app routes: a page there could never be reached. In `src/config`, not
+ * the pages feature, because the site profile validates its launch slugs against it.
+ */
 const RESERVED_SEGMENTS = new Set([
   'studio',
   'api',
@@ -18,6 +22,7 @@ const RESERVED_SEGMENTS = new Set([
   BLOG_SEGMENT,
   EXPERIMENT_SEGMENT,
   GALLERY_SEGMENT,
+  PRELAUNCH_VIEW_SEGMENT,
   SEARCH_SEGMENT,
   SIGN_IN_SEGMENT,
   SIGN_OUT_SEGMENT,

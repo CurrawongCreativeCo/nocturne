@@ -87,6 +87,13 @@ export const STUDIO_BRAND_PREVIEW_SEGMENT = 'studio-brand-preview'
 export const STUDIO_BRAND_PREVIEW_PATH = `/${STUDIO_BRAND_PREVIEW_SEGMENT}`
 
 /**
+ * Pre-launch preview (README, "Pre-launch and launch"): before a site launches, the team opens the
+ * real site under this segment. Reserved now so no page can take it. A CMS page can't use it.
+ */
+export const PRELAUNCH_VIEW_SEGMENT = 'prelaunch-view'
+export const PRELAUNCH_VIEW_PATH = `/${PRELAUNCH_VIEW_SEGMENT}`
+
+/**
  * Sign-in and sign-out pages (src/features/auth). A CMS page can't use these first segments, and
  * proxy.ts leaves them out of A/B tests. The Auth.js handlers live under /api/auth.
  */

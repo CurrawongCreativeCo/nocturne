@@ -11,6 +11,7 @@ interface SiteInfo {
   tier: string
   enabled: Record<string, boolean>
   features: Record<string, boolean>
+  launch: { status: string; homepage: string }
   commit: string | null
   builtAt: string
 }
@@ -31,6 +32,7 @@ test.describe('/api/site-info', () => {
       'commit',
       'enabled',
       'features',
+      'launch',
       'templateVersion',
       'tier',
     ])
@@ -39,6 +41,8 @@ test.describe('/api/site-info', () => {
     expect(body.tier).toBe('custom')
     expect(Object.values(body.enabled).every(Boolean)).toBe(true)
     expect(Object.keys(body.enabled)).toContain('blog')
+    // No launch block in the fixtures' profile: the site is live. Nothing else about it is reported.
+    expect(body.launch).toEqual({ status: 'live', homepage: 'links' })
     // The test environment switches these on (constants.ts); Sentry has no DSN.
     expect(body.features).toEqual({
       forms: true,

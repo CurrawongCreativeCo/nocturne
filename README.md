@@ -1345,6 +1345,7 @@ export const siteProfileInput = defineSiteProfile({
   tier: 'content', // 'brochure' | 'content' | 'commerce' | 'custom' (default 'custom')
   features: { pricing: false, members: false, experiments: false, team: false },
   clientSections: ['richText', 'mediaText', 'faq'], // empty: the default list
+  launch: { status: 'prelaunch', homepage: 'links', publicPages: ['privacy'] }, // left out: live
   help: { guideUrl: 'https://…', videos: { 'edit-a-page': 'https://…' }, supportEmail: 'help@…' },
 })
 ```
@@ -1360,6 +1361,9 @@ export const siteProfileInput = defineSiteProfile({
   (that is `studio-brand.json`).
 - A bad profile (missing client name or slug, an unknown tier, feature or section name, a non-https link) throws
   with every problem listed, so the build, `npm run dev` and the Studio all stop with a readable message.
+
+- **`launch`**: whether the site is open. Left out means **live**, so every existing site and the e2e fixtures are
+  unchanged. See [Launch state](#launch-state) below.
 
 **It controls visibility, not the schema.** Every document and section type stays registered, so `schema.json`,
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
@@ -1389,6 +1393,54 @@ yet configured.
 Tests: `src/config/profile.test.ts` (validation and defaults), `src/features/studio/utils/feature-visibility.test.ts`
 (what the Studio hides) and `site-profile-sections.test.ts` (the real profile against the real section list).
 The end-to-end fixtures run with everything on.
+
+#### Launch state
+
+A site is **pre-launch** (a temporary page at `/`, everything else private) or **live**. This block only _declares_
+the state and the helpers read it; the proxy that enforces it, the preview for the team and the launch checks are
+written in [Pre-launch and launch](#pre-launch-and-launch) (tasks 117 to 119).
+
+```ts
+launch: {
+  status: 'prelaunch', // 'prelaunch' | 'live'
+  homepage: 'links', // the slug shown at "/" before launch (default 'links')
+  publicPages: ['privacy'], // other slugs visitors may open before launch (default none)
+  unknownPaths: 'not-found', // or 'homepage': a 307 to the temporary page (default 'not-found')
+},
+```
+
+- **Defaults.** Leave the block out and the site is live. Inside it, only `status` is required. `unknownPaths: 'homepage'`
+  suits a business replacing an old site: a visitor following an old link lands on the temporary page, not a 404.
+- **Validation** (`validateSiteProfile`, so the build, `npm run dev` and Studio stop with a readable message): `status` and
+  `unknownPaths` must be one of their values; `homepage` and every `publicPages` entry must be a page slug (lowercase
+  letters, numbers and hyphens, `/` only between parts, the pattern the page schema uses); `homepage` cannot be `home`
+  (that is the real home page, which stays private until launch; the same goes for `publicPages`); none can start with
+  a segment the site uses (`blog`, `api`, `studio`, `prelaunch-view` and so on, from `src/config/reserved-slug.ts`);
+  `publicPages` cannot list a slug twice. A `publicPages` entry that repeats the `homepage` is allowed and ignored. A
+  `homepage` that is not published yet is allowed too: the gate answers 404 until it is, and `launch:check` will warn.
+- **Reading it.** `getLaunchState()` in `src/config/launch.ts` (shared code, so Studio can show it) returns `status`,
+  `homepage`, `publicPages`, `unknownPaths` and `visibleSlugs` (`[homepage, ...publicPages]`, no repeats).
+  `isPublicBeforeLaunch(pathname, state)` says whether a page path may be opened: live, always; pre-launch, `/` and the
+  `visibleSlugs`, matched whole (`/links` and `/links/` yes; `/links/more`, `/LINKS` and `//links` no, because it fails
+  closed). Routes that are not pages (`/api`, `/studio`, `/_next`) are the proxy's to classify.
+- **Why it is in code, not Studio.** On Sanity Growth every Editor can write any document, and hiding a field in the
+  Studio is not a permission. A switch in a document could be flipped by anyone who can edit it. In `site.profile.ts`,
+  changing the launch state is a reviewed commit and a deployment, and nothing in Sanity can change it.
+- **`SITE_LAUNCH_OVERRIDE=prelaunch`** turns a live profile into pre-launch without a commit: the second e2e server uses
+  it to test the gate, and it is the "hide the site now" lever in an emergency. It can **only hide**. Any other value,
+  including `live`, is ignored with a console warning, because an environment variable is set outside code review and
+  must never reveal a site the profile says is private. To open the site, change `status` in `site.profile.ts`.
+- **Caching rule.** Nothing cached may read the launch state: no page, query, feed or `'use cache'` function branches on
+  it. Pages render the same either way and the proxy decides what to serve; a cached read of it would bake one state
+  into the cache and show it in the other. The same rule is in the comment on `getLaunchState`.
+- **`/api/site-info`** adds `launch: { status, homepage }` and nothing else about it. It is prerendered, so it reports
+  the build's profile, not the runtime override.
+- **Reserved.** `prelaunch-view` (`PRELAUNCH_VIEW_PATH` in `src/config/paths.ts`) can't be a page slug: the team's
+  preview of the real site will live there.
+
+Tests: `src/config/launch.test.ts` (defaults, the override, `visibleSlugs`, `isPublicBeforeLaunch`),
+`src/config/profile.test.ts` (validation messages), `src/config/reserved-slug.test.ts` and `tests/e2e/site-info.spec.ts`
+(`launch.status` is `live` for the fixtures).
 
 ### Start here (Studio home screen)
 

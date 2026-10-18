@@ -1,3 +1,5 @@
+import { HOME_SLUG } from './paths'
+import { reservedSegment } from './reserved-slug'
 import { templateVersion } from './template-version'
 import { siteProfileInput } from '../../site.profile'
 
@@ -34,6 +36,26 @@ export type FeatureName = (typeof FEATURE_NAMES)[number]
 
 export type Features = Record<FeatureName, boolean>
 
+export const LAUNCH_STATUSES = ['prelaunch', 'live'] as const
+export type LaunchStatus = (typeof LAUNCH_STATUSES)[number]
+
+/** What a pre-launch visitor gets on a path that is not public: a 404, or a 307 to the temporary page. */
+export const UNKNOWN_PATHS = ['not-found', 'homepage'] as const
+export type UnknownPaths = (typeof UNKNOWN_PATHS)[number]
+
+/** The slug shown at "/" before launch, unless the profile names another. */
+export const DEFAULT_LAUNCH_HOMEPAGE = 'links'
+
+export interface LaunchInput {
+  status: LaunchStatus
+  /** The slug shown at "/" before launch. Default 'links'. It need not exist yet. */
+  homepage?: string
+  /** Other slugs visitors may open before launch. Default none. */
+  publicPages?: readonly string[]
+  /** Default 'not-found'. 'homepage' sends them to the temporary page (307): a business replacing an old site. */
+  unknownPaths?: UnknownPaths
+}
+
 export interface SiteProfileInput {
   client: { name: string; slug: string }
   /** Defaults to 'custom'. */
@@ -42,6 +64,12 @@ export interface SiteProfileInput {
   features?: Partial<Features>
   /** Section types clients may add, by schema name ('richText'). Empty or left out: the Studio's default list. */
   clientSections?: readonly string[]
+  /**
+   * Whether the site is open. Left out means live, so a site that never edits this behaves as it
+   * always has. Written in code on purpose: Studio cannot hold the switch safely, because anyone who
+   * can edit a document could change it (README, "Site profile").
+   */
+  launch?: LaunchInput
   help?: {
     /** The client's editing guide (an https URL). */
     guideUrl?: string
@@ -57,6 +85,7 @@ export interface SiteProfile {
   tier: Tier
   features: Features
   clientSections: string[]
+  launch: Required<LaunchInput> & { publicPages: string[] }
   help: { guideUrl?: string; videos?: Record<string, string>; supportEmail?: string }
   /** The template release this site was last brought up to (template-version.json). */
   templateVersion: string
@@ -70,6 +99,8 @@ export const DEFAULT_FEATURES: Readonly<Features> = Object.fromEntries(
 export const DEFAULT_TIER: Tier = 'custom'
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+/** A page slug: the same pattern the page schema enforces (nested paths allowed, no slashes at the ends). */
+const PAGE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -90,12 +121,64 @@ export interface ValidateOptions {
   sectionNames?: readonly string[]
 }
 
+/** Why `slug` cannot be a launch page, or null when it can. */
+function launchSlugProblem(field: string, slug: unknown): string | null {
+  if (typeof slug !== 'string' || !PAGE_SLUG.test(slug)) {
+    return `${field} ${JSON.stringify(slug)} is not a page slug: use lowercase letters, numbers and hyphens, with "/" only between parts (for example "links" or "services/web").`
+  }
+  if (slug === HOME_SLUG) {
+    return `${field} cannot be "${HOME_SLUG}": that is the real home page. Use another slug, such as "links".`
+  }
+  const reserved = reservedSegment(slug)
+  return reserved
+    ? `${field} "${slug}" starts with "${reserved}", which the site uses for something else.`
+    : null
+}
+
+function validateLaunch(launch: unknown): string[] {
+  if (!isRecord(launch)) return ['launch must be an object: { status: "prelaunch" | "live" }.']
+  const errors: string[] = []
+  const { status, homepage, publicPages, unknownPaths } = launch
+
+  if (!LAUNCH_STATUSES.includes(status as LaunchStatus)) {
+    errors.push(
+      `launch.status ${JSON.stringify(status)} is not one of ${LAUNCH_STATUSES.join(', ')}.`,
+    )
+  }
+  if (homepage !== undefined) {
+    const problem = launchSlugProblem('launch.homepage', homepage)
+    if (problem) errors.push(problem)
+  }
+  if (publicPages !== undefined) {
+    if (!Array.isArray(publicPages)) {
+      errors.push('launch.publicPages must be a list of page slugs.')
+    } else {
+      const slugs: unknown[] = publicPages
+      for (const slug of slugs) {
+        const problem = launchSlugProblem('launch.publicPages', slug)
+        if (problem) errors.push(problem)
+      }
+      const seen = new Set<unknown>()
+      for (const slug of slugs) {
+        if (seen.has(slug)) errors.push(`launch.publicPages lists "${String(slug)}" twice.`)
+        seen.add(slug)
+      }
+    }
+  }
+  if (unknownPaths !== undefined && !UNKNOWN_PATHS.includes(unknownPaths as UnknownPaths)) {
+    errors.push(
+      `launch.unknownPaths ${JSON.stringify(unknownPaths)} is not one of ${UNKNOWN_PATHS.join(', ')}.`,
+    )
+  }
+  return errors
+}
+
 /** Every problem with a profile, as readable sentences; empty when it is valid. */
 export function validateSiteProfile(input: unknown, options: ValidateOptions = {}): string[] {
   if (!isRecord(input)) return ['The profile must be an object.']
   const errors: string[] = []
 
-  const { client, tier, features, clientSections, help } = input
+  const { client, tier, features, clientSections, launch, help } = input
 
   if (!isRecord(client)) {
     errors.push('client is missing: add { name, slug }.')
@@ -143,6 +226,8 @@ export function validateSiteProfile(input: unknown, options: ValidateOptions = {
     }
   }
 
+  if (launch !== undefined) errors.push(...validateLaunch(launch))
+
   if (help !== undefined) {
     if (!isRecord(help)) {
       errors.push('help must be an object.')
@@ -186,6 +271,12 @@ export function resolveSiteProfile(
     tier: input.tier ?? DEFAULT_TIER,
     features: { ...DEFAULT_FEATURES, ...input.features },
     clientSections: [...(input.clientSections ?? [])],
+    launch: {
+      status: input.launch?.status ?? 'live',
+      homepage: input.launch?.homepage ?? DEFAULT_LAUNCH_HOMEPAGE,
+      publicPages: [...(input.launch?.publicPages ?? [])],
+      unknownPaths: input.launch?.unknownPaths ?? 'not-found',
+    },
     help: {
       ...(input.help?.guideUrl ? { guideUrl: input.help.guideUrl } : {}),
       ...(input.help?.videos ? { videos: { ...input.help.videos } } : {}),

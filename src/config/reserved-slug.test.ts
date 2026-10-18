@@ -10,6 +10,12 @@ describe('reservedSegment', () => {
     expect(reservedSegment('api/thing')).toBe('api')
   })
 
+  it('reserves the pre-launch preview segment', () => {
+    expect(reservedSegment('prelaunch-view')).toBe('prelaunch-view')
+    expect(reservedSegment('prelaunch-view/about')).toBe('prelaunch-view')
+    expect(reservedSegment('prelaunch')).toBeNull()
+  })
+
   it('reserves team only above the profile pages', () => {
     expect(reservedSegment('team/ann-lee')).toBe('team')
     expect(reservedSegment('team/a/b')).toBe('team')
