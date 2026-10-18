@@ -111,7 +111,7 @@ Open http://localhost:3000/studio:
     _Write alt text automatically_. It's off by default, each run spends credits, and the choice is
     saved per browser, so each editor decides for themselves (reload open Studio tabs to apply it).
   - _Meta description:_ in a page's SEO group, open the sparkle (AI Assist) menu on "Meta description" and
-    run **Write meta description**. It summarizes the page title and sections in one sentence under 155
+    run **Write meta description**. It summarises the page title and sections in one sentence under 155
     characters. Review before publishing.
 - **Blog:** _Blog_ in the sidebar holds _Posts_, _Authors_ and _Categories_. A post needs a title, slug, summary, main image (with alt text), published date, author and body; give it at least one category, because related posts are chosen by shared categories. The slug becomes `/blog/<slug>`, so `blog` is reserved and a page can't use it. Details:
   - _Index:_ `/blog` shows 12 posts per page, newest first by _Published at_, with Previous / Next links (`?page=2`) and a filter of the categories that have a post. `/blog/category/<slug>` lists one category the same way. Page 1 has no `?page`, and every page is its own canonical URL.
@@ -688,7 +688,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "form", "stripePrice"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -3090,23 +3090,23 @@ drift from the schemas). A new colour pair worth checking goes in `CONTRAST_PAIR
 ## Code quality
 
 **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It checks
-that the committed Sanity types and design token files are current, runs `npm run check`, proves the section generator's
-output passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
+that the committed Sanity types and design token files are current, runs `npm run check`, proves each generator's
+output (section, feature, document, singleton) passes too, and runs the end-to-end suite and Lighthouse in a real browser. **Dependabot** opens
 weekly grouped update PRs (Sanity, Next/React, dev tooling, GitHub Actions), waiting a week after
 each release before proposing it. Two scheduled workflows run beside CI: [Backups](#backups) and the
 weekly [enquiry retention](#enquiries) clean-up.
 
-| Command                   | Does                                                                       |
-| ------------------------- | -------------------------------------------------------------------------- |
-| `npm run check`           | Typecheck, lint, format and unit tests, read-only. Run it before pushing.  |
-| `npm run tokens`          | Regenerate the design token CSS and TypeScript from `tokens.json`          |
-| `npm run typecheck`       | TypeScript, strict mode                                                    |
-| `npm run lint`            | ESLint, zero warnings allowed (`lint:fix` to autofix)                      |
-| `npm run format:check`    | Prettier (`format` to apply)                                               |
-| `npm test`                | Unit tests (Vitest; `test:watch` while working)                            |
-| `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`) |
-| `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)       |
-| `npm run test:lighthouse` | Lighthouse budgets on `/` and `/about` (needs Chrome installed)            |
+| Command                   | Does                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `npm run check`           | Typecheck, lint, format and unit tests, read-only. Run it before pushing.      |
+| `npm run tokens`          | Regenerate the design token CSS and TypeScript from `tokens.json`              |
+| `npm run typecheck`       | TypeScript, strict mode                                                        |
+| `npm run lint`            | ESLint, zero warnings allowed (`lint:fix` to autofix)                          |
+| `npm run format:check`    | Prettier (`format` to apply)                                                   |
+| `npm test`                | Unit tests (Vitest; `test:watch` while working)                                |
+| `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`)     |
+| `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)           |
+| `npm run test:lighthouse` | Lighthouse budgets on `/`, `/about`, `/hero-parts` and `/links` (needs Chrome) |
 
 ### Link actions
 
@@ -3318,7 +3318,7 @@ Deleting the scratch dataset is permanent, so check the name first.
 
 ### Tests
 
-- **Unit** (`*.test.ts` next to the code): design token generation, the WCAG contrast of every token pairing and the no-raw-palette guardrail, slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
+- **Unit** (`*.test.ts` next to the code, or `*.test.tsx` for a component rendered to HTML): design token generation, the WCAG contrast of every token pairing and the no-raw-palette guardrail, slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
   dedupe logic, the section generator's naming, sitemap splitting, blog pagination, the RSS XML builder and date formatting, form validation, the members allow-list and callback-path checks, A/B option choice and cookie handling and the proxy's experiment lookup, the `/llms.txt` builder, consent parsing and the Google Analytics snippet, the rate limiter, the notification email, the Stripe webhook signature check, event and price mapping, config and REST calls, price formatting, the Turnstile and Resend calls and the forms environment check, the newsletter provider modules (Resend, Loops, Mailchimp, with `fetch` mocked) and their environment check, the setup wizard's validation and the launch check's pure checks (against saved pages and headers).
 - **End to end** (`tests/e2e`): a production build pointed at a fake Content Lake that serves
   `tests/e2e/fixtures/dataset.mjs`, so it runs offline with no Sanity project. On desktop and mobile
@@ -3366,6 +3366,9 @@ replaced by a fixed gradient, so no screenshot depends on the network. Baselines
 - **Baselines are Linux-only**: text renders slightly differently on every operating system. The visual tests
   skip themselves on macOS and Windows (`E2E_VISUAL_ANY_OS=1` compares anyway, against baselines you must
   not commit). CI runs on Linux, so it checks them.
+- **Which specs it refreshes:** those whose file name contains `visual`, plus `link-list-glass.spec.ts` (named in the
+  `test:e2e:update` script). A new spec that takes screenshots must be added to that script, or the workflow will
+  never create its baselines.
 - **Refreshing** after an intended design change: `npm run test:e2e:update` on Linux, or from any system in
   Docker (use the image tag that matches `@playwright/test` in `package.json`). CI's runner is the reference:
   if a Docker-made baseline differs from CI by a few pixels (system fonts), use the workflow below instead.
@@ -3455,7 +3458,7 @@ Content Lake as the end-to-end tests.
 
 - **JavaScript:** the test fetches `/`, takes every `<script src>` in the HTML, gzips each file from
   `.next/static` (level 9) and adds them up (1 KB = 1000 bytes). Over budget, it lists every chunk, largest
-  first. The total is about 216 KB today (200 KB before Motion, which adds 16.5 KB), so a new client-side dependency of even 5 KB trips it. Look first
+  first. The total is about 218.5 KB today (200 KB before Motion, which adds 16.5 KB), so a new client-side dependency of even 2 KB trips it. Look first
   for a client component that can be a server component, or an import that can be lazy-loaded (as
   `draft-mode-tools.tsx` does).
 - **Client memory:** in one page session, the test repeats what a visitor does (client navigations, quick
@@ -3821,7 +3824,7 @@ the template, so they merge cleanly unless you changed them.
 | Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                                                                                                                 | Clean                               |
 | Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                                                                                                                    | Take either side, regenerate        |
 
-Keep customizations out of core files where you can: add a section, a page template or a fixture
+Keep customisations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design
 tweaks to feature components (`src/features/*/components`) conflict like customize files. Where several
 projects keep editing the same core file, see [docs/template-packaging.md](docs/template-packaging.md)

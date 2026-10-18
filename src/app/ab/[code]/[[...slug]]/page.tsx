@@ -25,8 +25,9 @@ const renderNewsletter: ComponentProps<typeof PageView>['renderNewsletter'] = (r
   <NewsletterView {...request} />
 )
 
-/** Panels are their own feature too: the page hands over the panels its buttons open. */
 /**
+ * Panels are their own feature too: the page hands over the panels its buttons open.
+ *
  * Imported on demand, so the overlay's client code is referenced only by pages that render panels:
  * a static import here puts it in every page's scripts (the home page's JavaScript budget).
  */

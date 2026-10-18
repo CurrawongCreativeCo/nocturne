@@ -35,7 +35,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:update": "playwright test visual --update-snapshots --no-deps",
+    "test:e2e:update": "playwright test visual link-list-glass --update-snapshots --no-deps",
     "test:lighthouse": "lhci autorun"
   },
   "dependencies": {

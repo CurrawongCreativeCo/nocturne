@@ -51,6 +51,9 @@ const nextConfig: NextConfig = {
    * webhook in webhook mode) expires them when content changes; no time-based ISR.
    */
   cacheComponents: true,
+  // Unset behaves the same but warns on every build. Adopting `true` (one shared App Shell
+  // prefetch per route) needs its own change: see node_modules/next/dist/docs, "Adopting Partial Prefetching".
+  partialPrefetching: false,
   cacheLife: {
     // Cache "forever"; content changes are the invalidation mechanism.
     default: sanity,

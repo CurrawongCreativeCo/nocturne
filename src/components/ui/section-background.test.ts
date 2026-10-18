@@ -113,7 +113,8 @@ describe('SectionBackground', () => {
   it('keeps a fixed picture still on large screens only, clipped to the section', () => {
     const html = render({ image, placement: place({ imageFixed: true }) })
     expect(html).toContain('lg:motion-safe:fixed')
-    expect(html).toContain('[clip-path:inset(0)]')
+    // A class of its own: glued to the one before, it matches nothing.
+    expect(html).toContain(' [clip-path:inset(0)]')
     expect(render({ image })).not.toContain('fixed')
   })
 })

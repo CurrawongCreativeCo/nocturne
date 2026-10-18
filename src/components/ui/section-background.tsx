@@ -57,7 +57,7 @@ export function SectionBackground({
     <div
       aria-hidden="true"
       data-section-background=""
-      className={`absolute inset-0 -z-10 overflow-hidden${placement.fixed ? '[clip-path:inset(0)]' : ''}`}
+      className={`absolute inset-0 -z-10 overflow-hidden ${placement.fixed ? '[clip-path:inset(0)]' : ''}`}
     >
       {gradient ? (
         <div

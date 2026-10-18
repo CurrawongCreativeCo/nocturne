@@ -82,6 +82,8 @@ test('a tiled pattern repeats as a CSS background and strength is exact', async 
 })
 
 test('stays put on large screens only, and not for reduced motion', async ({ page }) => {
+  // playwright.config.ts reduces motion for every test; this one starts with it on.
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('/links-tiled')
   const image = layer(page).locator('[data-image-fixed]')

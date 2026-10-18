@@ -61,7 +61,8 @@ describe('Location', () => {
     expect(html).toContain('Newtown NSW 2042')
     expect(html).toContain('href="tel:+61298765432"')
     expect(html).toContain('href="mailto:hello@example.com"')
-    expect(html).toContain('Mon–Tue')
+    // Two days are listed; three or more in a row become a range (lib/opening-hours.ts).
+    expect(html).toContain('Mon, Tue')
     expect(html).toContain('8:00 am – 5:30 pm')
   })
 
