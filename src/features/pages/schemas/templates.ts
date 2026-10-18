@@ -1,5 +1,11 @@
 import type { Template } from 'sanity'
 
+/** Templates only the agency may start from: clients never see them in the New document menu. */
+export const AGENCY_ONLY_TEMPLATE_IDS: ReadonlySet<string> = new Set([
+  'page-coming-soon',
+  'page-under-construction',
+])
+
 /**
  * "New document" templates: pages that start with sections already in place, so
  * editors replace placeholder copy instead of building from an empty page.
@@ -94,10 +100,132 @@ export const pageTemplates: Template[] = [
       ],
     }),
   },
+  {
+    id: 'page-links-coming-soon',
+    title: 'Link page + coming soon',
+    schemaType: 'page',
+    // The permanent /links page with a "new website on its way" note: remove the note at launch. It
+    // stays indexed, because /links is a page people keep. Every link blocks publishing until it has
+    // an address.
+    value: () => ({
+      title: 'Links',
+      slug: { _type: 'slug', current: 'links' },
+      minimalLayout: true,
+      pageBuilder: [
+        section('richText', {
+          style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+          body: [paragraph('Our new website is on its way. Until then, everything is here.')],
+        }),
+        section('linkList', {
+          variant: 'stacked',
+          thumbnailSize: 'standard',
+          style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+          profile: {
+            name: 'Replace: Your name or business',
+            bio: 'Replace: One short line about who you are and what you do.',
+          },
+          socialSource: 'business',
+          links: ['Book now', 'Replace: Second link', 'Replace: Third link'].map(linkItem),
+        }),
+        section('newsletterSignup', {
+          title: 'Be the first to know',
+          text: 'Get one email when the new website launches.',
+          submitLabel: 'Subscribe',
+          successMessage: 'Thanks! Check your inbox for a message from us.',
+          style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+        }),
+        section('richText', {
+          body: [paragraph('Replace: © Your business name.')],
+        }),
+      ],
+    }),
+  },
+  {
+    id: 'page-coming-soon',
+    title: 'Coming soon',
+    schemaType: 'page',
+    // Agency only. Hidden from search engines until the site launches; delete the page (or the
+    // redirect in front of it) at launch.
+    value: () => ({
+      title: 'Coming soon',
+      slug: { _type: 'slug', current: 'coming-soon' },
+      minimalLayout: true,
+      seo: { _type: 'seo', noIndex: true },
+      pageBuilder: [
+        // The "Centred text, no image" hero preset, filling the screen.
+        section('hero', {
+          variant: 'overlay',
+          title: 'Something new is on its way',
+          description: 'Replace: Opening [date]',
+          style: { _type: 'sectionStyle', tone: 'surface', fillScreen: true },
+        }),
+        section('newsletterSignup', {
+          title: 'Be the first to know',
+          text: 'Get one email when we open.',
+          submitLabel: 'Subscribe',
+          successMessage: 'Thanks! Check your inbox for a message from us.',
+          style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+        }),
+        // The Compact preset, centred: social icons from Business info, no links of its own.
+        section('linkList', {
+          variant: 'compact',
+          thumbnailSize: 'standard',
+          style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+          socialSource: 'business',
+          links: [],
+        }),
+      ],
+    }),
+  },
+  {
+    id: 'page-under-construction',
+    title: 'Under construction',
+    schemaType: 'page',
+    // Agency only. Contact details come from Business info (the Location section, no map), so they
+    // are typed once and stay in step with the footer; a rich-text block would duplicate them.
+    value: () => ({
+      title: 'Under construction',
+      slug: { _type: 'slug', current: 'under-construction' },
+      minimalLayout: true,
+      seo: { _type: 'seo', noIndex: true },
+      pageBuilder: [
+        section('hero', {
+          variant: 'overlay',
+          title: 'We’re updating our website',
+          description:
+            'Replace: A line or two on what is changing and when it will be back. In the meantime, get in touch below.',
+          style: { _type: 'sectionStyle', tone: 'surface' },
+        }),
+        section('location', {
+          title: 'Contact us',
+          showHours: true,
+          showOpenNow: true,
+          showContact: true,
+          directionsLabel: 'Get directions',
+        }),
+        // No form chosen: the section blocks publishing until one is.
+        section('formSection', {
+          title: 'Send us a message',
+          text: 'We’ll reply as soon as we can.',
+        }),
+      ],
+    }),
+  },
 ]
 
 function section(type: string, fields: Record<string, unknown>) {
   return { _key: key(), _type: type, ...fields }
+}
+
+function linkItem(label: string, index: number) {
+  return {
+    _key: key(),
+    _type: 'linkItem',
+    label,
+    link: { _type: 'link', linkType: 'external', openInNewTab: false },
+    visibility: 'show',
+    featured: index === 0,
+  }
 }
 
 function paragraph(text: string) {
