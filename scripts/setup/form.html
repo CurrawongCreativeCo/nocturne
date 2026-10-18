@@ -383,6 +383,19 @@
               >
             </div>
           </label>
+          <label class="choice">
+            <input type="checkbox" name="prelaunch" checked />
+            <div>
+              <strong>Start with a pre-launch Link page</strong
+              ><span
+                >Link page today, full site later. The site opens on a published Link page and
+                everything else stays private. Home and About are saved as drafts, the menus start
+                empty, and <code>site.profile.ts</code> gets
+                <code>launch: { status: 'prelaunch' }</code>. Needs starter content. Untick it for a
+                live site with Home and About published.</span
+              >
+            </div>
+          </label>
         </fieldset>
 
         <details id="advanced">
@@ -433,6 +446,27 @@
       <section id="done" class="card" hidden aria-live="polite">
         <ul class="checklist" id="checklist"></ul>
         <p id="next" class="help"></p>
+        <div id="prelaunch-next" hidden>
+          <p class="help"><strong>Before you share the link</strong></p>
+          <ul class="checklist">
+            <li>
+              <span class="icon ok">→</span
+              ><span
+                >Attach the real domain: follow the domain runbook, README →
+                <em>Pre-launch and launch</em>, then run
+                <code>npm run launch:check -- https://example.com.au --prelaunch</code>.</span
+              >
+            </li>
+            <li>
+              <span class="icon ok">→</span
+              ><span
+                >Work through the launch checklist in Studio →
+                <em>Website settings → Launch &amp; visibility</em> (README →
+                <em>Launch &amp; visibility (Studio)</em>).</span
+              >
+            </li>
+          </ul>
+        </div>
         <div class="actions" id="actions" hidden>
           <a class="primary" id="studio-link" href="#">Open Studio</a>
           <a id="site-link" href="#">Open site</a>
@@ -504,16 +538,23 @@
         if (first && form[first].offsetParent !== null) form[first].focus()
       }
 
+      // A pre-launch site needs its Link page, which comes with the starter content.
+      function syncPrelaunch() {
+        form.prelaunch.disabled = !form.seed.checked
+      }
+
       async function load() {
         const state = await fetch('/api/state').then((r) => r.json())
         devPort = state.devPort
         for (const name of fields) form[name].value = state.values[name] ?? ''
         studioTitleEdited = Boolean(state.values.studioTitle)
+        form.prelaunch.checked = state.prelaunchDefault
         syncStudioTitle()
         if (state.values.projectId) form.projectMode.value = 'existing'
         if (state.values.token) form.tokenMode.value = 'paste'
         syncModes()
         syncLinks()
+        syncPrelaunch()
         if (state.initialError) {
           const { field, message } = state.initialError
           showErrors(
@@ -527,6 +568,7 @@
 
       form.addEventListener('change', (e) => {
         if (e.target.name === 'tokenMode' || e.target.name === 'projectMode') syncModes()
+        if (e.target.name === 'seed') syncPrelaunch()
       })
       form.addEventListener('input', (e) => {
         if (e.target.name === 'studioTitle') studioTitleEdited = true
@@ -551,6 +593,7 @@
         payload.tokenMode = tokenMode()
         payload.addCors = form.addCors.checked
         payload.seed = form.seed.checked
+        payload.prelaunch = form.seed.checked && form.prelaunch.checked
 
         try {
           const res = await fetch('/api/setup', {
@@ -597,8 +640,23 @@
           ),
           result.seed &&
             (result.seed.ok
-              ? ['ok', 'Added starter content: Home and About pages, site name and menu']
+              ? [
+                  'ok',
+                  result.prelaunch
+                    ? 'Added starter content: a published Link page, Home and About as drafts, and the site name'
+                    : 'Added starter content: Home and About pages, site name and menu',
+                ]
               : ['warn', `Starter content not added. ${escapeHtml(result.seed.message)}`]),
+          result.prelaunch &&
+            (result.profile?.ok
+              ? [
+                  'ok',
+                  'Set the site to pre-launch in <code>site.profile.ts</code> (<code>launch.status</code>)',
+                ]
+              : [
+                  'warn',
+                  `Could not set pre-launch in <code>site.profile.ts</code>. ${escapeHtml(result.profile?.message ?? '')} Add <code>launch: { status: 'prelaunch', homepage: 'links' }</code> by hand.`,
+                ]),
           [
             'ok',
             'The CMS uses Currawong Creative branding. To brand it for the client, edit <code>studio-brand.json</code> (see README, CMS branding).',
@@ -619,9 +677,14 @@
         document.getElementById('studio-link').href = `${site}/studio/presentation`
         document.getElementById('site-link').href = site
         const next = document.getElementById('next')
-        const homeHint = result.hasHome
-          ? ' Open Studio to edit pages side by side with the live preview.'
-          : ' Then create a Page with the slug <code>home</code> in Studio and publish it.'
+        const homeHint = result.prelaunch
+          ? ' Open Studio, fill in the Link page and publish it when its links have addresses.'
+          : result.hasHome
+            ? ' Open Studio to edit pages side by side with the live preview.'
+            : ' Then create a Page with the slug <code>home</code> in Studio and publish it.'
+        if (result.prelaunch) {
+          document.getElementById('prelaunch-next').hidden = false
+        }
         next.innerHTML = `Starting the site at ${site}…${homeHint}`
         waitForSite(site, () => {
           next.innerHTML = `Your site is running.${homeHint}`

@@ -31,6 +31,8 @@ with a **private** dataset (or connect an existing one; make that private too, s
 to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
 or future projects lose the wizard.
 
+**Link page today, full site later.** The form asks "Start with a pre-launch Link page?" (on by default in a new client project; it needs starter content). Yes imports a published **Link page** (the _Link page + coming soon_ template with its Minimal look and the site name in the profile; the placeholder links are hidden until the client gives them addresses), saves **Home and About as drafts only** (never published; they link to each other with weak references), leaves the menus empty, and sets `launch: { status: 'prelaunch', homepage: 'links' }` in `site.profile.ts` (one line; the rest of the file is untouched). The site then shows the Link page at `/` and answers 404 to everything else (see [Pre-launch and launch](#pre-launch-and-launch)). No gives the live site above. The import uses `--missing`, so existing documents are never overwritten. To see what it would do without writing anything: `npm run setup -- --dry-run --name "Acme"` (add `--live` for the other mode). The final screen points to the domain runbook (_Pre-launch and launch_) and the launch checklist (Studio → Website settings → _Launch & visibility_).
+
 A project set up without the wizard has no documents for those four screens, so each opens as _New Brand colours_ (and so on) until someone publishes it. Open each once in Studio and press **Publish** (nothing changes on the site). An empty Business info shows nothing on the site.
 
 The CMS (Studio) uses Currawong Creative's branding with no setup: `studio-brand.json` ships as an empty
