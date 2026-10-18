@@ -38,6 +38,9 @@ test('stays hidden while moving between prerendered pages', async ({ page }) => 
   await recordLoading(page)
   await page.goto('/')
   await expect(bar(page)).toHaveAttribute('data-phase', 'idle')
+  // "Instant" means the link's prefetch has landed. On a busy machine it can still be in flight at
+  // the click, and the bar is then right to appear, so wait for it.
+  await page.waitForLoadState('networkidle')
   await mainNav(page).getByRole('link', { name: 'About' }).click()
   await expect(page).toHaveURL('/about')
   await expect(page.getByRole('heading', { name: 'About', level: 1 })).toBeVisible()

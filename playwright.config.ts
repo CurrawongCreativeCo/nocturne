@@ -4,6 +4,9 @@ import {
   APP_ENV,
   APP_PORT,
   APP_PORT_ENQUIRIES_OFF,
+  APP_PORT_PRELAUNCH,
+  PRELAUNCH_PREVIEW_TOKEN,
+  PREVIEW_ACCESS_SECRET,
   FAKE_SANITY_PORT,
   REJECTED_CONSENT,
 } from './tests/e2e/constants'
@@ -11,6 +14,7 @@ import {
 const CI = Boolean(process.env.CI)
 // node_modules/.cache is ignored by git, ESLint and Prettier.
 const OFF_DIST_DIR = 'node_modules/.cache/e2e-enquiries-off'
+const PRELAUNCH_DIST_DIR = 'node_modules/.cache/e2e-prelaunch'
 const EXPERIMENTS_SPEC = /experiments\.spec\.ts/
 // Switch the colours the whole fake site is served in, so each runs alone (see the projects below).
 const DESIGN_SPEC = /design-settings\.spec\.ts/
@@ -106,6 +110,22 @@ export default defineConfig({
         E2E_GALLERY: '1',
         ENQUIRIES_STORE: '0',
         NEXT_DIST_DIR: OFF_DIST_DIR,
+      },
+    },
+    {
+      // The same build, started pre-launch by the hide-only override, to test the gate (README,
+      // "Pre-launch and launch"). Its own copy of the build, for the reason above.
+      command: `rm -rf ${PRELAUNCH_DIST_DIR} && mkdir -p node_modules/.cache && cp -R .next ${PRELAUNCH_DIST_DIR} && npx next start -p ${APP_PORT_PRELAUNCH}`,
+      port: APP_PORT_PRELAUNCH,
+      timeout: 120_000,
+      reuseExistingServer: !CI,
+      env: {
+        ...APP_ENV,
+        E2E_GALLERY: '1',
+        SITE_LAUNCH_OVERRIDE: 'prelaunch',
+        PREVIEW_ACCESS_SECRET,
+        PRELAUNCH_PREVIEW_TOKEN,
+        NEXT_DIST_DIR: PRELAUNCH_DIST_DIR,
       },
     },
   ],

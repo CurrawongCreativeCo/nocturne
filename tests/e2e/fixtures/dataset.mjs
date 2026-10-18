@@ -3265,6 +3265,14 @@ function launchDatePages() {
 
 documents.push(
   {
+    // The Presentation secret /api/draft-mode/enable validates (next-sanity reads this shared-access
+    // document, which does not expire); used by tests/e2e/prelaunch-gate.spec.ts.
+    _id: 'sanity-preview-url-secret.share-access',
+    _type: 'sanity.previewUrlShareAccess',
+    secret: 'e2e-draft-mode-secret',
+    studioUrl: 'http://localhost:3102/studio',
+  },
+  {
     _id: 'page-links',
     _type: 'page',
     title: 'Links',
@@ -3329,6 +3337,15 @@ documents.push(
             showFrom: '2099-01-01T00:00:00Z',
           }),
         ],
+      },
+      {
+        // Gives the pre-launch server a newsletter form on "/" (tests/e2e/prelaunch-gate.spec.ts).
+        _key: 'links-signup',
+        _type: 'newsletterSignup',
+        title: 'Be the first to know',
+        text: 'One email when the new website opens.',
+        submitLabel: 'Subscribe',
+        successMessage: 'Thanks! Check your inbox to confirm.',
       },
       {
         _key: 'links-note',

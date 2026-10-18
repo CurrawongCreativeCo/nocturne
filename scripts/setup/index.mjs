@@ -17,6 +17,7 @@ import { hostname, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { PRELAUNCH_LAUNCH, launchLine, setLaunchInProfile } from './profile-edit.mjs'
 import { seedDocuments } from './seed.mjs'
 import { DEFAULTS, DEV_PORT, ENV_KEYS, mergeEnv, normalize, parseEnv } from './validate.mjs'
 
@@ -30,8 +31,20 @@ const envPath = join(root, '.env.local')
  */
 const isTemplateCheckout = existsSync(join(root, '.template-dev'))
 
+const profilePath = join(root, 'site.profile.ts')
+
 // Must match HOME_SLUG in src/config/paths.ts.
 const HOME_SLUG = 'home'
+
+// `--dry-run [--name "Acme"] [--live]`: print what the wizard would write and stop. No network, no files.
+if (process.argv.includes('--dry-run')) {
+  const nameAt = process.argv.indexOf('--name')
+  printDryRun({
+    siteName: (nameAt > -1 && process.argv[nameAt + 1]) || DEFAULTS.projectName,
+    prelaunch: !process.argv.includes('--live'),
+  })
+  process.exit(0)
+}
 
 if (process.env.CI) {
   console.log('setup: CI detected, skipping the setup wizard.')
@@ -171,11 +184,54 @@ async function createProject({ projectName, dataset }) {
   return fail('projectName', cliErrorMessage(result, "Couldn't create the project"))
 }
 
-async function importStarterContent({ projectId, dataset, projectName }) {
+function printDryRun({ siteName, prelaunch }) {
+  console.log(
+    `Dry run: nothing is written. Starter content for "${siteName}", ${
+      prelaunch ? 'starting in pre-launch (--live for a live site)' : 'live'
+    }.\n`,
+  )
+  console.log('Documents (imported with --missing: created only if the ID is free):')
+  for (const doc of seedDocuments(siteName, { prelaunch })) {
+    const published = !doc._id.startsWith('drafts.')
+    const title = doc.title ?? ''
+    console.log(
+      `  ${doc._type.padEnd(16)} ${doc._id.padEnd(22)} ${published ? 'published' : 'draft only'}  ${title}`,
+    )
+  }
+  if (!prelaunch) return
+  const edit = existsSync(profilePath)
+    ? setLaunchInProfile(readFileSync(profilePath, 'utf8'))
+    : { ok: false, reason: 'site.profile.ts not found.' }
+  console.log('\nFiles:')
+  console.log(
+    edit.ok
+      ? `  site.profile.ts  ${launchLine(PRELAUNCH_LAUNCH)}${edit.changed ? '' : '  (already set)'}`
+      : `  site.profile.ts  NOT edited (${edit.reason}); add ${launchLine(PRELAUNCH_LAUNCH)} by hand`,
+  )
+  console.log('  .env.local       the Sanity connection (as usual)')
+}
+
+/** Sets the pre-launch block in site.profile.ts. Never throws: the site works without it. */
+function startInPrelaunch() {
+  try {
+    if (!existsSync(profilePath)) return { ok: false, message: 'site.profile.ts was not found.' }
+    const edit = setLaunchInProfile(readFileSync(profilePath, 'utf8'))
+    if (!edit.ok) return { ok: false, message: edit.reason }
+    if (edit.changed) writeFileSync(profilePath, edit.text)
+    return { ok: true }
+  } catch (error) {
+    return { ok: false, message: error.message }
+  }
+}
+
+async function importStarterContent(
+  { projectId, dataset, projectName },
+  { prelaunch = false } = {},
+) {
   const dir = mkdtempSync(join(tmpdir(), 'sanity-seed-'))
   const file = join(dir, 'starter.ndjson')
   try {
-    const docs = seedDocuments(projectName || 'My Site')
+    const docs = seedDocuments(projectName || 'My Site', { prelaunch })
     writeFileSync(file, docs.map((doc) => JSON.stringify(doc)).join('\n'))
     // --missing: never overwrite documents that already exist.
     const result = await sanityCli(
@@ -366,7 +422,13 @@ function startServer(port = 3333, attemptsLeft = 10) {
     }
 
     if (req.method === 'GET' && req.url === '/api/state') {
-      return sendJson(res, 200, { values: prefill, initialError, devPort: DEV_PORT })
+      return sendJson(res, 200, {
+        values: prefill,
+        initialError,
+        devPort: DEV_PORT,
+        // New client sites start in pre-launch; the template's own checkout stays live.
+        prelaunchDefault: !isTemplateCheckout,
+      })
     }
 
     if (req.method === 'POST' && req.url === '/api/setup') {
@@ -396,6 +458,11 @@ function startServer(port = 3333, attemptsLeft = 10) {
         res.on('finish', () => {
           console.log('✓ Connected to Sanity and wrote .env.local.')
           reportRemoval(outcome.removed)
+          if (outcome.prelaunch) {
+            console.log(
+              'Pre-launch: attach the domain in Vercel (README, "Deploying (Vercel)"), run npm run launch:check -- <domain> --prelaunch, then work through the launch checklist in Studio (Website settings → Launch & visibility).\n',
+            )
+          }
           console.log(
             'The CMS uses Currawong Creative branding. To brand it for the client, edit studio-brand.json (see README, CMS branding).\n',
           )
@@ -452,7 +519,10 @@ async function runSetup(body) {
   writeEnvFile(values)
   // The steps below are not blocking: the site works without them, and failures are reported.
   const cors = body.addCors ? await configureCors(values) : []
-  const seed = body.seed ? await importStarterContent(values) : null
+  const prelaunch = Boolean(body.seed && body.prelaunch)
+  const seed = body.seed ? await importStarterContent(values, { prelaunch }) : null
+  // Only once the Link page exists: a private site with no page to show would answer 404 at "/".
+  const profile = prelaunch && seed?.ok ? startInPrelaunch() : null
   const removed = removeWizard()
 
   return {
@@ -462,7 +532,9 @@ async function runSetup(body) {
     projectCreated: projectMode === 'create',
     tokenCreated: tokenMode === 'create',
     pageCount: connection.pageCount,
-    hasHome: connection.hasHome || Boolean(seed?.ok),
+    hasHome: connection.hasHome || Boolean(seed?.ok && !prelaunch),
+    prelaunch: Boolean(profile),
+    profile,
     cors,
     seed,
     removed,

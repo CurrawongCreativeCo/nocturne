@@ -41,6 +41,27 @@ const hueDistance = (a: string, b: string) => {
 const rgbToHexString = (rgb: string) =>
   `#${(rgb.match(/\d+/g) ?? []).map((v) => Number(v).toString(16).padStart(2, '0')).join('')}`
 
+test('shows the Launch & visibility screen for agency staff and clients, in both schemes', async ({
+  page,
+}) => {
+  for (const scheme of SCHEMES) {
+    const holder = page.locator(`[data-launch-scheme="${scheme}"]`)
+    const agency = holder.locator('[data-launch-example="agency"]')
+    await expect(agency.getByText('Pre-launch: visitors see Links at /')).toBeVisible()
+    await expect(agency.getByRole('heading', { name: 'Before launch' })).toBeVisible()
+    await expect(
+      agency.getByText('1 of 8 done').or(agency.getByText(/\d of \d done/)),
+    ).toBeVisible()
+    await expect(agency.getByRole('heading', { name: 'How to launch' })).toBeVisible()
+    const client = holder.locator('[data-launch-example="client"]')
+    await expect(
+      client.getByText(/Your website is in pre-launch\. Visitors see your Link page at/),
+    ).toBeVisible()
+    await expect(client.getByRole('button', { name: 'Edit your links' })).toBeVisible()
+    await expect(client.getByRole('heading', { name: 'Before launch' })).toHaveCount(0)
+  }
+})
+
 test.beforeEach(async ({ page }) => {
   await page.goto(PATH)
   await expect(page.locator('main[data-ready="true"]')).toBeVisible()

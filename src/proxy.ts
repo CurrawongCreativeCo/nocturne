@@ -2,6 +2,7 @@ import { get } from '@vercel/edge-config'
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { EVENTS_PATH } from '@/config/event-paths'
+import { getLaunchState } from '@/config/launch'
 import {
   BLOG_PATH,
   EXPERIMENT_PATH,
@@ -22,6 +23,15 @@ import {
 } from '@/features/experiments/utils/assign'
 import { encodeOption } from '@/features/experiments/utils/experiment-flag'
 import { loadActiveExperiment } from '@/features/experiments/utils/experiment-source'
+import {
+  decidePrelaunch,
+  decidePrelaunchFile,
+  isMachineFilePath,
+  PRELAUNCH_HEADERS,
+  PRELAUNCH_NOT_FOUND_PATH,
+  prelaunchViewPath,
+} from '@/lib/prelaunch-gate'
+import { PREVIEW_COOKIE, verifyPreviewPass } from '@/lib/preview-pass'
 import { EDGE_REDIRECTS_KEY, lookupRedirect, type EdgeRedirect } from '@/lib/redirects'
 import {
   currentStyleguideEnv,
@@ -33,7 +43,10 @@ import {
 } from '@/lib/styleguide-access'
 
 /**
- * Runs before every page request, for three jobs:
+ * Runs before every page request, for four jobs:
+ *  -1. The pre-launch gate (see `prelaunch`): while the site profile says pre-launch, only the
+ *     temporary page and the listed public pages are served, and everything else answers 404. Live,
+ *     it does nothing. It runs first, so the other jobs only ever see a request the gate let through.
  *  0. The style guide's preview token (see `styleguide`): on a preview deployment it answers 404
  *     unless the request carries the token.
  *  1. Studio-managed redirects, answered before any page renders. The map is written to Edge
@@ -43,12 +56,95 @@ import {
  *     variant) and the request is rewritten to the page's prerendered copy for that option.
  */
 export async function proxy(request: NextRequest) {
+  // The files the matcher also lists for the gate (sitemap, robots, feeds, the search and events APIs,
+  // share images) are not pages: no redirect, A/B test or style guide rule applies to them. Live they
+  // go straight through untouched.
+  if (isMachineFilePath(request.nextUrl.pathname)) return prelaunch(request) ?? NextResponse.next()
   return (
+    prelaunch(request) ??
     styleguide(request) ??
     (await redirect(request)) ??
     (await experiment(request)) ??
     NextResponse.next()
   )
+}
+
+/**
+ * The launch state, read once per server start: the profile is code and the override is an environment
+ * variable, so neither changes while the server runs (and a bad override warns once, not per request).
+ */
+const launchState = getLaunchState()
+
+/**
+ * Whether the request carries a valid pre-launch preview pass: a signed, unexpired `site_preview` cookie
+ * (`src/lib/preview-pass.ts`). Without PREVIEW_ACCESS_SECRET none is ever valid. The presence of
+ * `__prerender_bypass` proves nothing, because anyone can set a cookie with that name, so draft mode
+ * alone never opens the site: the enable route issues the pass.
+ */
+function hasValidPreviewPass(request: NextRequest) {
+  return verifyPreviewPass(request.cookies.get(PREVIEW_COOKIE)?.value, Date.now())
+}
+
+/**
+ * The pre-launch gate (README, "Pre-launch and launch"). Live: returns null and nothing changes.
+ * Before launch, `decidePrelaunch` picks one of four answers, and every gated response is marked
+ * `noindex` and `private, no-store`, so no cache between us and the visitor keeps a gated answer:
+ *  - "/" and the listed public pages are rewritten to the bare view, `/prelaunch-view/<slug>`
+ *    (no header, footer or menu), under the visitor's own address;
+ *  - anything else is rewritten to that view's not-found page, which answers a real 404 (a redirect
+ *    to the temporary page instead, for page paths, with `unknownPaths: 'homepage'`);
+ *  - a valid preview pass goes through untouched.
+ * The style guide keeps its own token rule, so it is left to `styleguide`. A/B tests are skipped by
+ * returning before they run. The gate stays correct under Cache Components because pages never read
+ * the launch state: the same cached page is served either way, and only this decides which.
+ */
+function prelaunch(request: NextRequest) {
+  if (launchState.status === 'live') return null
+  const { pathname } = request.nextUrl
+  if (pathname === GALLERY_PATH || pathname.startsWith(`${GALLERY_PATH}/`)) return null
+
+  const rewriteTo = (path: string, { keepQuery }: { keepQuery: boolean }) => {
+    const url = request.nextUrl.clone()
+    url.pathname = path
+    // A page keeps its query string (campaign tags, a form's return value); a 404 has no use for one.
+    if (!keepQuery) url.search = ''
+    return NextResponse.rewrite(url, { headers: PRELAUNCH_HEADERS })
+  }
+
+  // Machine-readable files first. A holder of a valid pass gets the normal ones.
+  const passed = hasValidPreviewPass(request)
+  const file = passed ? null : decidePrelaunchFile(pathname, launchState)
+  if (file?.action === 'rewrite') return rewriteFile(request, file.to)
+  if (file?.action === 'pass') return NextResponse.next({ headers: PRELAUNCH_HEADERS })
+  // Never a redirect to the temporary page, even with unknownPaths: 'homepage': an API wants a status.
+  if (file?.action === 'not-found') return rewriteTo(PRELAUNCH_NOT_FOUND_PATH, { keepQuery: false })
+
+  const decision = decidePrelaunch({
+    pathname,
+    hasValidPreviewPass: passed,
+    state: launchState,
+  })
+  switch (decision) {
+    case 'pass':
+      return NextResponse.next({ headers: PRELAUNCH_HEADERS })
+    case 'rewrite-view':
+      return rewriteTo(prelaunchViewPath(pathname, launchState.homepage), { keepQuery: true })
+    case 'redirect-home':
+      return NextResponse.redirect(new URL('/', request.url), {
+        status: 307,
+        headers: PRELAUNCH_HEADERS,
+      })
+    case 'not-found':
+      return rewriteTo(PRELAUNCH_NOT_FOUND_PATH, { keepQuery: false })
+  }
+}
+
+/** Serves a pre-launch file's handler under the address that was asked for (no query string is needed). */
+function rewriteFile(request: NextRequest, path: string) {
+  const url = request.nextUrl.clone()
+  url.pathname = path
+  url.search = ''
+  return NextResponse.rewrite(url, { headers: PRELAUNCH_HEADERS })
 }
 
 /**
@@ -165,9 +261,23 @@ async function experiment(request: NextRequest) {
   return response
 }
 
-/** Skips Studio, API routes, Next.js internals and static assets. Legacy ".html" URLs still match. */
+/**
+ * Skips Studio, API routes, Next.js internals and static assets, except the files listed after the
+ * first pattern. Legacy ".html" URLs still match.
+ */
 export const config = {
   matcher: [
     '/((?!(?:studio|api|_next)(?:/|$)|.*\.(?:ico|png|jpe?g|gif|svg|webp|avif|css|js|map|txt|xml|json|webmanifest|woff2?)$).*)',
+    // The machine-readable files, which the pattern above skips, so the pre-launch gate can answer
+    // them (live, the proxy lets them straight through). Next.js needs these as literals; the test in
+    // prelaunch-gate.test.ts checks each is covered.
+    '/sitemap.xml',
+    '/sitemap/:path*',
+    '/robots.txt',
+    '/llms.txt',
+    '/feed.xml',
+    '/api/search',
+    '/api/og/:path*',
+    '/api/events/:path*',
   ],
 }

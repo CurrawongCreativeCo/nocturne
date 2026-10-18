@@ -1,0 +1,8 @@
+{
+  "templateVersion": "1.5.0",
+  "tier": "custom",
+  "enabled": { "blog": true },
+  "features": {},
+  "commit": null,
+  "builtAt": null
+}

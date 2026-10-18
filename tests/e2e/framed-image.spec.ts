@@ -35,6 +35,23 @@ const rect = (locator: Locator) =>
     return { x, y, width, height }
   })
 
+/**
+ * The box's, frame's and picture's rects read in one go. Three separate reads can land on different
+ * frames while the page settles after a scroll, which shows up as sub-pixel "movement" between them.
+ */
+const rectsOf = (scope: Locator) =>
+  box(scope).evaluate((el) => {
+    const read = (node: Element | null) => {
+      const { x, y, width, height } = (node ?? el).getBoundingClientRect()
+      return { x, y, width, height }
+    }
+    return {
+      outer: read(el),
+      overlay: read(el.querySelector('[data-image-frame]')),
+      inner: read(el.querySelector('[data-framed-image-picture]')),
+    }
+  })
+
 const offsetOf = (scope: Locator) =>
   mover(scope).evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42)
 
@@ -71,11 +88,7 @@ test.describe('motion on', () => {
 
     // The frame's place inside its box, and the picture's, at three scroll positions.
     const sample = async () => {
-      const [outer, overlay, inner] = await Promise.all([
-        rect(box(scope)),
-        rect(frame(scope)),
-        rect(scaler(scope)),
-      ])
+      const { outer, overlay, inner } = await rectsOf(scope)
       return {
         frame: {
           x: overlay.x - outer.x,
@@ -118,7 +131,7 @@ test.describe('motion on', () => {
     for (const before of [800, 600, 450, 300, 150, 0, -150, -300]) {
       await scrollSection(page, scope, before)
       await scrollTo(page, (await page.evaluate(() => scrollY)) + 1)
-      const [outer, inner] = [await rect(box(scope)), await rect(scaler(scope))]
+      const { outer, inner } = await rectsOf(scope)
       moved ||= (await offsetOf(scope)) !== 0
       // The picture's box already includes its transform and its scale; 0.5px for rounding.
       expect(inner.y).toBeLessThanOrEqual(outer.y + 0.5)

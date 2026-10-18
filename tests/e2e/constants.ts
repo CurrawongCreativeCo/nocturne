@@ -2,6 +2,13 @@
 export const APP_PORT = 3100
 /** A second server on the same build with ENQUIRIES_STORE off; the main one has it on (enquiries.spec.ts). */
 export const APP_PORT_ENQUIRIES_OFF = 3101
+/** A third server on the same build with SITE_LAUNCH_OVERRIDE=prelaunch (prelaunch-gate.spec.ts). */
+export const APP_PORT_PRELAUNCH = 3102
+/** The pre-launch preview pass and client link (prelaunch-gate.spec.ts); only the pre-launch server gets them. */
+export const PREVIEW_ACCESS_SECRET = 'e2e-preview-access-secret-not-for-production'
+export const PRELAUNCH_PREVIEW_TOKEN = 'e2e-prelaunch-preview-token'
+/** The Presentation secret the fake Content Lake holds (fixtures: sanity.previewUrlShareAccess). */
+export const DRAFT_MODE_SECRET = 'e2e-draft-mode-secret'
 export const FAKE_SANITY_PORT = 9999
 export const SITE_URL = 'https://example.com'
 export const REVALIDATE_SECRET = 'e2e-webhook-secret'

@@ -13,6 +13,7 @@ import { FolderIcon } from '@sanity/icons/Folder'
 import { InboxIcon } from '@sanity/icons/Inbox'
 import { LockIcon } from '@sanity/icons/Lock'
 import { MenuIcon } from '@sanity/icons/Menu'
+import { RocketIcon } from '@sanity/icons/Rocket'
 import { SearchIcon } from '@sanity/icons/Search'
 import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
 import { StackIcon } from '@sanity/icons/Stack'
@@ -33,6 +34,7 @@ import { apiVersion } from '@/config/env'
 
 import { downloadEnquiriesCsv } from './enquiries/download-csv'
 import { enquiriesTitle } from './enquiries/wording'
+import { LaunchPane } from './launch/components/launch-pane'
 import { currentAudience } from './roles'
 import { SINGLETON_TYPES } from './singletons'
 import { TeamOrderPane } from './team-order/team-order-pane'
@@ -197,6 +199,12 @@ export const structure: StructureResolver = (S, context) => {
       singletonItem(S, 'siteNavigation', 'Navigation', MenuIcon),
       singletonItem(S, 'announcement', 'Announcement bar', BellIcon),
       singletonItem(S, 'cookieBanner', 'Cookie banner', LockIcon),
+      // Read-only: what visitors get today and what is left before launch. No document behind it.
+      S.listItem()
+        .title('Launch & visibility')
+        .id('launch')
+        .icon(RocketIcon)
+        .child(S.component(LaunchPane).id('launch').title('Launch & visibility')),
     ],
     audience,
     idOf,

@@ -132,7 +132,8 @@ test.describe('the Link page', () => {
       .evaluateAll((headings) =>
         headings.map((heading) => `${heading.tagName.toLowerCase()} ${heading.textContent}`),
       )
-    expect(levels).toEqual(['h1 Links', 'h2 Test Co', 'h3 Shop'])
+    // The newsletter signup after the list is the pre-launch gate's fixture (prelaunch-gate.spec.ts).
+    expect(levels).toEqual(['h1 Links', 'h2 Test Co', 'h3 Shop', 'h2 Be the first to know'])
   })
 
   test('shows the profile, with the bio under the name', async ({ page }) => {

@@ -8,10 +8,17 @@ export type ActionTarget =
   | { kind: 'help' }
 
 export interface QuickAction {
-  id: 'website' | 'blog' | 'events' | 'team' | 'business' | 'help'
+  id: 'links' | 'website' | 'blog' | 'events' | 'team' | 'business' | 'help'
   title: string
   description: string
   target: ActionTarget
+}
+
+export interface QuickActionOptions {
+  /** Who is looking. A client with a Link page gets "Your links" first; agency staff get it after the website card. */
+  audience?: 'agency' | 'client'
+  /** The published page that uses a Link list (`findLinkListPage`), or null/undefined when none does. */
+  linkPage?: { id: string } | null
 }
 
 /**
@@ -22,6 +29,7 @@ export interface QuickAction {
 export function buildQuickActions(
   profile: Pick<SiteProfile, 'features'>,
   schemaTypes: ReadonlySet<string>,
+  { audience = 'agency', linkPage = null }: QuickActionOptions = {},
 ): QuickAction[] {
   const { features } = profile
   const actions: QuickAction[] = [
@@ -32,6 +40,17 @@ export function buildQuickActions(
       target: { kind: 'tool', tool: 'presentation', search: 'preview=%2F' },
     },
   ]
+  if (linkPage && schemaTypes.has('page')) {
+    const links: QuickAction = {
+      id: 'links',
+      title: 'Your links',
+      description: 'Add, reorder or hide the links on your Link page.',
+      target: { kind: 'intent', intent: 'edit', params: { type: 'page', id: linkPage.id } },
+    }
+    // Clients come for their links: it leads. Agency staff keep "Edit your website" first.
+    if (audience === 'client') actions.unshift(links)
+    else actions.push(links)
+  }
   if (features.blog && schemaTypes.has('post')) {
     actions.push({
       id: 'blog',

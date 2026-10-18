@@ -19,9 +19,11 @@ describe('the Link page template', () => {
     expect(template).toMatchObject({ title: 'Link page', schemaType: 'page' })
   })
 
-  it('starts as a minimal page at /links', () => {
+  it('starts as a minimal page at /links, hidden from search engines', () => {
     expect(value.slug.current).toBe('links')
     expect(value.minimalLayout).toBe(true)
+    // A list of links, not a page to rank; the pre-launch templates match (see EXPECTED below).
+    expect(value.seo?.noIndex).toBe(true)
   })
 
   it('has a profile, a Minimal list with one featured link, and a footer note', () => {
@@ -59,7 +61,7 @@ describe('the pre-launch page templates', () => {
   const text = (value: unknown) => JSON.stringify(value)
 
   const EXPECTED = [
-    { id: 'page-links-coming-soon', slug: 'links', noIndex: false },
+    { id: 'page-links-coming-soon', slug: 'links', noIndex: true },
     { id: 'page-coming-soon', slug: 'coming-soon', noIndex: true },
     { id: 'page-under-construction', slug: 'under-construction', noIndex: true },
   ]

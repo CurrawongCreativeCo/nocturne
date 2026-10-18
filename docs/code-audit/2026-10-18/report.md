@@ -21,7 +21,7 @@ local run, kept 53 tests in three dependent projects from running), and 13 visua
 
 | #   | Severity | Finding                                                                                                                     | Status                                    |
 | --- | -------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| 1   | High     | [S-1](#s-1) Open redirect: `/api/draft-mode/disable?redirect=/%5Cevil.example` sends visitors off-site                      | Open, 2-line fix                          |
+| 1   | High     | [S-1](#s-1) Open redirect: `/api/draft-mode/disable?redirect=/%5Cevil.example` sends visitors off-site                      | **Fixed** (`feat/launch-state`)           |
 | 2   | High     | [C-1](#c-1) Webhook mode: a Stripe price change never reaches pages with a pricing table (`stripePrice` tag missing)        | Open, 1-line fix                          |
 | 3   | High     | [C-2](#c-2) Webhook mode: A/B tests never start or stop (README webhook filter lacked `experiment`)                         | **Fixed** (docs); guard test proposed     |
 | 4   | High     | [T-1](#t-1) CI e2e red on main: the "stays put" background test always failed                                               | **Fixed**                                 |

@@ -1,13 +1,22 @@
 /**
- * Starter content imported by the setup wizard (published, with fixed IDs, and
- * imported with `--missing` so existing documents are never overwritten).
+ * Starter content imported by the setup wizard (with fixed IDs, imported with `--missing` so
+ * existing documents are never overwritten: the import's createIfNotExists).
  * The copy doubles as a short guide for whoever edits the site first.
+ *
+ * `prelaunch: true` starts the site with a published Link page (the "Link page + coming soon"
+ * template with the default Minimal look, in src/features/pages/schemas/templates.ts), empty menus,
+ * and Home and About as drafts only, so nothing but the Link page is public until launch.
  */
-export function seedDocuments(siteName) {
+export function seedDocuments(siteName, { prelaunch = false } = {}) {
   let n = 0
   const key = () => `seed${(++n).toString(36)}`
 
-  const ref = (id) => ({ _type: 'reference', _ref: id })
+  // A draft may point at a page that is not published yet: Studio makes such references weak until
+  // the target is published (and the import refuses a strong reference to a missing document).
+  const ref = (id) =>
+    prelaunch
+      ? { _type: 'reference', _ref: id, _weak: true, _strengthenOnPublish: { type: 'page' } }
+      : { _type: 'reference', _ref: id }
   const internal = (id) => ({
     _type: 'link',
     linkType: 'internal',
@@ -46,14 +55,19 @@ export function seedDocuments(siteName) {
   const siteNavigation = {
     _id: 'siteNavigation',
     _type: 'siteNavigation',
-    headerNav: [navItem('Home', 'page-home'), navItem('About', 'page-about')],
-    headerCta: {
-      _type: 'cta',
-      label: 'Get in touch',
-      variant: 'primary',
-      link: internal('page-about'),
-    },
-    footerNav: [navItem('About', 'page-about')],
+    // Pre-launch: menus stay empty, because their pages are drafts. Add them at launch.
+    headerNav: prelaunch ? [] : [navItem('Home', 'page-home'), navItem('About', 'page-about')],
+    ...(prelaunch
+      ? {}
+      : {
+          headerCta: {
+            _type: 'cta',
+            label: 'Get in touch',
+            variant: 'primary',
+            link: internal('page-about'),
+          },
+        }),
+    footerNav: prelaunch ? [] : [navItem('About', 'page-about')],
     footerText: `${siteName}. All rights reserved.`,
   }
 
@@ -63,6 +77,55 @@ export function seedDocuments(siteName) {
   const announcement = { _id: 'announcement', _type: 'announcement' }
   const cookieBanner = { _id: 'cookieBanner', _type: 'cookieBanner' }
   const businessInfo = { _id: 'businessInfo', _type: 'businessInfo' }
+
+  // The "Link page + coming soon" template with its default (Minimal) look. The placeholder links are
+  // hidden, because this page is public at "/" and a link with no address would be a dead button.
+  const linkItem = (label, index) => ({
+    _key: key(),
+    _type: 'linkItem',
+    label,
+    link: { _type: 'link', linkType: 'external', openInNewTab: false },
+    visibility: 'hide',
+    featured: index === 0,
+  })
+  const compact = { _type: 'sectionStyle', align: 'center', spacing: 'compact', tone: 'surface' }
+  const linkPage = {
+    _id: 'page-links',
+    _type: 'page',
+    title: 'Links',
+    slug: { _type: 'slug', current: 'links' },
+    minimalLayout: true,
+    // Hidden from search engines, as the template is: a list of links, not a page to rank.
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: key(),
+        _type: 'richText',
+        style: compact,
+        body: [block('Our new website is on its way. Until then, everything is here.')],
+      },
+      {
+        _key: key(),
+        _type: 'linkList',
+        variant: 'stacked',
+        rowStyle: 'solid',
+        thumbnailSize: 'standard',
+        style: compact,
+        profile: { name: siteName },
+        socialSource: 'business',
+        links: ['Book now', 'Replace: Second link', 'Replace: Third link'].map(linkItem),
+      },
+      {
+        _key: key(),
+        _type: 'newsletterSignup',
+        title: 'Be the first to know',
+        text: 'Get one email when the new website launches.',
+        submitLabel: 'Subscribe',
+        successMessage: 'Thanks! Check your inbox for a message from us.',
+        style: compact,
+      },
+    ],
+  }
 
   const aboutLinkKey = key()
   const home = {
@@ -236,14 +299,21 @@ export function seedDocuments(siteName) {
     ],
   }
 
-  return [
+  const settings = [
     siteIdentity,
     siteNavigation,
     designSettings,
     announcement,
     cookieBanner,
     businessInfo,
-    home,
-    about,
+  ]
+  if (!prelaunch) return [...settings, home, about]
+
+  // Drafts only: published copies would be public the moment the site launched by accident.
+  return [
+    ...settings,
+    linkPage,
+    { ...home, _id: `drafts.${home._id}` },
+    { ...about, _id: `drafts.${about._id}` },
   ]
 }

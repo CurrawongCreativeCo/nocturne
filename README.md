@@ -31,6 +31,8 @@ with a **private** dataset (or connect an existing one; make that private too, s
 to Studio's Presentation view. Commit the deletions in the new project only; never in this template,
 or future projects lose the wizard.
 
+**Link page today, full site later.** The form asks "Start with a pre-launch Link page?" (on by default in a new client project; it needs starter content). Yes imports a published **Link page** (the _Link page + coming soon_ template with its Minimal look and the site name in the profile; the placeholder links are hidden until the client gives them addresses), saves **Home and About as drafts only** (never published; they link to each other with weak references), leaves the menus empty, and sets `launch: { status: 'prelaunch', homepage: 'links' }` in `site.profile.ts` (one line; the rest of the file is untouched). The site then shows the Link page at `/` and answers 404 to everything else (see [Pre-launch and launch](#pre-launch-and-launch)). No gives the live site above. The import uses `--missing`, so existing documents are never overwritten. To see what it would do without writing anything: `npm run setup -- --dry-run --name "Acme"` (add `--live` for the other mode). The final screen points to attaching the domain ([Deploying (Vercel)](#deploying-vercel)), `launch:check --prelaunch` and the launch checklist (Studio → Website settings → _Launch & visibility_).
+
 A project set up without the wizard has no documents for those four screens, so each opens as _New Brand colours_ (and so on) until someone publishes it. Open each once in Studio and press **Publish** (nothing changes on the site). An empty Business info shows nothing on the site.
 
 The CMS (Studio) uses Currawong Creative's branding with no setup: `studio-brand.json` ships as an empty
@@ -374,6 +376,8 @@ It still needs the CORS step below.
    | `OPS_NOTICES_KEY`                | optional: bearer key sent to that endpoint from the server; never reaches the browser   |
    | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                      |
    | `STYLEGUIDE_PREVIEW_TOKEN`       | optional: opens the style guide on Vercel preview deployments (see Style guide)         |
+   | `PREVIEW_ACCESS_SECRET`          | optional: signs the pre-launch preview pass (see Pre-launch and launch); 16+ characters |
+   | `PRELAUNCH_PREVIEW_TOKEN`        | optional: the client preview link's token (see Pre-launch and launch); 16+ characters   |
    | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                             |
    | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                            |
    | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                             |
@@ -1345,6 +1349,7 @@ export const siteProfileInput = defineSiteProfile({
   tier: 'content', // 'brochure' | 'content' | 'commerce' | 'custom' (default 'custom')
   features: { pricing: false, members: false, experiments: false, team: false },
   clientSections: ['richText', 'mediaText', 'faq'], // empty: the default list
+  launch: { status: 'prelaunch', homepage: 'links', publicPages: ['privacy'] }, // left out: live
   help: { guideUrl: 'https://…', videos: { 'edit-a-page': 'https://…' }, supportEmail: 'help@…' },
 })
 ```
@@ -1360,6 +1365,9 @@ export const siteProfileInput = defineSiteProfile({
   (that is `studio-brand.json`).
 - A bad profile (missing client name or slug, an unknown tier, feature or section name, a non-https link) throws
   with every problem listed, so the build, `npm run dev` and the Studio all stop with a readable message.
+
+- **`launch`**: whether the site is open. Left out means **live**, so every existing site and the e2e fixtures are
+  unchanged. See [Launch state](#launch-state) below.
 
 **It controls visibility, not the schema.** Every document and section type stays registered, so `schema.json`,
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
@@ -1390,6 +1398,238 @@ Tests: `src/config/profile.test.ts` (validation and defaults), `src/features/stu
 (what the Studio hides) and `site-profile-sections.test.ts` (the real profile against the real section list).
 The end-to-end fixtures run with everything on.
 
+#### Launch state
+
+A site is **pre-launch** (a temporary page at `/`, everything else private) or **live**. This block only _declares_
+the state and the helpers read it; the proxy that enforces it, the preview for the team and the launch checks are
+written in [Pre-launch and launch](#pre-launch-and-launch).
+
+```ts
+launch: {
+  status: 'prelaunch', // 'prelaunch' | 'live'
+  homepage: 'links', // the slug shown at "/" before launch (default 'links')
+  publicPages: ['privacy'], // other slugs visitors may open before launch (default none)
+  unknownPaths: 'not-found', // or 'homepage': a 307 to the temporary page (default 'not-found')
+},
+```
+
+- **Defaults.** Leave the block out and the site is live. Inside it, only `status` is required. `unknownPaths: 'homepage'`
+  suits a business replacing an old site: a visitor following an old link lands on the temporary page, not a 404.
+- **Validation** (`validateSiteProfile`, so the build, `npm run dev` and Studio stop with a readable message): `status` and
+  `unknownPaths` must be one of their values; `homepage` and every `publicPages` entry must be a page slug (lowercase
+  letters, numbers and hyphens, `/` only between parts, the pattern the page schema uses); `homepage` cannot be `home`
+  (that is the real home page, which stays private until launch; the same goes for `publicPages`); none can start with
+  a segment the site uses (`blog`, `api`, `studio`, `prelaunch-view` and so on, from `src/config/reserved-slug.ts`);
+  `publicPages` cannot list a slug twice. A `publicPages` entry that repeats the `homepage` is allowed and ignored. A
+  `homepage` that is not published yet is allowed too: the gate answers 404 until it is, and `launch:check --prelaunch` fails until it is published.
+- **Reading it.** `getLaunchState()` in `src/config/launch.ts` (shared code, so Studio can show it) returns `status`,
+  `homepage`, `publicPages`, `unknownPaths` and `visibleSlugs` (`[homepage, ...publicPages]`, no repeats).
+  `isPublicBeforeLaunch(pathname, state)` says whether a page path may be opened: live, always; pre-launch, `/` and the
+  `visibleSlugs`, matched whole (`/links` and `/links/` yes; `/links/more`, `/LINKS` and `//links` no, because it fails
+  closed). Routes that are not pages (`/api`, `/studio`, `/_next`) are the proxy's to classify.
+- **Why it is in code, not Studio.** On Sanity Growth every Editor can write any document, and hiding a field in the
+  Studio is not a permission. A switch in a document could be flipped by anyone who can edit it. In `site.profile.ts`,
+  changing the launch state is a reviewed commit and a deployment, and nothing in Sanity can change it.
+- **`SITE_LAUNCH_OVERRIDE=prelaunch`** turns a live profile into pre-launch without a commit: the second e2e server uses
+  it to test the gate, and it is the "hide the site now" lever in an emergency. It can **only hide**. Any other value,
+  including `live`, is ignored with a console warning, because an environment variable is set outside code review and
+  must never reveal a site the profile says is private. To open the site, change `status` in `site.profile.ts`.
+- **Caching rule.** Nothing cached may read the launch state: no page, query, feed or `'use cache'` function branches on
+  it. Pages render the same either way and the proxy decides what to serve; a cached read of it would bake one state
+  into the cache and show it in the other. The same rule is in the comment on `getLaunchState`.
+- **`/api/site-info`** adds `launch: { status, homepage }` and nothing else about it. It is prerendered, so it reports
+  the build's profile, not the runtime override.
+- **Reserved.** `prelaunch-view` (`PRELAUNCH_VIEW_PATH` in `src/config/paths.ts`) can't be a page slug: the team's
+  preview of the real site will live there.
+
+Tests: `src/config/launch.test.ts` (defaults, the override, `visibleSlugs`, `isPublicBeforeLaunch`),
+`src/config/profile.test.ts` (validation messages), `src/config/reserved-slug.test.ts` and `tests/e2e/site-info.spec.ts`
+(`launch.status` is `live` for the fixtures).
+
+### Pre-launch and launch
+
+While the profile says `launch.status: 'prelaunch'` (see [Launch state](#launch-state)), `src/proxy.ts` runs a gate
+**before anything else** (before the style guide, Edge Config redirects and A/B tests). Live, the gate returns
+immediately and nothing changes: a live site behaves exactly as it always has.
+
+**Checking it.** `npm run launch:check -- <url> --prelaunch` proves the gate holds on a deployed site (day one), and the default mode proves the launch worked (on the launch PR's preview with `--bypass`, then after merging). See [Launch check](#launch-check).
+
+**What the gate does.** For each page request it picks one answer (`decidePrelaunch`, `src/lib/prelaunch-gate.ts`):
+
+| Request                                            | Answer                                                                                                                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                                | The `homepage` page (default `links`), served under `/` by a rewrite to `/prelaunch-view/<homepage>`                                                                      |
+| A path in `publicPages`                            | That page, by a rewrite to `/prelaunch-view/<slug>`                                                                                                                       |
+| `/prelaunch-view/…` typed directly                 | 404                                                                                                                                                                       |
+| Anything else                                      | 404 (a rewrite to the bare view's not-found page, so the status is real), or with `unknownPaths: 'homepage'` a 307 to `/` for page paths (never for files such as `.ics`) |
+| A valid preview pass (task 118; never, until then) | Passes through untouched                                                                                                                                                  |
+
+Every gated response carries `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store`. The address stays
+what the visitor typed. Matching is exact and fails closed: `/links` and `/links/` are one page; `/links/more`, `/Links`
+and `//links` are not public. The presence of a `__prerender_bypass` cookie proves nothing (anyone can set one), so it
+never lets a request through. A/B tests are skipped before launch, and the style guide keeps its own token rule.
+
+**The bare view.** Pre-launch pages render in `src/app/(prelaunch)/prelaunch-view/`, through the same `PageView` and render
+props as the main route (`src/app/page-render-props.tsx`), in a layout that calls `SiteShell` with `chrome={false}`:
+**no announcement bar, header, menu or footer in the HTML** (the Link page's _Minimal page_ option only hides them with
+CSS, which is not enough here, because their links would still be in the source). Fonts, design colours, consent,
+analytics, the track script, structured data and the motion provider all stay. The page's metadata is the real page's, so
+its canonical is `/links`, never `/prelaunch-view/…` or `/`; it is marked `noindex`. `generateStaticParams` lists the
+profile's `visibleSlugs` (never empty), and any other slug answers 404 from the page itself too (a second lock, in case the
+proxy were skipped). The 404 page shows the site name, "This page isn’t open yet" and a link to `/`, with no navigation.
+
+**Listing public pages.** In `site.profile.ts`: `launch: { status: 'prelaunch', homepage: 'links', publicPages: ['privacy'] }`.
+Each slug is an exact page path. A page that is not published yet answers 404 until it is (`launch:check --prelaunch` fails until it is). A
+page under a public page (`/privacy/policy`) is not public unless it is listed. Open the site by changing `status` to
+`'live'`, in a reviewed commit, and deploying.
+
+**Redirects wait for launch.** The gate runs before Studio's redirects (Edge Config and the page route's fallback), so a
+published redirect from an old address answers 404 before launch, even one that points at a public page. Use
+`unknownPaths: 'homepage'` to send old addresses to the temporary page instead.
+
+**Caching rule.** Nothing cached may depend on the launch state. Pages, queries and feeds render the same either way;
+the proxy decides what to serve. That is what keeps it safe: on Vercel, Routing Middleware runs _before_ the CDN cache,
+so a gated request never reaches a cached page, and a cached page never has to know the site is pre-launch. A page that
+branched on the launch state would bake one state into the cache and serve it in the other. The one place that reads it
+is `generateStaticParams` and the slug check in the bare view, which only decide which slugs exist.
+
+**Not supported: Cloudflare proxying (the orange cloud) in front of Vercel.** The gate relies on Vercel's routing
+running first and on `Cache-Control: private, no-store` being honoured. A second CDN in front caches by its own rules and
+can serve a gated answer to the wrong visitor, or the live page after launch. Use DNS only (grey cloud) to Vercel.
+
+**Server actions.** A form on the temporary page posts to the address the visitor sees (`/`). The rewrite carries that
+request, including the `Next-Action` header, to the bare view, which holds the same actions, so the newsletter signup on
+`/` works (`tests/e2e/prelaunch-gate.spec.ts` submits it). Without JavaScript, a Link page with request-time parts (dated
+links, the launch date) answers the signup with Next's data only, live or pre-launch; that test is marked `fixme`. Note that the proxy is not an
+authorisation layer for Server Functions: they check their own inputs.
+
+**Private access before launch.** Three ways to see the whole site while the gate is on:
+
+1. **Presentation (the agency and editors).** Opening a page in Studio's Presentation tool turns on draft mode through
+   `/api/draft-mode/enable`. That route also sets the signed **preview pass** (cookie `site_preview`: HttpOnly,
+   SameSite=Lax, Secure on https, 8 hours) when the site is pre-launch. The gate lets a request with a valid pass through
+   untouched, with `noindex` and `Cache-Control: private, no-store`. **Draft mode alone opens nothing**: anyone can set a
+   cookie called `__prerender_bypass`, so only the signed pass counts. Exit preview (`/api/draft-mode/disable`) clears both.
+2. **The client preview link.** Set `PRELAUNCH_PREVIEW_TOKEN` (16+ characters) and send the client
+   `https://their-domain.com.au/api/preview-access?token=<token>`. It sets the pass and goes to `/`. A missing, wrong or
+   unset token, an unset `PREVIEW_ACCESS_SECRET` and too many tries (ten per address per ten minutes, per server instance)
+   all answer a plain 404, so the route doesn't confirm it exists. `/api/preview-access/exit` clears the pass.
+3. **Vercel preview deployments.** A preview deployment is its own URL, so it can show the unfinished site without
+   touching the real domain. Turn on Standard Protection (or Shareable Links) for it in Vercel's project settings. This is
+   Vercel's access control, separate from the pass above.
+
+The link is a **convenience, not a staging environment**: it shows the real site, with the real content, on the real
+domain, to anyone holding the link. Treat the URL like a password. **To revoke it**, change `PRELAUNCH_PREVIEW_TOKEN`
+(stops new links) and, to end passes already issued, change `PREVIEW_ACCESS_SECRET`; then redeploy, because both are read from the
+environment. A pass is never valid after the secret changes, and it expires by itself after 8 hours. Without
+`PREVIEW_ACCESS_SECRET` no pass is ever valid: the gate stays closed, and Presentation still works for pages the gate
+already shows (the console says so once).
+
+- **What the pass is.** `v1.<expiry>.<HMAC-SHA256 of that, keyed by PREVIEW_ACCESS_SECRET>`
+  (`src/lib/preview-pass.ts`). It holds no user data. It's verified in constant time, a 60-second clock skew is allowed,
+  and a malformed, expired, unsigned or differently signed value is refused. Neither secret has a `NEXT_PUBLIC_` prefix, is
+  imported by Studio or is ever logged.
+- **On a live site** the pass is ignored (the gate isn't running) and `/api/draft-mode/enable` doesn't issue one.
+- **Presentation in Studio** is same-origin (`/studio`), so SameSite=Lax cookies are sent.
+- **The cache.** A passed request is marked `private, no-store` by the proxy. On Vercel, Routing Middleware runs before the
+  CDN cache, so the decision is made on every request. Whether Next.js keeps that header on a prerendered page in a
+  production build is checked by `tests/e2e/prelaunch-gate.spec.ts`; if a future Next.js changes it, that test fails.
+  Check the real deployment's headers with `curl -I` before relying on it.
+- **No "Previewing before launch · Exit" notice.** It was optional and would need either a cookie read on public pages
+  (a request-time read on every page of a live site, or a Suspense island that depends on the launch state, which would
+  break the caching rule above because the override can hide a site that was built live) or JavaScript on every page. Pass
+  holders can exit with `/api/preview-access/exit` or Studio's Exit preview.
+- **Open redirect fixed.** `/api/draft-mode/disable?redirect=` now goes through `safePath`, which also refuses
+  `/\evil.example` and `/<tab>/evil.example` (audit finding S-1).
+
+**Route inventory.** `src/app/route-inventory.test.ts` lists every `page.tsx`, `route.ts`, `robots.ts` and `sitemap.ts`
+under `src/app` and fails unless each has a classification and a reason:
+
+| Classification         | Meaning                                                                                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `public-before-launch` | Visitors may open it. Only the bare view.                                                                                                                                                  |
+| `gated-by-proxy`       | The proxy answers 404 before launch: the CMS pages, blog, events, team, search page, sign-in, A/B.                                                                                         |
+| `prelaunch-aware`      | Machine-readable files that list or serve unfinished content: sitemap, robots, feeds, `llms.txt`, search API, share images, event files. The proxy answers them before launch (see below). |
+| `infrastructure`       | Not a visitor's page: Studio, webhooks, auth, draft mode, Ops endpoints, the style guide.                                                                                                  |
+
+Add a new page or route and the test fails until it has a line.
+
+**Machine-readable files.** The sitemap, robots, feeds, search, share images and calendar files list or serve every
+published page, post, team member and event, so a page gate alone would still leak unfinished content. The normal routes
+are unchanged (so nothing cached depends on the launch state); before launch the proxy answers these paths itself. The
+proxy matcher (`config.matcher` in `src/proxy.ts`, which Next.js needs as literals) lists them beside the page pattern;
+live, the proxy lets them straight through (no redirect or A/B rule applies), and a test checks every path below is
+covered.
+
+| Path                                                      | Before launch                                                                                                                                                                                | Live (and with a preview pass)                               |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `/sitemap.xml`, `/sitemap/0.xml`                          | One file: the public pages that are published and not "Hide from search engines", at their real paths (`/links`, never `/`). Empty but valid if none qualifies (a noindex Coming soon page). | Every page, post, team member and event, in chunks of 45,000 |
+| `/sitemap/1.xml` and up                                   | 404                                                                                                                                                                                          | The next chunk                                               |
+| `/robots.txt`                                             | Today's rules (Studio and `/api/` disallowed, the AI-crawler setting from Site settings), pointing at `/sitemap.xml`                                                                         | The normal file (`robots.ts`)                                |
+| `/llms.txt`                                               | The site name, description and the public pages only; 404 if AI crawlers are off                                                                                                             | Pages and posts                                              |
+| `/feed.xml`                                               | 404                                                                                                                                                                                          | The RSS feed                                                 |
+| `/api/search`                                             | 404                                                                                                                                                                                          | Quick search results                                         |
+| `/api/og/<slug>`                                          | The share image for a public page; 404 for every other slug, `/api/og` and event images                                                                                                      | Every share image                                            |
+| `/api/events/*`, `/events/<slug>.ics`, `/events/feed.ics` | 404 (the `.ics` paths are page paths to the proxy, which answers 404; files never get the `unknownPaths` redirect)                                                                           | Calendar files                                               |
+
+The three rewritten files are served by `src/app/(prelaunch)/prelaunch-view/FILES/{sitemap.xml,robots.txt,llms.txt}`,
+built from the cached page index (no extra request) by `src/lib/prelaunch-files.ts`. The folder is `FILES`, in capitals,
+because no page slug can be (and a folder starting with `_` would not be a route at all). A homepage that isn't published,
+or is marked "Hide from search engines", is simply left out. A visitor with a valid preview pass gets the normal files.
+All of them are `prelaunch-aware` in the route inventory.
+
+**Structured data.** Pre-launch pages carry only the site-level Organization or LocalBusiness and WebSite data from the
+shell. The bare view draws no breadcrumbs (`PageView breadcrumbs={false}`), because the trail and its markup would name
+parent pages that are private. Content-level markup, such as a FAQ section's, is the page's own content and stays.
+
+**Tests.** Vitest: `src/lib/prelaunch-gate.test.ts` (every decision, including the files), `src/lib/prelaunch-files.test.ts` (the sitemap, robots and llms builders), `src/proxy.test.ts` (the matcher covers every file) and `src/app/route-inventory.test.ts`.
+`tests/e2e/prelaunch-gate.spec.ts` runs a third server from the same build with `SITE_LAUNCH_OVERRIDE=prelaunch` (a copy
+of `.next` in `node_modules/.cache/e2e-prelaunch`, port 3102): `/` serves the Link page fixture with status 200 and the
+canonical `/links`; `/about`, `/blog` and others answer 404 with `noindex` and no header, footer or menu in the raw HTML;
+`/links` opens; the bare view can't be opened by address; a made-up cookie opens nothing; axe on `/` and on the 404; the
+newsletter signup submits; and the main (live) server is unaffected. Run `rm -rf .next` after changing fixtures.
+
+### Launch & visibility (Studio)
+
+**Website settings → Launch & visibility** is a read-only screen: no fields, no document and nothing stored. It shows what
+visitors get today and, for agency staff, what is left before launch. The state itself is `launch` in `site.profile.ts`
+(see [Launch state](#launch-state)), read through `getLaunchState()`, which is bundled with the Studio and holds no secret.
+Changing it is a reviewed commit and a deployment, so a field here (which anyone who can edit documents could flip) would
+be the wrong place. It uses Sanity UI components and tones only, so the CMS brand and Studio dark mode apply.
+
+**Agency view**
+
+- **Status in words:** "Pre-launch: visitors see Links at /" or "Live".
+- **Pages visitors can open:** each page in `visibleSlugs`, with **Open** (the public address) and **Edit**; a slug with no
+  published page says "not published yet".
+- **Open the temporary page** (the public address of `/`) and **Preview the full site** (Presentation at `/`; draft mode
+  also issues the [preview pass](#pre-launch-and-launch), so the gate lets it through).
+- **Before launch**, a checklist worked out from published content (a draft doesn't count), each with a **Fix it** button:
+  the home page is published; the temporary page is published and has a share image and a description (the site defaults
+  count); the header and footer menus are published and none links to an unpublished page (the same detector Start here
+  uses); the browser icon is the client's, not the default; Business info has a phone or email; Business info has social
+  links; and, as a **reminder** rather than a failure, the temporary page still has the coming-soon note ("Our new website
+  is on its way", "Coming soon", "Replace:"). It updates live as content is published.
+- **How to launch:** three plain steps (finish the checklist and preview; open a pull request that sets `launch.status` to
+  `'live'` and run `launch:check` with `--bypass --expect-origin` on its preview; merge and run it on the real domain) and a
+  link to this README section.
+- Once live, the screen says **Live** and shows nothing to do.
+
+**Client view** (editors): one sentence, "Your website is in pre-launch. Visitors see your Link page at example.com.au.
+Currawong will launch the full site." (or "Your website is live."), and an **Edit your links** button to the page that uses
+the Link list. Domains are not shown beyond the site address; they are managed by Currawong. The screen is in the client's
+Website settings allow-list (`CLIENT_WEBSITE_SETTINGS_IDS`).
+
+**It reports the profile the Studio was built with.** `SITE_LAUNCH_OVERRIDE` is a server environment variable and does not
+reach the Studio bundle, so an emergency override shows as "Live" here until the profile changes.
+
+**Where it lives.** `src/features/studio/launch/`: `utils/launch-checklist.ts` (the checklist, the public pages, the Link
+page finder), `utils/launch-wording.ts` (every sentence), `utils/launch-view.ts` (the view model for each audience),
+`api/launch-query.ts` (one `raw`-perspective query plus a listener filter) and `components/` (the pane and the
+presentational `LaunchScreen`). The brand preview (`/studio-brand-preview`) shows the screen's static parts, agency and
+client, in light and dark, so axe and screenshots cover them. Tests: `launch-checklist.test.ts`, `launch-wording.test.ts`
+and `launch-view.test.ts`.
+
 ### Start here (Studio home screen)
 
 A Studio tool (`src/features/studio/start-here/`, registered in `sanity.config.ts` as `startHere()`). Clients land on
@@ -1399,6 +1639,7 @@ history request for the author names, and, only when notices are set up, one cal
 
 - **Greeting:** the first word of the person's Sanity name ("Hello, Ben"; just "Hello" if the name is blank or an email
   address) and the site name from `site.profile.ts` (`client.name`).
+- **Before launch** a banner under the greeting says what visitors get (the client sentence above); agency staff also get a **Launch & visibility** button. **Your links** is a card for the page that uses the Link list: first for clients, after _Edit your website_ for agency staff, and absent when no page has one.
 - **Shortcut cards** (bordered, with an icon and a chevron; the first, _Edit your website_, is the primary card; icons are mapped by action id in `start-here-tool.tsx`), built from the site profile by `buildQuickActions`: _Edit your website_ (Presentation at `/`),
   _Write a blog post_ (opens a new post; needs `features.blog`), _Update the team_ (needs `features.team` **and** a
   `teamMember` document type, which the template does not have yet, so the card stays hidden until a project adds
@@ -3009,14 +3250,18 @@ existing sections, so every design choice is in the sections' own Design tabs, a
 
 | Template                    | Use it when                                                                   | Starts at             | Search engines |
 | --------------------------- | ----------------------------------------------------------------------------- | --------------------- | -------------- |
-| **Link page**               | The business only needs a link-in-bio page, now or for good.                  | `/links`              | Allowed        |
-| **Link page + coming soon** | There is a link-in-bio page now and a new website is on its way. The default. | `/links`              | Allowed        |
+| **Link page**               | The business only needs a link-in-bio page, now or for good.                  | `/links`              | Hidden         |
+| **Link page + coming soon** | There is a link-in-bio page now and a new website is on its way. The default. | `/links`              | Hidden         |
 | **Coming soon**             | The domain points at the site but it opens on a date.                         | `/coming-soon`        | Hidden         |
 | **Under construction**      | A live site is being rebuilt and visitors still need to reach you.            | `/under-construction` | Hidden         |
 
 - **Link page + coming soon** is the Link page with a short note above the list ("Our new website is on its way. Until then,
   everything is here."), a compact **Newsletter signup** under it and a footer note. The first link, "Book now", is the large
-  one. It stays indexed, because `/links` is a page people keep.
+  one.
+- **Both Link page templates are hidden from search engines** (_Search & sharing → Hide from search engines_ is on). A
+  link-in-bio page is a list of links: it has little for a search engine to rank, and after launch it would compete with the
+  home page for the business's name. People reach it from bios and QR codes, not search. Before launch that leaves the
+  pre-launch sitemap empty (valid, with no URLs), which is expected. Turn the option off on a page that should be found.
 - **Coming soon** is a **Hero** on the _Centred text, no image_ preset that fills the screen, a **Newsletter signup** and a
   compact **Link list** of the social icons from [Business info](#business-info). The line "Replace: Opening [date]" is plain
   text in the hero's intro; type the date by hand, or add a [Launch date](#link-list) to the hero for a formatted one.
@@ -3481,7 +3726,7 @@ The A/B test spec starts a site-wide experiment, which rewrites every page reque
 
 `npm run launch:check -- https://example.com` asks a **deployed** site whether it is ready to go live. It is
 dependency-free, makes only ordinary page requests plus the Sanity lookups below, and never changes anything. Run it
-against the production domain, not a preview, because it compares the site with its own address.
+against the production domain, not a preview, because it compares the site with its own address (to check a protected preview deployment, see `--bypass` and `--expect-origin` below).
 
 It prints one line per check (pass, warning or fail) with what to do about anything that isn't a pass, then exits `1`
 if any check failed. Warnings never fail the run; read them anyway. `--json` prints the same results as JSON (for the
@@ -3512,6 +3757,77 @@ future Ops dashboard), and `--max-urls=N` lowers the page cap.
   URL asks for, which also proves the CDN rasterised an SVG upload.
 - **Not covered.** Content and design quality, forms actually delivering email, analytics, and Stripe in live mode. Test
   those by hand.
+
+#### Launch state: `--prelaunch`, `--bypass` and the launch lines
+
+The check knows about [Pre-launch and launch](#pre-launch-and-launch). It reads the launch block from `/api/site-info`
+(the profile the build saw), so the mode you run must match the site.
+
+**Launch mode (the default)** gains three lines in the _Launch state_ area: `/api/site-info` says the site is **live**
+(fail if it still says pre-launch); the home page is the real one, with canonical `/`, not the temporary page; and the
+temporary page's own path (`/links`, or the profile's `homepage`) still answers 200 (a warning if not, because people
+have shared that address: keep it published or add a redirect).
+
+**`--prelaunch`** proves a pre-launch site is private:
+
+`npm run launch:check -- https://example.com.au --prelaunch [--expect-private=/about,/pricing] [--expect-public=/privacy]`
+
+| Check                           | Passes when                                                                                                                                                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/site-info` is pre-launch  | `launch.status` is `prelaunch` (it fails on a live site, and on a template older than the launch block). If it fails the rest are skipped                                                                                                                         |
+| Home page is the temporary page | `/` answers 200 with a canonical to the homepage slug (`https://example.com.au/links`), never `/`                                                                                                                                                                 |
+| The homepage is open            | `/links` (the profile's homepage) answers 200                                                                                                                                                                                                                     |
+| Unfinished pages are private    | Each `--expect-private` path (default `/about`, `/blog`, `/search`, `/team`) answers **404** with `noindex` (header or meta) and **no navigation markup** in the raw HTML (`<nav>`, `<header>`, `<footer>` or `data-site-chrome`; CSS-hidden chrome still counts) |
+| Sitemap lists only public pages | `/sitemap.xml` lists only the homepage and the `--expect-public` paths (match `launch.publicPages`)                                                                                                                                                               |
+| Feed and search are closed      | `/feed.xml` and `/api/search?q=a` answer 404                                                                                                                                                                                                                      |
+| Favicon isn't Currawong's       | The home page's icons aren't Currawong's default or the template placeholder (a **fail** here, because the client shares this page before launch)                                                                                                                 |
+| Share image                     | The `og:image` the temporary page names returns an image (the generated `/api/og/<homepage>` when it names none)                                                                                                                                                  |
+
+- **`--bypass`** sends `x-vercel-protection-bypass` on every request to the site's own host, so a protected Vercel preview
+  deployment can be checked. The secret is `VERCEL_AUTOMATION_BYPASS_SECRET` from the environment or `.env.local`
+  (Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation). It is **never printed**, is
+  never sent to another host (a redirect elsewhere doesn't receive it), and the run stops with a message if it isn't set.
+- **`--expect-origin=https://example.com.au`.** A preview deployment's canonicals, sitemap and share images name the
+  production domain (`NEXT_PUBLIC_SITE_URL`), not the preview's address, so the canonical checks would fail. Pass the
+  production domain and they compare against it. The run adds a note saying which it used.
+- **`--expect-private`, `--expect-public`.** Comma-separated paths, repeatable, each starting with `/`.
+- Nothing is crawled in this mode: about a dozen requests.
+
+**When to run which.**
+
+1. **Day one**, once the real domain is attached and the temporary page is published, before the client shares her link:
+   `npm run launch:check -- https://example.com.au --prelaunch`. Replace the favicon if it fails.
+2. **On the launch pull request's preview** (`status: 'live'` in `site.profile.ts`): run the default mode with
+   `--bypass --expect-origin=https://example.com.au` against the preview URL. It must pass before you merge.
+3. **After merging and deploying**, against the real domain: `npm run launch:check -- https://example.com.au`.
+
+Sample output, from the saved fixtures (a site whose gate lets `/blog` open and whose sitemap lists too much):
+
+```text
+Pre-launch check for https://example.com.au
+
+  STATUS  AREA          CHECK
+  ✓ PASS  Launch state  /api/site-info says the site is pre-launch
+  ✓ PASS  Launch state  Home page shows the temporary page
+  ✓ PASS  Launch state  /links is open
+  ✗ FAIL  Launch state  Unfinished pages are private
+                        /blog answered 200, not 404.
+                        Fix: Check launch.status is 'prelaunch' in site.profile.ts and the proxy gate is deployed (README, 'Pre-launch and launch').
+  ✗ FAIL  Launch state  Sitemap lists only public pages
+                        It also lists https://example.com.au/about, https://example.com.au/blog/hello.
+                        Fix: The sitemap must come from the pre-launch handler. Check launch.status and redeploy.
+  ✓ PASS  Launch state  Feed and search are closed
+  ✓ PASS  Launch state  Favicon isn't Currawong's
+  ✓ PASS  Launch state  Temporary page has a share image
+
+Not private yet: 6 passed, 0 to review, 2 failed.
+```
+
+In launch mode the same area reads `✓ PASS  Launch state  /api/site-info says the site is live`, `Home page is the real
+home page` (canonical `https://example.com.au/`) and `/links still answers`, beside the checks above.
+
+The new checks are in `scripts/launch-check/prelaunch.mjs`, tested in `prelaunch.test.mjs` against saved HTML, header,
+site-info and sitemap fixtures (no network; the bypass header is tested with a stubbed `fetch`).
 
 For developers: each check is a pure function in `scripts/launch-check/*.mjs` (`http`, `seo`, `leftovers`, `sanity`,
 `psi`) that takes already-fetched data and returns result lines; `scripts/launch-check.mjs` does the fetching and the

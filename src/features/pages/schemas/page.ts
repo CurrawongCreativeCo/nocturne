@@ -3,12 +3,12 @@ import { HomeIcon } from '@sanity/icons/Home'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { HOME_SLUG, slugToPath } from '@/config/paths'
+import { reservedSegment } from '@/config/reserved-slug'
 import { ACCESS_MEMBERS } from '@/lib/sanity/access'
 import { hiddenFromClients, lockedForClientsOnceSet } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 
 import { sectionTypes } from './sections'
-import { reservedSegment } from '../utils/reserved-slug'
 import { findDuplicateAnchors } from '../utils/section-anchors'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/

@@ -8,6 +8,56 @@ const ALL_TYPES = new Set(['post', 'event', 'teamMember', 'businessInfo'])
 const ids = (features = DEFAULT_FEATURES, types: ReadonlySet<string> = ALL_TYPES) =>
   buildQuickActions({ features }, types).map(({ id }) => id)
 
+describe('buildQuickActions: Your links', () => {
+  const linkPage = { id: 'links-id' }
+  const build = (audience: 'agency' | 'client', page: { id: string } | null = linkPage) =>
+    buildQuickActions({ features: DEFAULT_FEATURES }, new Set([...ALL_TYPES, 'page']), {
+      audience,
+      linkPage: page,
+    })
+
+  it('leads for a client when a page uses the Link list', () => {
+    expect(build('client').map(({ id }) => id)).toEqual([
+      'links',
+      'website',
+      'blog',
+      'events',
+      'team',
+      'business',
+      'help',
+    ])
+  })
+
+  it('follows "Edit your website" for agency staff', () => {
+    expect(
+      build('agency')
+        .map(({ id }) => id)
+        .slice(0, 2),
+    ).toEqual(['website', 'links'])
+  })
+
+  it('opens that page', () => {
+    expect(build('client')[0]).toMatchObject({
+      title: 'Your links',
+      target: { kind: 'intent', intent: 'edit', params: { type: 'page', id: 'links-id' } },
+    })
+  })
+
+  it('is left out with no Link page, or without the page type', () => {
+    expect(build('client', null).map(({ id }) => id)).not.toContain('links')
+    expect(
+      buildQuickActions({ features: DEFAULT_FEATURES }, ALL_TYPES, {
+        audience: 'client',
+        linkPage,
+      }).map(({ id }) => id),
+    ).not.toContain('links')
+  })
+
+  it('changes nothing for callers that pass no options', () => {
+    expect(ids()).toEqual(['website', 'blog', 'events', 'team', 'business', 'help'])
+  })
+})
+
 describe('buildQuickActions', () => {
   it('offers every card when the site has every feature and type', () => {
     expect(ids()).toEqual(['website', 'blog', 'events', 'team', 'business', 'help'])

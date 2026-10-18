@@ -120,6 +120,7 @@ describe('resolveSiteProfile', () => {
       tier: 'custom',
       features: DEFAULT_FEATURES,
       clientSections: [],
+      launch: { status: 'live', homepage: 'links', publicPages: [], unknownPaths: 'not-found' },
       help: {},
       templateVersion,
     })
@@ -173,5 +174,111 @@ describe('hasEvents', () => {
   it('is on by default and follows the events switch', () => {
     expect(hasEvents(profile({}))).toBe(true)
     expect(hasEvents(profile({ events: false }))).toBe(false)
+  })
+})
+
+describe('launch', () => {
+  const withLaunch = (launch: unknown) => ({ ...valid, launch })
+
+  it('is live when left out, with the defaults ready', () => {
+    expect(resolveSiteProfile(valid).launch).toEqual({
+      status: 'live',
+      homepage: 'links',
+      publicPages: [],
+      unknownPaths: 'not-found',
+    })
+    expect(siteProfile.launch.status).toBe('live')
+  })
+
+  it('fills in the defaults around a status', () => {
+    expect(resolveSiteProfile({ ...valid, launch: { status: 'prelaunch' } }).launch).toEqual({
+      status: 'prelaunch',
+      homepage: 'links',
+      publicPages: [],
+      unknownPaths: 'not-found',
+    })
+  })
+
+  it('keeps what is given', () => {
+    const launch = {
+      status: 'prelaunch',
+      homepage: 'coming-soon',
+      publicPages: ['links', 'services/web'],
+      unknownPaths: 'homepage',
+    } as const
+    expect(resolveSiteProfile({ ...valid, launch }).launch).toEqual(launch)
+    expect(validateSiteProfile(withLaunch(launch))).toEqual([])
+  })
+
+  it.each([
+    ['not an object', 'prelaunch', 'launch must be an object'],
+    ['no status', {}, 'launch.status undefined is not one of prelaunch, live'],
+    ['a bad status', { status: 'soon' }, 'launch.status "soon" is not one of prelaunch, live'],
+    [
+      'an uppercase homepage',
+      { status: 'live', homepage: 'Links' },
+      'launch.homepage "Links" is not a page slug',
+    ],
+    [
+      'a homepage with slashes at the ends',
+      { status: 'live', homepage: '/links/' },
+      'launch.homepage "/links/" is not a page slug',
+    ],
+    [
+      'the real home page',
+      { status: 'prelaunch', homepage: 'home' },
+      'launch.homepage cannot be "home": that is the real home page',
+    ],
+    [
+      'a reserved homepage',
+      { status: 'prelaunch', homepage: 'blog' },
+      'launch.homepage "blog" starts with "blog"',
+    ],
+    [
+      'a reserved public page',
+      { status: 'prelaunch', publicPages: ['prelaunch-view/x'] },
+      'launch.publicPages "prelaunch-view/x" starts with "prelaunch-view"',
+    ],
+    [
+      'a bad public page',
+      { status: 'prelaunch', publicPages: ['About us'] },
+      'launch.publicPages "About us" is not a page slug',
+    ],
+    [
+      'the home page as a public page',
+      { status: 'prelaunch', publicPages: ['home'] },
+      'launch.publicPages cannot be "home"',
+    ],
+    [
+      'public pages that are not a list',
+      { status: 'prelaunch', publicPages: 'links' },
+      'launch.publicPages must be a list of page slugs',
+    ],
+    [
+      'a repeated public page',
+      { status: 'prelaunch', publicPages: ['about', 'about'] },
+      'launch.publicPages lists "about" twice',
+    ],
+    [
+      'a bad unknownPaths',
+      { status: 'prelaunch', unknownPaths: 'redirect' },
+      'launch.unknownPaths "redirect" is not one of not-found, homepage',
+    ],
+  ])('rejects %s', (_name, launch, message) => {
+    expect(validateSiteProfile(withLaunch(launch)).join('\n')).toContain(message)
+  })
+
+  it('lets a public page repeat the homepage (it is removed later), and a homepage that does not exist yet', () => {
+    expect(
+      validateSiteProfile(
+        withLaunch({ status: 'prelaunch', homepage: 'links', publicPages: ['links', 'about'] }),
+      ),
+    ).toEqual([])
+  })
+
+  it('stops resolveSiteProfile with every problem listed', () => {
+    expect(() =>
+      resolveSiteProfile(withLaunch({ status: 'soon', homepage: 'home' }) as SiteProfileInput),
+    ).toThrow(/launch\.status[\s\S]*launch\.homepage/)
   })
 })
