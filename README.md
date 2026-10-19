@@ -2873,6 +2873,35 @@ members stub, shared section, anchor margin, footer band, layout shift). Gallery
 below has a key ending `--below` and is drawn in the same frame); their visual baselines are Linux-only, so run the
 **Update visual baselines** workflow after changing a shape or the CSS.
 
+### Paragraphs in plain text
+
+Multiline text boxes (Sanity `text` fields: intros, descriptions, card text, testimonials, short bios, event summaries,
+blog excerpts) follow one rule everywhere, in `plainTextParagraphs` (`src/lib/plain-text.ts`):
+
+- **A blank line starts a new paragraph.** Several blank lines in a row are still one paragraph break, so extra empty
+  lines never add extra space.
+- **A single new line is a line break** inside the paragraph, where the editor pressed Enter.
+- Spaces around each line are dropped; text that is only spaces and new lines draws nothing, so no gap is left.
+
+`PlainText` (`src/components/ui/plain-text.tsx`, server only, no JavaScript) draws it. One paragraph is the same single
+`<p>` the sections always drew, so existing text looks the same; several are a `<div>` holding a `<p>` each, spaced 0.75em
+(it follows the text size), never a `<p>` inside a `<p>`. Everything is plain strings rendered by React, so nothing typed
+is ever treated as HTML. The hero's description (a motion element) and testimonial quotes (quotation marks around all the
+paragraphs) use `PlainLines` and `PARAGRAPH_GAP` from the same file. Visual editing still works: the invisible
+click-to-edit characters move to the end of the last paragraph.
+
+Not affected: one-line `string` fields (labels, names, eyebrows, link descriptions), addresses, embed code, SEO and form
+messages, and Portable Text (rich text and headings), which has its own blocks. Use `PlainText` for any new multiline
+`text` field shown on the site.
+
+**Rich text later.** Bold, italic, links, lists or coloured words belong in Portable Text, the format the rich text section,
+team and author bios and heading highlights already use (`src/components/ui/rich-text.tsx`, `rich-heading.tsx`), not in a
+syntax typed into plain text. A field moves to it with a migration like
+[`hero-title-to-heading-text`](migrations/hero-title-to-heading-text/index.ts): each plain-text paragraph becomes one
+`block`, which is why paragraphs are split on blank lines and nothing else. There is deliberately no punctuation parser
+that colours bullets inside ordinary text: lists of labels use Service categories (`InlineList`), and highlighted words
+will use Portable Text annotations.
+
 ### Highlighting words in a heading
 
 Editors select words in a heading and choose how they stand out. Every section's title uses it: the hero, CTA banner,
@@ -3094,8 +3123,8 @@ rendering: the **Link page** template is a page with this section and one page o
 **Five minutes for a new Link page.**
 
 1. _Pages → New → Link page_. It starts at `/links` with a profile, three links and a footer note, and **Minimal page** ticked.
-2. Fill in the profile (a picture or logo, a name, a bio of up to 160 characters). The social icons come from
-   [Business info](#business-info) by default.
+2. Fill in the profile (a picture or logo, a name, optional **Service categories**, a bio of up to 160 characters). The social
+   icons come from [Business info](#business-info) by default.
 3. Give each link a label and a destination (**Goes to**, the same picker as every other link: a page, a website, a section, a
    panel or booking). Drag to reorder.
 4. Publish. Add `https://yoursite.com.au/links` to the Instagram bio.
@@ -3164,15 +3193,42 @@ link, so there is one Tab stop per row, and every row is at least 44 px tall.
 - **Icons.** The shared set gained Care, Sun, Community, Person, Location, Email, Calendar and Phone, so badge rows
   (the hero slot) offer them too. A new one is a line in `BADGE_ICONS` and a drawing in `badge-icon.tsx`.
 
-**Design.** The Link list's Design tab (agency only) has three boxes above the shared Background and Animation. Everything
+**Service categories.** _Content › Profile › Service categories_ is a list of short words for what the business offers
+(Bodywork, Breathwork, Movement, Retreats), one per line, using Sanity's own list: **Add item**, type, drag to reorder, and
+the menu on a line to remove it. The page draws them in one row under the name, with a separator between each two:
+"Bodywork • Breathwork • Movement • Retreats". The separators are drawn, never typed, so editors don't type dots, and the
+agency can colour them on their own. **Show the categories** (Show / Hide) appears once there is one, to take them off the
+page without deleting them; hidden categories never leave the Content Lake. Studio warns past 24 characters a category or
+6 categories, and the same category can't be listed twice.
+
+- **Stored as** `profile.categories`, an array of strings, and `profile.categoriesVisibility`. Optional: a profile without
+  them renders exactly as before, so no content needs migrating.
+- **Drawn by** `InlineList` (`src/components/ui/inline-list.tsx`), a server component with no JavaScript: a real `<ul>`
+  named "Services" (read as "list, 4 items"), each label an `<li>`, each separator an `aria-hidden` shape before its label.
+- **Wrapping.** Each separator sits in the gap _before_ its label and the list clips what falls outside it. A label that
+  starts a line starts at the list's edge, so its separator is clipped, and no separator is ever drawn after a label: no
+  line begins or ends with one. For that every line has to start at the edge, so centred lines share out their room (each
+  label centred in its share), and a list that fits on one line is only as wide as its labels. Long labels wrap inside
+  themselves. **On a phone: One per line** stacks the labels below 640 px and hides the separators there.
+- **The bio** stays its own field. When a bio's first paragraph is _exactly_ the categories (any of • · | ◆ , / between them,
+  any case), the page leaves that paragraph out, so an editor who has filled in categories but not yet tidied the bio never
+  sees them twice. Anything else in the bio is drawn as typed.
+- **Moving an old bio over.** Nothing changes by itself: a bio that starts "Bodywork • Breathwork • Retreats" keeps
+  rendering that line as text (now as its own paragraph). Studio shows a warning on such a bio suggesting Service
+  categories; put each one in the list and delete the line from the bio. Once the categories are set, a bio that still
+  repeats them gets a warning to delete the line. No migration script: the fields are optional, and only the editor can tell
+  a typed list of services from a sentence that happens to use a bullet.
+
+**Design.** The Link list's Design tab (agency only) has four boxes above the shared Background and Animation. Everything
 empty is the look the section always had, so no content needs migrating. The colour overrides sit in a collapsed **Colours**
 inside each box, and every option that depends on another only shows once it applies.
 
-| Box          | Options                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Profile      | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border. |
-| Links        | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                              |
-| Social icons | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                     |
+| Box                | Options                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Profile            | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border.                                                                                                                                                                                                                                                               |
+| Service categories | **Separator** Bullet (default), Middle dot, Line, Diamond or None, drawn in CSS so it looks the same in every font. **On a phone** One row that wraps (default) or One per line. Text (collapsed): **Size** Small (default), Medium or Large (the `small`, `body` and `lead` type tokens), **Weight** Regular, Medium (default) or Bold, **Letters** As typed (default) or Capitals (with a little letter spacing), **Space between** Compact, Comfortable (default) or Wide. Colours: category (Inherit is the text colour) and separator (Inherit is Primary), each Text, Muted text, Primary, Secondary, Highlight or Custom. It follows the section's alignment. Shown once there are categories. |
+| Links              | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 - **Colours** are one shared field (`themeColourField`, `src/lib/sanity/schema/theme-colour.ts`): Inherit, Text, Muted text,
   Primary, Secondary, Highlight or Custom (a hex field appears only then). Each element offers only the choices that suit it.

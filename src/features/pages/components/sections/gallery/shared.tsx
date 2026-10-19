@@ -1,6 +1,7 @@
 import { stegaClean } from 'next-sanity'
 
 import { FramedImage } from '@/components/ui/framed-image'
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -49,7 +50,7 @@ export function GalleryHeader({ data }: { data: GalleryData }) {
           className="text-h2 font-semibold text-balance"
         />
       )}
-      {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
+      <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
     </header>
   )
 }

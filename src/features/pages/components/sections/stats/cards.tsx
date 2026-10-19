@@ -1,3 +1,4 @@
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -38,7 +39,7 @@ export function StatsCards({ data, isFirst }: SectionProps<'stats'>) {
               className="text-h2 font-semibold text-balance"
             />
           )}
-          {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
+          <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
         </header>
       )}
       <ul

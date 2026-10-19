@@ -11,6 +11,7 @@ import {
   GLASS_STRENGTH_TITLES,
   glassContrastProblem,
 } from '@/lib/color/glass-contrast'
+import { listsCategories, looksLikeTypedCategories, plainTextParagraphs } from '@/lib/plain-text'
 import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
@@ -43,7 +44,29 @@ const LIMITS = {
   label: 40,
   description: 90,
   name: 50,
+  // About one line of small text on a phone each, so four still wrap to two lines.
+  category: 24,
 } as const
+
+/** More service categories than this read as a paragraph, not a row: Studio warns. */
+const CATEGORIES_RECOMMENDED_MAX = 6
+
+/**
+ * Points an editor at Service categories when the bio starts with a typed list ("Bodywork •
+ * Breathwork • Retreats"), or still repeats the categories. A suggestion only: nothing is moved or
+ * hidden for them (the page drops an exact repeat, see `bioParagraphs`).
+ */
+const bioCategoriesHint = (bio: string | undefined, { parent }: { parent?: unknown }) => {
+  const categories = (parent as { categories?: string[] } | undefined)?.categories ?? []
+  const firstLine = plainTextParagraphs(bio)[0]?.join(' ') ?? ''
+  if (categories.length > 0 && listsCategories(firstLine, categories)) {
+    return 'The first line repeats your service categories. Delete it here: the categories already show above the bio.'
+  }
+  if (categories.length === 0 && looksLikeTypedCategories(bio)) {
+    return 'This first line looks like a list of services. Put each one in Service categories above (the dots are added for you), then delete the line here.'
+  }
+  return true
+}
 
 /**
  * One component per variant in components/sections/link-list/. The first is the default: what
@@ -409,7 +432,8 @@ export const linkList = defineType({
       defineField({
         name: 'profile',
         type: 'object',
-        description: 'A picture or logo, a name and a short line about you. All optional.',
+        description:
+          'A picture or logo, a name, what you offer and a short line about you. All optional.',
         options: { collapsible: true, collapsed: false },
         fields: [
           imageField({
@@ -427,14 +451,56 @@ export const linkList = defineType({
           }),
           ...textOrImageFields({ prefix: 'name', what: 'the name', textField: 'name' }),
           defineField({
+            name: 'categories',
+            title: 'Service categories',
+            type: 'array',
+            description:
+              'Optional. A few words for what you offer, e.g. Bodywork, Breathwork, Retreats, one per line. They show in a row under the name with a dot between them, so don’t type the dots. Drag to reorder.',
+            of: [
+              defineArrayMember({
+                type: 'string',
+                validation: (rule) => [
+                  rule.required().error('Type a category, or remove this line.'),
+                  lengthWarning(rule, LIMITS.category, 'Categories'),
+                ],
+              }),
+            ],
+            validation: (rule) => [
+              rule.unique().error('Each category is listed once.'),
+              rule
+                .max(CATEGORIES_RECOMMENDED_MAX)
+                .warning(
+                  `More than ${CATEGORIES_RECOMMENDED_MAX} categories is hard to take in at a glance. Keep the ones people look for.`,
+                ),
+            ],
+          }),
+          defineField({
+            name: 'categoriesVisibility',
+            title: 'Show the categories',
+            type: 'string',
+            description: 'Hide them to take them off the page without deleting them.',
+            options: {
+              list: [
+                { value: 'show', title: 'Show' },
+                { value: 'hide', title: 'Hide' },
+              ],
+              layout: 'radio',
+              direction: 'horizontal',
+            },
+            hidden: ({ parent }: { parent?: { categories?: unknown[] } }) =>
+              !parent?.categories?.length,
+          }),
+          defineField({
             name: 'bio',
             type: 'text',
             rows: 3,
-            description: `A line or two, up to ${PROFILE_BIO_MAX} characters.`,
-            validation: (rule) =>
+            description: `A line or two, up to ${PROFILE_BIO_MAX} characters. Leave a blank line to start a new paragraph.`,
+            validation: (rule) => [
               rule
                 .max(PROFILE_BIO_MAX)
                 .error(`Keep it to ${PROFILE_BIO_MAX} characters or fewer (it is a short bio).`),
+              rule.custom(bioCategoriesHint).warning(),
+            ],
           }),
         ],
       }),

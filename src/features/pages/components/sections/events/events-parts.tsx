@@ -3,6 +3,7 @@ import { stegaClean } from 'next-sanity'
 import { Suspense, type ReactNode } from 'react'
 
 import { ctaClassName } from '@/components/ui/cta-link'
+import { PlainText } from '@/components/ui/plain-text'
 import { resolveLink } from '@/components/ui/resolve-link'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityLink } from '@/components/ui/sanity-link'
@@ -154,7 +155,10 @@ function Header({ data, classes }: { data: EventsData; classes: string }) {
         />
       )}
       {text && (
-        <p className={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}>{text}</p>
+        <PlainText
+          text={text}
+          className={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
+        />
       )}
     </div>
   )

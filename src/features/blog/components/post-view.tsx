@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { stegaClean } from 'next-sanity'
 
+import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { siteLanguage } from '@/config/env'
@@ -49,7 +50,7 @@ export async function PostView({ slug, ...mode }: { slug: string } & FetchMode) 
             <time dateTime={publishedAt}>{formatDate(publishedAt, siteLanguage)}</time>
             {name && <> · By {name}</>}
           </p>
-          <p className="mt-6 text-h4 text-pretty text-ink-muted">{post.excerpt}</p>
+          <PlainText text={post.excerpt} className="mt-6 text-h4 text-pretty text-ink-muted" />
         </header>
         <SanityImage
           image={post.mainImage}
@@ -103,7 +104,7 @@ function AuthorBio({ author }: { author: PostData['author'] | null }) {
       )}
       <div>
         <p className="font-semibold">Written by {author.name}</p>
-        {author.bio && <p className="mt-1 text-ink-muted">{author.bio}</p>}
+        <PlainText text={author.bio} className="mt-1 text-ink-muted" />
       </div>
     </footer>
   )

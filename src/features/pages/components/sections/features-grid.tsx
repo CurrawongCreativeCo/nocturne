@@ -1,3 +1,4 @@
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
@@ -32,7 +33,7 @@ export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
               className="text-h2 font-semibold text-balance"
             />
           )}
-          {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
+          <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
         </header>
       )}
       <ul className={`grid grid-cols-1 gap-x-8 gap-y-12 ${columnClasses[columns]}`}>
@@ -46,7 +47,7 @@ export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
               className="mb-4 size-12 object-contain"
             />
             <h3 className="text-lead font-semibold">{item.title}</h3>
-            {item.text && <p className="mt-2 text-ink-muted">{item.text}</p>}
+            <PlainText text={item.text} className="mt-2 text-ink-muted" />
           </li>
         ))}
       </ul>

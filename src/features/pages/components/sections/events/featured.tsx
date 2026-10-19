@@ -1,3 +1,4 @@
+import { PlainText } from '@/components/ui/plain-text'
 import { SanityImage } from '@/components/ui/sanity-image'
 import type { SectionDefaults } from '@/components/ui/section-style'
 
@@ -43,9 +44,10 @@ const layout: EventsLayout = {
               level={level}
               className="mt-2 text-h3 font-semibold text-balance"
             />
-            {first.event.summary && (
-              <p className="mt-3 max-w-measure text-pretty text-ink-muted">{first.event.summary}</p>
-            )}
+            <PlainText
+              text={first.event.summary}
+              className="mt-3 max-w-measure text-pretty text-ink-muted"
+            />
             <EventPills entry={first} />
           </div>
         </article>

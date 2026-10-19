@@ -1,5 +1,6 @@
 import { useId } from 'react'
 
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -30,7 +31,7 @@ export function NewsletterSignup({
           fallback={title}
           className="text-h2 font-semibold text-balance"
         />
-        {text && <p className="mt-4 text-lead text-pretty text-ink-muted">{text}</p>}
+        <PlainText text={text} className="mt-4 text-lead text-pretty text-ink-muted" />
       </header>
       {renderNewsletter?.({ submitLabel, successMessage, headingId })}
     </SectionFrame>

@@ -1,3 +1,4 @@
+import { PlainText } from '@/components/ui/plain-text'
 import type { SectionDefaults } from '@/components/ui/section-style'
 import { formatDayOf, formatTimeRange } from '@/lib/events/format'
 
@@ -60,11 +61,10 @@ const layout: EventsLayout = {
                     <div className="min-w-0">
                       <EventTitle entry={entry} level={entryLevel} />
                       {where && <p className="mt-1 text-small text-ink-muted">{where}</p>}
-                      {entry.event.summary && (
-                        <p className="mt-2 max-w-measure text-pretty text-ink-muted">
-                          {entry.event.summary}
-                        </p>
-                      )}
+                      <PlainText
+                        text={entry.event.summary}
+                        className="mt-2 max-w-measure text-pretty text-ink-muted"
+                      />
                       <EventPills entry={entry} />
                     </div>
                   </li>

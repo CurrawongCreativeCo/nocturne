@@ -1,6 +1,7 @@
 import { stegaClean, toPlainText } from 'next-sanity'
 
 import { JsonLd } from '@/components/ui/json-ld'
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { RichText } from '@/components/ui/rich-text'
 import { SectionFrame } from '@/components/ui/section-frame'
@@ -43,7 +44,7 @@ export function Faq({ data, isFirst }: SectionProps<'faq'>) {
               className="text-h2 font-semibold text-balance"
             />
           )}
-          {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
+          <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
         </header>
       )}
       <div className="divide-y divide-line border-y border-line">

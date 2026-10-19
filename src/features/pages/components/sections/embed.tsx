@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -40,7 +41,10 @@ export function Embed({ data, isFirst }: SectionProps<'embed'>) {
         className="text-h2 font-semibold text-balance"
       />
       {text && (
-        <p className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted">{text}</p>
+        <PlainText
+          text={text}
+          className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted"
+        />
       )}
       <div className="mt-8 text-center">
         <LazyFacade

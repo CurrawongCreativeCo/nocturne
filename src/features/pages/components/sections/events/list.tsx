@@ -1,3 +1,4 @@
+import { PlainText } from '@/components/ui/plain-text'
 import type { SectionDefaults } from '@/components/ui/section-style'
 
 import {
@@ -49,9 +50,10 @@ const layout: EventsLayout = {
               level={level}
               className="mt-1 text-h4 font-semibold text-balance"
             />
-            {entry.event.summary && (
-              <p className="mt-2 max-w-measure text-pretty text-ink-muted">{entry.event.summary}</p>
-            )}
+            <PlainText
+              text={entry.event.summary}
+              className="mt-2 max-w-measure text-pretty text-ink-muted"
+            />
             <EventPills entry={entry} />
           </div>
           <Chevron />

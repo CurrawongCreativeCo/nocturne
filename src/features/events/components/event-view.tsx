@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 
 import { CtaLink } from '@/components/ui/cta-link'
 import { JsonLd } from '@/components/ui/json-ld'
+import { PlainText } from '@/components/ui/plain-text'
 import { resolveLink } from '@/components/ui/resolve-link'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
@@ -54,9 +55,7 @@ export async function EventView({ slug, ...mode }: { slug: string } & FetchMode)
       <header className="max-w-measure">
         <Pills event={event} timing={timing} status={status} />
         <h1 className="mt-3 text-h1 font-semibold text-balance">{event.title}</h1>
-        {event.summary && (
-          <p className="mt-5 text-lead text-pretty text-ink-muted">{event.summary}</p>
-        )}
+        <PlainText text={event.summary} className="mt-5 text-lead text-pretty text-ink-muted" />
         {status === 'cancelled' && (
           <p
             role="status"

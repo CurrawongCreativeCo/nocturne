@@ -337,6 +337,8 @@ export const linkListFragment = /* groq */ `
     headingImage { size, ${imageFields} },
     profile {
       name,
+      // Hidden categories never leave the Content Lake, like hidden links.
+      "categories": select(categoriesVisibility != "hide" => categories),
       bio,
       image { ${imageFields} },
       nameDisplay,
@@ -354,6 +356,16 @@ export const linkListFragment = /* groq */ `
       borderColour { colour, hex },
       nameColour { colour, hex },
       bioColour { colour, hex }
+    },
+    categoryDesign {
+      separator,
+      size,
+      weight,
+      textCase,
+      gap,
+      phoneLayout,
+      textColour { colour, hex },
+      separatorColour { colour, hex }
     },
     linkDesign {
       arrowStyle,
