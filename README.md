@@ -3220,7 +3220,7 @@ page without deleting them; hidden categories never leave the Content Lake. Stud
   repeats them gets a warning to delete the line. No migration script: the fields are optional, and only the editor can tell
   a typed list of services from a sentence that happens to use a bullet.
 
-**Design.** The Link list's Design tab (agency only) has four boxes above the shared Background and Animation. Everything
+**Design.** The Link list's Design tab (agency only) has four boxes and a collapsed **Depth and glow** above the shared Background and Animation. Everything
 empty is the look the section always had, so no content needs migrating. The colour overrides sit in a collapsed **Colours**
 inside each box, and every option that depends on another only shows once it applies.
 
@@ -3231,6 +3231,17 @@ inside each box, and every option that depends on another only shows once it app
 | Links              | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
+- **Depth and glow** (collapsed; empty is each layout's own look, so nothing changes until a level is chosen).
+  **Link shadow** Flat, Soft, Raised or Floating, as pictures, for every link (not offered for Editorial, whose links are a
+  ruled list); **Social button shadow** for the shaped icon styles; **Picture shadow**, drawn as a filter so it follows a
+  round crop, a ring, a frame or a transparent logo instead of a square box. **Glow** Off, Soft or Strong: a soft halo
+  around the ticked parts (the links while nothing is ticked) in a theme colour (Inherit is Primary). A level replaces
+  the element's own shadow and keeps the ring the layouts use as a border; a glow on its own is added to the element's
+  own shadow (on Glass rows, the glass's). Values: `shadow.floating` and the optional `depth` group in
+  `src/styles/tokens.json` (picture shadows, glow size and strength); choices and defaults in
+  `src/lib/sanity/depth-options.ts` (`resolveDepth`), which is not tied to the Link list so other sections can reuse it.
+  CSS only, no JavaScript. Browsers drop shadows in forced-colours mode, where the rings still mark each link. Glow is
+  decorative: it never carries meaning, and is clearest on a dark tone.
 - **Colours** are one shared field (`themeColourField`, `src/lib/sanity/schema/theme-colour.ts`): Inherit, Text, Muted text,
   Primary, Secondary, Highlight or Custom (a hex field appears only then). Each element offers only the choices that suit it.
   Every choice but Custom is a token, so it follows the section's tone; the site draws it with `themeColourCss`, which ignores

@@ -7,14 +7,14 @@
  *   `image{ ${imageFields}, caption }`
  */
 
-/** Everything <SanityImage /> needs: crop/hotspot for framing, dimensions + LQIP for layout/blur. */
+/** Everything <SanityImage /> needs: crop/hotspot for framing, dimensions + LQIP for layout/blur, `hasAlpha` so a transparent picture gets no blur. */
 export const imageFields = /* groq */ `
   alt,
   crop,
   hotspot,
   asset->{
     _id,
-    metadata { lqip, dimensions { width, height } }
+    metadata { lqip, hasAlpha, dimensions { width, height } }
   }
 `
 

@@ -1,7 +1,13 @@
 import { buttonFeedback } from '@/components/ui/cta-link'
 import { SanityLink } from '@/components/ui/sanity-link'
 
-import { LinkItem, LinkListView, LinkVisual, type LinkListLayout } from './link-list-parts'
+import {
+  LinkItem,
+  LinkListView,
+  LinkVisual,
+  linkShadow,
+  type LinkListLayout,
+} from './link-list-parts'
 import type { SectionProps } from '../../../types'
 
 // How this section looks without a style. Keep `align` equal to the Compact preset's.
@@ -20,21 +26,24 @@ const layout: LinkListLayout = {
   },
   // Wraps; the section's alignment decides whether the pills sit left or centred.
   listClassName: 'flex flex-wrap gap-2 [text-align:inherit]',
-  renderLink: (link, { iconStyle }) => (
-    <LinkItem link={link}>
-      <SanityLink link={link.link} className={PILL}>
-        <LinkVisual
-          link={link}
-          thumbClass=""
-          iconClass="size-4"
-          iconStyle={iconStyle}
-          sizes="16px"
-          useThumbnail={false}
-        />
-        {link.label}
-      </SanityLink>
-    </LinkItem>
-  ),
+  renderLink: (link, context) => {
+    const depth = linkShadow(context, 'none')
+    return (
+      <LinkItem link={link} style={depth.style}>
+        <SanityLink link={link.link} className={`${PILL} ${depth.className}`}>
+          <LinkVisual
+            link={link}
+            thumbClass=""
+            iconClass="size-4"
+            iconStyle={context.iconStyle}
+            sizes="16px"
+            useThumbnail={false}
+          />
+          {link.label}
+        </SanityLink>
+      </LinkItem>
+    )
+  },
 }
 
 /** Compact: small pills that wrap, for tucking into another page. Descriptions and large links aren't shown. */

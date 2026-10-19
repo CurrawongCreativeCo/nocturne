@@ -378,6 +378,14 @@ export const linkListFragment = /* groq */ `
       iconColour { colour, hex },
       background { colour, hex }
     },
+    depthDesign {
+      linkShadow,
+      socialShadow,
+      pictureShadow,
+      glow,
+      glowTargets,
+      glowColour { colour, hex }
+    },
     socialSource,
     "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),
     // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due

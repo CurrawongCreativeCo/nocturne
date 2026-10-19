@@ -36,18 +36,21 @@ export function GlassRow({
   arrow,
   arrowStyle,
   iconStyle,
+  className = '',
 }: {
   link: ListLink
   strength: GlassStrength
   arrow: LinkArrowStyle
   arrowStyle?: CSSProperties
   iconStyle?: CSSProperties
+  /** A shadow class from Design › Depth and glow, in place of the glass's own. */
+  className?: string
 }) {
   const thumbnail = link.item.thumbnail as SanityImageData | null | undefined
   return (
     <SanityLink
       link={link.link}
-      className={`${ROW} ${STRENGTH[strength]} ${link.large ? 'min-h-20' : 'min-h-14'}`}
+      className={`${ROW} ${STRENGTH[strength]} ${link.large ? 'min-h-20' : 'min-h-14'} ${className}`}
     >
       {hasThumbnail(link) && thumbnail && (
         <span className="relative w-[30%] max-w-32 shrink-0 bg-surface-alt">

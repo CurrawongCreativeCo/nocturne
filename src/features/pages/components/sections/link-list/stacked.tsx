@@ -9,6 +9,7 @@ import {
   LinkListView,
   LinkVisual,
   hasThumbnail,
+  linkShadow,
   type LinkListLayout,
 } from './link-list-parts'
 import type { SectionProps } from '../../../types'
@@ -23,28 +24,40 @@ export const PICTURE = {
 } as const
 
 const BUTTON = `group relative flex w-full items-center justify-center rounded-button px-14 text-center ${buttonFeedback}`
-const NORMAL = `min-h-14 py-3 font-semibold bg-surface text-ink shadow-card ring-1 ring-inset ring-line hover:bg-surface-alt`
+// The shadow is added per link (`linkShadow`), so Depth and glow can replace it.
+const NORMAL = `min-h-14 py-3 font-semibold bg-surface text-ink ring-1 ring-inset ring-line hover:bg-surface-alt`
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
   profile: { picture: PICTURE, name: 'text-h3' },
   listClassName: 'grid gap-3',
-  renderLink: (link, { surface, rowStyle, glassStrength, arrow, arrowStyle, iconStyle }) =>
-    rowStyle === 'glass' ? (
-      <LinkItem link={link}>
-        <GlassRow
-          link={link}
-          strength={glassStrength}
-          arrow={arrow}
-          arrowStyle={arrowStyle}
-          iconStyle={iconStyle}
-        />
-      </LinkItem>
-    ) : (
-      <LinkItem link={link}>
+  renderLink: (link, context) => {
+    const { surface, rowStyle, glassStrength, arrow, arrowStyle, iconStyle } = context
+    if (rowStyle === 'glass') {
+      // The glass draws its own shadow (`.glass-row`); a chosen one replaces it.
+      const depth = linkShadow(context, 'glass')
+      return (
+        <LinkItem link={link} style={depth.style}>
+          <GlassRow
+            link={link}
+            strength={glassStrength}
+            arrow={arrow}
+            arrowStyle={arrowStyle}
+            iconStyle={iconStyle}
+            className={depth.className}
+          />
+        </LinkItem>
+      )
+    }
+    // The large link is a filled button with no shadow of its own; the others are cards.
+    const depth = link.large
+      ? linkShadow(context, 'none')
+      : linkShadow(context, 'card', 'shadow-card')
+    return (
+      <LinkItem link={link} style={depth.style}>
         <SanityLink
           link={link.link}
-          className={`${BUTTON} ${link.large ? `min-h-20 py-4 text-lead font-semibold ${ctaColours(surface, 'primary')}` : NORMAL}`}
+          className={`${BUTTON} ${link.large ? `min-h-20 py-4 text-lead font-semibold ${ctaColours(surface, 'primary')}` : NORMAL} ${depth.className}`}
         >
           <span className="absolute left-4 flex items-center">
             <LinkVisual
@@ -77,7 +90,8 @@ const layout: LinkListLayout = {
           )}
         </SanityLink>
       </LinkItem>
-    ),
+    )
+  },
 }
 
 /**

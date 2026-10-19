@@ -112,6 +112,28 @@ export const defaultGlass = {
 
 export const glassOf = (tokens) => ({ ...defaultGlass, ...tokens.glass })
 
+/**
+ * Depth and glow (README, "Link list": Depth and glow). Box shadows are the `shadow` group; these are
+ * what a box shadow can't do: `picture-*` are drop-shadow filters, which follow a picture's real
+ * outline (a round crop, a ring, a transparent logo) instead of its square box, and `glow-*` are the
+ * blur and spread of a halo whose colour the editor picks, with `*-strength` the share of that colour
+ * kept. Optional in tokens.json, like the groups above.
+ */
+export const defaultDepth = {
+  'picture-soft':
+    'drop-shadow(0 1px 2px rgb(0 0 0 / 0.14)) drop-shadow(0 2px 6px rgb(0 0 0 / 0.08))',
+  'picture-raised':
+    'drop-shadow(0 4px 6px rgb(0 0 0 / 0.12)) drop-shadow(0 10px 15px rgb(0 0 0 / 0.1))',
+  'picture-floating':
+    'drop-shadow(0 8px 12px rgb(0 0 0 / 0.14)) drop-shadow(0 20px 28px rgb(0 0 0 / 0.16))',
+  'glow-soft': '0 0 18px 0',
+  'glow-soft-strength': '35%',
+  'glow-strong': '0 0 28px 4px',
+  'glow-strong-strength': '55%',
+}
+
+export const depthOf = (tokens) => ({ ...defaultDepth, ...tokens.depth })
+
 const glassFractions = ['light', 'medium', 'strong', 'solid', 'border', 'border-hover']
 
 export { hexToRgb }
@@ -372,6 +394,8 @@ export function buildCss(tokens) {
   lines.push('')
   theme('--glass-blur', glassOf(tokens).blur)
   theme('--glass-shadow', glassOf(tokens).shadow)
+  lines.push('')
+  for (const [name, value] of Object.entries(depthOf(tokens))) theme(`--depth-${name}`, value)
   lines.push('}', '', toneCss, glassCss(tokens))
   return lines.join('\n')
 }

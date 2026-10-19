@@ -80,6 +80,7 @@
   --radius-pill: 9999px;
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-raised: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-floating: 0 20px 40px -12px rgb(0 0 0 / 0.25), 0 8px 16px -8px rgb(0 0 0 / 0.12);
 
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
@@ -102,6 +103,14 @@
 
   --glass-blur: 14px;
   --glass-shadow: 0 8px 32px 0 rgb(0 0 0 / 0.12);
+
+  --depth-picture-soft: drop-shadow(0 1px 2px rgb(0 0 0 / 0.14)) drop-shadow(0 2px 6px rgb(0 0 0 / 0.08));
+  --depth-picture-raised: drop-shadow(0 4px 6px rgb(0 0 0 / 0.12)) drop-shadow(0 10px 15px rgb(0 0 0 / 0.1));
+  --depth-picture-floating: drop-shadow(0 8px 12px rgb(0 0 0 / 0.14)) drop-shadow(0 20px 28px rgb(0 0 0 / 0.16));
+  --depth-glow-soft: 0 0 18px 0;
+  --depth-glow-soft-strength: 35%;
+  --depth-glow-strong: 0 0 28px 4px;
+  --depth-glow-strong-strength: 55%;
 }
 
 :root {

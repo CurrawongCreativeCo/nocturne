@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 
 import { SocialIcon } from '@/components/ui/social-icon'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
+import { OWN_SHADOW, type BoxDepth } from '@/lib/sanity/depth-options'
 import type { SocialStyle } from '@/lib/sanity/social-style-options'
 import { socialPlatformTitle } from '@/lib/social-platforms'
 
@@ -16,7 +17,7 @@ export interface SocialProfile {
 const BASE =
   'inline-flex size-11 items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none'
 const PLAIN = 'rounded-button text-ink-muted hover:bg-surface-alt hover:text-ink'
-const SOLID = 'bg-surface text-ink shadow-card ring-1 ring-inset ring-line hover:bg-surface-alt'
+const SOLID = 'bg-surface text-ink ring-1 ring-inset ring-line hover:bg-surface-alt'
 // The frosted surface of Glass rows (`.glass-row` in globals.css), so icons and rows match.
 const GLASS = 'glass-row text-ink'
 const GLASS_STRENGTH: Record<GlassStrength, string> = {
@@ -35,9 +36,14 @@ export function socialLinkClass(
   shape: SocialStyle,
   surface: 'solid' | 'glass' = 'solid',
   strength: GlassStrength = 'medium',
+  /** False leaves the solid button's shadow off, for a caller that draws its own. */
+  shadow = true,
 ): string {
   if (shape === 'plain') return `${BASE} ${PLAIN}`
-  const look = surface === 'glass' ? `${GLASS} ${GLASS_STRENGTH[strength]}` : SOLID
+  const look =
+    surface === 'glass'
+      ? `${GLASS} ${GLASS_STRENGTH[strength]}`
+      : `${SOLID}${shadow ? ' shadow-card' : ''}`
   return `${BASE} ${look} ${RADIUS[shape]}`.trim()
 }
 
@@ -56,6 +62,7 @@ export function SocialLinks({
   background,
   className = '',
   label = 'Social profiles',
+  depth,
 }: {
   profiles: readonly SocialProfile[]
   shape?: SocialStyle
@@ -66,13 +73,20 @@ export function SocialLinks({
   /** Classes for the list: spacing and justification. */
   className?: string
   label?: string
+  /** Design › Depth and glow for the shaped buttons, given the shadow a button draws on its own. */
+  depth?: BoxDepth
 }) {
   const links = profiles.filter((profile) => profile.url)
   if (links.length === 0) return null
   const solidButton = shape !== 'plain' && surface !== 'glass'
   const backgroundColor = solidButton ? background : undefined
+  // Plain icons have no button to lift. Glass buttons draw the glass's shadow, solid ones the card's.
+  const lift =
+    shape === 'plain' ? undefined : depth?.(OWN_SHADOW[surface === 'glass' ? 'glass' : 'card'])
   const style: CSSProperties | undefined =
-    colour || backgroundColor ? { color: colour, backgroundColor } : undefined
+    colour || backgroundColor || lift
+      ? { color: colour, backgroundColor, ...lift?.style }
+      : undefined
 
   return (
     <nav aria-label={label}>
@@ -88,7 +102,11 @@ export function SocialLinks({
                 href={stegaClean(profile.url) ?? undefined}
                 rel="me"
                 aria-label={socialPlatformTitle(platform)}
-                className={socialLinkClass(shape, surface, strength)}
+                className={
+                  lift
+                    ? `${socialLinkClass(shape, surface, strength, false)} ${lift.className}`
+                    : socialLinkClass(shape, surface, strength)
+                }
                 style={style}
               >
                 <SocialIcon platform={platform} />

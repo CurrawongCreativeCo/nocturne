@@ -15,6 +15,12 @@ import { trackAttributes } from '@/lib/analytics/track-script'
 import { glassStrengthOf, type GlassStrength } from '@/lib/color/glass-contrast'
 import { bioParagraphs } from '@/lib/plain-text'
 import { requestTime } from '@/lib/request-time'
+import {
+  OWN_SHADOW,
+  resolveDepth,
+  type BoxDepth,
+  type ElementDepth,
+} from '@/lib/sanity/depth-options'
 import { inlineListItems, resolveInlineListDesign } from '@/lib/sanity/inline-list-options'
 import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
@@ -63,6 +69,22 @@ export interface LinkContext {
   /** Colour overrides from Design › Links, as inline styles; undefined keeps the layout's colours. */
   arrowStyle: CSSProperties | undefined
   iconStyle: CSSProperties | undefined
+  /** Design › Depth and glow for the links, given the shadow a link draws on its own. */
+  linkDepth: BoxDepth
+}
+
+/**
+ * The shadow class for a link and the style its `<li>` carries: the layout's own class while Depth
+ * and glow leaves links alone, else the chosen shadow (and glow), fed by a custom property on the
+ * `<li>` that the link inherits. `ownClass` is the layout's class, `own` the shadow it draws.
+ */
+export function linkShadow(
+  context: Pick<LinkContext, 'linkDepth'>,
+  own: keyof typeof OWN_SHADOW,
+  ownClass = '',
+): { className: string; style: CSSProperties | undefined } {
+  const depth = context.linkDepth(OWN_SHADOW[own])
+  return depth ?? { className: ownClass, style: undefined }
 }
 
 const clean = (value: string | null | undefined) => (value ? stegaClean(value).trim() : '')
@@ -80,6 +102,7 @@ function Profile({
   isFirst,
   block,
   align,
+  pictureDepth,
   nameLevel: Name,
 }: {
   data: Data
@@ -87,6 +110,7 @@ function Profile({
   isFirst: boolean
   block: string
   align: 'start' | 'center'
+  pictureDepth: ElementDepth | undefined
   nameLevel: 'h2'
 }) {
   const name = clean(data.profile?.name)
@@ -111,7 +135,8 @@ function Profile({
         scale={layout.profile.picture}
         colour={themeColourCss(design?.borderColour)}
         preload={isFirst}
-        className={`mb-4 ${block}`}
+        className={`mb-4 ${block} ${pictureDepth?.className ?? ''}`}
+        style={pictureDepth?.style}
       />
       {wordmark ? (
         // Without the name as text the picture is only decoration, so it is not a heading.
@@ -177,14 +202,21 @@ function WordmarkHeading({
 export function LinkItem({
   link,
   className,
+  style,
   children,
 }: {
   link: ListLink
   className?: string
+  /** Custom properties the link inherits (Depth and glow). */
+  style?: CSSProperties
   children: ReactNode
 }) {
   return (
-    <li {...trackAttributes('link_click', linkTrackProps(link))} className={className}>
+    <li
+      {...trackAttributes('link_click', linkTrackProps(link))}
+      className={className}
+      style={style}
+    >
       {children}
     </li>
   )
@@ -319,6 +351,7 @@ export function LinkListView({
   const thumbnailSize = stegaClean(data.thumbnailSize) === 'large' ? 'large' : 'standard'
   const rowStyle = stegaClean(data.rowStyle) === 'glass' ? 'glass' : 'solid'
   const glassStrength = glassStrengthOf(clean(data.glassStrength))
+  const depth = resolveDepth(data.depthDesign)
   const shared = {
     layout,
     context: {
@@ -332,6 +365,7 @@ export function LinkListView({
       ),
       arrowStyle: themeColourStyle(data.linkDesign?.arrowColour),
       iconStyle: themeColourStyle(data.linkDesign?.iconColour),
+      linkDepth: depth.links,
     } satisfies LinkContext,
     groupHeading: levels.group,
   }
@@ -351,6 +385,7 @@ export function LinkListView({
       strength={glassStrength}
       colour={themeColourCss(socialDesign?.iconColour)}
       background={themeColourCss(socialDesign?.background)}
+      depth={depth.social}
       className={`${socialsBelow ? 'mt-10' : 'mb-8'} ${traits.justify}`}
     />
   )
@@ -368,6 +403,7 @@ export function LinkListView({
         isFirst={Boolean(isFirst)}
         block={traits.block}
         align={traits.align}
+        pictureDepth={depth.picture}
         nameLevel={levels.top}
       />
       {headingWordmark ? (

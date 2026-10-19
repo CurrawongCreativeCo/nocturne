@@ -1,4 +1,5 @@
 import { Wireframe } from './wireframe'
+import type { ShadowLevel } from '../../depth-options'
 import type { LinkArrowStyle } from '../../link-arrow-options'
 import type { SocialStyle } from '../../social-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
@@ -69,4 +70,53 @@ export const socialStyleThumbnails: Record<
   circle: () => <SocialThumbnail shape="circle" />,
   rounded: () => <SocialThumbnail shape="rounded" />,
   square: () => <SocialThumbnail shape="square" />,
+}
+
+/** Three link rows lifted by the level's shadow, drawn as a soft offset shape under each row. */
+function ShadowThumbnail({ level }: { level: ShadowLevel }) {
+  const lift = { flat: 0, soft: 2, raised: 4, floating: 7 }[level]
+  return (
+    <Wireframe label={`link-shadow-${level}`}>
+      {[18, 50, 82].map((y) => (
+        <g key={y}>
+          {lift > 0 && (
+            <rect
+              x={20 + lift / 2}
+              y={y + lift}
+              width={120}
+              height={22}
+              rx={8}
+              style={{ fill: FG, opacity: 0.06 + lift * 0.025 }}
+            />
+          )}
+          <rect
+            x={20}
+            y={y - lift / 2}
+            width={120}
+            height={22}
+            rx={8}
+            style={{ ...outline, fill: 'var(--card-bg-color)', fillOpacity: 1 }}
+          />
+          <rect
+            x={30}
+            y={y + 9 - lift / 2}
+            width={48}
+            height={4}
+            rx={2}
+            style={{ fill: FG, opacity: 0.6 }}
+          />
+        </g>
+      ))}
+    </Wireframe>
+  )
+}
+
+export const shadowThumbnails: Record<
+  ShadowLevel,
+  (props: PresetThumbnailProps) => React.JSX.Element
+> = {
+  flat: () => <ShadowThumbnail level="flat" />,
+  soft: () => <ShadowThumbnail level="soft" />,
+  raised: () => <ShadowThumbnail level="raised" />,
+  floating: () => <ShadowThumbnail level="floating" />,
 }

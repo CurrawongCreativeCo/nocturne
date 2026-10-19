@@ -20,6 +20,7 @@ export interface SanityImageData {
     _id: string
     metadata?: {
       lqip?: string | null
+      hasAlpha?: boolean | null
       dimensions?: { width: number; height: number } | null
     } | null
   } | null
