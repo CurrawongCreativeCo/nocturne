@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import {
   useClient,
   useDocumentOperation,
+  useDocumentVersions,
   type DocumentActionComponent,
   type DocumentActionProps,
   type DocumentActionsResolver,
@@ -16,6 +17,7 @@ import {
 import { apiVersion } from '@/config/env'
 
 import { CONTENT_HEALTH_QUERY } from '../content-health/api/query'
+import { versionsToDelete } from '../utils/delete-versions'
 import { findIncomingLinks, type IncomingLinks } from '../utils/incoming-links'
 
 type State = { status: 'loading' } | { status: 'error' } | { status: 'ready'; links: IncomingLinks }
@@ -35,6 +37,7 @@ export const ConfirmDeletePage: DocumentActionComponent = ({
 }: DocumentActionProps) => {
   const client = useClient({ apiVersion })
   const { delete: del } = useDocumentOperation(id, type, release)
+  const { data: versionIds, loading: versionsLoading } = useDocumentVersions({ documentId: id })
   const [open, setOpen] = useState(false)
   const [opened, setOpened] = useState(0)
   const [lookup, setLookup] = useState<Lookup | null>(null)
@@ -102,9 +105,11 @@ export const ConfirmDeletePage: DocumentActionComponent = ({
           <Button
             text="Delete"
             tone="critical"
+            disabled={versionsLoading}
             onClick={() => {
               setOpen(false)
-              del.execute()
+              // The operation removes only the drafts and versions it is handed (see versionsToDelete).
+              del.execute(versionsToDelete(versionIds, draft?._id))
             }}
           />
         </Flex>
