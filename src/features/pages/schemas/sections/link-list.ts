@@ -28,8 +28,10 @@ import {
   LinkListImageThumbnail,
   LinkListMinimalThumbnail,
 } from '@/lib/sanity/schema/thumbnails/link-list-thumbnails'
+import { textOrImageFields } from '@/lib/sanity/schema/wordmark'
 import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
 
+import { linkListDesignFields } from './link-list-design'
 import { LINK_LIST_RECOMMENDED_MAX, PROFILE_BIO_MAX } from '../../utils/link-list'
 import { enclosingOfArray } from '../../utils/schema-path'
 
@@ -398,6 +400,12 @@ export const linkList = defineType({
         requiredUnless: 'title',
       }),
       legacyTitleField(LIMITS.title),
+      ...textOrImageFields({
+        prefix: 'heading',
+        what: 'the heading',
+        textField: 'heading',
+        richText: true,
+      }),
       defineField({
         name: 'profile',
         type: 'object',
@@ -407,7 +415,8 @@ export const linkList = defineType({
           imageField({
             name: 'image',
             title: 'Picture or logo',
-            description: 'Shown round, so centre the face or mark.',
+            description:
+              'Shown round unless the Design tab says otherwise, so centre the face or mark.',
             aspect: '1:1',
             minWidth: 400,
           }),
@@ -416,6 +425,7 @@ export const linkList = defineType({
             type: 'string',
             validation: (rule) => lengthWarning(rule, LIMITS.name, 'Names'),
           }),
+          ...textOrImageFields({ prefix: 'name', what: 'the name', textField: 'name' }),
           defineField({
             name: 'bio',
             type: 'text',
@@ -542,14 +552,15 @@ export const linkList = defineType({
             .warning(),
         ],
       }),
+      // Replaced by Design › Links › Arrow style. Kept, hidden, so Glass rows saved with it switched off
+      // still draw no arrow (defaultLinkArrow reads it while Arrow style is empty).
       defineField({
         name: 'showArrows',
         title: 'Arrow on each row',
-        description: 'A round arrow at the end of every row.',
         type: 'boolean',
-        initialValue: true,
-        hidden: notGlassRows,
+        hidden: true,
       }),
+      ...linkListDesignFields,
       accessField,
       // Set by the presets above the form; the stored value is the layout the section renders. Hidden
       // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.

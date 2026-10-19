@@ -80,6 +80,7 @@ import {
   ImageSizeActualThumbnail,
   ImageSizeContainThumbnail,
   ImageSizeCoverThumbnail,
+  ImageSizeScreenThumbnail,
   ImageStrengthFaintThumbnail,
   ImageStrengthFullThumbnail,
   ImageStrengthSoftThumbnail,
@@ -283,7 +284,7 @@ export const sectionStyle = defineType({
       name: 'imageSize',
       title: 'Picture size',
       description:
-        'Fill the section crops the picture to the section; Show the whole picture fits all of it in; Actual size draws it at its own size, for small patterns.',
+        'Fill the section crops the picture to the section; Cover the screen sizes it to the window and keeps it in view while the content scrolls; Show the whole picture fits all of it in; Actual size draws it at its own size, for small patterns.',
       required: false,
       options: [
         {
@@ -291,6 +292,13 @@ export const sectionStyle = defineType({
           title: SECTION_IMAGE_SIZE_TITLES.cover,
           description: 'Cropped to fill, the hotspot kept in view.',
           thumbnail: ImageSizeCoverThumbnail,
+        },
+        {
+          value: 'screen',
+          title: SECTION_IMAGE_SIZE_TITLES.screen,
+          description:
+            'The window’s size, held still as the content scrolls. Best behind a long list. The section is at least the window’s height.',
+          thumbnail: ImageSizeScreenThumbnail,
         },
         {
           value: 'contain',
@@ -467,7 +475,8 @@ export const sectionStyle = defineType({
       type: 'boolean',
       fieldset: 'backgroundAdvanced',
       initialValue: false,
-      hidden: imageOptionHidden('any'),
+      // Cover the screen already holds the picture still.
+      hidden: imageOptionHidden('fixed'),
     }),
     presetField({
       name: 'motion',
@@ -813,9 +822,9 @@ export const sectionStyle = defineType({
     }),
     defineField({
       name: 'fillScreen',
-      title: 'Fill the screen',
+      title: 'At least the screen’s height',
       description:
-        'At least as tall as the screen, with the content in the middle. For a Minimal page, so its background covers the whole window.',
+        'The section is at least as tall as the window, with its content centred up and down; long content still scrolls. To cover the window with a background picture and leave the content at the top, choose Picture size › Cover the screen instead.',
       type: 'boolean',
       fieldset: 'layoutOptions',
       initialValue: false,

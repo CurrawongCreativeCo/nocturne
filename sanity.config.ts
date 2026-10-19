@@ -41,6 +41,7 @@ import { RoleNavbar } from './src/features/studio/components/role-navbar'
 import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
 import { StudioIcon } from './src/features/studio/components/studio-icon'
 import { StudioLogo } from './src/features/studio/components/studio-logo'
+import { ThemeColourPickerInput } from './src/features/studio/components/theme-colour-picker/theme-colour-picker-input'
 import { contentHealth } from './src/features/studio/content-health/plugin'
 import { resolve } from './src/features/studio/presentation'
 import { currentAudience } from './src/features/studio/roles'
@@ -78,10 +79,14 @@ const PresetAwareInput = withPresetPicker(
 )
 // A heading highlight's custom gradient colours reuse the Brand colours input (features/site), which
 // a studio or shared module may not import: composed here.
+// An element's Custom colour (themeColourField) uses the same input; its colour choice gets swatches.
 const StudioInput = (props: InputProps) =>
-  isStringInputProps(props) && props.schemaType.options?.headingStop === true
+  isStringInputProps(props) &&
+  (props.schemaType.options?.headingStop === true || props.schemaType.options?.themeColourHex)
     ? createElement(ColourInput, props)
-    : createElement(PresetAwareInput, props)
+    : isStringInputProps(props) && props.schemaType.options?.themeColourPicker
+      ? createElement(ThemeColourPickerInput, props)
+      : createElement(PresetAwareInput, props)
 
 export default defineConfig({
   basePath: studioUrl,

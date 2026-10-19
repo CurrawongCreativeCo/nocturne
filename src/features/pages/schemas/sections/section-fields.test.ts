@@ -20,11 +20,13 @@ describe('every section', () => {
       expect(own.at(-1)?.name).toBe('style')
       expect(fields.find((f) => f.name === 'style')?.group).toBe('design')
       if (fields.some((f) => f.name === 'variant')) expect(fields[0]?.name).toBe('variant')
-      // Nothing but the style, the picture's design (shared `imageDesign`) and Advanced fields lives in the Design tab.
+      // Nothing but the style, design boxes (the shared `imageDesign`, the Link list's
+      // `profileDesign`…) and Advanced fields lives in the Design tab.
       for (const field of fields.filter((f) => f.group === 'design')) {
-        expect(['style', 'imageDesign'].includes(field.name) || field.fieldset === 'advanced').toBe(
-          true,
-        )
+        expect(
+          field.name === 'style' || field.name.endsWith('Design') || field.fieldset === 'advanced',
+          field.name,
+        ).toBe(true)
       }
     },
   )

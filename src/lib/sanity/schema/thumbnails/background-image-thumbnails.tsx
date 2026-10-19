@@ -57,6 +57,34 @@ function SizeThumbnail({ size }: { size: Size }) {
   return (
     <Frame name={`image-size-${size}`}>
       {size === 'cover' ? <Picture x={0} y={0} w={WIDTH} h={HEIGHT} /> : null}
+      {size === 'screen' ? (
+        // The picture fills a phone-shaped window, with the content scrolling past it.
+        <>
+          <Picture x={WIDTH / 2 - 30} y={6} w={60} h={HEIGHT - 12} />
+          <rect
+            x={WIDTH / 2 - 30}
+            y={6}
+            width={60}
+            height={HEIGHT - 12}
+            rx={6}
+            fill="none"
+            stroke="#1f2937"
+            strokeWidth={2}
+          />
+          {[34, 52, 70].map((y) => (
+            <rect
+              key={y}
+              x={WIDTH / 2 - 20}
+              y={y}
+              width={40}
+              height={10}
+              rx={5}
+              fill="#ffffff"
+              opacity={0.85}
+            />
+          ))}
+        </>
+      ) : null}
       {size === 'contain' ? <Picture x={WIDTH / 2 - 40} y={0} w={80} h={HEIGHT} /> : null}
       {size === 'actual' ? <Picture x={WIDTH / 2 - 22} y={HEIGHT - 44} w={44} h={36} /> : null}
     </Frame>
@@ -102,6 +130,9 @@ function WashThumbnail({ wash }: { wash: Wash }) {
 
 export const ImageSizeCoverThumbnail = (_props: PresetThumbnailProps) => (
   <SizeThumbnail size="cover" />
+)
+export const ImageSizeScreenThumbnail = (_props: PresetThumbnailProps) => (
+  <SizeThumbnail size="screen" />
 )
 export const ImageSizeContainThumbnail = (_props: PresetThumbnailProps) => (
   <SizeThumbnail size="contain" />

@@ -1,4 +1,5 @@
 import { buttonFeedback, ctaColours } from '@/components/ui/cta-link'
+import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 
 import { GlassRow } from './glass-row'
@@ -15,17 +16,29 @@ import type { SectionProps } from '../../../types'
 // How this section looks without a style. Keep `align` equal to the Minimal preset's.
 const DEFAULTS = { container: 'max-w-md', spacing: 'compact', align: 'center' } as const
 
+/** The profile picture at each size: Medium is the size this layout always drew. */
+export const PICTURE = {
+  box: { small: 'size-16', medium: 'size-24', large: 'size-32 sm:size-36' },
+  height: { small: 'h-16', medium: 'h-24', large: 'h-32 sm:h-36' },
+} as const
+
 const BUTTON = `group relative flex w-full items-center justify-center rounded-button px-14 text-center ${buttonFeedback}`
 const NORMAL = `min-h-14 py-3 font-semibold bg-surface text-ink shadow-card ring-1 ring-inset ring-line hover:bg-surface-alt`
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
-  profile: { picture: 'size-24', name: 'text-h3' },
+  profile: { picture: PICTURE, name: 'text-h3' },
   listClassName: 'grid gap-3',
-  renderLink: (link, { surface, rowStyle, glassStrength, showArrows }) =>
+  renderLink: (link, { surface, rowStyle, glassStrength, arrow, arrowStyle, iconStyle }) =>
     rowStyle === 'glass' ? (
       <LinkItem link={link}>
-        <GlassRow link={link} strength={glassStrength} showArrow={showArrows} />
+        <GlassRow
+          link={link}
+          strength={glassStrength}
+          arrow={arrow}
+          arrowStyle={arrowStyle}
+          iconStyle={iconStyle}
+        />
       </LinkItem>
     ) : (
       <LinkItem link={link}>
@@ -38,6 +51,7 @@ const layout: LinkListLayout = {
               link={link}
               thumbClass="size-10 rounded-control object-cover"
               iconClass="size-5"
+              iconStyle={iconStyle}
               sizes="40px"
             />
           </span>
@@ -48,6 +62,19 @@ const layout: LinkListLayout = {
               className="text-small font-normal opacity-80"
             />
           </span>
+          {/* In the right gutter, mirroring the picture on the left, so the label stays centred. */}
+          {arrow !== 'none' && (
+            <span
+              className="absolute right-4 flex items-center opacity-70 group-hover:opacity-100"
+              style={arrowStyle}
+            >
+              <LinkArrow
+                arrow={arrow}
+                external={link.kind === 'external'}
+                className="size-5 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+              />
+            </span>
+          )}
         </SanityLink>
       </LinkItem>
     ),

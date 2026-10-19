@@ -139,10 +139,14 @@ export const SECTION_OVERLAY_OPACITY: Record<(typeof SECTION_OVERLAYS)[number], 
 /**
  * How a background image sits in its section (README, "Section backgrounds"). `cover` is today's
  * behaviour and the default: the picture fills the section, the hotspot keeps the subject in view.
+ * `screen` sizes the picture to the window instead and keeps it in view while the content scrolls
+ * over it, so a long section (a long Link list on a phone) never blows the picture up; the section
+ * is then at least the window's height, with its content where it would be.
  */
-export const SECTION_IMAGE_SIZES = ['cover', 'contain', 'actual'] as const
+export const SECTION_IMAGE_SIZES = ['cover', 'screen', 'contain', 'actual'] as const
 export const SECTION_IMAGE_SIZE_TITLES: Record<(typeof SECTION_IMAGE_SIZES)[number], string> = {
   cover: 'Fill the section',
+  screen: 'Cover the screen',
   contain: 'Show the whole picture',
   actual: 'Actual size',
 }
@@ -206,10 +210,12 @@ export const SECTION_WASH_TITLES: Record<(typeof SECTION_WASHES)[number], string
  */
 export const SECTION_WASH_COLOURS = { light: '#ffffff', dark: '#030712' } as const
 
-/** Position and Repeat apply only to some sizes; Fill the section keeps using the hotspot. */
+/** Position and Repeat apply only to some sizes; Fill the section and Cover the screen keep using the hotspot. */
 export const imageSizeUsesPosition = (size: string | null | undefined) =>
   size === 'contain' || size === 'actual'
 export const imageSizeUsesRepeat = (size: string | null | undefined) => size === 'actual'
+/** Cover the screen already holds the picture still, so "Stays put while scrolling" has nothing to add. */
+export const imageSizeUsesFixed = (size: string | null | undefined) => size !== 'screen'
 
 /**
  * The overlay an image gets when none is chosen: Medium on the dark tones, where a bright photo

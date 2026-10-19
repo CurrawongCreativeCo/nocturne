@@ -153,6 +153,9 @@ export function applyPrelaunchLook(
       // Fill the screen so there is a photo's worth of page; a light dark wash keeps the photo
       // showing (Glass rows read best with the overlay on None or Light).
       next.style = { ...next.style, fillScreen: true, overlay: 'light', overlayColor: 'dark' }
+      // Behind a list of links the photo covers the window, not the list, so a long list on a phone
+      // doesn't blow it up (README, "Section height").
+      if (section._type === 'linkList') next.style.imageSize = 'screen'
     }
     return next
   })

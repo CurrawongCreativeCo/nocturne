@@ -95,8 +95,15 @@ const FRAMES: Record<ImageFramePreset, (inset: number) => ReactNode> = {
  * used as a CSS mask on a div filled with the chosen token colour, so it recolours with the theme,
  * scales with the picture and, loaded as an image, cannot run a script.
  */
-export function ImageFrame({ frame }: { frame: ResolvedFrame }) {
-  const colour = TEXT_COLOUR[frame.colour]
+export function ImageFrame({
+  frame,
+  colour: override,
+}: {
+  frame: ResolvedFrame
+  /** A CSS colour (a theme-colour field) instead of the frame's token. */
+  colour?: string
+}) {
+  const colour = override ? '' : TEXT_COLOUR[frame.colour]
 
   if (frame.kind === 'custom') {
     const mask = `url("${frame.url}")`
@@ -108,12 +115,13 @@ export function ImageFrame({ frame }: { frame: ResolvedFrame }) {
       WebkitMaskSize: '100% 100%',
       maskRepeat: 'no-repeat',
       WebkitMaskRepeat: 'no-repeat',
+      backgroundColor: override,
     }
     return (
       <div
         aria-hidden="true"
         data-image-frame="custom"
-        className={`pointer-events-none absolute ${BACKGROUND_COLOUR[frame.colour]}`}
+        className={`pointer-events-none absolute ${override ? '' : BACKGROUND_COLOUR[frame.colour]}`.trim()}
         style={style}
       />
     )
@@ -126,7 +134,8 @@ export function ImageFrame({ frame }: { frame: ResolvedFrame }) {
       data-image-frame={frame.preset}
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
-      className={`pointer-events-none absolute inset-0 size-full overflow-visible ${colour}`}
+      className={`pointer-events-none absolute inset-0 size-full overflow-visible ${colour}`.trim()}
+      style={override ? { color: override } : undefined}
     >
       {FRAMES[frame.preset](frame.inset)}
     </svg>

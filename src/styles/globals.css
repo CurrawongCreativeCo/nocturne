@@ -476,3 +476,26 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
     }
   }
 }
+
+/*
+ * The ring around a profile picture (components/ui/profile-image.tsx): one layer filled with a colour
+ * or a gradient (`--ring-fill`) and masked to a band `--ring-width` wide, so the gap between it and
+ * the picture is see-through over a photo or glass. It follows the wrapper's corners.
+ */
+@layer components {
+  .image-ring {
+    position: absolute;
+    inset: 0;
+    padding: var(--ring-width);
+    border-radius: inherit;
+    background: var(--ring-fill);
+    pointer-events: none;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+}

@@ -5,6 +5,7 @@ import {
   LINK_LIST_ROW_STYLES,
   LINK_LIST_VARIANTS,
   isGlassRows,
+  linkList,
   usesDescription,
   usesFeatured,
   usesIcon,
@@ -69,5 +70,56 @@ describe('what a link asks for, by layout', () => {
       'cards',
       'editorial',
     ])
+  })
+})
+
+describe('Design boxes and conditional fields', () => {
+  type Hidden = (context: Record<string, unknown>) => boolean
+  interface Field {
+    name: string
+    hidden?: Hidden | boolean
+    fields?: Field[]
+  }
+  const fields = linkList.fields as unknown as Field[]
+  const field = (name: string, list: Field[] = fields) => {
+    const found = list.find((candidate) => candidate.name === name)
+    if (!found) throw new Error(`No field ${name}`)
+    return found
+  }
+  const AGENCY = { currentUser: { roles: [{ name: 'administrator' }] } }
+  const hidden = (target: Field, context: Record<string, unknown>) =>
+    typeof target.hidden === 'function' ? target.hidden({ ...AGENCY, ...context }) : target.hidden
+
+  it('offers Links on every layout but Compact, which draws no arrow', () => {
+    expect(hidden(field('linkDesign'), { parent: { variant: 'compact' } })).toBe(true)
+    expect(hidden(field('linkDesign'), { parent: { variant: 'cards' } })).toBe(false)
+  })
+
+  it('hides Social icons when the section shows none', () => {
+    expect(hidden(field('socialDesign'), { parent: { socialSource: 'none' } })).toBe(true)
+    expect(hidden(field('socialDesign'), { parent: { socialSource: 'business' } })).toBe(false)
+  })
+
+  it('shows the border options only for the border that uses them', () => {
+    const profile = field('profileDesign').fields ?? []
+    const shown = (name: string, border?: string) =>
+      !hidden(field(name, profile), { parent: { border } })
+    expect(shown('borderWidth')).toBe(false)
+    expect(shown('borderWidth', 'line')).toBe(true)
+    expect(shown('borderGradient', 'line')).toBe(false)
+    expect(shown('borderGradient', 'gradient')).toBe(true)
+    expect(shown('frame', 'gradient')).toBe(false)
+    expect(shown('frame', 'frame')).toBe(true)
+    expect(shown('borderColour', 'gradient')).toBe(false)
+  })
+
+  it('shows the heading image only once Image is chosen', () => {
+    expect(hidden(field('headingImage'), { parent: { headingDisplay: 'text' } })).toBe(true)
+    expect(hidden(field('headingImage'), { parent: {} })).toBe(true)
+    expect(hidden(field('headingImage'), { parent: { headingDisplay: 'image' } })).toBe(false)
+  })
+
+  it('keeps the older arrow switch for saved content, out of sight', () => {
+    expect(field('showArrows').hidden).toBe(true)
   })
 })

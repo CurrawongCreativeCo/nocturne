@@ -1,21 +1,27 @@
 import { stegaClean } from 'next-sanity'
-import { Fragment, Suspense, type ReactNode } from 'react'
+import { Fragment, Suspense, type ReactNode, type CSSProperties } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
+import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
-import { SocialIcon } from '@/components/ui/social-icon'
+import { SocialLinks } from '@/components/ui/social-links'
+import { Wordmark } from '@/components/ui/wordmark'
 import { trackAttributes } from '@/lib/analytics/track-script'
 import { glassStrengthOf, type GlassStrength } from '@/lib/color/glass-contrast'
 import { requestTime } from '@/lib/request-time'
+import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
+import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
-import { socialPlatformTitle } from '@/lib/social-platforms'
+import { socialPositionOf, socialStyleOf } from '@/lib/sanity/social-style-options'
+import { themeColourCss, themeColourStyle } from '@/lib/sanity/theme-colour'
+import { showsWordmark, wordmarkSizeOf } from '@/lib/sanity/wordmark-options'
 import type { SanityImageData } from '@/types/sanity'
 
 import type { SectionProps } from '../../../types'
-import { headingLevels } from '../../../utils/link-list'
+import { defaultLinkArrow, headingLevels } from '../../../utils/link-list'
 import {
   drawableLinks,
   groupDrawn,
@@ -34,8 +40,8 @@ export type ListLink = DrawnLink<StoredLink>
 export interface LinkListLayout {
   /** How this layout looks without a style. Keep `align` equal to the matching preset's. */
   defaults: SectionDefaults
-  /** Size of the profile block: the picture, the name and the bio. */
-  profile: { picture: string; name: string }
+  /** Size of the profile block: the picture at each size (Medium is the layout's own), and the name. */
+  profile: { picture: ProfileImageScale; name: string }
   /** Classes for the `<ul>` of one group. */
   listClassName: string
   renderLink: (link: ListLink, context: LinkContext) => ReactNode
@@ -48,16 +54,21 @@ export interface LinkContext {
   /** Minimal only: plain buttons, or the frosted rows of the Glass rows preset. */
   rowStyle: 'solid' | 'glass'
   glassStrength: GlassStrength
-  /** Glass rows only: whether each row ends in a round arrow. */
-  showArrows: boolean
+  /** The indicator at the end of each link (Design › Links › Arrow style, else the layout's default). */
+  arrow: LinkArrowStyle
+  /** Colour overrides from Design › Links, as inline styles; undefined keeps the layout's colours. */
+  arrowStyle: CSSProperties | undefined
+  iconStyle: CSSProperties | undefined
 }
 
 const clean = (value: string | null | undefined) => (value ? stegaClean(value).trim() : '')
 
-/** Round, with room for a thumb and an icon under the same rules. */
-const SOCIAL_LINK =
-  'inline-flex size-11 items-center justify-center rounded-button text-ink-muted transition-colors duration-(--duration-fast) hover:bg-surface-alt hover:text-ink motion-reduce:transition-none'
+type WordmarkImage = SanityImageData & { size?: string | null }
 
+/**
+ * The picture, the name and the bio. The name can be drawn as a wordmark (Content › Profile › Show
+ * as); its text is then the picture's alt text, so the heading keeps its name.
+ */
 function Profile({
   data,
   layout,
@@ -74,24 +85,41 @@ function Profile({
   const name = clean(data.profile?.name)
   const bio = clean(data.profile?.bio)
   const image = data.profile?.image as SanityImageData | null | undefined
-  if (!name && !bio && !image?.asset) return null
+  const nameImage = data.profile?.nameImage as WordmarkImage | null | undefined
+  const wordmark = showsWordmark(data.profile?.nameDisplay, nameImage) ? nameImage : null
+  if (!name && !bio && !image?.asset && !wordmark) return null
+  const design = data.profileDesign
 
   return (
     <div className="mb-6">
-      {image?.asset && (
-        <SanityImage
-          image={image}
-          width={256}
-          height={256}
-          sizes="128px"
-          preload={isFirst}
-          className={`mb-4 block rounded-full object-cover ${layout.profile.picture} ${block}`}
+      <ProfileImage
+        image={image}
+        design={resolveProfileImage(design)}
+        scale={layout.profile.picture}
+        colour={themeColourCss(design?.borderColour)}
+        preload={isFirst}
+        className={`mb-4 ${block}`}
+      />
+      {wordmark ? (
+        // Without the name as text the picture is only decoration, so it is not a heading.
+        <WordmarkHeading
+          as={name ? Name : 'div'}
+          alt={name}
+          image={wordmark}
+          preload={isFirst && !image?.asset}
         />
-      )}
-      {name && <Name className={`${layout.profile.name} font-semibold text-balance`}>{name}</Name>}
+      ) : name ? (
+        <Name
+          className={`${layout.profile.name} font-semibold text-balance`}
+          style={themeColourStyle(design?.nameColour)}
+        >
+          {name}
+        </Name>
+      ) : null}
       {bio && (
         <p
-          className={`${name ? 'mt-2' : ''} max-w-measure-narrow text-pretty text-ink-muted ${block}`}
+          className={`${name || wordmark ? 'mt-2' : ''} max-w-measure-narrow text-pretty text-ink-muted ${block}`}
+          style={themeColourStyle(design?.bioColour)}
         >
           {bio}
         </p>
@@ -100,30 +128,27 @@ function Profile({
   )
 }
 
-function Socials({
-  profiles,
-  justify,
+/**
+ * A wordmark standing in for a heading's text. The text is the picture's alt text: one heading, one
+ * name, nothing read twice, and the words stay in the page for search engines.
+ */
+function WordmarkHeading({
+  as: Element,
+  alt,
+  image,
+  preload,
+  className,
 }: {
-  profiles: ReturnType<typeof resolveSocials>
-  justify: string
+  as: 'h1' | 'h2' | 'h3' | 'div'
+  alt: string
+  image: WordmarkImage
+  preload: boolean
+  className?: string
 }) {
-  if (profiles.length === 0) return null
   return (
-    <nav aria-label="Social profiles" className="mb-8">
-      <ul className={`flex flex-wrap gap-1 ${justify}`}>
-        {profiles.map((profile) => (
-          <li key={profile._key}>
-            <a
-              href={profile.url}
-              aria-label={socialPlatformTitle(clean(profile.platform))}
-              className={SOCIAL_LINK}
-            >
-              <SocialIcon platform={clean(profile.platform)} />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <Element className={className}>
+      <Wordmark image={image} alt={alt} size={wordmarkSizeOf(image.size)} preload={preload} />
+    </Element>
   )
 }
 
@@ -172,12 +197,15 @@ export function LinkVisual({
   link,
   thumbClass,
   iconClass = '',
+  iconStyle,
   sizes,
   useThumbnail = true,
 }: {
   link: ListLink
   thumbClass: string
   iconClass?: string
+  /** The icon colour from Design › Links. */
+  iconStyle?: CSSProperties
   sizes: string
   useThumbnail?: boolean
 }) {
@@ -194,31 +222,19 @@ export function LinkVisual({
       />
     )
   }
-  return link.item.icon ? <BadgeIcon name={clean(link.item.icon)} className={iconClass} /> : null
+  if (!link.item.icon) return null
+  return iconStyle ? (
+    <span className="contents" style={iconStyle}>
+      <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
+    </span>
+  ) : (
+    <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
+  )
 }
 
 /** Whether a link has a picture to draw (a thumbnail, when the layout shows them). */
 export function hasThumbnail(link: ListLink): boolean {
   return Boolean((link.item.thumbnail as SanityImageData | null | undefined)?.asset)
-}
-
-/** The shared arrow of the editorial list and of Glass rows; it points out of the page for another website. */
-export function ArrowIcon({ out, className = '' }: { out: boolean; className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-      className={`size-6 shrink-0 ${className}`}
-    >
-      {out ? <path d="M8 16 16 8m-6 0h6v6" /> : <path d="M5 12h14m-5-5 5 5-5 5" />}
-    </svg>
-  )
 }
 
 /** The groups of links, each under its heading, drawn by the layout. */
@@ -283,17 +299,43 @@ export function LinkListView({
   const levels = headingLevels({ hasProfileName: hasName, hasTitle: Boolean(title) })
   const Title = levels.title
   const thumbnailSize = stegaClean(data.thumbnailSize) === 'large' ? 'large' : 'standard'
+  const rowStyle = stegaClean(data.rowStyle) === 'glass' ? 'glass' : 'solid'
+  const glassStrength = glassStrengthOf(clean(data.glassStrength))
   const shared = {
     layout,
     context: {
       surface,
       thumbnailSize,
-      rowStyle: stegaClean(data.rowStyle) === 'glass' ? 'glass' : 'solid',
-      glassStrength: glassStrengthOf(clean(data.glassStrength)),
-      showArrows: data.showArrows !== false,
+      rowStyle,
+      glassStrength,
+      arrow: linkArrowOf(
+        data.linkDesign?.arrowStyle,
+        defaultLinkArrow({ layout: data.variant, rowStyle, showArrows: data.showArrows }),
+      ),
+      arrowStyle: themeColourStyle(data.linkDesign?.arrowColour),
+      iconStyle: themeColourStyle(data.linkDesign?.iconColour),
     } satisfies LinkContext,
     groupHeading: levels.group,
   }
+  const headingImage = data.headingImage as WordmarkImage | null | undefined
+  const headingWordmark = showsWordmark(data.headingDisplay, headingImage) ? headingImage : null
+  const socialDesign = data.socialDesign
+  // Every layout but these three is drawn by Minimal (index.tsx), so only Minimal has glass rows.
+  const glassRows =
+    rowStyle === 'glass' && !['cards', 'editorial', 'compact'].includes(stegaClean(data.variant))
+  const socialsBelow = socialPositionOf(socialDesign?.position) === 'below'
+  const socialRow = (
+    <SocialLinks
+      profiles={socials}
+      shape={socialStyleOf(socialDesign?.style)}
+      // Glass rows' icons are frosted glass too, at the rows' strength, so the two read as one design.
+      surface={glassRows ? 'glass' : 'solid'}
+      strength={glassStrength}
+      colour={themeColourCss(socialDesign?.iconColour)}
+      background={themeColourCss(socialDesign?.background)}
+      className={`${socialsBelow ? 'mt-10' : 'mb-8'} ${traits.justify}`}
+    />
+  )
 
   return (
     <SectionFrame
@@ -309,15 +351,23 @@ export function LinkListView({
         block={traits.block}
         nameLevel={levels.top}
       />
-      {title && (
+      {headingWordmark ? (
+        <WordmarkHeading
+          as={title ? Title : 'div'}
+          alt={title}
+          image={headingWordmark}
+          preload={Boolean(isFirst) && !hasName}
+          className="mb-8"
+        />
+      ) : title ? (
         <RichHeading
           as={Title}
           blocks={data.heading}
           fallback={title}
           className={`mb-8 text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
         />
-      )}
-      <Socials profiles={socials} justify={traits.justify} />
+      ) : null}
+      {socialsBelow ? null : socialRow}
       {prepared.some((link) => link.scheduled) ? (
         // A scheduled link is due only at some times. The prerendered page shows the links that
         // always are; the visitor's request fills in the rest.
@@ -327,6 +377,7 @@ export function LinkListView({
       ) : (
         <LinkGroups links={drawableLinks(prepared)} {...shared} />
       )}
+      {socialsBelow ? socialRow : null}
     </SectionFrame>
   )
 }

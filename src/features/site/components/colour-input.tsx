@@ -7,7 +7,9 @@ import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 import { adjustLightnessForContrast } from '@/lib/color/contrast'
 import { stopContrast } from '@/lib/color/heading-contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
+import { USAGE_RATIO, themeColourContrast } from '@/lib/color/theme-colour-contrast'
 import { headingSectionPath, headingTone } from '@/lib/sanity/heading-text'
+import { sectionPathOf } from '@/lib/sanity/schema/theme-colour'
 
 import { defaultColourFor } from '../utils/default-colour'
 import {
@@ -43,6 +45,27 @@ function headingStopCheck(hex: string, tone: string | undefined): ContrastCheck 
     ratio,
     required: 3,
     pass,
+    adjustable: true,
+  }
+}
+
+/** An element's Custom colour (themeColourField) on its section's background: 4.5:1 for text, 3:1 for icons. */
+function elementCheck(
+  hex: string,
+  tone: string | undefined,
+  usage: 'text' | 'graphic',
+): ContrastCheck {
+  const check = themeColourContrast('custom', hex, tone, usage)
+  return {
+    id: 'element-colour',
+    fields: [],
+    label:
+      usage === 'text' ? "Text on the section's background" : "Icon on the section's background",
+    foreground: hex,
+    background: check?.background ?? '#ffffff',
+    ratio: check?.ratio ?? 1,
+    required: USAGE_RATIO[usage],
+    pass: check?.pass ?? false,
     adjustable: true,
   }
 }
@@ -97,19 +120,22 @@ export function ColourInput(props: StringInputProps) {
   const invalid = draft !== null && draft.trim() !== '' && toHex(draft) === null
 
   // A colour of a heading highlight's custom gradient is checked against its section's background.
+  // An element's Custom colour (themeColourField) is checked the same way, at its own ratio.
   const headingStop = props.schemaType.options?.headingStop === true
-  const section = headingStop ? headingSectionPath(path) : null
+  const elementUsage = props.schemaType.options?.themeColourHex
+  const section = headingStop ? headingSectionPath(path) : elementUsage ? sectionPathOf(path) : null
   const sectionValue = useFormValue(section ?? ['_type'])
-  const headingCheck =
-    headingStop && hex
-      ? headingStopCheck(
-          hex,
-          section ? headingTone(sectionValue as Parameters<typeof headingTone>[0]) : undefined,
-        )
-      : null
+  const tone = section ? headingTone(sectionValue as Parameters<typeof headingTone>[0]) : undefined
+  const sectionCheck = !hex
+    ? null
+    : headingStop
+      ? headingStopCheck(hex, tone)
+      : elementUsage
+        ? elementCheck(hex, tone, elementUsage)
+        : null
 
-  const checks = headingCheck
-    ? [headingCheck]
+  const checks = sectionCheck
+    ? [sectionCheck]
     : field
       ? resolveDesignTokens(document).checks.filter((check) => check.fields.includes(field))
       : []
