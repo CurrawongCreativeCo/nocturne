@@ -37,8 +37,17 @@ you start a release.
 
 - **Setup wizard starts in pre-launch:** a new question, "Start with a pre-launch Link page" (on by default for client projects, off in the template checkout, needs starter content). Yes seeds a published Link page (the _Link page + coming soon_ template, Minimal look, site name in the profile, placeholder links hidden), saves Home and About as drafts only with weak references, leaves the menus empty, and writes `launch: { status: 'prelaunch', homepage: 'links' }` into `site.profile.ts` (one line changed, nothing reformatted; skipped with a warning if the starter content failed). No answers today's behaviour. `npm run setup -- --dry-run [--name "Acme"] [--live]` prints the documents and file edit without writing. The last screen points to the domain runbook and the launch checklist. Vitest covers the seed in both modes and the profile edit.
 
+- **Link list Design boxes** (agency only, README "Link list" › Design): **Profile** (picture size Small, Medium or Large; Circle, Rounded square or Logo, uncropped; a solid or gradient ring with a see-through gap, or an approved decorative frame; name and bio colours), **Links** (Arrow style: Chevron, Arrow, External link or None; arrow and icon colours) and **Social icons** (Plain, Circles, Rounded squares or Squares, frosted glass with Glass rows; above or below the links; icon and button colours).
+- **Theme colours for single elements:** one shared `themeColourField` (Inherit, Text, Muted text, Primary, Secondary, Highlight or Custom hex) with swatches and a contrast badge in Studio, drawn by `themeColourCss` as tokens that follow the tone.
+- **Wordmarks:** the Link list's profile name and heading can show as an image (_Show as_ › Image). The text stays and becomes the image's alt text inside the same heading.
+- **Cover the screen** background picture size on every section: the picture is the window's size and stays in view while the content scrolls, so a long list never stretches it. Independent of the section's height. The _Dark and atmospheric_ pre-launch look uses it for the Link list.
+- Shared server components for reuse: `LinkArrow`, `SocialLinks`, `ProfileImage` and `Wordmark` in `src/components/ui/`.
+
 ### Changed
 
+- **Glass rows and Editorial draw a chevron** at the end of each link instead of an arrow (↗ for other websites). Choose _External link_ under Design › Links › Arrow style for the previous look. Glass rows saved with "Arrow on each row" off still draw none; that switch is now hidden, replaced by Arrow style.
+- **Fill the screen** is now titled _At least the screen's height_ and explains its relation to _Cover the screen_. Same field (`fillScreen`), same behaviour.
+- **Picture pickers** in Studio have a bordered Close button with an X at the top of the open grid, and Escape closes it.
 - `reservedSegment` moved from `src/features/pages/utils/reserved-slug.ts` to `src/config/reserved-slug.ts` (the site profile validates against it). Update the import if a project uses it.
 
 ### Fixed

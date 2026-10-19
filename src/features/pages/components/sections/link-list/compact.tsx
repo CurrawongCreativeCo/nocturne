@@ -11,16 +11,23 @@ const PILL = `inline-flex min-h-10 items-center gap-2 rounded-pill bg-surface px
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
-  profile: { picture: 'size-16', name: 'text-h4' },
+  profile: {
+    picture: {
+      box: { small: 'size-12', medium: 'size-16', large: 'size-24' },
+      height: { small: 'h-12', medium: 'h-16', large: 'h-24' },
+    },
+    name: 'text-h4',
+  },
   // Wraps; the section's alignment decides whether the pills sit left or centred.
   listClassName: 'flex flex-wrap gap-2 [text-align:inherit]',
-  renderLink: (link) => (
+  renderLink: (link, { iconStyle }) => (
     <LinkItem link={link}>
       <SanityLink link={link.link} className={PILL}>
         <LinkVisual
           link={link}
           thumbClass=""
           iconClass="size-4"
+          iconStyle={iconStyle}
           sizes="16px"
           useThumbnail={false}
         />

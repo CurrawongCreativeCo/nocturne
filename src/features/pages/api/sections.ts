@@ -333,7 +333,39 @@ export const linkListFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
-    profile { name, bio, image { ${imageFields} } },
+    headingDisplay,
+    headingImage { size, ${imageFields} },
+    profile {
+      name,
+      bio,
+      image { ${imageFields} },
+      nameDisplay,
+      nameImage { size, ${imageFields} }
+    },
+    // The approved frame is resolved to its SVG's CDN URL, as for imageDesign (tagged \`frame\`).
+    profileDesign {
+      imageSize,
+      imageShape,
+      border,
+      borderWidth,
+      borderGap,
+      borderGradient,
+      "frameUrl": frame->svg.asset->url,
+      borderColour { colour, hex },
+      nameColour { colour, hex },
+      bioColour { colour, hex }
+    },
+    linkDesign {
+      arrowStyle,
+      arrowColour { colour, hex },
+      iconColour { colour, hex }
+    },
+    socialDesign {
+      style,
+      position,
+      iconColour { colour, hex },
+      background { colour, hex }
+    },
     socialSource,
     "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),
     // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due

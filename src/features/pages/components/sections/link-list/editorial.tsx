@@ -1,13 +1,8 @@
 import { buttonFeedback } from '@/components/ui/cta-link'
+import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 
-import {
-  ArrowIcon,
-  LinkDescription,
-  LinkItem,
-  LinkListView,
-  type LinkListLayout,
-} from './link-list-parts'
+import { LinkDescription, LinkItem, LinkListView, type LinkListLayout } from './link-list-parts'
 import type { SectionProps } from '../../../types'
 
 // How this section looks without a style. Keep `align` equal to the Editorial preset's.
@@ -17,9 +12,15 @@ const ROW = `group -mx-3 flex w-full items-center justify-between gap-6 rounded-
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
-  profile: { picture: 'size-28', name: 'text-h1' },
+  profile: {
+    picture: {
+      box: { small: 'size-20', medium: 'size-28', large: 'size-36 sm:size-40' },
+      height: { small: 'h-20', medium: 'h-28', large: 'h-36 sm:h-40' },
+    },
+    name: 'text-h1',
+  },
   listClassName: 'divide-y divide-line border-y border-line',
-  renderLink: (link) => (
+  renderLink: (link, { arrow, arrowStyle }) => (
     <LinkItem link={link}>
       <SanityLink link={link.link} className={ROW}>
         <span className="flex min-w-0 flex-col">
@@ -31,16 +32,18 @@ const layout: LinkListLayout = {
             className="mt-1 text-body text-pretty text-ink-muted"
           />
         </span>
-        <ArrowIcon
-          out={link.kind === 'external'}
+        <LinkArrow
+          arrow={arrow}
+          external={link.kind === 'external'}
           className="text-ink-muted group-hover:text-ink motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
+          style={arrowStyle}
         />
       </SanityLink>
     </LinkItem>
   ),
 }
 
-/** Editorial: larger type, the links as a ruled list with an arrow at the end of each row. */
+/** Editorial: larger type, the links as a ruled list with the section's arrow (a chevron by default) at the end of each row. */
 export function LinkListEditorial(props: SectionProps<'linkList'>) {
   return <LinkListView {...props} layout={layout} />
 }

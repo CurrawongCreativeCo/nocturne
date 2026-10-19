@@ -1,5 +1,7 @@
 import { stegaClean } from 'next-sanity'
 
+import type { LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
+
 /** More links than this and visitors stop reading: Studio warns (it never blocks publishing). */
 export const LINK_LIST_RECOMMENDED_MAX = 12
 
@@ -131,3 +133,28 @@ export function headingLevels({
     group: hasProfileName || hasTitle ? 'h3' : 'h2',
   }
 }
+
+/**
+ * The indicator a layout draws while Arrow style is unset. Glass rows and Editorial always had an
+ * arrow, so they get the chevron (Glass rows switched off with the older "Arrow on each row" get
+ * none); Minimal and Cards never had one and stay without; Compact pills have no room for one.
+ */
+export function defaultLinkArrow({
+  layout,
+  rowStyle,
+  showArrows,
+}: {
+  layout: string | null | undefined
+  rowStyle?: string | null
+  showArrows?: boolean | null
+}): LinkArrowStyle {
+  const variant = stegaClean(layout) ?? 'stacked'
+  if (variant === 'editorial') return 'chevron'
+  if (variant === 'stacked' && stegaClean(rowStyle) === 'glass') {
+    return showArrows === false ? 'none' : 'chevron'
+  }
+  return 'none'
+}
+
+/** Compact pills draw no indicator, so the choice is not offered there. */
+export const usesArrow = (layout: string | null | undefined) => stegaClean(layout) !== 'compact'

@@ -1,13 +1,16 @@
 import { stegaClean } from 'next-sanity'
+import type { CSSProperties } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
 import { buttonFeedback } from '@/components/ui/cta-link'
+import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
+import type { LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import type { SanityImageData } from '@/types/sanity'
 
-import { ArrowIcon, LinkDescription, hasThumbnail, type ListLink } from './link-list-parts'
+import { LinkDescription, hasThumbnail, type ListLink } from './link-list-parts'
 
 // The glass itself (blur, surface, border, shadow) is `.glass-row` in globals.css, from the glass tokens;
 // the strength is a modifier class that tokens.generated.css defines.
@@ -23,18 +26,22 @@ const BADGE =
 
 /**
  * One Glass rows link: a flush thumbnail the height of the row (clipped to the row's outer corners),
- * a round icon badge, the title and description, and an optional round arrow badge. The whole row is
- * the one link. Title and description are both `text-ink`: the contrast check measures that colour
+ * a round icon badge, the title and description, and a round badge holding the section's arrow style
+ * (a chevron unless Design › Links says otherwise; none draws no badge). The whole row is the one link. Title and description are both `text-ink`: the contrast check measures that colour
  * over the glass (src/lib/color/glass-contrast.ts), and `text-ink-muted` would not reach 4.5:1.
  */
 export function GlassRow({
   link,
   strength,
-  showArrow,
+  arrow,
+  arrowStyle,
+  iconStyle,
 }: {
   link: ListLink
   strength: GlassStrength
-  showArrow: boolean
+  arrow: LinkArrowStyle
+  arrowStyle?: CSSProperties
+  iconStyle?: CSSProperties
 }) {
   const thumbnail = link.item.thumbnail as SanityImageData | null | undefined
   return (
@@ -56,7 +63,7 @@ export function GlassRow({
       )}
       <span className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5">
         {link.item.icon && (
-          <span className={BADGE}>
+          <span className={BADGE} style={iconStyle}>
             <BadgeIcon name={stegaClean(link.item.icon)} className="size-5" />
           </span>
         )}
@@ -66,9 +73,13 @@ export function GlassRow({
           </span>
           <LinkDescription text={link.item.description} className="text-small text-pretty" />
         </span>
-        {showArrow && (
-          <span className={BADGE}>
-            <ArrowIcon out={link.kind === 'external'} className="size-4!" />
+        {arrow !== 'none' && (
+          <span className={BADGE} style={arrowStyle}>
+            <LinkArrow
+              arrow={arrow}
+              external={link.kind === 'external'}
+              className="size-4! motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+            />
           </span>
         )}
       </span>

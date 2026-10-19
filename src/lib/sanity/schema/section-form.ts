@@ -13,6 +13,7 @@ import {
   SECTION_MOTIONS,
   edgeAllowsFlip,
   edgeAllowsInvert,
+  imageSizeUsesFixed,
   imageSizeUsesPosition,
   imageSizeUsesRepeat,
 } from '../section-style-options'
@@ -132,14 +133,16 @@ export const overlayHidden: ConditionalPropertyCallback = ({ document, path, par
   !(parent as { image?: { asset?: unknown } } | undefined)?.image?.asset ||
   !allowsBackgroundImage(sectionAtStylePath(document, path))
 
-type ImageOption = 'position' | 'repeat' | 'any'
+type ImageOption = 'position' | 'repeat' | 'fixed' | 'any'
 
 const imageOptionApplies = (option: ImageOption, size: unknown) =>
   option === 'position'
     ? imageSizeUsesPosition(size as string)
     : option === 'repeat'
       ? imageSizeUsesRepeat(size as string)
-      : true
+      : option === 'fixed'
+        ? imageSizeUsesFixed(size as string)
+        : true
 
 /**
  * A background-image option is shown only with a picture, and Position and Repeat only for the sizes
@@ -158,14 +161,14 @@ export const imageOptionHidden =
 
 /** The warning for a Position or Repeat value the chosen size ignores; true when there is nothing to say. */
 export function staleImageOptionMessage(
-  option: Exclude<ImageOption, 'any'>,
+  option: Exclude<ImageOption, 'any' | 'fixed'>,
   value: unknown,
   context: { parent?: unknown },
 ): string | true {
   const size = (context.parent as { imageSize?: string } | undefined)?.imageSize
   if (!value || imageOptionApplies(option, size)) return true
   return option === 'position'
-    ? 'Fill the section uses the picture’s hotspot, so this position is ignored. Choose Show the whole picture or Actual size, or clear it.'
+    ? 'Fill the section and Cover the screen use the picture’s hotspot, so this position is ignored. Choose Show the whole picture or Actual size, or clear it.'
     : 'Only Actual size can repeat, so this is ignored. Choose Actual size, or clear it.'
 }
 

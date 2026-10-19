@@ -2752,12 +2752,20 @@ did: Fill the section, the hotspot, Full, the background colour.
   size only: No repeat, Repeat across, Repeat down, Tile), _Exact strength (%)_ (5 to 100, wins over the named strength) and
   _Stays put while scrolling_ (off by default).
 - A Position or Repeat left over from another size stays visible with a warning saying it is ignored, as Alignment does.
-- **Fill the screen** (in _Advanced: layout_ on every section): the section is at least the screen tall (`min-h-dvh`) with
-  its content centred. This is a per-section option rather than a page-level background, so the background travels with
+- <a id="section-height"></a>**At least the screen's height** (stored as `fillScreen`; titled _Fill the screen_ before
+  v1.7, same meaning) in _Advanced: layout_ on every section: the section is at least the screen tall (`min-h-dvh`, a
+  minimum, so long content still scrolls) with its content centred. This is a per-section option rather than a page-level background, so the background travels with
   the section (reordering, shared sections), the page needs no second background field, and the section's tone, overlay
   and contrast check all stay in one place. It is explicit rather than automatic for single-section Minimal pages
   because a Link page is also fine as a short band, and `SectionFrame` cannot see the page. Turn it on for a Link page
   that should have a full-window photo or pattern.
+- **Cover the screen** (a _Picture size_, next to Fill the section) is the background half of that, on its own: the
+  picture is the window's size (`h-lvh`, so no gap opens when a phone's toolbar hides) and sticks to the top of the
+  viewport while the section scrolls past, so a long Link list never stretches a landscape photo to its height. The section
+  is then at least the window's height so the picture covers it, but the content stays at the top. Combine it with _At
+  least the screen's height_ to centre the content as well. It uses the hotspot, needs no JavaScript, and makes _Stays put
+  while scrolling_ redundant (hidden). The background layer clips with `overflow: clip` rather than `hidden`, which would
+  stop the sticky layer. Saved sections keep their picture size, so nothing published changes.
 
 **How they are drawn.** All choices map through fixed lookups in `resolveBackgroundImage`
 (`src/components/ui/section-style.ts`, unit tested): nine positions to `x% y%` for `object-position` and
@@ -3113,10 +3121,10 @@ Studio warns above 12 links. The link management (add, edit, reorder, hide, sche
 | ------------- | ----------------------------------------------------------------------------------- | ---------------------------------------- |
 | Minimal       | Full-width buttons, one under the other. The large link is a filled, taller button. | `variant: stacked`                       |
 | Cards         | A small thumbnail (or icon) and the text on each card, two across from `md`.        | `variant: cards`                         |
-| Editorial     | Larger type, a ruled list, an arrow at the end of each row.                         | `variant: editorial`                     |
+| Editorial     | Larger type, a ruled list, a chevron at the end of each row.                        | `variant: editorial`                     |
 | Compact       | Small pills that wrap; for tucking into another page.                               | `variant: compact`                       |
 | Image-focused | Cards with a big picture leading each card. Give every link a thumbnail.            | `variant: cards`, `thumbnailSize: large` |
-| Glass rows    | Frosted-glass rows over a background photo: thumbnail, icon, text and an arrow.     | `variant: stacked`, `rowStyle: glass`    |
+| Glass rows    | Frosted-glass rows over a background photo: thumbnail, icon, text and a chevron.    | `variant: stacked`, `rowStyle: glass`    |
 
 A section has at most four layouts (see [Section variants](#section-variants)), so Image-focused is Cards with large pictures
 and Glass rows is Minimal with the glass row style, rather than a fifth and sixth variant. A preset also sets the alignment that suits it (`style.align`), and leaves content and tone
@@ -3127,7 +3135,7 @@ doesn't draw are hidden on the links (`enclosingOfArray` reads the section's lay
 section a **Background image** in its Design tab; leave the overlay on _None_ or _Light_ so the photo shows).
 Each link is one row on a frosted-glass card, left to right: a **thumbnail** that fills the row's height (rounded
 on the outer corners only, about 30% of the row on a phone), a round **icon** badge, the **title and description**,
-and a round **arrow** badge (untick **Arrow on each row** to leave it off). Unlike the other layouts, a link can
+and a round badge with the section's **arrow style** (a chevron by default; see _Design_ below). Unlike the other layouts, a link can
 have an icon _and_ a thumbnail; either, both or neither works, and the row holds together. The whole row is one
 link, so there is one Tab stop per row, and every row is at least 44 px tall.
 
@@ -3155,6 +3163,29 @@ link, so there is one Tab stop per row, and every row is at least 44 px tall.
   still starts as Minimal.
 - **Icons.** The shared set gained Care, Sun, Community, Person, Location, Email, Calendar and Phone, so badge rows
   (the hero slot) offer them too. A new one is a line in `BADGE_ICONS` and a drawing in `badge-icon.tsx`.
+
+**Design.** The Link list's Design tab (agency only) has three boxes above the shared Background and Animation. Everything
+empty is the look the section always had, so no content needs migrating. The colour overrides sit in a collapsed **Colours**
+inside each box, and every option that depends on another only shows once it applies.
+
+| Box          | Options                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Profile      | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border. |
+| Links        | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                              |
+| Social icons | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                     |
+
+- **Colours** are one shared field (`themeColourField`, `src/lib/sanity/schema/theme-colour.ts`): Inherit, Text, Muted text,
+  Primary, Secondary, Highlight or Custom (a hex field appears only then). Each element offers only the choices that suit it.
+  Every choice but Custom is a token, so it follows the section's tone; the site draws it with `themeColourCss`, which ignores
+  anything not offered and lets only a valid six-digit hex through. The swatch picker shows the colour on this section's tone
+  and a contrast badge (4.5:1 for text, 3:1 for icons), measured on the background colour; over a photo or glass, check by eye.
+- **Wordmarks.** _Content › Profile › Show as_ and the heading's _Show as_ offer **Image** for a client's wordmark. The text
+  stays and becomes the image's alt text, inside the same heading element, so the heading hierarchy, the accessible name and
+  the indexed words are unchanged and nothing is read twice. Studio warns if the image or the text is missing.
+- **The older "Arrow on each row"** is hidden but still read: Glass rows saved with it unticked draw no arrow until an Arrow
+  style is chosen.
+- **Shared parts.** `LinkArrow`, `SocialLinks`, `ProfileImage` and `Wordmark` in `src/components/ui/` are server components
+  with no JavaScript, ready for other sections (see the follow-up tasks in the build plan).
 
 **Scheduling and hiding.** Pages are cached, so the server can't know the time while it builds one.
 

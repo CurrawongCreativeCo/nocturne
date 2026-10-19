@@ -116,7 +116,14 @@ describe('applyPrelaunchLook on Link page + coming soon', () => {
       variant: 'stacked',
       rowStyle: 'glass',
       glassStrength: 'medium',
-      style: { tone: 'inverse', fillScreen: true, overlay: 'light', overlayColor: 'dark' },
+      style: {
+        tone: 'inverse',
+        fillScreen: true,
+        // The photo covers the window, so a long list doesn't stretch it.
+        imageSize: 'screen',
+        overlay: 'light',
+        overlayColor: 'dark',
+      },
     })
     expect(note?.style?.fillScreen).toBeUndefined()
   })

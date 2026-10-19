@@ -31,6 +31,7 @@ describe('resolveSectionStyle', () => {
           strength: 1,
           wash: 'background',
           fixed: false,
+          screen: false,
           tiled: false,
         },
         edge: undefined,
@@ -398,5 +399,43 @@ describe('Fill the screen', () => {
     )
     expect(resolveSectionStyle({ fillScreen: false }).sectionClass).not.toContain('min-h-dvh')
     expect(resolveSectionStyle({}).sectionClass).not.toContain('min-h-dvh')
+  })
+})
+
+describe('Cover the screen, apart from the section height', () => {
+  const picture = { asset: { _id: 'image-abc-2000x1000-jpg' } } as never
+
+  it('sizes the picture to the window and keeps the content where it is', () => {
+    const resolved = resolveSectionStyle({ image: picture, imageSize: 'screen' })
+    expect(resolved.backgroundImage).toMatchObject({ size: 'screen', screen: true, tiled: false })
+    // The section is tall enough for the picture to cover the window, but the content is not centred.
+    expect(resolved.sectionClass).toContain('min-h-dvh')
+    expect(resolved.sectionClass).not.toContain('justify-center')
+  })
+
+  it('uses the hotspot, like Fill the section, and ignores a stored position', () => {
+    expect(resolveBackgroundImage({ imageSize: 'screen', imageVertical: 'top' }).position).toBe(
+      undefined,
+    )
+  })
+
+  it('has nothing to add to "Stays put while scrolling", so that is ignored', () => {
+    expect(resolveBackgroundImage({ imageSize: 'screen', imageFixed: true }).fixed).toBe(false)
+  })
+
+  it('leaves the height alone without a picture', () => {
+    expect(resolveSectionStyle({ imageSize: 'screen' }).sectionClass).not.toContain('min-h-dvh')
+  })
+
+  it('combines with At least the screen’s height, which still centres the content', () => {
+    const resolved = resolveSectionStyle({ image: picture, imageSize: 'screen', fillScreen: true })
+    expect(resolved.sectionClass).toContain('min-h-dvh flex flex-col justify-center')
+    expect(resolved.sectionClass.match(/min-h-dvh/g)).toHaveLength(1)
+  })
+
+  it('keeps a saved "Fill the screen" section exactly as it was: picture over the section, content centred', () => {
+    const resolved = resolveSectionStyle({ image: picture, fillScreen: true })
+    expect(resolved.backgroundImage.size).toBe('cover')
+    expect(resolved.sectionClass).toContain('min-h-dvh flex flex-col justify-center')
   })
 })

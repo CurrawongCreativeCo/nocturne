@@ -1,4 +1,5 @@
 import { buttonFeedback } from '@/components/ui/cta-link'
+import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 
 import {
@@ -9,6 +10,7 @@ import {
   hasThumbnail,
   type LinkListLayout,
 } from './link-list-parts'
+import { PICTURE } from './stacked'
 import type { SectionProps } from '../../../types'
 
 // How this section looks without a style. Keep `align` equal to the Cards preset's.
@@ -18,9 +20,9 @@ const CARD = `group flex h-full w-full rounded-card bg-surface p-3 text-left sha
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
-  profile: { picture: 'size-24', name: 'text-h3' },
+  profile: { picture: PICTURE, name: 'text-h3' },
   listClassName: 'grid gap-4 md:grid-cols-2',
-  renderLink: (link, { thumbnailSize }) => {
+  renderLink: (link, { thumbnailSize, arrow, arrowStyle, iconStyle }) => {
     const large = thumbnailSize === 'large'
     // The picture, or a tile holding the icon, so cards in a row stay the same shape.
     const picture = hasThumbnail(link) || link.item.icon
@@ -42,18 +44,32 @@ const layout: LinkListLayout = {
                 link={link}
                 thumbClass="size-full object-cover"
                 iconClass={large ? 'size-10' : 'size-6'}
+                iconStyle={iconStyle}
                 sizes={large ? '(min-width: 768px) 384px, 100vw' : '64px'}
               />
             </span>
           )}
-          <span className={`flex min-w-0 flex-col ${large ? 'px-1 pb-1' : ''}`}>
-            <span className={`${link.large ? 'text-h4' : 'text-body'} font-semibold text-balance`}>
-              {link.label}
+          <span
+            className={`flex min-w-0 items-center gap-3 ${large ? 'w-full px-1 pb-1' : 'flex-1'}`}
+          >
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span
+                className={`${link.large ? 'text-h4' : 'text-body'} font-semibold text-balance`}
+              >
+                {link.label}
+              </span>
+              <LinkDescription
+                text={link.item.description}
+                className="mt-0.5 text-small text-pretty text-ink-muted"
+              />
             </span>
-            <LinkDescription
-              text={link.item.description}
-              className="mt-0.5 text-small text-pretty text-ink-muted"
-            />
+            <span className="text-ink-muted group-hover:text-ink" style={arrowStyle}>
+              <LinkArrow
+                arrow={arrow}
+                external={link.kind === 'external'}
+                className="size-5 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+              />
+            </span>
           </span>
         </SanityLink>
       </LinkItem>

@@ -28,6 +28,15 @@ const DEFAULT_PLACEMENT = resolveBackgroundImage(undefined)
  */
 const FIXED_LAYER_CLASS = 'lg:motion-safe:fixed'
 
+/**
+ * Cover the screen: the picture is a window-sized layer that sticks to the top of the viewport while
+ * the section scrolls past, so it is never stretched to a long section's height. `lvh` is the window
+ * with the browser's toolbars hidden, so no gap opens when a phone's address bar slides away. The
+ * section's layer clips instead of hiding overflow, because `overflow: hidden` would make it the
+ * sticky layer's scroll container and the picture would scroll away.
+ */
+const SCREEN_LAYER_CLASS = 'sticky top-0 h-lvh w-full'
+
 type Props = Pick<ResolvedSectionStyle, 'tone' | 'gradient' | 'image' | 'overlay'> & {
   /** Placement, strength and wash; unset is the default picture (fills the section, full strength, background colour). */
   placement?: ResolvedBackgroundImage
@@ -57,7 +66,7 @@ export function SectionBackground({
     <div
       aria-hidden="true"
       data-section-background=""
-      className={`absolute inset-0 -z-10 overflow-hidden ${placement.fixed ? '[clip-path:inset(0)]' : ''}`}
+      className={`absolute inset-0 -z-10 ${placement.screen ? 'overflow-clip' : 'overflow-hidden'} ${placement.fixed ? '[clip-path:inset(0)]' : ''}`}
     >
       {gradient ? (
         <div
@@ -72,11 +81,18 @@ export function SectionBackground({
           <div
             data-section-image={placement.size}
             data-image-fixed={placement.fixed ? '' : undefined}
+            data-image-screen={placement.screen ? '' : undefined}
             // The picture's strength: it lets the section's own background show through.
             style={placement.strength < 1 ? { opacity: placement.strength } : undefined}
             className={`absolute inset-0 ${placement.fixed ? FIXED_LAYER_CLASS : ''}`.trim()}
           >
-            <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
+            {placement.screen ? (
+              <div className={`relative ${SCREEN_LAYER_CLASS}`}>
+                <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
+              </div>
+            ) : (
+              <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
+            )}
           </div>
           {opacity > 0 ? (
             <div

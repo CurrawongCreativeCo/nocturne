@@ -15,6 +15,7 @@ import {
   imageStrengthOpacity,
   SECTION_IMAGE_VERTICALS,
   SECTION_WASHES,
+  imageSizeUsesFixed,
   imageSizeUsesPosition,
   imageSizeUsesRepeat,
   SECTION_EDGES,
@@ -85,7 +86,7 @@ export interface SectionStyleInput {
   imageStrengthPercent?: number | null
   overlayColor?: string | null
   imageFixed?: boolean | null
-  /** The section is at least as tall as the screen. */
+  /** The section is at least as tall as the screen, its content centred (README, "Section height"). */
   fillScreen?: boolean | null
   /** The shape of the bottom edge (section dividers); unset or 'none' for a straight one. */
   edge?: string | null
@@ -149,8 +150,13 @@ const WIDTH_CLASSES: Record<Exclude<SectionWidth, 'default'>, string> = {
 
 const DEFAULT_CONTAINER = 'max-w-content'
 
-/** "Fill the screen": at least the viewport tall (dvh, so a phone's address bar does not cut it), content centred. */
+/**
+ * "At least the screen's height": at least the viewport tall (dvh, so a phone's address bar does not
+ * cut it), content centred. A min-height, never a height, so long content grows the section and scrolls.
+ */
 const FILL_SCREEN_CLASS = 'min-h-dvh flex flex-col justify-center'
+/** A Cover the screen picture needs a section at least the window's height to cover it; the content stays put. */
+const SCREEN_PICTURE_CLASS = 'min-h-dvh'
 
 /** Where each choice puts the picture: CSS positions for object-position and background-position. */
 const VERTICAL_POSITION: Record<(typeof SECTION_IMAGE_VERTICALS)[number], string> = {
@@ -195,6 +201,8 @@ export interface ResolvedBackgroundImage {
   wash: SectionWash
   /** Stays put while the page scrolls (large screens, no reduced motion). */
   fixed: boolean
+  /** Cover the screen: the picture is the window's size and stays in view while the section scrolls. */
+  screen: boolean
   /** Drawn as a CSS background so it can repeat; every other mode uses SanityImage. */
   tiled: boolean
 }
@@ -229,7 +237,8 @@ export function resolveBackgroundImage(
     repeatCss: REPEAT_CSS[repeat],
     strength: imageStrengthOpacity(style?.imageStrength, style?.imageStrengthPercent),
     wash: pick(SECTION_WASHES, style?.overlayColor) ?? 'background',
-    fixed: style?.imageFixed === true,
+    fixed: style?.imageFixed === true && imageSizeUsesFixed(size),
+    screen: size === 'screen',
     tiled: repeat !== 'none',
   }
 }
@@ -312,6 +321,15 @@ export function resolveSectionStyle(
     !spacing || spacing === 'default' ? (defaults.spacing ?? 'default') : spacing
   const container =
     !width || width === 'default' ? (defaults.container ?? DEFAULT_CONTAINER) : WIDTH_CLASSES[width]
+  const image = style?.image?.asset ? style.image : undefined
+  const backgroundImage = resolveBackgroundImage(style)
+  // Height and picture are separate choices: centring is only ever "At least the screen's height".
+  const height =
+    style?.fillScreen === true
+      ? ` ${FILL_SCREEN_CLASS}`
+      : image && backgroundImage.screen
+        ? ` ${SCREEN_PICTURE_CLASS}`
+        : ''
 
   return {
     tone,
@@ -320,14 +338,14 @@ export function resolveSectionStyle(
     anchorId,
     // Only a slug the schema could have produced reaches a style attribute.
     gradient: gradient && GRADIENT_SLUG_PATTERN.test(gradient) ? gradient : undefined,
-    image: style?.image?.asset ? style.image : undefined,
+    image,
     overlay: pick(SECTION_OVERLAYS, style?.overlay) ?? defaultOverlayFor(tone),
-    backgroundImage: resolveBackgroundImage(style),
+    backgroundImage,
     edge: resolveEdge(style),
     spacing: resolvedSpacing,
     // A full-width section runs edge to edge, so it keeps no gutters of its own.
     // The site header is sticky, so a linked-to section needs room above it.
-    sectionClass: `relative isolate ${SPACING_CLASSES[resolvedSpacing]}${width === 'full' ? '' : ' px-gutter'}${anchorId ? ' scroll-mt-24' : ''}${style?.fillScreen === true ? ` ${FILL_SCREEN_CLASS}` : ''}`,
+    sectionClass: `relative isolate ${SPACING_CLASSES[resolvedSpacing]}${width === 'full' ? '' : ' px-gutter'}${anchorId ? ' scroll-mt-24' : ''}${height}`,
     containerClass: `mx-auto w-full ${container}`,
   }
 }

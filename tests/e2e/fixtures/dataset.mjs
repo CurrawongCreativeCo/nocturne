@@ -3477,6 +3477,142 @@ documents.push(
     ],
   },
   {
+    // Every Link list design option at once (tests/e2e/link-list-design.spec.ts): a wordmark for the
+    // name, a ring, coloured name and bio, External link arrows on Cards, round social icons below.
+    _id: 'page-link-design',
+    _type: 'page',
+    title: 'Link design',
+    slug: { _type: 'slug', current: 'link-design' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'design-list',
+        _type: 'linkList',
+        variant: 'cards',
+        thumbnailSize: 'standard',
+        heading: [
+          {
+            _type: 'block',
+            _key: 'h',
+            style: 'normal',
+            markDefs: [],
+            children: [{ _type: 'span', _key: 's', text: 'Find us online', marks: [] }],
+          },
+        ],
+        headingDisplay: 'image',
+        headingImage: { _type: 'image', asset: ref(IMAGE_ASSET_ID), size: 'small' },
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: {
+          _type: 'object',
+          name: 'Test Co',
+          bio: 'Small-batch ceramics.',
+          image: image('Test Co logo'),
+          nameDisplay: 'text',
+        },
+        profileDesign: {
+          _type: 'object',
+          imageSize: 'large',
+          border: 'line',
+          borderWidth: 'thick',
+          borderGap: 'large',
+          borderColour: { _type: 'object', colour: 'accent-2' },
+          nameColour: { _type: 'object', colour: 'custom', hex: '#7a1f5c' },
+          bioColour: { _type: 'object', colour: 'ink' },
+        },
+        linkDesign: {
+          _type: 'object',
+          arrowStyle: 'external',
+          arrowColour: { _type: 'object', colour: 'accent' },
+          iconColour: { _type: 'object', colour: 'custom', hex: 'not-a-colour' },
+        },
+        socialDesign: { _type: 'object', style: 'circle', position: 'below' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/testco',
+          },
+          {
+            _key: 'yt',
+            _type: 'socialLink',
+            platform: 'youtube',
+            url: 'https://youtube.com/@testco',
+          },
+          {
+            _key: 'tt',
+            _type: 'socialLink',
+            platform: 'tiktok',
+            url: 'https://tiktok.com/@testco',
+          },
+        ],
+        links: [
+          linkItem('d-shop', 'Shop the range', external('https://example.com/shop'), {
+            icon: 'bolt',
+          }),
+          linkItem('d-about', 'About the studio', internal('page-about'), { icon: 'star' }),
+        ],
+      },
+    ],
+  },
+  {
+    // A long Glass rows list over a Cover the screen photo, with the name as a wordmark and a
+    // decorative frame (tests/e2e/link-list-design.spec.ts): the photo stays the window's size.
+    _id: 'page-link-screen',
+    _type: 'page',
+    title: 'Link screen',
+    slug: { _type: 'slug', current: 'link-screen' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'screen-list',
+        _type: 'linkList',
+        variant: 'stacked',
+        rowStyle: 'glass',
+        glassStrength: 'strong',
+        thumbnailSize: 'standard',
+        style: {
+          _type: 'sectionStyle',
+          align: 'center',
+          image: image(''),
+          imageSize: 'screen',
+          overlay: 'none',
+        },
+        profile: {
+          _type: 'object',
+          name: 'Sunrise Community Care',
+          image: image('Sunrise logo'),
+          nameDisplay: 'image',
+          nameImage: { _type: 'image', asset: ref(IMAGE_ASSET_ID), size: 'medium' },
+        },
+        profileDesign: { _type: 'object', border: 'frame', frame: ref('frame-leaf') },
+        socialDesign: { _type: 'object', style: 'rounded' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/sunrise',
+          },
+        ],
+        links: Array.from({ length: 14 }, (_, index) =>
+          linkItem(
+            `s-${index}`,
+            `Link number ${index + 1}`,
+            external(`https://example.com/${index}`),
+            {
+              icon: 'leaf',
+            },
+          ),
+        ),
+      },
+    ],
+  },
+  {
     // The "Coming soon" page template (src/features/pages/schemas/templates.ts), as an editor would
     // leave it (tests/e2e/prelaunch-pages.spec.ts). Keep it in step with the template.
     _id: 'page-coming-soon',
