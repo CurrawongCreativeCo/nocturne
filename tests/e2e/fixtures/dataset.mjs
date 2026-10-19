@@ -2286,6 +2286,23 @@ const gallerySections = [
     socialSource: 'business',
     links: galleryLinks(`ll-${name}`),
   })),
+  // Service categories with the default look (a bullet in Primary), under a Glass rows profile.
+  {
+    _key: 'link-list-categories',
+    _type: 'linkList',
+    variant: 'stacked',
+    rowStyle: 'glass',
+    glassStrength: 'medium',
+    thumbnailSize: 'standard',
+    style: { _type: 'sectionStyle', align: 'center', image: image(''), overlay: 'none' },
+    profile: {
+      ...galleryProfile,
+      categories: ['Bodywork', 'Breathwork', 'Movement', 'Retreats'],
+      bio: 'Reconnect to your body and your nature.\n\nRemember what makes you feel alive!',
+    },
+    socialSource: 'business',
+    links: galleryLinks('ll-categories'),
+  },
   // Events: the gallery's own events are in 2099 and in the "Workshop" category, so nothing about them
   // changes with the date. Each section filters to that category.
   ...['list', 'agenda', 'featured'].map((name) => ({
@@ -3554,6 +3571,116 @@ documents.push(
           }),
           linkItem('d-about', 'About the studio', internal('page-about'), { icon: 'star' }),
         ],
+      },
+    ],
+  },
+  {
+    // Service categories and paragraph-aware bios (tests/e2e/link-list-categories.spec.ts): a Glass
+    // rows list over a photo whose bio still repeats the categories (the page shows them once), a
+    // list saved before categories existed (its typed bullets stay text), and a start-aligned list
+    // of long capitalised names that stacks on phones.
+    _id: 'page-link-categories',
+    _type: 'page',
+    title: 'Link categories',
+    slug: { _type: 'slug', current: 'link-categories' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'cat-glass',
+        _type: 'linkList',
+        variant: 'stacked',
+        rowStyle: 'glass',
+        glassStrength: 'strong',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center', image: image(''), overlay: 'none' },
+        profile: {
+          _type: 'object',
+          name: 'Still Water Wellness',
+          image: image('Still Water Wellness logo'),
+          categories: ['Bodywork', 'Breathwork', 'Movement', 'Retreats'],
+          bio: 'Bodywork • Breathwork • Movement • Retreats\n\nReconnect to your body and your nature.\nRemember what makes you feel alive!',
+        },
+        categoryDesign: {
+          _type: 'object',
+          separatorColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+        },
+        socialSource: 'none',
+        links: [
+          linkItem('cat-book', 'Book a session', external('https://example.com/book'), {
+            icon: 'calendar',
+          }),
+        ],
+      },
+      {
+        _key: 'cat-legacy',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center', tone: 'alt' },
+        profile: {
+          _type: 'object',
+          name: 'Saved before categories',
+          bio: 'Bodywork • Breathwork • Movement • Retreats\n\nReconnect to your body and your nature. Remember what makes you feel alive!',
+        },
+        socialSource: 'none',
+        links: [linkItem('cat-legacy-link', 'Visit', external('https://example.com/visit'))],
+      },
+      {
+        _key: 'cat-long',
+        _type: 'linkList',
+        variant: 'editorial',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'start', tone: 'inverse' },
+        profile: {
+          _type: 'object',
+          name: 'Long names',
+          categories: [
+            'Remedial massage',
+            'Pregnancy and postnatal care',
+            'Myofascial release',
+            'Craniosacral therapy for the whole family',
+          ],
+          bio: 'One paragraph only.',
+        },
+        categoryDesign: {
+          _type: 'object',
+          separator: 'diamond',
+          phoneLayout: 'stack',
+          textCase: 'uppercase',
+          textColour: { _type: 'object', colour: 'accent' },
+          separatorColour: { _type: 'object', colour: 'highlight' },
+        },
+        socialSource: 'none',
+        links: [linkItem('cat-long-link', 'Enquire', external('https://example.com/enquire'))],
+      },
+      {
+        _key: 'cat-hidden',
+        _type: 'linkList',
+        variant: 'compact',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: {
+          _type: 'object',
+          name: 'Hidden categories',
+          categories: ['Never shown'],
+          categoriesVisibility: 'hide',
+        },
+        socialSource: 'none',
+        links: [linkItem('cat-hidden-link', 'Shop', external('https://example.com/shop'))],
+      },
+      {
+        _key: 'cat-features',
+        _type: 'featuresGrid',
+        title: 'Paragraphs everywhere',
+        intro: 'The first paragraph.\nWith a line break.\n\n\n\nThe second paragraph.',
+        columns: 2,
+        items: [1, 2].map((i) => ({
+          _key: `cat-feature-${i}`,
+          _type: 'featureItem',
+          title: `Feature ${i}`,
+          text: 'Text.',
+        })),
       },
     ],
   },

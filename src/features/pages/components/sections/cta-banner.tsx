@@ -1,6 +1,7 @@
 import { stegaClean } from 'next-sanity'
 
 import { CtaGroup } from '@/components/ui/cta-link'
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
@@ -44,9 +45,10 @@ export function CtaBanner({ data, isFirst }: SectionProps<'ctaBanner'>) {
           className="text-h2 font-semibold text-balance"
         />
         {text && (
-          <p className={`mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`}>
-            {text}
-          </p>
+          <PlainText
+            text={text}
+            className={`mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`}
+          />
         )}
         <CtaGroup ctas={ctas} surface={card.surface} className={`mt-8 ${justify}`} />
       </div>

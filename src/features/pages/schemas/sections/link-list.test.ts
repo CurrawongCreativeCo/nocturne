@@ -119,6 +119,39 @@ describe('Design boxes and conditional fields', () => {
     expect(hidden(field('headingImage'), { parent: { headingDisplay: 'image' } })).toBe(false)
   })
 
+  it('keeps the profile in reading order: picture, name, service categories, bio', () => {
+    const names = (field('profile').fields ?? []).map((candidate) => candidate.name)
+    const at = (name: string) => names.indexOf(name)
+    expect(at('image')).toBeLessThan(at('name'))
+    expect(at('name')).toBeLessThan(at('categories'))
+    expect(at('categories')).toBeLessThan(at('bio'))
+  })
+
+  it('asks whether to show the categories, and offers their design, only once there are some', () => {
+    const visibility = field('categoriesVisibility', field('profile').fields)
+    expect(hidden(visibility, { parent: {} })).toBe(true)
+    expect(hidden(visibility, { parent: { categories: ['Bodywork'] } })).toBe(false)
+    expect(hidden(field('categoryDesign'), { parent: { profile: {} } })).toBe(true)
+    expect(hidden(field('categoryDesign'), { parent: { profile: { categories: ['A'] } } })).toBe(
+      false,
+    )
+  })
+
+  it('keeps the category design from clients, like the rest of Design', () => {
+    expect(
+      hidden(field('categoryDesign'), {
+        currentUser: { roles: [{ name: 'editor' }] },
+        parent: { profile: { categories: ['A'] } },
+      }),
+    ).toBe(true)
+  })
+
+  it('hides the separator colour when there is no separator', () => {
+    const design = field('categoryDesign').fields ?? []
+    expect(hidden(field('separatorColour', design), { parent: { separator: 'none' } })).toBe(true)
+    expect(hidden(field('separatorColour', design), { parent: {} })).toBe(false)
+  })
+
   it('keeps the older arrow switch for saved content, out of sight', () => {
     expect(field('showArrows').hidden).toBe(true)
   })

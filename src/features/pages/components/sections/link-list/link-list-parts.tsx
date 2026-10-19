@@ -2,6 +2,8 @@ import { stegaClean } from 'next-sanity'
 import { Fragment, Suspense, type ReactNode, type CSSProperties } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
+import { InlineList } from '@/components/ui/inline-list'
+import { PlainText } from '@/components/ui/plain-text'
 import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
@@ -11,7 +13,9 @@ import { SocialLinks } from '@/components/ui/social-links'
 import { Wordmark } from '@/components/ui/wordmark'
 import { trackAttributes } from '@/lib/analytics/track-script'
 import { glassStrengthOf, type GlassStrength } from '@/lib/color/glass-contrast'
+import { bioParagraphs } from '@/lib/plain-text'
 import { requestTime } from '@/lib/request-time'
+import { inlineListItems, resolveInlineListDesign } from '@/lib/sanity/inline-list-options'
 import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
@@ -66,29 +70,38 @@ const clean = (value: string | null | undefined) => (value ? stegaClean(value).t
 type WordmarkImage = SanityImageData & { size?: string | null }
 
 /**
- * The picture, the name and the bio. The name can be drawn as a wordmark (Content › Profile › Show
- * as); its text is then the picture's alt text, so the heading keeps its name.
+ * The picture, the name, the service categories and the bio. The name can be drawn as a wordmark
+ * (Content › Profile › Show as); its text is then the picture's alt text, so the heading keeps its
+ * name. The categories are their own list (Design › Service categories), and the bio is paragraphs.
  */
 function Profile({
   data,
   layout,
   isFirst,
   block,
+  align,
   nameLevel: Name,
 }: {
   data: Data
   layout: LinkListLayout
   isFirst: boolean
   block: string
+  align: 'start' | 'center'
   nameLevel: 'h2'
 }) {
   const name = clean(data.profile?.name)
-  const bio = clean(data.profile?.bio)
+  const categories = inlineListItems(data.profile?.categories)
+  const bio = bioParagraphs(data.profile?.bio, categories)
   const image = data.profile?.image as SanityImageData | null | undefined
   const nameImage = data.profile?.nameImage as WordmarkImage | null | undefined
   const wordmark = showsWordmark(data.profile?.nameDisplay, nameImage) ? nameImage : null
-  if (!name && !bio && !image?.asset && !wordmark) return null
+  if (!name && categories.length === 0 && bio.length === 0 && !image?.asset && !wordmark) {
+    return null
+  }
   const design = data.profileDesign
+  const { textColour, ...categoryLook } = resolveInlineListDesign(data.categoryDesign)
+  const hasHeading = Boolean(name || wordmark)
+  const bioGap = categories.length > 0 ? 'mt-3' : hasHeading ? 'mt-2' : ''
 
   return (
     <div className="mb-6">
@@ -116,14 +129,19 @@ function Profile({
           {name}
         </Name>
       ) : null}
-      {bio && (
-        <p
-          className={`${name || wordmark ? 'mt-2' : ''} max-w-measure-narrow text-pretty text-ink-muted ${block}`}
-          style={themeColourStyle(design?.bioColour)}
-        >
-          {bio}
-        </p>
-      )}
+      <InlineList
+        items={categories}
+        {...categoryLook}
+        colour={textColour}
+        align={align}
+        label="Services"
+        className={`${hasHeading ? 'mt-2' : ''} ${block}`}
+      />
+      <PlainText
+        paragraphs={bio}
+        className={`${bioGap} max-w-measure-narrow text-pretty text-ink-muted ${block}`}
+        style={themeColourStyle(design?.bioColour)}
+      />
     </div>
   )
 }
@@ -349,6 +367,7 @@ export function LinkListView({
         layout={layout}
         isFirst={Boolean(isFirst)}
         block={traits.block}
+        align={traits.align}
         nameLevel={levels.top}
       />
       {headingWordmark ? (

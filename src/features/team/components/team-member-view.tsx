@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { stegaClean } from 'next-sanity'
 
+import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
@@ -45,9 +46,10 @@ export async function TeamMemberView({ slug, ...mode }: { slug: string } & Fetch
                 ))}
               </ul>
             )}
-            {member.shortBio && (
-              <p className="mt-6 text-lead text-pretty text-ink-muted">{member.shortBio}</p>
-            )}
+            <PlainText
+              text={member.shortBio}
+              className="mt-6 text-lead text-pretty text-ink-muted"
+            />
           </header>
         </div>
         {member.bio && member.bio.length > 0 && (

@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
@@ -53,7 +54,7 @@ export function VideoAmbient({ data, isFirst }: SectionProps<'video'>) {
         fallback={title}
         className="text-h2 font-semibold text-balance"
       />
-      {text && <p className="mt-4 text-lead text-pretty text-ink-muted">{text}</p>}
+      <PlainText text={text} className="mt-4 text-lead text-pretty text-ink-muted" />
     </SectionFrame>
   )
 }

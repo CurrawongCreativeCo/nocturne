@@ -1,6 +1,21 @@
 import { defineField, type ConditionalPropertyCallback } from 'sanity'
 
 import {
+  INLINE_CASES,
+  INLINE_CASE_TITLES,
+  INLINE_COLOUR_CHOICES,
+  INLINE_GAPS,
+  INLINE_GAP_TITLES,
+  INLINE_PHONE_LAYOUTS,
+  INLINE_PHONE_LAYOUT_TITLES,
+  INLINE_SEPARATORS,
+  INLINE_SEPARATOR_TITLES,
+  INLINE_SIZES,
+  INLINE_SIZE_TITLES,
+  INLINE_WEIGHTS,
+  INLINE_WEIGHT_TITLES,
+} from '@/lib/sanity/inline-list-options'
+import {
   LINK_ARROWS,
   LINK_ARROW_DESCRIPTIONS,
   LINK_ARROW_TITLES,
@@ -35,8 +50,8 @@ import {
 import { defaultLinkArrow, usesArrow } from '../../utils/link-list'
 
 /**
- * The Link list's own Design options (agency only, like the rest of Design), in three boxes above the
- * shared Background and Animation: Profile, Links and Social icons. Each starts with one or two
+ * The Link list's own Design options (agency only, like the rest of Design), in four boxes above the
+ * shared Background and Animation: Profile, Service categories, Links and Social icons. Each starts with one or two
  * picture or radio choices; the colour overrides sit in a collapsed "Colours" inside each box, and
  * every option that depends on another is shown only once it applies. Everything empty is the look
  * the section always had (link-list-parts.tsx resolves the defaults).
@@ -175,6 +190,93 @@ export const linkListDesignFields = [
         usage: 'text',
         inherits: 'the muted text colour',
         fieldset: 'colours',
+      }),
+    ],
+  }),
+  defineField({
+    name: 'categoryDesign',
+    title: 'Service categories',
+    type: 'object',
+    group: 'design',
+    description:
+      'The row of categories under the name. It follows the section’s alignment. Empty is small words with a bullet in Primary between them.',
+    hidden: agencyOnly(
+      ({ parent }) =>
+        !(parent as { profile?: { categories?: unknown[] } } | undefined)?.profile?.categories
+          ?.length,
+    ),
+    options: { collapsible: true, collapsed: false },
+    fieldsets: [
+      {
+        name: 'text',
+        title: 'Text',
+        description: 'Size, weight, capitals and spacing.',
+        options: { collapsible: true, collapsed: true },
+      },
+      colours,
+    ],
+    fields: [
+      defineField({
+        name: 'separator',
+        title: 'Separator',
+        type: 'string',
+        description: 'Drawn between two categories, never at the start or end of a line.',
+        options: radio(INLINE_SEPARATORS, INLINE_SEPARATOR_TITLES),
+      }),
+      defineField({
+        name: 'phoneLayout',
+        title: 'On a phone',
+        type: 'string',
+        description: 'One per line suits long names or more than four categories.',
+        options: radio(INLINE_PHONE_LAYOUTS, INLINE_PHONE_LAYOUT_TITLES),
+      }),
+      defineField({
+        name: 'size',
+        title: 'Size',
+        type: 'string',
+        fieldset: 'text',
+        options: radio(INLINE_SIZES, INLINE_SIZE_TITLES),
+      }),
+      defineField({
+        name: 'weight',
+        title: 'Weight',
+        type: 'string',
+        fieldset: 'text',
+        options: radio(INLINE_WEIGHTS, INLINE_WEIGHT_TITLES),
+      }),
+      defineField({
+        name: 'textCase',
+        title: 'Letters',
+        type: 'string',
+        description: 'Capitals are spaced out a little, as small capitals usually are.',
+        fieldset: 'text',
+        options: radio(INLINE_CASES, INLINE_CASE_TITLES),
+      }),
+      defineField({
+        name: 'gap',
+        title: 'Space between',
+        type: 'string',
+        fieldset: 'text',
+        options: radio(INLINE_GAPS, INLINE_GAP_TITLES),
+      }),
+      themeColourField({
+        name: 'textColour',
+        title: 'Category colour',
+        usage: 'text',
+        inherits: 'the text colour',
+        choices: INLINE_COLOUR_CHOICES,
+        fieldset: 'colours',
+      }),
+      themeColourField({
+        name: 'separatorColour',
+        title: 'Separator colour',
+        usage: 'graphic',
+        description: 'Inherit uses Primary. Highlight or a Custom gold suits a warm brand.',
+        inherits: 'Primary',
+        choices: INLINE_COLOUR_CHOICES,
+        fieldset: 'colours',
+        hidden: ({ parent }) =>
+          (parent as { separator?: string } | undefined)?.separator === 'none',
       }),
     ],
   }),

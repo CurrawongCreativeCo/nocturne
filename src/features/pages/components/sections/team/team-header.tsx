@@ -1,3 +1,4 @@
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { sectionTitle } from '@/lib/sanity/section-title'
 
@@ -27,7 +28,10 @@ export function TeamHeader({
         />
       )}
       {text && (
-        <p className={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}>{text}</p>
+        <PlainText
+          text={text}
+          className={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
+        />
       )}
     </div>
   )

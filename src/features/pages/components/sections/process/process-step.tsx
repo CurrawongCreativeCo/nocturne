@@ -1,5 +1,6 @@
 import { MotionLi } from '@/components/motion/motion-elements'
 import { revealInView, revealOnLoad } from '@/components/motion/presets'
+import { PlainText } from '@/components/ui/plain-text'
 import { SanityImage } from '@/components/ui/sanity-image'
 import type { sectionMotion } from '@/components/ui/section-style'
 
@@ -72,7 +73,7 @@ export function ProcessStep({ step, index, side, plan }: Props) {
           </p>
         )}
         <h3 className="mt-1 text-lead font-semibold">{step.title}</h3>
-        {step.text && <p className="mt-2 max-w-measure-narrow text-ink-muted">{step.text}</p>}
+        <PlainText text={step.text} className="mt-2 max-w-measure-narrow text-ink-muted" />
       </div>
     </MotionLi>
   )

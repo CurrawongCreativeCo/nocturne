@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { ctaClassName } from '@/components/ui/cta-link'
 import { OpenNowBadge } from '@/components/ui/open-now-badge'
 import { OpeningHours } from '@/components/ui/opening-hours'
+import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
@@ -83,7 +84,7 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
         fallback={title}
         className="text-h2 font-semibold text-balance"
       />
-      {intro && <p className="mt-4 text-lead text-pretty text-ink-muted">{intro}</p>}
+      <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
     </header>
   )
 

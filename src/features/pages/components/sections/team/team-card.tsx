@@ -3,6 +3,7 @@ import { stegaClean } from 'next-sanity'
 
 import { HoverLift } from '@/components/motion/hover-lift'
 import { FramedImage } from '@/components/ui/framed-image'
+import { PlainText } from '@/components/ui/plain-text'
 import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { resolveImageDesign } from '@/lib/sanity/image-design-options'
@@ -66,7 +67,7 @@ export function TeamCard({ member, design, headingLevel, eager }: CardProps) {
       <div className="flex flex-1 flex-col p-6">
         <MemberName member={member} headingLevel={headingLevel} />
         {member.role && <p className="mt-1 text-small font-medium text-ink-muted">{member.role}</p>}
-        {member.shortBio && <p className="mt-3 text-pretty text-ink-muted">{member.shortBio}</p>}
+        <PlainText text={member.shortBio} className="mt-3 text-pretty text-ink-muted" />
       </div>
     </HoverLift>
   )
@@ -92,9 +93,10 @@ export function TeamRow({ member, design, headingLevel, eager }: CardProps) {
       <div className="min-w-0">
         <MemberName member={member} headingLevel={headingLevel} />
         {member.role && <p className="mt-1 text-small font-medium text-ink-muted">{member.role}</p>}
-        {member.shortBio && (
-          <p className="mt-3 max-w-measure text-pretty text-ink-muted">{member.shortBio}</p>
-        )}
+        <PlainText
+          text={member.shortBio}
+          className="mt-3 max-w-measure text-pretty text-ink-muted"
+        />
       </div>
     </HoverLift>
   )
