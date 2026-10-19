@@ -22,7 +22,15 @@ import {
   type BoxDepth,
   type ElementDepth,
 } from '@/lib/sanity/depth-options'
-import { linkListParts, resolveDivider } from '@/lib/sanity/divider-options'
+import {
+  LINK_LIST_DIVIDER_PLACEMENTS,
+  linkListParts,
+  resolveDivider,
+  type DividerInput,
+  type LinkListDividerPlacement,
+  type LinkListPart,
+  type ResolvedDivider,
+} from '@/lib/sanity/divider-options'
 import { inlineListItems, resolveInlineListDesign } from '@/lib/sanity/inline-list-options'
 import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
@@ -93,6 +101,18 @@ const clean = (value: string | null | undefined) => (value ? stegaClean(value).t
 
 type WordmarkImage = SanityImageData & { size?: string | null }
 
+/** Each of Design › Dividers' placements, resolved (null where none is drawn). */
+function resolveLinkListDividers(
+  design: Partial<Record<LinkListDividerPlacement, DividerInput | null>> | null | undefined,
+): Record<LinkListDividerPlacement, ResolvedDivider | null> {
+  return {
+    afterCategories: resolveDivider(design?.afterCategories),
+    afterProfile: resolveDivider(design?.afterProfile),
+    aboveSocial: resolveDivider(design?.aboveSocial),
+    belowSocial: resolveDivider(design?.belowSocial),
+  }
+}
+
 /** Whether the profile draws anything: a picture, a name or wordmark, categories or a bio. */
 function hasProfile(data: Data): boolean {
   const profile = data.profile
@@ -118,6 +138,8 @@ function Profile({
   block,
   align,
   pictureDepth,
+  categoriesDivider,
+  className,
   nameLevel: Name,
 }: {
   data: Data
@@ -126,6 +148,10 @@ function Profile({
   block: string
   align: 'start' | 'center'
   pictureDepth: ElementDepth | undefined
+  /** Design › Dividers › Between the categories and the bio; drawn only when both show. */
+  categoriesDivider: ResolvedDivider | null
+  /** The space below: none when a divider follows, which brings its own. */
+  className: string
   nameLevel: 'h2'
 }) {
   const name = clean(data.profile?.name)
@@ -141,7 +167,7 @@ function Profile({
   const bioGap = categories.length > 0 ? 'mt-3' : hasHeading ? 'mt-2' : ''
 
   return (
-    <div className="mb-6">
+    <div className={className || undefined}>
       <ProfileImage
         image={image}
         design={resolveProfileImage(design)}
@@ -175,6 +201,9 @@ function Profile({
         label="Services"
         className={`${hasHeading ? 'mt-2' : ''} ${block}`}
       />
+      {categoriesDivider && categories.length > 0 && bio.length > 0 && (
+        <DecorativeDivider divider={categoriesDivider} block={block} className="my-4!" />
+      )}
       <PlainText
         paragraphs={bio}
         className={`${bioGap} max-w-measure-narrow text-pretty text-ink-muted ${block}`}
@@ -390,14 +419,24 @@ export function LinkListView({
     rowStyle === 'glass' && !['cards', 'editorial', 'compact'].includes(stegaClean(data.variant))
   const socialsBelow = socialPositionOf(socialDesign?.position) === 'below'
   // Design › Dividers: which parts are drawn, in order, with the dividers between them.
-  const divider = resolveDivider(data.dividerDesign)
+  const dividers = resolveLinkListDividers(data.dividerDesign)
   const parts = linkListParts({
     profile: hasProfile(data),
     heading: Boolean(headingWordmark ?? title),
     social: socials.some((profile) => profile.url),
     socialsBelow,
-    placements: divider?.placements ?? [],
+    dividers: LINK_LIST_DIVIDER_PLACEMENTS.filter((placement) => dividers[placement]),
   })
+  // A divider brings its own space, so the part beside it drops its margin on that side.
+  const besideDivider = (part: LinkListPart, side: -1 | 1) =>
+    typeof parts[parts.indexOf(part) + side] === 'object'
+  const socialSpace = socialsBelow
+    ? besideDivider('social', -1)
+      ? ''
+      : 'mt-10'
+    : besideDivider('social', 1)
+      ? ''
+      : 'mb-8'
   const socialRow = (
     <SocialLinks
       profiles={socials}
@@ -408,7 +447,7 @@ export function LinkListView({
       colour={themeColourCss(socialDesign?.iconColour)}
       background={themeColourCss(socialDesign?.background)}
       depth={depth.social}
-      className={`${socialsBelow ? 'mt-10' : 'mb-8'} ${traits.justify}`}
+      className={`${socialSpace} ${traits.justify}`.trim()}
     />
   )
 
@@ -419,7 +458,7 @@ export function LinkListView({
       isFirst={isFirst}
       containerClassName={traits.text}
     >
-      {parts.map((part, index) => {
+      {parts.map((part) => {
         switch (part) {
           case 'profile':
             return (
@@ -431,6 +470,8 @@ export function LinkListView({
                 block={traits.block}
                 align={traits.align}
                 pictureDepth={depth.picture}
+                categoriesDivider={dividers.afterCategories}
+                className={besideDivider('profile', 1) ? '' : 'mb-6'}
                 nameLevel={levels.top}
               />
             )
@@ -442,7 +483,7 @@ export function LinkListView({
                 alt={title}
                 image={headingWordmark}
                 preload={Boolean(isFirst) && !hasName}
-                className="mb-8"
+                className={besideDivider('heading', 1) ? '' : 'mb-8'}
               />
             ) : (
               <RichHeading
@@ -450,7 +491,7 @@ export function LinkListView({
                 as={Title}
                 blocks={data.heading}
                 fallback={title}
-                className={`mb-8 text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
+                className={`${besideDivider('heading', 1) ? '' : 'mb-8'} text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
               />
             )
           case 'social':
@@ -468,16 +509,12 @@ export function LinkListView({
             ) : (
               <LinkGroups key="links" links={drawableLinks(prepared)} {...shared} />
             )
-          default:
+          default: {
+            const divider = dividers[part.divider]
             return divider ? (
-              <DecorativeDivider
-                key={`divider-${String(index)}`}
-                style={divider.style}
-                width={divider.width}
-                colour={divider.colour}
-                block={traits.block}
-              />
+              <DecorativeDivider key={part.divider} divider={divider} block={traits.block} />
             ) : null
+          }
         }
       })}
     </SectionFrame>

@@ -2802,6 +2802,36 @@ overlay, plus the unset defaults on a light and a dark tone). The fixture's `des
 colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
 the real guard for pictures is the Studio warning and the overlay values above.
 
+### Decorative dividers
+
+A decorative divider is a small rule _inside_ a section, between two parts of its content: a line, a fading line or three
+dots, with an optional middle between two lines: a diamond, an icon (the badge icon set), a few words ("Stay connected")
+or a small picture. Not to be confused with [Section dividers](#section-dividers), the shaped edge between two sections.
+
+| Option              | Choices                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Divider             | None (default), Line, Fading line, Three dots, as pictures                                                  |
+| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals, letter-spaced), Picture     |
+| Size in the middle  | Small, Medium (default), Large, for an icon, the words or a picture                                         |
+| Length              | Short, Medium (default), Long, Full width: the whole rule, or each line beside a middle                     |
+| Thickness           | Thin (default), Bold                                                                                        |
+| Colours (collapsed) | Line colour (Inherit is the line colour) and Colour in the middle (Inherit follows the lines); theme or hex |
+
+Each option appears only once it applies (three dots take no middle and no length). A fading line fades towards its outer
+ends around a middle. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
+middle are read like any text. A picture is a small mark with a transparent background, shown without a blurred
+preview (no alt text: it is decoration). CSS and server components only, no JavaScript.
+
+- **Code.** The schema type is `decorativeDivider` (`src/lib/sanity/schema/decorative-divider.ts`, registered in
+  `sharedSchemaTypes`), queried with `decorativeDividerFields` (`src/lib/sanity/fragments.ts`), resolved by
+  `resolveDivider` (`src/lib/sanity/divider-options.ts`) and drawn by `DecorativeDivider`
+  (`src/components/ui/decorative-divider.tsx`).
+- **Adding one to another section.** Add a field `{ name: 'divider', type: 'decorativeDivider' }` to the section's Design
+  group (agency only), project it as `divider { ${decorativeDividerFields} }`, run `npm run typegen`, and render
+  `resolveDivider(data.divider)` with `DecorativeDivider` between the parts it divides, dropping their margin on that
+  side. Empty is None, so nothing changes until a divider is chosen. Only the Link list offers dividers so far (build
+  plan task 151 lists the candidates).
+
 ### Section dividers
 
 A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch or a layered wave. The
@@ -3231,14 +3261,13 @@ inside each box, and every option that depends on another only shows once it app
 | Links              | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
-- **Dividers**: one decorative rule for the list, **Divider** None (default), Line, Fading line, Three dots or Line with a
-  diamond (as pictures), placed by ticking **After the profile**, **Above the social icons** and **Below the social icons**
-  (the profile while nothing is ticked), with a **Width** (Short, Medium, Full width; not for dots) and a colour (Inherit
-  is the line colour). A divider only sits between two parts that are drawn: never first or last, never two in a row
-  (after the profile and above the icons meet as one), and never for social icons that aren't shown (`linkListParts` in
-  `src/lib/sanity/divider-options.ts`). Drawn by `DecorativeDivider` (`src/components/ui/decorative-divider.tsx`) in CSS,
-  hidden from screen readers. These are dividers inside a section; the shaped edge between sections is
-  [Section dividers](#section-dividers).
+- **Dividers**: a divider of its own at each of four positions: **Between the categories and the bio** (shown once
+  both exist), **After the profile**, **Above the social icons** (words here make a heading for the icons, such as "Stay
+  connected") and **Below the social icons**. Each is the shared `decorativeDivider` (see
+  [Decorative dividers](#decorative-dividers)). A divider only sits between two parts that are drawn: never first or
+  last, never for social icons that aren't shown, and where two would meet (after the profile, right above the icons)
+  the later one stays (`linkListParts` in `src/lib/sanity/divider-options.ts`). The part beside a divider drops its own
+  margin on that side, so the spacing never doubles.
 - **Depth and glow** (collapsed; empty is each layout's own look, so nothing changes until a level is chosen).
   **Link shadow** Flat, Soft, Raised or Floating, as pictures, for every link (not offered for Editorial, whose links are a
   ruled list); **Social button shadow** for the shaped icon styles; **Picture shadow**, drawn as a filter so it follows a

@@ -3592,9 +3592,11 @@ documents.push(
     ],
   },
   {
-    // Decorative dividers (tests/e2e/link-list-dividers.spec.ts): a diamond after the profile and
-    // around social icons above the links (the two that would meet become one), a fading line in
-    // Highlight around icons below the links, and dividers asked for with no social icons to divide.
+    // Decorative dividers (tests/e2e/link-list-dividers.spec.ts), after a wellness client's mock-ups:
+    // a short gold line between the categories and the bio, a sun between two lines after the
+    // profile, and "Stay connected" between two lines above the icons (the icons sit below the
+    // links). Then a fading Highlight rule with a diamond around icons above the links (Above meets
+    // After the profile, so only Above stays), and dividers asked for with no icons to divide.
     _id: 'page-link-dividers',
     _type: 'page',
     title: 'Link dividers',
@@ -3603,12 +3605,18 @@ documents.push(
     seo: { _type: 'seo', noIndex: true },
     pageBuilder: [
       {
-        _key: 'div-above',
+        _key: 'div-mockup',
         _type: 'linkList',
         variant: 'stacked',
         thumbnailSize: 'standard',
         style: { _type: 'sectionStyle', align: 'center' },
-        profile: { _type: 'object', name: 'Diamond dividers', bio: 'A short bio.' },
+        profile: {
+          _type: 'object',
+          name: 'Mock-up dividers',
+          categories: ['Move', 'Breathe', 'Feel', 'Be'],
+          bio: 'A welcoming space for therapeutic bodywork.',
+        },
+        socialDesign: { _type: 'object', position: 'below' },
         socialSource: 'custom',
         socialLinks: [
           {
@@ -3620,29 +3628,57 @@ documents.push(
         ],
         dividerDesign: {
           _type: 'object',
-          style: 'diamond',
-          placements: ['afterProfile', 'aboveSocial', 'belowSocial'],
+          afterCategories: {
+            _type: 'decorativeDivider',
+            style: 'line',
+            width: 'short',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+          },
+          afterProfile: {
+            _type: 'decorativeDivider',
+            style: 'line',
+            width: 'long',
+            thickness: 'bold',
+            centre: 'icon',
+            icon: 'sun',
+            centreSize: 'large',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+          },
+          aboveSocial: {
+            _type: 'decorativeDivider',
+            style: 'line',
+            width: 'full',
+            centre: 'text',
+            text: 'Stay connected',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+            centreColour: { _type: 'object', colour: 'ink' },
+          },
+          belowSocial: { _type: 'decorativeDivider', style: 'dots' },
         },
         links: [linkItem('div-a', 'First link', external('https://example.com/a'))],
       },
       {
-        _key: 'div-below',
+        _key: 'div-above',
         _type: 'linkList',
         variant: 'cards',
         thumbnailSize: 'standard',
         style: { _type: 'sectionStyle', align: 'start', tone: 'inverse' },
         profile: { _type: 'object', name: 'Fading dividers' },
-        socialDesign: { _type: 'object', position: 'below' },
         socialSource: 'custom',
         socialLinks: [
           { _key: 'fb', _type: 'socialLink', platform: 'facebook', url: 'https://facebook.com/x' },
         ],
         dividerDesign: {
           _type: 'object',
-          style: 'fade',
-          width: 'full',
-          placements: ['aboveSocial', 'belowSocial'],
-          colour: { _type: 'object', colour: 'highlight' },
+          afterProfile: { _type: 'decorativeDivider', style: 'dots' },
+          aboveSocial: {
+            _type: 'decorativeDivider',
+            style: 'fade',
+            width: 'full',
+            centre: 'diamond',
+            lineColour: { _type: 'object', colour: 'highlight' },
+          },
+          belowSocial: { _type: 'decorativeDivider', style: 'line', width: 'medium' },
         },
         links: [linkItem('div-b', 'Second link', external('https://example.com/b'))],
       },
@@ -3656,8 +3692,8 @@ documents.push(
         socialSource: 'none',
         dividerDesign: {
           _type: 'object',
-          style: 'dots',
-          placements: ['aboveSocial', 'belowSocial'],
+          aboveSocial: { _type: 'decorativeDivider', style: 'line' },
+          belowSocial: { _type: 'decorativeDivider', style: 'line' },
         },
         links: [linkItem('div-c', 'Third link', external('https://example.com/c'))],
       },

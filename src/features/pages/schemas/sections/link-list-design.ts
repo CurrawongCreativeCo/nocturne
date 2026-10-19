@@ -11,16 +11,6 @@ import {
   SHADOW_TITLES,
 } from '@/lib/sanity/depth-options'
 import {
-  DIVIDER_COLOUR_CHOICES,
-  DIVIDER_PLACEMENTS,
-  DIVIDER_PLACEMENT_TITLES,
-  DIVIDER_STYLES,
-  DIVIDER_STYLE_DESCRIPTIONS,
-  DIVIDER_STYLE_TITLES,
-  DIVIDER_WIDTHS,
-  DIVIDER_WIDTH_TITLES,
-} from '@/lib/sanity/divider-options'
-import {
   INLINE_CASES,
   INLINE_CASE_TITLES,
   INLINE_COLOUR_CHOICES,
@@ -57,7 +47,6 @@ import { presetField } from '@/lib/sanity/schema/preset-field'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
-  dividerThumbnails,
   linkArrowThumbnails,
   shadowThumbnails,
   socialStyleThumbnails,
@@ -102,7 +91,7 @@ const borderIs =
     !kinds.includes((parent as ProfileDesign | undefined)?.border ?? 'none')
 
 interface Section {
-  profile?: { image?: { asset?: unknown } }
+  profile?: { image?: { asset?: unknown }; categories?: unknown[]; bio?: string }
   variant?: string
   rowStyle?: string
   showArrows?: boolean
@@ -121,9 +110,9 @@ const layoutOf = (variant: string | undefined) => variant ?? 'stacked'
 const glowOff: ConditionalPropertyCallback = ({ parent }) =>
   ((parent as { glow?: string } | undefined)?.glow ?? 'off') === 'off'
 
-/** The divider's options only show once a divider is chosen. */
-const noDivider: ConditionalPropertyCallback = ({ parent }) =>
-  ((parent as { style?: string } | undefined)?.style ?? 'none') === 'none'
+/** The social dividers only apply while the section shows social icons. */
+const noSocials: ConditionalPropertyCallback = (context) =>
+  sectionOf(context)?.socialSource === 'none'
 
 const agencyOnly =
   (own?: ConditionalPropertyCallback): ConditionalPropertyCallback =>
@@ -430,58 +419,37 @@ export const linkListDesignFields = [
     type: 'object',
     group: 'design',
     description:
-      'A small decorative rule after the profile or around the social icons. Only drawn between two things that show.',
+      'Decorative rules, each with its own look: a line, a fading line or dots, with an icon, a few words or a picture in the middle. Each is only drawn between two things that show.',
     hidden: agencyOnly(),
     options: { collapsible: true, collapsed: false },
     fields: [
-      presetField({
-        name: 'style',
-        title: 'Divider',
-        description: 'One look for every divider in this list.',
-        options: DIVIDER_STYLES.map((value) => ({
-          value,
-          title: DIVIDER_STYLE_TITLES[value],
-          description: DIVIDER_STYLE_DESCRIPTIONS[value],
-          thumbnail: dividerThumbnails[value],
-        })),
-        // Empty is None, so existing lists stay as they are.
-        required: false,
-        initialValue: null,
-        defaultValue: () => 'none',
-      }),
       defineField({
-        name: 'placements',
-        title: 'Where',
-        type: 'array',
-        of: [{ type: 'string' }],
-        description:
-          'After the profile while nothing is ticked. The social ones apply only while social icons show.',
-        options: {
-          list: DIVIDER_PLACEMENTS.map((value) => ({
-            value,
-            title: DIVIDER_PLACEMENT_TITLES[value],
-          })),
-          layout: 'grid',
+        name: 'afterCategories',
+        title: 'Between the categories and the bio',
+        type: 'decorativeDivider',
+        hidden: (context) => {
+          const profile = sectionOf(context)?.profile
+          return !profile?.categories?.length || !profile.bio
         },
-        hidden: noDivider,
       }),
       defineField({
-        name: 'width',
-        title: 'Width',
-        type: 'string',
-        description: 'Medium while unset.',
-        options: radio(DIVIDER_WIDTHS, DIVIDER_WIDTH_TITLES),
-        hidden: (context) =>
-          noDivider(context) ||
-          (context.parent as { style?: string } | undefined)?.style === 'dots',
+        name: 'afterProfile',
+        title: 'After the profile',
+        type: 'decorativeDivider',
       }),
-      themeColourField({
-        name: 'colour',
-        title: 'Divider colour',
-        usage: 'graphic',
-        inherits: 'the line colour',
-        choices: DIVIDER_COLOUR_CHOICES,
-        hidden: noDivider,
+      defineField({
+        name: 'aboveSocial',
+        title: 'Above the social icons',
+        description: 'Words here make a heading for the icons, e.g. “Stay connected”.',
+        type: 'decorativeDivider',
+        hidden: noSocials,
+      }),
+      defineField({
+        name: 'belowSocial',
+        title: 'Below the social icons',
+        description: 'Not drawn when the icons are the last thing in the list.',
+        type: 'decorativeDivider',
+        hidden: noSocials,
       }),
     ],
   }),

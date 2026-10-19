@@ -18,6 +18,21 @@ export const imageFields = /* groq */ `
   }
 `
 
+/** A `decorativeDivider` (schema: lib/sanity/schema/decorative-divider.ts): project it as `divider { ${decorativeDividerFields} }`. */
+export const decorativeDividerFields = /* groq */ `
+  style,
+  width,
+  thickness,
+  centre,
+  text,
+  textCase,
+  icon,
+  centreSize,
+  image { ${imageFields} },
+  lineColour { colour, hex },
+  centreColour { colour, hex }
+`
+
 /**
  * A section's `imageDesign` (schema: lib/sanity/schema/image-design.ts): project it as
  * `imageDesign { ${imageDesignFields} }`. The approved custom frame is resolved to its SVG's CDN URL

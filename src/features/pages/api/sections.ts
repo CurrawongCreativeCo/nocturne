@@ -3,6 +3,7 @@ import {
   eventCardFields,
   eventLastRelevant,
   formFields,
+  decorativeDividerFields,
   heroSupportingFields,
   imageDesignFields,
   imageFields,
@@ -379,10 +380,10 @@ export const linkListFragment = /* groq */ `
       background { colour, hex }
     },
     dividerDesign {
-      style,
-      width,
-      placements,
-      colour { colour, hex }
+      afterCategories { ${decorativeDividerFields} },
+      afterProfile { ${decorativeDividerFields} },
+      aboveSocial { ${decorativeDividerFields} },
+      belowSocial { ${decorativeDividerFields} }
     },
     depthDesign {
       linkShadow,

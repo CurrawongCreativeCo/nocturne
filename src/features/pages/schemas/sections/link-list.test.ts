@@ -170,16 +170,24 @@ describe('Design boxes and conditional fields', () => {
     expect(at('glowTargets', { parent: { glow: 'soft' } })).toBe(false)
   })
 
-  it('shows the divider options only once a divider is chosen, and no width for dots', () => {
-    const divider = field('dividerDesign').fields ?? []
-    const at = (name: string, parent: Record<string, unknown>) =>
-      hidden(field(name, divider), { parent })
-    expect(at('placements', {})).toBe(true)
-    expect(at('placements', { style: 'none' })).toBe(true)
-    expect(at('placements', { style: 'line' })).toBe(false)
-    expect(at('colour', { style: 'diamond' })).toBe(false)
-    expect(at('width', { style: 'line' })).toBe(false)
-    expect(at('width', { style: 'dots' })).toBe(true)
+  it('offers a divider per position, each only where it can be drawn', () => {
+    const boxes = field('dividerDesign').fields ?? []
+    const page = (section: Record<string, unknown>) => ({
+      document: { pageBuilder: [{ _key: 's', _type: 'linkList', ...section }] },
+      path: ['pageBuilder', { _key: 's' }, 'dividerDesign', 'field'],
+    })
+    const at = (name: string, section: Record<string, unknown>) =>
+      hidden(field(name, boxes), page(section))
+    expect(boxes.map((box) => box.name)).toEqual([
+      'afterCategories',
+      'afterProfile',
+      'aboveSocial',
+      'belowSocial',
+    ])
+    expect(at('afterCategories', { profile: { categories: ['A'] } })).toBe(true)
+    expect(at('afterCategories', { profile: { categories: ['A'], bio: 'Hi' } })).toBe(false)
+    expect(at('aboveSocial', { socialSource: 'none' })).toBe(true)
+    expect(at('belowSocial', { socialSource: 'business' })).toBe(false)
     expect(hidden(field('dividerDesign'), { currentUser: { roles: [{ name: 'editor' }] } })).toBe(
       true,
     )

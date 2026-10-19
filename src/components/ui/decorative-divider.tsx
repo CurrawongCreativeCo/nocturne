@@ -1,38 +1,144 @@
-import type { DividerStyle, DividerWidth } from '@/lib/sanity/divider-options'
+import type {
+  DividerCentreSize,
+  DividerThickness,
+  DividerWidth,
+  ResolvedCentre,
+  ResolvedDivider,
+} from '@/lib/sanity/divider-options'
+
+import { BadgeIcon } from './badge-icon'
+import { SanityImage } from './sanity-image'
 
 // Full class names, so Tailwind's scanner sees them.
-const WIDTH: Record<DividerWidth, string> = { short: 'w-16', medium: 'w-40', full: 'w-full' }
+/** Length of the whole divider when it is a plain rule. */
+const RULE_WIDTH: Record<DividerWidth, string> = {
+  short: 'w-24',
+  medium: 'w-48',
+  long: 'w-80',
+  full: 'w-full',
+}
+/** Length of each line beside a centre; Full width lets them share the row. They shrink on a phone. */
+const SIDE_WIDTH: Record<DividerWidth, string> = {
+  short: 'w-8',
+  medium: 'w-16',
+  long: 'w-28',
+  full: 'flex-1',
+}
+const THICKNESS: Record<DividerThickness, string> = { thin: 'h-px', bold: 'h-0.5' }
+const ICON: Record<DividerCentreSize, string> = {
+  small: 'size-4',
+  medium: 'size-6',
+  large: 'size-8',
+}
+const PICTURE: Record<DividerCentreSize, string> = { small: 'h-5', medium: 'h-8', large: 'h-12' }
+const TEXT: Record<DividerCentreSize, string> = {
+  small: 'text-small',
+  medium: 'text-body',
+  large: 'text-lead',
+}
 // Forced-colours mode drops backgrounds, so the shapes fall back to the system text colour.
 const FILL = 'bg-current forced-colors:bg-[CanvasText]'
-const RULE = `block h-px ${FILL}`
+
+/** One line: even, or fading towards its outer end (`side`), or towards both ends when it stands alone. */
+function Line({
+  divider,
+  side,
+  className,
+}: {
+  divider: ResolvedDivider
+  side?: 'start' | 'end'
+  className: string
+}) {
+  const fade =
+    divider.style !== 'fade'
+      ? FILL
+      : side === 'start'
+        ? 'bg-linear-to-r from-transparent to-current forced-colors:bg-[CanvasText]'
+        : side === 'end'
+          ? 'bg-linear-to-l from-transparent to-current forced-colors:bg-[CanvasText]'
+          : 'bg-linear-to-r from-transparent via-current to-transparent forced-colors:bg-[CanvasText]'
+  return (
+    <span
+      aria-hidden="true"
+      className={`block min-w-4 shrink-[4] ${THICKNESS[divider.thickness]} ${fade} ${className}`}
+    />
+  )
+}
+
+function Centre({
+  centre,
+  size,
+  thickness,
+}: {
+  centre: ResolvedCentre
+  size: DividerCentreSize
+  thickness: DividerThickness
+}) {
+  switch (centre.kind) {
+    case 'diamond':
+      return (
+        <span
+          aria-hidden="true"
+          className={`block shrink-0 rotate-45 ${thickness === 'bold' ? 'size-2' : 'size-1.5'} ${FILL}`}
+        />
+      )
+    case 'icon':
+      return (
+        <span aria-hidden="true" className="shrink-0">
+          <BadgeIcon name={centre.icon} className={ICON[size]} />
+        </span>
+      )
+    case 'image':
+      return (
+        <SanityImage
+          image={centre.image}
+          alt=""
+          height={96}
+          sizes="96px"
+          className={`w-auto shrink-0 object-contain ${PICTURE[size]}`}
+        />
+      )
+    case 'text':
+      // Real words, so they are read out (a label such as "Stay connected"); only the lines are hidden.
+      return (
+        <span
+          className={`text-center text-balance ${TEXT[size]} ${centre.textCase === 'uppercase' ? 'tracking-[0.2em] uppercase' : 'tracking-[0.08em]'}`}
+        >
+          {centre.text}
+        </span>
+      )
+  }
+}
 
 /**
- * A small decorative rule inside a section (lib/sanity/divider-options.ts): Line, Fading line, Three
- * dots or Line with a diamond, drawn in CSS in `currentColor`. Purely decoration, so it is hidden
- * from assistive technology rather than announced as a separator: the parts on either side already
- * have their own headings and lists. `block` centres it in a centred section; the space around it
- * collapses with its neighbours' margins.
+ * A decorative divider inside a section (lib/sanity/divider-options.ts): a line, a fading line or
+ * three dots, with an optional diamond, icon, few words or small picture between two lines, in
+ * `currentColor` (the line colour unless one is chosen; the middle follows the lines unless it has
+ * its own). Decoration is hidden from assistive technology; words in the middle are read like any
+ * text. `block` centres it in a centred section. It brings its own space above and below
+ * (`my-6`), so the parts beside it drop theirs on that side (LinkListView does).
  */
 export function DecorativeDivider({
-  style,
-  width = 'medium',
-  colour,
+  divider,
   block = '',
   className = '',
 }: {
-  style: Exclude<DividerStyle, 'none'>
-  width?: DividerWidth
-  /** A CSS colour (lib/sanity/theme-colour.ts); undefined is the line colour. */
-  colour?: string
+  divider: ResolvedDivider
   /** From `sectionTraits`: `mx-auto` in a centred section. */
   block?: string
   className?: string
 }) {
+  const { style, width, centre } = divider
+  const words = centre?.kind === 'text'
   const classes = [
     'my-6 flex max-w-full items-center',
-    colour ? '' : 'text-line-strong',
-    style === 'dots' ? 'w-fit gap-2' : WIDTH[width],
-    style === 'diamond' ? 'gap-2' : '',
+    divider.lineColour ? '' : 'text-line-strong',
+    // With a centre, the row is as wide as its lines and middle; at Full width the lines share it.
+    style === 'dots'
+      ? 'w-fit gap-2'
+      : centre
+        ? `gap-3 ${width === 'full' ? 'w-full' : 'w-fit'}`
+        : RULE_WIDTH[width],
     block,
     className,
   ]
@@ -40,23 +146,28 @@ export function DecorativeDivider({
     .join(' ')
   return (
     <div
-      aria-hidden="true"
+      aria-hidden={words ? undefined : true}
       data-decorative-divider={style}
+      data-divider-centre={centre?.kind}
       className={classes}
-      style={colour ? { color: colour } : undefined}
+      style={divider.lineColour ? { color: divider.lineColour } : undefined}
     >
-      {style === 'line' && <span className={`${RULE} w-full`} />}
-      {style === 'fade' && (
-        <span className="block h-px w-full bg-linear-to-r from-transparent via-current to-transparent forced-colors:bg-[CanvasText]" />
-      )}
-      {style === 'dots' &&
-        [0, 1, 2].map((dot) => <span key={dot} className={`block size-1 rounded-full ${FILL}`} />)}
-      {style === 'diamond' && (
+      {style === 'dots' ? (
+        [0, 1, 2].map((dot) => <span key={dot} className={`block size-1 rounded-full ${FILL}`} />)
+      ) : centre ? (
         <>
-          <span className={`${RULE} flex-1`} />
-          <span className={`block size-1.5 shrink-0 rotate-45 ${FILL}`} />
-          <span className={`${RULE} flex-1`} />
+          <Line divider={divider} side="start" className={SIDE_WIDTH[width]} />
+          {/* Keeps its one-line width while the lines can give way; wraps only if the row is too narrow. */}
+          <span
+            className="flex min-w-0 items-center justify-center"
+            style={divider.centreColour ? { color: divider.centreColour } : undefined}
+          >
+            <Centre centre={centre} size={divider.centreSize} thickness={divider.thickness} />
+          </span>
+          <Line divider={divider} side="end" className={SIDE_WIDTH[width]} />
         </>
+      ) : (
+        <Line divider={divider} className="w-full" />
       )}
     </div>
   )
