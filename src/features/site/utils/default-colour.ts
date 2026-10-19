@@ -2,7 +2,7 @@ import {
   resolveDesignTokens,
   type BaseColours,
   type DesignOverrides,
-} from './resolve-design-tokens'
+} from '@/lib/color/resolve-design-tokens'
 
 /** The Brand colours fields that hold a single colour, and the resolved token each one stands for. */
 const FIELD_TOKENS = {

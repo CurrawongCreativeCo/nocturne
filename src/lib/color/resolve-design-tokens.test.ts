@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { colorHex } from '@/config/tokens.generated'
-import { contrastRatio } from '@/lib/color/contrast'
 
+import { contrastRatio } from './contrast'
 import { resolveDesignTokens } from './resolve-design-tokens'
 
 const AA = 4.5

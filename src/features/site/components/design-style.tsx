@@ -1,7 +1,7 @@
+import { resolveDesignTokens } from '@/lib/color/resolve-design-tokens'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { getSettings } from '../api/get-settings'
-import { resolveDesignTokens } from '../utils/resolve-design-tokens'
 
 /**
  * The Studio's brand colours as `:root` CSS variable overrides, rendered on the server so the first

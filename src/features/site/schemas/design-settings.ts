@@ -2,10 +2,10 @@ import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { defineField, defineType, type StringRule } from 'sanity'
 
 import { HEX_PATTERN } from '@/lib/color/oklch'
+import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
 
 import { ColourInput } from '../components/colour-input'
 import { DesignSettingsInput } from '../components/design-settings-input'
-import { resolveDesignTokens, type DesignOverrides } from '../utils/resolve-design-tokens'
 
 const HEX_MESSAGE = 'Use a six-digit hex colour such as #3266e4'
 

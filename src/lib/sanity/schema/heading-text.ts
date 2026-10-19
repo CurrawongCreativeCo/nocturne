@@ -12,6 +12,7 @@ import {
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import { emphasisPhrases, headingPlainText, headingTone } from '@/lib/sanity/heading-text'
 
+import { DEFAULT_BRAND_COLOURS, fetchBrandColours } from './brand-colours'
 import { fetchBrandGradients } from './brand-gradients'
 import { lengthMessage, lengthWarning } from './length-guidance'
 import { presetField } from './preset-field'
@@ -313,7 +314,17 @@ export function headingField({
           const brand = usesBrand
             ? await fetchBrandGradients(context.getClient({ apiVersion: '2025-01-01' }))
             : []
-          const [worst] = emphasisContrastProblems(headingTone(parent, defaultTone), phrases, brand)
+          // Measured on the site's colours after its Brand colours, as the page draws them.
+          const { colours } =
+            phrases.length > 0
+              ? await fetchBrandColours(context.getClient({ apiVersion: '2025-01-01' }))
+              : DEFAULT_BRAND_COLOURS
+          const [worst] = emphasisContrastProblems(
+            headingTone(parent, defaultTone),
+            phrases,
+            brand,
+            colours,
+          )
           return worst ? worst.message : true
         })
         .warning(),

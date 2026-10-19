@@ -1126,7 +1126,7 @@ Studio access; see _Studio roles and permissions_).
 
 With nothing set, no CSS is added. Otherwise `SiteShell` renders one `<style>` with `:root{...}` containing only
 what differs from `tokens.json`, on the server, so there is no flash and no JavaScript. It comes from
-`resolveDesignTokens` (`src/features/site/utils/resolve-design-tokens.ts`, pure and unit-tested), fed by the
+`resolveDesignTokens` (`src/lib/color/resolve-design-tokens.ts`, pure and unit-tested), fed by the
 `design` part of `SETTINGS_QUERY`, so it is one cached read like every other setting. The `designSettings` tag is in
 `TAGS` and the webhook filter; drafts and Presentation update through `SanityLive`. The Studio's own colours are not
 affected.
@@ -2929,6 +2929,7 @@ bottom). Any colour is allowed: Studio never blocks one. Instead each colour sho
 section's background (large text needs 3:1), the field warns when a colour is hard to read, and **Suggest an accessible
 shade** moves the colour's lightness (OKLCH, as Brand colours does) to the nearest shade that reaches 3:1. Changing the
 section's background (its tone) changes the check. A gradient from Brand colours is checked the same way, stop by stop.
+The built-in gradients, the Brand highlight and the other treatments are measured with the site's Brand colours too.
 
 **Custom colours bypass the brand palette on purpose.** A heading can use colours that are not in Design → Brand
 colours, and a re-skin does not change them. Anyone who can highlight words can do this; there is no separate
@@ -3234,7 +3235,12 @@ inside each box, and every option that depends on another only shows once it app
   Primary, Secondary, Highlight or Custom (a hex field appears only then). Each element offers only the choices that suit it.
   Every choice but Custom is a token, so it follows the section's tone; the site draws it with `themeColourCss`, which ignores
   anything not offered and lets only a valid six-digit hex through. The swatch picker shows the colour on this section's tone
-  and a contrast badge (4.5:1 for text, 3:1 for icons), measured on the background colour; over a photo or glass, check by eye.
+  and a contrast badge (4.5:1 for text, 3:1 for icons), measured on the background colour. The swatches and badges use the
+  site's **Brand colours** (Design settings, published), not `tokens.json`: a site that changed Primary sees its own Primary,
+  and the picker says which it used ("Swatches and contrast use this site's Brand colours", or the defaults when nothing is
+  changed). On **Glass rows** the arrow and icon colours are measured on the glass at its worst (over the darkest or lightest
+  photo, at the section's glass strength). Over any other background picture the badge is still the background colour; check
+  it by eye. Every check is a warning, never an error.
 - **Wordmarks.** _Content › Profile › Show as_ and the heading's _Show as_ offer **Image** for a client's wordmark. The text
   stays and becomes the image's alt text, inside the same heading element, so the heading hierarchy, the accessible name and
   the indexed words are unchanged and nothing is read twice. Studio warns if the image or the text is missing.

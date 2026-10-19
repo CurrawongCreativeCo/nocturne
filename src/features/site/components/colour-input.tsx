@@ -5,18 +5,20 @@ import { useState } from 'react'
 import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 
 import { adjustLightnessForContrast } from '@/lib/color/contrast'
-import { stopContrast } from '@/lib/color/heading-contrast'
+import { glassRowsStrength, type GlassStrength } from '@/lib/color/glass-contrast'
+import { stopContrast, type ColourSet } from '@/lib/color/heading-contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
-import { USAGE_RATIO, themeColourContrast } from '@/lib/color/theme-colour-contrast'
-import { headingSectionPath, headingTone } from '@/lib/sanity/heading-text'
-import { sectionPathOf } from '@/lib/sanity/schema/theme-colour'
-
-import { defaultColourFor } from '../utils/default-colour'
 import {
   resolveDesignTokens,
   type ContrastCheck,
   type DesignOverrides,
-} from '../utils/resolve-design-tokens'
+} from '@/lib/color/resolve-design-tokens'
+import { USAGE_RATIO, themeColourContrast } from '@/lib/color/theme-colour-contrast'
+import { headingSectionPath, headingTone } from '@/lib/sanity/heading-text'
+import { sectionPathOf } from '@/lib/sanity/schema/theme-colour'
+import { useBrandColours } from '@/lib/sanity/schema/use-brand-colours'
+
+import { defaultColourFor } from '../utils/default-colour'
 
 /** "3266E4" / "#3266E4" -> "#3266e4"; anything else is not a finished colour yet. */
 function toHex(text: string): string | null {
@@ -34,8 +36,8 @@ const visuallyHidden = {
 } as const
 
 /** One gradient colour read as large text (3:1) on the tone's background. */
-function headingStopCheck(hex: string, tone: string | undefined): ContrastCheck {
-  const { background, ratio, pass } = stopContrast(tone, hex)
+function headingStopCheck(hex: string, tone: string | undefined, site: ColourSet): ContrastCheck {
+  const { background, ratio, pass } = stopContrast(tone, hex, site)
   return {
     id: 'heading-stop',
     fields: [],
@@ -54,13 +56,15 @@ function elementCheck(
   hex: string,
   tone: string | undefined,
   usage: 'text' | 'graphic',
+  site: ColourSet,
+  glass: GlassStrength | null,
 ): ContrastCheck {
-  const check = themeColourContrast('custom', hex, tone, usage)
+  const check = themeColourContrast('custom', hex, tone, usage, { site, glass })
+  const surface = glass ? 'the glass, over a photo' : "the section's background"
   return {
     id: 'element-colour',
     fields: [],
-    label:
-      usage === 'text' ? "Text on the section's background" : "Icon on the section's background",
+    label: usage === 'text' ? `Text on ${surface}` : `Icon on ${surface}`,
     foreground: hex,
     background: check?.background ?? '#ffffff',
     ratio: check?.ratio ?? 1,
@@ -112,6 +116,7 @@ export function ColourInput(props: StringInputProps) {
   const [draft, setDraft] = useState<string | null>(null)
   const [cleared, setCleared] = useState(false)
   const document = useFormValue([]) as DesignOverrides | undefined
+  const { colours: site } = useBrandColours()
   const [first] = path
   const field = path.length === 1 && typeof first === 'string' ? first : null
   const hex = value && HEX_PATTERN.test(value) ? value.toLowerCase() : null
@@ -123,15 +128,19 @@ export function ColourInput(props: StringInputProps) {
   // An element's Custom colour (themeColourField) is checked the same way, at its own ratio.
   const headingStop = props.schemaType.options?.headingStop === true
   const elementUsage = props.schemaType.options?.themeColourHex
+  const onRows = props.schemaType.options?.themeColourRows === true
   const section = headingStop ? headingSectionPath(path) : elementUsage ? sectionPathOf(path) : null
   const sectionValue = useFormValue(section ?? ['_type'])
   const tone = section ? headingTone(sectionValue as Parameters<typeof headingTone>[0]) : undefined
+  const glass = onRows
+    ? glassRowsStrength(sectionValue as Parameters<typeof glassRowsStrength>[0])
+    : null
   const sectionCheck = !hex
     ? null
     : headingStop
-      ? headingStopCheck(hex, tone)
+      ? headingStopCheck(hex, tone, site)
       : elementUsage
-        ? elementCheck(hex, tone, elementUsage)
+        ? elementCheck(hex, tone, elementUsage, site, glass)
         : null
 
   const checks = sectionCheck

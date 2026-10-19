@@ -14,6 +14,8 @@ declare module 'sanity' {
     themeColourPicker?: ColourUsage
     /** The Custom hex of a `themeColourField`: the Brand colours input, checked on the section's background. */
     themeColourHex?: ColourUsage
+    /** The element sits on the rows of Glass rows, so it is measured on the glass (not the page) there. */
+    themeColourRows?: boolean
   }
 }
 
@@ -40,6 +42,8 @@ interface ThemeColourFieldConfig {
   choices?: readonly Exclude<ThemeColour, 'inherit' | 'custom'>[]
   /** Text needs 4.5:1 on its background, icons and lines 3:1. */
   usage: ColourUsage
+  /** True for an element drawn on a row (the Link list's arrow and icon): on Glass rows it is measured on the glass. */
+  onRows?: boolean
   /** What Inherit means here, e.g. "the text colour", so the editor knows what they get. */
   inherits: string
   fieldset?: string
@@ -58,6 +62,7 @@ export function themeColourField({
   description,
   choices = ['ink', 'muted', 'accent', 'accent-2', 'highlight'],
   usage,
+  onRows,
   inherits,
   fieldset,
   hidden,
@@ -78,6 +83,7 @@ export function themeColourField({
         type: 'string',
         options: {
           themeColourPicker: usage,
+          themeColourRows: onRows,
           list: THEME_COLOURS.filter((value) => offered.includes(value)).map((value) => ({
             value,
             title: THEME_COLOUR_TITLES[value],
@@ -91,7 +97,7 @@ export function themeColourField({
         title: 'Custom colour',
         type: 'string',
         description: 'Six-digit hex, e.g. #3266e4. Choose Inherit above to go back to the theme.',
-        options: { themeColourHex: usage },
+        options: { themeColourHex: usage, themeColourRows: onRows },
         hidden: ({ parent }: { parent?: { colour?: string } }) => parent?.colour !== 'custom',
         validation: (rule) =>
           rule.custom((value, { parent }) => {

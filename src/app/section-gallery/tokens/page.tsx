@@ -3,12 +3,12 @@ import { Suspense } from 'react'
 
 import { getSettings } from '@/features/site/api/get-settings'
 import { DesignStyle } from '@/features/site/components/design-style'
-import { resolveDesignTokens } from '@/features/site/utils/resolve-design-tokens'
 import { StyleguideNav } from '@/features/styleguide/components/styleguide-nav'
 import { TokensColours } from '@/features/styleguide/components/tokens-colours'
 import { TokensLayout } from '@/features/styleguide/components/tokens-layout'
 import { TokensMotion } from '@/features/styleguide/components/tokens-motion'
 import { TokensType } from '@/features/styleguide/components/tokens-type'
+import { resolveDesignTokens } from '@/lib/color/resolve-design-tokens'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 import { requireStyleguide, requireStyleguideToken } from '../guard'

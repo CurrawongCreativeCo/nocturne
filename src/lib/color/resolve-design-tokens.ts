@@ -1,7 +1,8 @@
 import { colorHex } from '@/config/tokens.generated'
-import { adjustLightnessForContrast, contrastRatio } from '@/lib/color/contrast'
-import { brandGradients, type GradientInput } from '@/lib/color/gradients'
-import { HEX_PATTERN, hexToOklch, oklchToHex } from '@/lib/color/oklch'
+
+import { adjustLightnessForContrast, contrastRatio } from './contrast'
+import { brandGradients, type GradientInput } from './gradients'
+import { HEX_PATTERN, hexToOklch, oklchToHex } from './oklch'
 
 /** The generated token colours, camelCase hex (what `colorHex` in tokens.generated.ts holds). */
 export type BaseColours = Readonly<Record<keyof typeof colorHex, string>>

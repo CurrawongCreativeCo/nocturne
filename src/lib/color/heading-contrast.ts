@@ -10,7 +10,9 @@ import { hexToOklch, hexToRgb, oklchToHex, rgbToHex } from './oklch'
  * Contrast checks for highlighted heading words against the section's tone background. Headings are
  * large text, so WCAG 2.2 asks for 3:1 (1.4.3), and every gradient stop has to reach it. The colours
  * mirror what the page draws: the `[data-tone]` rules in tokens.generated.css redefine `accent` and
- * `ink` per tone, and this file resolves them the same way.
+ * `ink` per tone, and this file resolves them the same way. Every function takes the site's colours
+ * (`ColourSet`, from `resolveDesignTokens`) and falls back to tokens.json's, so a site with its own
+ * Brand colours is measured as the page draws it.
  */
 
 export const LARGE_TEXT_RATIO = 3
@@ -20,6 +22,9 @@ export type EmphasisTreatment =
   'brand' | 'colour' | 'gradient' | 'highlight' | 'underline' | 'plain'
 
 type Palette = Record<GradientToken, string>
+
+/** Every colour token as hex: tokens.json's (`colorHex`), or the site's after its Brand colours. */
+export type ColourSet = Readonly<Record<GradientToken, string>>
 
 /** Linear blend of two colours in OKLab, as CSS `color-mix(in oklab, a p%, b)` does. */
 function mixOklab(a: string, b: string, share: number): string {
@@ -40,31 +45,34 @@ function mixOklab(a: string, b: string, share: number): string {
 }
 
 /** The tone's background and the token colours as that tone redefines them. */
-export function tonePalette(tone: string | null | undefined): {
+export function tonePalette(
+  tone: string | null | undefined,
+  site: ColourSet = colorHex,
+): {
   background: string
   colors: Palette
 } {
-  const base: Palette = { ...colorHex }
+  const base: Palette = { ...site }
   switch (tone) {
     case 'alt':
-      return { background: colorHex.surfaceAlt, colors: base }
+      return { background: site.surfaceAlt, colors: base }
     case 'inverse':
       return {
-        background: colorHex.surfaceInverse,
+        background: site.surfaceInverse,
         colors: {
           ...base,
-          ink: colorHex.inkInverse,
+          ink: site.inkInverse,
           // --color-accent: color-mix(in oklab, var(--tone-accent) 55%, var(--color-ink-inverse))
-          accent: mixOklab(colorHex.accent, colorHex.inkInverse, 0.55),
+          accent: mixOklab(site.accent, site.inkInverse, 0.55),
         },
       }
     case 'accent':
       return {
-        background: colorHex.accent,
-        colors: { ...base, ink: colorHex.accentInk, accent: colorHex.accentInk },
+        background: site.accent,
+        colors: { ...base, ink: site.accentInk, accent: site.accentInk },
       }
     default:
-      return { background: colorHex.surface, colors: base }
+      return { background: site.surface, colors: base }
   }
 }
 
@@ -103,8 +111,9 @@ function gradientColours(
   tone: string | null | undefined,
   { gradient, stops }: EmphasisInput,
   brand: readonly BrandGradient[],
+  site: ColourSet,
 ): { stops: string[]; name: string; custom: boolean } {
-  const { colors } = tonePalette(tone)
+  const { colors } = tonePalette(tone, site)
   if (gradient === CUSTOM_GRADIENT) {
     const clean = validStops(stops)
     if (clean) return { stops: clean, name: 'Custom gradient', custom: true }
@@ -125,11 +134,12 @@ function measured(
   tone: string | null | undefined,
   input: EmphasisInput,
   brand: readonly BrandGradient[],
+  site: ColourSet,
 ) {
-  const { background, colors } = tonePalette(tone)
+  const { background, colors } = tonePalette(tone, site)
   switch (input.treatment) {
     case 'gradient':
-      return gradientColours(tone, input, brand).stops.map((foreground) => ({
+      return gradientColours(tone, input, brand, site).stops.map((foreground) => ({
         foreground,
         background,
       }))
@@ -155,8 +165,12 @@ function measured(
 }
 
 /** How one colour reads on the section's background, and the nearest shade that reaches 3:1. */
-export function stopContrast(tone: string | null | undefined, hex: string) {
-  const { background } = tonePalette(tone)
+export function stopContrast(
+  tone: string | null | undefined,
+  hex: string,
+  site: ColourSet = colorHex,
+) {
+  const { background } = tonePalette(tone, site)
   const ratio = contrastRatio(hex, background)
   const suggestion =
     ratio < LARGE_TEXT_RATIO ? adjustLightnessForContrast(hex, background, LARGE_TEXT_RATIO) : null
@@ -174,32 +188,34 @@ function problemId(
   treatment: EmphasisTreatment,
   tone: string | null | undefined,
   brand: readonly BrandGradient[],
+  site: ColourSet,
 ) {
   if (treatment === 'colour') return `colour:${validColour(input.colour) ?? ''}`
   if (treatment !== 'gradient') return treatment
-  return `gradient:${gradientColours(tone, input, brand).stops.join(',')}`
+  return `gradient:${gradientColours(tone, input, brand, site).stops.join(',')}`
 }
 
 /**
  * Treatments below 3:1 on this tone, worst first, one message each. `null` or unknown treatments
  * (content from a newer deployment) pass: there is nothing to measure. `brand` is the Brand colours
  * gradients, for phrases that picked one by name; one that is gone is measured as the default,
- * which is what the page then draws.
+ * which is what the page then draws. `site` is the site's colours after its Brand colours.
  */
 export function emphasisContrastProblems(
   tone: string | null | undefined,
   inputs: readonly EmphasisInput[],
   brand: readonly BrandGradient[] = [],
+  site: ColourSet = colorHex,
 ): ContrastProblem[] {
   const seen = new Set<string>()
   const problems: ContrastProblem[] = []
   for (const input of inputs) {
     const treatment = input.treatment as EmphasisTreatment
     if (!(treatment in TITLES)) continue
-    const id = problemId(input, treatment, tone, brand)
+    const id = problemId(input, treatment, tone, brand, site)
     if (seen.has(id)) continue
     seen.add(id)
-    const pairs = measured(tone, input, brand).map((pair) => ({
+    const pairs = measured(tone, input, brand, site).map((pair) => ({
       ...pair,
       ratio: contrastRatio(pair.foreground, pair.background),
     }))
@@ -208,7 +224,7 @@ export function emphasisContrastProblems(
       undefined,
     )
     if (worst && worst.ratio < LARGE_TEXT_RATIO) {
-      const gradient = treatment === 'gradient' ? gradientColours(tone, input, brand) : null
+      const gradient = treatment === 'gradient' ? gradientColours(tone, input, brand, site) : null
       // A custom gradient names the colour to fix; the presets are named by title.
       const label = gradient
         ? gradient.custom

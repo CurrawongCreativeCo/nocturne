@@ -2,6 +2,7 @@ import { colorHex, glass } from '@/config/tokens.generated'
 
 import { BODY_TEXT_RATIO, composite, textColours } from './background-contrast'
 import { contrastRatio } from './contrast'
+import type { ColourSet } from './heading-contrast'
 
 /**
  * Whether Glass rows stay readable over a photo (WCAG 2.2 AA asks for 4.5:1). The photo behind is
@@ -30,26 +31,70 @@ export function glassStrengthOf(value: string | null | undefined): GlassStrength
   return GLASS_STRENGTHS.find((strength) => strength === value) ?? DEFAULT_GLASS_STRENGTH
 }
 
+/**
+ * The glass a Link list section draws its rows in, or null when it draws none: Glass rows are Minimal
+ * (`variant` stacked, the default) with the glass row style. Mirrors `isGlassRows` in the Link list
+ * schema, which a shared module cannot import.
+ */
+export function glassRowsStrength(
+  section:
+    | { variant?: string | null; rowStyle?: string | null; glassStrength?: string | null }
+    | null
+    | undefined,
+): GlassStrength | null {
+  if (section?.rowStyle !== 'glass' || (section.variant ?? 'stacked') !== 'stacked') return null
+  return glassStrengthOf(section.glassStrength)
+}
+
 /** The colour the glass is made from: the tone's `--color-surface`. */
-function glassColour(tone: string | null | undefined): string {
+function glassColour(tone: string | null | undefined, site: ColourSet): string {
   switch (tone) {
     case 'inverse':
-      return colorHex.surfaceInverse
+      return site.surfaceInverse
     case 'accent':
-      return colorHex.accent
+      return site.accent
     default:
-      return colorHex.surface
+      return site.surface
   }
 }
 
+/**
+ * What a row's glass looks like over the darkest and the lightest photo: the two backgrounds the
+ * worst case is measured on.
+ */
+export function glassAreas(
+  tone: string | null | undefined,
+  strength: GlassStrength,
+  site: ColourSet = colorHex,
+): [string, string] {
+  const surface = glassColour(tone, site)
+  return [
+    composite(surface, '#000000', glass[strength]),
+    composite(surface, '#ffffff', glass[strength]),
+  ]
+}
+
+/** The harder of the two glass backgrounds for `foreground`, with the contrast it gives. */
+export function glassWorstCase(
+  foreground: string,
+  tone: string | null | undefined,
+  strength: GlassStrength,
+  site: ColourSet = colorHex,
+): { background: string; ratio: number } {
+  const [dark, light] = glassAreas(tone, strength, site).map((background) => ({
+    background,
+    ratio: contrastRatio(foreground, background),
+  })) as [{ background: string; ratio: number }, { background: string; ratio: number }]
+  return light.ratio < dark.ratio ? light : dark
+}
+
 /** The lowest text contrast a strength gives on the tone, over the darkest or lightest photo. */
-export function glassWorstRatio(tone: string | null | undefined, strength: GlassStrength): number {
-  const body = textColours(tone).body
-  return Math.min(
-    ...['#000000', '#ffffff'].map((area) =>
-      contrastRatio(body, composite(glassColour(tone), area, glass[strength])),
-    ),
-  )
+export function glassWorstRatio(
+  tone: string | null | undefined,
+  strength: GlassStrength,
+  site: ColourSet = colorHex,
+): number {
+  return glassWorstCase(textColours(tone, site).body, tone, strength, site).ratio
 }
 
 export interface GlassProblem {
@@ -61,16 +106,19 @@ export interface GlassProblem {
 export function glassContrastProblem({
   tone,
   strength,
+  site = colorHex,
 }: {
   tone: string | null | undefined
   strength: string | null | undefined
+  /** The site's colours after its Brand colours; tokens.json's when left out. */
+  site?: ColourSet
 }): GlassProblem | null {
   const chosen = glassStrengthOf(strength)
-  const ratio = glassWorstRatio(tone, chosen)
+  const ratio = glassWorstRatio(tone, chosen, site)
   if (ratio >= BODY_TEXT_RATIO) return null
   const stronger = GLASS_STRENGTHS.find(
     (candidate) =>
-      glass[candidate] > glass[chosen] && glassWorstRatio(tone, candidate) >= BODY_TEXT_RATIO,
+      glass[candidate] > glass[chosen] && glassWorstRatio(tone, candidate, site) >= BODY_TEXT_RATIO,
   )
   return {
     ratio,

@@ -8,7 +8,7 @@ import {
 } from '@/lib/sanity/section-style-options'
 
 import { contrastRatio } from './contrast'
-import { tonePalette } from './heading-contrast'
+import { tonePalette, type ColourSet } from './heading-contrast'
 import { hexToRgb, rgbToHex } from './oklch'
 
 /**
@@ -27,14 +27,17 @@ interface TextColours {
   secondary: string
 }
 
-export function textColours(tone: string | null | undefined): TextColours {
+export function textColours(
+  tone: string | null | undefined,
+  site: ColourSet = colorHex,
+): TextColours {
   switch (tone) {
     case 'inverse':
-      return { body: colorHex.inkInverse, secondary: colorHex.inkInverseMuted }
+      return { body: site.inkInverse, secondary: site.inkInverseMuted }
     case 'accent':
-      return { body: colorHex.accentInk, secondary: colorHex.accentInk }
+      return { body: site.accentInk, secondary: site.accentInk }
     default:
-      return { body: colorHex.ink, secondary: colorHex.inkMuted }
+      return { body: site.ink, secondary: site.inkMuted }
   }
 }
 

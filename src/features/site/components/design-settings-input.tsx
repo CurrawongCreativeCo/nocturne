@@ -3,7 +3,7 @@
 import { Card, Stack, Text } from '@sanity/ui'
 import { useFormValue, type ObjectInputProps } from 'sanity'
 
-import { resolveDesignTokens, type DesignOverrides } from '../utils/resolve-design-tokens'
+import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
 
 /**
  * A small mock-up of the site in the colours being edited, above the form. It reads the same

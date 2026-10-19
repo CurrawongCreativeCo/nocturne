@@ -1,19 +1,35 @@
 import { Badge, Button, Flex, Stack, Text } from '@sanity/ui'
 import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 
+import { glassRowsStrength } from '@/lib/color/glass-contrast'
+import type { ColourSet } from '@/lib/color/heading-contrast'
 import { themeColourContrast, themeColourHex } from '@/lib/color/theme-colour-contrast'
 import { headingTone } from '@/lib/sanity/heading-text'
 import { sectionPathOf } from '@/lib/sanity/schema/theme-colour'
+import { useBrandColours } from '@/lib/sanity/schema/use-brand-colours'
 import type { ThemeColour } from '@/lib/sanity/theme-colour'
 
 interface Section {
   _type?: string
   style?: { tone?: string; image?: { asset?: unknown } } | null
+  variant?: string
+  rowStyle?: string
+  glassStrength?: string
 }
 
 /** The dot on each choice: the colour the page draws on this section's tone. */
-function Swatch({ colour, hex, tone }: { colour: string; hex?: string; tone?: string }) {
-  const fill = themeColourHex(colour, hex, tone)
+function Swatch({
+  colour,
+  hex,
+  tone,
+  site,
+}: {
+  colour: string
+  hex?: string
+  tone?: string
+  site: ColourSet
+}) {
+  const fill = themeColourHex(colour, hex, tone, site)
   const base = {
     display: 'inline-block',
     width: 16,
@@ -51,7 +67,8 @@ function Swatch({ colour, hex, tone }: { colour: string; hex?: string; tone?: st
 /**
  * The colour choice of a `themeColourField` (lib/sanity/schema/theme-colour.ts): one button per
  * theme colour, each showing the colour this section's tone draws, and a contrast line for the one
- * chosen. Picking Custom reveals the hex field below; Inherit clears the value. The stored values are
+ * chosen. Both use the site's Brand colours (Design settings), not tokens.json's, and say so; an
+ * element on Glass rows is measured on the glass, over the worst photo. Picking Custom reveals the hex field below; Inherit clears the value. The stored values are
  * the field's own `options.list`, so without this input the field is a plain radio list.
  */
 export function ThemeColourPickerInput(props: StringInputProps) {
@@ -63,8 +80,10 @@ export function ThemeColourPickerInput(props: StringInputProps) {
   const tone = sectionPath ? headingTone(section) : undefined
   const parent = useFormValue(path.slice(0, -1)) as { hex?: string } | undefined
   const current = typeof value === 'string' && value !== '' ? value : 'inherit'
-  const check = themeColourContrast(current, parent?.hex, tone, usage)
-  const overPicture = Boolean(section?.style?.image?.asset)
+  const { colours, custom, ready } = useBrandColours()
+  const glass = schemaType.options?.themeColourRows ? glassRowsStrength(section) : null
+  const check = themeColourContrast(current, parent?.hex, tone, usage, { site: colours, glass })
+  const overPicture = !glass && Boolean(section?.style?.image?.asset)
 
   return (
     <Stack gap={3}>
@@ -92,7 +111,7 @@ export function ThemeColourPickerInput(props: StringInputProps) {
               }}
             >
               <Flex align="center" gap={2}>
-                <Swatch colour={option.value} hex={parent?.hex} tone={tone} />
+                <Swatch colour={option.value} hex={parent?.hex} tone={tone} site={colours} />
                 <Text size={1}>{option.title}</Text>
               </Flex>
             </Button>
@@ -108,11 +127,20 @@ export function ThemeColourPickerInput(props: StringInputProps) {
             {check.pass
               ? `${usage === 'text' ? 'Readable' : 'Clear'} on this section’s background.`
               : `Needs ${check.required}:1 on this section’s background. Pick another colour, or a different background.`}
-            {overPicture
-              ? ' Measured on the background colour; check it over the picture too.'
-              : ''}
+            {glass
+              ? ' Measured on the glass, over the lightest or darkest part of a photo.'
+              : overPicture
+                ? ' Measured on the background colour; check it over the picture too.'
+                : ''}
           </Text>
         </Flex>
+      ) : null}
+      {ready ? (
+        <Text size={1} muted>
+          {custom
+            ? 'Swatches and contrast use this site’s Brand colours (Design settings).'
+            : 'Swatches and contrast use the default colours: Design › Brand colours has nothing changed.'}
+        </Text>
       ) : null}
     </Stack>
   )

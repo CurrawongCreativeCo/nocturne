@@ -1,6 +1,6 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { OFFERED_GRADIENTS } from '@/config/heading-gradients'
 
@@ -247,6 +247,9 @@ describe('headingText type', () => {
   })
 })
 
+// Design settings with nothing set: the default colours and no Brand gradients.
+const plainClient = () => ({ fetch: () => Promise.resolve(null) })
+
 describe('headingField', () => {
   const field = headingField({
     name: 'heading',
@@ -287,15 +290,17 @@ describe('headingField', () => {
   it("warns about contrast on the section's tone, or the default tone when the style is unset", async () => {
     expect(contrast.level).toBe('warning')
     const green = words('shine', 'gradient')
-    expect(await contrast.run(green, { parent: { style: { tone: 'surface' } } })).toBe(true)
-    expect(await contrast.run(green, { parent: { style: { tone: 'accent' } } })).toEqual(
-      expect.stringContaining('hard to read'),
-    )
+    expect(
+      await contrast.run(green, { getClient: plainClient, parent: { style: { tone: 'surface' } } }),
+    ).toBe(true)
+    expect(
+      await contrast.run(green, { getClient: plainClient, parent: { style: { tone: 'accent' } } }),
+    ).toEqual(expect.stringContaining('hard to read'))
     // No style: the hero starts on the inverse tone, where this gradient also fails.
-    expect(await contrast.run(green, { parent: {} })).toEqual(
+    expect(await contrast.run(green, { getClient: plainClient, parent: {} })).toEqual(
       expect.stringContaining('hard to read'),
     )
-    expect(await contrast.run(words('plain'), { parent: {} })).toBe(true)
+    expect(await contrast.run(words('plain'), { getClient: plainClient, parent: {} })).toBe(true)
   })
 
   const phrase = (def: Record<string, unknown>) => [
@@ -307,19 +312,27 @@ describe('headingField', () => {
 
   it('warns about a custom colour that is hard to read, naming it', async () => {
     const pale = phrase({ gradient: 'custom', stops: ['#102030', '#ffff99'] })
-    const message = await contrast.run(pale, { parent: { style: { tone: 'surface' } } })
+    const message = await contrast.run(pale, {
+      getClient: plainClient,
+      parent: { style: { tone: 'surface' } },
+    })
     expect(message).toEqual(expect.stringContaining('Custom gradient'))
     expect(message).toEqual(expect.stringContaining('#ffff99'))
     const dark = phrase({ gradient: 'custom', stops: ['#102030', '#003366'] })
-    expect(await contrast.run(dark, { parent: { style: { tone: 'surface' } } })).toBe(true)
+    expect(
+      await contrast.run(dark, { getClient: plainClient, parent: { style: { tone: 'surface' } } }),
+    ).toBe(true)
   })
 
   it('reads a Brand colours gradient from Design settings, only when one is picked', async () => {
     let asked = 0
     const getClient = () => ({
-      fetch: () => {
-        asked++
-        return Promise.resolve([{ name: 'Pale dawn', stops: ['#ffffcc', '#ffffff'] }])
+      fetch: (query: string) => {
+        if (query.includes('gradients')) {
+          asked++
+          return Promise.resolve([{ name: 'Pale dawn', stops: ['#ffffcc', '#ffffff'] }])
+        }
+        return Promise.resolve(null)
       },
     })
     const named = phrase({ gradient: 'brand-colours:pale-dawn' })
@@ -328,5 +341,22 @@ describe('headingField', () => {
     expect(asked).toBe(1)
     await contrast.run(words('plain'), { getClient, parent: {} })
     expect(asked).toBe(1)
+  })
+
+  it("measures against the site's Brand colours, not the defaults", async () => {
+    const brand = phrase({ treatment: 'brand' })
+    const style = { style: { tone: 'surface' } }
+    // The default Primary reads well on the page background; a pale Primary does not.
+    expect(await contrast.run(brand, { getClient: plainClient, parent: style })).toBe(true)
+    // The Studio shares Design settings for a few seconds; look again after that.
+    vi.useFakeTimers({ toFake: ['Date'], now: Date.now() + 60_000 })
+    const paleClient = () => ({
+      fetch: (query: string) =>
+        Promise.resolve(query.includes('gradients') ? null : { primary: '#ffd200' }),
+    })
+    expect(await contrast.run(brand, { getClient: paleClient, parent: style })).toEqual(
+      expect.stringContaining('hard to read'),
+    )
+    vi.useRealTimers()
   })
 })

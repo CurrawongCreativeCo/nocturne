@@ -18,6 +18,10 @@ you start a release.
 
 ## [Unreleased]
 
+### Changed
+
+- **Colour checks use the site's Brand colours.** The element colour swatches and contrast badges (every `themeColourField`, including Design › Service categories), the Custom colour badge and the heading highlight checks now measure the colours the page draws after Design › Brand colours (Primary, Secondary, Highlight, Appearance, surfaces and inks), not `tokens.json`'s defaults. The picker says which it used. On Glass rows the arrow and icon colours are measured on the glass at its worst, reusing the Glass strength check. Still warnings, never errors. One shared fetch of Design settings (`fetchBrandColours`, `useBrandColours`); `resolveDesignTokens` moved from `src/features/site/utils` to `src/lib/color` so shared validation can use it. No content migration.
+
 ### Added
 
 - **Service categories** for the Link list profile: _Content › Profile › Service categories_, a native Sanity list of short labels (add, edit, drag to reorder, remove; **Show the categories** hides them without deleting). The page draws them in a row under the name with drawn separators (Bullet, Middle dot, Line, Diamond or None) that never start or end a line, in a real `<ul>` with `aria-hidden` separators. Agency-only _Design › Service categories_: separator, phone layout (wrap or one per line), size, weight, capitals, spacing, and separate category and separator colours through `themeColourField` (separators default to Primary). New shared `InlineList` (`src/components/ui/inline-list.tsx`) and `src/lib/sanity/inline-list-options.ts`. New optional fields `profile.categories`, `profile.categoriesVisibility` and `categoryDesign`; run `npm run typegen`. Studio suggests moving a typed list ("Bodywork • Breathwork") out of the bio, and the page leaves out a bio's first paragraph when it exactly repeats the categories. No migration. See the README's _Link list_.

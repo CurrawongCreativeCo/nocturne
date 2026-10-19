@@ -15,6 +15,7 @@ import { listsCategories, looksLikeTypedCategories, plainTextParagraphs } from '
 import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
@@ -608,11 +609,13 @@ export const linkList = defineType({
         validation: (rule) => [
           rule.required(),
           rule
-            .custom((value, { parent }) => {
+            .custom(async (value, { parent, getClient }) => {
               const section = parent as { style?: { tone?: string } } | undefined
+              // The glass is made from the site's colours, so a changed Brand colour changes the verdict.
+              const { colours } = await fetchBrandColours(getClient({ apiVersion: '2025-01-01' }))
               return (
-                glassContrastProblem({ tone: section?.style?.tone, strength: value })?.message ??
-                true
+                glassContrastProblem({ tone: section?.style?.tone, strength: value, site: colours })
+                  ?.message ?? true
               )
             })
             .warning(),

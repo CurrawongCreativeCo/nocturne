@@ -7,7 +7,7 @@ import { segmentsToSlug } from '@/config/paths'
 import { getPage, getPageStaticParams } from '@/features/pages/api/get-page'
 import { OG_TITLE_MAX_LINES, ogTitleFontSize } from '@/features/pages/utils/og-title'
 import { getSettings } from '@/features/site/api/get-settings'
-import { resolveDesignTokens } from '@/features/site/utils/resolve-design-tokens'
+import { resolveDesignTokens } from '@/lib/color/resolve-design-tokens'
 import { PUBLISHED } from '@/lib/sanity/live'
 
 /**
