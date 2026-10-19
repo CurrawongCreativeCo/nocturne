@@ -1,6 +1,16 @@
 import { defineField, type ConditionalPropertyCallback } from 'sanity'
 
 import {
+  GLOW_COLOUR_CHOICES,
+  GLOW_LEVELS,
+  GLOW_TARGETS,
+  GLOW_TARGET_TITLES,
+  GLOW_TITLES,
+  SHADOW_DESCRIPTIONS,
+  SHADOW_LEVELS,
+  SHADOW_TITLES,
+} from '@/lib/sanity/depth-options'
+import {
   INLINE_CASES,
   INLINE_CASE_TITLES,
   INLINE_COLOUR_CHOICES,
@@ -38,6 +48,7 @@ import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
   linkArrowThumbnails,
+  shadowThumbnails,
   socialStyleThumbnails,
 } from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
 import {
@@ -51,7 +62,8 @@ import { defaultLinkArrow, usesArrow } from '../../utils/link-list'
 
 /**
  * The Link list's own Design options (agency only, like the rest of Design), in four boxes above the
- * shared Background and Animation: Profile, Service categories, Links and Social icons. Each starts with one or two
+ * shared Background and Animation: Profile, Service categories, Links, Social icons, Dividers and a
+ * collapsed Depth and glow. Each starts with one or two
  * picture or radio choices; the colour overrides sit in a collapsed "Colours" inside each box, and
  * every option that depends on another is shown only once it applies. Everything empty is the look
  * the section always had (link-list-parts.tsx resolves the defaults).
@@ -79,6 +91,7 @@ const borderIs =
     !kinds.includes((parent as ProfileDesign | undefined)?.border ?? 'none')
 
 interface Section {
+  profile?: { image?: { asset?: unknown }; categories?: unknown[]; bio?: string }
   variant?: string
   rowStyle?: string
   showArrows?: boolean
@@ -89,6 +102,17 @@ interface Section {
 /** The Link list a field of one of these boxes sits in (the path is section › box › field). */
 const sectionOf = (context: { document?: unknown; path?: unknown }) =>
   sectionAtStylePath(context.document, context.path as never) as Section | undefined
+
+/** The layout a section draws; unset is Minimal. */
+const layoutOf = (variant: string | undefined) => variant ?? 'stacked'
+
+/** The glow's options only show once a glow is chosen. */
+const glowOff: ConditionalPropertyCallback = ({ parent }) =>
+  ((parent as { glow?: string } | undefined)?.glow ?? 'off') === 'off'
+
+/** The social dividers only apply while the section shows social icons. */
+const noSocials: ConditionalPropertyCallback = (context) =>
+  sectionOf(context)?.socialSource === 'none'
 
 const agencyOnly =
   (own?: ConditionalPropertyCallback): ConditionalPropertyCallback =>
@@ -386,6 +410,123 @@ export const linkListDesignFields = [
             (section?.variant ?? 'stacked') === 'stacked' && section?.rowStyle === 'glass'
           return style === 'plain' || glassRows
         },
+      }),
+    ],
+  }),
+  defineField({
+    name: 'dividerDesign',
+    title: 'Dividers',
+    type: 'object',
+    group: 'design',
+    description:
+      'Decorative rules, each with its own look: a line, a fading line or dots, with an icon, a few words or a picture in the middle. Each is only drawn between two things that show.',
+    hidden: agencyOnly(),
+    options: { collapsible: true, collapsed: false },
+    fields: [
+      defineField({
+        name: 'afterCategories',
+        title: 'Between the categories and the bio',
+        type: 'decorativeDivider',
+        hidden: (context) => {
+          const profile = sectionOf(context)?.profile
+          return !profile?.categories?.length || !profile.bio
+        },
+      }),
+      defineField({
+        name: 'afterProfile',
+        title: 'After the profile',
+        type: 'decorativeDivider',
+      }),
+      defineField({
+        name: 'aboveSocial',
+        title: 'Above the social icons',
+        description: 'Words here make a heading for the icons, e.g. “Stay connected”.',
+        type: 'decorativeDivider',
+        hidden: noSocials,
+      }),
+      defineField({
+        name: 'belowSocial',
+        title: 'Below the social icons',
+        description: 'Not drawn when the icons are the last thing in the list.',
+        type: 'decorativeDivider',
+        hidden: noSocials,
+      }),
+    ],
+  }),
+  defineField({
+    name: 'depthDesign',
+    title: 'Depth and glow',
+    type: 'object',
+    group: 'design',
+    description:
+      'How far the links, social buttons and picture lift off the page, and an optional soft glow in a theme colour. Leave a shadow empty for the layout’s own.',
+    hidden: agencyOnly(),
+    options: { collapsible: true, collapsed: true },
+    fields: [
+      presetField({
+        name: 'linkShadow',
+        title: 'Link shadow',
+        description: 'One choice for every link. Empty is the layout’s own.',
+        required: false,
+        initialValue: null,
+        options: SHADOW_LEVELS.map((value) => ({
+          value,
+          title: SHADOW_TITLES[value],
+          description: SHADOW_DESCRIPTIONS[value],
+          thumbnail: shadowThumbnails[value],
+        })),
+        // Editorial links are a ruled list with no surface to lift.
+        hidden: (context) => layoutOf(sectionOf(context)?.variant) === 'editorial',
+      }),
+      defineField({
+        name: 'socialShadow',
+        title: 'Social button shadow',
+        type: 'string',
+        description: 'Only for the shaped icon styles. Empty is the style’s own.',
+        options: radio(SHADOW_LEVELS, SHADOW_TITLES),
+        hidden: (context) => {
+          const section = sectionOf(context)
+          return (
+            section?.socialSource === 'none' ||
+            (section?.socialDesign?.style ?? 'plain') === 'plain'
+          )
+        },
+      }),
+      defineField({
+        name: 'pictureShadow',
+        title: 'Picture shadow',
+        type: 'string',
+        description:
+          'Follows the picture’s own outline, so a round photo or a transparent logo gets no square shadow. Empty is none.',
+        options: radio(SHADOW_LEVELS, SHADOW_TITLES),
+        hidden: (context) => !sectionOf(context)?.profile?.image?.asset,
+      }),
+      defineField({
+        name: 'glow',
+        title: 'Glow',
+        type: 'string',
+        description: 'A soft halo around what you tick below. Strongest on a dark background.',
+        options: radio(GLOW_LEVELS, GLOW_TITLES),
+      }),
+      defineField({
+        name: 'glowTargets',
+        title: 'Glow around',
+        type: 'array',
+        of: [{ type: 'string' }],
+        description: 'The links while nothing is ticked.',
+        options: {
+          list: GLOW_TARGETS.map((value) => ({ value, title: GLOW_TARGET_TITLES[value] })),
+          layout: 'grid',
+        },
+        hidden: glowOff,
+      }),
+      themeColourField({
+        name: 'glowColour',
+        title: 'Glow colour',
+        usage: 'graphic',
+        inherits: 'Primary',
+        choices: GLOW_COLOUR_CHOICES,
+        hidden: glowOff,
       }),
     ],
   }),

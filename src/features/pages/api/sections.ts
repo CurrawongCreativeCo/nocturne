@@ -3,6 +3,7 @@ import {
   eventCardFields,
   eventLastRelevant,
   formFields,
+  decorativeDividerFields,
   heroSupportingFields,
   imageDesignFields,
   imageFields,
@@ -377,6 +378,20 @@ export const linkListFragment = /* groq */ `
       position,
       iconColour { colour, hex },
       background { colour, hex }
+    },
+    dividerDesign {
+      afterCategories { ${decorativeDividerFields} },
+      afterProfile { ${decorativeDividerFields} },
+      aboveSocial { ${decorativeDividerFields} },
+      belowSocial { ${decorativeDividerFields} }
+    },
+    depthDesign {
+      linkShadow,
+      socialShadow,
+      pictureShadow,
+      glow,
+      glowTargets,
+      glowColour { colour, hex }
     },
     socialSource,
     "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),

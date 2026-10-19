@@ -2802,6 +2802,36 @@ overlay, plus the unset defaults on a light and a dark tone). The fixture's `des
 colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
 the real guard for pictures is the Studio warning and the overlay values above.
 
+### Decorative dividers
+
+A decorative divider is a small rule _inside_ a section, between two parts of its content: a line, a fading line or three
+dots, with an optional middle between two lines: a diamond, an icon (the badge icon set), a few words ("Stay connected")
+or a small picture. Not to be confused with [Section dividers](#section-dividers), the shaped edge between two sections.
+
+| Option              | Choices                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Divider             | None (default), Line, Fading line, Three dots, as pictures                                                  |
+| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals, letter-spaced), Picture     |
+| Size in the middle  | Small, Medium (default), Large, for an icon, the words or a picture                                         |
+| Length              | Short, Medium (default), Long, Full width: the whole rule, or each line beside a middle                     |
+| Thickness           | Thin (default), Bold                                                                                        |
+| Colours (collapsed) | Line colour (Inherit is the line colour) and Colour in the middle (Inherit follows the lines); theme or hex |
+
+Each option appears only once it applies (three dots take no middle and no length). A fading line fades towards its outer
+ends around a middle. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
+middle are read like any text. A picture is a small mark with a transparent background, shown without a blurred
+preview (no alt text: it is decoration). CSS and server components only, no JavaScript.
+
+- **Code.** The schema type is `decorativeDivider` (`src/lib/sanity/schema/decorative-divider.ts`, registered in
+  `sharedSchemaTypes`), queried with `decorativeDividerFields` (`src/lib/sanity/fragments.ts`), resolved by
+  `resolveDivider` (`src/lib/sanity/divider-options.ts`) and drawn by `DecorativeDivider`
+  (`src/components/ui/decorative-divider.tsx`).
+- **Adding one to another section.** Add a field `{ name: 'divider', type: 'decorativeDivider' }` to the section's Design
+  group (agency only), project it as `divider { ${decorativeDividerFields} }`, run `npm run typegen`, and render
+  `resolveDivider(data.divider)` with `DecorativeDivider` between the parts it divides, dropping their margin on that
+  side. Empty is None, so nothing changes until a divider is chosen. Only the Link list offers dividers so far (build
+  plan task 151 lists the candidates).
+
 ### Section dividers
 
 A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch or a layered wave. The
@@ -3220,7 +3250,7 @@ page without deleting them; hidden categories never leave the Content Lake. Stud
   repeats them gets a warning to delete the line. No migration script: the fields are optional, and only the editor can tell
   a typed list of services from a sentence that happens to use a bullet.
 
-**Design.** The Link list's Design tab (agency only) has four boxes above the shared Background and Animation. Everything
+**Design.** The Link list's Design tab (agency only) has five boxes and a collapsed **Depth and glow** above the shared Background and Animation. Everything
 empty is the look the section always had, so no content needs migrating. The colour overrides sit in a collapsed **Colours**
 inside each box, and every option that depends on another only shows once it applies.
 
@@ -3231,6 +3261,24 @@ inside each box, and every option that depends on another only shows once it app
 | Links              | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
+- **Dividers**: a divider of its own at each of four positions: **Between the categories and the bio** (shown once
+  both exist), **After the profile**, **Above the social icons** (words here make a heading for the icons, such as "Stay
+  connected") and **Below the social icons**. Each is the shared `decorativeDivider` (see
+  [Decorative dividers](#decorative-dividers)). A divider only sits between two parts that are drawn: never first or
+  last, never for social icons that aren't shown, and where two would meet (after the profile, right above the icons)
+  the later one stays (`linkListParts` in `src/lib/sanity/divider-options.ts`). The part beside a divider drops its own
+  margin on that side, so the spacing never doubles.
+- **Depth and glow** (collapsed; empty is each layout's own look, so nothing changes until a level is chosen).
+  **Link shadow** Flat, Soft, Raised or Floating, as pictures, for every link (not offered for Editorial, whose links are a
+  ruled list); **Social button shadow** for the shaped icon styles; **Picture shadow**, drawn as a filter so it follows a
+  round crop, a ring, a frame or a transparent logo instead of a square box. **Glow** Off, Soft or Strong: a soft halo
+  around the ticked parts (the links while nothing is ticked) in a theme colour (Inherit is Primary). A level replaces
+  the element's own shadow and keeps the ring the layouts use as a border; a glow on its own is added to the element's
+  own shadow (on Glass rows, the glass's). Values: `shadow.floating` and the optional `depth` group in
+  `src/styles/tokens.json` (picture shadows, glow size and strength); choices and defaults in
+  `src/lib/sanity/depth-options.ts` (`resolveDepth`), which is not tied to the Link list so other sections can reuse it.
+  CSS only, no JavaScript. Browsers drop shadows in forced-colours mode, where the rings still mark each link. Glow is
+  decorative: it never carries meaning, and is clearest on a dark tone.
 - **Colours** are one shared field (`themeColourField`, `src/lib/sanity/schema/theme-colour.ts`): Inherit, Text, Muted text,
   Primary, Secondary, Highlight or Custom (a hex field appears only then). Each element offers only the choices that suit it.
   Every choice but Custom is a token, so it follows the section's tone; the site draws it with `themeColourCss`, which ignores

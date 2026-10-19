@@ -51,6 +51,7 @@ export function ProfileImage({
   colour,
   preload,
   className = '',
+  style,
 }: {
   image: SanityImageData | null | undefined
   design: ResolvedProfileImage
@@ -58,8 +59,10 @@ export function ProfileImage({
   /** The ring or frame colour, as CSS (a theme-colour field); Primary when unset. */
   colour?: string
   preload?: boolean
-  /** Placement classes: alignment and the space below. */
+  /** Placement classes: alignment and the space below (and a Depth and glow filter). */
   className?: string
+  /** Custom properties for those classes, on the outer element. */
+  style?: CSSProperties
 }) {
   if (!image?.asset) return null
   const { size, shape, border } = design
@@ -86,6 +89,7 @@ export function ProfileImage({
         data-profile-image={shape}
         data-profile-border="frame"
         className={`relative block ${scale.box[size]} ${className}`.trim()}
+        style={style}
       >
         {/* The frame's middle holds the picture: it sits 14% in from each edge. */}
         <span className={`absolute inset-[14%] overflow-hidden ${radius}`}>
@@ -101,7 +105,8 @@ export function ProfileImage({
 
   if (border?.kind === 'ring') {
     const offset = border.widthPx + border.gapPx
-    const style = {
+    const ringStyle = {
+      ...style,
       '--ring-width': `${border.widthPx}px`,
       '--ring-offset': `${offset}px`,
       '--ring-fill': border.gradient ?? colour ?? 'var(--color-accent)',
@@ -115,7 +120,7 @@ export function ProfileImage({
         data-profile-image={shape}
         data-profile-border={border.gradient ? 'gradient' : 'line'}
         className={`relative block w-fit p-(--ring-offset) ${className}`.trim()}
-        style={style}
+        style={ringStyle}
       >
         {picture()}
         <span aria-hidden="true" className="image-ring" />
@@ -124,7 +129,7 @@ export function ProfileImage({
   }
 
   return (
-    <span data-profile-image={shape} className={`block w-fit ${className}`.trim()}>
+    <span data-profile-image={shape} className={`block w-fit ${className}`.trim()} style={style}>
       {picture()}
     </span>
   )

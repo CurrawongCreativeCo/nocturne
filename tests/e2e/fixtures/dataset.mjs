@@ -111,6 +111,11 @@ const UPDATED = '2026-10-12T00:00:00Z'
 const IMAGE_ASSET_ID = 'image-0123456789abcdef0123456789abcdef01234567-1200x630-png'
 const image = (alt) => ({ _type: 'image', alt, asset: ref(IMAGE_ASSET_ID) })
 // A small transparent pattern (tests/e2e/section-background-image.spec.ts); the spec serves its pixels.
+// Two pictures with a blur preview (tests/e2e/image-placeholder.spec.ts): a transparent logo and an opaque photo.
+const LOGO_ASSET_ID = 'image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-400x400-png'
+const PHOTO_ASSET_ID = 'image-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-800x600-jpg'
+const LQIP =
+  'data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
 const PATTERN_ASSET_ID = 'image-fedcba9876543210fedcba9876543210fedcba98-160x120-png'
 const pattern = () => ({ _type: 'image', alt: '', asset: ref(PATTERN_ASSET_ID) })
 
@@ -1062,6 +1067,18 @@ export const documents = [
     _type: 'sanity.imageAsset',
     url: 'https://cdn.sanity.io/images/test/test/0123456789abcdef0123456789abcdef01234567-1200x630.png',
     metadata: { dimensions: { width: 1200, height: 630 } },
+  },
+  {
+    _id: LOGO_ASSET_ID,
+    _type: 'sanity.imageAsset',
+    url: 'https://cdn.sanity.io/images/test/test/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-400x400.png',
+    metadata: { lqip: LQIP, hasAlpha: true, dimensions: { width: 400, height: 400 } },
+  },
+  {
+    _id: PHOTO_ASSET_ID,
+    _type: 'sanity.imageAsset',
+    url: 'https://cdn.sanity.io/images/test/test/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-800x600.jpg',
+    metadata: { lqip: LQIP, hasAlpha: false, dimensions: { width: 800, height: 600 } },
   },
   {
     _id: PATTERN_ASSET_ID,
@@ -3571,6 +3588,222 @@ documents.push(
           }),
           linkItem('d-about', 'About the studio', internal('page-about'), { icon: 'star' }),
         ],
+      },
+    ],
+  },
+  {
+    // Decorative dividers (tests/e2e/link-list-dividers.spec.ts), after a wellness client's mock-ups:
+    // a short gold line between the categories and the bio, a sun between two lines after the
+    // profile, and "Stay connected" between two lines above the icons (the icons sit below the
+    // links). Then a fading Highlight rule with a diamond around icons above the links (Above meets
+    // After the profile, so only Above stays), and dividers asked for with no icons to divide.
+    _id: 'page-link-dividers',
+    _type: 'page',
+    title: 'Link dividers',
+    slug: { _type: 'slug', current: 'link-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'div-mockup',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: {
+          _type: 'object',
+          name: 'Mock-up dividers',
+          categories: ['Move', 'Breathe', 'Feel', 'Be'],
+          bio: 'A welcoming space for therapeutic bodywork.',
+        },
+        socialDesign: { _type: 'object', position: 'below' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        dividerDesign: {
+          _type: 'object',
+          afterCategories: {
+            _type: 'decorativeDivider',
+            style: 'line',
+            width: 'short',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+          },
+          afterProfile: {
+            _type: 'decorativeDivider',
+            style: 'line',
+            width: 'long',
+            thickness: 'bold',
+            centre: 'icon',
+            icon: 'sun',
+            centreSize: 'large',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+          },
+          aboveSocial: {
+            _type: 'decorativeDivider',
+            style: 'line',
+            width: 'full',
+            centre: 'text',
+            text: 'Stay connected',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+            centreColour: { _type: 'object', colour: 'ink' },
+          },
+          belowSocial: { _type: 'decorativeDivider', style: 'dots' },
+        },
+        links: [linkItem('div-a', 'First link', external('https://example.com/a'))],
+      },
+      {
+        _key: 'div-above',
+        _type: 'linkList',
+        variant: 'cards',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'start', tone: 'inverse' },
+        profile: { _type: 'object', name: 'Fading dividers' },
+        socialSource: 'custom',
+        socialLinks: [
+          { _key: 'fb', _type: 'socialLink', platform: 'facebook', url: 'https://facebook.com/x' },
+        ],
+        dividerDesign: {
+          _type: 'object',
+          afterProfile: { _type: 'decorativeDivider', style: 'dots' },
+          aboveSocial: {
+            _type: 'decorativeDivider',
+            style: 'fade',
+            width: 'full',
+            centre: 'diamond',
+            lineColour: { _type: 'object', colour: 'highlight' },
+          },
+          belowSocial: { _type: 'decorativeDivider', style: 'line', width: 'medium' },
+        },
+        links: [linkItem('div-b', 'Second link', external('https://example.com/b'))],
+      },
+      {
+        _key: 'div-none',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: { _type: 'object', name: 'No icons to divide' },
+        socialSource: 'none',
+        dividerDesign: {
+          _type: 'object',
+          aboveSocial: { _type: 'decorativeDivider', style: 'line' },
+          belowSocial: { _type: 'decorativeDivider', style: 'line' },
+        },
+        links: [linkItem('div-c', 'Third link', external('https://example.com/c'))],
+      },
+    ],
+  },
+  {
+    // The blur preview is only for opaque pictures (tests/e2e/image-placeholder.spec.ts): a transparent
+    // logo as the profile picture and as a wordmark, and an opaque photo as a picture.
+    _id: 'page-image-placeholders',
+    _type: 'page',
+    title: 'Image placeholders',
+    slug: { _type: 'slug', current: 'image-placeholders' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'ph-logo',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: {
+          _type: 'object',
+          name: 'Transparent logo',
+          image: { _type: 'image', alt: 'Logo', asset: ref(LOGO_ASSET_ID) },
+          nameDisplay: 'image',
+          nameImage: { _type: 'image', asset: ref(LOGO_ASSET_ID), size: 'medium' },
+        },
+        socialSource: 'none',
+        links: [linkItem('ph-l', 'Link', external('https://example.com/l'))],
+      },
+      {
+        _key: 'ph-photo',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: {
+          _type: 'object',
+          name: 'Opaque photo',
+          image: { _type: 'image', alt: 'Photo', asset: ref(PHOTO_ASSET_ID) },
+        },
+        socialSource: 'none',
+        links: [linkItem('ph-p', 'Link', external('https://example.com/p'))],
+      },
+    ],
+  },
+  {
+    // Depth and glow (tests/e2e/link-list-depth.spec.ts): Cards with floating links, raised social
+    // buttons and a raised picture with a Highlight glow on a dark tone; Glass rows with only a glow
+    // (the glass keeps its own shadow); and a Minimal list with nothing chosen (unchanged).
+    _id: 'page-link-depth',
+    _type: 'page',
+    title: 'Link depth',
+    slug: { _type: 'slug', current: 'link-depth' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'depth-cards',
+        _type: 'linkList',
+        variant: 'cards',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center', tone: 'inverse' },
+        profile: { _type: 'object', name: 'Floating cards', image: image('Logo') },
+        socialDesign: { _type: 'object', style: 'circle' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        depthDesign: {
+          _type: 'object',
+          linkShadow: 'floating',
+          socialShadow: 'raised',
+          pictureShadow: 'raised',
+          glow: 'soft',
+          glowTargets: ['links', 'picture'],
+          glowColour: { _type: 'object', colour: 'highlight' },
+        },
+        links: [
+          linkItem('depth-a', 'Floating link', external('https://example.com/a'), { icon: 'sun' }),
+        ],
+      },
+      {
+        _key: 'depth-glass',
+        _type: 'linkList',
+        variant: 'stacked',
+        rowStyle: 'glass',
+        glassStrength: 'strong',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center', image: image(''), overlay: 'none' },
+        profile: { _type: 'object', name: 'Glowing glass' },
+        socialSource: 'none',
+        depthDesign: { _type: 'object', glow: 'strong' },
+        links: [linkItem('depth-g', 'Glass link', external('https://example.com/g'))],
+      },
+      {
+        _key: 'depth-plain',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: { _type: 'object', name: 'Nothing chosen' },
+        socialSource: 'none',
+        links: [linkItem('depth-p', 'Plain link', external('https://example.com/p'))],
       },
     ],
   },

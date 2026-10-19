@@ -3,6 +3,7 @@ import type { SchemaTypeDefinition } from 'sanity'
 import { badgeRow } from './badge-row'
 import { blockContent } from './block-content'
 import { cta } from './cta'
+import { decorativeDivider } from './decorative-divider'
 import { headingText } from './heading-text'
 import { imageDesign } from './image-design'
 import { launchDate } from './launch-date'
@@ -26,4 +27,5 @@ export const sharedSchemaTypes: SchemaTypeDefinition[] = [
   logoRow,
   launchDate,
   imageDesign,
+  decorativeDivider,
 ]

@@ -7,15 +7,30 @@
  *   `image{ ${imageFields}, caption }`
  */
 
-/** Everything <SanityImage /> needs: crop/hotspot for framing, dimensions + LQIP for layout/blur. */
+/** Everything <SanityImage /> needs: crop/hotspot for framing, dimensions + LQIP for layout/blur, `hasAlpha` so a transparent picture gets no blur. */
 export const imageFields = /* groq */ `
   alt,
   crop,
   hotspot,
   asset->{
     _id,
-    metadata { lqip, dimensions { width, height } }
+    metadata { lqip, hasAlpha, dimensions { width, height } }
   }
+`
+
+/** A `decorativeDivider` (schema: lib/sanity/schema/decorative-divider.ts): project it as `divider { ${decorativeDividerFields} }`. */
+export const decorativeDividerFields = /* groq */ `
+  style,
+  width,
+  thickness,
+  centre,
+  text,
+  textCase,
+  icon,
+  centreSize,
+  image { ${imageFields} },
+  lineColour { colour, hex },
+  centreColour { colour, hex }
 `
 
 /**

@@ -94,3 +94,18 @@ describe('design token generator', () => {
     expect(oklchToRgb('oklch(0.55 0.2 264)').map(Math.round)).toEqual(hexToRgb('#3266e4'))
   })
 })
+
+describe('depth tokens', () => {
+  it('writes the picture shadows and glow sizes to :root, and the floating box shadow to the theme', () => {
+    const css = buildCss(readTokens())
+    expect(css).toMatch(/:root \{[^}]*--depth-picture-raised: drop-shadow\(/)
+    expect(css).toContain('--depth-glow-soft: 0 0 18px 0;')
+    expect(css).toContain('--depth-glow-strong-strength: 55%;')
+    expect(css).toContain('--shadow-floating:')
+  })
+
+  it('falls back to the defaults when tokens.json has no depth group', () => {
+    const { depth: _depth, ...tokens } = readTokens()
+    expect(buildCss(tokens)).toContain('--depth-picture-soft: drop-shadow(')
+  })
+})

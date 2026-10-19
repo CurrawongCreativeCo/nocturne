@@ -8,6 +8,7 @@ import {
   LinkListView,
   LinkVisual,
   hasThumbnail,
+  linkShadow,
   type LinkListLayout,
 } from './link-list-parts'
 import { PICTURE } from './stacked'
@@ -16,21 +17,28 @@ import type { SectionProps } from '../../../types'
 // How this section looks without a style. Keep `align` equal to the Cards preset's.
 const DEFAULTS = { container: 'max-w-3xl', align: 'center' } as const
 
-const CARD = `group flex h-full w-full rounded-card bg-surface p-3 text-left shadow-card ring-1 ring-inset ring-line hover:ring-line-strong ${buttonFeedback}`
+// The shadow is added per link (`linkShadow`), so Depth and glow can replace it.
+const CARD = `group flex h-full w-full rounded-card bg-surface p-3 text-left ring-1 ring-inset ring-line hover:ring-line-strong ${buttonFeedback}`
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
   profile: { picture: PICTURE, name: 'text-h3' },
   listClassName: 'grid gap-4 md:grid-cols-2',
-  renderLink: (link, { thumbnailSize, arrow, arrowStyle, iconStyle }) => {
+  renderLink: (link, context) => {
+    const { thumbnailSize, arrow, arrowStyle, iconStyle } = context
     const large = thumbnailSize === 'large'
+    const depth = linkShadow(context, 'card', 'shadow-card')
     // The picture, or a tile holding the icon, so cards in a row stay the same shape.
     const picture = hasThumbnail(link) || link.item.icon
     return (
-      <LinkItem link={link} className={link.large ? 'md:col-span-2' : undefined}>
+      <LinkItem
+        link={link}
+        className={link.large ? 'md:col-span-2' : undefined}
+        style={depth.style}
+      >
         <SanityLink
           link={link.link}
-          className={`${CARD} ${large ? 'flex-col gap-3' : 'items-center gap-4'} ${link.large ? 'ring-2! ring-ink!' : ''}`}
+          className={`${CARD} ${depth.className} ${large ? 'flex-col gap-3' : 'items-center gap-4'} ${link.large ? 'ring-2! ring-ink!' : ''}`}
         >
           {picture && (
             <span

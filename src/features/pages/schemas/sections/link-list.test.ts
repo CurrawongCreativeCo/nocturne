@@ -152,6 +152,53 @@ describe('Design boxes and conditional fields', () => {
     expect(hidden(field('separatorColour', design), { parent: {} })).toBe(false)
   })
 
+  it('offers depth only where it draws something, and the glow options only with a glow', () => {
+    const depth = field('depthDesign').fields ?? []
+    const at = (name: string, context: Record<string, unknown>) =>
+      hidden(field(name, depth), context)
+    const page = (section: Record<string, unknown>) => ({
+      document: { pageBuilder: [{ _key: 's', _type: 'linkList', ...section }] },
+      path: ['pageBuilder', { _key: 's' }, 'depthDesign', 'field'],
+    })
+    expect(at('linkShadow', page({ variant: 'editorial' }))).toBe(true)
+    expect(at('linkShadow', page({ variant: 'cards' }))).toBe(false)
+    expect(at('socialShadow', page({}))).toBe(true)
+    expect(at('socialShadow', page({ socialDesign: { style: 'circle' } }))).toBe(false)
+    expect(at('pictureShadow', page({}))).toBe(true)
+    expect(at('pictureShadow', page({ profile: { image: { asset: { _ref: 'a' } } } }))).toBe(false)
+    expect(at('glowColour', { parent: {} })).toBe(true)
+    expect(at('glowTargets', { parent: { glow: 'soft' } })).toBe(false)
+  })
+
+  it('offers a divider per position, each only where it can be drawn', () => {
+    const boxes = field('dividerDesign').fields ?? []
+    const page = (section: Record<string, unknown>) => ({
+      document: { pageBuilder: [{ _key: 's', _type: 'linkList', ...section }] },
+      path: ['pageBuilder', { _key: 's' }, 'dividerDesign', 'field'],
+    })
+    const at = (name: string, section: Record<string, unknown>) =>
+      hidden(field(name, boxes), page(section))
+    expect(boxes.map((box) => box.name)).toEqual([
+      'afterCategories',
+      'afterProfile',
+      'aboveSocial',
+      'belowSocial',
+    ])
+    expect(at('afterCategories', { profile: { categories: ['A'] } })).toBe(true)
+    expect(at('afterCategories', { profile: { categories: ['A'], bio: 'Hi' } })).toBe(false)
+    expect(at('aboveSocial', { socialSource: 'none' })).toBe(true)
+    expect(at('belowSocial', { socialSource: 'business' })).toBe(false)
+    expect(hidden(field('dividerDesign'), { currentUser: { roles: [{ name: 'editor' }] } })).toBe(
+      true,
+    )
+  })
+
+  it('keeps Depth and glow from clients', () => {
+    expect(hidden(field('depthDesign'), { currentUser: { roles: [{ name: 'editor' }] } })).toBe(
+      true,
+    )
+  })
+
   it('keeps the older arrow switch for saved content, out of sight', () => {
     expect(field('showArrows').hidden).toBe(true)
   })
