@@ -170,6 +170,21 @@ describe('Design boxes and conditional fields', () => {
     expect(at('glowTargets', { parent: { glow: 'soft' } })).toBe(false)
   })
 
+  it('shows the divider options only once a divider is chosen, and no width for dots', () => {
+    const divider = field('dividerDesign').fields ?? []
+    const at = (name: string, parent: Record<string, unknown>) =>
+      hidden(field(name, divider), { parent })
+    expect(at('placements', {})).toBe(true)
+    expect(at('placements', { style: 'none' })).toBe(true)
+    expect(at('placements', { style: 'line' })).toBe(false)
+    expect(at('colour', { style: 'diamond' })).toBe(false)
+    expect(at('width', { style: 'line' })).toBe(false)
+    expect(at('width', { style: 'dots' })).toBe(true)
+    expect(hidden(field('dividerDesign'), { currentUser: { roles: [{ name: 'editor' }] } })).toBe(
+      true,
+    )
+  })
+
   it('keeps Depth and glow from clients', () => {
     expect(hidden(field('depthDesign'), { currentUser: { roles: [{ name: 'editor' }] } })).toBe(
       true,

@@ -11,6 +11,16 @@ import {
   SHADOW_TITLES,
 } from '@/lib/sanity/depth-options'
 import {
+  DIVIDER_COLOUR_CHOICES,
+  DIVIDER_PLACEMENTS,
+  DIVIDER_PLACEMENT_TITLES,
+  DIVIDER_STYLES,
+  DIVIDER_STYLE_DESCRIPTIONS,
+  DIVIDER_STYLE_TITLES,
+  DIVIDER_WIDTHS,
+  DIVIDER_WIDTH_TITLES,
+} from '@/lib/sanity/divider-options'
+import {
   INLINE_CASES,
   INLINE_CASE_TITLES,
   INLINE_COLOUR_CHOICES,
@@ -47,6 +57,7 @@ import { presetField } from '@/lib/sanity/schema/preset-field'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
+  dividerThumbnails,
   linkArrowThumbnails,
   shadowThumbnails,
   socialStyleThumbnails,
@@ -62,8 +73,8 @@ import { defaultLinkArrow, usesArrow } from '../../utils/link-list'
 
 /**
  * The Link list's own Design options (agency only, like the rest of Design), in four boxes above the
- * shared Background and Animation: Profile, Service categories, Links, Social icons and a collapsed
- * Depth and glow. Each starts with one or two
+ * shared Background and Animation: Profile, Service categories, Links, Social icons, Dividers and a
+ * collapsed Depth and glow. Each starts with one or two
  * picture or radio choices; the colour overrides sit in a collapsed "Colours" inside each box, and
  * every option that depends on another is shown only once it applies. Everything empty is the look
  * the section always had (link-list-parts.tsx resolves the defaults).
@@ -109,6 +120,10 @@ const layoutOf = (variant: string | undefined) => variant ?? 'stacked'
 /** The glow's options only show once a glow is chosen. */
 const glowOff: ConditionalPropertyCallback = ({ parent }) =>
   ((parent as { glow?: string } | undefined)?.glow ?? 'off') === 'off'
+
+/** The divider's options only show once a divider is chosen. */
+const noDivider: ConditionalPropertyCallback = ({ parent }) =>
+  ((parent as { style?: string } | undefined)?.style ?? 'none') === 'none'
 
 const agencyOnly =
   (own?: ConditionalPropertyCallback): ConditionalPropertyCallback =>
@@ -406,6 +421,67 @@ export const linkListDesignFields = [
             (section?.variant ?? 'stacked') === 'stacked' && section?.rowStyle === 'glass'
           return style === 'plain' || glassRows
         },
+      }),
+    ],
+  }),
+  defineField({
+    name: 'dividerDesign',
+    title: 'Dividers',
+    type: 'object',
+    group: 'design',
+    description:
+      'A small decorative rule after the profile or around the social icons. Only drawn between two things that show.',
+    hidden: agencyOnly(),
+    options: { collapsible: true, collapsed: false },
+    fields: [
+      presetField({
+        name: 'style',
+        title: 'Divider',
+        description: 'One look for every divider in this list.',
+        options: DIVIDER_STYLES.map((value) => ({
+          value,
+          title: DIVIDER_STYLE_TITLES[value],
+          description: DIVIDER_STYLE_DESCRIPTIONS[value],
+          thumbnail: dividerThumbnails[value],
+        })),
+        // Empty is None, so existing lists stay as they are.
+        required: false,
+        initialValue: null,
+        defaultValue: () => 'none',
+      }),
+      defineField({
+        name: 'placements',
+        title: 'Where',
+        type: 'array',
+        of: [{ type: 'string' }],
+        description:
+          'After the profile while nothing is ticked. The social ones apply only while social icons show.',
+        options: {
+          list: DIVIDER_PLACEMENTS.map((value) => ({
+            value,
+            title: DIVIDER_PLACEMENT_TITLES[value],
+          })),
+          layout: 'grid',
+        },
+        hidden: noDivider,
+      }),
+      defineField({
+        name: 'width',
+        title: 'Width',
+        type: 'string',
+        description: 'Medium while unset.',
+        options: radio(DIVIDER_WIDTHS, DIVIDER_WIDTH_TITLES),
+        hidden: (context) =>
+          noDivider(context) ||
+          (context.parent as { style?: string } | undefined)?.style === 'dots',
+      }),
+      themeColourField({
+        name: 'colour',
+        title: 'Divider colour',
+        usage: 'graphic',
+        inherits: 'the line colour',
+        choices: DIVIDER_COLOUR_CHOICES,
+        hidden: noDivider,
       }),
     ],
   }),

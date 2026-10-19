@@ -1,5 +1,6 @@
 import { Wireframe } from './wireframe'
 import type { ShadowLevel } from '../../depth-options'
+import type { DividerStyle } from '../../divider-options'
 import type { LinkArrowStyle } from '../../link-arrow-options'
 import type { SocialStyle } from '../../social-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
@@ -119,4 +120,57 @@ export const shadowThumbnails: Record<
   soft: () => <ShadowThumbnail level="soft" />,
   raised: () => <ShadowThumbnail level="raised" />,
   floating: () => <ShadowThumbnail level="floating" />,
+}
+
+/** A profile block above a link row, with the divider style between them. */
+function DividerThumbnail({ style }: { style: DividerStyle }) {
+  const y = 62
+  const rule = { fill: FG, opacity: 0.55 }
+  return (
+    <Wireframe label={`divider-${style}`}>
+      <circle cx={80} cy={22} r={10} style={outline} />
+      <rect x={55} y={38} width={50} height={5} rx={2.5} style={{ fill: FG, opacity: 0.6 }} />
+      {style === 'line' && <rect x={50} y={y} width={60} height={1.5} style={rule} />}
+      {style === 'fade' && (
+        <>
+          <defs>
+            <linearGradient id="divider-fade">
+              <stop offset="0" stopColor={FG} stopOpacity={0} />
+              <stop offset="0.5" stopColor={FG} stopOpacity={0.7} />
+              <stop offset="1" stopColor={FG} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <rect x={40} y={y} width={80} height={1.5} fill="url(#divider-fade)" />
+        </>
+      )}
+      {style === 'dots' &&
+        [72, 80, 88].map((cx) => <circle key={cx} cx={cx} cy={y + 0.75} r={1.8} style={rule} />)}
+      {style === 'diamond' && (
+        <>
+          <rect x={50} y={y} width={25} height={1.5} style={rule} />
+          <rect
+            x={77.5}
+            y={y - 1.75}
+            width={5}
+            height={5}
+            transform={`rotate(45 80 ${y + 0.75})`}
+            style={rule}
+          />
+          <rect x={85} y={y} width={25} height={1.5} style={rule} />
+        </>
+      )}
+      <rect x={20} y={82} width={120} height={22} rx={8} style={outline} />
+    </Wireframe>
+  )
+}
+
+export const dividerThumbnails: Record<
+  DividerStyle,
+  (props: PresetThumbnailProps) => React.JSX.Element
+> = {
+  none: () => <DividerThumbnail style="none" />,
+  line: () => <DividerThumbnail style="line" />,
+  fade: () => <DividerThumbnail style="fade" />,
+  dots: () => <DividerThumbnail style="dots" />,
+  diamond: () => <DividerThumbnail style="diamond" />,
 }

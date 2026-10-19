@@ -2,6 +2,7 @@ import { stegaClean } from 'next-sanity'
 import { Fragment, Suspense, type ReactNode, type CSSProperties } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
+import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { InlineList } from '@/components/ui/inline-list'
 import { PlainText } from '@/components/ui/plain-text'
 import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
@@ -13,7 +14,7 @@ import { SocialLinks } from '@/components/ui/social-links'
 import { Wordmark } from '@/components/ui/wordmark'
 import { trackAttributes } from '@/lib/analytics/track-script'
 import { glassStrengthOf, type GlassStrength } from '@/lib/color/glass-contrast'
-import { bioParagraphs } from '@/lib/plain-text'
+import { bioParagraphs, plainTextParagraphs } from '@/lib/plain-text'
 import { requestTime } from '@/lib/request-time'
 import {
   OWN_SHADOW,
@@ -21,6 +22,7 @@ import {
   type BoxDepth,
   type ElementDepth,
 } from '@/lib/sanity/depth-options'
+import { linkListParts, resolveDivider } from '@/lib/sanity/divider-options'
 import { inlineListItems, resolveInlineListDesign } from '@/lib/sanity/inline-list-options'
 import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
@@ -91,6 +93,19 @@ const clean = (value: string | null | undefined) => (value ? stegaClean(value).t
 
 type WordmarkImage = SanityImageData & { size?: string | null }
 
+/** Whether the profile draws anything: a picture, a name or wordmark, categories or a bio. */
+function hasProfile(data: Data): boolean {
+  const profile = data.profile
+  const nameImage = profile?.nameImage as WordmarkImage | null | undefined
+  return Boolean(
+    clean(profile?.name) ||
+    inlineListItems(profile?.categories).length > 0 ||
+    plainTextParagraphs(profile?.bio).length > 0 ||
+    (profile?.image as SanityImageData | null | undefined)?.asset ||
+    (showsWordmark(profile?.nameDisplay, nameImage) && nameImage),
+  )
+}
+
 /**
  * The picture, the name, the service categories and the bio. The name can be drawn as a wordmark
  * (Content › Profile › Show as); its text is then the picture's alt text, so the heading keeps its
@@ -119,9 +134,7 @@ function Profile({
   const image = data.profile?.image as SanityImageData | null | undefined
   const nameImage = data.profile?.nameImage as WordmarkImage | null | undefined
   const wordmark = showsWordmark(data.profile?.nameDisplay, nameImage) ? nameImage : null
-  if (!name && categories.length === 0 && bio.length === 0 && !image?.asset && !wordmark) {
-    return null
-  }
+  if (!hasProfile(data)) return null
   const design = data.profileDesign
   const { textColour, ...categoryLook } = resolveInlineListDesign(data.categoryDesign)
   const hasHeading = Boolean(name || wordmark)
@@ -376,6 +389,15 @@ export function LinkListView({
   const glassRows =
     rowStyle === 'glass' && !['cards', 'editorial', 'compact'].includes(stegaClean(data.variant))
   const socialsBelow = socialPositionOf(socialDesign?.position) === 'below'
+  // Design › Dividers: which parts are drawn, in order, with the dividers between them.
+  const divider = resolveDivider(data.dividerDesign)
+  const parts = linkListParts({
+    profile: hasProfile(data),
+    heading: Boolean(headingWordmark ?? title),
+    social: socials.some((profile) => profile.url),
+    socialsBelow,
+    placements: divider?.placements ?? [],
+  })
   const socialRow = (
     <SocialLinks
       profiles={socials}
@@ -397,42 +419,67 @@ export function LinkListView({
       isFirst={isFirst}
       containerClassName={traits.text}
     >
-      <Profile
-        data={data}
-        layout={layout}
-        isFirst={Boolean(isFirst)}
-        block={traits.block}
-        align={traits.align}
-        pictureDepth={depth.picture}
-        nameLevel={levels.top}
-      />
-      {headingWordmark ? (
-        <WordmarkHeading
-          as={title ? Title : 'div'}
-          alt={title}
-          image={headingWordmark}
-          preload={Boolean(isFirst) && !hasName}
-          className="mb-8"
-        />
-      ) : title ? (
-        <RichHeading
-          as={Title}
-          blocks={data.heading}
-          fallback={title}
-          className={`mb-8 text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
-        />
-      ) : null}
-      {socialsBelow ? null : socialRow}
-      {prepared.some((link) => link.scheduled) ? (
-        // A scheduled link is due only at some times. The prerendered page shows the links that
-        // always are; the visitor's request fills in the rest.
-        <Suspense fallback={<LinkGroups links={drawableLinks(prepared)} {...shared} />}>
-          <DueLinkGroups prepared={prepared} {...shared} />
-        </Suspense>
-      ) : (
-        <LinkGroups links={drawableLinks(prepared)} {...shared} />
-      )}
-      {socialsBelow ? socialRow : null}
+      {parts.map((part, index) => {
+        switch (part) {
+          case 'profile':
+            return (
+              <Profile
+                key="profile"
+                data={data}
+                layout={layout}
+                isFirst={Boolean(isFirst)}
+                block={traits.block}
+                align={traits.align}
+                pictureDepth={depth.picture}
+                nameLevel={levels.top}
+              />
+            )
+          case 'heading':
+            return headingWordmark ? (
+              <WordmarkHeading
+                key="heading"
+                as={title ? Title : 'div'}
+                alt={title}
+                image={headingWordmark}
+                preload={Boolean(isFirst) && !hasName}
+                className="mb-8"
+              />
+            ) : (
+              <RichHeading
+                key="heading"
+                as={Title}
+                blocks={data.heading}
+                fallback={title}
+                className={`mb-8 text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
+              />
+            )
+          case 'social':
+            return <Fragment key="social">{socialRow}</Fragment>
+          case 'links':
+            return prepared.some((link) => link.scheduled) ? (
+              // A scheduled link is due only at some times. The prerendered page shows the links that
+              // always are; the visitor's request fills in the rest.
+              <Suspense
+                key="links"
+                fallback={<LinkGroups links={drawableLinks(prepared)} {...shared} />}
+              >
+                <DueLinkGroups prepared={prepared} {...shared} />
+              </Suspense>
+            ) : (
+              <LinkGroups key="links" links={drawableLinks(prepared)} {...shared} />
+            )
+          default:
+            return divider ? (
+              <DecorativeDivider
+                key={`divider-${String(index)}`}
+                style={divider.style}
+                width={divider.width}
+                colour={divider.colour}
+                block={traits.block}
+              />
+            ) : null
+        }
+      })}
     </SectionFrame>
   )
 }

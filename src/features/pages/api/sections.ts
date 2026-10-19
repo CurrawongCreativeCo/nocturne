@@ -378,6 +378,12 @@ export const linkListFragment = /* groq */ `
       iconColour { colour, hex },
       background { colour, hex }
     },
+    dividerDesign {
+      style,
+      width,
+      placements,
+      colour { colour, hex }
+    },
     depthDesign {
       linkShadow,
       socialShadow,

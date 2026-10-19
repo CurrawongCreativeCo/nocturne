@@ -3220,7 +3220,7 @@ page without deleting them; hidden categories never leave the Content Lake. Stud
   repeats them gets a warning to delete the line. No migration script: the fields are optional, and only the editor can tell
   a typed list of services from a sentence that happens to use a bullet.
 
-**Design.** The Link list's Design tab (agency only) has four boxes and a collapsed **Depth and glow** above the shared Background and Animation. Everything
+**Design.** The Link list's Design tab (agency only) has five boxes and a collapsed **Depth and glow** above the shared Background and Animation. Everything
 empty is the look the section always had, so no content needs migrating. The colour overrides sit in a collapsed **Colours**
 inside each box, and every option that depends on another only shows once it applies.
 
@@ -3231,6 +3231,14 @@ inside each box, and every option that depends on another only shows once it app
 | Links              | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
+- **Dividers**: one decorative rule for the list, **Divider** None (default), Line, Fading line, Three dots or Line with a
+  diamond (as pictures), placed by ticking **After the profile**, **Above the social icons** and **Below the social icons**
+  (the profile while nothing is ticked), with a **Width** (Short, Medium, Full width; not for dots) and a colour (Inherit
+  is the line colour). A divider only sits between two parts that are drawn: never first or last, never two in a row
+  (after the profile and above the icons meet as one), and never for social icons that aren't shown (`linkListParts` in
+  `src/lib/sanity/divider-options.ts`). Drawn by `DecorativeDivider` (`src/components/ui/decorative-divider.tsx`) in CSS,
+  hidden from screen readers. These are dividers inside a section; the shaped edge between sections is
+  [Section dividers](#section-dividers).
 - **Depth and glow** (collapsed; empty is each layout's own look, so nothing changes until a level is chosen).
   **Link shadow** Flat, Soft, Raised or Floating, as pictures, for every link (not offered for Editorial, whose links are a
   ruled list); **Social button shadow** for the shaped icon styles; **Picture shadow**, drawn as a filter so it follows a

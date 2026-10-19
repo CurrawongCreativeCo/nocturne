@@ -3592,6 +3592,78 @@ documents.push(
     ],
   },
   {
+    // Decorative dividers (tests/e2e/link-list-dividers.spec.ts): a diamond after the profile and
+    // around social icons above the links (the two that would meet become one), a fading line in
+    // Highlight around icons below the links, and dividers asked for with no social icons to divide.
+    _id: 'page-link-dividers',
+    _type: 'page',
+    title: 'Link dividers',
+    slug: { _type: 'slug', current: 'link-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'div-above',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: { _type: 'object', name: 'Diamond dividers', bio: 'A short bio.' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        dividerDesign: {
+          _type: 'object',
+          style: 'diamond',
+          placements: ['afterProfile', 'aboveSocial', 'belowSocial'],
+        },
+        links: [linkItem('div-a', 'First link', external('https://example.com/a'))],
+      },
+      {
+        _key: 'div-below',
+        _type: 'linkList',
+        variant: 'cards',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'start', tone: 'inverse' },
+        profile: { _type: 'object', name: 'Fading dividers' },
+        socialDesign: { _type: 'object', position: 'below' },
+        socialSource: 'custom',
+        socialLinks: [
+          { _key: 'fb', _type: 'socialLink', platform: 'facebook', url: 'https://facebook.com/x' },
+        ],
+        dividerDesign: {
+          _type: 'object',
+          style: 'fade',
+          width: 'full',
+          placements: ['aboveSocial', 'belowSocial'],
+          colour: { _type: 'object', colour: 'highlight' },
+        },
+        links: [linkItem('div-b', 'Second link', external('https://example.com/b'))],
+      },
+      {
+        _key: 'div-none',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: { _type: 'object', name: 'No icons to divide' },
+        socialSource: 'none',
+        dividerDesign: {
+          _type: 'object',
+          style: 'dots',
+          placements: ['aboveSocial', 'belowSocial'],
+        },
+        links: [linkItem('div-c', 'Third link', external('https://example.com/c'))],
+      },
+    ],
+  },
+  {
     // The blur preview is only for opaque pictures (tests/e2e/image-placeholder.spec.ts): a transparent
     // logo as the profile picture and as a wordmark, and an opaque photo as a picture.
     _id: 'page-image-placeholders',
