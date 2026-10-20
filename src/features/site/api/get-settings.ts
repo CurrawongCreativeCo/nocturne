@@ -5,7 +5,7 @@ import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 import { SETTINGS_QUERY } from './queries'
-import { browserIconLinks } from '../utils/browser-icon'
+import { DEFAULT_ICON_LINKS, browserIconLinks } from '../utils/browser-icon'
 import { hasBusinessDetails } from '../utils/business-details'
 
 export async function getSettings(mode: FetchMode) {
@@ -40,11 +40,12 @@ export async function getSiteMetadata(): Promise<Metadata> {
     : undefined
 
   // Next.js adds src/app/icon.png and apple-icon.png only when `icons` is unset, so setting it here
-  // replaces them (never two <link rel="icon"> sets). Without a custom icon the default files apply.
+  // replaces them (never two <link rel="icon"> sets). Without a custom icon the Currawong defaults
+  // apply, in a light and a dark variant (DEFAULT_ICON_LINKS).
   const browserIcon = settings?.browserIcon
   const icons = browserIcon?.image
     ? browserIconLinks(browserIcon.image, browserIcon, { projectId, dataset })
-    : undefined
+    : DEFAULT_ICON_LINKS
 
   const description = settings?.description ?? undefined
   const template = { template: `%s | ${title}`, default: title }
@@ -54,7 +55,7 @@ export async function getSiteMetadata(): Promise<Metadata> {
   return {
     title: template,
     description,
-    ...(icons && { icons }),
+    icons,
     openGraph: {
       type: 'website',
       siteName: title,

@@ -30,6 +30,7 @@ interface IconLink {
   href: string
   sizes: string | null
   type: string | null
+  media: string | null
 }
 
 /** Every icon link in <head>, in document order. */
@@ -44,6 +45,7 @@ async function iconLinks(page: Page): Promise<IconLink[]> {
         href: link.getAttribute('href') ?? '',
         sizes: link.getAttribute('sizes'),
         type: link.getAttribute('type'),
+        media: link.getAttribute('media'),
       })),
     )
 }
@@ -55,14 +57,22 @@ test.afterAll(async ({ request }, testInfo) => {
 })
 
 test.describe('default icon', () => {
-  test('links the Currawong icon files, once each', async ({ page }) => {
+  test('links the Currawong icon files, once each, with a dark variant', async ({ page }) => {
     await page.goto('/')
     const links = await iconLinks(page)
-    expect(links.filter((link) => link.rel === 'icon').map((link) => link.href)).toHaveLength(1)
-    const icon = links.find((link) => link.rel === 'icon')
-    expect(new URL(icon?.href ?? '', 'http://x').pathname).toBe('/icon.png')
-    expect(icon?.sizes).toBe('512x512')
-    expect(icon?.type).toBe('image/png')
+    const icons = links.filter((link) => link.rel === 'icon')
+    expect(icons.map((link) => new URL(link.href, 'http://x').pathname)).toEqual([
+      '/icon.png',
+      '/icon-dark.png',
+    ])
+    expect(icons.map((link) => link.media)).toEqual([
+      '(prefers-color-scheme: light)',
+      '(prefers-color-scheme: dark)',
+    ])
+    for (const icon of icons) {
+      expect(icon.sizes).toBe('512x512')
+      expect(icon.type).toBe('image/png')
+    }
     const apple = links.filter((link) => link.rel === 'apple-touch-icon')
     expect(apple).toHaveLength(1)
     expect(new URL(apple[0]?.href ?? '', 'http://x').pathname).toBe('/apple-icon.png')
@@ -71,7 +81,7 @@ test.describe('default icon', () => {
   })
 
   test('serves the files as PNGs, and no longer the purple placeholder', async ({ request }) => {
-    for (const path of ['/icon.png', '/apple-icon.png']) {
+    for (const path of ['/icon.png', '/icon-dark.png', '/apple-icon.png']) {
       const response = await request.get(path)
       expect(response.status()).toBe(200)
       expect(response.headers()['content-type']).toBe('image/png')
