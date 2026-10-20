@@ -1,6 +1,5 @@
 import { defineField, defineType, type ConditionalPropertyCallback } from 'sanity'
 
-import { BADGE_ICONS } from '../badge-icons'
 import {
   DIVIDER_CENTRES,
   DIVIDER_CENTRE_SIZES,
@@ -18,6 +17,7 @@ import {
   DIVIDER_WIDTHS,
   DIVIDER_WIDTH_TITLES,
 } from '../divider-options'
+import { badgeIconField } from './badge-icon-field'
 import { imageField } from './image-field'
 import { lengthWarning } from './length-guidance'
 import { presetField } from './preset-field'
@@ -104,16 +104,7 @@ export const decorativeDivider = defineType({
       options: radio(DIVIDER_TEXT_CASES, DIVIDER_TEXT_CASE_TITLES),
       hidden: centreIs('text'),
     }),
-    defineField({
-      name: 'icon',
-      title: 'Icon',
-      type: 'string',
-      options: {
-        list: BADGE_ICONS.map(({ value, title }) => ({ value, title })),
-        layout: 'dropdown',
-      },
-      hidden: centreIs('icon'),
-    }),
+    badgeIconField({ hidden: centreIs('icon') }),
     {
       ...imageField({
         name: 'image',

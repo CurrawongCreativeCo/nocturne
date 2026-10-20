@@ -1,5 +1,13 @@
-import { defineField, type ConditionalPropertyCallback } from 'sanity'
+import { defineField, type ConditionalPropertyCallback, type FieldDefinition } from 'sanity'
 
+import { BODY_TEXT_RATIO } from '@/lib/color/background-contrast'
+import {
+  cardLabelHex,
+  cardTextContrast,
+  layeredCardSurface,
+  type StoredCardSurface,
+} from '@/lib/color/card-contrast'
+import { glassRowsStrength } from '@/lib/color/glass-contrast'
 import {
   GLOW_COLOUR_CHOICES,
   GLOW_LEVELS,
@@ -43,8 +51,15 @@ import {
   PROFILE_IMAGE_SIZE_TITLES,
 } from '@/lib/sanity/profile-image-options'
 import { hiddenFromClients } from '@/lib/sanity/roles'
+import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
+import {
+  choiceField,
+  iconDesignFields,
+  surfaceFields,
+  textStyleField,
+} from '@/lib/sanity/schema/surface-design'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
   linkArrowThumbnails,
@@ -57,8 +72,17 @@ import {
   SOCIAL_STYLES,
   SOCIAL_STYLE_TITLES,
 } from '@/lib/sanity/social-style-options'
+import {
+  BORDER_COLOUR_CHOICES,
+  SURFACE_BORDERS,
+  SURFACE_BORDER_TITLES,
+  SURFACE_COLOUR_CHOICES,
+  SURFACE_STRENGTHS,
+  SURFACE_STRENGTH_TITLES,
+} from '@/lib/sanity/surface-options'
 
-import { defaultLinkArrow, usesArrow } from '../../utils/link-list'
+import { defaultLinkArrow, ownIconShape, usesArrow } from '../../utils/link-list'
+import { enclosingOfArray, memberOfArray } from '../../utils/schema-path'
 
 /**
  * The Link list's own Design options (agency only, like the rest of Design), in four boxes above the
@@ -94,10 +118,13 @@ interface Section {
   profile?: { image?: { asset?: unknown }; categories?: unknown[]; bio?: string }
   variant?: string
   rowStyle?: string
+  glassStrength?: string
   showArrows?: boolean
   socialSource?: string
-  linkDesign?: { arrowStyle?: string }
-  socialDesign?: { style?: string }
+  style?: { tone?: string }
+  cardDesign?: StoredCardSurface
+  linkDesign?: { arrowStyle?: string; iconShape?: string }
+  socialDesign?: { style?: string; border?: string }
 }
 /** The Link list a field of one of these boxes sits in (the path is section › box › field). */
 const sectionOf = (context: { document?: unknown; path?: unknown }) =>
@@ -113,6 +140,65 @@ const glowOff: ConditionalPropertyCallback = ({ parent }) =>
 /** The social dividers only apply while the section shows social icons. */
 const noSocials: ConditionalPropertyCallback = (context) =>
   sectionOf(context)?.socialSource === 'none'
+
+/**
+ * Adds a warning to a card's Background colour: the label measured on the background the card draws
+ * (the card's choice over the list's, lib/color/card-contrast.ts), with the site's Brand colours.
+ * Other fields pass through unchanged, so it can map over `surfaceFields`.
+ */
+export function withCardContrast<T extends FieldDefinition>(field: T, { inItem = false } = {}): T {
+  if (field.name !== 'background') return field
+  return {
+    ...field,
+    validation: (rule: { custom: (fn: unknown) => { warning: () => unknown } }) =>
+      rule
+        .custom(
+          async (
+            _value: unknown,
+            context: {
+              document?: unknown
+              path?: unknown
+              getClient: (options: { apiVersion: string }) => never
+            },
+          ) => {
+            const path = context.path as never
+            const section = (
+              inItem ? enclosingOfArray(context.document, path, 'links') : sectionOf(context)
+            ) as Section | undefined
+            const link = inItem
+              ? (memberOfArray(context.document, path, 'links') as
+                  { design?: StoredCardSurface & { appearance?: string } } | undefined)
+              : undefined
+            const card = link?.design?.appearance === 'custom' ? link.design : undefined
+            const surface = layeredCardSurface(section?.cardDesign, card)
+            const tone = section?.style?.tone
+            const { colours } = await fetchBrandColours(
+              context.getClient({ apiVersion: '2025-01-01' }),
+            )
+            const result = cardTextContrast({
+              foreground: cardLabelHex(surface, tone, colours),
+              surface,
+              tone,
+              glass: glassRowsStrength(section),
+              site: colours,
+            })
+            if (!result || result.ratio >= BODY_TEXT_RATIO) return true
+            return `The label may be hard to read on this background: ${result.ratio.toFixed(1)}:1 (text needs ${BODY_TEXT_RATIO}:1)${glassRowsStrength(section) ? ', measured over the lightest or darkest part of a photo' : ''}. Choose a stronger or different colour, or change the label colour under Text.`
+          },
+        )
+        .warning(),
+  }
+}
+
+/** Editorial links are a ruled list, with no card to colour. */
+const isEditorial: ConditionalPropertyCallback = (context) =>
+  layoutOf(sectionOf(context)?.variant) === 'editorial'
+const isCompact: ConditionalPropertyCallback = (context) =>
+  layoutOf(sectionOf(context)?.variant) === 'compact'
+
+/** Plain social icons have no button to fill or outline. */
+const plainSocial: ConditionalPropertyCallback = ({ parent }) =>
+  ((parent as { style?: string } | undefined)?.style ?? 'plain') === 'plain'
 
 const agencyOnly =
   (own?: ConditionalPropertyCallback): ConditionalPropertyCallback =>
@@ -305,14 +391,59 @@ export const linkListDesignFields = [
     ],
   }),
   defineField({
-    name: 'linkDesign',
-    title: 'Links',
+    name: 'cardDesign',
+    title: 'Cards',
     type: 'object',
     group: 'design',
-    description: 'The indicator at the end of each link, and the colour of the link icons.',
-    hidden: agencyOnly(({ parent }) => !usesArrow((parent as Section | undefined)?.variant)),
+    description:
+      'Every link’s background, border and text. Each starts on Inherit: the layout’s own look. Glass rows stay glass when tinted. A link can change any of these for itself (Content › the link › Appearance).',
+    hidden: agencyOnly(),
     options: { collapsible: true, collapsed: false },
-    fieldsets: [colours],
+    fieldsets: [
+      {
+        name: 'text',
+        title: 'Text',
+        description: 'Eyebrow, label and description.',
+        options: { collapsible: true, collapsed: true },
+      },
+    ],
+    fields: [
+      ...surfaceFields({ inherits: 'the layout’s own', hidden: isEditorial }).map((field) =>
+        withCardContrast(field),
+      ),
+      textStyleField({
+        element: 'eyebrow',
+        inherits: 'the layout’s own',
+        fieldset: 'text',
+        hidden: isCompact,
+      }),
+      textStyleField({ element: 'label', inherits: 'the layout’s own', fieldset: 'text' }),
+      textStyleField({
+        element: 'description',
+        inherits: 'the layout’s own',
+        fieldset: 'text',
+        hidden: isCompact,
+      }),
+    ],
+  }),
+  defineField({
+    name: 'linkDesign',
+    title: 'Arrows and icons',
+    type: 'object',
+    group: 'design',
+    description:
+      'The indicator at the end of each link, and each link’s icon: its colour and an optional container (circle, rounded or square) with its own fill and border.',
+    hidden: agencyOnly(),
+    options: { collapsible: true, collapsed: false },
+    fieldsets: [
+      colours,
+      {
+        name: 'icons',
+        title: 'Icons',
+        description: 'For links with an icon. A link can change these for itself.',
+        options: { collapsible: true, collapsed: true },
+      },
+    ],
     fields: [
       presetField({
         name: 'arrowStyle',
@@ -326,6 +457,7 @@ export const linkListDesignFields = [
           description: LINK_ARROW_DESCRIPTIONS[value],
           thumbnail: linkArrowThumbnails[value],
         })),
+        hidden: (context) => !usesArrow(sectionOf(context)?.variant),
         // What the layout draws while nothing is chosen, so the picker shows it as chosen.
         defaultValue: (context) => {
           const section = sectionOf(context)
@@ -344,17 +476,22 @@ export const linkListDesignFields = [
         inherits: 'the link’s own colour',
         choices: ['ink', 'muted', 'accent', 'accent-2', 'highlight'],
         fieldset: 'colours',
-        hidden: ({ parent }) =>
-          (parent as { arrowStyle?: string } | undefined)?.arrowStyle === 'none',
+        hidden: (context) =>
+          !usesArrow(sectionOf(context)?.variant) ||
+          (context.parent as { arrowStyle?: string } | undefined)?.arrowStyle === 'none',
       }),
-      themeColourField({
-        name: 'iconColour',
-        title: 'Icon colour',
-        usage: 'graphic',
-        onRows: true,
-        inherits: 'the link’s own colour',
-        choices: ['ink', 'muted', 'accent', 'accent-2', 'highlight'],
-        fieldset: 'colours',
+      // `iconColour` keeps its name (and saved choices) from before the containers.
+      ...iconDesignFields({
+        inherits: 'the layout’s own',
+        fieldset: 'icons',
+        hidden: isEditorial,
+        shapeOf: (context) => {
+          const section = sectionOf(context)
+          return (
+            (context.parent as { iconShape?: string } | undefined)?.iconShape ??
+            ownIconShape(section?.variant, section?.rowStyle)
+          )
+        },
       }),
     ],
   }),
@@ -372,7 +509,7 @@ export const linkListDesignFields = [
         name: 'style',
         title: 'Icon style',
         description:
-          'The shaped styles put each icon on a button; with Glass rows the buttons are frosted glass to match.',
+          'The shaped styles put each icon on a button; with Glass rows the buttons are frosted glass to match. Its colour, strength and border are below.',
         required: false,
         initialValue: null,
         options: SOCIAL_STYLES.map((value) => ({
@@ -398,18 +535,47 @@ export const linkListDesignFields = [
       themeColourField({
         name: 'background',
         title: 'Button colour',
+        description:
+          'Inherit uses the section’s surface. With Glass rows the buttons are glass: a colour tints them and the blur stays.',
         usage: 'graphic',
         inherits: 'the section’s surface',
-        choices: ['ink', 'accent', 'accent-2', 'highlight'],
+        choices: SURFACE_COLOUR_CHOICES,
         fieldset: 'colours',
-        // Plain icons have no button, and glass buttons must stay see-through.
-        hidden: (context) => {
-          const style = (context.parent as { style?: string } | undefined)?.style ?? 'plain'
-          const section = sectionOf(context)
-          const glassRows =
-            (section?.variant ?? 'stacked') === 'stacked' && section?.rowStyle === 'glass'
-          return style === 'plain' || glassRows
-        },
+        // Plain icons have no button.
+        hidden: plainSocial,
+      }),
+      choiceField({
+        name: 'backgroundStrength',
+        title: 'Button strength',
+        description: 'How much of the button colour shows. Solid hides what is behind.',
+        values: SURFACE_STRENGTHS,
+        titles: SURFACE_STRENGTH_TITLES,
+        inherits: 'the style’s own (the glass strength with Glass rows, else Solid)',
+        fieldset: 'colours',
+        hidden: (context) =>
+          plainSocial(context) ||
+          (context.parent as { background?: { colour?: string } } | undefined)?.background
+            ?.colour === 'transparent',
+      }),
+      choiceField({
+        name: 'border',
+        title: 'Button border',
+        description: 'None removes it.',
+        values: SURFACE_BORDERS,
+        titles: SURFACE_BORDER_TITLES,
+        inherits: 'the style’s own (thin)',
+        hidden: plainSocial,
+      }),
+      themeColourField({
+        name: 'borderColour',
+        title: 'Button border colour',
+        usage: 'graphic',
+        inherits: 'the style’s own',
+        choices: BORDER_COLOUR_CHOICES,
+        fieldset: 'colours',
+        hidden: (context) =>
+          plainSocial(context) ||
+          (context.parent as { border?: string } | undefined)?.border === 'none',
       }),
     ],
   }),

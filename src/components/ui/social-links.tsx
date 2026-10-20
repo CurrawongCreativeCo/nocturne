@@ -4,7 +4,8 @@ import type { CSSProperties } from 'react'
 import { SocialIcon } from '@/components/ui/social-icon'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
 import { OWN_SHADOW, type BoxDepth } from '@/lib/sanity/depth-options'
-import type { SocialStyle } from '@/lib/sanity/social-style-options'
+import { SHAPE_RADIUS, type SocialStyle } from '@/lib/sanity/social-style-options'
+import { glassSurfaceLook, ringSurfaceLook, type SurfaceDesign } from '@/lib/sanity/surface-options'
 import { socialPlatformTitle } from '@/lib/social-platforms'
 
 export interface SocialProfile {
@@ -17,18 +18,16 @@ export interface SocialProfile {
 const BASE =
   'inline-flex size-11 items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none'
 const PLAIN = 'rounded-button text-ink-muted hover:bg-surface-alt hover:text-ink'
-const SOLID = 'bg-surface text-ink ring-1 ring-inset ring-line hover:bg-surface-alt'
+// A solid button's fill and border, which a chosen design replaces one property at a time.
+const SOLID_FILL = 'bg-surface hover:bg-surface-alt'
+const SOLID_BORDER = 'ring-1 ring-inset ring-line'
+const SOLID = `${SOLID_FILL} text-ink ${SOLID_BORDER}`
 // The frosted surface of Glass rows (`.glass-row` in globals.css), so icons and rows match.
 const GLASS = 'glass-row text-ink'
 const GLASS_STRENGTH: Record<GlassStrength, string> = {
   light: 'glass-row-light',
   medium: '',
   strong: 'glass-row-strong',
-}
-const RADIUS: Record<Exclude<SocialStyle, 'plain'>, string> = {
-  circle: 'rounded-full',
-  rounded: 'rounded-control',
-  square: 'rounded-sm',
 }
 
 /** The classes for one icon link, so other components can draw a matching single icon. */
@@ -44,14 +43,15 @@ export function socialLinkClass(
     surface === 'glass'
       ? `${GLASS} ${GLASS_STRENGTH[strength]}`
       : `${SOLID}${shadow ? ' shadow-card' : ''}`
-  return `${BASE} ${look} ${RADIUS[shape]}`.trim()
+  return `${BASE} ${look} ${SHAPE_RADIUS[shape]}`.trim()
 }
 
 /**
  * A labelled list of social profile links, one icon each. Each link is named for its network
  * ("Instagram"), takes `rel="me"` (it is this person's or business's profile) and wraps onto more
- * lines on a narrow screen. `colour` and `background` are CSS colours from the theme-colour field;
- * the background only applies to the shaped styles, and never to glass, which must stay see-through.
+ * lines on a narrow screen. `colour` is a CSS colour from the theme-colour field. `design` changes
+ * the shaped buttons' fill, strength and border one property at a time (lib/sanity/surface-options.ts):
+ * on glass it tints the glass and keeps the blur, the same way Glass rows are tinted.
  */
 export function SocialLinks({
   profiles,
@@ -59,7 +59,7 @@ export function SocialLinks({
   surface = 'solid',
   strength,
   colour,
-  background,
+  design = {},
   className = '',
   label = 'Social profiles',
   depth,
@@ -69,7 +69,8 @@ export function SocialLinks({
   surface?: 'solid' | 'glass'
   strength?: GlassStrength
   colour?: string
-  background?: string
+  /** The shaped buttons' fill and border; unset properties keep the style's own. */
+  design?: SurfaceDesign
   /** Classes for the list: spacing and justification. */
   className?: string
   label?: string
@@ -78,15 +79,25 @@ export function SocialLinks({
 }) {
   const links = profiles.filter((profile) => profile.url)
   if (links.length === 0) return null
-  const solidButton = shape !== 'plain' && surface !== 'glass'
-  const backgroundColor = solidButton ? background : undefined
-  // Plain icons have no button to lift. Glass buttons draw the glass's shadow, solid ones the card's.
+  // Plain icons have no button to fill, outline or lift.
+  const look =
+    shape === 'plain'
+      ? undefined
+      : surface === 'glass'
+        ? glassSurfaceLook(design, { strength: strength ?? 'medium' })
+        : ringSurfaceLook(design, { background: SOLID_FILL, border: SOLID_BORDER })
+  // Glass buttons draw the glass's shadow, solid ones the card's.
   const lift =
     shape === 'plain' ? undefined : depth?.(OWN_SHADOW[surface === 'glass' ? 'glass' : 'card'])
   const style: CSSProperties | undefined =
-    colour || backgroundColor || lift
-      ? { color: colour, backgroundColor, ...lift?.style }
-      : undefined
+    colour || look?.style || lift ? { color: colour, ...look?.style, ...lift?.style } : undefined
+  // The solid button's own fill and border, swapped for the chosen ones where there are any.
+  const linkClass = (withShadow: boolean) => {
+    const base = socialLinkClass(shape, surface, strength, withShadow)
+    return look?.className && surface !== 'glass'
+      ? base.replace(SOLID_FILL, '').replace(SOLID_BORDER, look.className)
+      : base
+  }
 
   return (
     <nav aria-label={label}>
@@ -102,11 +113,7 @@ export function SocialLinks({
                 href={stegaClean(profile.url) ?? undefined}
                 rel="me"
                 aria-label={socialPlatformTitle(platform)}
-                className={
-                  lift
-                    ? `${socialLinkClass(shape, surface, strength, false)} ${lift.className}`
-                    : socialLinkClass(shape, surface, strength)
-                }
+                className={lift ? `${linkClass(false)} ${lift.className}` : linkClass(true)}
                 style={style}
               >
                 <SocialIcon platform={platform} />

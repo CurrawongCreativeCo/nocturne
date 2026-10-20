@@ -196,12 +196,16 @@ export function imageStrengthOpacity(
   return SECTION_IMAGE_STRENGTH_OPACITY[named ?? 'full']
 }
 
-/** The overlay's colour: the section's own background (today), or a light or dark wash whatever the tone. */
-export const SECTION_WASHES = ['background', 'light', 'dark'] as const
+/**
+ * The overlay's colour: the section's own background (today), a light or dark wash whatever the tone,
+ * or a gradient of the site's colours (lib/sanity/overlay-gradient.ts) at the overlay's strength.
+ */
+export const SECTION_WASHES = ['background', 'light', 'dark', 'gradient'] as const
 export const SECTION_WASH_TITLES: Record<(typeof SECTION_WASHES)[number], string> = {
   background: 'Background colour',
   light: 'Light wash',
   dark: 'Dark wash',
+  gradient: 'Gradient',
 }
 /**
  * The two fixed washes, as plain colours. They stay light or dark whatever the tone or the brand

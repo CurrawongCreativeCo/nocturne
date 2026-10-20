@@ -1,7 +1,14 @@
 import type { ReactNode } from 'react'
 
 import { colorHex } from '@/config/tokens.generated'
+import { stopColourHex } from '@/lib/color/overlay-gradient-contrast'
 
+import { HEIGHT, WIDTH } from './wireframe'
+import {
+  overlayGradientCss,
+  resolveOverlayGradient,
+  type OverlayGradient,
+} from '../../overlay-gradient'
 import {
   SECTION_IMAGE_STRENGTH_OPACITY,
   SECTION_WASH_COLOURS,
@@ -10,7 +17,6 @@ import {
   type SECTION_WASHES,
 } from '../../section-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
-import { HEIGHT, WIDTH } from './wireframe'
 
 type Size = (typeof SECTION_IMAGE_SIZES)[number]
 type Strength = (typeof SECTION_IMAGE_STRENGTHS)[number]
@@ -105,7 +111,7 @@ function StrengthThumbnail({ strength }: { strength: Strength }) {
   )
 }
 
-function WashThumbnail({ wash }: { wash: Wash }) {
+function WashThumbnail({ wash }: { wash: Exclude<Wash, 'gradient'> }) {
   const fill =
     wash === 'background'
       ? colorHex.surfaceAlt
@@ -154,3 +160,45 @@ export const WashBackgroundThumbnail = (_props: PresetThumbnailProps) => (
 )
 export const WashLightThumbnail = (_props: PresetThumbnailProps) => <WashThumbnail wash="light" />
 export const WashDarkThumbnail = (_props: PresetThumbnailProps) => <WashThumbnail wash="dark" />
+
+/**
+ * The gradient overlay at Medium over the same picture, drawn with the page's own maths
+ * (overlay-gradient.ts) in the default colours: a picture box with the gradient laid over it.
+ */
+function GradientThumbnail({ shape }: { shape: OverlayGradient }) {
+  const css = overlayGradientCss(
+    resolveOverlayGradient({ overlayGradient: shape }, 'medium'),
+    stopColourHex('surface'),
+  )
+  return (
+    <div
+      data-wireframe={`image-gradient-${shape}`}
+      style={{ position: 'relative', width: '100%', height: '100%' }}
+    >
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        width="100%"
+        height="100%"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        focusable="false"
+        style={{ display: 'block' }}
+      >
+        <Picture x={0} y={0} w={WIDTH} h={HEIGHT} />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: css }} />
+    </div>
+  )
+}
+
+export const WashGradientThumbnail = (_props: PresetThumbnailProps) => (
+  <GradientThumbnail shape="deepen" />
+)
+export const overlayGradientThumbnails: Record<
+  OverlayGradient,
+  (props: PresetThumbnailProps) => ReactNode
+> = {
+  deepen: () => <GradientThumbnail shape="deepen" />,
+  even: () => <GradientThumbnail shape="even" />,
+  focus: () => <GradientThumbnail shape="focus" />,
+}

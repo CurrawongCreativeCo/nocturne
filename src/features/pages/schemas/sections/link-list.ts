@@ -12,9 +12,12 @@ import {
   glassContrastProblem,
 } from '@/lib/color/glass-contrast'
 import { listsCategories, looksLikeTypedCategories, plainTextParagraphs } from '@/lib/plain-text'
-import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
+import { SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { headingPlainText } from '@/lib/sanity/heading-text'
+import { LINK_ARROWS, LINK_ARROW_TITLES } from '@/lib/sanity/link-arrow-options'
+import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -22,6 +25,13 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import {
+  choiceField,
+  iconDesignFields,
+  surfaceFields,
+  textStyleField,
+} from '@/lib/sanity/schema/surface-design'
+import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
   LinkListCardsThumbnail,
   LinkListCompactThumbnail,
@@ -33,9 +43,15 @@ import {
 import { textOrImageFields } from '@/lib/sanity/schema/wordmark'
 import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
 
-import { linkListDesignFields } from './link-list-design'
-import { LINK_LIST_RECOMMENDED_MAX, PROFILE_BIO_MAX } from '../../utils/link-list'
-import { enclosingOfArray } from '../../utils/schema-path'
+import { linkListDesignFields, withCardContrast } from './link-list-design'
+import {
+  LINK_LIST_RECOMMENDED_MAX,
+  PROFILE_BIO_MAX,
+  defaultLinkArrow,
+  ownIconShape,
+  usesArrow,
+} from '../../utils/link-list'
+import { enclosingOfArray, memberOfArray } from '../../utils/schema-path'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -43,6 +59,8 @@ const LIMITS = {
   title: 60,
   // One line of a button on a phone (about 40), and a two-line description under it.
   label: 40,
+  // A few words in small capitals over the label.
+  eyebrow: 28,
   description: 90,
   name: 50,
   // About one line of small text on a phone each, so four still wrap to two lines.
@@ -210,6 +228,9 @@ export const usesIcon = (layout: string, rowStyle = 'solid') =>
 export const usesThumbnail = (layout: string, rowStyle = 'solid') =>
   isGlassRows(layout, rowStyle) || layout === 'stacked' || layout === 'cards'
 export const usesDescription = (layout: string) => layout !== 'compact'
+export const usesEyebrow = (layout: string) => layout !== 'compact'
+/** Editorial links are a ruled list: there is no card surface to colour. */
+export const usesSurface = (layout: string) => layout !== 'editorial'
 export const usesFeatured = (layout: string) => layout !== 'compact'
 
 const hiddenUnlessLayout =
@@ -233,6 +254,177 @@ const notGlassRows = ({ parent }: { parent?: { variant?: string; rowStyle?: stri
 const notExternal: ConditionalPropertyCallback = ({ parent }) =>
   (parent as { link?: { linkType?: string } } | undefined)?.link?.linkType !== 'external'
 
+interface StoredLinkDesign {
+  appearance?: string
+  iconShape?: string
+}
+interface StoredLink {
+  icon?: string
+  design?: StoredLinkDesign
+}
+
+/** The link a field of its Appearance sits in, and that link's section. */
+const linkContext = ({ document, path }: Parameters<ConditionalPropertyCallback>[0]) => ({
+  link: memberOfArray(document, path, 'links') as StoredLink | undefined,
+  section: enclosingOfArray(document, path, 'links') as
+    | {
+        variant?: string
+        rowStyle?: string
+        showArrows?: boolean
+        linkDesign?: { iconShape?: string; arrowStyle?: string }
+      }
+    | undefined,
+})
+
+/** The Appearance options only show once "Customise this card" is chosen, and only to the agency. */
+const notCustomised: ConditionalPropertyCallback = (context) =>
+  hiddenFromClients(context) ||
+  (context.parent as StoredLinkDesign | undefined)?.appearance !== 'custom'
+
+const notCustomisedOr =
+  (
+    own: (context: Parameters<ConditionalPropertyCallback>[0]) => boolean,
+  ): ConditionalPropertyCallback =>
+  (context) =>
+    notCustomised(context) || own(context)
+
+const CARD_INHERITS = 'the Link list’s'
+
+/**
+ * A link's own Appearance (README, "Link list": Card design and overrides): "Use the Link list design"
+ * (unset) or "Customise this card". Customised, every option starts on Inherit, and only what the
+ * editor changes differs from the list; the rest keeps following it. Switching back to the list's
+ * design keeps the choices (the page ignores them), so trying it loses nothing.
+ */
+const linkAppearanceField = defineField({
+  name: 'design',
+  title: 'Appearance',
+  type: 'object',
+  description:
+    'This link follows the Link list’s design (Design tab). Customise it to change only what you pick here.',
+  hidden: hiddenFromClients,
+  options: { collapsible: true, collapsed: true },
+  fieldsets: [
+    { name: 'card', title: 'Card', options: { collapsible: true, collapsed: false } },
+    {
+      name: 'text',
+      title: 'Text',
+      description: 'Eyebrow, label and description.',
+      options: { collapsible: true, collapsed: true },
+    },
+    { name: 'icon', title: 'Icon', options: { collapsible: true, collapsed: true } },
+    { name: 'arrow', title: 'Arrow', options: { collapsible: true, collapsed: true } },
+  ],
+  fields: [
+    defineField({
+      name: 'appearance',
+      title: 'Design',
+      type: 'string',
+      options: {
+        list: [{ value: 'custom', title: 'Customise this card' }],
+        layout: 'radio',
+        direction: 'horizontal',
+        inheritable: 'Use the Link list design',
+      },
+    }),
+    ...surfaceFields({
+      inherits: CARD_INHERITS,
+      inItem: true,
+      fieldset: 'card',
+      hidden: notCustomisedOr((context) => {
+        const { layout } = looksOfLink(context)
+        return !usesSurface(layout)
+      }),
+    }).map((field) => withCardContrast(field, { inItem: true })),
+    choiceField({
+      name: 'shadow',
+      title: 'Shadow',
+      description: 'Flat removes it.',
+      values: SHADOW_LEVELS,
+      titles: SHADOW_TITLES,
+      inherits: `${CARD_INHERITS} (Design › Depth and glow)`,
+      fieldset: 'card',
+      hidden: notCustomisedOr((context) => looksOfLink(context).layout === 'editorial'),
+    }),
+    textStyleField({
+      element: 'eyebrow',
+      inherits: CARD_INHERITS,
+      inItem: true,
+      fieldset: 'text',
+      hidden: notCustomisedOr(
+        (context) => !usesEyebrow(looksOfLink(context).layout) || !linkContext(context).link,
+      ),
+    }),
+    textStyleField({
+      element: 'label',
+      inherits: CARD_INHERITS,
+      inItem: true,
+      fieldset: 'text',
+      hidden: notCustomised,
+    }),
+    textStyleField({
+      element: 'description',
+      inherits: CARD_INHERITS,
+      inItem: true,
+      fieldset: 'text',
+      hidden: notCustomisedOr((context) => !usesDescription(looksOfLink(context).layout)),
+    }),
+    ...iconDesignFields({
+      inherits: CARD_INHERITS,
+      inItem: true,
+      fieldset: 'icon',
+      // Only for a link with an icon, in a layout that draws one.
+      hidden: notCustomisedOr((context) => {
+        const { layout, rowStyle } = looksOfLink(context)
+        return !linkContext(context).link?.icon || !usesIcon(layout, rowStyle)
+      }),
+      shapeOf: (context) => {
+        const { link, section } = linkContext(context)
+        return (
+          link?.design?.iconShape ??
+          section?.linkDesign?.iconShape ??
+          ownIconShape(section?.variant, section?.rowStyle)
+        )
+      },
+    }),
+    choiceField({
+      name: 'arrowStyle',
+      title: 'Arrow style',
+      description: 'None takes the arrow off this link only.',
+      values: LINK_ARROWS,
+      titles: LINK_ARROW_TITLES,
+      inherits: CARD_INHERITS,
+      fieldset: 'arrow',
+      hidden: notCustomisedOr((context) => !usesArrow(looksOfLink(context).layout)),
+    }),
+    themeColourField({
+      name: 'arrowColour',
+      title: 'Arrow colour',
+      usage: 'graphic',
+      onRows: true,
+      inItem: true,
+      choices: ['ink', 'muted', 'accent', 'accent-2', 'highlight'],
+      inherits: CARD_INHERITS,
+      fieldset: 'arrow',
+      hidden: notCustomisedOr((context) => {
+        const { link, section } = linkContext(context)
+        if (!usesArrow(section?.variant)) return true
+        const arrow =
+          link?.design?.appearance === 'custom' &&
+          (link.design as { arrowStyle?: string }).arrowStyle
+            ? (link.design as { arrowStyle?: string }).arrowStyle
+            : (section?.linkDesign?.arrowStyle ??
+              defaultLinkArrow({
+                layout: section?.variant,
+                rowStyle: section?.rowStyle,
+                showArrows: section?.showArrows,
+              }))
+        return arrow === 'none'
+      }),
+    }),
+  ],
+})
+
 const linkItem = defineArrayMember({
   type: 'object',
   name: 'linkItem',
@@ -247,16 +439,17 @@ const linkItem = defineArrayMember({
   ],
   fields: [
     defineField({
+      name: 'eyebrow',
+      type: 'string',
+      description: 'A few words above the label, e.g. “New” or “Free guide”. Optional.',
+      hidden: hiddenUnlessLayout(usesEyebrow),
+      validation: (rule) => lengthWarning(rule, LIMITS.eyebrow, 'Eyebrows'),
+    }),
+    defineField({
       name: 'label',
       type: 'string',
       description: 'What the button says, e.g. “Book a consultation”.',
       validation: (rule) => [rule.required(), lengthWarning(rule, LIMITS.label, 'Link labels')],
-    }),
-    defineField({
-      name: 'link',
-      title: 'Where it goes',
-      type: 'link',
-      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'description',
@@ -266,14 +459,14 @@ const linkItem = defineArrayMember({
       validation: (rule) => lengthWarning(rule, LIMITS.description, 'Descriptions'),
     }),
     defineField({
-      name: 'icon',
-      type: 'string',
+      name: 'link',
+      title: 'Where it goes',
+      type: 'link',
+      validation: (rule) => rule.required(),
+    }),
+    badgeIconField({
       description:
         'A small icon beside the label. Optional. In Glass rows it sits beside the picture; in the other layouts a picture replaces it.',
-      options: {
-        list: BADGE_ICONS.map(({ value, title }) => ({ value, title })),
-        layout: 'dropdown',
-      },
       hidden: hiddenUnlessLayout(usesIcon),
     }),
     defineField({
@@ -363,10 +556,12 @@ const linkItem = defineArrayMember({
       fieldset: 'advanced',
       hidden: notExternal,
     }),
+    linkAppearanceField,
   ],
   preview: {
     select: {
       title: 'label',
+      custom: 'design.appearance',
       group: 'group',
       visibility: 'visibility',
       featured: 'featured',
@@ -382,8 +577,10 @@ const linkItem = defineArrayMember({
       from,
       until,
       media,
+      custom,
     }: {
       title?: string
+      custom?: string
       group?: string
       visibility?: string
       featured?: boolean
@@ -396,6 +593,7 @@ const linkItem = defineArrayMember({
         visibility === 'hide' && 'Hidden',
         (from || until) && 'Scheduled',
         featured && 'Large',
+        custom === 'custom' && 'Own design',
         group,
       ),
       media: media as never,

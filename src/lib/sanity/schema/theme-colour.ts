@@ -16,6 +16,13 @@ declare module 'sanity' {
     themeColourHex?: ColourUsage
     /** The element sits on the rows of Glass rows, so it is measured on the glass (not the page) there. */
     themeColourRows?: boolean
+    /**
+     * A Link list card's text (`'text'`) or background (`'background'`): measured on the card's own
+     * background as the list and the card layer it (lib/color/card-contrast.ts) once one is chosen.
+     */
+    themeColourCard?: 'text' | 'background'
+    /** The field sits inside one item of the section (a link), not on the section itself. */
+    themeColourInItem?: boolean
   }
 }
 
@@ -24,14 +31,21 @@ declare module 'sanity' {
  * way down (a page-builder section; the fields are never placed inside a link). The colour input
  * reads the section's tone through it, so the contrast check judges the background the page draws.
  */
-export function sectionPathOf(path: Path): Path | null {
+export function sectionPathOf(path: Path, { inItem = false } = {}): Path | null {
+  let skip = inItem ? 1 : 0
   for (let index = path.length - 1; index >= 0; index--) {
     const segment = path[index]
     if (segment && typeof segment === 'object' && !Array.isArray(segment) && '_key' in segment) {
+      if (skip-- > 0) continue
       return path.slice(0, index + 1)
     }
   }
   return null
+}
+
+/** The item (a link) a field inside one sits in, for `themeColourInItem` fields. */
+export function itemPathOf(path: Path): Path | null {
+  return sectionPathOf(path)
 }
 
 interface ThemeColourFieldConfig {
@@ -44,6 +58,10 @@ interface ThemeColourFieldConfig {
   usage: ColourUsage
   /** True for an element drawn on a row (the Link list's arrow and icon): on Glass rows it is measured on the glass. */
   onRows?: boolean
+  /** A Link list card's text or background: measured on the card's chosen background. */
+  onCard?: 'text' | 'background'
+  /** The field sits inside one of the section's items (a link), not on the section. */
+  inItem?: boolean
   /** What Inherit means here, e.g. "the text colour", so the editor knows what they get. */
   inherits: string
   fieldset?: string
@@ -63,6 +81,8 @@ export function themeColourField({
   choices = ['ink', 'muted', 'accent', 'accent-2', 'highlight'],
   usage,
   onRows,
+  onCard,
+  inItem,
   inherits,
   fieldset,
   hidden,
@@ -84,6 +104,8 @@ export function themeColourField({
         options: {
           themeColourPicker: usage,
           themeColourRows: onRows,
+          themeColourCard: onCard,
+          themeColourInItem: inItem,
           list: THEME_COLOURS.filter((value) => offered.includes(value)).map((value) => ({
             value,
             title: THEME_COLOUR_TITLES[value],
@@ -97,7 +119,12 @@ export function themeColourField({
         title: 'Custom colour',
         type: 'string',
         description: 'Six-digit hex, e.g. #3266e4. Choose Inherit above to go back to the theme.',
-        options: { themeColourHex: usage, themeColourRows: onRows },
+        options: {
+          themeColourHex: usage,
+          themeColourRows: onRows,
+          themeColourCard: onCard,
+          themeColourInItem: inItem,
+        },
         hidden: ({ parent }: { parent?: { colour?: string } }) => parent?.colour !== 'custom',
         validation: (rule) =>
           rule.custom((value, { parent }) => {

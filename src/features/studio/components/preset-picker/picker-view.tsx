@@ -21,6 +21,8 @@ interface PickerViewProps {
    * options are shown straight away. With it ("Custom"), the summary shows and "Change" opens them.
    */
   unmatched?: { title: string; description: string }
+  /** Smaller cards, for icons. */
+  compact?: boolean
 }
 
 /**
@@ -115,7 +117,7 @@ export function PickerView({ unmatched, ...grid }: PickerViewProps) {
   return (
     <Card padding={2} radius={3} border data-picker-summary="">
       <Flex align="center" gap={3}>
-        <div style={{ width: 96, flexShrink: 0 }}>
+        <div style={{ width: grid.compact ? 56 : 96, flexShrink: 0 }}>
           {chosen ? <OptionThumbnail option={chosen} selected /> : null}
         </div>
         <Stack flex={1} gap={2}>

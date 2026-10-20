@@ -6,7 +6,7 @@ import { validColour } from '@/lib/color/heading-gradient'
  * The shared colour choice for one element of a section (schema: lib/sanity/schema/theme-colour.ts):
  * "which colour of the theme does this icon, name or arrow use". The choices are the theme's own
  * roles, named as in Brand colours and the edge accent (Primary, Secondary, Highlight), plus the two
- * text colours and a Custom hex. Every choice but Custom is a token, so it follows the section's tone
+ * text colours, Transparent (offered only to backgrounds) and a Custom hex. Every choice but Custom is a token, so it follows the section's tone
  * (`[data-tone]` in tokens.generated.css redefines `accent`, `ink` and `ink-muted` on dark tones).
  * Kept free of Studio code so the site can import it.
  *
@@ -21,6 +21,7 @@ export const THEME_COLOURS = [
   'accent',
   'accent-2',
   'highlight',
+  'transparent',
   'custom',
 ] as const
 export type ThemeColour = (typeof THEME_COLOURS)[number]
@@ -32,6 +33,7 @@ export const THEME_COLOUR_TITLES: Record<ThemeColour, string> = {
   accent: 'Primary',
   'accent-2': 'Secondary',
   highlight: 'Highlight',
+  transparent: 'Transparent',
   custom: 'Custom',
 }
 
@@ -42,6 +44,8 @@ const TOKEN_CSS: Record<Exclude<ThemeColour, 'inherit' | 'custom'>, string> = {
   accent: 'var(--color-accent-text)',
   'accent-2': 'var(--color-accent-2)',
   highlight: 'var(--color-highlight)',
+  // A deliberate "no fill" for a background, never the same as Inherit (which keeps the component's own).
+  transparent: 'transparent',
 }
 
 /** A `themeColour` as a query returns it: untrusted, so both values are checked. */

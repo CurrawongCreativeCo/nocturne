@@ -26,6 +26,14 @@ describe('BadgeIcon', () => {
     })
   })
 
+  it('has the lotus and gift, in currentColor so they take any theme or custom colour', () => {
+    for (const name of ['lotus', 'gift']) {
+      const html = renderToStaticMarkup(<BadgeIcon name={name} />)
+      expect(html).toContain('stroke="currentColor"')
+      expect(html).not.toMatch(/#[0-9a-f]{3,6}/i)
+    }
+  })
+
   it('draws each with the one line style, from the page colour', () => {
     for (const { value } of BADGE_ICONS) {
       const html = renderToStaticMarkup(<BadgeIcon name={value} />)

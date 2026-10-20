@@ -46,8 +46,8 @@ export function glassRowsStrength(
   return glassStrengthOf(section.glassStrength)
 }
 
-/** The colour the glass is made from: the tone's `--color-surface`. */
-function glassColour(tone: string | null | undefined, site: ColourSet): string {
+/** The colour the glass (and a card's own surface) is made from: the tone's `--color-surface`. */
+export function toneSurfaceColour(tone: string | null | undefined, site: ColourSet): string {
   switch (tone) {
     case 'inverse':
       return site.surfaceInverse
@@ -67,7 +67,7 @@ export function glassAreas(
   strength: GlassStrength,
   site: ColourSet = colorHex,
 ): [string, string] {
-  const surface = glassColour(tone, site)
+  const surface = toneSurfaceColour(tone, site)
   return [
     composite(surface, '#000000', glass[strength]),
     composite(surface, '#ffffff', glass[strength]),

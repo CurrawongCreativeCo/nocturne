@@ -3808,6 +3808,148 @@ documents.push(
     ],
   },
   {
+    // Card design and overrides, gradient overlays, icon containers and social buttons
+    // (tests/e2e/link-list-overrides.spec.ts). A long Glass rows list over a photo with a Soft top,
+    // deep bottom gradient; the list tints its glass teal with a thin gold border, circles its icons in
+    // gold and frosts its social buttons to match. One card is customised (stronger, thicker, larger
+    // Highlight label, a filled icon), one turns its border, shadow and arrow off, and one has
+    // overrides stored but is set back to the list's design (they must be ignored). Then solid Cards
+    // with a tint and no border, one card putting a Primary border back.
+    _id: 'page-link-overrides',
+    _type: 'page',
+    title: 'Link overrides',
+    slug: { _type: 'slug', current: 'link-overrides' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'ov-glass',
+        _type: 'linkList',
+        variant: 'stacked',
+        rowStyle: 'glass',
+        glassStrength: 'medium',
+        thumbnailSize: 'standard',
+        style: {
+          _type: 'sectionStyle',
+          align: 'center',
+          image: image(''),
+          imageSize: 'screen',
+          overlay: 'medium',
+          overlayColor: 'gradient',
+          overlayGradient: 'deepen',
+        },
+        profile: { _type: 'object', name: 'Tinted glass', bio: 'Rows tinted teal, edged in gold.' },
+        cardDesign: {
+          _type: 'object',
+          background: { _type: 'object', colour: 'custom', hex: '#f5f1e9' },
+          border: 'thin',
+          borderColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+          eyebrow: { _type: 'object', colour: { _type: 'object', colour: 'ink' } },
+        },
+        linkDesign: {
+          _type: 'object',
+          iconShape: 'circle',
+          iconBackground: { _type: 'object', colour: 'transparent' },
+          iconBorder: 'thin',
+          iconBorderColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+          iconColour: { _type: 'object', colour: 'custom', hex: '#6b5416' },
+        },
+        socialDesign: {
+          _type: 'object',
+          style: 'circle',
+          position: 'below',
+          border: 'medium',
+          borderColour: { _type: 'object', colour: 'custom', hex: '#8a6d1d' },
+          background: { _type: 'object', colour: 'custom', hex: '#f5f1e9' },
+        },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        links: [
+          linkItem('ov-a', 'Book a session', external('https://example.com/a'), {
+            eyebrow: 'New',
+            description: 'Sixty minutes in the studio',
+            icon: 'lotus',
+          }),
+          linkItem('ov-b', 'Gift vouchers', external('https://example.com/b'), {
+            eyebrow: 'Featured',
+            icon: 'gift',
+            design: {
+              _type: 'object',
+              appearance: 'custom',
+              backgroundStrength: 'strong',
+              border: 'thick',
+              label: {
+                _type: 'object',
+                size: 'large',
+                colour: { _type: 'object', colour: 'custom', hex: '#4a3a0c' },
+              },
+              iconBackground: { _type: 'object', colour: 'custom', hex: '#e8d9a8' },
+            },
+          }),
+          linkItem('ov-c', 'Quiet link', external('https://example.com/c'), {
+            icon: 'leaf',
+            design: {
+              _type: 'object',
+              appearance: 'custom',
+              border: 'none',
+              shadow: 'flat',
+              arrowStyle: 'none',
+              iconShape: 'plain',
+            },
+          }),
+          linkItem('ov-d', 'Back to the list design', external('https://example.com/d'), {
+            design: { _type: 'object', border: 'none', arrowStyle: 'none' },
+          }),
+          ...['Journal', 'Retreats', 'Workshops', 'Podcast', 'Newsletter', 'Contact'].map(
+            (label, index) =>
+              linkItem(
+                `ov-more-${String(index)}`,
+                label,
+                external(`https://example.com/m${String(index)}`),
+                {
+                  icon: index % 2 ? 'calendar' : 'email',
+                },
+              ),
+          ),
+        ],
+      },
+      {
+        _key: 'ov-cards',
+        _type: 'linkList',
+        variant: 'cards',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: { _type: 'object', name: 'Tinted cards' },
+        socialSource: 'none',
+        cardDesign: {
+          _type: 'object',
+          background: { _type: 'object', colour: 'accent-2' },
+          backgroundStrength: 'light',
+          border: 'none',
+        },
+        links: [
+          linkItem('ovc-a', 'No border card', external('https://example.com/ca'), { icon: 'sun' }),
+          linkItem('ovc-b', 'Bordered card', external('https://example.com/cb'), {
+            icon: 'gift',
+            design: {
+              _type: 'object',
+              appearance: 'custom',
+              border: 'medium',
+              borderColour: { _type: 'object', colour: 'accent' },
+            },
+          }),
+        ],
+      },
+    ],
+  },
+  {
     // Service categories and paragraph-aware bios (tests/e2e/link-list-categories.spec.ts): a Glass
     // rows list over a photo whose bio still repeats the categories (the page shows them once), a
     // list saved before categories existed (its typed bullets stay text), and a start-aligned list

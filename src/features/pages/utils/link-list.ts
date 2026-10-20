@@ -158,3 +158,16 @@ export function defaultLinkArrow({
 
 /** Compact pills draw no indicator, so the choice is not offered there. */
 export const usesArrow = (layout: string | null | undefined) => stegaClean(layout) !== 'compact'
+
+/**
+ * The container a layout draws its link icons in while none is chosen: Glass rows a round badge,
+ * Cards a rounded tile, Minimal and Compact the bare icon. Editorial draws no icons.
+ */
+export function ownIconShape(
+  layout: string | null | undefined,
+  rowStyle: string | null | undefined,
+): 'plain' | 'circle' | 'rounded' {
+  const clean = stegaClean(layout) || 'stacked'
+  if (clean === 'stacked' && stegaClean(rowStyle) === 'glass') return 'circle'
+  return clean === 'cards' ? 'rounded' : 'plain'
+}
