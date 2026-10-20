@@ -129,7 +129,12 @@ export function ColourInput(props: StringInputProps) {
   const headingStop = props.schemaType.options?.headingStop === true
   const elementUsage = props.schemaType.options?.themeColourHex
   const onRows = props.schemaType.options?.themeColourRows === true
-  const section = headingStop ? headingSectionPath(path) : elementUsage ? sectionPathOf(path) : null
+  const inItem = props.schemaType.options?.themeColourInItem === true
+  const section = headingStop
+    ? headingSectionPath(path)
+    : elementUsage
+      ? sectionPathOf(path, { inItem })
+      : null
   const sectionValue = useFormValue(section ?? ['_type'])
   const tone = section ? headingTone(sectionValue as Parameters<typeof headingTone>[0]) : undefined
   const glass = onRows

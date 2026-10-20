@@ -28,3 +28,6 @@ tests/e2e/*-snapshots/*-win32.png
 
 # Screenshot sweeps from `npm run launch:screens`
 launch-screens/
+
+# macOS folder metadata
+.DS_Store

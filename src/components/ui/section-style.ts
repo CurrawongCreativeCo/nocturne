@@ -7,6 +7,7 @@ import {
   type MotionContext,
 } from '@/components/motion/presets'
 import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
+import type { OverlayGradientInput } from '@/lib/sanity/overlay-gradient'
 import {
   SECTION_ALIGNS,
   SECTION_IMAGE_HORIZONTALS,
@@ -85,6 +86,11 @@ export interface SectionStyleInput {
   /** An exact strength in percent; wins over `imageStrength`. */
   imageStrengthPercent?: number | null
   overlayColor?: string | null
+  /** The gradient overlay's shape and its Advanced stops (README, "Section backgrounds"). */
+  overlayGradient?: string | null
+  overlayGradientTop?: OverlayGradientInput['overlayGradientTop']
+  overlayGradientMiddle?: OverlayGradientInput['overlayGradientMiddle']
+  overlayGradientBottom?: OverlayGradientInput['overlayGradientBottom']
   imageFixed?: boolean | null
   /** The section is at least as tall as the screen, its content centred (README, "Section height"). */
   fillScreen?: boolean | null
@@ -199,6 +205,8 @@ export interface ResolvedBackgroundImage {
   /** The picture's opacity, 0 to 1. */
   strength: number
   wash: SectionWash
+  /** The gradient overlay's stored shape and stops, when the wash is Gradient. */
+  gradient: OverlayGradientInput | undefined
   /** Stays put while the page scrolls (large screens, no reduced motion). */
   fixed: boolean
   /** Cover the screen: the picture is the window's size and stays in view while the section scrolls. */
@@ -223,6 +231,7 @@ export function resolveBackgroundImage(
   const repeat = imageSizeUsesRepeat(size)
     ? (pick(SECTION_IMAGE_REPEATS, style?.imageRepeat) ?? 'none')
     : 'none'
+  const wash = pick(SECTION_WASHES, style?.overlayColor) ?? 'background'
 
   return {
     size,
@@ -236,7 +245,16 @@ export function resolveBackgroundImage(
     repeat,
     repeatCss: REPEAT_CSS[repeat],
     strength: imageStrengthOpacity(style?.imageStrength, style?.imageStrengthPercent),
-    wash: pick(SECTION_WASHES, style?.overlayColor) ?? 'background',
+    wash,
+    gradient:
+      wash === 'gradient'
+        ? {
+            overlayGradient: style?.overlayGradient,
+            overlayGradientTop: style?.overlayGradientTop,
+            overlayGradientMiddle: style?.overlayGradientMiddle,
+            overlayGradientBottom: style?.overlayGradientBottom,
+          }
+        : undefined,
     fixed: style?.imageFixed === true && imageSizeUsesFixed(size),
     screen: size === 'screen',
     tiled: repeat !== 'none',

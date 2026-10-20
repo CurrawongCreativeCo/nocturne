@@ -38,3 +38,15 @@ export function enclosingOfArray(
   const found = valueAtPath(document, path.slice(0, index))
   return found && typeof found === 'object' ? (found as Record<string, unknown>) : undefined
 }
+
+/** The array member a field sits in: for a field of a link's Appearance, the link itself. */
+export function memberOfArray(
+  document: unknown,
+  path: FieldPath,
+  arrayName: string,
+): Record<string, unknown> | undefined {
+  const index = path.lastIndexOf(arrayName)
+  if (index < 0 || index + 1 >= path.length) return undefined
+  const found = valueAtPath(document, path.slice(0, index + 2))
+  return found && typeof found === 'object' ? (found as Record<string, unknown>) : undefined
+}

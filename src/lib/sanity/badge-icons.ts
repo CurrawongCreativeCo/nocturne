@@ -21,6 +21,8 @@ export const BADGE_ICONS = [
   { value: 'email', title: 'Email' },
   { value: 'calendar', title: 'Calendar' },
   { value: 'phone', title: 'Phone' },
+  { value: 'lotus', title: 'Lotus' },
+  { value: 'gift', title: 'Gift' },
 ] as const
 
 export type BadgeIconName = (typeof BADGE_ICONS)[number]['value']

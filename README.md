@@ -2743,10 +2743,21 @@ did: Fill the section, the hotspot, Full, the background colour.
   picture_ (all of it, `object-fit: contain`) or _Actual size_ (not scaled, for small patterns).
 - **Picture strength**: _Full_ (default), _Soft_ (60%) or _Faint_ (30%). The picture's layer is made see-through, so the
   section's own background shows through; the overlay then lies on top, as before.
-- **Overlay colour**: _Background colour_ (default, the tone's own colour), _Light wash_ (white) or _Dark wash_ (near
-  black), at the existing Overlay strengths (Light 45%, Medium 70%, Strong 88%). A wash stays light or dark whatever the
+- **Overlay colour**: _Background colour_ (default, the tone's own colour), _Light wash_ (white), _Dark wash_ (near
+  black) or _Gradient_, at the existing Overlay strengths (Light 45%, Medium 70%, Strong 88%). A wash stays light or dark whatever the
   tone or brand colours, so it is a plain colour (`SECTION_WASH_COLOURS`), not a token. Text colours still follow the tone,
   so pair a Dark wash with Contrast and a Light wash with Page.
+- **Gradient** (`src/lib/sanity/overlay-gradient.ts`): a see-through, multi-stop gradient of the site's own colours on the
+  same overlay layer, so it sits above the picture and below the content, covers the whole section however long it is,
+  and never fades the content. Three presets with pictures: _Soft top, deep bottom_ (default: the section's colour barely
+  there at the top, Primary through the middle, a deep Primary at the bottom), _Even atmosphere_ and _Focused centre_
+  (darker edges). The Overlay strength (Light, Medium, Strong) sets how strong it is. The brand colours are the root ones
+  (`--tone-accent`, `--color-accent-2`, `--color-highlight`), so a client's Primary is used in any tone. _Advanced:
+  gradient_ (collapsed) sets each of the top, middle and bottom stops' colour (Background colour, Light, Dark, Primary,
+  Deep Primary, Secondary, Highlight or Custom) and opacity (a 0 to 90% slider); anything empty follows the preset. The
+  CSS adds eased in-between stops so it never bands. Studio shows a preview under the picker over the section's own
+  picture (a phone-shaped crop, in the site's Brand colours), and the background contrast warning measures each stop over
+  the darkest and lightest photo: a soft top usually warns, because there the text sits on the photo itself.
 - **Advanced: background** (shown only where they apply): _Position_ (up and down: Top, Middle, Bottom; left and right: Left,
   Centre, Right; for Show the whole picture and Actual size only, since Fill the section uses the hotspot), _Repeat_ (Actual
   size only: No repeat, Repeat across, Repeat down, Tile), _Exact strength (%)_ (5 to 100, wins over the named strength) and
@@ -3164,14 +3175,16 @@ rendering: the **Link page** template is a page with this section and one page o
 
 | Field            | What it does                                                                                                                                                                                                                      |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Eyebrow          | Optional small line above the label ("New", "Free guide"), read before it. A warning past 28 characters. Empty takes no space. Not shown in Compact.                                                                              |
 | Label            | The button text. A warning past 40 characters.                                                                                                                                                                                    |
 | Where it goes    | The shared link picker (see [Link actions](#link-actions)).                                                                                                                                                                       |
 | Description      | A line under the label. Not shown in the Compact layout.                                                                                                                                                                          |
-| Icon             | From the badge icon set (the same sixteen icons as badge rows, including Care, Community, Person, Location, Email, Calendar, Phone and Sun). Not shown in Editorial.                                                              |
+| Icon             | From the shared icon set (eighteen, including Lotus and Gift), picked from a grid that draws each icon above its name. Not shown in Editorial.                                                                                    |
 | Show large       | One link is drawn large: the first one ticked. A second tick is ignored (Studio warns). Not used by Compact.                                                                                                                      |
 | Heading above it | Optional group heading. Links under the same heading are grouped; a link with no heading joins the group above it.                                                                                                                |
 | Show or Hide     | Hide takes a link off the page without deleting it. A hidden link never leaves the Content Lake.                                                                                                                                  |
 | Advanced         | A **thumbnail** (Minimal and Cards only; Glass rows draw it beside the icon, the other layouts instead of it), **Show from** / **Show until**, and **UTM** source, medium and campaign (shown for links to another website only). |
+| Appearance       | Agency only. _Use the Link list design_ (default) or _Customise this card_; see [Card design and overrides](#card-design-and-overrides).                                                                                          |
 
 Studio warns above 12 links. The link management (add, edit, reorder, hide, schedule) is open to clients.
 
@@ -3250,7 +3263,7 @@ page without deleting them; hidden categories never leave the Content Lake. Stud
   repeats them gets a warning to delete the line. No migration script: the fields are optional, and only the editor can tell
   a typed list of services from a sentence that happens to use a bullet.
 
-**Design.** The Link list's Design tab (agency only) has five boxes and a collapsed **Depth and glow** above the shared Background and Animation. Everything
+**Design.** The Link list's Design tab (agency only) has six boxes and a collapsed **Depth and glow** above the shared Background and Animation. Everything
 empty is the look the section always had, so no content needs migrating. The colour overrides sit in a collapsed **Colours**
 inside each box, and every option that depends on another only shows once it applies.
 
@@ -3258,8 +3271,9 @@ inside each box, and every option that depends on another only shows once it app
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Profile            | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border.                                                                                                                                                                                                                                                               |
 | Service categories | **Separator** Bullet (default), Middle dot, Line, Diamond or None, drawn in CSS so it looks the same in every font. **On a phone** One row that wraps (default) or One per line. Text (collapsed): **Size** Small (default), Medium or Large (the `small`, `body` and `lead` type tokens), **Weight** Regular, Medium (default) or Bold, **Letters** As typed (default) or Capitals (with a little letter spacing), **Space between** Compact, Comfortable (default) or Wide. Colours: category (Inherit is the text colour) and separator (Inherit is Primary), each Text, Muted text, Primary, Secondary, Highlight or Custom. It follows the section's alignment. Shown once there are categories. |
-| Links              | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow, icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. Colours: icon, button.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Cards              | Every link's **Background colour** (Primary, Secondary, Highlight, Text, Transparent or Custom), **Background strength** (Light, Medium, Strong, Solid), **Border** (None, Thin, Medium, Thick) and **Border colour**, then a collapsed **Text** with the **Eyebrow**, **Label** and **Description** (size Small, Medium or Large as steps from the layout's own, weight, colour; the eyebrow's capitals and letter spacing; the description's line height). Every option starts on _Inherit_ (the layout's own). Not offered for Editorial's ruled list. See [Card design and overrides](#card-design-and-overrides).                                                                                |
+| Arrows and icons   | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow. **Icons** (collapsed): **Icon container** No container, Circle, Rounded square or Square (the social icon shapes), its colour, strength, border and border colour, and the icon colour.                                                                                                                                                                                                                                                                          |
+| Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. **Button border** None, Thin, Medium or Thick. Colours: icon, button (a tint on glass: the blur stays), button strength, border.                                                                                                                                                                                                                                                                                                                                                                                         |
 
 - **Dividers**: a divider of its own at each of four positions: **Between the categories and the bio** (shown once
   both exist), **After the profile**, **Above the social icons** (words here make a heading for the icons, such as "Stay
@@ -3296,6 +3310,31 @@ inside each box, and every option that depends on another only shows once it app
   style is chosen.
 - **Shared parts.** `LinkArrow`, `SocialLinks`, `ProfileImage` and `Wordmark` in `src/components/ui/` are server components
   with no JavaScript, ready for other sections (see the follow-up tasks in the build plan).
+
+<a id="card-design-and-overrides"></a>**Card design and overrides.** A card's look is resolved in four layers, each more
+specific than the last, one property at a time (`layerDesign`, `src/lib/sanity/design-overrides.ts`):
+
+1. the site's design tokens;
+2. the layout's preset (Minimal's buttons, Cards' cards, Glass rows' glass);
+3. the list's _Design › Cards_, _Arrows and icons_ and _Depth and glow › Link shadow_;
+4. one link's _Appearance_, only while it is set to _Customise this card_.
+
+The most specific value **chosen** wins for that property only: a card that sets a thick border keeps the list's tint,
+label size and everything else. Only an unset value inherits. _None_ borders, _Transparent_ backgrounds, _Flat_ shadows,
+_None_ arrows and _No container_ icons are real values and are never mistaken for "inherit". Every option shows an
+**Inherit** button first, so going back is one click; switching a card back to _Use the Link list design_ keeps its
+choices but the page ignores them (and the query never sends them).
+
+- **Glass stays glass.** On Glass rows a colour **tints** the glass at the glass strength (or the chosen strength) through
+  CSS variables `.glass-row` reads (`--glass-tint`, `--glass-border-width`, `--glass-border-colour`), so the blur, the
+  glass's shadow and the nearly solid fallback (no blur support, reduced transparency) all stay. Only _Solid_ makes it
+  opaque. Solid cards draw their border as an inset ring, so a thicker border never changes a card's size.
+- **Icon containers** (`iconLook`, `src/lib/sanity/surface-options.ts`) use the social icon shapes; the container keeps the
+  layout's size whatever the shape, so mixed shapes line up. Social buttons use the same surface primitives.
+- **Contrast.** A card background or text colour is measured on the card it draws on: Studio layers the list's and the
+  card's choices (`src/lib/color/card-contrast.ts`), over the section's background, or for glass over the darkest and
+  lightest photo. Transparent glass never passes on its own: its text sits on the photo. Warnings only.
+- **Rendering** is server-only CSS: classes plus custom properties on each link's `<li>`, no JavaScript.
 
 **Scheduling and hiding.** Pages are cached, so the server can't know the time while it builds one.
 

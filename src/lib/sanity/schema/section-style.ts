@@ -8,7 +8,19 @@ import {
 
 import { customRange, isMotionPreset } from '@/components/motion/presets'
 import { backgroundContrastProblem } from '@/lib/color/background-contrast'
+import { overlayGradientContrastProblem } from '@/lib/color/overlay-gradient-contrast'
 
+import {
+  GRADIENT_OPACITY_RANGE,
+  GRADIENT_STOP_COLOURS,
+  GRADIENT_STOP_TITLES,
+  OVERLAY_GRADIENTS,
+  OVERLAY_GRADIENT_DESCRIPTIONS,
+  OVERLAY_GRADIENT_TITLES,
+  resolveOverlayGradient,
+  type GradientStop,
+  type OverlayGradientInput,
+} from '../overlay-gradient'
 import { hiddenFromClients } from '../roles'
 import {
   ANCHOR_PATTERN,
@@ -54,6 +66,7 @@ import {
   SECTION_TONE_TITLES,
   SECTION_WIDTHS,
 } from '../section-style-options'
+import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradients } from './brand-gradients'
 import { imageField } from './image-field'
 import { presetField } from './preset-field'
@@ -86,7 +99,9 @@ import {
   ImageStrengthSoftThumbnail,
   WashBackgroundThumbnail,
   WashDarkThumbnail,
+  WashGradientThumbnail,
   WashLightThumbnail,
+  overlayGradientThumbnails,
 } from './thumbnails/background-image-thumbnails'
 import {
   EdgeArchThumbnail,
@@ -132,6 +147,88 @@ function motionRangeProblem(
   return value >= min && value <= max ? true : `Use ${min} to ${max} ${unit}`
 }
 
+type StyleWithGradient = OverlayGradientInput & {
+  overlay?: string
+  overlayColor?: string
+  tone?: string
+  imageStrength?: string
+  imageStrengthPercent?: number
+}
+
+/** The gradient's options only show while the overlay colour is Gradient (and there is an overlay). */
+const gradientHidden: ConditionalPropertyCallback = (context) => {
+  const style = context.parent as StyleWithGradient | undefined
+  return overlayHidden(context) || style?.overlayColor !== 'gradient' || style.overlay === 'none'
+}
+
+const STOP_TITLES: Record<GradientStop, string> = {
+  top: 'Top',
+  middle: 'Middle',
+  bottom: 'Bottom',
+}
+
+/** One stop of the gradient overlay (Advanced): a colour and an opacity, each following the preset while empty. */
+function gradientStopField(stop: GradientStop) {
+  return defineField({
+    name: `overlayGradient${STOP_TITLES[stop]}`,
+    title: `${STOP_TITLES[stop]} of the gradient`,
+    description:
+      stop === 'top'
+        ? 'For Focused centre, the top is the centre and the bottom the edges.'
+        : undefined,
+    type: 'object',
+    fieldset: 'gradientAdvanced',
+    hidden: gradientHidden,
+    options: { collapsible: false },
+    fields: [
+      defineField({
+        name: 'colour',
+        title: 'Colour',
+        type: 'string',
+        options: {
+          list: GRADIENT_STOP_COLOURS.map((value) => ({
+            value,
+            title: GRADIENT_STOP_TITLES[value],
+          })),
+          layout: 'radio',
+          direction: 'horizontal',
+          inheritable: 'As the preset',
+        },
+      }),
+      defineField({
+        name: 'hex',
+        title: 'Custom colour',
+        type: 'string',
+        options: { colourPicker: true },
+        hidden: ({ parent }: { parent?: { colour?: string } }) => parent?.colour !== 'custom',
+        validation: (rule) =>
+          rule.custom((value, { parent }) =>
+            (parent as { colour?: string } | undefined)?.colour !== 'custom' ||
+            (typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value))
+              ? true
+              : 'Choose a colour. Until then this stop keeps the preset’s.',
+          ),
+      }),
+      defineField({
+        name: 'opacity',
+        title: 'Opacity',
+        type: 'number',
+        description: 'Empty follows the preset at the overlay strength above.',
+        options: {
+          slider: { ...GRADIENT_OPACITY_RANGE, step: 1, unit: '%' },
+        },
+        validation: (rule) =>
+          rule.integer().min(GRADIENT_OPACITY_RANGE.min).max(GRADIENT_OPACITY_RANGE.max),
+      }),
+    ],
+  })
+}
+
+/** Adds the Studio's preview over the section's own picture below the gradient picker. */
+function withOverlayPreview<T extends { options?: object }>(field: T): T {
+  return { ...field, options: { ...field.options, overlayPreview: true } }
+}
+
 const radio = (values: readonly string[], titles: Record<string, string>) => ({
   list: values.map((value) => ({ title: titles[value] ?? value, value })),
   layout: 'radio' as const,
@@ -139,6 +236,10 @@ const radio = (values: readonly string[], titles: Record<string, string>) => ({
 })
 
 declare module 'sanity' {
+  interface NumberOptions {
+    /** Draw the number as a slider (features/studio/components/slider-input). */
+    slider?: { min: number; max: number; step: number; unit: string }
+  }
   interface ObjectOptions {
     /** Show the object's fields without its own title and frame (the Studio field is in features/studio/components/frameless-field). */
     frameless?: boolean
@@ -146,6 +247,10 @@ declare module 'sanity' {
   interface StringOptions {
     /** The field holds the slug of a brand gradient: the Studio draws the picker (features/studio/components/gradient-picker). */
     gradientPicker?: boolean
+    /** A six-digit hex with the Brand colours input's picker and no contrast check (features/site/components/colour-input). */
+    colourPicker?: boolean
+    /** The gradient overlay's shape: the Studio adds a preview over the section's own picture (features/studio/components/overlay-preview). */
+    overlayPreview?: boolean
   }
 }
 
@@ -167,6 +272,13 @@ export const sectionStyle = defineType({
       title: 'Advanced: background',
       description:
         'Where the picture sits, whether it repeats, an exact strength, and keeping it still while the page scrolls. Only the options that apply are shown.',
+      options: { collapsible: true, collapsed: true },
+    },
+    {
+      name: 'gradientAdvanced',
+      title: 'Advanced: gradient',
+      description:
+        'The colour and opacity of the top, middle and bottom of the gradient. Anything left empty follows the gradient chosen above.',
       options: { collapsible: true, collapsed: true },
     },
     {
@@ -257,24 +369,30 @@ export const sectionStyle = defineType({
       hidden: backgroundImageHidden,
       validation: (rule) =>
         rule
-          .custom((value, { parent }) => {
-            const style = parent as
-              | {
-                  tone?: string
-                  overlay?: string
-                  overlayColor?: string
-                  imageStrength?: string
-                  imageStrengthPercent?: number
-                }
-              | undefined
+          .custom(async (value, { parent, getClient }) => {
+            const style = parent as StyleWithGradient | undefined
             if (!(value as { asset?: unknown } | undefined)?.asset) return true
+            const strength = imageStrengthOpacity(style?.imageStrength, style?.imageStrengthPercent)
+            if (style?.overlayColor === 'gradient') {
+              const level = style.overlay ?? defaultOverlayFor(style.tone)
+              if (level === 'none') return true
+              const { colours } = await fetchBrandColours(getClient({ apiVersion: '2025-01-01' }))
+              return (
+                overlayGradientContrastProblem({
+                  tone: style.tone,
+                  gradient: resolveOverlayGradient(style, level as 'light' | 'medium' | 'strong'),
+                  strength,
+                  site: colours,
+                })?.message ?? true
+              )
+            }
             return (
               backgroundContrastProblem({
                 tone: style?.tone,
                 hasImage: true,
                 overlay: style?.overlay,
                 wash: style?.overlayColor,
-                strength: imageStrengthOpacity(style?.imageStrength, style?.imageStrengthPercent),
+                strength,
               })?.message ?? true
             )
           })
@@ -410,11 +528,38 @@ export const sectionStyle = defineType({
           description: 'Near black, whatever the background.',
           thumbnail: WashDarkThumbnail,
         },
+        {
+          value: 'gradient',
+          title: SECTION_WASH_TITLES.gradient,
+          description: 'Brand colours that deepen across the picture.',
+          thumbnail: WashGradientThumbnail,
+        },
       ],
       initialValue: null,
       hidden: overlayHidden,
       defaultValue: () => 'background',
     }),
+    withOverlayPreview(
+      presetField({
+        name: 'overlayGradient',
+        title: 'Gradient',
+        description:
+          'Made from this site’s colours, at the overlay strength above (Light, Medium or Strong). The preview below uses this section’s picture.',
+        required: false,
+        initialValue: null,
+        options: OVERLAY_GRADIENTS.map((value) => ({
+          value,
+          title: OVERLAY_GRADIENT_TITLES[value],
+          description: OVERLAY_GRADIENT_DESCRIPTIONS[value],
+          thumbnail: overlayGradientThumbnails[value],
+        })),
+        hidden: gradientHidden,
+        defaultValue: () => 'deepen',
+      }),
+    ),
+    gradientStopField('top'),
+    gradientStopField('middle'),
+    gradientStopField('bottom'),
     defineField({
       name: 'imageVertical',
       title: 'Position: up and down',

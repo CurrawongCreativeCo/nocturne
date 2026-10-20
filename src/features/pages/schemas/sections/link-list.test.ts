@@ -90,9 +90,17 @@ describe('Design boxes and conditional fields', () => {
   const hidden = (target: Field, context: Record<string, unknown>) =>
     typeof target.hidden === 'function' ? target.hidden({ ...AGENCY, ...context }) : target.hidden
 
-  it('offers Links on every layout but Compact, which draws no arrow', () => {
-    expect(hidden(field('linkDesign'), { parent: { variant: 'compact' } })).toBe(true)
+  it('offers Arrows and icons on every layout, with the arrow options only where there is an arrow', () => {
+    // Compact pills have icons but no arrow.
+    expect(hidden(field('linkDesign'), { parent: { variant: 'compact' } })).toBe(false)
     expect(hidden(field('linkDesign'), { parent: { variant: 'cards' } })).toBe(false)
+    const arrowStyle = field('arrowStyle', field('linkDesign').fields)
+    const inSection = (variant: string) => ({
+      document: { pageBuilder: [{ _key: 's', _type: 'linkList', variant }] },
+      path: ['pageBuilder', { _key: 's' }, 'linkDesign', 'arrowStyle'],
+    })
+    expect(hidden(arrowStyle, inSection('compact'))).toBe(true)
+    expect(hidden(arrowStyle, inSection('cards'))).toBe(false)
   })
 
   it('hides Social icons when the section shows none', () => {

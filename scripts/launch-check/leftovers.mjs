@@ -18,8 +18,8 @@ export const TEMPLATE_ICON_SVG =
  * byte for byte has not set its own icon. `node scripts/make-default-icons.mjs` prints these.
  */
 export const DEFAULT_ICON_SHA256 = [
-  'de290a2d74b8a858e022037a4672cc59528259ddf7ee56ea32a0acde4c52be10',
-  '431605b870497c8b932e2861d04e8aea26bdff826eeca7495b1ea90041bbd4a0',
+  'a0a23f975365fe17e43eee9f7da32135ec035a86111a14dc3e7e4990096c019d',
+  '34f5f51f6777f1e90ab5d84763898832d3829be5046ef35e68a0770f31cf87c2',
 ]
 
 const squash = (svg) => svg.replace(/\s+/g, '').toLowerCase()

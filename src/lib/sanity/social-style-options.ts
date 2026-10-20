@@ -16,6 +16,16 @@ export const SOCIAL_STYLE_TITLES: Record<SocialStyle, string> = {
   square: 'Squares',
 }
 
+/**
+ * The corners of each shaped style. Shared with the Link list's icon containers (surface-options.ts),
+ * so a circle or rounded square is the same shape wherever an icon sits on one.
+ */
+export const SHAPE_RADIUS: Record<Exclude<SocialStyle, 'plain'>, string> = {
+  circle: 'rounded-full',
+  rounded: 'rounded-control',
+  square: 'rounded-sm',
+}
+
 /** Where the icons sit: under the profile (the original place) or after the links. */
 export const SOCIAL_POSITIONS = ['above', 'below'] as const
 export type SocialPosition = (typeof SOCIAL_POSITIONS)[number]

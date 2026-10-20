@@ -78,6 +78,23 @@ export const BADGE_ICON_PATHS: Record<BadgeIconName, ReactNode> = {
   phone: (
     <path d="M6.5 3.5h3L11 7.5l-2 1.3a10 10 0 0 0 5.2 5.2l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A15.5 15.5 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2Z" />
   ),
+  // A symmetrical lotus: a tall centre petal, two side petals tucked behind it, and a low cradle.
+  lotus: (
+    <>
+      <path d="M12 17.5c-2.1-2.1-3-4.3-3-6.6 0-2.3 1.1-4.3 3-5.9 1.9 1.6 3 3.6 3 5.9 0 2.3-.9 4.5-3 6.6Z" />
+      <path d="M10.6 17.4C7.3 17.2 5 14.9 4.4 10.9c1.7 0 3.2.5 4.5 1.4" />
+      <path d="M13.4 17.4c3.3-.2 5.6-2.5 6.2-6.5-1.7 0-3.2.5-4.5 1.4" />
+      <path d="M3.5 15.2c1.7 2.4 4.7 3.8 8.5 3.8s6.8-1.4 8.5-3.8" />
+    </>
+  ),
+  // A wrapped present: lid, box, ribbon and a two-loop bow.
+  gift: (
+    <>
+      <rect x="3.5" y="8" width="17" height="4" rx="1" />
+      <path d="M5 12v7.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V12M12 8v12.5" />
+      <path d="M12 8c-.9-2.5-2.4-4-3.9-4A1.9 1.9 0 0 0 6.2 6c0 1.3 1.3 2 3.3 2H12Zm0 0c.9-2.5 2.4-4 3.9-4A1.9 1.9 0 0 1 17.8 6c0 1.3-1.3 2-3.3 2H12Z" />
+    </>
+  ),
 }
 
 interface Props {

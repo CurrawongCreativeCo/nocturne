@@ -86,6 +86,8 @@ interface OptionGridProps {
   focusRef?: RefCallback<HTMLButtonElement>
   onFocus?: FocusEventHandler<HTMLElement>
   onBlur?: FocusEventHandler<HTMLElement>
+  /** Smaller cards (from 88 px), for a long list of small pictures such as icons. */
+  compact?: boolean
 }
 
 /**
@@ -104,6 +106,7 @@ export function OptionGrid({
   focusRef,
   onFocus,
   onBlur,
+  compact = false,
 }: OptionGridProps) {
   const prefix = useId()
   const cards = useRef<(HTMLButtonElement | null)[]>([])
@@ -131,8 +134,8 @@ export function OptionGrid({
       onBlur={onBlur}
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-        gap: 12,
+        gridTemplateColumns: `repeat(auto-fill, minmax(${compact ? 88 : 160}px, 1fr))`,
+        gap: compact ? 8 : 12,
       }}
     >
       {options.map((option, index) => {
@@ -172,7 +175,7 @@ export function OptionGrid({
             }}
             style={{ textAlign: 'left', cursor: readOnly ? 'default' : 'pointer' }}
           >
-            <Stack gap={3}>
+            <Stack gap={compact ? 2 : 3}>
               <OptionThumbnail option={option} selected={selected} />
               <Flex align="center" gap={2}>
                 <Box flex={1}>

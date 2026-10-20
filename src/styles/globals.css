@@ -450,27 +450,33 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
  * the see-through strengths (lib/color/glass-contrast.ts). The focus ring is the shared one above.
  */
 @layer components {
+  /*
+   * A card can tint and outline its glass (README, "Link list": Card design and overrides) through
+   * --glass-tint, --glass-tint-solid, --glass-border-width and --glass-border-colour, set on the element
+   * or inherited from its list item. Unset, each falls back to the glass tokens: the blur and the
+   * shadow always stay, so a tinted row is still glass.
+   */
   .glass-row {
-    background-color: var(--glass-surface);
-    border: 1px solid var(--glass-border);
+    background-color: var(--glass-tint, var(--glass-surface));
+    border: var(--glass-border-width, 1px) solid var(--glass-border-colour, var(--glass-border));
     box-shadow: var(--glass-shadow);
     -webkit-backdrop-filter: blur(var(--glass-blur));
     backdrop-filter: blur(var(--glass-blur));
   }
 
   .glass-row:hover {
-    border-color: var(--glass-border-hover);
+    border-color: var(--glass-border-colour, var(--glass-border-hover));
   }
 
   @supports not (backdrop-filter: blur(1px)) {
     .glass-row {
-      background-color: var(--glass-solid);
+      background-color: var(--glass-tint-solid, var(--glass-solid));
     }
   }
 
   @media (prefers-reduced-transparency: reduce) {
     .glass-row {
-      background-color: var(--glass-solid);
+      background-color: var(--glass-tint-solid, var(--glass-solid));
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }

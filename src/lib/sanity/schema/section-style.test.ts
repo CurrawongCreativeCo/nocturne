@@ -73,6 +73,10 @@ describe('sectionStyle', () => {
       'imageStrength',
       'overlay',
       'overlayColor',
+      'overlayGradient',
+      'overlayGradientTop',
+      'overlayGradientMiddle',
+      'overlayGradientBottom',
       'imageVertical',
       'imageHorizontal',
       'imageRepeat',
@@ -125,6 +129,11 @@ describe('sectionStyle', () => {
       expect.objectContaining({
         name: 'backgroundAdvanced',
         title: 'Advanced: background',
+        options: { collapsible: true, collapsed: true },
+      }),
+      expect.objectContaining({
+        name: 'gradientAdvanced',
+        title: 'Advanced: gradient',
         options: { collapsible: true, collapsed: true },
       }),
       expect.objectContaining({

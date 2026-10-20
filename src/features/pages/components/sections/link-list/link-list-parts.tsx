@@ -36,11 +36,25 @@ import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-option
 import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { socialPositionOf, socialStyleOf } from '@/lib/sanity/social-style-options'
+import {
+  iconLook,
+  resolveSurface,
+  type IconDesign,
+  type OwnIcon,
+} from '@/lib/sanity/surface-options'
+import { textLook, type OwnText } from '@/lib/sanity/text-style-options'
 import { themeColourCss, themeColourStyle } from '@/lib/sanity/theme-colour'
 import { showsWordmark, wordmarkSizeOf } from '@/lib/sanity/wordmark-options'
 import type { SanityImageData } from '@/types/sanity'
 
 import type { SectionProps } from '../../../types'
+import {
+  cardOverrides,
+  layerLinkCardDesign,
+  listCardDesignInput,
+  resolveLinkCardDesign,
+  type LinkCardDesign,
+} from '../../../utils/link-card-design'
 import { defaultLinkArrow, headingLevels } from '../../../utils/link-list'
 import {
   drawableLinks,
@@ -74,13 +88,14 @@ export interface LinkContext {
   /** Minimal only: plain buttons, or the frosted rows of the Glass rows preset. */
   rowStyle: 'solid' | 'glass'
   glassStrength: GlassStrength
-  /** The indicator at the end of each link (Design › Links › Arrow style, else the layout's default). */
+  /** The indicator at the end of this link: its own, else the list's Arrow style, else the layout's. */
   arrow: LinkArrowStyle
-  /** Colour overrides from Design › Links, as inline styles; undefined keeps the layout's colours. */
+  /** The arrow's colour, as an inline style; undefined keeps the layout's colour. */
   arrowStyle: CSSProperties | undefined
-  iconStyle: CSSProperties | undefined
-  /** Design › Depth and glow for the links, given the shadow a link draws on its own. */
+  /** Depth and glow for this link (its own shadow, else the list's), given the shadow it draws on its own. */
   linkDepth: BoxDepth
+  /** This link's card design: the list's Cards and icons, with the link's own Appearance over it. */
+  design: LinkCardDesign
 }
 
 /**
@@ -249,15 +264,21 @@ export function LinkItem({
 }: {
   link: ListLink
   className?: string
-  /** Custom properties the link inherits (Depth and glow). */
-  style?: CSSProperties
+  /** Custom properties the link inherits (Depth and glow, its card surface); later ones win. */
+  style?: CSSProperties | readonly (CSSProperties | undefined)[]
   children: ReactNode
 }) {
+  const merged = Array.isArray(style)
+    ? (style as readonly (CSSProperties | undefined)[]).reduce<CSSProperties | undefined>(
+        (all, next) => (next ? { ...all, ...next } : all),
+        undefined,
+      )
+    : (style as CSSProperties | undefined)
   return (
     <li
       {...trackAttributes('link_click', linkTrackProps(link))}
       className={className}
-      style={style}
+      style={merged}
     >
       {children}
     </li>
@@ -271,15 +292,123 @@ export function LinkItem({
 export function LinkDescription({
   text,
   className,
+  style,
 }: {
   text: string | null | undefined
   className: string
+  style?: CSSProperties
 }) {
   if (!text) return null
   return (
-    <span className={className}>
+    <span className={className} style={style}>
       <span className="sr-only">. </span>
       {text}
+    </span>
+  )
+}
+
+/** What a layout draws for a link's three lines with nothing chosen, and the classes it always adds. */
+export interface OwnLinkText {
+  eyebrow: OwnText
+  label: OwnText
+  description: OwnText
+  /** Classes the label always has (`text-balance`). */
+  labelClass?: string
+  /** Classes the description always has (spacing, `text-pretty`). */
+  descriptionClass?: string
+}
+
+/** The usual eyebrow: small spaced capitals in the medium weight, in the description's colour. */
+export function ownEyebrow(colour?: string): OwnText {
+  return {
+    size: 'text-small',
+    defaultSize: 'small',
+    weight: 'medium',
+    textCase: 'uppercase',
+    colour,
+  }
+}
+
+/**
+ * A link's eyebrow, label and description, each in the layout's own look with the card's text design
+ * over it. The eyebrow is read first, then a visually hidden full stop, so it doesn't run into the
+ * label ("New. Book a consultation. Thirty minutes"); an empty one draws nothing and takes no space.
+ */
+export function LinkText({
+  link,
+  design,
+  own,
+  className = '',
+}: {
+  link: ListLink
+  design: LinkCardDesign
+  own: OwnLinkText
+  /** The column's own classes (width, alignment). */
+  className?: string
+}) {
+  const eyebrowText = clean(link.item.eyebrow)
+  const eyebrow = textLook(design.eyebrow, own.eyebrow)
+  const label = textLook(design.label, own.label)
+  const description = textLook(design.description, own.description)
+  return (
+    <span className={`flex min-w-0 flex-col ${className}`.trim()}>
+      {eyebrowText && (
+        <span className={`mb-0.5 ${eyebrow.className}`} style={eyebrow.style} data-link-eyebrow="">
+          {link.item.eyebrow}
+          <span className="sr-only">. </span>
+        </span>
+      )}
+      <span className={`${label.className} ${own.labelClass ?? ''}`.trim()} style={label.style}>
+        {link.label}
+      </span>
+      <LinkDescription
+        text={link.item.description}
+        className={`${description.className} ${own.descriptionClass ?? ''}`.trim()}
+        style={description.style}
+      />
+    </span>
+  )
+}
+
+/**
+ * A link's icon in its container (the card's icon design over the layout's own). `box` sizes the
+ * container; `keepBox` keeps that box for a plain icon too, so rows with and without containers line
+ * up (Glass rows, Cards). Draws nothing for a link without an icon.
+ */
+export function LinkIcon({
+  link,
+  design,
+  own,
+  box,
+  iconClass,
+  keepBox = false,
+}: {
+  link: ListLink
+  design: IconDesign
+  own: OwnIcon
+  box: string
+  iconClass: string
+  keepBox?: boolean
+}) {
+  if (!link.item.icon) return null
+  const look = iconLook(design, own)
+  const icon = <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
+  if (look.shape === 'plain' && !keepBox) {
+    return look.className || look.style ? (
+      <span className={`contents ${look.className}`} style={look.style}>
+        {icon}
+      </span>
+    ) : (
+      icon
+    )
+  }
+  return (
+    <span
+      className={`grid shrink-0 place-items-center ${box} ${look.className}`}
+      style={look.style}
+      data-icon-shape={look.shape}
+    >
+      {icon}
     </span>
   )
 }
@@ -288,17 +417,15 @@ export function LinkDescription({
 export function LinkVisual({
   link,
   thumbClass,
-  iconClass = '',
-  iconStyle,
   sizes,
+  icon,
   useThumbnail = true,
 }: {
   link: ListLink
   thumbClass: string
-  iconClass?: string
-  /** The icon colour from Design › Links. */
-  iconStyle?: CSSProperties
   sizes: string
+  /** The icon, drawn when there is no thumbnail. */
+  icon: ReactNode
   useThumbnail?: boolean
 }) {
   const thumbnail = link.item.thumbnail as SanityImageData | null | undefined
@@ -314,14 +441,7 @@ export function LinkVisual({
       />
     )
   }
-  if (!link.item.icon) return null
-  return iconStyle ? (
-    <span className="contents" style={iconStyle}>
-      <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
-    </span>
-  ) : (
-    <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
-  )
+  return icon
 }
 
 /** Whether a link has a picture to draw (a thumbnail, when the layout shows them). */
@@ -338,7 +458,7 @@ function LinkGroups({
 }: {
   links: ListLink[]
   layout: LinkListLayout
-  context: LinkContext
+  context: (link: ListLink) => LinkContext
   groupHeading: 'h2' | 'h3'
 }) {
   return groupDrawn(links).map((group, index) => (
@@ -353,7 +473,7 @@ function LinkGroups({
       )}
       <ul className={layout.listClassName}>
         {group.links.map((link) => (
-          <Fragment key={link.item._key}>{layout.renderLink(link, context)}</Fragment>
+          <Fragment key={link.item._key}>{layout.renderLink(link, context(link))}</Fragment>
         ))}
       </ul>
     </div>
@@ -370,7 +490,7 @@ async function DueLinkGroups({
 }: {
   prepared: PreparedLink<StoredLink>[]
   layout: LinkListLayout
-  context: LinkContext
+  context: (link: ListLink) => LinkContext
   groupHeading: 'h2' | 'h3'
 }) {
   return <LinkGroups links={drawableLinks(prepared, await requestTime())} {...rest} />
@@ -394,23 +514,32 @@ export function LinkListView({
   const rowStyle = stegaClean(data.rowStyle) === 'glass' ? 'glass' : 'solid'
   const glassStrength = glassStrengthOf(clean(data.glassStrength))
   const depth = resolveDepth(data.depthDesign)
-  const shared = {
-    layout,
-    context: {
+  // The list's card design, once; each link lays its own Appearance over it (design-overrides.ts).
+  const listDesign = resolveLinkCardDesign(listCardDesignInput(data))
+  const layoutArrow = defaultLinkArrow({
+    layout: data.variant,
+    rowStyle,
+    showArrows: data.showArrows,
+  })
+  const contextFor = (link: ListLink): LinkContext => {
+    const own = cardOverrides(link.item.design)
+    const design = own ? layerLinkCardDesign(listDesign, resolveLinkCardDesign(own)) : listDesign
+    return {
       surface,
       thumbnailSize,
       rowStyle,
       glassStrength,
-      arrow: linkArrowOf(
-        data.linkDesign?.arrowStyle,
-        defaultLinkArrow({ layout: data.variant, rowStyle, showArrows: data.showArrows }),
-      ),
-      arrowStyle: themeColourStyle(data.linkDesign?.arrowColour),
-      iconStyle: themeColourStyle(data.linkDesign?.iconColour),
-      linkDepth: depth.links,
-    } satisfies LinkContext,
-    groupHeading: levels.group,
+      arrow: design.arrow ?? linkArrowOf(undefined, layoutArrow),
+      arrowStyle: design.arrowColour ? { color: design.arrowColour } : undefined,
+      // A card's own shadow replaces the list's; the glow is the list's either way.
+      linkDepth:
+        own && design.shadow !== listDesign.shadow
+          ? resolveDepth({ ...data.depthDesign, linkShadow: design.shadow }).links
+          : depth.links,
+      design,
+    }
   }
+  const shared = { layout, context: contextFor, groupHeading: levels.group }
   const headingImage = data.headingImage as WordmarkImage | null | undefined
   const headingWordmark = showsWordmark(data.headingDisplay, headingImage) ? headingImage : null
   const socialDesign = data.socialDesign
@@ -445,7 +574,7 @@ export function LinkListView({
       surface={glassRows ? 'glass' : 'solid'}
       strength={glassStrength}
       colour={themeColourCss(socialDesign?.iconColour)}
-      background={themeColourCss(socialDesign?.background)}
+      design={resolveSurface(socialDesign)}
       depth={depth.social}
       className={`${socialSpace} ${traits.justify}`.trim()}
     />

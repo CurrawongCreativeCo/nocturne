@@ -1,7 +1,7 @@
 import { TagIcon } from '@sanity/icons/Tag'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
-import { BADGE_ICONS } from '../badge-icons'
+import { badgeIconField } from './badge-icon-field'
 import { lengthWarning } from './length-guidance'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -40,14 +40,7 @@ export const badgeRow = defineType({
                 lengthWarning(rule, BADGE_LIMITS.label, 'Labels'),
               ],
             }),
-            defineField({
-              name: 'icon',
-              type: 'string',
-              description: 'Optional. A small picture before the label.',
-              options: {
-                list: BADGE_ICONS.map(({ value, title }) => ({ value, title })),
-              },
-            }),
+            badgeIconField({ description: 'Optional. A small picture before the label.' }),
           ],
           preview: { select: { title: 'label', subtitle: 'icon' } },
         }),

@@ -80,9 +80,12 @@ const PresetAwareInput = withPresetPicker(
 // A heading highlight's custom gradient colours reuse the Brand colours input (features/site), which
 // a studio or shared module may not import: composed here.
 // An element's Custom colour (themeColourField) uses the same input; its colour choice gets swatches.
+// A plain colour (`options.colourPicker`, a gradient overlay's stop) uses it with no contrast check.
 const StudioInput = (props: InputProps) =>
   isStringInputProps(props) &&
-  (props.schemaType.options?.headingStop === true || props.schemaType.options?.themeColourHex)
+  (props.schemaType.options?.headingStop === true ||
+    props.schemaType.options?.themeColourHex ||
+    props.schemaType.options?.colourPicker === true)
     ? createElement(ColourInput, props)
     : isStringInputProps(props) && props.schemaType.options?.themeColourPicker
       ? createElement(ThemeColourPickerInput, props)

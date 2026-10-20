@@ -27,7 +27,7 @@ type Palette = Record<GradientToken, string>
 export type ColourSet = Readonly<Record<GradientToken, string>>
 
 /** Linear blend of two colours in OKLab, as CSS `color-mix(in oklab, a p%, b)` does. */
-function mixOklab(a: string, b: string, share: number): string {
+export function mixOklab(a: string, b: string, share: number): string {
   const toLab = (hex: string) => {
     const { l, c, h } = hexToOklch(hex)
     const radians = (h * Math.PI) / 180

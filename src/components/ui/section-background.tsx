@@ -1,6 +1,11 @@
 import { SanityImage } from '@/components/ui/sanity-image'
 import { urlFor } from '@/lib/sanity/image'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import {
+  overlayGradientCss,
+  resolveOverlayGradient,
+  stopColourCss,
+} from '@/lib/sanity/overlay-gradient'
 import { SECTION_OVERLAY_OPACITY, SECTION_WASH_COLOURS } from '@/lib/sanity/section-style-options'
 
 import {
@@ -47,7 +52,7 @@ type Props = Pick<ResolvedSectionStyle, 'tone' | 'gradient' | 'image' | 'overlay
 /**
  * The layers behind a section's content, from back to front: the brand gradient, the picture, then
  * the overlay (the tone's colour at the chosen strength, so the tone's text colours keep their
- * contrast). All three are absolutely positioned inside the <section> (which is `relative isolate`),
+ * contrast, a light or dark wash, or a see-through gradient of the site's colours). All three are absolutely positioned inside the <section> (which is `relative isolate`),
  * so they take no space and cannot shift the layout. Purely decorative, hence hidden from assistive
  * technology, and the picture has empty alt text. Renders nothing for a section with neither.
  */
@@ -61,6 +66,12 @@ export function SectionBackground({
 }: Props) {
   if (!gradient && !image) return null
   const opacity = SECTION_OVERLAY_OPACITY[overlay]
+  // A gradient overlay carries its opacity in its stops (at the overlay's strength), so its layer is
+  // drawn at full opacity; the other colours are one flat colour at the strength's opacity.
+  const overlayGradient =
+    placement.wash === 'gradient' && placement.gradient && overlay !== 'none'
+      ? overlayGradientCss(resolveOverlayGradient(placement.gradient, overlay), stopColourCss(tone))
+      : undefined
 
   return (
     <div
@@ -94,7 +105,14 @@ export function SectionBackground({
               <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
             )}
           </div>
-          {opacity > 0 ? (
+          {overlayGradient ? (
+            <div
+              data-section-overlay={overlay}
+              data-overlay-colour="gradient"
+              className="absolute inset-0"
+              style={{ backgroundImage: overlayGradient }}
+            />
+          ) : opacity > 0 && placement.wash !== 'gradient' ? (
             <div
               data-section-overlay={overlay}
               data-overlay-colour={placement.wash}

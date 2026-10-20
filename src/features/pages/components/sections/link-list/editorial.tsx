@@ -2,13 +2,30 @@ import { buttonFeedback } from '@/components/ui/cta-link'
 import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 
-import { LinkDescription, LinkItem, LinkListView, type LinkListLayout } from './link-list-parts'
+import {
+  LinkItem,
+  LinkListView,
+  LinkText,
+  ownEyebrow,
+  type LinkListLayout,
+  type OwnLinkText,
+} from './link-list-parts'
 import type { SectionProps } from '../../../types'
 
 // How this section looks without a style. Keep `align` equal to the Editorial preset's.
 const DEFAULTS = { container: 'max-w-measure', align: 'start' } as const
 
 const ROW = `group -mx-3 flex w-full items-center justify-between gap-6 rounded-control px-3 py-5 text-left hover:bg-surface-alt ${buttonFeedback}`
+
+// A ruled list, so only the text and the arrow take a card's design. The eyebrow starts a step up,
+// in proportion with the large labels.
+const text = (large: boolean): OwnLinkText => ({
+  eyebrow: { ...ownEyebrow('text-ink-muted'), defaultSize: 'medium' },
+  label: { size: large ? 'text-display' : 'text-h3', weight: 'semibold' },
+  description: { size: 'text-body', weight: 'regular', colour: 'text-ink-muted' },
+  labelClass: 'text-balance',
+  descriptionClass: 'mt-1 text-pretty',
+})
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
@@ -20,18 +37,10 @@ const layout: LinkListLayout = {
     name: 'text-h1',
   },
   listClassName: 'divide-y divide-line border-y border-line',
-  renderLink: (link, { arrow, arrowStyle }) => (
+  renderLink: (link, { arrow, arrowStyle, design }) => (
     <LinkItem link={link}>
       <SanityLink link={link.link} className={ROW}>
-        <span className="flex min-w-0 flex-col">
-          <span className={`${link.large ? 'text-display' : 'text-h3'} font-semibold text-balance`}>
-            {link.label}
-          </span>
-          <LinkDescription
-            text={link.item.description}
-            className="mt-1 text-body text-pretty text-ink-muted"
-          />
-        </span>
+        <LinkText link={link} design={design} own={text(link.large)} />
         <LinkArrow
           arrow={arrow}
           external={link.kind === 'external'}

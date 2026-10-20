@@ -323,6 +323,25 @@ export const embedFragment = /* groq */ `
   }
 `
 
+/** One text element's look (lib/sanity/text-style-options.ts). */
+const textStyleProjection = /* groq */ `size, weight, colour { colour, hex }, textCase, tracking, leading`
+
+/** A card's fill and border, and its icon's container (lib/sanity/surface-options.ts). */
+const surfaceProjection = /* groq */ `
+  background { colour, hex },
+  backgroundStrength,
+  border,
+  borderColour { colour, hex }
+`
+const iconDesignProjection = /* groq */ `
+  iconShape,
+  iconColour { colour, hex },
+  iconBackground { colour, hex },
+  iconBackgroundStrength,
+  iconBorder,
+  iconBorderColour { colour, hex }
+`
+
 export const linkListFragment = /* groq */ `
   _type == "linkList" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -368,16 +387,22 @@ export const linkListFragment = /* groq */ `
       textColour { colour, hex },
       separatorColour { colour, hex }
     },
+    cardDesign {
+      ${surfaceProjection},
+      eyebrow { ${textStyleProjection} },
+      label { ${textStyleProjection} },
+      description { ${textStyleProjection} }
+    },
     linkDesign {
       arrowStyle,
       arrowColour { colour, hex },
-      iconColour { colour, hex }
+      ${iconDesignProjection}
     },
     socialDesign {
       style,
       position,
       iconColour { colour, hex },
-      background { colour, hex }
+      ${surfaceProjection}
     },
     dividerDesign {
       afterCategories { ${decorativeDividerFields} },
@@ -399,6 +424,7 @@ export const linkListFragment = /* groq */ `
     // (the page is cached and can't know the time), see LINK_SCHEDULE_SCRIPT.
     "links": links[visibility != "hide"] {
       _key,
+      eyebrow,
       label,
       description,
       icon,
@@ -410,7 +436,19 @@ export const linkListFragment = /* groq */ `
       utmMedium,
       utmCampaign,
       thumbnail { ${imageFields} },
-      link { ${linkFields} }
+      link { ${linkFields} },
+      // A card's own Appearance, only while it is set to "Customise this card".
+      "design": select(design.appearance == "custom" => design {
+        appearance,
+        ${surfaceProjection},
+        shadow,
+        eyebrow { ${textStyleProjection} },
+        label { ${textStyleProjection} },
+        description { ${textStyleProjection} },
+        ${iconDesignProjection},
+        arrowStyle,
+        arrowColour { colour, hex }
+      })
     }
   }
 `

@@ -1,16 +1,20 @@
 import { buttonFeedback, ctaColours } from '@/components/ui/cta-link'
 import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
+import { glassSurfaceLook, ringSurfaceLook } from '@/lib/sanity/surface-options'
 
 import { GlassRow } from './glass-row'
 import {
-  LinkDescription,
+  LinkIcon,
   LinkItem,
   LinkListView,
+  LinkText,
   LinkVisual,
   hasThumbnail,
   linkShadow,
+  ownEyebrow,
   type LinkListLayout,
+  type OwnLinkText,
 } from './link-list-parts'
 import type { SectionProps } from '../../../types'
 
@@ -24,26 +28,42 @@ export const PICTURE = {
 } as const
 
 const BUTTON = `group relative flex w-full items-center justify-center rounded-button px-14 text-center ${buttonFeedback}`
-// The shadow is added per link (`linkShadow`), so Depth and glow can replace it.
-const NORMAL = `min-h-14 py-3 font-semibold bg-surface text-ink ring-1 ring-inset ring-line hover:bg-surface-alt`
+// The shadow is added per link (`linkShadow`), so Depth and glow can replace it; the fill and border
+// per link too (`ringSurfaceLook`), so Cards can change them.
+const NORMAL = 'min-h-14 py-3 text-ink'
+const NORMAL_SURFACE = {
+  background: 'bg-surface hover:bg-surface-alt',
+  border: 'ring-1 ring-inset ring-line',
+}
+
+/** The label, eyebrow and description: the large link's label is a step up. */
+const text = (large: boolean): OwnLinkText => ({
+  eyebrow: ownEyebrow('opacity-80'),
+  label: { size: large ? 'text-lead' : 'text-body', weight: 'semibold' },
+  description: { size: 'text-small', weight: 'regular', colour: 'opacity-80' },
+})
+// The icon sits bare in the left gutter; a chosen container is 40 px, the gutter's width.
+const ICON = { shape: 'plain', background: '', border: '' } as const
 
 const layout: LinkListLayout = {
   defaults: DEFAULTS,
   profile: { picture: PICTURE, name: 'text-h3' },
   listClassName: 'grid gap-3',
   renderLink: (link, context) => {
-    const { surface, rowStyle, glassStrength, arrow, arrowStyle, iconStyle } = context
+    const { surface, rowStyle, glassStrength, arrow, arrowStyle, design } = context
     if (rowStyle === 'glass') {
       // The glass draws its own shadow (`.glass-row`); a chosen one replaces it.
       const depth = linkShadow(context, 'glass')
+      // A tint or border reaches the glass through variables the row inherits (globals.css).
+      const look = glassSurfaceLook(design.surface, { strength: glassStrength })
       return (
-        <LinkItem link={link} style={depth.style}>
+        <LinkItem link={link} style={[depth.style, look.style]}>
           <GlassRow
             link={link}
             strength={glassStrength}
             arrow={arrow}
             arrowStyle={arrowStyle}
-            iconStyle={iconStyle}
+            design={design}
             className={depth.className}
           />
         </LinkItem>
@@ -53,28 +73,36 @@ const layout: LinkListLayout = {
     const depth = link.large
       ? linkShadow(context, 'none')
       : linkShadow(context, 'card', 'shadow-card')
+    // The large link's own fill is the primary button's; a chosen fill takes the text colour with it.
+    const filled = ctaColours(surface, 'primary')
+    const tinted = design.surface.background !== undefined || design.surface.strength !== undefined
+    const look = ringSurfaceLook(
+      design.surface,
+      link.large ? { background: filled, border: '', fill: 'var(--color-cta)' } : NORMAL_SURFACE,
+    )
     return (
-      <LinkItem link={link} style={depth.style}>
+      <LinkItem link={link} style={[depth.style, look.style]}>
         <SanityLink
           link={link.link}
-          className={`${BUTTON} ${link.large ? `min-h-20 py-4 text-lead font-semibold ${ctaColours(surface, 'primary')}` : NORMAL} ${depth.className}`}
+          className={`${BUTTON} ${link.large ? `min-h-20 py-4${tinted ? 'text-ink' : ''}` : NORMAL} ${look.className} ${depth.className}`}
         >
           <span className="absolute left-4 flex items-center">
             <LinkVisual
               link={link}
               thumbClass="size-10 rounded-control object-cover"
-              iconClass="size-5"
-              iconStyle={iconStyle}
               sizes="40px"
+              icon={
+                <LinkIcon
+                  link={link}
+                  design={design.icon}
+                  own={ICON}
+                  box="size-10"
+                  iconClass="size-5"
+                />
+              }
             />
           </span>
-          <span className="flex flex-col">
-            <span>{link.label}</span>
-            <LinkDescription
-              text={link.item.description}
-              className="text-small font-normal opacity-80"
-            />
-          </span>
+          <LinkText link={link} design={design} own={text(link.large)} />
           {/* In the right gutter, mirroring the picture on the left, so the label stays centred. */}
           {arrow !== 'none' && (
             <span
