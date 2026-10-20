@@ -14,14 +14,12 @@ export const TEMPLATE_ICON_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><!-- Placeholder: replace with your logo mark. --><rect width="32" height="32" rx="7" fill="#4f46e5"/><circle cx="16" cy="16" r="7" fill="#fff"/></svg>'
 
 /**
- * SHA-256 of Currawong's default src/app/icon.png, apple-icon.png and public/icon-dark.png. A site still serving either
+ * SHA-256 of Currawong's default src/app/icon.png and apple-icon.png. A site still serving either
  * byte for byte has not set its own icon. `node scripts/make-default-icons.mjs` prints these.
  */
 export const DEFAULT_ICON_SHA256 = [
-  'de290a2d74b8a858e022037a4672cc59528259ddf7ee56ea32a0acde4c52be10',
-  '431605b870497c8b932e2861d04e8aea26bdff826eeca7495b1ea90041bbd4a0',
-  // public/icon-dark.png, the dark-mode variant of the default.
   '69806629168cb4db6796aef7bfdffc9a14b0fcc594ed5fac2814628506ea4417',
+  'd5f8436be0b66954ce0e1146b4af3980d9bbd1d976a0f31b63fbcb4e237bbe53',
 ]
 
 const squash = (svg) => svg.replace(/\s+/g, '').toLowerCase()

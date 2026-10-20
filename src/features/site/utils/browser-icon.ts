@@ -66,30 +66,6 @@ export function browserIconUrl(
   return url.url()
 }
 
-/**
- * Currawong's default icons, used while Website settings has no Browser icon. The light icon is the
- * file src/app/icon.png and the dark one public/icon-dark.png (the mark on dark, for browsers in dark
- * mode). Next.js only adds the file-based tags itself when `icons` is unset, and file conventions
- * can't carry a media query, so the defaults are listed here and both files are linked once each.
- */
-export const DEFAULT_ICON_LINKS = {
-  icon: [
-    {
-      url: '/icon.png',
-      sizes: '512x512',
-      type: 'image/png',
-      media: '(prefers-color-scheme: light)',
-    },
-    {
-      url: '/icon-dark.png',
-      sizes: '512x512',
-      type: 'image/png',
-      media: '(prefers-color-scheme: dark)',
-    },
-  ],
-  apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
-}
-
 interface IconLink {
   url: string
   sizes: string
