@@ -1,3 +1,4 @@
+import { vercelStegaCombine } from '@vercel/stega'
 import { describe, expect, it } from 'vitest'
 
 import { colorHex } from '@/config/tokens.generated'
@@ -290,3 +291,31 @@ function hslToHex(h: number, s: number, l: number): string {
   }
   return `#${channel(0)}${channel(8)}${channel(4)}`
 }
+
+describe('resolveDesignTokens in preview mode', () => {
+  // Draft fetches use stega: every string gets invisible edit-link characters appended.
+  const encode = <T extends Record<string, unknown>>(value: T): T =>
+    Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        typeof item === 'string'
+          ? vercelStegaCombine(item, { origin: 'sanity.io', href: '/x' })
+          : item,
+      ]),
+    ) as T
+
+  const brand = { appearance: 'light', primary: '#0b6e4f', secondary: '#d4a017', ink: '#112233' }
+
+  it('resolves the same effective colours as normal mode when the brand is the same', () => {
+    const encoded = encode(brand)
+    expect(encoded.primary).not.toBe(brand.primary)
+    expect(resolveDesignTokens(encoded)).toEqual(resolveDesignTokens(brand))
+    expect(resolveDesignTokens(encoded).css).not.toBe('')
+  })
+
+  it('shows unpublished brand changes in preview while normal mode keeps the published ones', () => {
+    const draft = { ...brand, primary: '#7a1f5c' }
+    expect(resolveDesignTokens(encode(draft)).accent).toEqual(resolveDesignTokens(draft).accent)
+    expect(resolveDesignTokens(encode(draft)).css).not.toBe(resolveDesignTokens(brand).css)
+  })
+})
