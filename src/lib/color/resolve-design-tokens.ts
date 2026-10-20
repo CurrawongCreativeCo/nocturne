@@ -1,3 +1,5 @@
+import { stegaClean } from 'next-sanity'
+
 import { colorHex } from '@/config/tokens.generated'
 
 import { adjustLightnessForContrast, contrastRatio } from './contrast'
@@ -110,7 +112,9 @@ export function resolveDesignTokens(
   overrides: DesignOverrides | null | undefined,
   base: BaseColours = DEFAULT_BASE,
 ): ResolvedDesign {
-  const input = overrides ?? {}
+  // Draft mode fetches with stega, which hides edit-link characters inside every string (hex colours
+  // and `appearance` included); those fail the hex check below and the brand falls back to tokens.json.
+  const input = stegaClean(overrides) ?? {}
   const colours: Record<keyof typeof colorHex, string> = { ...base }
   const dark = input.appearance === 'dark'
   const checks: ContrastCheck[] = []
