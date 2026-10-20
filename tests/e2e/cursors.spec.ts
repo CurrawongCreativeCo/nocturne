@@ -5,7 +5,8 @@ const cursorOf = (target: Locator) => target.evaluate((el) => getComputedStyle(e
 
 async function expectCursor(target: Locator, cursor: string) {
   await expect(target.first()).toBeVisible()
-  expect(await cursorOf(target.first())).toBe(cursor)
+  // Retried: the control can be swapped out as the page hydrates, which reads as an empty cursor.
+  await expect.poll(() => cursorOf(target.first())).toBe(cursor)
 }
 
 test.describe('cursors', () => {

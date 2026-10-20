@@ -135,6 +135,8 @@ test.describe('the countdown', () => {
 
   test('holds its height before it fills in, so nothing moves', async ({ page }) => {
     await page.goto('/launch-date')
+    // Streaming leaves the fallback and its replacement in the page for a moment; wait for one.
+    await expect(countdown(page)).toHaveCount(1)
     const box = await countdown(page).boundingBox()
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(24)
   })

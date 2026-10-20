@@ -39,6 +39,8 @@ test.describe('the Link page', () => {
     request,
   }) => {
     await page.goto('/links')
+    // Scheduled links are decided at request time and stream in after the prerendered page.
+    await expect(link(page, 'Spring offer')).toBeVisible()
     expect(await visibleLinks(page)).toEqual([
       'Book a consultation',
       'Read the journal',
