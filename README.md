@@ -1311,7 +1311,9 @@ Only supported Sanity APIs are used, in four places:
   compensation. Neutral buttons mix the text and canvas colours. Hover and selected states use
   accent tints with readable labels. Inputs use `surface`, `text` and `surfaceBorder`; focus uses
   the scheme's independent `focus` role. Themer supplies the remaining semantic tones, including
-  success, warning and danger. Radius and focus-ring geometry retain the installed defaults.
+  success, warning and danger. Badge labels are checked against their generated fill in each card
+  tone and scheme; their OKLCH lightness is adjusted to 4.6:1 when needed, preserving the fill and
+  the label's hue. Radius and focus-ring geometry retain the installed defaults.
 - **Fonts.** The workspace theme uses Inter for interface text, labels and inputs, and Newsreader
   for display headings (including the Start here greeting and document headers where Sanity uses
   heading tokens). Code remains monospaced. `src/config/studio-fonts.ts` loads variable normal fonts
