@@ -1,5 +1,6 @@
 import { type ComponentType, useMemo } from 'react'
 import {
+  ArrayOfObjectsFunctions,
   type ArrayInputFunctionsProps,
   type ArrayOfObjectsInputProps,
   type ArraySchemaType,
@@ -26,7 +27,10 @@ const allowed = resolveClientSections(siteProfile.clientSections)
 function SectionInsertFilter(props: ArrayOfObjectsInputProps) {
   const user = useCurrentUser()
   const restricted = isClientView(user)
-  const DefaultFunctions = props.arrayFunctions as ComponentType<FunctionsProps>
+  // Sanity leaves `arrayFunctions` undefined unless an override sets it (the array inputs fall back
+  // to ArrayOfObjectsFunctions themselves), so wrapping the prop alone would render nothing.
+  const DefaultFunctions = (props.arrayFunctions ??
+    ArrayOfObjectsFunctions) as ComponentType<FunctionsProps>
   const FilteredFunctions = useMemo(
     () =>
       function FilteredFunctions(functionsProps: FunctionsProps) {

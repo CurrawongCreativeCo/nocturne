@@ -1779,6 +1779,16 @@ visible and editable whatever the list says. A Sanity array's `of` can't vary by
 `src/features/studio/components/section-insert-filter.tsx` wraps the page-builder input and hands only its
 "Add item" button a copy of the type list with the approved sections; it is registered once for the whole
 Studio as `form.components.input` in `sanity.config.ts`, and finds page-builder arrays by their section types.
+Sanity leaves the array input's `arrayFunctions` undefined unless something sets it, so the filter wraps
+Sanity's public `ArrayOfObjectsFunctions` in that case (wrapping the undefined prop crashed client view with
+React error #130 before 1.7.0). Never import Sanity's internal chunks for this.
+
+**A broken input never shows a client a raw error.** Every project input override (`StudioInput` in
+`sanity.config.ts`) sits inside `StudioInputBoundary` (`src/features/studio/components/studio-input-boundary.tsx`).
+If an input throws, a client sees "This part of the page couldn't be shown. Your content is safe." with
+**Try again** and a link to `help.supportEmail` (else `help.guideUrl`) from the site profile. It never offers
+Sanity's "Unset value", which would delete the field's content. Agency staff still get Sanity's own error, which
+names the cause. Sanity's inputs that no override wraps keep Sanity's own handling.
 
 **Preview the client view.** Agency staff see an **Agency view** badge above the navbar. **Preview client
 view** switches to what an Editor sees (saved in that browser's `localStorage`, so it stays until you switch
