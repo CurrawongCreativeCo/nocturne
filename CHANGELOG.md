@@ -24,6 +24,9 @@ you start a release.
 
 ### Fixed
 
+- Register Sanity's built-in image types in the Link list validation test fixture so hidden dividers validate without an `Unknown type: sanity.imageHotspot` error in CI.
+- Hidden Image design and Link list design settings no longer block publishing. Inactive frame references remain weak when published, with their selections retained; visible custom frames still require a published frame. Both frame pickers disable inline creation: add frames under Design → Image frames. Hidden numeric limits, inherited reference/list checks and nested custom colours are skipped. No content migration.
+
 ### Breaking changes / migration steps
 
 ## [1.7.0] - 2026-10-21
