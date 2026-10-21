@@ -40,6 +40,7 @@ import { withPresetPicker } from './src/features/studio/components/preset-picker
 import { RoleNavbar } from './src/features/studio/components/role-navbar'
 import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
 import { StudioIcon } from './src/features/studio/components/studio-icon'
+import { StudioInputBoundary } from './src/features/studio/components/studio-input-boundary'
 import { StudioLogo } from './src/features/studio/components/studio-logo'
 import { ThemeColourPickerInput } from './src/features/studio/components/theme-colour-picker/theme-colour-picker-input'
 import { contentHealth } from './src/features/studio/content-health/plugin'
@@ -81,7 +82,7 @@ const PresetAwareInput = withPresetPicker(
 // a studio or shared module may not import: composed here.
 // An element's Custom colour (themeColourField) uses the same input; its colour choice gets swatches.
 // A plain colour (`options.colourPicker`, a gradient overlay's stop) uses it with no contrast check.
-const StudioInput = (props: InputProps) =>
+const StudioInputs = (props: InputProps) =>
   isStringInputProps(props) &&
   (props.schemaType.options?.headingStop === true ||
     props.schemaType.options?.themeColourHex ||
@@ -90,6 +91,9 @@ const StudioInput = (props: InputProps) =>
     : isStringInputProps(props) && props.schemaType.options?.themeColourPicker
       ? createElement(ThemeColourPickerInput, props)
       : createElement(PresetAwareInput, props)
+// A throwing input shows a client a safe message with Try again, never a raw React error.
+const StudioInput = (props: InputProps) =>
+  createElement(StudioInputBoundary, null, createElement(StudioInputs, props))
 
 export default defineConfig({
   basePath: studioUrl,

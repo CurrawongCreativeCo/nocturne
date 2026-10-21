@@ -57,6 +57,21 @@ Tick each line as "pass" or note what you saw.
       blank Page, Form, Redirect or A/B test.
 - [ ] Publish works on a page.
 
+### Client view regression check (UX-001, fixed in 1.7.0)
+
+Run on a scratch or e2e dataset, never production. As Admin choose **Preview client view**, then:
+
+- [ ] Open Home: the Sections list shows its items and **Add item** (no "Minified React error #130", no
+      Dismiss or Unset value).
+- [ ] Open a Link page (Links): same.
+- [ ] Open a section, then a link nested inside it, and edit a field.
+- [ ] Use the browser's Back, then Forward, then navigate away and return: the Sections list still shows.
+- [ ] **Add item** lists only the approved sections.
+- [ ] Back to agency view: **Add item** lists every section.
+
+Last run: _not yet run by hand_ (the automated tests in `section-insert-filter.test.tsx` and
+`studio-input-boundary.test.tsx` cover the logic, not a real Studio). Record the date and who ran it here.
+
 ## 4. Contributor: drafts only
 
 - [ ] Same view as the Editor in section 3.

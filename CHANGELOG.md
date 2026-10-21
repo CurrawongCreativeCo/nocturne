@@ -20,6 +20,8 @@ you start a release.
 
 ### Fixed
 
+- **Client view no longer crashes where a page's Sections should be** ("An error occurred. Minified React error #130" with Dismiss and Unset value, on Home and Links; audit UX-001). `SectionInsertFilter` wrapped `props.arrayFunctions`, which Sanity 6.19 leaves undefined, so it rendered an undefined component. It now falls back to Sanity's public `ArrayOfObjectsFunctions`. Clients still see only the approved sections in Add item, existing sections of any type still open and edit, and agency staff are unfiltered.
+- **A failing Studio input shows a safe message instead of a raw React error.** The project's input overrides are wrapped in an error boundary: clients see "This part of the page couldn't be shown. Your content is safe." with Try again and the support route from `help` in the site profile, never Unset value. Agency staff keep Sanity's own error.
 - **Transparent pictures and wordmarks no longer sit on a blurred smear.** `next/image` draws Sanity's blurred preview as the picture's background, so it stayed visible through every transparent pixel. `SanityImage` now shows the preview only for pictures that are certainly opaque (`hasAlpha` is false, or, when Sanity hasn't recorded it, the asset is a JPEG; see `src/lib/sanity/image-placeholder.ts`). `imageFields` now also fetches `hasAlpha`; run `npm run typegen`. Opaque photos keep the preview. New e2e page `/image-placeholders`.
 
 ### Changed
