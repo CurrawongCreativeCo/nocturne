@@ -1,3 +1,6 @@
+import { createClient } from '@sanity/client'
+import { Schema } from '@sanity/schema'
+import { validateDocument } from '@sanity/validation'
 import { describe, expect, it } from 'vitest'
 
 import { IMAGE_APPEARANCES, IMAGE_FRAMES, IMAGE_MOTIONS } from '../image-design-options'
@@ -25,7 +28,7 @@ const field = (name: string): FieldLike => {
 const hidden = (name: string, parent: Record<string, unknown>) =>
   field(name).hidden?.({ parent }) ?? false
 
-const AGENCY = { roles: [{ name: 'administrator' }] }
+const AGENCY = { roles: [{ name: 'administrator', title: 'Administrator' }] }
 
 describe('imageDesign', () => {
   it('is a frameless object, so its pictures sit straight in the Design tab', () => {
@@ -134,5 +137,108 @@ describe('imageDesignField', () => {
     }) as unknown as { hidden: Callback }
     expect(design.hidden({ currentUser: AGENCY, parent: { variant: 'masonry' } })).toBe(true)
     expect(design.hidden({ currentUser: AGENCY, parent: { variant: 'grid' } })).toBe(false)
+  })
+})
+
+// The same document validator Studio uses, including its inherited reference and list rules.
+const validationSchema = Schema.compile({
+  types: [
+    imageDesign,
+    { name: 'frame', type: 'document', fields: [{ name: 'title', type: 'string' }] },
+    {
+      name: 'page',
+      type: 'document',
+      fields: [
+        {
+          name: 'sections',
+          type: 'array',
+          of: [
+            {
+              name: 'hero',
+              type: 'object',
+              fields: [{ name: 'imageDesign', type: 'imageDesign' }],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+})
+const validationClient = createClient({
+  projectId: 'e2etest1',
+  dataset: 'production',
+  apiVersion: '2025-01-01',
+  apiHost: 'http://localhost:9999',
+  useCdn: false,
+})
+const validateHero = (design: Record<string, unknown>) =>
+  validateDocument({
+    schema: validationSchema,
+    client: validationClient,
+    document: {
+      _id: 'drafts.hidden-design',
+      _createdAt: '2026-10-21T00:00:00Z',
+      _updatedAt: '2026-10-21T00:00:00Z',
+      _rev: 'fixture',
+      _type: 'page',
+      sections: [{ _key: 'hero', _type: 'hero', imageDesign: design }],
+    },
+    getDocumentExists: () => Promise.resolve(false),
+  })
+
+describe('hidden image design validation', () => {
+  it('allows a round hero with a stale unpublished custom frame and invalid hidden numbers', async () => {
+    const result = await validateHero({
+      appearance: 'circle',
+      frame: 'custom',
+      customFrame: {
+        _type: 'reference',
+        _ref: 'unpublished-frame',
+        _weak: true,
+        _strengthenOnPublish: { type: 'frame' },
+      },
+      motion: 'none',
+      custom: true,
+      travel: 99,
+      scale: 9,
+      direction: 'old-direction',
+      frameInset: 99,
+      frameColour: 'old-colour',
+    })
+    expect(result.markers).toEqual([])
+  })
+
+  it('still asks for an approved frame when the visible custom frame is empty', async () => {
+    const result = await validateHero({ appearance: 'framed', frame: 'custom' })
+    expect(result.markers).toEqual([
+      expect.objectContaining({
+        level: 'error',
+        message: 'Choose an approved frame, or a different frame style',
+        path: ['sections', { _key: 'hero' }, 'imageDesign', 'customFrame'],
+      }),
+    ])
+  })
+
+  it('still rejects an unpublished frame while visible and out-of-range values while used', async () => {
+    const result = await validateHero({
+      appearance: 'framed',
+      frame: 'custom',
+      customFrame: { _type: 'reference', _ref: 'unpublished-frame', _weak: true },
+      motion: 'subtle',
+      custom: true,
+      travel: 99,
+      scale: 9,
+      frameInset: 99,
+    })
+    expect(result.markers.map((marker) => marker.path.at(-1)).sort()).toEqual([
+      'customFrame',
+      'frameInset',
+      'scale',
+      'travel',
+    ])
+  })
+
+  it('disables inline frame creation', () => {
+    expect(field('customFrame').options).toMatchObject({ disableNew: true })
   })
 })

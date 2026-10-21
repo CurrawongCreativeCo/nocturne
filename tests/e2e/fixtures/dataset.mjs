@@ -566,7 +566,18 @@ export const documents = [
         body: [block(['A circle is always square.'])],
         image: image('Circle picture'),
         imagePosition: 'right',
-        imageDesign: imageDesign({ appearance: 'circle', motion: 'subtle' }),
+        imageDesign: imageDesign({
+          appearance: 'circle',
+          motion: 'subtle',
+          // Saved frame choices are hidden and must not change this circle.
+          frame: 'custom',
+          customFrame: ref('frame-leaf'),
+          frameColour: 'highlight',
+          frameInset: 99,
+          custom: false,
+          travel: 99,
+          scale: 9,
+        }),
       },
       {
         _key: 'framed-text-4',

@@ -66,6 +66,7 @@ import {
   shadowThumbnails,
   socialStyleThumbnails,
 } from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
+import { validateVisible } from '@/lib/sanity/schema/validate-visible'
 import {
   SOCIAL_POSITIONS,
   SOCIAL_POSITION_TITLES,
@@ -267,6 +268,7 @@ export const linkListDesignFields = [
         title: 'Frame',
         type: 'reference',
         to: [{ type: 'frame' }],
+        options: { disableNew: true },
         description:
           'An approved SVG frame, added by the agency under Design › Image frames. The picture shrinks a little inside it, so the layout stays the same.',
         hidden: borderIs('frame'),
@@ -696,4 +698,4 @@ export const linkListDesignFields = [
       }),
     ],
   }),
-]
+].map(validateVisible)
