@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" role="img" aria-label="Proposed Nocturne Studio page editor with clear drafting states and a preview panel">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f6f1fa"/><stop offset="1" stop-color="#eae6f3"/></linearGradient>
+<linearGradient id="preview" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b2d48"/><stop offset=".5" stop-color="#786184"/><stop offset="1" stop-color="#c3b6af"/></linearGradient>
+<linearGradient id="screen" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fefcff"/><stop offset="1" stop-color="#f7f4f9"/></linearGradient>
+<filter id="sh"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="7"/><feComponentTransfer><feFuncA type="linear" slope=".17"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="1600" height="960" fill="url(#bg)"/>
+<circle cx="1457" cy="89" r="230" fill="#d6c2f0" opacity=".55"/>
+<text x="55" y="58" font-family="Arial" font-size="29" fill="#2c2037" font-weight="700">THE PAGE EDITOR <tspan fill="#895ec3">/</tspan> CONFIDENCE BY DESIGN</text>
+<text x="56" y="83" font-family="Arial" font-size="14" fill="#7c6e87">Concept B • content first • explicit draft status • contextual preview • no data edits made</text>
+<g filter="url(#sh)"><rect x="45" y="113" width="1510" height="780" rx="21" fill="url(#screen)"/></g>
+<rect x="45" y="113" width="1510" height="58" rx="21" fill="#ffffff"/>
+<rect x="45" y="145" width="1510" height="26" fill="#ffffff"/>
+<path d="M45 171H1555" stroke="#e4dfeb"/>
+<circle cx="76" cy="143" r="13" fill="#32243b"/><circle cx="82" cy="137" r="10" fill="#fff"/>
+<text x="96" y="150" font-family="Georgia" font-size="20" letter-spacing="3" font-weight="700" fill="#2c2037">NOCTURNE</text>
+<text x="351" y="150" font-family="Arial" font-size="13" fill="#a296af">Structure</text>
+<rect x="421" y="124" width="87" height="38" rx="11" fill="#ece2fb"/>
+<text x="464" y="148" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle" fill="#603e9c">Pages</text>
+<text x="534" y="149" font-family="Arial" font-size="13" fill="#75687e">Presentation</text>
+<rect x="1191" y="127" width="135" height="32" rx="15" fill="#f4f0f7" stroke="#e2dbe9"/>
+<circle cx="1209" cy="143" r="5" fill="#4b9e85"/>
+<text x="1223" y="147" font-family="Arial" font-size="12" fill="#594f65">Draft saved</text>
+<rect x="1341" y="124" width="93" height="38" rx="11" fill="#f3ecfc" stroke="#ded3f0"/>
+<text x="1387" y="148" text-anchor="middle" font-family="Arial" font-size="13" fill="#60468b" font-weight="700">Preview</text>
+<rect x="1445" y="124" width="91" height="38" rx="11" fill="#e7e0ea"/>
+<text x="1490" y="148" text-anchor="middle" font-family="Arial" font-size="13" fill="#978b9e" font-weight="700">Publish</text>
+<!-- side rail -->
+<rect x="45" y="171" width="206" height="722" fill="#f5f2f8"/>
+<path d="M251 171V893" stroke="#e4deea"/>
+<text x="65" y="210" font-family="Arial" font-size="11" fill="#918397" font-weight="700" letter-spacing="1.6">CONTENT</text>
+<rect x="57" y="229" width="184" height="40" rx="11" fill="#e9dff8"/>
+<text x="73" y="255" font-family="Arial" font-size="14" fill="#593983" font-weight="700">▤  Pages</text>
+<text x="73" y="301" font-family="Arial" font-size="13" fill="#655a6e">▧  Business info</text>
+<text x="73" y="344" font-family="Arial" font-size="13" fill="#655a6e">◇  Reusable content</text>
+<text x="73" y="387" font-family="Arial" font-size="13" fill="#655a6e">⚙  Website settings</text>
+<path d="M64 413H237" stroke="#e4deea"/>
+<text x="65" y="445" font-family="Arial" font-size="11" fill="#918397" font-weight="700" letter-spacing="1.6">THIS WEBSITE</text>
+<text x="73" y="481" font-family="Arial" font-size="13" fill="#655a6e">Home</text>
+<rect x="60" y="495" width="178" height="40" rx="11" fill="#ffffff" stroke="#ddd3e9"/>
+<circle cx="79" cy="515" r="5" fill="#3ea78a"/>
+<text x="94" y="520" font-family="Arial" font-size="13" fill="#43354d" font-weight="700">Links</text>
+<text x="73" y="564" font-family="Arial" font-size="13" fill="#655a6e">All pages</text>
+<!-- main edit -->
+<text x="286" y="211" font-family="Arial" font-size="12" fill="#847790">PAGES  /  LINKS</text>
+<text x="284" y="249" font-family="Georgia" font-size="32" fill="#2b2133">Links</text>
+<rect x="390" y="225" width="67" height="26" rx="13" fill="#f7eedf"/>
+<circle cx="404" cy="238" r="4" fill="#bb822d"/>
+<text x="416" y="242" font-family="Arial" font-size="11" fill="#8e622b">Draft</text>
+<text x="285" y="279" font-family="Arial" font-size="13" fill="#7e7387">Update the words and links visitors see on this page.</text>
+<path d="M284 304H1050" stroke="#e8e2ec"/>
+<rect x="284" y="327" width="766" height="515" rx="17" fill="#ffffff" stroke="#e3dce8"/>
+<text x="311" y="366" font-family="Arial" font-size="18" fill="#2d2336" font-weight="700">Page details</text>
+<text x="311" y="392" font-family="Arial" font-size="13" fill="#84788b">The information that identifies this page.</text>
+<text x="311" y="431" font-family="Arial" font-size="13" fill="#46384f" font-weight="700">Page title</text>
+<rect x="309" y="441" width="713" height="44" rx="10" fill="#fefcff" stroke="#d7cede"/>
+<text x="325" y="470" font-family="Arial" font-size="14" fill="#3b3246">Links</text>
+<text x="311" y="521" font-family="Arial" font-size="13" fill="#46384f" font-weight="700">Page URL</text>
+<rect x="309" y="532" width="713" height="44" rx="10" fill="#fefcff" stroke="#d7cede"/>
+<text x="325" y="560" font-family="Arial" font-size="14" fill="#54495b">/links</text>
+<text x="311" y="597" font-family="Arial" font-size="13" fill="#8a7d91">This page's public address; changes require review.</text>
+<path d="M310 618H1022" stroke="#ede7f0"/>
+<text x="311" y="657" font-family="Arial" font-size="18" fill="#2d2336" font-weight="700">Sections</text>
+<text x="311" y="682" font-family="Arial" font-size="13" fill="#8a7d91">Reorder or open a section to change its content.</text>
+<rect x="308" y="701" width="713" height="99" rx="12" fill="#f8f4fd" stroke="#d9c8f2"/>
+<rect x="323" y="717" width="56" height="66" rx="9" fill="#e5d7f4"/>
+<circle cx="351" cy="738" r="12" fill="#b895df"/>
+<rect x="333" y="756" width="35" height="8" rx="4" fill="#9171b3"/>
+<rect x="338" y="768" width="25" height="5" rx="2.5" fill="#b895df"/>
+<text x="397" y="736" font-family="Arial" font-size="15" fill="#32233f" font-weight="700">Living Prana</text>
+<text x="397" y="758" font-family="Arial" font-size="12" fill="#82718f">Link List · Glass rows preset</text>
+<rect x="741" y="716" width="162" height="25" rx="12" fill="#eee6fb"/>
+<text x="822" y="733" font-family="Arial" text-anchor="middle" font-size="11" fill="#6e4aa5" font-weight="700">1 custom override</text>
+<rect x="929" y="725" width="72" height="38" rx="10" fill="#ffffff" stroke="#d9c8ec"/>
+<text x="965" y="749" font-family="Arial" text-anchor="middle" font-size="12" fill="#694c94" font-weight="700">Open →</text>
+<!-- preview panel -->
+<rect x="1080" y="198" width="449" height="651" rx="17" fill="#ffffff" stroke="#e2dce9"/>
+<text x="1104" y="229" font-family="Arial" font-size="15" fill="#2d2336" font-weight="700">Live preview</text>
+<text x="1104" y="250" font-family="Arial" font-size="12" fill="#82788a">Showing your current draft</text>
+<rect x="1372" y="216" width="131" height="30" rx="11" fill="#f3eef9"/>
+<text x="1438" y="236" font-family="Arial" font-size="12" fill="#6c5288" text-anchor="middle">◧  Desktop  ▾</text>
+<rect x="1098" y="268" width="412" height="555" rx="13" fill="url(#preview)"/>
+<circle cx="1304" cy="355" r="101" fill="#e6d6cc" opacity=".09"/>
+<path d="M1098 599C1220 512 1286 515 1510 628V823H1098Z" fill="#2d2a3e" opacity=".5"/>
+<circle cx="1304" cy="370" r="45" fill="#ffffff" opacity=".15" stroke="#f3e9f4"/>
+<text x="1304" y="378" text-anchor="middle" font-family="Georgia" fill="#fff" font-size="23">LP</text>
+<text x="1304" y="438" text-anchor="middle" font-family="Georgia" fill="#fff" font-size="28">Living Prana</text>
+<text x="1304" y="465" text-anchor="middle" font-family="Arial" fill="#f2e9ef" font-size="13">Thoughtful bodywork and wellbeing</text>
+<rect x="1140" y="510" width="328" height="54" rx="14" fill="#ffffff" fill-opacity=".17" stroke="#ffffff" stroke-opacity=".42"/>
+<text x="1165" y="544" font-family="Arial" font-size="15" font-weight="700" fill="#fff">Book a bodywork session</text>
+<text x="1443" y="545" text-anchor="middle" fill="#fff" font-family="Arial" font-size="20">→</text>
+<rect x="1140" y="574" width="328" height="54" rx="14" fill="#ffffff" fill-opacity=".17" stroke="#ffffff" stroke-opacity=".42"/>
+<text x="1165" y="608" font-family="Arial" font-size="15" font-weight="700" fill="#fff">Gift vouchers</text>
+<text x="1443" y="609" text-anchor="middle" fill="#fff" font-family="Arial" font-size="20">→</text>
+<rect x="1140" y="638" width="328" height="54" rx="14" fill="#ffffff" fill-opacity=".17" stroke="#ffffff" stroke-opacity=".42"/>
+<text x="1165" y="672" font-family="Arial" font-size="15" font-weight="700" fill="#fff">Find us</text>
+<text x="1443" y="673" text-anchor="middle" fill="#fff" font-family="Arial" font-size="20">→</text>
+<rect x="50" y="910" width="1500" height="33" rx="9" fill="#e6def0"/>
+<text x="68" y="931" font-family="Arial" font-size="12" fill="#675a73">PROPOSED UI • not a live Studio capture. Draft/publish behaviour and preview routing require staging verification before adoption.</text>
+</svg>

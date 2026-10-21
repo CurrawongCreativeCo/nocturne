@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" role="img" aria-label="Proposed nested appearance editor with clearly marked scope, inherited values, restrained glass preview toolbar and accessible dark theme">
+<defs>
+<linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1c172a"/><stop offset="1" stop-color="#12111c"/></linearGradient>
+<linearGradient id="photo" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#806d8d"/><stop offset=".5" stop-color="#3c4058"/><stop offset="1" stop-color="#1e2c35"/></linearGradient>
+<linearGradient id="frost" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#8b74a6" stop-opacity=".35"/><stop offset="1" stop-color="#a9a7bf" stop-opacity=".15"/></linearGradient>
+<filter id="shade"><feGaussianBlur in="SourceAlpha" stdDeviation="11"/><feOffset dy="9"/><feComponentTransfer><feFuncA type="linear" slope=".3"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="1600" height="960" fill="#14121e"/>
+<circle cx="1479" cy="30" r="330" fill="#5f3e86" opacity=".16"/>
+<text x="45" y="54" font-family="Arial" font-size="30" font-weight="700" fill="#f8f4ff">NESTED SETTINGS <tspan fill="#bca0f3">/</tspan> DEPTH WITHOUT DISORIENTATION</text>
+<text x="46" y="81" font-family="Arial" font-size="14" fill="#c5b6d2">Concept D + E • explicit scope • inheritance summary • accessible feedback • glass reserved for floating layers</text>
+<g filter="url(#shade)"><rect x="37" y="114" width="1525" height="778" rx="20" fill="url(#base)"/></g>
+<rect x="37" y="114" width="1525" height="58" rx="20" fill="#211c2c"/>
+<rect x="37" y="142" width="1525" height="30" fill="#211c2c"/>
+<path d="M37 172H1562" stroke="#3c3448"/>
+<circle cx="70" cy="143" r="13" fill="#efe7ff"/><circle cx="76" cy="137" r="10" fill="#211c2c"/>
+<text x="92" y="150" font-family="Georgia" font-size="20" font-weight="700" letter-spacing="3" fill="#fcf8ff">NOCTURNE</text>
+<text x="346" y="149" font-family="Arial" font-size="13" fill="#b4a7c4">Structure</text>
+<rect x="422" y="126" width="75" height="33" rx="10" fill="#46345f"/>
+<text x="459" y="147" text-anchor="middle" font-family="Arial" font-size="13" fill="#e5d4ff" font-weight="700">Pages</text>
+<text x="518" y="149" font-family="Arial" font-size="13" fill="#b4a7c4">Presentation</text>
+<rect x="1332" y="126" width="135" height="32" rx="15" fill="#342b44"/>
+<text x="1399" y="147" font-family="Arial" font-size="12" fill="#d0c1de" text-anchor="middle">Agency view</text>
+<circle cx="1521" cy="142" r="14" fill="#a88bd5"/><text x="1521" y="146" text-anchor="middle" font-family="Arial" font-size="10" font-weight="700" fill="#281936">BT</text>
+<!-- left nav -->
+<rect x="37" y="172" width="252" height="720" fill="#1b1825"/>
+<path d="M289 172V892" stroke="#362e43"/>
+<text x="62" y="213" font-family="Arial" font-size="11" fill="#9d8caf" font-weight="700" letter-spacing="1.6">CURRENT DOCUMENT</text>
+<rect x="54" y="230" width="219" height="54" rx="11" fill="#2d263b" stroke="#4a3b5e"/>
+<text x="73" y="252" font-family="Arial" font-size="14" fill="#f0e6fb" font-weight="700">Links</text>
+<text x="73" y="269" font-family="Arial" font-size="11" fill="#b2a3c1">Living Prana · Link List</text>
+<text x="62" y="326" font-family="Arial" font-size="11" fill="#9d8caf" font-weight="700" letter-spacing="1.6">CARD EDITOR</text>
+<text x="73" y="369" font-family="Arial" font-size="14" fill="#bcb0cb">Content</text>
+<rect x="54" y="390" width="219" height="42" rx="11" fill="#473464" stroke="#72589c"/>
+<text x="73" y="417" font-family="Arial" font-size="14" fill="#f6eeff" font-weight="700">Appearance</text>
+<text x="73" y="470" font-family="Arial" font-size="14" fill="#bcb0cb">Advanced</text>
+<path d="M62 501H274" stroke="#3a3148"/>
+<text x="62" y="538" font-family="Arial" font-size="11" fill="#9d8caf" font-weight="700" letter-spacing="1.6">OTHER LINKS</text>
+<text x="73" y="575" font-family="Arial" font-size="12" fill="#ae9ebd">Gift vouchers</text>
+<text x="73" y="610" font-family="Arial" font-size="12" fill="#ae9ebd">Feet, knees, hips</text>
+<text x="73" y="645" font-family="Arial" font-size="12" fill="#ae9ebd">Find us</text>
+<rect x="54" y="825" width="218" height="42" rx="11" fill="#292332" stroke="#544562"/>
+<text x="72" y="851" font-family="Arial" fill="#d4c6e1" font-size="12">←  Back to Living Prana</text>
+<!-- center editor -->
+<text x="326" y="210" font-family="Arial" font-size="12" fill="#a799b6">LINKS  /  LIVING PRANA  /  BOOK A BODYWORK SESSION</text>
+<text x="325" y="252" font-family="Georgia" font-size="30" fill="#f7f0ff">Appearance</text>
+<rect x="512" y="226" width="105" height="25" rx="12" fill="#3e3153" stroke="#745992"/>
+<text x="564" y="243" font-family="Arial" fill="#ddc8fa" text-anchor="middle" font-size="11" font-weight="700">THIS CARD ONLY</text>
+<text x="327" y="283" font-family="Arial" font-size="13" fill="#b8aabf">Choose a look, then adjust only the details this card needs.</text>
+<rect x="319" y="303" width="720" height="113" rx="17" fill="#262132" stroke="#463b56"/>
+<rect x="335" y="319" width="312" height="80" rx="12" fill="#312a3f" stroke="#6a5b7e"/>
+<circle cx="356" cy="342" r="9" fill="#342c43" stroke="#8f74b0" stroke-width="1.5"/>
+<text x="376" y="348" font-family="Arial" font-size="15" fill="#ded3e7" font-weight="700">Use Link List design</text>
+<text x="376" y="368" font-family="Arial" font-size="11" fill="#a99ab8">Inherit all properties from Glass rows</text>
+<rect x="662" y="319" width="361" height="80" rx="12" fill="#49365f" stroke="#aa82db" stroke-width="2"/>
+<circle cx="683" cy="342" r="9" fill="#c9a8f9"/>
+<circle cx="683" cy="342" r="3.5" fill="#38264c"/>
+<text x="703" y="348" font-family="Arial" font-size="15" fill="#faf5ff" font-weight="700">Customise this card</text>
+<text x="703" y="368" font-family="Arial" font-size="11" fill="#dfcbf0">2 overrides · text colour, icon shade</text>
+<text x="328" y="451" font-family="Arial" font-size="18" font-weight="700" fill="#f6f0ff">Your overrides</text>
+<rect x="915" y="434" width="122" height="33" rx="10" fill="#32283f" stroke="#594b67"/>
+<text x="976" y="455" font-family="Arial" fill="#d7c5e9" text-anchor="middle" font-size="12">Reset all ↺</text>
+<rect x="319" y="479" width="720" height="152" rx="17" fill="#262132" stroke="#463b56"/>
+<text x="339" y="514" font-family="Arial" font-size="16" font-weight="700" fill="#f3eafc">Text</text>
+<rect x="921" y="495" width="100" height="25" rx="12" fill="#3b2d53"/>
+<text x="971" y="512" font-family="Arial" font-size="11" fill="#dfc7fa" text-anchor="middle">1 override</text>
+<text x="339" y="549" font-family="Arial" font-size="12" fill="#c8bbd4">Label colour</text>
+<rect x="338" y="563" width="300" height="46" rx="11" fill="#342b42" stroke="#745f88"/>
+<rect x="354" y="576" width="23" height="21" rx="6" fill="#bda0e1"/>
+<text x="388" y="593" font-family="Arial" font-size="13" fill="#f6edff">#BDA0E1</text>
+<text x="674" y="593" font-family="Arial" font-size="12" fill="#b8a3c8">Inherited: text on glass</text>
+<text x="1010" y="593" text-anchor="end" font-family="Arial" font-size="13" fill="#cfb1f3">↺</text>
+<rect x="319" y="650" width="720" height="120" rx="17" fill="#262132" stroke="#463b56"/>
+<text x="339" y="685" font-family="Arial" font-size="16" font-weight="700" fill="#f3eafc">Icon &amp; arrow</text>
+<rect x="921" y="667" width="100" height="25" rx="12" fill="#3b2d53"/>
+<text x="971" y="684" font-family="Arial" font-size="11" fill="#dfc7fa" text-anchor="middle">1 override</text>
+<text x="339" y="726" font-family="Arial" font-size="12" fill="#c8bbd4">Icon strength</text>
+<rect x="511" y="717" width="317" height="7" rx="4" fill="#493a5c"/>
+<rect x="511" y="717" width="167" height="7" rx="4" fill="#b697e3"/>
+<circle cx="677" cy="720" r="11" fill="#e5d7fc" stroke="#433054" stroke-width="3"/>
+<rect x="861" y="707" width="96" height="33" rx="9" fill="#342b42" stroke="#695978"/>
+<text x="909" y="729" font-family="Arial" fill="#f4ebff" text-anchor="middle" font-size="12">55%</text>
+<rect x="319" y="787" width="720" height="79" rx="16" fill="#3c2e33" stroke="#795552"/>
+<circle cx="344" cy="813" r="10" fill="#e4b772"/>
+<text x="344" y="818" font-family="Arial" fill="#503123" text-anchor="middle" font-size="14" font-weight="700">!</text>
+<text x="365" y="811" font-family="Arial" fill="#ffe0c9" font-size="13" font-weight="700">Contrast needs attention</text>
+<text x="365" y="831" font-family="Arial" fill="#e4c4ba" font-size="12">One icon state may be too faint on this background.</text>
+<rect x="815" y="801" width="207" height="40" rx="11" fill="#ead3ae"/>
+<text x="918" y="826" font-family="Arial" fill="#4f3422" text-anchor="middle" font-size="12" font-weight="700">See safer colour →</text>
+<!-- preview -->
+<rect x="1060" y="192" width="472" height="671" rx="19" fill="#231e2d" stroke="#4b3d5b"/>
+<text x="1083" y="226" font-family="Arial" font-size="16" fill="#f5ebff" font-weight="700">Card preview</text>
+<text x="1083" y="247" font-family="Arial" font-size="12" fill="#afa0bf">Changing this card does not affect its siblings.</text>
+<rect x="1080" y="269" width="431" height="568" rx="14" fill="url(#photo)"/>
+<circle cx="1450" cy="413" r="180" fill="#b5a9d0" opacity=".08"/>
+<path d="M1081 688C1200 581 1312 590 1511 712V837H1081Z" fill="#101b2b" opacity=".43"/>
+<rect x="1102" y="284" width="388" height="43" rx="13" fill="url(#frost)" stroke="#e6d3f9" stroke-opacity=".42"/>
+<text x="1121" y="311" font-family="Arial" font-size="12" fill="#f4e8ff">◈  Preview as visitor</text>
+<text x="1466" y="311" text-anchor="end" font-family="Arial" font-size="13" fill="#f4e8ff">◧   ↗</text>
+<circle cx="1295" cy="455" r="42" fill="#f1e6ff" opacity=".14"/>
+<text x="1295" y="466" text-anchor="middle" font-family="Georgia" fill="#ffffff" font-size="27">LP</text>
+<text x="1295" y="522" text-anchor="middle" font-family="Georgia" fill="#fff" font-size="28">Living Prana</text>
+<rect x="1120" y="562" width="351" height="66" rx="14" fill="#e7d3fa" fill-opacity=".25" stroke="#f4e5ff" stroke-opacity=".72"/>
+<text x="1144" y="591" font-family="Arial" fill="#fff" font-size="11" font-weight="700">BOOK A SESSION</text>
+<text x="1144" y="611" font-family="Arial" fill="#fff" font-size="15" font-weight="700">Book a bodywork session</text>
+<text x="1447" y="605" text-anchor="middle" font-family="Arial" fill="#ffffff" font-size="22">→</text>
+<rect x="1120" y="642" width="351" height="62" rx="14" fill="#e7d3fa" fill-opacity=".10" stroke="#f4e5ff" stroke-opacity=".22"/>
+<text x="1144" y="682" font-family="Arial" fill="#fff" font-size="14">Gift vouchers</text>
+<text x="1447" y="682" text-anchor="middle" font-family="Arial" fill="#fff" font-size="20">→</text>
+<rect x="1099" y="786" width="394" height="35" rx="12" fill="#292334" stroke="#bcacd0" stroke-opacity=".35"/>
+<text x="1296" y="808" font-family="Arial" text-anchor="middle" font-size="11" fill="#dbcbeb">GLASS ONLY FOR TEMPORARY VIEW TOOLS • FALLBACK: OPAQUE</text>
+<rect x="41" y="906" width="1520" height="36" rx="9" fill="#2c2438" stroke="#493e5c"/>
+<text x="61" y="929" font-family="Arial" fill="#d7c8e6" font-size="12">CONCEPT ONLY • illustrative link text, tokens and preview • not a screenshot, tested interaction, or claim about current Sanity component APIs.</text>
+</svg>

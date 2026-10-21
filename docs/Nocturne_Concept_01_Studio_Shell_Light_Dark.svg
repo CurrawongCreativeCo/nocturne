@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" role="img" aria-label="Conceptual Nocturne Studio shell in light and dark themes side by side">
+<defs>
+  <linearGradient id="board" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#251c37"/><stop offset="1" stop-color="#12121c"/></linearGradient>
+  <linearGradient id="light" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8f6fb"/><stop offset="1" stop-color="#f2eef9"/></linearGradient>
+  <linearGradient id="lav" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f1eafd"/><stop offset="1" stop-color="#ded2f8"/></linearGradient>
+  <linearGradient id="dark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1b1826"/><stop offset="1" stop-color="#17151f"/></linearGradient>
+  <linearGradient id="darkLav" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34294b"/><stop offset="1" stop-color="#242132"/></linearGradient>
+  <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope="0.25"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#9e82da" opacity=".10"/></pattern>
+</defs>
+<rect width="1600" height="960" fill="url(#board)"/>
+<rect width="1600" height="960" fill="url(#dots)"/>
+<circle cx="1377" cy="25" r="225" fill="#5c3b9a" opacity=".13"/>
+<circle cx="150" cy="900" r="290" fill="#9c78ee" opacity=".10"/>
+<text x="48" y="54" fill="#faf7ff" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing=".2">NOCTURNE <tspan fill="#bca7ed">/</tspan> THE STUDIO SHELL</text>
+<text x="49" y="81" fill="#c1b3d5" font-family="Arial, sans-serif" font-size="15">Concept A + F • restrained glass navigation • one design language, two intentional themes</text>
+
+<!-- light browser -->
+<g filter="url(#shadow)">
+<rect x="42" y="112" width="742" height="764" rx="22" fill="url(#light)"/>
+<rect x="42" y="112" width="742" height="56" rx="22" fill="#fcfbfd"/>
+<rect x="42" y="146" width="742" height="22" fill="#fcfbfd"/>
+<path d="M42 168H784" stroke="#e8e2ee"/>
+<rect x="42" y="168" width="220" height="708" rx="0" fill="#f5f2f9"/>
+<path d="M262 168V876" stroke="#e3ddea"/>
+</g>
+<!-- product brand -->
+<circle cx="75" cy="140" r="13" fill="#332343"/>
+<circle cx="81" cy="134" r="10.5" fill="#fcfbfd"/>
+<text x="96" y="146" font-family="Georgia, serif" font-size="21" font-weight="700" letter-spacing="3" fill="#25202e">NOCTURNE</text>
+<rect x="630" y="126" width="98" height="29" rx="14" fill="#ede4f9"/>
+<text x="679" y="145" font-family="Arial" font-size="12" fill="#543c85" text-anchor="middle" font-weight="700">Agency view</text>
+<circle cx="749" cy="141" r="14" fill="#6d4ac1"/><text x="749" y="145" text-anchor="middle" fill="white" font-family="Arial" font-size="10" font-weight="700">BT</text>
+<text x="64" y="202" fill="#777080" font-family="Arial" font-size="10" font-weight="700" letter-spacing="1.8">WORKSPACE</text>
+<rect x="57" y="213" width="191" height="44" rx="12" fill="#ffffff" stroke="#ddd6e7"/>
+<circle cx="80" cy="235" r="11" fill="#dac9f1"/><text x="80" y="239" text-anchor="middle" font-family="Arial" font-weight="700" fill="#543782" font-size="10">C</text>
+<text x="97" y="239" font-family="Arial" fill="#31283d" font-size="13" font-weight="700">Currawong Creative</text>
+<text x="65" y="296" fill="#81778b" font-family="Arial" font-size="10" font-weight="700" letter-spacing="1.6">STUDIO</text>
+<rect x="55" y="309" width="194" height="42" rx="12" fill="#e9def9"/>
+<rect x="66" y="320" width="18" height="18" rx="5" fill="#6d4ac1"/>
+<text x="75" y="333" text-anchor="middle" font-family="Arial" font-size="12" fill="white">▦</text>
+<text x="98" y="336" font-family="Arial" font-size="14" font-weight="700" fill="#39245b">Structure</text>
+<text x="72" y="381" font-family="Arial" font-size="17" fill="#9d92ad">◉</text><text x="98" y="379" font-family="Arial" font-size="14" fill="#594f64">Presentation</text>
+<text x="72" y="420" font-family="Arial" font-size="17" fill="#9d92ad">✧</text><text x="98" y="418" font-family="Arial" font-size="14" fill="#594f64">Start here</text>
+<path d="M61 449H245" stroke="#e2dce9"/>
+<text x="65" y="481" fill="#81778b" font-family="Arial" font-size="10" font-weight="700" letter-spacing="1.6">CONTENT</text>
+<text x="74" y="519" font-family="Arial" font-size="14" fill="#53485d">▤  Pages</text>
+<text x="74" y="555" font-family="Arial" font-size="14" fill="#53485d">▥  Business info</text>
+<text x="74" y="591" font-family="Arial" font-size="14" fill="#53485d">◇  Reusable content</text>
+<text x="74" y="627" font-family="Arial" font-size="14" fill="#53485d">⚙  Website settings</text>
+<rect x="58" y="819" width="191" height="39" rx="11" fill="#f0ebf5" stroke="#ded6e8"/>
+<text x="74" y="844" font-family="Arial" font-size="12" fill="#6c6178">ⓘ  Help &amp; support</text>
+<!-- light home -->
+<text x="300" y="218" font-family="Arial" fill="#766983" font-size="12" font-weight="700" letter-spacing="1">START HERE</text>
+<text x="298" y="256" font-family="Georgia" fill="#261e30" font-size="34">Good morning.</text>
+<text x="300" y="286" font-family="Arial" fill="#71687e" font-size="14">Everything you need to keep your website looking its best.</text>
+<rect x="292" y="315" width="461" height="142" rx="19" fill="url(#lav)"/>
+<circle cx="674" cy="384" r="90" fill="#bca5e5" opacity=".33"/>
+<circle cx="674" cy="384" r="53" fill="none" stroke="#ffffff" opacity=".50" stroke-width="2"/>
+<text x="315" y="347" font-family="Arial" fill="#594378" font-size="12" font-weight="700">YOUR SITE</text>
+<text x="315" y="381" font-family="Georgia" fill="#2c2039" font-size="26">Living Prana</text>
+<text x="315" y="406" font-family="Arial" fill="#5f5273" font-size="13">Drafts are private until you publish.</text>
+<rect x="313" y="423" width="139" height="23" rx="11" fill="#fffafc" opacity=".88"/>
+<circle cx="328" cy="435" r="4" fill="#3f9c80"/>
+<text x="337" y="439" font-family="Arial" fill="#5b4772" font-size="11" font-weight="700">Site is published</text>
+<text x="294" y="493" font-family="Arial" fill="#2e2539" font-size="16" font-weight="700">Quick actions</text>
+<rect x="292" y="510" width="220" height="132" rx="15" fill="#fff" stroke="#e3dfea"/>
+<rect x="532" y="510" width="221" height="132" rx="15" fill="#fff" stroke="#e3dfea"/>
+<rect x="312" y="528" width="34" height="34" rx="11" fill="#eee7fb"/>
+<text x="329" y="550" font-family="Arial" fill="#7050bd" text-anchor="middle" font-size="17">↗</text>
+<text x="312" y="584" font-family="Arial" fill="#2b2236" font-weight="700" font-size="15">Edit your website</text>
+<text x="312" y="606" font-family="Arial" fill="#82788c" font-size="12">Pages, sections and links</text>
+<rect x="552" y="528" width="34" height="34" rx="11" fill="#eee7fb"/>
+<text x="569" y="550" font-family="Arial" fill="#7050bd" text-anchor="middle" font-size="17">◈</text>
+<text x="552" y="584" font-family="Arial" fill="#2b2236" font-weight="700" font-size="15">Business information</text>
+<text x="552" y="606" font-family="Arial" fill="#82788c" font-size="12">Hours, contact and profiles</text>
+<rect x="292" y="664" width="461" height="155" rx="16" fill="#fff" stroke="#e3dfea"/>
+<text x="315" y="694" font-family="Arial" fill="#2b2236" font-weight="700" font-size="16">Before you publish</text>
+<text x="315" y="722" font-family="Arial" fill="#6b6175" font-size="13">A few small checks keep your site consistent.</text>
+<path d="M315 740H728" stroke="#eeeaf2"/>
+<circle cx="324" cy="766" r="8" fill="#d5efe7"/><text x="321" y="770" fill="#317b64" font-family="Arial" font-size="11">✓</text>
+<text x="344" y="771" font-family="Arial" fill="#45384f" font-size="13">Logo and site title</text>
+<circle cx="324" cy="795" r="8" fill="#fff1dc"/><text x="321" y="799" fill="#98632a" font-family="Arial" font-size="10">!</text>
+<text x="344" y="800" font-family="Arial" fill="#45384f" font-size="13">Check descriptions on 2 pages</text>
+
+<!-- dark browser -->
+<g filter="url(#shadow)"><rect x="818" y="112" width="742" height="764" rx="22" fill="url(#dark)"/><rect x="818" y="112" width="742" height="56" rx="22" fill="#211d2a"/><rect x="818" y="145" width="742" height="23" fill="#211d2a"/><rect x="818" y="168" width="220" height="708" fill="#1d1a27"/></g>
+<path d="M818 168H1560M1038 168V876" stroke="#393246"/>
+<circle cx="850" cy="140" r="13" fill="#eee6ff"/><circle cx="856" cy="134" r="10.5" fill="#211d2a"/>
+<text x="872" y="146" font-family="Georgia" font-size="21" font-weight="700" letter-spacing="3" fill="#faf6ff">NOCTURNE</text>
+<rect x="1406" y="126" width="98" height="29" rx="14" fill="#3c3055"/>
+<text x="1455" y="145" font-family="Arial" font-size="12" fill="#e4d1ff" text-anchor="middle" font-weight="700">Agency view</text>
+<circle cx="1525" cy="141" r="14" fill="#a58adb"/><text x="1525" y="145" text-anchor="middle" fill="#21172d" font-family="Arial" font-size="10" font-weight="700">BT</text>
+<text x="841" y="202" fill="#9388a5" font-family="Arial" font-size="10" font-weight="700" letter-spacing="1.8">WORKSPACE</text>
+<rect x="833" y="213" width="191" height="44" rx="12" fill="#2b2538" stroke="#493d57"/>
+<circle cx="856" cy="235" r="11" fill="#554073"/><text x="856" y="239" text-anchor="middle" font-family="Arial" font-weight="700" fill="#e9dbff" font-size="10">C</text>
+<text x="874" y="239" font-family="Arial" fill="#ebe2f4" font-size="13" font-weight="700">Currawong Creative</text>
+<text x="841" y="296" fill="#9388a5" font-family="Arial" font-size="10" font-weight="700" letter-spacing="1.6">STUDIO</text>
+<rect x="831" y="309" width="194" height="42" rx="12" fill="#473366" stroke="#7756b1" opacity=".95"/>
+<rect x="842" y="320" width="18" height="18" rx="5" fill="#b89aea"/>
+<text x="851" y="333" text-anchor="middle" font-family="Arial" font-size="12" fill="#2b183f">▦</text>
+<text x="874" y="336" font-family="Arial" font-size="14" font-weight="700" fill="#f5ecff">Structure</text>
+<text x="848" y="381" font-family="Arial" font-size="17" fill="#8e819e">◉</text><text x="874" y="379" font-family="Arial" font-size="14" fill="#c3b8d3">Presentation</text>
+<text x="848" y="420" font-family="Arial" font-size="17" fill="#8e819e">✧</text><text x="874" y="418" font-family="Arial" font-size="14" fill="#c3b8d3">Start here</text>
+<path d="M837 449H1021" stroke="#3d354c"/>
+<text x="841" y="481" fill="#9388a5" font-family="Arial" font-size="10" font-weight="700" letter-spacing="1.6">CONTENT</text>
+<text x="850" y="519" font-family="Arial" font-size="14" fill="#cdc1db">▤  Pages</text>
+<text x="850" y="555" font-family="Arial" font-size="14" fill="#cdc1db">▥  Business info</text>
+<text x="850" y="591" font-family="Arial" font-size="14" fill="#cdc1db">◇  Reusable content</text>
+<text x="850" y="627" font-family="Arial" font-size="14" fill="#cdc1db">⚙  Website settings</text>
+<rect x="834" y="819" width="191" height="39" rx="11" fill="#2b2637" stroke="#4b405a"/>
+<text x="850" y="844" font-family="Arial" font-size="12" fill="#baadc9">ⓘ  Help &amp; support</text>
+<text x="1076" y="218" font-family="Arial" fill="#a99abc" font-size="12" font-weight="700" letter-spacing="1">START HERE</text>
+<text x="1074" y="256" font-family="Georgia" fill="#f9f3ff" font-size="34">Good morning.</text>
+<text x="1076" y="286" font-family="Arial" fill="#aca1b9" font-size="14">Everything you need to keep your website looking its best.</text>
+<rect x="1068" y="315" width="461" height="142" rx="19" fill="url(#darkLav)" stroke="#5a4674"/>
+<circle cx="1450" cy="384" r="90" fill="#7552aa" opacity=".20"/>
+<circle cx="1450" cy="384" r="53" fill="none" stroke="#b89bdd" opacity=".18" stroke-width="2"/>
+<text x="1091" y="347" font-family="Arial" fill="#baa4dc" font-size="12" font-weight="700">YOUR SITE</text>
+<text x="1091" y="381" font-family="Georgia" fill="#f4edff" font-size="26">Living Prana</text>
+<text x="1091" y="406" font-family="Arial" fill="#c2b4d2" font-size="13">Drafts are private until you publish.</text>
+<rect x="1089" y="423" width="139" height="23" rx="11" fill="#332a45" stroke="#5e4b73"/>
+<circle cx="1104" cy="435" r="4" fill="#5ed6aa"/>
+<text x="1113" y="439" font-family="Arial" fill="#d8cbe8" font-size="11" font-weight="700">Site is published</text>
+<text x="1070" y="493" font-family="Arial" fill="#f5eeff" font-size="16" font-weight="700">Quick actions</text>
+<rect x="1068" y="510" width="220" height="132" rx="15" fill="#282332" stroke="#494057"/>
+<rect x="1308" y="510" width="221" height="132" rx="15" fill="#282332" stroke="#494057"/>
+<rect x="1088" y="528" width="34" height="34" rx="11" fill="#46315f"/><text x="1105" y="550" font-family="Arial" fill="#d4b8ff" text-anchor="middle" font-size="17">↗</text>
+<text x="1088" y="584" font-family="Arial" fill="#f0eafb" font-weight="700" font-size="15">Edit your website</text>
+<text x="1088" y="606" font-family="Arial" fill="#ad9fbf" font-size="12">Pages, sections and links</text>
+<rect x="1328" y="528" width="34" height="34" rx="11" fill="#46315f"/><text x="1345" y="550" font-family="Arial" fill="#d4b8ff" text-anchor="middle" font-size="17">◈</text>
+<text x="1328" y="584" font-family="Arial" fill="#f0eafb" font-weight="700" font-size="15">Business information</text>
+<text x="1328" y="606" font-family="Arial" fill="#ad9fbf" font-size="12">Hours, contact and profiles</text>
+<rect x="1068" y="664" width="461" height="155" rx="16" fill="#282332" stroke="#494057"/>
+<text x="1091" y="694" font-family="Arial" fill="#f0eafb" font-weight="700" font-size="16">Before you publish</text>
+<text x="1091" y="722" font-family="Arial" fill="#ada0bb" font-size="13">A few small checks keep your site consistent.</text>
+<path d="M1091 740H1504" stroke="#3e344b"/>
+<circle cx="1100" cy="766" r="8" fill="#274f46"/><text x="1097" y="770" fill="#81e3b9" font-family="Arial" font-size="11">✓</text>
+<text x="1120" y="771" font-family="Arial" fill="#e1d7ed" font-size="13">Logo and site title</text>
+<circle cx="1100" cy="795" r="8" fill="#614a30"/><text x="1097" y="799" fill="#f3c781" font-family="Arial" font-size="10">!</text>
+<text x="1120" y="800" font-family="Arial" fill="#e1d7ed" font-size="13">Check descriptions on 2 pages</text>
+<rect x="43" y="890" width="1515" height="40" rx="10" fill="#292136" stroke="#554367"/>
+<text x="61" y="915" font-family="Arial" fill="#ddcfe9" font-size="13">CONCEPT ONLY  /  Wordmark shown as typographic placeholder; final asset, product/workspace hierarchy and implementation must be verified in the repository.</text>
+</svg>
