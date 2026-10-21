@@ -19,6 +19,7 @@
     "check:dataset": "node scripts/check-dataset.mjs",
     "check:version": "node scripts/check-version.mjs",
     "check:studio-brand": "node scripts/check-studio-brand.mjs",
+    "domain:check": "node scripts/domain-check.mjs",
     "launch:check": "node scripts/launch-check.mjs",
     "launch:screens": "node scripts/launch-screens.mjs",
     "release": "node scripts/release.mjs",

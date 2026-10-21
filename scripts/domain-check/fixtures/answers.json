@@ -1,0 +1,318 @@
+{
+  "description": "Sanitised DNS-answer fixtures using documentation domains and addresses. Fixed offline examples; never query live DNS in tests.",
+  "correct": {
+    "ns": ["ns1.example.net"],
+    "records": [
+      {
+        "name": "example.com.au",
+        "type": "A",
+        "values": ["216.198.79.1"]
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "CNAME",
+        "values": ["project.vercel-dns-017.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "CNAME",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "A",
+        "values": []
+      }
+    ]
+  },
+  "cloudflare": {
+    "ns": ["alice.ns.cloudflare.com"],
+    "records": [
+      {
+        "name": "example.com.au",
+        "type": "A",
+        "values": ["104.16.1.2"]
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "CNAME",
+        "values": ["project.vercel-dns-017.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "CNAME",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "A",
+        "values": []
+      }
+    ]
+  },
+  "m365": {
+    "ns": ["ns1.synergywholesale.com"],
+    "records": [
+      {
+        "name": "example.com.au",
+        "type": "A",
+        "values": ["216.198.79.1"]
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "CNAME",
+        "values": ["project.vercel-dns-017.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "CNAME",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "A",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "MX",
+        "values": ["0 example-com-au.mail.protection.outlook.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "TXT",
+        "values": ["v=spf1 include:spf.protection.outlook.com -all"]
+      },
+      {
+        "name": "_dmarc.example.com.au",
+        "type": "TXT",
+        "values": ["v=DMARC1; p=reject; rua=mailto:dmarc@example.com.au"]
+      },
+      {
+        "name": "selector1._domainkey.example.com.au",
+        "type": "CNAME",
+        "values": ["selector1-example-com-au._domainkey.tenant.onmicrosoft.com"]
+      },
+      {
+        "name": "_vercel.example.com.au",
+        "type": "TXT",
+        "values": ["vc-domain-verify=example.com.au,example-value"]
+      }
+    ]
+  },
+  "vercel": {
+    "ns": ["ns1.vercel-dns.com"],
+    "records": [
+      {
+        "name": "example.com.au",
+        "type": "A",
+        "values": ["216.198.79.1"]
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "CNAME",
+        "values": ["project.vercel-dns-017.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "CNAME",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "A",
+        "values": []
+      }
+    ]
+  },
+  "aaaa": {
+    "ns": ["ns1.example.net"],
+    "records": [
+      {
+        "name": "example.com.au",
+        "type": "A",
+        "values": ["216.198.79.1"]
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "CNAME",
+        "values": ["project.vercel-dns-017.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "AAAA",
+        "values": ["2001:db8::1"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "CNAME",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "A",
+        "values": []
+      }
+    ]
+  },
+  "caa": {
+    "ns": ["ns1.example.net"],
+    "records": [
+      {
+        "name": "example.com.au",
+        "type": "A",
+        "values": ["216.198.79.1"]
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "CNAME",
+        "values": ["project.vercel-dns-017.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "CNAME",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "A",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "CAA",
+        "values": ["0 issue \"digicert.com\""]
+      }
+    ]
+  },
+  "ds": {
+    "ns": ["ns1.example.net"],
+    "records": [
+      {
+        "name": "example.com.au",
+        "type": "A",
+        "values": ["216.198.79.1"]
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "CNAME",
+        "values": ["project.vercel-dns-017.com"]
+      },
+      {
+        "name": "example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "example.com.au",
+        "type": "CNAME",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "AAAA",
+        "values": []
+      },
+      {
+        "name": "www.example.com.au",
+        "type": "A",
+        "values": []
+      }
+    ],
+    "ds": [
+      {
+        "name": "example.com.au",
+        "type": "DS",
+        "values": ["12345 13 2 AABBCCDD"]
+      }
+    ]
+  },
+  "doh": {
+    "Status": 0,
+    "Answer": [
+      {
+        "name": "example.com.au.",
+        "type": 1,
+        "TTL": 300,
+        "data": "216.198.79.1"
+      },
+      {
+        "name": "other.example.",
+        "type": 1,
+        "TTL": 300,
+        "data": "192.0.2.1"
+      }
+    ]
+  },
+  "config": {
+    "misconfigured": false,
+    "configuredBy": "A",
+    "recommendedIPv4": [
+      {
+        "rank": 1,
+        "value": ["216.198.79.1"]
+      }
+    ],
+    "recommendedCNAME": [
+      {
+        "rank": 1,
+        "value": "project.vercel-dns-017.com"
+      }
+    ]
+  }
+}

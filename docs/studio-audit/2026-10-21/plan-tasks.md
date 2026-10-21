@@ -423,4 +423,6 @@ Include opening a page in client view after task 160, switching Presentation bet
 before and after task 172's fonts."
 
 **32. Go live and hand over**: add "Set help.supportEmail (and guideUrl) in site.profile.ts (audit UX-008), and set
-features.releases to match the Sanity plan (task 166)."
+features.releases to match the Sanity plan (task 166). Follow the
+[domain connection runbook](../../runbooks/connect-a-domain.md): save before/after DNS snapshots and a full zone export,
+confirm the certificate and email, and retain the rollback values before signing off."

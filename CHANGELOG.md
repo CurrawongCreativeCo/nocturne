@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Domain connection runbook and read-only DNS checker.** `npm run domain:check -- <domain>` snapshots authoritative DNS, compares two public resolvers and project-card expectations, preserves email records, and explains certificate and DNSSEC caveats. Optional Vercel configuration GETs supply recommendations. Includes JSON snapshots, offline tests and a manual launch/rollback checklist.
+
 - **Help when Publish is blocked.** A **Why can’t I publish?** action opens a list of errors with field-title breadcrumbs and **Go to field**, plus separate, non-blocking warnings. Hidden settings explain a choice that reveals them where possible, or ask for agency help. Sanity's own Publish action, validation tooltip and inspector stay available. Includes unit and dialog component tests; no content migration.
 
 ### Changed

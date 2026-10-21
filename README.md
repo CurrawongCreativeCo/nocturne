@@ -380,7 +380,8 @@ them, but it doesn't set `NEXT_PUBLIC_SITE_URL`, and the button can't require it
 It still needs the CORS step below.
 
 1. **Import the repo** at vercel.com/new (or use the Deploy button). Next.js is detected automatically. Node comes from
-   `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
+   `engines` in `package.json` (`.nvmrc` pins the same for local work and CI). Before attaching the client’s domain,
+   follow the [domain connection runbook](docs/runbooks/connect-a-domain.md), including the before snapshot and zone export.
 2. **Environment variables** (Production and Preview):
 
    | Variable                         | Value                                                                                   |
@@ -3954,6 +3955,17 @@ replaced by a fixed gradient, so no screenshot depends on the network. Baselines
   spec fails when a section type with a thumbnail in `public/section-previews/` has no gallery entry.
 
 The A/B test spec starts a site-wide experiment, which rewrites every page request while it runs. It is its own Playwright project (`experiments`) that waits for `desktop` and `mobile` to finish, so no other test ever sees an experiment running. Any new spec that changes site-wide state (settings variants, experiments) should do the same, or restore the state before other specs can run.
+
+### Domain connection
+
+Follow the [domain connection runbook](docs/runbooks/connect-a-domain.md) before changing client DNS.
+`npm run domain:check -- example.com.au --expect-a <card-ip> --expect-cname <card-www-target>` reads
+authoritative DNS and two public resolvers, preserves email records in the output, and explains connection blockers.
+Save clean JSON with `npm run --silent domain:check -- example.com.au --json > domain-before.json`;
+keep a full zone export too. Optional `VERCEL_TOKEN` + `VERCEL_PROJECT_ID` (and `VERCEL_TEAM_ID` for team scope)
+read project recommendations through GET requests only; tokens are never printed and `.env` files are not loaded.
+Without expected values this is a snapshot only. Exit codes: 0 no observed blockers, 1 connection blocked,
+2 invalid arguments or incomplete checks. Re-run after connecting, then use the launch check below.
 
 ### Launch check
 
