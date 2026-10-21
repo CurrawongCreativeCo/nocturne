@@ -11,9 +11,10 @@ const byId = (id: string) => {
 }
 
 describe('brand preview cases', () => {
-  it('covers the four brands', () => {
+  it('covers the default, classic and client brands', () => {
     expect(brandPreviewCases.map((item) => item.id)).toEqual([
       'currawong',
+      'currawong-classic',
       'green-cream',
       'partial',
       'low-contrast',

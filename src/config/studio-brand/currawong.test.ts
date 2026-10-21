@@ -2,10 +2,14 @@ import { describe, expect, it } from 'vitest'
 
 import { contrastRatio } from '@/lib/color/contrast'
 
-import { currawongBrand, currawongPalette } from './currawong'
+import {
+  currawongBrand as premiumBrand,
+  currawongClassicBrand as currawongBrand,
+  currawongPalette,
+} from './currawong'
 import { CONTRAST_RULES, ROLE_NAMES } from './types'
 
-describe('Currawong default CMS brand', () => {
+describe('Currawong classic CMS brand', () => {
   for (const scheme of ['light', 'dark'] as const) {
     describe(`${scheme} mode`, () => {
       const roles = currawongBrand[scheme]
@@ -71,5 +75,42 @@ describe('Currawong default CMS brand', () => {
       expect(asset.kind).toBe('image')
       expect(asset.kind === 'image' && asset.src).toMatch(/^src\/assets\/brand\/currawong\//)
     }
+  })
+})
+
+describe('Currawong premium CMS brand', () => {
+  for (const scheme of ['light', 'dark'] as const) {
+    const roles = premiumBrand[scheme]
+    it(`${scheme} defines every role as a lowercase hex`, () => {
+      for (const role of ROLE_NAMES) expect(roles[role]).toMatch(/^#[0-9a-f]{6}$/)
+    })
+    for (const rule of CONTRAST_RULES) {
+      it(`${scheme}: ${rule.foreground} on ${rule.background} reaches ${rule.min}:1`, () => {
+        expect(
+          contrastRatio(roles[rule.foreground], roles[rule.background]),
+        ).toBeGreaterThanOrEqual(rule.min)
+      })
+    }
+    it(`${scheme} retains the classic highlight roles`, () => {
+      for (const role of ['highlightFill', 'onHighlight', 'highlightText'] as const) {
+        expect(roles[role]).toBe(currawongBrand[scheme][role])
+      }
+    })
+  }
+  it('uses the approved proposal roles', () => {
+    expect(premiumBrand.light).toMatchObject({
+      background: '#f7f4fa',
+      text: '#1f1a29',
+      surface: '#fffeff',
+      accentFill: '#6d47c8',
+      focus: '#7651dc',
+    })
+    expect(premiumBrand.dark).toMatchObject({
+      background: '#17151f',
+      text: '#f6f3fa',
+      surface: '#25212f',
+      accentFill: '#c4a9f6',
+      focus: '#d2b6ff',
+    })
   })
 })

@@ -10,7 +10,7 @@ export const currawongPalette = {
 } as const
 
 /**
- * Currawong Creative's default CMS brand: used by a site's Studio unless studio-brand.json sets
+ * Currawong Creative's classic CMS brand: used by a site's Studio unless studio-brand.json sets
  * something. The role colours are fixed, not computed, and `currawong.test.ts` checks every pair
  * against its contrast threshold. The rules behind the choices:
  * - Violet is for light backgrounds only. On ink it is 2.5:1, so dark mode uses the lighter #9f80e5.
@@ -18,7 +18,7 @@ export const currawongPalette = {
  *   uses the darker #7e5c1f.
  * - Lilac is only ever a surface, and always with a border: against paper it is just 1.1:1.
  */
-export const currawongBrand: StudioBrandDefaults = {
+export const currawongClassicBrand: StudioBrandDefaults = {
   name: 'Currawong Creative',
   logo: {
     light: { kind: 'image', src: 'src/assets/brand/currawong/wordmark-on-light.webp' },
@@ -53,5 +53,32 @@ export const currawongBrand: StudioBrandDefaults = {
     highlightFill: currawongPalette.amber,
     onHighlight: currawongPalette.ink,
     highlightText: currawongPalette.amber, // 9.2:1 on ink
+  },
+}
+
+/** Approved proposal §5, with borders strengthened to meet the existing 3:1 boundary rules. */
+export const currawongBrand: StudioBrandDefaults = {
+  ...currawongClassicBrand,
+  light: {
+    ...currawongClassicBrand.light,
+    background: '#f7f4fa',
+    text: '#1f1a29',
+    surface: '#fffeff',
+    surfaceBorder: '#8a7c9b',
+    accentFill: '#6d47c8',
+    onAccent: '#ffffff',
+    accentText: '#6d47c8',
+    focus: '#7651dc',
+  },
+  dark: {
+    ...currawongClassicBrand.dark,
+    background: '#17151f',
+    text: '#f6f3fa',
+    surface: '#25212f',
+    surfaceBorder: '#8b7999',
+    accentFill: '#c4a9f6',
+    onAccent: '#211e2b',
+    accentText: '#c4a9f6',
+    focus: '#d2b6ff',
   },
 }

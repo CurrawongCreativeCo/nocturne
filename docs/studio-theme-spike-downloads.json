@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-21",
+  "browser": "Chromium 156.0.8078.4",
+  "platform": "macOS",
+  "status": "UI 4 implementation approved; UI 5 styling and Sanity-hosted Inter retained",
+  "before": {
+    "label": "before",
+    "scope": "Cold signed-out /studio; all external browser requests blocked; locally recompressed gzip, not wire bytes",
+    "resources": {
+      "stylesheet": {
+        "count": 6,
+        "bytes": 282577,
+        "gzip": 45223
+      },
+      "font": {
+        "count": 1,
+        "bytes": 48432,
+        "gzip": 48442
+      },
+      "script": {
+        "count": 56,
+        "bytes": 6794998,
+        "gzip": 2175597
+      }
+    },
+    "fonts": [
+      {
+        "url": "http://localhost:3210/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+        "type": "font",
+        "bytes": 48432,
+        "gzip": 48442
+      }
+    ]
+  },
+  "discardedPrototype": {
+    "label": "after",
+    "scope": "Cold signed-out /studio; all external browser requests blocked; locally recompressed gzip, not wire bytes",
+    "resources": {
+      "stylesheet": {
+        "count": 6,
+        "bytes": 285777,
+        "gzip": 46132
+      },
+      "font": {
+        "count": 2,
+        "bytes": 106584,
+        "gzip": 106430
+      },
+      "script": {
+        "count": 56,
+        "bytes": 6747145,
+        "gzip": 2163127
+      }
+    },
+    "fonts": [
+      {
+        "url": "http://localhost:3210/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+        "type": "font",
+        "bytes": 48432,
+        "gzip": 48442
+      },
+      {
+        "url": "http://localhost:3210/_next/static/media/5f402bd2d8eef81a-s.p.40bho2kviej2o.woff2",
+        "type": "font",
+        "bytes": 58152,
+        "gzip": 57988
+      }
+    ]
+  },
+  "implementation": {
+    "label": "implementation",
+    "scope": "Cold signed-out /studio; all external browser requests blocked; locally recompressed gzip, not wire bytes",
+    "resources": {
+      "stylesheet": {
+        "count": 6,
+        "bytes": 285777,
+        "gzip": 46132
+      },
+      "font": {
+        "count": 2,
+        "bytes": 106584,
+        "gzip": 106430
+      },
+      "script": {
+        "count": 56,
+        "bytes": 6747362,
+        "gzip": 2163192
+      }
+    },
+    "fonts": [
+      {
+        "url": "http://localhost:3210/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+        "type": "font",
+        "bytes": 48432,
+        "gzip": 48442
+      },
+      {
+        "url": "http://localhost:3210/_next/static/media/5f402bd2d8eef81a-s.p.40bho2kviej2o.woff2",
+        "type": "font",
+        "bytes": 58152,
+        "gzip": 57988
+      }
+    ]
+  }
+}

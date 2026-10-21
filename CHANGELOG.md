@@ -20,11 +20,15 @@ you start a release.
 
 ### Added
 
+- **Studio theme API findings and download comparison:** `docs/studio-theme-spike.md` records the supported API, approved UI 4 scope and UI 5 styling/font exception.
+
 - **Opt-in Studio performance harness.** A guarded throwaway-project seed and separate, local-only Playwright project capture five-run interaction medians, script download sizes and long tasks in agency and client views. Includes Presentation route and edit latency checks, saved sign-in instructions and append-only daily result files. Live baseline and any measured optimisation require disposable project credentials.
 
 - **Help when Publish is blocked.** A **Why can’t I publish?** action opens a list of errors with field-title breadcrumbs and **Go to field**, plus separate, non-blocking warnings. Hidden settings explain a choice that reveals them where possible, or ask for agency help. Sanity's own Publish action, validation tooltip and inspector stay available. Includes unit and dialog component tests; no content migration.
 
 ### Changed
+
+- **Studio palette, theme API and fonts (UI 4 scope):** Currawong's default CMS palette now follows the 21 October proposal, with contrast-tested borders and the previous palette retained as `currawongClassicBrand` (README: one-line rollback). The stable `@sanity/themer` generator and public v2 tokens replace `buildLegacyTheme`. The workspace theme uses self-hosted Inter for interface text and Newsreader for headings in both schemes. UI 5 alpha components retain Sanity's styling and CDN-hosted Inter, as explicitly agreed. Client palettes still replace defaults as a set, public-site font tokens are untouched, and there is no content migration. Refresh the Studio brand preview baselines using **Update visual baselines**; the findings document lists them.
 
 ### Fixed
 
