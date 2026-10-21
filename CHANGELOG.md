@@ -18,6 +18,16 @@ you start a release.
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.7.0] - 2026-10-21
+
 ### Fixed
 
 - **Client view no longer crashes where a page's Sections should be** ("An error occurred. Minified React error #130" with Dismiss and Unset value, on Home and Links; audit UX-001). `SectionInsertFilter` wrapped `props.arrayFunctions`, which Sanity 6.19 leaves undefined, so it rendered an undefined component. It now falls back to Sanity's public `ArrayOfObjectsFunctions`. Clients still see only the approved sections in Add item, existing sections of any type still open and edit, and agency staff are unfiltered.
@@ -993,7 +1003,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.3.0...v1.4.0
