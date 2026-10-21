@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Help when Publish is blocked.** A **Why can’t I publish?** action opens a list of errors with field-title breadcrumbs and **Go to field**, plus separate, non-blocking warnings. Hidden settings explain a choice that reveals them where possible, or ask for agency help. Sanity's own Publish action, validation tooltip and inspector stay available. Includes unit and dialog component tests; no content migration.
+
 ### Changed
 
 ### Fixed

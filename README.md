@@ -175,6 +175,20 @@ Open http://localhost:3000/studio:
   `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
   Normally they only apply to paths with no page, so they can't hide a live page. With Edge Config
   redirects on (see below) they run first, so a redirect from a path that has a page hides that page.
+- **When Publish is blocked:** open **Why can’t I publish?** beside Publish (in its actions menu). Each error shows
+  the field's title path, a plain instruction and **Go to field**, which opens the section, tab and field. Warnings
+  appear separately and never block publishing. If a setting is hidden by another choice, the dialog names the
+  current choice and a choice that reveals it when one can be found; **Go to field** takes you to that choice.
+  Settings hidden in your view ask for agency help. Document-level errors, removed fields and unavailable paths
+  open Sanity's existing validation inspector. Close the dialog, fix the errors and publish as usual. Agency and
+  client views use the same wording; no stored field paths or array keys appear in the list.
+  Developers: `publishValidationActions` adds help after the existing Publish action for every type that has one;
+  it keeps Sanity 6.19's disabled-Publish tooltip, inspector, permission checks and validation. It reads the same
+  live validation target as Publish (including release versions), adds no content queries and never edits values.
+  Title paths and hidden-choice guidance come from the compiled schema, including field groups and fieldsets.
+  Before merging changes to this flow, check a local Studio as agency and client: missing required field, a nested
+  section error, warning-only document, hidden setting, keyboard navigation and focus after **Go to field**.
+  Record the results in the PR; automated component tests do not replace that signed-in check.
 - **Publishing safely:** the first time a page or post is published, and whenever its address changes, Publish asks
   "Publish changes to `https://example.com/about`?" (the site's public address plus the page's path), with **Publish**
   and **Cancel**. Other edits to a live page publish straight away, with no dialog. If the page is already live and you changed its

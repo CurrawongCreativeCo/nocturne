@@ -33,6 +33,7 @@ import { siteSchemaTypes } from './src/features/site/schemas'
 import { confirmDeletePageActions } from './src/features/studio/actions/confirm-delete-page'
 import { confirmPublishActions } from './src/features/studio/actions/confirm-publish'
 import { pageLinkActions } from './src/features/studio/actions/page-link-actions'
+import { publishValidationActions } from './src/features/studio/actions/publish-validation'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
 import { FramelessAwareField } from './src/features/studio/components/frameless-field'
@@ -147,8 +148,11 @@ export default defineConfig({
       filterDocumentActions(
         pageLinkActions(
           confirmDeletePageActions(
-            confirmPublishActions(
-              singletonDocumentActions(withoutEnquiryDuplicate(prev, context), context),
+            publishValidationActions(
+              confirmPublishActions(
+                singletonDocumentActions(withoutEnquiryDuplicate(prev, context), context),
+                context,
+              ),
               context,
             ),
             context,
