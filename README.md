@@ -66,6 +66,28 @@ Create a page with slug `home` to populate `/`. After changing schemas or querie
 Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
+  Presentation maps `/` to `launch.homepage` before launch and to `home` when live; `/links` and nested
+  page addresses open their own documents. Blog, category, team profile and event addresses open their respective
+  documents. Built-in routes, APIs (including the draft-mode enable handshake) and files have no main document
+  lookup, so they do not trigger a missing-document warning. An unknown CMS address says: “This address has no
+  page in the Studio. It may be a redirect or a built-in page.” Sanity still gives that notice its caution icon
+  and colour; it offers a translation hook, but no supported empty-state component or tone hook.
+
+  **Redirects in Presentation:** the synchronous [main-document resolver](https://www.sanity.io/docs/visual-editing/presentation-resolver-api) receives only the URL, not published
+  redirects or a client. It cannot consult the server's cached redirect list or Edge Config synchronously.
+  We do not add a redirect request on each Studio navigation: the preview follows the actual redirect and
+  Presentation resolves the destination when the iframe reports it. A source address may briefly show the
+  explanation above. Before launch, the proxy gate still precedes redirects, and a valid signed preview pass
+  still bypasses the gate unchanged (task 118). In particular, a passed preview at `/` can render the full
+  site's Home while the launch-state resolver initially selects the temporary page; selecting a region opens
+  the document that owns that region. This resolver does not inspect cookies or change preview access.
+
+  **Manual verification after changing the resolver:** as both agency and client, check direct Presentation
+  loads, opening from a page editor, refresh and region selection, on desktop and mobile. Repeat live and
+  pre-launch with `/`, `/links`, a nested page, blog, team and event pages, an unknown address and a published
+  redirect; the enable handshake should show no missing-document notice. Check the signed preview pass still
+  opens private pages and exit preview still closes access. These checks require authenticated Studio access.
+
 - **Roles:** clients see a simpler Studio than Currawong staff; see [Studio roles and permissions](#studio-roles-and-permissions).
 - **The sidebar** is grouped by what you are doing, not by how the data is stored. Agency staff see every item; clients see the ones marked (client).
   - **Start here** (client) is also a tool in the top bar, not only a sidebar item: the Studio opens on it. See [Start here](#start-here-studio-home-screen).
@@ -153,6 +175,20 @@ Open http://localhost:3000/studio:
   `/about`. Studio blocks duplicates and loops, and warns about chains and sources a page already uses.
   Normally they only apply to paths with no page, so they can't hide a live page. With Edge Config
   redirects on (see below) they run first, so a redirect from a path that has a page hides that page.
+- **When Publish is blocked:** open **Why can’t I publish?** beside Publish (in its actions menu). Each error shows
+  the field's title path, a plain instruction and **Go to field**, which opens the section, tab and field. Warnings
+  appear separately and never block publishing. If a setting is hidden by another choice, the dialog names the
+  current choice and a choice that reveals it when one can be found; **Go to field** takes you to that choice.
+  Settings hidden in your view ask for agency help. Document-level errors, removed fields and unavailable paths
+  open Sanity's existing validation inspector. Close the dialog, fix the errors and publish as usual. Agency and
+  client views use the same wording; no stored field paths or array keys appear in the list.
+  Developers: `publishValidationActions` adds help after the existing Publish action for every type that has one;
+  it keeps Sanity 6.19's disabled-Publish tooltip, inspector, permission checks and validation. It reads the same
+  live validation target as Publish (including release versions), adds no content queries and never edits values.
+  Title paths and hidden-choice guidance come from the compiled schema, including field groups and fieldsets.
+  Before merging changes to this flow, check a local Studio as agency and client: missing required field, a nested
+  section error, warning-only document, hidden setting, keyboard navigation and focus after **Go to field**.
+  Record the results in the PR; automated component tests do not replace that signed-in check.
 - **Publishing safely:** the first time a page or post is published, and whenever its address changes, Publish asks
   "Publish changes to `https://example.com/about`?" (the site's public address plus the page's path), with **Publish**
   and **Cancel**. Other edits to a live page publish straight away, with no dialog. If the page is already live and you changed its
@@ -2092,7 +2128,10 @@ _Set exact motion values_ (parallax only) reveals **Travel distance** (2–7 % o
 **Direction** (down drifts with the scroll, up goes against it) and **Picture scale** (1.05–1.15; empty uses just enough for the
 travel). A frame has a **Frame colour** (a design token: accent, second accent, highlight or text colour) and a **Frame inset**
 (how far it sits in from the edge, 0–12 %; for the offset border, how far it sticks out). Hidden fields keep their values, but the
-site ignores a value the current choices do not use (a frame on a circle, a travel on a still picture).
+site ignores a value the current choices do not use (a frame on a circle, a travel on a still picture). Hidden
+controls also skip validation, including Sanity’s built-in reference checks. Switching a shape or frame keeps the
+saved choices; unused frame references stay weak so an unpublished frame cannot block publishing. Switching back
+checks the frame again. The same rule applies to Link list design controls and their nested custom colours.
 
 **Image + text and the section's own Parallax.** Choosing the _Parallax_ animation preset on Image + text still works and the
 stored values are unchanged, but it now moves **only the picture inside its still frame** (before, the whole framed picture
@@ -2100,7 +2139,8 @@ drifted). Subtle, Medium and Strong keep their strengths (Strong is held to the 
 is not _None_ uses that instead.
 
 **Approved custom frames.** An agency-uploaded SVG in a **Frame** document (Studio → Design → Image frames; agency only: clients
-never see or create them, and an image design can only point at one). The file must be an SVG with a `viewBox`, under 50 KB, with no
+never see or create them, and an image design can only point at one). The Image design and Link list profile
+frame pickers offer existing frames only: add and publish new frames under **Design → Image frames**. The file must be an SVG with a `viewBox`, under 50 KB, with no
 scripts, event handlers or `foreignObject` (checked on save by `checkFrameSvg`, `src/features/frames/utils/frame-svg.ts`). The site
 **never inlines it**: it uses the file's CDN URL (and only a `cdn.sanity.io` URL) as a CSS `mask-image` on a `div` filled with the
 chosen colour token, so it recolours with the theme, scales to the picture and, loaded as an image, cannot run a script. Design it as
@@ -2132,6 +2172,9 @@ box        aspect ratio and place in the layout (the corners of a plain picture)
 (`src/lib/sanity/image-design-options.ts`), its drawing (`image-frames.tsx`), a thumbnail (`image-design-thumbnails.tsx` and
 `registry.ts`) and a class (`SHAPE_CLASS`). Tests fail until each table has a row. **Adding it to another section:** add
 `imageDesignField()` to its schema, `imageDesign { ${imageDesignFields} }` to its fragment, and render the picture with `FramedImage`.
+
+**Validation investigation (21 October 2026).** See [hidden image settings](docs/hidden-image-settings.md) for the
+local reproduction, exact error paths, hidden-field audit and reference publishing behaviour. No content migration is needed.
 
 **Tests.** `image-travel.test.ts` (scale from travel, phones, range), `image-design-options.test.ts` (shape and frame rules, what
 is ignored), `image-design.test.ts` (which fields the Studio shows), `framed-image.test.ts` (markup: layers, scale classes, frames,

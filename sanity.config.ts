@@ -33,6 +33,7 @@ import { siteSchemaTypes } from './src/features/site/schemas'
 import { confirmDeletePageActions } from './src/features/studio/actions/confirm-delete-page'
 import { confirmPublishActions } from './src/features/studio/actions/confirm-publish'
 import { pageLinkActions } from './src/features/studio/actions/page-link-actions'
+import { publishValidationActions } from './src/features/studio/actions/publish-validation'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
 import { FramelessAwareField } from './src/features/studio/components/frameless-field'
@@ -106,6 +107,19 @@ export default defineConfig({
   theme: buildStudioTheme(studioBrand),
   projectId,
   dataset,
+  // Sanity's built-in English locale ID; our editor-facing wording uses Australian English.
+  i18n: {
+    bundles: [
+      {
+        locale: 'en-US',
+        namespace: 'presentation',
+        resources: {
+          'main-document.missing.text':
+            'This address has no page in the Studio. It may be a redirect or a built-in page.',
+        },
+      },
+    ],
+  },
   studio: { components: { logo: StudioLogo, navbar: RoleNavbar } },
   // Clients only get the approved sections in the page builder's insert menu; presetPicker fields
   // and objects with presets get the picture picker; frameless objects drop their own box.
@@ -134,8 +148,11 @@ export default defineConfig({
       filterDocumentActions(
         pageLinkActions(
           confirmDeletePageActions(
-            confirmPublishActions(
-              singletonDocumentActions(withoutEnquiryDuplicate(prev, context), context),
+            publishValidationActions(
+              confirmPublishActions(
+                singletonDocumentActions(withoutEnquiryDuplicate(prev, context), context),
+                context,
+              ),
               context,
             ),
             context,

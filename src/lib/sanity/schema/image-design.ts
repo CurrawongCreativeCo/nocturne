@@ -28,6 +28,7 @@ import {
   imageFrameThumbnails,
   imageMotionThumbnails,
 } from './thumbnails/registry'
+import { validateVisible } from './validate-visible'
 
 /**
  * The shared `imageDesign` object: how a section's picture looks and moves (README, "Image design").
@@ -164,6 +165,7 @@ export const imageDesign = defineType({
       title: 'Approved frame',
       type: 'reference',
       to: [{ type: 'frame' }],
+      options: { disableNew: true },
       description: 'Frames are added by the agency, under Design > Image frames.',
       hidden: ({ parent }) => {
         const design = designOf(parent)
@@ -231,7 +233,7 @@ export const imageDesign = defineType({
       hidden: hiddenUnless((uses) => uses.frameInset),
       validation: (rule) => rule.min(FRAME_INSET.min).max(FRAME_INSET.max),
     }),
-  ],
+  ].map(validateVisible),
 })
 
 /**

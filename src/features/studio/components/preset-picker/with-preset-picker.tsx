@@ -10,6 +10,7 @@ import {
 import { PresetBarInput } from './preset-bar-input'
 import { PresetPickerInput } from './preset-picker-input'
 import { AnchorPickerInput } from '../anchor-picker/anchor-picker-input'
+import { FrameReferenceInput } from '../frame-reference-input'
 import { GradientPickerInput } from '../gradient-picker/gradient-picker-input'
 import { HeadingGradientInput } from '../gradient-picker/heading-gradient-input'
 import { IconPickerInput } from '../icon-picker-input'
@@ -26,6 +27,12 @@ import { SlotInput } from '../slot-input'
  */
 export function withPresetPicker(Fallback: ComponentType<InputProps>) {
   return function PresetAwareInput(props: InputProps) {
+    if (
+      isObjectInputProps(props) &&
+      (props.schemaType.name === 'imageDesign' || props.path.at(-1) === 'profileDesign')
+    ) {
+      return <FrameReferenceInput {...props} />
+    }
     if (isStringInputProps(props) && props.schemaType.options?.overlayPreview === true) {
       return <OverlayPreviewInput {...props} />
     }
