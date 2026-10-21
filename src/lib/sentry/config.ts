@@ -1,3 +1,5 @@
+import type { BrowserOptions } from '@sentry/nextjs'
+
 /**
  * Optional Sentry error tracking, switched on by `SENTRY_DSN`. next.config.ts copies the DSN and
  * the sample rate to the `NEXT_PUBLIC_*` names below, so one variable configures server and
@@ -10,6 +12,22 @@
 export const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN || undefined
 
 export const DEFAULT_TRACES_SAMPLE_RATE = 0.1
+
+/** Preserve v10's collection defaults: v11 otherwise opts into user and request data. */
+export const sentryDataCollection = {
+  userInfo: false,
+  cookies: false,
+  httpHeaders: {
+    request: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+    response: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+  },
+  httpBodies: [],
+  urlQueryParams: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+  genAI: { inputs: false, outputs: false },
+  databaseQueryData: false,
+  queues: false,
+  graphQL: { document: false, variables: false },
+} satisfies NonNullable<BrowserOptions['dataCollection']>
 
 /** A number from 0 to 1; anything else (unset, empty, text, out of range) falls back to the default. */
 export function parseSampleRate(value: string | undefined): number {
