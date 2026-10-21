@@ -31,3 +31,6 @@ launch-screens/
 
 # macOS folder metadata
 .DS_Store
+
+# Saved Sanity sign-in (credentials); never commit or upload.
+tests/studio-perf/.auth/

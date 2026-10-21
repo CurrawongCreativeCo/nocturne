@@ -4550,3 +4550,98 @@ the changelog transformation.
 - 404s for unknown URLs are rendered on demand, so Next.js streams their metadata to browsers (the tab
   title is set by script) and sends crawlers a minimal shell. Both get a 404 status and `noindex`,
   which is what search engines act on; the end-to-end tests check exactly that.
+
+## Studio performance check
+
+This opt-in, local-only Playwright project measures the **production Studio** against a real,
+signed-in, throwaway Content Lake. Normal `npm run test:e2e` and CI never discover it. It does not
+create Sanity projects, datasets, tokens, CORS origins or memberships. An agency developer must set
+those up by hand in Sanity Manage. Never use a client project, including a client's staging project.
+
+1. Create a disposable project named **Nocturne Studio performance**, with a private dataset named
+   **studio-perf**. Add `http://localhost:3200` to its CORS origins with credentials. Give your test
+   account the Developer or Administrator role (the harness measures agency view and the built-in
+   client-view preview with the same sign-in).
+2. Add **every protected template/client project ID** to `tests/studio-perf/denied-projects.json`
+   before setting the target. Keep this committed deny list current in client clones. The included
+   `e2etest1` entry also prevents confusing this with the offline e2e fixture project. Missing,
+   empty or malformed lists fail closed. A target matching the normal site's exported project ID
+   or its `.env` files is also refused. There is no default project and no dataset override.
+3. In a separate terminal, export `STUDIO_PERF_PROJECT_ID` and
+   `STUDIO_PERF_CONFIRM_PROJECT_ID` to the **same throwaway ID**. Export a dataset-scoped write token
+   as `STUDIO_PERF_WRITE_TOKEN` and a Viewer token as `STUDIO_PERF_READ_TOKEN`, both belonging only
+   to the throwaway project. Use your secret manager; never paste tokens into committed files or
+   command arguments. Do not export the normal site's `NEXT_PUBLIC_SANITY_PROJECT_ID` as the target.
+4. Seed and build, then serve for the one-off sign-in:
+
+   ```bash
+   npm run studio-perf:seed
+   npm run studio-perf:build
+   npm run studio-perf:serve
+   ```
+
+   In another terminal:
+
+   ```bash
+   mkdir -p tests/studio-perf/.auth
+   npx playwright codegen --save-storage=tests/studio-perf/.auth/state.json http://localhost:3200/studio
+   ```
+
+   Sign in to the throwaway project, wait until the Studio opens, then close codegen so it saves
+   storage. The entire `.auth/` directory is gitignored: it contains credentials. Never upload it,
+   traces or browser profiles. Stop the sign-in server before running the check; the harness refuses
+   to reuse an existing server. Repeat sign-in when the saved session expires.
+
+5. Run the measurement with the same environment:
+
+   ```bash
+   STUDIO_PERF_LABEL=baseline npm run test:studio-perf
+   ```
+
+   The separate server uses the build in `node_modules/.cache/studio-perf` and port 3200. Rebuild
+   whenever code or target credentials change. The public site and Studio use the same throwaway
+   project; the ordinary `.next` build is untouched. The browser blocks Content Lake requests for
+   other projects/datasets. The seed uses fixed API URLs and `createIfNotExists`: reruns preserve
+   existing fixture edits. It writes only the fixed dataset, including one SVG image asset, 10 small
+   pages, 40 pages in a folder referencing shared content, a mixed 40-section page (hero slots and part motion),
+   20 posts, their author, a shared section and site identity. It never deletes existing content.
+
+Each complete experiment appends to `tests/studio-perf/results/<Brisbane-date>.json`, retaining
+previous experiments from that day. Results include five raw samples and their median for each view:
+first load to a populated, clickable desk; small and 40-section page opens; five document switches;
+section expansion; the agency Design tab; typing on the large page through the Studio’s **Saved**
+indicator; Presentation load; five preview route switches; and an actual Studio input edit
+appearing in the preview. Edits are restored in `finally`; an interrupted process may leave a draft
+in the disposable dataset. Discard that draft by hand before comparing experiments. Client view has
+no Design tab, so that metric is agency-only. This reproduces task 160's client page opening path.
+
+Every run starts a fresh browser context with cold HTTP cache and the saved sign-in; document and
+Presentation interactions then run warm in that context. Server caches remain warm across runs.
+Request interception disables the browser's HTTP cache
+throughout the experiment, so warm interactions reuse Studio state rather than cached network assets.
+Long tasks **over 200 ms** are captured per operation in both Studio and preview frames, with start
+times relative to each frame's navigation. Timings include Playwright interaction/assertion overhead
+and two animation frames to paint; they are consistent interaction proxies, not internal Sanity
+instrumentation. Large-page typing uses a fixed 50 ms between characters and includes Sanity’s
+one-second Saved-indicator delay; compare the same marker lengths and inspect long tasks for stalls.
+A failed interaction fails the experiment; it never reports a timeout as a speed.
+
+The desk-load download sample records script count, decoded script bytes and locally recompressed
+gzip bytes (not negotiated wire bytes). This makes the 16 October script baseline comparable without
+mixing fonts into JavaScript. Font count and decoded font bytes are recorded separately. Compare
+font impact using the same run on the revisions before and
+after task 172; fonts affect load timing even though their bytes are excluded from script totals.
+Results also record revision, dirty-tree flag, browser version and platform. Use the same machine,
+browser, network, dataset and viewport, with other tabs closed, for comparisons.
+
+**Make a fix only after measuring.** Record a labelled baseline, change one measured bottleneck,
+rebuild, then run with `STUDIO_PERF_LABEL=after-<fix>`. Review both raw samples and medians and commit
+the result JSON alongside the fix. No fix is justified by bundle size alone. As of this harness's
+implementation, client-section permissions already come synchronously from `site.profile.ts`, and
+Presentation location `select` fields already contain only title and slug. Do not add a redundant
+session cache or projection change. Profile validation while typing if the large-page measurement
+or long tasks show a problem. No authenticated timings are included until this procedure is run with
+a disposable project and saved sign-in.
+
+When finished, revoke the throwaway tokens and remove the disposable project through Sanity Manage.
+No public sections or visual baselines are changed by this harness.
