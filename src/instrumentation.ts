@@ -1,12 +1,16 @@
 import type { Instrumentation } from 'next'
 
-import { sentryDsn, sentryTracesSampleRate } from '@/lib/sentry/config'
+import { sentryDataCollection, sentryDsn, sentryTracesSampleRate } from '@/lib/sentry/config'
 
 /** Starts the Sentry SDK on the server. Only when SENTRY_DSN is set, so it is not even loaded otherwise. */
 export async function register() {
   if (!sentryDsn) return
   const Sentry = await import('@sentry/nextjs')
-  Sentry.init({ dsn: sentryDsn, tracesSampleRate: sentryTracesSampleRate })
+  Sentry.init({
+    dsn: sentryDsn,
+    tracesSampleRate: sentryTracesSampleRate,
+    dataCollection: sentryDataCollection,
+  })
 }
 
 /**
