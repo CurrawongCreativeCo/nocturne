@@ -125,7 +125,7 @@ Open http://localhost:3000/studio:
 - **Start here** (toolbar, first for clients) is the first screen: a greeting, shortcut cards (_Edit your website_, _Write a blog post_, _Update the team_, _Business info and opening hours_, _Help_), your eight most recent changes with who made them and when, and up to five things to check in plain words. See [Start here](#start-here-studio-home-screen).
 - **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, links to missing sections or unpublished panels, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
 - **Image and text guidance:** image fields say what suits their spot ("Recommended: 2400 × 1600 px, landscape.") and show a yellow warning, never an error, when an uploaded picture is narrower than that or a different shape by more than 15%, for example "This image is 1200 × 1800 (portrait). This spot looks best with a landscape image at least 2400 px wide." You can still publish; the warning is a nudge to swap the picture. SVGs are never checked. Section titles and intro text warn the same way when they run past what the design handles (a hero title over 80 characters, other headings over 60–70, intro text over 200). Current targets: hero background 2400 px wide, landscape; _Image + text_ 1600 px at 4:3; testimonial and author portraits 800 px square; logos 400–600 px wide if not SVG (SVG preferred).
-- **AI Assist** (`@sanity/assist`) writes alt text and meta descriptions. It needs a Sanity **Growth** plan
+- **AI Assist** (`@sanity/assist`) helps with alt text, summaries, headlines, body copy and meta descriptions. It needs a Sanity **Growth** plan
   or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
   assist actions just aren't usable, and everything is written by hand. To use it:
   - _Alt text:_ nothing runs on upload, so no AI credits are spent unless someone asks. With an image
@@ -136,7 +136,32 @@ Open http://localhost:3000/studio:
     saved per browser, so each editor decides for themselves (reload open Studio tabs to apply it).
   - _Meta description:_ in a page's SEO group, open the sparkle (AI Assist) menu on "Meta description" and
     run **Write meta description**. It summarises the page title and sections in one sentence under 155
-    characters. Review before publishing.
+    characters (the field warns above 160), in the site's voice and Australian English. Also available
+    on posts, using the post title and body. Review before publishing.
+  - _Post summary:_ **Write a summary** uses the title and body, up to 300 characters. The summary's
+    stored field name is `excerpt`.
+  - _Hero title:_ **Suggest three headlines** offers three alternatives, each up to 80 characters.
+    Keep one headline in the Title field before publishing. Available on the current heading and the
+    legacy title, in pages and shared sections.
+  - _Rich text and post body:_ **Improve this in our voice** preserves meaning, facts, links, images
+    and formatting at a similar length; these fields have no character cap. Rich text presets are
+    available in pages and shared sections.
+
+  **Writing your site's voice:** edit `voice: { summary, do: [], dont: [] }` in `site.profile.ts`,
+  then rebuild and deploy Studio. Write all entries in Australian English. The summary should be two
+  or three sentences naming your audience, how you want to sound and how you help. Prefer concrete
+  direction such as “A calm, practical plumbing team helping Brisbane homeowners understand the next
+  step” over vague adjectives such as “professional and engaging”. Put a few actionable rules in each
+  list: `do: ['Use short sentences and explain trade terms.', 'Address the reader as you.']` and
+  `dont: ['Use scare tactics or forced slang.', 'Promise results we cannot substantiate.']`. Include
+  preferred terms and a short example where helpful; avoid contradictory rules. Australian spelling
+  is required by every writing preset regardless of the voice wording. Older client profiles without
+  `voice` use clear, warm, practical Australian English. Prompts guide the AI; always check the result
+  and its length before publishing. These presets do not run automatically or add AI requests on Free.
+  Assist saves instructions by key: the voice-aware meta description uses a new key so it also appears
+  in Studios with the earlier preset saved. Existing saved instructions are retained; later voice edits
+  may require an agency editor to update or remove the saved instruction in Assist so it can be reseeded.
+
 - **Blog:** _Blog_ in the sidebar holds _Posts_, _Authors_ and _Categories_. A post needs a title, slug, summary, main image (with alt text), published date, author and body; give it at least one category, because related posts are chosen by shared categories. The slug becomes `/blog/<slug>`, so `blog` is reserved and a page can't use it. Details:
   - _Index:_ `/blog` shows 12 posts per page, newest first by _Published at_, with Previous / Next links (`?page=2`) and a filter of the categories that have a post. `/blog/category/<slug>` lists one category the same way. Page 1 has no `?page`, and every page is its own canonical URL.
   - _Summary_ is the card text, the RSS description and the search description unless the post's SEO group sets one. The main image is the share image unless the SEO group has its own; there is no generated image for blog URLs, so set a default in _Name, logo & icon_ if you want one on `/blog`.
@@ -1390,6 +1415,7 @@ export const siteProfileInput = defineSiteProfile({
 })
 ```
 
+- **`voice`**: the AI Assist tone summary and `do` / `dont` lists, all in Australian English (see _AI Assist_ above). Omitted in older profiles: clear, warm and practical defaults.
 - **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo`,
   `team`, `teamProfiles` and `events`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
 - **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;

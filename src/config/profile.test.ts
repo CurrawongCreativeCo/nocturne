@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   DEFAULT_FEATURES,
+  DEFAULT_VOICE,
   FEATURE_NAMES,
   hasEvents,
   hasTeamProfiles,
@@ -118,6 +119,7 @@ describe('resolveSiteProfile', () => {
     expect(resolveSiteProfile(valid)).toEqual({
       client: { name: 'Acme Plumbing', slug: 'acme-plumbing' },
       tier: 'custom',
+      voice: DEFAULT_VOICE,
       features: DEFAULT_FEATURES,
       clientSections: [],
       launch: { status: 'live', homepage: 'links', publicPages: [], unknownPaths: 'not-found' },
@@ -281,4 +283,21 @@ describe('launch', () => {
       resolveSiteProfile(withLaunch({ status: 'soon', homepage: 'home' }) as SiteProfileInput),
     ).toThrow(/launch\.status[\s\S]*launch\.homepage/)
   })
+})
+
+describe('site voice', () => {
+  it('resolves client guidance without sharing mutable lists', () => {
+    const voice = { summary: 'Warm and direct.', do: ['Use active verbs.'], dont: ['Use hype.'] }
+    const resolved = resolveSiteProfile({ ...valid, voice }).voice
+    expect(resolved).toEqual(voice)
+    expect(resolved.do).not.toBe(voice.do)
+    expect(resolved.dont).not.toBe(voice.dont)
+  })
+
+  it.each([null, {}, { summary: ' ', do: [], dont: [] }, { summary: 'Clear.', do: [''], dont: 1 }])(
+    'rejects malformed voice guidance: %j',
+    (voice) => {
+      expect(validateSiteProfile({ ...valid, voice }).length).toBeGreaterThan(0)
+    },
+  )
 })
