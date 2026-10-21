@@ -5,8 +5,13 @@ import {
 } from 'sanity/presentation'
 
 import { eventPath, EVENTS_PATH } from '@/config/event-paths'
-import { BLOG_PATH, categoryPath, HOME_SLUG, postPath, slugToPath, teamPath } from '@/config/paths'
+import { getLaunchState } from '@/config/launch'
+import { BLOG_PATH, categoryPath, postPath, slugToPath, teamPath } from '@/config/paths'
 import { hasEvents, hasTeamProfiles } from '@/config/profile'
+
+import { resolveMainDocument } from './utils/main-document'
+
+const launchState = getLaunchState()
 
 /**
  * Two-way mapping between documents and URLs for the Presentation tool:
@@ -15,48 +20,9 @@ import { hasEvents, hasTeamProfiles } from '@/config/profile'
  */
 export const resolve: PresentationPluginOptions['resolve'] = {
   mainDocuments: defineDocuments([
-    // Listed first: `/blog/<slug>` would otherwise only match the two-segment page route below.
     {
-      route: '/blog/:slug',
-      resolve: ({ params }) =>
-        params.slug
-          ? { filter: `_type == "post" && slug.current == $slug`, params: { slug: params.slug } }
-          : undefined,
-    },
-    {
-      route: '/blog/category/:slug',
-      resolve: ({ params }) =>
-        params.slug
-          ? {
-              filter: `_type == "category" && slug.current == $slug`,
-              params: { slug: params.slug },
-            }
-          : undefined,
-    },
-    {
-      route: '/team/:slug',
-      resolve: ({ params }) =>
-        params.slug
-          ? {
-              filter: `_type == "teamMember" && slug.current == $slug`,
-              params: { slug: params.slug },
-            }
-          : undefined,
-    },
-    {
-      route: '/events/:slug',
-      resolve: ({ params }) =>
-        params.slug
-          ? { filter: `_type == "event" && slug.current == $slug`, params: { slug: params.slug } }
-          : undefined,
-    },
-    {
-      // Plain `:param` segments only; covers paths up to 4 levels deep.
-      route: ['/', '/:a', '/:a/:b', '/:a/:b/:c', '/:a/:b/:c/:d'],
-      resolve: ({ path }) => ({
-        filter: `_type == "page" && slug.current == $slug`,
-        params: { slug: path.replace(/^\/|\/$/g, '') || HOME_SLUG },
-      }),
+      route: '{/*path}',
+      resolve: ({ path }) => resolveMainDocument(path, launchState),
     },
   ]),
   locations: {

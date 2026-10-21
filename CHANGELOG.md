@@ -24,6 +24,8 @@ you start a release.
 
 ### Fixed
 
+- **Presentation document routing:** the root selects the configured pre-launch homepage before launch and Home when live. Nested page paths have no depth limit; APIs, built-in routes and files skip main-document lookups. Unknown page addresses use a plain explanation through Sanity's translation hook. Redirects resolve after the preview reaches their destination, without an extra redirect lookup. The signed pre-launch preview pass is unchanged; see README for its root-page caveat and the authenticated manual checks.
+
 - Register Sanity's built-in image types in the Link list validation test fixture so hidden dividers validate without an `Unknown type: sanity.imageHotspot` error in CI.
 - Hidden Image design and Link list design settings no longer block publishing. Inactive frame references remain weak when published, with their selections retained; visible custom frames still require a published frame. Both frame pickers disable inline creation: add frames under Design → Image frames. Hidden numeric limits, inherited reference/list checks and nested custom colours are skipped. No content migration.
 

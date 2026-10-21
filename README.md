@@ -66,6 +66,28 @@ Create a page with slug `home` to populate `/`. After changing schemas or querie
 Open http://localhost:3000/studio:
 
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
+  Presentation maps `/` to `launch.homepage` before launch and to `home` when live; `/links` and nested
+  page addresses open their own documents. Blog, category, team profile and event addresses open their respective
+  documents. Built-in routes, APIs (including the draft-mode enable handshake) and files have no main document
+  lookup, so they do not trigger a missing-document warning. An unknown CMS address says: “This address has no
+  page in the Studio. It may be a redirect or a built-in page.” Sanity still gives that notice its caution icon
+  and colour; it offers a translation hook, but no supported empty-state component or tone hook.
+
+  **Redirects in Presentation:** the synchronous [main-document resolver](https://www.sanity.io/docs/visual-editing/presentation-resolver-api) receives only the URL, not published
+  redirects or a client. It cannot consult the server's cached redirect list or Edge Config synchronously.
+  We do not add a redirect request on each Studio navigation: the preview follows the actual redirect and
+  Presentation resolves the destination when the iframe reports it. A source address may briefly show the
+  explanation above. Before launch, the proxy gate still precedes redirects, and a valid signed preview pass
+  still bypasses the gate unchanged (task 118). In particular, a passed preview at `/` can render the full
+  site's Home while the launch-state resolver initially selects the temporary page; selecting a region opens
+  the document that owns that region. This resolver does not inspect cookies or change preview access.
+
+  **Manual verification after changing the resolver:** as both agency and client, check direct Presentation
+  loads, opening from a page editor, refresh and region selection, on desktop and mobile. Repeat live and
+  pre-launch with `/`, `/links`, a nested page, blog, team and event pages, an unknown address and a published
+  redirect; the enable handshake should show no missing-document notice. Check the signed preview pass still
+  opens private pages and exit preview still closes access. These checks require authenticated Studio access.
+
 - **Roles:** clients see a simpler Studio than Currawong staff; see [Studio roles and permissions](#studio-roles-and-permissions).
 - **The sidebar** is grouped by what you are doing, not by how the data is stored. Agency staff see every item; clients see the ones marked (client).
   - **Start here** (client) is also a tool in the top bar, not only a sidebar item: the Studio opens on it. See [Start here](#start-here-studio-home-screen).

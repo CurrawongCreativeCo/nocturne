@@ -106,6 +106,19 @@ export default defineConfig({
   theme: buildStudioTheme(studioBrand),
   projectId,
   dataset,
+  // Sanity's built-in English locale ID; our editor-facing wording uses Australian English.
+  i18n: {
+    bundles: [
+      {
+        locale: 'en-US',
+        namespace: 'presentation',
+        resources: {
+          'main-document.missing.text':
+            'This address has no page in the Studio. It may be a redirect or a built-in page.',
+        },
+      },
+    ],
+  },
   studio: { components: { logo: StudioLogo, navbar: RoleNavbar } },
   // Clients only get the approved sections in the page builder's insert menu; presetPicker fields
   // and objects with presets get the picture picker; frameless objects drop their own box.
