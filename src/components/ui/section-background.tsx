@@ -34,13 +34,14 @@ const DEFAULT_PLACEMENT = resolveBackgroundImage(undefined)
 const FIXED_LAYER_CLASS = 'lg:motion-safe:fixed'
 
 /**
- * Cover the screen: the picture is a window-sized layer that sticks to the top of the viewport while
- * the section scrolls past, so it is never stretched to a long section's height. `lvh` is the window
- * with the browser's toolbars hidden, so no gap opens when a phone's address bar slides away. The
- * section's layer clips instead of hiding overflow, because `overflow: hidden` would make it the
- * sticky layer's scroll container and the picture would scroll away.
+ * Cover the screen: the gradient, picture and overlay share one window-sized layer fixed to the
+ * viewport, so they stay one still surface while the content scrolls, and are never stretched to a
+ * long section's height. `lvh` is the window with the browser's toolbars hidden, so no gap opens
+ * when a phone's address bar slides away. The section's layer clips it (`[data-screen-backdrop]` in
+ * globals.css, which also lets it show past the page's ends on a Minimal page, where iOS Safari's
+ * overscroll would otherwise uncover the page's own background).
  */
-const SCREEN_LAYER_CLASS = 'sticky top-0 h-lvh w-full'
+const SCREEN_LAYER_CLASS = 'fixed inset-x-0 top-0 h-lvh'
 
 type Props = Pick<ResolvedSectionStyle, 'tone' | 'gradient' | 'image' | 'overlay'> & {
   /** Placement, strength and wash; unset is the default picture (fills the section, full strength, background colour). */
@@ -53,7 +54,8 @@ type Props = Pick<ResolvedSectionStyle, 'tone' | 'gradient' | 'image' | 'overlay
  * The layers behind a section's content, from back to front: the brand gradient, the picture, then
  * the overlay (the tone's colour at the chosen strength, so the tone's text colours keep their
  * contrast, a light or dark wash, or a see-through gradient of the site's colours). All three are absolutely positioned inside the <section> (which is `relative isolate`),
- * so they take no space and cannot shift the layout. Purely decorative, hence hidden from assistive
+ * or, for Cover the screen, inside one layer fixed to the window, so they take no space and cannot
+ * shift the layout. Purely decorative, hence hidden from assistive
  * technology, and the picture has empty alt text. Renders nothing for a section with neither.
  */
 export function SectionBackground({
@@ -73,12 +75,8 @@ export function SectionBackground({
       ? overlayGradientCss(resolveOverlayGradient(placement.gradient, overlay), stopColourCss(tone))
       : undefined
 
-  return (
-    <div
-      aria-hidden="true"
-      data-section-background=""
-      className={`absolute inset-0 -z-10 ${placement.screen ? 'overflow-clip' : 'overflow-hidden'} ${placement.fixed ? '[clip-path:inset(0)]' : ''}`}
-    >
+  const layers = (
+    <>
       {gradient ? (
         <div
           data-section-gradient={gradient}
@@ -97,13 +95,7 @@ export function SectionBackground({
             style={placement.strength < 1 ? { opacity: placement.strength } : undefined}
             className={`absolute inset-0 ${placement.fixed ? FIXED_LAYER_CLASS : ''}`.trim()}
           >
-            {placement.screen ? (
-              <div className={`relative ${SCREEN_LAYER_CLASS}`}>
-                <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
-              </div>
-            ) : (
-              <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
-            )}
+            <BackgroundPicture image={image} placement={placement} isFirst={isFirst} />
           </div>
           {overlayGradient ? (
             <div
@@ -127,6 +119,32 @@ export function SectionBackground({
           ) : null}
         </>
       ) : null}
+    </>
+  )
+
+  // Cover the screen needs a picture; a gradient alone keeps filling the section.
+  if (image && placement.screen) {
+    return (
+      <div
+        aria-hidden="true"
+        data-section-background=""
+        data-screen-backdrop=""
+        className="absolute inset-0 -z-10"
+      >
+        <div data-screen-layer="" className={SCREEN_LAYER_CLASS}>
+          {layers}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      data-section-background=""
+      className={`absolute inset-0 -z-10 overflow-hidden ${placement.fixed ? '[clip-path:inset(0)]' : ''}`}
+    >
+      {layers}
     </div>
   )
 }
