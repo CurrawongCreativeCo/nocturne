@@ -56,8 +56,23 @@ export interface LaunchInput {
   unknownPaths?: UnknownPaths
 }
 
+/** Writing guidance for AI Assist. Write every entry in Australian English. */
+export interface SiteVoice {
+  summary: string
+  do: readonly string[]
+  dont: readonly string[]
+}
+
+export const DEFAULT_VOICE: SiteVoice = {
+  summary: 'Clear, warm and practical. Speak directly to the reader in Australian English.',
+  do: ['Use plain language and active verbs.', 'Explain benefits with specific, factual examples.'],
+  dont: ['Use jargon or exaggerated claims.', 'Invent facts, testimonials or guarantees.'],
+}
+
 export interface SiteProfileInput {
   client: { name: string; slug: string }
+  /** AI Assist writing guidance. Left out: clear, practical Australian English. */
+  voice?: SiteVoice
   /** Defaults to 'custom'. */
   tier?: Tier
   /** Anything left out stays on (see DEFAULT_FEATURES). */
@@ -83,6 +98,7 @@ export interface SiteProfileInput {
 export interface SiteProfile {
   client: { name: string; slug: string }
   tier: Tier
+  voice: SiteVoice
   features: Features
   clientSections: string[]
   launch: Required<LaunchInput> & { publicPages: string[] }
@@ -178,7 +194,7 @@ export function validateSiteProfile(input: unknown, options: ValidateOptions = {
   if (!isRecord(input)) return ['The profile must be an object.']
   const errors: string[] = []
 
-  const { client, tier, features, clientSections, launch, help } = input
+  const { client, tier, voice, features, clientSections, launch, help } = input
 
   if (!isRecord(client)) {
     errors.push('client is missing: add { name, slug }.')
@@ -195,6 +211,27 @@ export function validateSiteProfile(input: unknown, options: ValidateOptions = {
 
   if (tier !== undefined && !TIERS.includes(tier as Tier)) {
     errors.push(`tier ${JSON.stringify(tier)} is not one of ${TIERS.join(', ')}.`)
+  }
+
+  if (voice !== undefined) {
+    if (!isRecord(voice)) {
+      errors.push('voice must be an object: { summary, do, dont }.')
+    } else {
+      if (typeof voice.summary !== 'string' || voice.summary.trim() === '') {
+        errors.push('voice.summary must describe the tone in Australian English.')
+      }
+      for (const list of ['do', 'dont'] as const) {
+        const entries = voice[list]
+        if (
+          !Array.isArray(entries) ||
+          entries.some((entry) => typeof entry !== 'string' || entry.trim() === '')
+        ) {
+          errors.push(
+            `voice.${list} must be a list of non-empty instructions in Australian English.`,
+          )
+        }
+      }
+    }
   }
 
   if (features !== undefined) {
@@ -269,6 +306,11 @@ export function resolveSiteProfile(
   return {
     client: { ...input.client },
     tier: input.tier ?? DEFAULT_TIER,
+    voice: {
+      summary: (input.voice ?? DEFAULT_VOICE).summary,
+      do: [...(input.voice ?? DEFAULT_VOICE).do],
+      dont: [...(input.voice ?? DEFAULT_VOICE).dont],
+    },
     features: { ...DEFAULT_FEATURES, ...input.features },
     clientSections: [...(input.clientSections ?? [])],
     launch: {

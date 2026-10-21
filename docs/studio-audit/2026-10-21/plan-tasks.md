@@ -2,7 +2,7 @@
 
 Ready to paste into Claude Code, with the build plan's template context on top. Numbers follow the plan's last task
 (159). Evidence is in [`plan-review.md`](plan-review.md); decisions answered on 21 October 2026 are in its section 8.
-**Status:** approved, but not yet copied into the plan page (see `plan-review.md`, section 10).
+**Status:** published to the build plan as version 15 on 21 October 2026; task 174 added later that day.
 
 | #   | Stage   | Size   | Title                                                                | Source                    | Deps     |
 | --- | ------- | ------ | -------------------------------------------------------------------- | ------------------------- | -------- |
@@ -20,6 +20,7 @@ Ready to paste into Claude Code, with the build plan's template context on top. 
 | 171 | q1      | Small  | Nocturne wordmark in the Studio navbar                               | VD-001, decision 1        | 170, 172 |
 | 172 | q1      | Medium | New Studio palette and fonts on a supported theme API                | VD-002/012, decisions 3–4 | 160      |
 | 173 | q1      | Medium | Keyboard, name and narrow-screen check of the custom Studio inputs   | UX-014, UX-017, VD-011    | 160      |
+| 174 | q1      | Small  | Spike: Nocturne shell layout on Sanity's supported components        | VD-009, concept board 01  | 171, 172 |
 
 Additions to existing tasks: **77** scenario I, **91** audit context, **32** help settings at handover (end of file).
 
@@ -408,6 +409,48 @@ REQUIREMENTS
 
 ACCEPTANCE
 - npm run check passes; the matrix holds real results.
+```
+
+## 174. Spike: Nocturne shell layout on Sanity's supported components
+
+```text
+TASK
+Find out how much of concept board 01's shell (top bar, brand zone, navigation rail, breadcrumbs, form and preview
+side by side) Sanity Studio 6 can take through its supported component APIs, then propose build tasks. A spike: findings
+and throwaway prototypes on a branch, nothing merged.
+
+EVIDENCE
+- docs/Nocturne_Studio_Premium_Visual_Redesign_Proposal.md, VD-009 ("Tabs, navigation, and shell"): a 60–64 px top
+  bar with a stable ~210 px wordmark zone, a 224–248 px left rail (60–68 px compact) with labels or tooltips, a scoped
+  breadcrumb, and an adaptive two-column form and preview. docs/Nocturne_Concept_01_Studio_Shell_Light_Dark.png
+  (a concept, not a capture).
+- Deferred in the 21 October plan review ("layout rework not justified yet"); added on request once tasks 171 and 172
+  have merged, so the wordmark, palette and fonts are already in place.
+- Today: sanity.config.ts sets studio.components.logo (StudioLogo, deprecated hook) and navbar (RoleNavbar, which wraps
+  renderDefault and adds the agency strip). Installed sanity 6.19. src/features/studio/no-ui-overrides.test.ts forbids
+  CSS that targets Sanity UI internals.
+
+REQUIREMENTS
+1. Read the installed types and docs (node_modules/sanity/lib/index.d.ts, Sanity's Studio components and Structure
+   docs) and list every supported extension point for the shell: studio.components (layout, navbar, toolMenu, logo),
+   renderDefault composition, Structure Builder pane options, document views, and anything for breadcrumbs or a
+   form-beside-preview layout (Presentation already has one). Mark each as stable, beta or deprecated.
+2. For each part of VD-009 (top bar height, brand zone, workspace selector, tool navigation, left rail and its compact
+   state, breadcrumb, two-column form and preview, tablet and phone behaviour) say: possible with supported APIs, possible
+   only by replacing a Sanity component (what we would then own and maintain), or not possible without CSS patching
+   (out of bounds).
+3. Prototype the two most valuable feasible parts on a spike branch (likely the top bar with the brand zone, and a rail
+   built from the navbar or layout component), in both schemes, as agency and client (RoleNavbar's strip and Preview
+   client view must keep working). Check keyboard order, focus after navigation, and widths of 390, 768, 1024 and
+   1440 px. Measure the Studio download before and after.
+4. Write docs/studio-audit/<date>/shell-spike.md: the matrix from step 2, screenshots of the prototypes, the upgrade risk
+   of each approach (what breaks on a Sanity major), and proposed build tasks (title, what, why, files, size), so they can
+   be added to the plan. Recommend whether to build any of it now.
+5. Do not change sanity.config.ts on main, add dependencies, or touch production content.
+
+ACCEPTANCE
+- The report exists with evidence for each VD-009 part; prototypes stay on the spike branch; no-ui-overrides.test.ts
+  passes on it.
 ```
 
 ---
