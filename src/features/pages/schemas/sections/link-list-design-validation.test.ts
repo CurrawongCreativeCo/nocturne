@@ -1,5 +1,6 @@
 import { createClient } from '@sanity/client'
 import { Schema } from '@sanity/schema'
+import { builtinTypes } from '@sanity/schema/_internal'
 import { validateDocument } from '@sanity/validation'
 import { describe, expect, it } from 'vitest'
 
@@ -9,6 +10,8 @@ import { linkListDesignFields } from './link-list-design'
 
 const schema = Schema.compile({
   types: [
+    // Divider images use Studio's crop, hotspot and asset types, even when their controls are hidden.
+    ...builtinTypes,
     decorativeDivider,
     { name: 'frame', type: 'document', fields: [{ name: 'title', type: 'string' }] },
     {
