@@ -1,6 +1,6 @@
 import type * as SentryModule from '@sentry/nextjs'
 
-import { sentryDsn, sentryTracesSampleRate } from './config'
+import { sentryDataCollection, sentryDsn, sentryTracesSampleRate } from './config'
 
 let sentry: Promise<typeof SentryModule> | undefined
 
@@ -12,7 +12,11 @@ let sentry: Promise<typeof SentryModule> | undefined
 function loadSentry() {
   if (!sentryDsn) return undefined
   sentry ??= import('@sentry/nextjs').then((Sentry) => {
-    Sentry.init({ dsn: sentryDsn, tracesSampleRate: sentryTracesSampleRate })
+    Sentry.init({
+      dsn: sentryDsn,
+      tracesSampleRate: sentryTracesSampleRate,
+      dataCollection: sentryDataCollection,
+    })
     return Sentry
   })
   return sentry
