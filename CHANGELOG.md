@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Site voice in AI Assist.** Configure `voice: { summary, do, dont }` in `site.profile.ts`. Summary, hero headline, rich text, post body and SEO presets include that guidance, Australian spelling and the field's length guidance. Summary targets the existing `excerpt` field; heroes support current headings and legacy titles, including shared sections. Free-plan behaviour is unchanged. Existing client profiles can omit `voice` for practical Australian English defaults; see README for saved Assist instructions after voice changes.
+
 - **Opt-in Studio performance harness.** A guarded throwaway-project seed and separate, local-only Playwright project capture five-run interaction medians, script download sizes and long tasks in agency and client views. Includes Presentation route and edit latency checks, saved sign-in instructions and append-only daily result files. Live baseline and any measured optimisation require disposable project credentials.
 
 - **Help when Publish is blocked.** A **Why can’t I publish?** action opens a list of errors with field-title breadcrumbs and **Go to field**, plus separate, non-blocking warnings. Hidden settings explain a choice that reveals them where possible, or ask for agency help. Sanity's own Publish action, validation tooltip and inspector stay available. Includes unit and dialog component tests; no content migration.

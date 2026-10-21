@@ -7,6 +7,20 @@ import { defineSiteProfile } from './src/config/define-site-profile'
  */
 export const siteProfileInput = defineSiteProfile({
   client: { name: 'Currawong Creative', slug: 'currawong-creative' },
+  voice: {
+    summary:
+      'A thoughtful Australian creative agency: warm, clear and quietly confident. Help business owners understand their options and take the next step.',
+    do: [
+      'Speak directly to the reader using plain Australian English.',
+      'Use active verbs and concrete examples to explain the value of our work.',
+      'Keep sentences concise and advice practical.',
+    ],
+    dont: [
+      'Use hype, corporate jargon or pushy sales language.',
+      'Invent results, testimonials or guarantees.',
+      'Use American spelling or forced Australian slang.',
+    ],
+  },
   tier: 'custom',
   features: {
     blog: true,
