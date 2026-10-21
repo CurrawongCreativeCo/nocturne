@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Opt-in Studio performance harness.** A guarded throwaway-project seed and separate, local-only Playwright project capture five-run interaction medians, script download sizes and long tasks in agency and client views. Includes Presentation route and edit latency checks, saved sign-in instructions and append-only daily result files. Live baseline and any measured optimisation require disposable project credentials.
+
 - **Help when Publish is blocked.** A **Why can’t I publish?** action opens a list of errors with field-title breadcrumbs and **Go to field**, plus separate, non-blocking warnings. Hidden settings explain a choice that reveals them where possible, or ask for agency help. Sanity's own Publish action, validation tooltip and inspector stay available. Includes unit and dialog component tests; no content migration.
 
 ### Changed

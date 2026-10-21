@@ -19,3 +19,7 @@ test-results
 .lighthouseci
 playwright-report
 blob-report
+
+# Saved credentials and generated performance measurements
+tests/studio-perf/.auth
+tests/studio-perf/results/*.json
