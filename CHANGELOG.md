@@ -20,13 +20,21 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.7.1] - 2026-10-21
+
+### Added
+
 - **Site voice in AI Assist.** Configure `voice: { summary, do, dont }` in `site.profile.ts`. Summary, hero headline, rich text, post body and SEO presets include that guidance, Australian spelling and the field's length guidance. Summary targets the existing `excerpt` field; heroes support current headings and legacy titles, including shared sections. Free-plan behaviour is unchanged. Existing client profiles can omit `voice` for practical Australian English defaults; see README for saved Assist instructions after voice changes.
 
 - **Opt-in Studio performance harness.** A guarded throwaway-project seed and separate, local-only Playwright project capture five-run interaction medians, script download sizes and long tasks in agency and client views. Includes Presentation route and edit latency checks, saved sign-in instructions and append-only daily result files. Live baseline and any measured optimisation require disposable project credentials.
 
 - **Help when Publish is blocked.** A **Why can’t I publish?** action opens a list of errors with field-title breadcrumbs and **Go to field**, plus separate, non-blocking warnings. Hidden settings explain a choice that reveals them where possible, or ask for agency help. Sanity's own Publish action, validation tooltip and inspector stay available. Includes unit and dialog component tests; no content migration.
-
-### Changed
 
 ### Fixed
 
@@ -36,6 +44,8 @@ you start a release.
 - Hidden Image design and Link list design settings no longer block publishing. Inactive frame references remain weak when published, with their selections retained; visible custom frames still require a published frame. Both frame pickers disable inline creation: add frames under Design → Image frames. Hidden numeric limits, inherited reference/list checks and nested custom colours are skipped. No content migration.
 
 ### Breaking changes / migration steps
+
+None.
 
 ## [1.7.0] - 2026-10-21
 
@@ -1014,7 +1024,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.4.0...v1.5.0
