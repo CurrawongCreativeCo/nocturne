@@ -2106,7 +2106,10 @@ _Set exact motion values_ (parallax only) reveals **Travel distance** (2–7 % o
 **Direction** (down drifts with the scroll, up goes against it) and **Picture scale** (1.05–1.15; empty uses just enough for the
 travel). A frame has a **Frame colour** (a design token: accent, second accent, highlight or text colour) and a **Frame inset**
 (how far it sits in from the edge, 0–12 %; for the offset border, how far it sticks out). Hidden fields keep their values, but the
-site ignores a value the current choices do not use (a frame on a circle, a travel on a still picture).
+site ignores a value the current choices do not use (a frame on a circle, a travel on a still picture). Hidden
+controls also skip validation, including Sanity’s built-in reference checks. Switching a shape or frame keeps the
+saved choices; unused frame references stay weak so an unpublished frame cannot block publishing. Switching back
+checks the frame again. The same rule applies to Link list design controls and their nested custom colours.
 
 **Image + text and the section's own Parallax.** Choosing the _Parallax_ animation preset on Image + text still works and the
 stored values are unchanged, but it now moves **only the picture inside its still frame** (before, the whole framed picture
@@ -2114,7 +2117,8 @@ drifted). Subtle, Medium and Strong keep their strengths (Strong is held to the 
 is not _None_ uses that instead.
 
 **Approved custom frames.** An agency-uploaded SVG in a **Frame** document (Studio → Design → Image frames; agency only: clients
-never see or create them, and an image design can only point at one). The file must be an SVG with a `viewBox`, under 50 KB, with no
+never see or create them, and an image design can only point at one). The Image design and Link list profile
+frame pickers offer existing frames only: add and publish new frames under **Design → Image frames**. The file must be an SVG with a `viewBox`, under 50 KB, with no
 scripts, event handlers or `foreignObject` (checked on save by `checkFrameSvg`, `src/features/frames/utils/frame-svg.ts`). The site
 **never inlines it**: it uses the file's CDN URL (and only a `cdn.sanity.io` URL) as a CSS `mask-image` on a `div` filled with the
 chosen colour token, so it recolours with the theme, scales to the picture and, loaded as an image, cannot run a script. Design it as
@@ -2146,6 +2150,9 @@ box        aspect ratio and place in the layout (the corners of a plain picture)
 (`src/lib/sanity/image-design-options.ts`), its drawing (`image-frames.tsx`), a thumbnail (`image-design-thumbnails.tsx` and
 `registry.ts`) and a class (`SHAPE_CLASS`). Tests fail until each table has a row. **Adding it to another section:** add
 `imageDesignField()` to its schema, `imageDesign { ${imageDesignFields} }` to its fragment, and render the picture with `FramedImage`.
+
+**Validation investigation (21 October 2026).** See [hidden image settings](docs/hidden-image-settings.md) for the
+local reproduction, exact error paths, hidden-field audit and reference publishing behaviour. No content migration is needed.
 
 **Tests.** `image-travel.test.ts` (scale from travel, phones, range), `image-design-options.test.ts` (shape and frame rules, what
 is ignored), `image-design.test.ts` (which fields the Studio shows), `framed-image.test.ts` (markup: layers, scale classes, frames,

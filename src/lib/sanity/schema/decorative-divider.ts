@@ -23,6 +23,7 @@ import { lengthWarning } from './length-guidance'
 import { presetField } from './preset-field'
 import { themeColourField } from './theme-colour'
 import { dividerThumbnails } from './thumbnails/divider-thumbnails'
+import { validateVisible } from './validate-visible'
 
 /**
  * The shared `decorativeDivider` object: one decorative rule, with an optional centre between two
@@ -157,7 +158,7 @@ export const decorativeDivider = defineType({
       // A picture keeps its own colours.
       hidden: centreIs('diamond', 'icon', 'text'),
     }),
-  ],
+  ].map(validateVisible),
   preview: {
     select: { style: 'style', centre: 'centre', text: 'text' },
     prepare: ({ style, centre, text }: { style?: string; centre?: string; text?: string }) => ({
