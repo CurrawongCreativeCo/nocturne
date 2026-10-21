@@ -1,5 +1,5 @@
 import type { BrandImage } from '@/config/studio-brand/assets.generated'
-import { currawongBrand } from '@/config/studio-brand/currawong'
+import { currawongBrand, currawongClassicBrand } from '@/config/studio-brand/currawong'
 import { resolveStudioBrand } from '@/config/studio-brand/resolve'
 import type { StudioBrand, StudioBrandFile } from '@/config/studio-brand/types'
 
@@ -36,9 +36,15 @@ const define = (id: string, label: string, file: StudioBrandFile): BrandPreviewC
   brand: resolveStudioBrand(file, currawongBrand),
 })
 
-/** The four brands the preview shows; each is rendered in light and dark. */
+/** Default, classic alternative and client brands, each rendered in light and dark. */
 export const brandPreviewCases: BrandPreviewCase[] = [
   define('currawong', 'Currawong default', {}),
+  {
+    id: 'currawong-classic',
+    label: 'Currawong classic',
+    file: {},
+    brand: resolveStudioBrand({}, currawongClassicBrand),
+  },
   define('green-cream', 'Green and cream client', {
     name: 'Greenleaf',
     logo: { onLight: LOGO_ON_LIGHT, onDark: LOGO_ON_DARK },

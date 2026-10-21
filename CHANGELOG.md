@@ -20,7 +20,11 @@ you start a release.
 
 ### Added
 
+- **Studio theme API findings and download comparison:** `docs/studio-theme-spike.md` records the supported API, approved UI 4 scope and UI 5 styling/font exception.
+
 ### Changed
+
+- **Studio palette, theme API and fonts (UI 4 scope):** Currawong's default CMS palette now follows the 21 October proposal, with contrast-tested borders and the previous palette retained as `currawongClassicBrand` (README: one-line rollback). The stable `@sanity/themer` generator and public v2 tokens replace `buildLegacyTheme`. The workspace theme uses self-hosted Inter for interface text and Newsreader for headings in both schemes. UI 5 alpha components retain Sanity's styling and CDN-hosted Inter, as explicitly agreed. Client palettes still replace defaults as a set, public-site font tokens are untouched, and there is no content migration. Refresh the Studio brand preview baselines using **Update visual baselines**; the findings document lists them.
 
 ### Fixed
 

@@ -10,7 +10,7 @@ if (!validation.ok) {
 
 /**
  * This site's resolved CMS brand: studio-brand.json (the client's) over Currawong's defaults.
- * The Studio logo reads it for now; the Studio theme (src/features/studio/theme.ts) will build on it.
+ * The Studio logo and workspace theme read it; client colours replace defaults as a whole set.
  * Run `npm run check:studio-brand` to see the result and any contrast warnings.
  */
 export const studioBrand = resolveStudioBrand(validation.brand, currawongBrand, {

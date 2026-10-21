@@ -1230,11 +1230,18 @@ section covers the brand data it is built from, then [how it is applied](#how-th
   Every adjustment is recorded as a warning, so a client who picks `#ffd400` is told why their Studio
   links are a darker gold.
 
-**Currawong's defaults** use ink `#101013`, paper `#f4efe6`, violet `#5f2bd4`, amber `#eca72a` and lilac
-`#e9deef` under fixed rules: violet text and focus only on paper (in dark mode the lighter `#9f80e5`
-takes its place, because violet on ink is 2.5:1); amber is a fill with ink text, or text on ink only
-(light mode's amber text is `#7e5c1f`); lilac is a surface and always has a border. A unit test checks
-every role pair in both schemes.
+**Currawong's defaults** use the premium palette approved on 21 October 2026 (proposal §5):
+light canvas `#f7f4fa`, text `#1f1a29`, surface `#fffeff`, accent `#6d47c8` and focus `#7651dc`;
+dark canvas `#17151f`, text `#f6f3fa`, surface `#25212f`, accent `#c4a9f6` and focus `#d2b6ff`.
+Borders are strengthened to `#8a7c9b` / `#8b7999` to reach 3:1 against both canvas and surface.
+Highlight roles retain the classic amber values. `currawong.test.ts` checks every role pair in both
+palettes and both schemes; the proposal's sample ratios are not used as proof.
+
+The previous palette remains exported as **`currawongClassicBrand`** in
+`src/config/studio-brand/currawong.ts`. To switch this site's default back, change just the import in
+`src/config/studio-brand/client.ts` to
+`import { currawongClassicBrand as currawongBrand } from './currawong.ts'`.
+Client colours still replace either default as a whole set. The preview deliberately shows both palettes.
 
 **New projects need no setup.** The template ships `studio-brand.json` with only a `$schema` line and
 `src/assets/brand/client/` holding just a README, so Studio shows Currawong Creative's branding from the
@@ -1273,6 +1280,13 @@ site name, which names the Studio only while `name` is unset in `studio-brand.js
 `src/styles/tokens.json` (the `accent` token's `hex`) into `colors.primary` in `studio-brand.json`.
 They stay in step only when someone changes both.
 
+**Approved scope (21 October 2026).** Branding and typography apply to components that read the
+workspace theme (UI 4). Sanity 6.19 also uses UI 5 alpha components; those retain Sanity's own styling
+and CDN-hosted Inter. This exception is intentional: no CSS overrides are used to force the new
+palette or fonts onto UI 5. There are no Google Fonts browser requests. See the
+[API findings and download comparison](docs/studio-theme-spike.md). Client-configurable Studio fonts
+remain a separate decision.
+
 #### How the Studio applies the brand
 
 Only supported Sanity APIs are used, in four places:
@@ -1284,43 +1298,29 @@ Only supported Sanity APIs are used, in four places:
 | Workspace icon (the mark) | `src/features/studio/components/studio-icon.tsx`    | `mark`, light or dark by colour scheme |
 | Workspace title           | `title` in `sanity.config.ts`                       | The resolved name                      |
 
-- **Theme.** Sanity 6.18 marks both `buildLegacyTheme` and the `theme` option as deprecated ("will be removed
-  in upcoming major version"), so `theme.ts` is the only file that touches them. If a future Sanity removes
-  `buildLegacyTheme`, `buildStudioTheme` returns `undefined`, Studio uses its default theme, and the logo,
-  icon and name keep the brand. When upgrading Sanity, check that comment block in `theme.ts` first.
+- **Theme.** `src/features/studio/theme.ts` uses the stable `buildTheme` from `@sanity/themer`
+  0.10.4, with separate light/dark brand colours and public `RootTheme_v2` tokens for exact runtime
+  roles. No legacy builder, internal conversion helpers or experimental Themer preview tool is used.
+  The theme covers UI 4; UI 5 components keep their own styling as described above.
 - **Light, dark and Appearance.** Editors choose _System_ (the default: follows the device), _Light_ or
-  _Dark_ under **Appearance** in the Studio user menu (their avatar, top right); the choice is remembered
-  in their browser. Both schemes are built from the one theme and both are tested: the brand preview page
-  (`/studio-brand-preview`) renders every brand case in light and dark, with the contrast assertions
-  (text 4.5:1, focus ring 3:1) and visual baselines for each. `buildLegacyTheme` marks its result as
-  "legacy", and Studio pins a legacy theme to one scheme and hides Appearance, so `theme.ts` removes
-  those markers. Never set a `scheme` in code. The Brand colours preview keeps the site's own colours.
-- **What the theme sets.** `buildLegacyTheme` takes one accent and one grey ramp for both colour schemes, so
-  `theme.ts` calls it **once per scheme**, each time with that scheme's roles as both the component and the
-  navigation colours, and builds the theme from `color.light` of the first and `color.dark` of the second.
-  Each scheme therefore gets its own background and text (`--component-bg`, `--component-text-color`,
-  `--main-navigation-color` and its inverted value), grey (`--gray-base`), primary fill
-  (`--default-button-primary-color`), neutral button (`--default-button-color`), selection colour
-  (`--brand-primary`) and focus ring (`--focus-color`). Success, warning and danger colours, and the font,
-  stay Sanity's.
-- **How a fill becomes the brand colour.** Sanity draws a solid button as the card background multiplied (light)
-  or screened (dark) with the colour you give it, so passing `#5f2bd4` unchanged came out as `#5b28bf`. `theme.ts`
-  works the blend backwards, so a primary button is exactly the scheme's accent fill (`#5f2bd4` in light mode,
-  `#9f80e5` in dark for Currawong). Sanity picks the label itself, the card background blended with itself
-  (`#e9e0cf` on Currawong's violet, 5.8:1), not `onAccent`, so a fill is moved only as far as it takes to reach
-  4.6:1 against that label. Currawong's accents need no move; a client's yellow in light mode is darkened to
-  `#856d00`, and a dark green in dark mode is lightened.
-- **Neutral buttons and greys.** Sanity's default button colour is a slate grey. The default button is now the
-  text colour pulled 65% toward the background (a warm grey in Currawong's case), nudged if needed to reach 4.6:1
-  against its label, so neutrals stay in the ink and paper range.
-- **Selection.** Selected tabs and tools use Sanity's "info" colour, which is `--brand-primary`, mixed 20% into
-  the background and blended again. Left alone that gives a dusty pink on Currawong's paper, so `theme.ts` solves
-  for the colour that makes the selected background 35% accent on the background (`#c0b3d4` in light mode,
-  `#423750` in dark). The cost is that the primary badge and links drawn in that info colour lean a little
-  toward the nearest saturated hue (Currawong's violet reads slightly bluer in light mode); the badge text is
-  still above 11:1.
-- **Focus ring.** Each scheme uses its own `focus` role, so the ring is the brand colour exactly (it used to be
-  one colour lifted to suit both backgrounds).
+  _Dark_ under **Appearance** in the Studio user menu. The choice is remembered in their browser.
+  The theme contains both schemes without legacy scheme-lock markers. The preview at
+  `/studio-brand-preview` renders both palettes and sample client brands in both schemes. Existing
+  rendered contrast assertions remain at 4.5:1 for text and 3:1 for focus. Never pin a Studio scheme.
+- **Controls.** Primary buttons use `accentFill` and `onAccent` directly, without legacy blend
+  compensation. Neutral buttons mix the text and canvas colours. Hover and selected states use
+  accent tints with readable labels. Inputs use `surface`, `text` and `surfaceBorder`; focus uses
+  the scheme's independent `focus` role. Themer supplies the remaining semantic tones, including
+  success, warning and danger. Radius and focus-ring geometry retain the installed defaults.
+- **Fonts.** The workspace theme uses Inter for interface text, labels and inputs, and Newsreader
+  for display headings (including the Start here greeting and document headers where Sanity uses
+  heading tokens). Code remains monospaced. `src/config/studio-fonts.ts` loads variable normal fonts
+  through `next/font/google`, with the Latin subset and `display: 'swap'`; only Studio and its preview
+  import it. Those font files are downloaded at build time and self-hosted. UI 5 may additionally
+  load Sanity's own Inter from its CDN. `BrandedStudio` passes the resolved families through the
+  theme, including compatibility font fields for document headers; the schema CLI never imports
+  Next's font loader. The public site's font tokens are untouched. `studio-brand.json` has no font
+  settings; client-selectable Studio fonts remain deferred.
 - **Logo.** A client logo file is shown alone, the on-light or on-dark variant to match the colour scheme.
   If a client supplies only one file, it is never recoloured: on the other scheme it sits on a small
   background in the colour it was drawn for. With no logo file, the navbar shows a mark (the client's

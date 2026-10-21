@@ -30,7 +30,7 @@ checks each finding against the repository, and maps it to the real plan. Propos
 - Roles: `src/lib/sanity/roles.ts` and `src/features/studio/roles.ts`. Tools are filtered in `utils/tool-access.ts`,
   the insert menu in `components/section-insert-filter.tsx`, and actions in `utils/document-access.ts`.
 - Approved decisions that bear on the proposal (14 and 17 October): the CMS brand is **Currawong by default and the
-  client's own when set**. It is separate from the site's `tokens.json`. **The Studio keeps Sanity's default font.**
+  client's own when set**. It is separate from the site's `tokens.json`. **The workspace theme uses self-hosted Newsreader for display headings and Inter for interface text and inputs (21 October, task 172). UI 5 alpha components retain Sanity styling and CDN-hosted Inter under the agreed narrower scope.** The default CMS palette follows proposal §5, with the classic palette retained as a named alternative.
   Clients **keep Variants and Releases** (17 October, decisions 1–2). Dark mode is preferred, with light offered (106,
   shipped).
 - No end-to-end test opens the Studio. Studio code is covered by unit tests (`studio-inputs.test.tsx`, `*.test.ts`)

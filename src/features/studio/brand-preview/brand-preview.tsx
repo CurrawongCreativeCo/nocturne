@@ -19,6 +19,7 @@ import {
 import { useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 
 import type { Scheme } from '@/config/studio-brand/types'
+import { studioFontFamilies } from '@/config/studio-fonts'
 
 import { brandPreviewCases, sampleAssets, type BrandPreviewCase } from './cases'
 import { LaunchExample } from './launch-example'
@@ -195,17 +196,8 @@ function PreviewSection({ item, scheme }: { item: BrandPreviewCase; scheme: Sche
   const headingId = `heading-${item.id}-${scheme}`
   // One theme per case, as Studio would build it for that studio-brand.json.
   const theme = useMemo(() => {
-    const built = buildStudioTheme(item.brand)
-    return built ? toUiTheme(built) : undefined
+    return toUiTheme(buildStudioTheme(item.brand, studioFontFamilies))
   }, [item.brand])
-
-  if (!theme) {
-    return (
-      <p>
-        buildLegacyTheme is not available in this Sanity version; the Studio uses its default theme.
-      </p>
-    )
-  }
 
   return (
     <section aria-labelledby={headingId} data-case={item.id} data-scheme={scheme}>
@@ -237,7 +229,7 @@ function InputExamples({
 }) {
   const theme = useMemo(() => {
     const first = brandPreviewCases[0]
-    const built = first ? buildStudioTheme(first.brand) : undefined
+    const built = first ? buildStudioTheme(first.brand, studioFontFamilies) : undefined
     return built ? toUiTheme(built) : undefined
   }, [])
   if (!theme) return null
