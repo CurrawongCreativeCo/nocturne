@@ -1,18 +1,8 @@
 import { get } from '@vercel/edge-config'
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { EVENTS_PATH } from '@/config/event-paths'
 import { getLaunchState } from '@/config/launch'
-import {
-  BLOG_PATH,
-  EXPERIMENT_PATH,
-  GALLERY_PATH,
-  SEARCH_PATH,
-  SIGN_IN_PATH,
-  SIGN_OUT_PATH,
-  STUDIO_BRAND_PREVIEW_PATH,
-  TEAM_PATH,
-} from '@/config/paths'
+import { EXPERIMENT_PATH, GALLERY_PATH } from '@/config/paths'
 import {
   chooseOption,
   EXPERIMENT_COOKIE,
@@ -23,6 +13,7 @@ import {
 } from '@/features/experiments/utils/assign'
 import { encodeOption } from '@/features/experiments/utils/experiment-flag'
 import { loadActiveExperiment } from '@/features/experiments/utils/experiment-source'
+import { isPagePath } from '@/lib/page-path'
 import {
   decidePrelaunch,
   decidePrelaunchFile,
@@ -197,24 +188,6 @@ async function redirect(request: NextRequest) {
 
   const match = lookupRedirect(map, request.nextUrl.pathname)
   return match ? NextResponse.redirect(new URL(match.to, request.url), match.status) : null
-}
-
-/**
- * Only CMS pages have variants; the blog, search, gallery, brand preview, sign-in, variant, team
- * profile and event routes themselves are left alone. A page called exactly `/team` or `/events` is
- * still a CMS page.
- */
-function isPagePath(pathname: string) {
-  if (pathname.startsWith(`${TEAM_PATH}/`) || pathname.startsWith(`${EVENTS_PATH}/`)) return false
-  return ![
-    BLOG_PATH,
-    EXPERIMENT_PATH,
-    GALLERY_PATH,
-    SEARCH_PATH,
-    SIGN_IN_PATH,
-    SIGN_OUT_PATH,
-    STUDIO_BRAND_PREVIEW_PATH,
-  ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
 }
 
 /**
