@@ -110,6 +110,25 @@ describe('SectionBackground', () => {
     )
   })
 
+  it('holds a Cover the screen picture and its overlay in one window-sized layer fixed to the viewport', () => {
+    const html = render({
+      image,
+      gradient: 'forest-dusk',
+      overlay: 'light',
+      placement: place({ imageSize: 'screen', overlayColor: 'gradient' }),
+    })
+    expect(html).toContain('data-screen-backdrop=""')
+    const layer = html.slice(html.indexOf('data-screen-layer'))
+    expect(layer).toMatch(/^data-screen-layer="" class="fixed inset-x-0 top-0 h-lvh"/)
+    // Gradient, picture and overlay all inside it, in that order, so they move as one surface.
+    expect(layer.indexOf('data-section-gradient')).toBeGreaterThan(0)
+    expect(layer.indexOf('data-section-gradient')).toBeLessThan(layer.indexOf('<img'))
+    expect(layer.indexOf('<img')).toBeLessThan(layer.indexOf('data-overlay-colour="gradient"'))
+    expect(html).not.toContain('sticky')
+    // globals.css clips it; overflow would not clip a fixed layer.
+    expect(html).not.toContain('overflow-')
+  })
+
   it('keeps a fixed picture still on large screens only, clipped to the section', () => {
     const html = render({ image, placement: place({ imageFixed: true }) })
     expect(html).toContain('lg:motion-safe:fixed')

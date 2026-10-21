@@ -65,6 +65,29 @@
     display: none;
   }
 
+  /*
+   * A Cover the screen picture (section-background.tsx) is fixed to the window, so its section clips
+   * it, with a clip-path rather than overflow, which would not clip a fixed layer. On a Minimal page
+   * nothing sits above the first section or below the last, so there the clip reaches past the
+   * page's ends: the strips iOS Safari uncovers when the page is pulled past its top or bottom, or
+   * before a resized toolbar updates `dvh`, show the still picture instead of the page's background.
+   */
+  [data-screen-backdrop] {
+    clip-path: inset(var(--screen-backdrop-top, 0) 0 var(--screen-backdrop-bottom, 0));
+  }
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > section:first-of-type
+    > [data-screen-backdrop] {
+    --screen-backdrop-top: -100lvh;
+  }
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > section:last-of-type
+    > [data-screen-backdrop] {
+    --screen-backdrop-bottom: -100lvh;
+  }
+
   /* Programmatic focus targets (the skip link's <main>) aren't controls: no ring. */
   [tabindex='-1']:focus {
     outline: none;

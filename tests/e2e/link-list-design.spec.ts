@@ -143,7 +143,7 @@ test.describe('Link list design', () => {
   }) => {
     await page.goto('/link-screen')
     const viewport = page.viewportSize()
-    const layer = page.locator('[data-image-screen] > div')
+    const layer = page.locator('[data-screen-layer]')
     const section = page.locator('#main-content section').first()
     const sectionBox = await section.boundingBox()
     // A long list: the section is taller than the window, so it still scrolls.
@@ -158,6 +158,23 @@ test.describe('Link list design', () => {
     await expect.poll(async () => Math.round((await layer.boundingBox())?.y ?? -1)).toBe(0)
     // The content is not centred: it starts at the top, as without the option.
     expect(await section.evaluate((el) => getComputedStyle(el).justifyContent)).not.toBe('center')
+  })
+
+  test('Cover the screen: on a Minimal page the picture reaches past the page’s ends, for iOS overscroll', async ({
+    page,
+  }) => {
+    const clip = (path: string) =>
+      page.goto(path).then(() =>
+        page
+          .locator('#main-content section [data-screen-backdrop]')
+          .first()
+          .evaluate((el) => getComputedStyle(el).clipPath),
+      )
+    // The only section: above and below, nothing but the page's own background (the browser
+    // shortens equal top and bottom insets to one).
+    expect(await clip('/link-screen')).toMatch(/^inset\(-\d+px 0px\)$/)
+    // The first of two sections: above it only; the next section follows below.
+    expect(await clip('/link-overrides')).toMatch(/^inset\(-\d+px 0px 0px\)$/)
   })
 
   test('both pages pass axe', async ({ page }) => {

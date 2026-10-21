@@ -102,16 +102,34 @@ test.describe('Link list card design and overrides', () => {
     await expect(link(page, 'Quiet link').locator('[data-link-eyebrow]')).toHaveCount(0)
   })
 
-  test('the gradient overlay covers the whole long section, behind fully opaque content', async ({
+  test('the gradient overlay lies exactly over the still picture, down the whole long section', async ({
     page,
   }) => {
     const glass = section(page, 'Tinted glass')
     const overlay = glass.locator('[data-overlay-colour="gradient"]')
+    const picture = glass.locator('[data-image-screen]')
     expect(await css(overlay, 'background-image')).toContain('linear-gradient')
-    const [overlayBox, sectionBox] = await Promise.all([overlay.boundingBox(), glass.boundingBox()])
+    const sectionBox = await glass.boundingBox()
     const viewport = page.viewportSize()
     expect(sectionBox && viewport && sectionBox.height > viewport.height).toBe(true)
-    expect(overlayBox?.height).toBeCloseTo(sectionBox?.height ?? 0, 0)
+    // One surface: the overlay is the picture's box (the window), not stretched to the section,
+    // and the two stay together, at the top of the window, as the list scrolls past.
+    for (const y of [0, (sectionBox?.height ?? 0) / 2]) {
+      await page.evaluate((top) => {
+        window.scrollTo(0, top)
+      }, y)
+      await expect.poll(async () => Math.round((await overlay.boundingBox())?.y ?? -1)).toBe(0)
+      const [overlayBox, pictureBox] = await Promise.all([
+        overlay.boundingBox(),
+        picture.boundingBox(),
+      ])
+      expect(overlayBox).toEqual(pictureBox)
+      expect(overlayBox?.height ?? 0).toBeGreaterThanOrEqual(viewport?.height ?? 0)
+      expect(overlayBox?.height ?? 0).toBeLessThan(sectionBox?.height ?? 0)
+    }
+    await page.evaluate(() => {
+      window.scrollTo(0, 0)
+    })
     // The layer is decoration: nothing on it is faded or covered.
     expect(await css(glass.getByRole('heading', { name: 'Tinted glass' }), 'opacity')).toBe('1')
     const last = link(page, 'Contact')
