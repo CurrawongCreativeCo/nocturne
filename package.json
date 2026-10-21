@@ -36,7 +36,11 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test visual link-list-glass --update-snapshots --no-deps",
-    "test:lighthouse": "lhci autorun"
+    "test:lighthouse": "lhci autorun",
+    "studio-perf:seed": "node --experimental-strip-types tests/studio-perf/seed.ts",
+    "studio-perf:build": "node --experimental-strip-types tests/studio-perf/server.ts",
+    "studio-perf:serve": "node --experimental-strip-types tests/studio-perf/server.ts --serve",
+    "test:studio-perf": "playwright test --config tests/studio-perf/playwright.config.ts"
   },
   "dependencies": {
     "@sanity/assist": "^6.2.4",
