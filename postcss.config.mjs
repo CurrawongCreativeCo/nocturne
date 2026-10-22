@@ -1,8 +1,8 @@
-import containerFrames from './scripts/postcss-container-frames.mjs'
+import containerFrames, { includeContainerFrames } from './scripts/postcss-container-frames.mjs'
 
 // The style guide's width frames need container-query copies of the responsive rules (see the
-// plugin). The live site has no use for them, so Vercel production builds leave them out.
-const frames = process.env.VERCEL_ENV !== 'production'
+// plugin). Only development, preview and gallery test builds need these rules.
+const frames = includeContainerFrames(process.env)
 
 const config = {
   plugins: [

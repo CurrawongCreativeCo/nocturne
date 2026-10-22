@@ -364,7 +364,7 @@ export const linkListFragment = /* groq */ `
       nameDisplay,
       nameImage { size, ${imageFields} }
     },
-    // The approved frame is resolved to its SVG's CDN URL, as for imageDesign (tagged \`frame\`).
+    // The approved frame is resolved to its artwork's CDN URL, as for imageDesign (tagged \`frame\`).
     profileDesign {
       imageSize,
       imageShape,
@@ -372,7 +372,7 @@ export const linkListFragment = /* groq */ `
       borderWidth,
       borderGap,
       borderGradient,
-      "frameUrl": frame->svg.asset->url,
+      "frameUrl": frame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,
       borderColour { colour, hex },
       nameColour { colour, hex },
       bioColour { colour, hex }

@@ -31,6 +31,58 @@ async function watchProviders(page: Page) {
 
 const banner = (page: Page) => page.getByRole('region', { name: 'Your privacy choices' })
 
+for (const decided of [false, true]) {
+  test(`before hydration, the banner is ${decided ? 'hidden for a saved choice' : 'visible on a first visit'}`, async ({
+    page,
+  }) => {
+    await page.route(/\/_next\/static\/chunks\/.*\.js(?:\?|$)/, (route) => route.abort())
+    await page.addInitScript(() => {
+      // The reveal must wait for the controls' HTML, preventing a partially parsed banner painting.
+      const observer = new MutationObserver((records) => {
+        for (const { target } of records) {
+          if (!(target instanceof HTMLElement) || target.hidden) continue
+          if (!target.matches('section[aria-labelledby="consent-title"]')) continue
+          target.dataset.controlsAtReveal = String(target.querySelectorAll('button').length)
+          observer.disconnect()
+        }
+      })
+      observer.observe(document, { subtree: true, attributes: true, attributeFilter: ['hidden'] })
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          observer.disconnect()
+        },
+        { once: true },
+      )
+    })
+    if (decided) {
+      await page.addInitScript(() => {
+        localStorage.setItem(
+          'consent',
+          JSON.stringify({
+            version: 1,
+            necessary: true,
+            analytics: false,
+            marketing: false,
+            savedAt: '2026-10-22T00:00:00Z',
+          }),
+        )
+      })
+    }
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    const region = page.locator('section[aria-labelledby="consent-title"]')
+    await expect(region).toHaveCount(1)
+    if (decided) await expect(region).toBeHidden()
+    else {
+      await expect(region).toBeVisible()
+      await expect(region).toHaveAttribute('data-controls-at-reveal', '3')
+    }
+    await expect(
+      page.locator('script[src*="plausible"], script[src*="googletagmanager"]'),
+    ).toHaveCount(0)
+  })
+}
+
 test('shows the editable banner on a first visit, with focus inside it and no layout shift', async ({
   page,
 }) => {
@@ -194,7 +246,11 @@ test('the banner does not move the page', async ({ page }) => {
   await page.goto('/')
   const heading = page.locator('h1')
   await expect(banner(page)).toBeVisible()
+  // The banner can appear before the streamed page heading arrives.
+  await expect(heading).toBeVisible()
+  await expect.poll(() => heading.boundingBox()).not.toBeNull()
   const before = await heading.boundingBox()
+  expect(before).not.toBeNull()
   await banner(page).getByRole('button', { name: 'Choose' }).click()
   await expect(banner(page).getByRole('checkbox', { name: 'Analytics' })).toBeVisible()
   expect(await heading.boundingBox()).toEqual(before)

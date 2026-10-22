@@ -11,126 +11,53 @@
         "http://localhost:3100/links"
       ],
       "numberOfRuns": 3,
-      "settings": {
-        "chromeFlags": "--no-sandbox --headless=new",
-        "throttlingMethod": "devtools"
-      }
+      "settings": { "chromeFlags": "--no-sandbox --headless=new", "throttlingMethod": "devtools" }
     },
     "assert": {
+      "includePassedAssertions": true,
       "assertMatrix": [
         {
           "matchingUrlPattern": "^http://localhost:3100/$",
-          "categories:performance": [
-            "error",
-            {
-              "minScore": 0.9
-            }
-          ],
-          "categories:accessibility": [
-            "error",
-            {
-              "minScore": 1
-            }
-          ],
-          "cumulative-layout-shift": [
-            "error",
-            {
-              "maxNumericValue": 0.05
-            }
-          ],
-          "largest-contentful-paint": [
-            "error",
-            {
-              "maxNumericValue": 2500
-            }
-          ]
+          "assertions": {
+            "categories:performance": ["error", { "minScore": 0.9 }],
+            "categories:accessibility": ["error", { "minScore": 1 }],
+            "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }],
+            "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }]
+          },
+          "aggregationMethod": "median"
         },
         {
           "matchingUrlPattern": "^http://localhost:3100/about$",
-          "categories:performance": [
-            "error",
-            {
-              "minScore": 0.9
-            }
-          ],
-          "categories:accessibility": [
-            "error",
-            {
-              "minScore": 1
-            }
-          ],
-          "cumulative-layout-shift": [
-            "error",
-            {
-              "maxNumericValue": 0.05
-            }
-          ],
-          "largest-contentful-paint": [
-            "error",
-            {
-              "maxNumericValue": 3000
-            }
-          ]
+          "assertions": {
+            "categories:performance": ["error", { "minScore": 0.9 }],
+            "categories:accessibility": ["error", { "minScore": 1 }],
+            "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }],
+            "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }]
+          },
+          "aggregationMethod": "median"
         },
         {
           "matchingUrlPattern": "^http://localhost:3100/hero-parts$",
-          "categories:performance": [
-            "error",
-            {
-              "minScore": 0.9
-            }
-          ],
-          "categories:accessibility": [
-            "error",
-            {
-              "minScore": 1
-            }
-          ],
-          "cumulative-layout-shift": [
-            "error",
-            {
-              "maxNumericValue": 0.05
-            }
-          ],
-          "largest-contentful-paint": [
-            "error",
-            {
-              "maxNumericValue": 2500
-            }
-          ]
+          "assertions": {
+            "categories:performance": ["error", { "minScore": 0.9 }],
+            "categories:accessibility": ["error", { "minScore": 1 }],
+            "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }],
+            "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }]
+          },
+          "aggregationMethod": "median"
         },
         {
           "matchingUrlPattern": "^http://localhost:3100/links$",
-          "categories:performance": [
-            "error",
-            {
-              "minScore": 0.9
-            }
-          ],
-          "categories:accessibility": [
-            "error",
-            {
-              "minScore": 1
-            }
-          ],
-          "cumulative-layout-shift": [
-            "error",
-            {
-              "maxNumericValue": 0.05
-            }
-          ],
-          "largest-contentful-paint": [
-            "error",
-            {
-              "maxNumericValue": 2500
-            }
-          ]
+          "assertions": {
+            "categories:performance": ["error", { "minScore": 0.9 }],
+            "categories:accessibility": ["error", { "minScore": 1 }],
+            "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }],
+            "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }]
+          },
+          "aggregationMethod": "median"
         }
       ]
     },
-    "upload": {
-      "target": "filesystem",
-      "outputDir": ".lighthouseci"
-    }
+    "upload": { "target": "filesystem", "outputDir": ".lighthouseci" }
   }
 }

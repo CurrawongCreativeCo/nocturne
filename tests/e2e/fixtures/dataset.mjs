@@ -145,6 +145,9 @@ const fileRef = (id) => ({ _type: 'file', asset: ref(id) })
 const FRAME_ASSET_ID = 'file-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-svg'
 const FRAME_URL =
   'https://cdn.sanity.io/files/test/test/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.svg'
+const RASTER_FRAME_ASSET_ID = 'image-cccccccccccccccccccccccccccccccccccccccc-2400x1600-webp'
+const RASTER_FRAME_URL =
+  'https://cdn.sanity.io/images/e2etest1/production/cccccccccccccccccccccccccccccccccccccccc-2400x1600.webp'
 
 /** An `imageDesign` value (README, "Image design"). */
 const imageDesign = (fields) => ({ _type: 'imageDesign', ...fields })
@@ -548,6 +551,23 @@ export const documents = [
           frame: 'custom',
           customFrame: ref('frame-leaf'),
           motion: 'subtle',
+        }),
+      },
+      {
+        _key: 'framed-picture',
+        _type: 'mediaText',
+        title: 'Approved picture frame',
+        body: [
+          block([
+            'A transparent WebP frame, resized by the image CDN and filled with a theme colour.',
+          ]),
+        ],
+        image: image('Raster frame picture'),
+        imageDesign: imageDesign({
+          appearance: 'framed',
+          frame: 'custom',
+          customFrame: ref('frame-picture'),
+          frameColour: 'highlight',
         }),
       },
       {
@@ -1123,6 +1143,24 @@ export const documents = [
     _id: 'frame-leaf',
     _type: 'frame',
     title: 'Leaf border',
+    svg: fileRef(FRAME_ASSET_ID),
+    _updatedAt: UPDATED,
+  },
+  {
+    _id: RASTER_FRAME_ASSET_ID,
+    _type: 'sanity.imageAsset',
+    url: RASTER_FRAME_URL,
+    mimeType: 'image/webp',
+    size: 11178,
+    metadata: { hasAlpha: true, dimensions: { width: 2400, height: 1600 } },
+  },
+  {
+    _id: 'frame-picture',
+    _type: 'frame',
+    title: 'Hand-drawn picture border',
+    format: 'picture',
+    picture: { _type: 'image', asset: ref(RASTER_FRAME_ASSET_ID) },
+    // Switching formats keeps the unused upload, but must not select it.
     svg: fileRef(FRAME_ASSET_ID),
     _updatedAt: UPDATED,
   },
@@ -1862,6 +1900,7 @@ const gallerySections = [
     ['frame-organic-brush', { appearance: 'framed', frame: 'organic-brush' }],
     ['frame-corner-brackets', { appearance: 'framed', frame: 'corner-brackets' }],
     ['frame-custom', { appearance: 'framed', frame: 'custom', customFrame: ref('frame-leaf') }],
+    ['frame-picture', { appearance: 'framed', frame: 'custom', customFrame: ref('frame-picture') }],
     [
       'frame-tweaked',
       { appearance: 'framed', frame: 'thin-line', frameColour: 'highlight', frameInset: 8 },

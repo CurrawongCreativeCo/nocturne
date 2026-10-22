@@ -62,7 +62,7 @@ export const IMAGE_FRAME_PRESETS = [
 ] as const
 export type ImageFramePreset = (typeof IMAGE_FRAME_PRESETS)[number]
 
-/** `none` draws no frame; `custom` uses an approved SVG from a `frame` document. */
+/** `none` draws no frame; `custom` uses approved artwork from a `frame` document. */
 export const IMAGE_FRAMES = ['none', ...IMAGE_FRAME_PRESETS, 'custom'] as const
 export type ImageFrame = (typeof IMAGE_FRAMES)[number]
 
@@ -98,6 +98,10 @@ export const FRAME_INSET_DEFAULTS: Record<ImageFramePreset, number> = {
 
 /** A custom frame's SVG: only an SVG with a viewBox, no bigger than this. */
 export const CUSTOM_FRAME_MAX_BYTES = 50 * 1024
+
+/** Upload budget, not the visitor download: raster masks are resized by the image CDN. */
+export const CUSTOM_FRAME_PICTURE_MAX_BYTES = 5 * 1024 * 1024
+export const CUSTOM_FRAME_PICTURE_MIN_SIZE = 1600
 
 /** The only place an uploaded frame may be loaded from: the Sanity image and file CDN. */
 const CDN_PREFIX = 'https://cdn.sanity.io/'
@@ -157,7 +161,7 @@ export interface ImageDesignInput {
   frame?: string | null
   frameColour?: string | null
   frameInset?: number | null
-  /** The CDN URL of the chosen `frame` document's SVG. */
+  /** The CDN URL of the chosen `frame` document's artwork. */
   customFrameUrl?: string | null
 }
 

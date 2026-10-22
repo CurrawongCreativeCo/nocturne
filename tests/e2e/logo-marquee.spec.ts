@@ -115,6 +115,8 @@ test.describe('with motion allowed', () => {
 
   test('the Pause button stops the animation and Play starts it again', async ({ page }) => {
     await page.goto(GALLERY)
+    // Let the gallery finish replacing its streamed markup before interacting with the toggle.
+    await page.waitForLoadState('networkidle')
     await toggle(page).scrollIntoViewIfNeeded()
     await expect(toggle(page)).toHaveAccessibleName('Pause logo scrolling')
     await expect(toggle(page)).toHaveText('Pause')

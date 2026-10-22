@@ -79,7 +79,7 @@ test.describe('the countdown', () => {
 
   test('is hidden from screen readers and the date line stays', async ({ page }) => {
     await page.goto('/launch-date')
-    await expect(countdown(page)).toHaveAttribute('aria-hidden', 'true')
+    await expect(countdown(page).filter({ visible: true })).toHaveAttribute('aria-hidden', 'true')
     await expect(line(page).locator('p').first()).toHaveText('Opening Monday 5 January')
     await expect(page.locator(`[${ISLAND_MARKER}]`)).toContainText('to go')
   })

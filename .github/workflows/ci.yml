@@ -153,18 +153,22 @@ jobs:
       - name: End-to-end tests
         run: npx playwright test --project=desktop --project=mobile --shard=${{ matrix.shard }}/4
 
-      # Lighthouse scores on /, /about, /hero-parts and /links against the build Playwright just made. Budgets are in
+      # Lighthouse rebuilds public output, then scores /, /about, /hero-parts and /links. Budgets are in
       # lighthouserc.json; the JavaScript size budget is tests/e2e/performance.spec.ts.
-      # Runs once (shard 1); every shard leaves a build behind.
+      # Runs once (shard 1), after Playwright has stopped its servers.
       - name: Lighthouse CI
         if: matrix.shard == 1
-        run: npx lhci autorun
+        run: |
+          export CHROME_PATH="$(node -p "require('@playwright/test').chromium.executablePath()")"
+          npx lhci autorun
 
       - name: Upload report on failure
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-reports-${{ matrix.shard }}
+          # Lighthouse reports live in a hidden directory.
+          include-hidden-files: true
           path: |
             playwright-report
             test-results

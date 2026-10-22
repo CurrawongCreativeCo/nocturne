@@ -5,7 +5,7 @@ import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 import { SETTINGS_QUERY } from './queries'
-import { browserIconLinks } from '../utils/browser-icon'
+import { browserIconLinks, DEFAULT_BROWSER_ICONS } from '../utils/browser-icon'
 import { hasBusinessDetails } from '../utils/business-details'
 
 export async function getSettings(mode: FetchMode) {
@@ -39,12 +39,12 @@ export async function getSiteMetadata(): Promise<Metadata> {
         .url()
     : undefined
 
-  // Next.js adds src/app/icon.png and apple-icon.png only when `icons` is unset, so setting it here
-  // replaces them (never two <link rel="icon"> sets). Without a custom icon the default files apply.
+  // Explicit defaults include a small tab icon; the original 512 px file stays available for Android.
+  // Setting `icons` replaces Next's file-based links, so a client's own artwork always wins.
   const browserIcon = settings?.browserIcon
   const icons = browserIcon?.image
     ? browserIconLinks(browserIcon.image, browserIcon, { projectId, dataset })
-    : undefined
+    : DEFAULT_BROWSER_ICONS
 
   const description = settings?.description ?? undefined
   const template = { template: `%s | ${title}`, default: title }
@@ -54,7 +54,7 @@ export async function getSiteMetadata(): Promise<Metadata> {
   return {
     title: template,
     description,
-    ...(icons && { icons }),
+    icons,
     openGraph: {
       type: 'website',
       siteName: title,

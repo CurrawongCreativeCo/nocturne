@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
@@ -10,6 +12,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 const PAGE = '/framed-images'
 const PLACEHOLDER_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#6366f1"/></svg>`
 const FRAME_FILE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill-rule="evenodd" d="M0 0H100V100H0Z M4 4V96H96V4Z"/></svg>`
+const FRAME_PICTURE = readFileSync('tests/e2e/fixtures/frame-picture.webp')
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://cdn.sanity.io/**', (route) =>
@@ -18,6 +21,15 @@ test.beforeEach(async ({ page }) => {
   // Registered last, so it wins for the custom frame's file.
   await page.route('https://cdn.sanity.io/files/**/*.svg', (route) =>
     route.fulfill({ contentType: 'image/svg+xml', body: FRAME_FILE }),
+  )
+  await page.route(
+    'https://cdn.sanity.io/images/**/cccccccccccccccccccccccccccccccccccccccc-*',
+    (route) =>
+      route.fulfill({
+        contentType: 'image/webp',
+        headers: { 'access-control-allow-origin': '*' },
+        body: FRAME_PICTURE,
+      }),
   )
 })
 
@@ -149,6 +161,9 @@ test.describe('motion on', () => {
     await page.goto(PAGE)
     const scope = section(page, 'Built-in frame')
     await expect(scaler(scope)).toBeAttached()
+    await expect
+      .poll(() => scaler(scope).evaluate((el) => parseFloat(getComputedStyle(el).scale)))
+      .toBeCloseTo(1.13, 2)
     const desktop = parseFloat(await scaler(scope).evaluate((el) => getComputedStyle(el).scale))
     // Medium parallax: 6 % travel each way, scaled by twice that plus a 1 % slack.
     expect(desktop).toBeCloseTo(1.13, 2)
@@ -156,6 +171,9 @@ test.describe('motion on', () => {
     expect(desktop).toBeLessThanOrEqual(1.15)
 
     await page.setViewportSize({ width: 390, height: 800 })
+    await expect
+      .poll(() => scaler(scope).evaluate((el) => parseFloat(getComputedStyle(el).scale)))
+      .toBeCloseTo(1.07, 2)
     const phone = parseFloat(await scaler(scope).evaluate((el) => getComputedStyle(el).scale))
     expect(phone).toBeCloseTo(1.07, 2)
     expect(phone).toBeLessThan(desktop)
@@ -216,6 +234,47 @@ test.describe('motion on', () => {
     expect(await overlay.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe('none')
   })
 
+  test('a transparent picture frame loads a sized WebP mask in the chosen colour', async ({
+    page,
+  }) => {
+    const response = page.waitForResponse((res) =>
+      res.url().includes('/cccccccccccccccccccccccccccccccccccccccc-'),
+    )
+    await page.goto(PAGE)
+    expect((await response).ok()).toBe(true)
+    const overlay = frame(section(page, 'Approved picture frame'))
+    await expect(overlay).toBeVisible()
+    await expect(overlay).toHaveClass(/bg-highlight/)
+    const mask = await overlay.evaluate((el) => getComputedStyle(el).maskImage)
+    expect(mask).toContain('https://cdn.sanity.io/images/')
+    const viewport = page.viewportSize()?.width ?? 1280
+    expect(mask).toContain(`w=${viewport < 640 ? 1280 : viewport < 1024 ? 2048 : 2560}`)
+    expect(mask).toContain('fm=webp')
+    expect(mask).toContain('fit=max')
+    // Decode the real raster pixels, checking that its centre remains transparent.
+    const alpha = await page.evaluate(
+      async (url) => {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.src = url
+        await img.decode()
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const context = canvas.getContext('2d')
+        if (!context) throw new Error('Canvas context unavailable')
+        context.drawImage(img, 0, 0)
+        return {
+          centre: context.getImageData(img.width / 2, img.height / 2, 1, 1).data[3],
+          border: context.getImageData(40, img.height / 2, 1, 1).data[3],
+        }
+      },
+      mask.slice(5, -2),
+    )
+    expect(alpha.centre).toBe(0)
+    expect(alpha.border).toBe(255)
+  })
+
   test('a frame without motion leaves the picture still and unscaled', async ({ page }) => {
     await page.goto(PAGE)
     const scope = section(page, 'No motion')
@@ -226,6 +285,7 @@ test.describe('motion on', () => {
 
   test('has no WCAG 2.2 AA violations', async ({ page }) => {
     await page.goto(PAGE)
+    await page.waitForLoadState('networkidle')
     // Content sections fade up as they arrive: let each finish before axe measures its contrast.
     for (const element of await page.locator('[data-reveal]').all()) {
       await element.scrollIntoViewIfNeeded()

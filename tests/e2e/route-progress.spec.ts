@@ -36,10 +36,16 @@ async function delayNavigations(page: Page, ms: number) {
 
 test('stays hidden while moving between prerendered pages', async ({ page }) => {
   await recordLoading(page)
+  const prefetch = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === '/about' &&
+      response.request().headers()['next-router-prefetch'] === '1',
+  )
   await page.goto('/')
   await expect(bar(page)).toHaveAttribute('data-phase', 'idle')
   // "Instant" means the link's prefetch has landed. On a busy machine it can still be in flight at
   // the click, and the bar is then right to appear, so wait for it.
+  await (await prefetch).finished()
   await page.waitForLoadState('networkidle')
   await mainNav(page).getByRole('link', { name: 'About' }).click()
   await expect(page).toHaveURL('/about')

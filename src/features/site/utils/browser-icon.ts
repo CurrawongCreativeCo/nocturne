@@ -72,6 +72,16 @@ interface IconLink {
   type: 'image/png'
 }
 
+/** Tab-sized artwork avoids downloading the 512 px Android icon for every browser tab. */
+export const DEFAULT_BROWSER_ICONS = {
+  icon: [
+    { url: '/icons/icon-32.png', sizes: '32x32', type: 'image/png' },
+    { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    { url: '/icon.png', sizes: '512x512', type: 'image/png' },
+  ],
+  apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+}
+
 /** What Next.js turns into `<link rel="icon">` and `<link rel="apple-touch-icon">` tags. */
 export function browserIconLinks(
   image: SanityImageSource,

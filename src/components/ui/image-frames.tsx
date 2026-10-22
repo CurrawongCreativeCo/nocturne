@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 
+import { frameMaskUrl } from '@/lib/sanity/frame-mask'
 import type {
   ImageFrameColour,
   ImageFramePreset,
@@ -91,22 +92,28 @@ const FRAMES: Record<ImageFramePreset, (inset: number) => ReactNode> = {
  * The decorative layer over a framed picture: it fills the picture's box, ignores the pointer and is
  * hidden from assistive technology. It never moves; only the picture behind it does.
  *
- * A built-in preset is an inline SVG. An approved custom frame is never inlined: the uploaded SVG is
+ * A built-in preset is an inline SVG. An approved custom frame is never inlined: the uploaded artwork is
  * used as a CSS mask on a div filled with the chosen token colour, so it recolours with the theme,
  * scales with the picture and, loaded as an image, cannot run a script.
  */
 export function ImageFrame({
   frame,
   colour: override,
+  width,
 }: {
   frame: ResolvedFrame
   /** A CSS colour (a theme-colour field) instead of the frame's token. */
   colour?: string
+  /** Twice the largest rendered width; defaults to the site's content width at 2×. */
+  width?: number
 }) {
   const colour = override ? '' : TEXT_COLOUR[frame.colour]
 
   if (frame.kind === 'custom') {
-    const mask = `url("${frame.url}")`
+    const url = frameMaskUrl(frame.url, width)
+    if (!url) return null
+    const responsive = width === undefined && frame.url.includes('/images/')
+    const mask = responsive ? 'var(--frame-mask)' : `url("${url}")`
     const style: CSSProperties = {
       inset: `${frame.inset}%`,
       maskImage: mask,
@@ -114,15 +121,23 @@ export function ImageFrame({
       maskSize: '100% 100%',
       WebkitMaskSize: '100% 100%',
       maskRepeat: 'no-repeat',
+      maskMode: 'alpha',
       WebkitMaskRepeat: 'no-repeat',
       backgroundColor: override,
     }
+    const masks = responsive
+      ? {
+          '--frame-mask-small': `url("${frameMaskUrl(frame.url, 1280)}")`,
+          '--frame-mask-medium': `url("${frameMaskUrl(frame.url, 2048)}")`,
+          '--frame-mask-large': `url("${url}")`,
+        }
+      : {}
     return (
       <div
         aria-hidden="true"
         data-image-frame="custom"
-        className={`pointer-events-none absolute ${override ? '' : BACKGROUND_COLOUR[frame.colour]}`.trim()}
-        style={style}
+        className={`pointer-events-none absolute ${override ? '' : BACKGROUND_COLOUR[frame.colour]} ${responsive ? '[--frame-mask:var(--frame-mask-small)] sm:[--frame-mask:var(--frame-mask-medium)] lg:[--frame-mask:var(--frame-mask-large)]' : ''}`.trim()}
+        style={{ ...style, ...masks }}
       />
     )
   }

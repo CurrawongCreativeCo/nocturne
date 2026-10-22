@@ -290,13 +290,17 @@ Changes go live with the usual live update or webhook revalidation.
 **Developers.**
 
 - **Default files.** `src/app/icon.png` (512 × 512) and `src/app/apple-icon.png` (180 × 180, on paper `#F4EFE6`)
-  are made from Currawong's mark (`src/assets/brand/currawong/mark-no-text.webp`) by `node scripts/make-default-icons.mjs`.
+  and `public/icons/icon-32.png` / `icon-192.png` are made from Currawong's mark
+  (`src/assets/brand/currawong/mark-no-text.webp`) by `node scripts/make-default-icons.mjs`.
   Next.js icon files can't be WebP, so the PNGs are committed. The script uses `sharp`, which Next.js already
   installs; it is not a dependency and nothing runs at build or request time. It crops, scales and places the artwork
   on paper; it never redraws it. Re-run it only if the artwork changes, then paste the hashes it prints into
   `DEFAULT_ICON_SHA256` in `scripts/launch-check/leftovers.mjs`.
-- **A client's own default.** Replace those two PNGs, or just set the icon in Studio (no code change).
-- **`favicon.ico` is not needed.** Browsers use the `<link rel="icon">` tags Next.js writes from `icon.png`, and every
+- **A client's own default.** Replace the two large PNGs, then run
+  `node scripts/make-default-icons.mjs --sizes-only` to refresh the 32/192 px variants. Alternatively,
+  set the icon in Studio (no code change).
+- **`favicon.ico` is not needed.** Default metadata offers 32, 192 and 512 px PNGs, so browser tabs
+  download the small variant (1.6 KB), and every
   current browser accepts PNG. An `.ico` only helps very old browsers and tools that request `/favicon.ico`
   without reading the page; if one matters, add `src/app/favicon.ico` (Next.js serves it first).
 - **How the custom icon is rendered.** `getSiteMetadata` (`src/features/site/api/get-settings.ts`) reads `browserIcon`
@@ -369,7 +373,9 @@ Presentation the document's locations are _Home_ and the footer.
 - **Open now, and why it is a client component.** `OpenNowBadge` (`src/components/ui/open-now-badge.tsx`) reads the
   clock, which Cache Components forbids in cached or prerendered output, and the server's "now" would not be the
   visitor's anyway. It subscribes to the current minute with `useSyncExternalStore` (server snapshot `null`, so it renders
-  an empty placeholder of the same height and nothing shifts), re-checks every 30 seconds and clears its timer on unmount.
+  an empty placeholder of the same height). Its clock starts when the badge first enters view, avoiding
+  date-formatting work for an off-screen footer. It then re-checks every 30 seconds; its observer and
+  timer are cleaned up on unmount. Without IntersectionObserver it starts after hydration instead.
   It uses the document's `timeZone`, so a Perth business shows "open" in Perth time for a visitor in Sydney. It costs
   well under 1 KB gzipped. Only render it when there are hours (the footer does).
 - **Dates on the server.** Hiding passed special days needs today's date, so `getToday(timeZone)`
@@ -971,7 +977,7 @@ These are public values, baked in at build time: redeploy after changing them. S
 - **Withdrawing:** Cookie settings → change → save. Analytics cookies (`_ga*`, `ph_*`) and PostHog's local storage are removed, and the page reloads, because a loaded script can't be unloaded. Removal also runs on every visit by someone who has refused.
 - **Marketing** is a category in the store and the banner, ready for an ad or pixel provider: read `useConsentState().consent?.marketing` in a client component and gate its `<Script>` the same way. Today it only drives the Google ad signals.
 - **No provider, no banner.** `hasConsentProviders` in `src/config/analytics.ts` is false when none of the three variables is set; the banner, the footer link and the loader are then not rendered at all.
-- **The banner** is a labelled region (`<section aria-labelledby>`), not a dialog: nothing is trapped and the page stays usable. It is fixed to the bottom of the viewport, so showing it never shifts content (no CLS). It sits first in the DOM and takes focus when it opens; Tab continues from there, and after a choice Tab reaches the skip link. A reopened banner returns focus to the footer link, and Escape closes it without changing the choice. The server can't know the choice, so the banner appears after hydration.
+- **The banner** is a labelled region (`<section aria-labelledby>`), not a dialog: nothing is trapped and the page stays usable. It is fixed to the bottom of the viewport, so showing it never shifts content (no CLS). It sits first in the DOM and takes focus when it opens; Tab continues from there, and after a choice Tab reaches the skip link. A reopened banner returns focus to the footer link, and Escape closes it without changing the choice. Cached HTML contains the banner hidden. A small inline script reads the stored choice and reveals it before first paint when needed; React takes over its controls and focus after hydration. Saved choices keep it hidden, and no analytics provider loads before consent.
 - **Bundle:** the banner and the loader are a few KB; the provider code is third-party and arrives only after consent. PostHog is loaded from its CDN (`array.js`), not bundled.
 - **Your privacy policy** should name the providers you switch on, the `ab` cookie if you run A/B tests, and what a choice stores. This starter can't write that for you, and a banner is not legal advice.
 
@@ -1317,8 +1323,10 @@ Only supported Sanity APIs are used, in four places:
 - **Fonts.** The workspace theme uses Inter for interface text, labels and inputs, and Newsreader
   for display headings (including the Start here greeting and document headers where Sanity uses
   heading tokens). Code remains monospaced. `src/config/studio-fonts.ts` loads variable normal fonts
-  through `next/font/google`, with the Latin subset and `display: 'swap'`; only Studio and its preview
-  import it. Those font files are downloaded at build time and self-hosted. UI 5 may additionally
+  through `next/font/google`, with the Latin subset, `display: 'swap'` and `preload: false`; only Studio and its preview
+  import it. Disabling preload prevents unused Studio font hints leaking into public routes; Studio
+  still loads the fonts through its CSS. Those font files are downloaded at build time and self-hosted.
+  UI 5 may additionally
   load Sanity's own Inter from its CDN. `BrandedStudio` passes the resolved families through the
   theme, including compatibility font fields for document headers; the schema CLI never imports
   Next's font loader. The public site's font tokens are untouched. `studio-brand.json` has no font
@@ -2166,14 +2174,23 @@ stored values are unchanged, but it now moves **only the picture inside its stil
 drifted). Subtle, Medium and Strong keep their strengths (Strong is held to the 1.15 scale limit). A picture whose own _Picture motion_
 is not _None_ uses that instead.
 
-**Approved custom frames.** An agency-uploaded SVG in a **Frame** document (Studio → Design → Image frames; agency only: clients
+**Approved custom frames.** An agency-uploaded SVG or transparent picture in a **Frame** document (Studio → Design → Image frames; agency only: clients
 never see or create them, and an image design can only point at one). The Image design and Link list profile
-frame pickers offer existing frames only: add and publish new frames under **Design → Image frames**. The file must be an SVG with a `viewBox`, under 50 KB, with no
-scripts, event handlers or `foreignObject` (checked on save by `checkFrameSvg`, `src/features/frames/utils/frame-svg.ts`). The site
-**never inlines it**: it uses the file's CDN URL (and only a `cdn.sanity.io` URL) as a CSS `mask-image` on a `div` filled with the
+frame pickers offer existing frames only: add and publish new frames under **Design → Image frames**. Choose **Artwork → SVG file** or **Picture**:
+
+- **SVG file:** a `viewBox`, at most 50 KB, with no scripts, event handlers or `foreignObject` (checked by `checkFrameSvg`, `src/features/frames/utils/frame-svg.ts`).
+- **Picture:** a Sanity image asset, PNG or WebP, with a transparent background and middle. Export a single-colour outline at **1600–2400 px on the long side**, at least 1600 px, at most **5 MB**. The Studio warns if Sanity's metadata reports no alpha channel; an alpha channel alone cannot prove that the middle is transparent, so check the preview. Picture thumbnails appear in the frame picker and Image frames list.
+
+Complex hand-drawn SVGs are better exported as pictures: an SVG downloads all its paths at every display size, whereas the image CDN resizes a picture. Keep simple vector frames as SVG. The 5 MB limit is an **upload** budget allowing detailed transparent PNGs; visitors receive a resized WebP, never the original upload. Check actual transfer sizes for your artwork before using it above the fold (see [frame measurement notes](docs/frame-picture-measurement.md)).
+
+Existing frame documents with no Artwork choice still use their SVG. Switching Artwork retains the other upload but only the selected format is queried and validated. Publish the frame after changing its artwork; there is no content migration.
+
+The site **never inlines artwork**: it uses a CDN URL (and only a `cdn.sanity.io` URL) as an alpha CSS `mask-image` on a `div` filled with the
 chosen colour token, so it recolours with the theme, scales to the picture and, loaded as an image, cannot run a script. Design it as
 a single-colour outline; the transparent middle shows the picture. A frame document is tagged `frame`, so editing one refreshes the
 pages that use it (add `"frame"` to the webhook filter in webhook mode: the filter above includes it).
+
+The existing page queries resolve the selected asset URL without extra Content Lake requests. `frameMaskUrl` (`src/lib/sanity/frame-mask.ts`) uses the Sanity image URL builder for pictures with `fit=max&fm=webp` and no upscaling. CSS requests 1280 px below a 640 px viewport, 2048 px below 1024 px, and 2560 px above that: 2× the largest frame width in each range, up to the 80rem content width. Small Link list profile frames use their own 2× request widths (192, 256 or 384 px). SVG URLs are unchanged. If a client layout increases the maximum frame width beyond 80rem, update the mask widths accordingly. Frame colour and inset work identically for both formats. Public rendering makes no extra JavaScript measurement or Content Lake request.
 
 **How it is built.**
 
@@ -3350,7 +3367,7 @@ inside each box, and every option that depends on another only shows once it app
 
 | Box                | Options                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Profile            | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border.                                                                                                                                                                                                                                                               |
+| Profile            | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG or transparent picture from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border.                                                                                                                                                                                                                                        |
 | Service categories | **Separator** Bullet (default), Middle dot, Line, Diamond or None, drawn in CSS so it looks the same in every font. **On a phone** One row that wraps (default) or One per line. Text (collapsed): **Size** Small (default), Medium or Large (the `small`, `body` and `lead` type tokens), **Weight** Regular, Medium (default) or Bold, **Letters** As typed (default) or Capitals (with a little letter spacing), **Space between** Compact, Comfortable (default) or Wide. Colours: category (Inherit is the text colour) and separator (Inherit is Primary), each Text, Muted text, Primary, Secondary, Highlight or Custom. It follows the section's alignment. Shown once there are categories. |
 | Cards              | Every link's **Background colour** (Primary, Secondary, Highlight, Text, Transparent or Custom), **Background strength** (Light, Medium, Strong, Solid), **Border** (None, Thin, Medium, Thick) and **Border colour**, then a collapsed **Text** with the **Eyebrow**, **Label** and **Description** (size Small, Medium or Large as steps from the layout's own, weight, colour; the eyebrow's capitals and letter spacing; the description's line height). Every option starts on _Inherit_ (the layout's own). Not offered for Editorial's ruled list. See [Card design and overrides](#card-design-and-overrides).                                                                                |
 | Arrows and icons   | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow. **Icons** (collapsed): **Icon container** No container, Circle, Rounded square or Square (the social icon shapes), its colour, strength, border and border colour, and the icon colour.                                                                                                                                                                                                                                                                          |
@@ -3640,7 +3657,7 @@ box on a wide screen would still lay out for desktop. `scripts/postcss-container
 for `src/styles/globals.css` only) adds, for every width media query, the same rules as a query on the `styleguide`
 container, and wraps the original rules in `@container not style(--sg-frame: 1)`; the frame sets `--sg-frame: 1`, which
 inherits to everything inside it. Outside a frame nothing changes, and with no frame chosen the page is laid out by the
-window as normal. Lengths in viewport units (`vh`, `vw`, `min-h-screen`) still follow the window. **Vercel production builds
+window as normal. Lengths in viewport units (`vh`, `vw`, `min-h-screen`) still follow the window. **Live production builds
 leave the plugin out** (`VERCEL_ENV=production`), so the live site's stylesheet is unchanged; every other build (development,
 previews, the end-to-end build) has it, about 4 KB larger before compression and 0.2 KB after. If you add a width media
 query by hand to `globals.css`, the plugin picks it up as long as it is a single `min-width`/`max-width` or `width >=`/`<`
@@ -4111,14 +4128,14 @@ to 800 images).
 CI fails when a page gets heavier or slower than these. They run against the same production build and fake
 Content Lake as the end-to-end tests.
 
-| Budget                                 | Limit                     | Where it lives                                    |
-| -------------------------------------- | ------------------------- | ------------------------------------------------- |
-| JavaScript loaded by `/` (gzipped)     | 220 KB                    | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
-| Lighthouse performance (`/`, `/about`) | ≥ 0.9                     | `lighthouserc.json`                               |
-| Lighthouse accessibility               | 1                         | `lighthouserc.json`                               |
-| Cumulative Layout Shift                | ≤ 0.05                    | `lighthouserc.json`                               |
-| Largest Contentful Paint               | ≤ 2.5 s (`/about`: ≤ 3 s) | `lighthouserc.json`                               |
-| Client memory (30 rounds of browsing)  | see below                 | `tests/e2e/memory.spec.ts`                        |
+| Budget                                  | Limit     | Where it lives                                    |
+| --------------------------------------- | --------- | ------------------------------------------------- |
+| JavaScript loaded by `/` (gzipped)      | 220 KB    | `JS_BUDGET_KB` in `tests/e2e/performance.spec.ts` |
+| Lighthouse performance (all four pages) | ≥ 0.9     | `lighthouserc.json`                               |
+| Lighthouse accessibility                | 1         | `lighthouserc.json`                               |
+| Cumulative Layout Shift                 | ≤ 0.05    | `lighthouserc.json`                               |
+| Largest Contentful Paint                | ≤ 2.5 s   | `lighthouserc.json`                               |
+| Client memory (30 rounds of browsing)   | see below | `tests/e2e/memory.spec.ts`                        |
 
 - **JavaScript:** the test fetches `/`, takes every `<script src>` in the HTML, gzips each file from
   `.next/static` (level 9) and adds them up (1 KB = 1000 bytes). Over budget, it lists every chunk, largest
@@ -4137,19 +4154,25 @@ Content Lake as the end-to-end tests.
 - **Lighthouse:** `npm run test:lighthouse` (CI runs `npx lhci autorun`) starts the fake Content Lake and
   `next start` through `scripts/e2e-server.mjs`, which shares its env with `playwright.config.ts` via
   `tests/e2e/constants.ts`, then runs three Lighthouse passes per page and judges the median. It builds the
-  site only if `.next` is missing, so delete `.next` after changing code. It uses applied (`devtools`)
-  throttling: Lighthouse's default simulated model reports `/about` about 20 ms over the LCP limit while
-  Chrome actually paints it in about 130 ms. It needs Chrome installed (CI's runner has it). Reports go to
-  `.lighthouseci/`.
-- **Why `/about` has a looser LCP limit:** on a first visit (which is what Lighthouse always sees) the
-  largest element on `/about` is the cookie banner's text. The server can't know the visitor's consent
-  choice, so the banner only renders after hydration, about 2.8 s under Lighthouse's throttling. `/` passes
-  at 2.5 s because its hero heading is larger and paints first. **To tighten it back to 2.5 s:** server-render
-  the banner markup `hidden` and reveal it before first paint with a small inline script that reads the
-  `consent` key in localStorage (the approach `announcement-bar.tsx` uses), then keep the focus and
-  keyboard behaviour in `consent-banner.tsx` working once React takes over. That changes the banner's
-  accessibility behaviour and probably the visual snapshots, so it needs its own pull request. Then set
-  both URLs in `lighthouserc.json` back to 2500.
+  public site afresh with the gallery disabled, after the fake lake is ready. Applied (`devtools`)
+  throttling is retained. It needs Chrome installed (CI's runner has it); on Windows set `CHROME_PATH`
+  to the installed Chrome executable, or the Playwright Chromium executable. Reports go to
+  `.lighthouseci/`. Each matrix entry nests its rules under `assertions` and explicitly selects
+  median aggregation. `scripts/lighthouse-config.test.mjs` checks these rules against the installed
+  LHCI assertion engine, including failures in two out of three runs; a successful collection alone
+  does not establish budget compliance.
+  The CLI's Lighthouse dependency is pinned to 13.5.0, the release targeting Chrome 156,
+  rather than its bundled 12.6.1. Use Node 24 (see `.nvmrc`); a portable Node installation
+  on the terminal's `PATH` is sufficient and does not require a computer-wide update.
+  Browser/engine upgrades can change measurements, so compare runs using the same versions.
+- **First-visit rendering:** the cookie banner's hidden markup is server-rendered and revealed by a small
+  inline storage check after the banner's content, before hydration, when no valid choice exists.
+  Revealing it after its children are parsed prevents a thin empty banner painting and then expanding.
+  Its controls and keyboard focus
+  take over after hydration; saved choices keep it hidden. All four pages now have the same 2500 ms
+  LCP limit (About previously allowed 3000 ms for the late banner). Studio font loaders disable
+  preloading so unused CMS fonts do not compete with public assets. Default browser tabs download a
+  32 px icon rather than the 512 px original.
 - **Raising a budget** is a decision, not a fix for a red build. First find what grew (the chunk list, or the
   failing audit in the Lighthouse report) and try to shrink it. If the cost is worth it, change the limit in
   the file above in the same pull request as the change that needs it, and say why in the description. Don't

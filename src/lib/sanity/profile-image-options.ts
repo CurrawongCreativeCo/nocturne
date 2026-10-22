@@ -29,7 +29,7 @@ export const PROFILE_IMAGE_SHAPE_TITLES: Record<ProfileImageShape, string> = {
 
 /**
  * `line` and `gradient` draw a ring around the picture, with a see-through gap; `frame` lays an
- * approved custom frame (Design > Image frames, the same SVG frames as Image design) around it.
+ * approved custom frame (Design > Image frames, the same artwork as Image design) around it.
  */
 export const PROFILE_BORDERS = ['none', 'line', 'gradient', 'frame'] as const
 export type ProfileBorder = (typeof PROFILE_BORDERS)[number]
@@ -73,7 +73,7 @@ export interface ProfileImageDesignInput {
   borderGap?: string | null
   /** The slug of a Brand colours gradient, for the gradient ring. */
   borderGradient?: string | null
-  /** The CDN URL of the chosen `frame` document's SVG. */
+  /** The CDN URL of the chosen `frame` document's artwork. */
   frameUrl?: string | null
 }
 
