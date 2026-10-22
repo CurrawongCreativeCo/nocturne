@@ -4,6 +4,8 @@
 
 The remaining text preserves the original work-computer handover as historical context. Its unfinished-validation notes are superseded by the results above. This handover was written on 22 October 2026 because the owner needed to leave work and resume on their home laptop.
 
+**Later CI follow-up:** Linux baselines were imported and their paths corrected in `3cb7a23`. A subsequent CI run failed home CLS and About LCP/performance. The announcement now reveals only after its complete content is parsed; CI explicitly selects Playwright Chromium and retains hidden Lighthouse reports. Code checks, 40 focused browser tests and all 16 Lighthouse assertions pass locally. **Linux CI must be rerun; About's CI LCP cause remains unconfirmed.** See [the follow-up results](frame-picture-measurement.md#follow-up-linux-ci-failure-and-announcement-fix).
+
 ## Start here
 
 1. Read `AGENTS.md` if present and `README.md`. No applicable `AGENTS.md` was found on the work computer. Follow the repository's existing architecture, generators, direct imports, Australian English, accessibility, caching and test conventions. Read the relevant Next.js 16 guides in `node_modules/next/dist/docs/` before changing Next.js code.

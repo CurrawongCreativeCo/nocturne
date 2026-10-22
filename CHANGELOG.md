@@ -29,6 +29,7 @@ you start a release.
 
 ### Fixed
 
+- **Announcement first paint and CI diagnostics:** reveal an announcement only after its message and dismiss control have been parsed. Lighthouse CI uses the installed Playwright Chromium and retains its hidden report directory in failure artifacts; budgets and throttling are unchanged.
 - **Lighthouse budget enforcement:** audit rules now sit inside each matrix entry's `assertions` object, with median aggregation and regression tests against the installed LHCI engine. Previously the command could exit successfully without checking any budgets. About now shares the 2500 ms LCP limit; the other thresholds and applied throttling are retained.
 - **Lighthouse engine and production CSS:** pin the CLI's Lighthouse engine to 13.5.0 for Chrome 156, using the project's Node 24 runtime. Style-guide container-frame CSS is included in development, previews and the end-to-end gallery, and omitted from live production builds, including self-hosted builds.
 - **First-paint consent and public asset downloads:** the cookie banner reveals its complete markup before hydration while saved choices keep it hidden; keyboard focus and consent gating are retained. CMS fonts no longer leak unused Newsreader preloads into public pages. Default icons include a 1.6 KB browser-tab image alongside the existing large and Apple icons; client-uploaded artwork still replaces all defaults. The footer's opening-hours clock starts when its badge first enters view, with observer and timer cleanup.

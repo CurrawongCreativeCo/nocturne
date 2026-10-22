@@ -95,7 +95,6 @@ export function AnnouncementBar({
       suppressHydrationWarning
       className="bg-surface-inverse text-ink-inverse"
     >
-      <script dangerouslySetInnerHTML={{ __html: revealScript(start, end, key, dismissible) }} />
       <div className="mx-auto flex max-w-content items-center justify-center gap-3 px-gutter py-2 text-center text-small">
         <p>{children}</p>
         {dismissible && (
@@ -120,6 +119,8 @@ export function AnnouncementBar({
           </button>
         )}
       </div>
+      {/* Reveal only after the complete message and control have been parsed. */}
+      <script dangerouslySetInnerHTML={{ __html: revealScript(start, end, key, dismissible) }} />
     </section>
   )
 }

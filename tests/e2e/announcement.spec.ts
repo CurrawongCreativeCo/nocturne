@@ -7,6 +7,36 @@ const AFTER_WINDOW = new Date('2101-01-01T00:00:00Z')
 const MESSAGE = 'Summer sale: 20% off all services'
 
 test.describe('announcement bar', () => {
+  test('reveals the complete message and dismiss control before hydration', async ({ page }) => {
+    await page.route(/\/_next\/static\/chunks\/.*\.js(?:\?|$)/, (route) => route.abort())
+    await page.addInitScript(() => {
+      const observer = new MutationObserver((records) => {
+        for (const { target } of records) {
+          if (!(target instanceof HTMLElement) || target.hidden) continue
+          if (!target.matches('section[aria-label="Announcement"]')) continue
+          target.dataset.completeAtReveal = String(
+            Boolean(target.querySelector('p a') && target.querySelector('button')),
+          )
+          observer.disconnect()
+        }
+      })
+      observer.observe(document, { subtree: true, attributes: true, attributeFilter: ['hidden'] })
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          observer.disconnect()
+        },
+        { once: true },
+      )
+    })
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    const bar = page.getByRole('region', { name: 'Announcement' })
+    await expect(bar).toBeVisible()
+    await expect(bar).toHaveAttribute('data-complete-at-reveal', 'true')
+    await expect(bar.getByRole('link', { name: MESSAGE })).toBeVisible()
+    await expect(bar.getByRole('button', { name: 'Dismiss announcement' })).toBeVisible()
+  })
+
   test('shows inside its window, as a labelled region with a link', async ({ page }) => {
     await page.goto('/')
     const bar = page.getByRole('region', { name: 'Announcement' })

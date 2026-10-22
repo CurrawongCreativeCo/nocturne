@@ -90,3 +90,17 @@ Three-run medians from that final Lighthouse invocation:
 | `/about`      | 0.98        | 1             | 1700 ms | 87 ms | 0.000492 |
 | `/hero-parts` | 0.99        | 1             | 1711 ms | 81 ms | 0        |
 | `/links`      | 0.99        | 1             | 1650 ms | 80 ms | 0.018774 |
+
+### Follow-up Linux CI failure and announcement fix
+
+A subsequent Linux CI run on `3cb7a23` failed home CLS (median **0.056183**) and About performance/LCP (**0.85 / 4047 ms**), despite the local results above. The other pages passed. These CI failures remain relevant; a passing local run does not establish Linux acceptance.
+
+The announcement's reveal script ran before its message and dismiss button were parsed. A new desktop/mobile regression blocks Next.js chunks and observes the markup at reveal: both cases failed against the old build and pass after moving the script after the content. Date windows, stored dismissals, blocked storage, keyboard behaviour and consent remain covered. CI now explicitly selects the installed Playwright Chromium, matching local validation, and includes hidden files in the report artifact so `.lighthouseci` is retained. The downloaded failing artifact contained no Lighthouse reports, preventing identification of About's actual CI LCP candidate or browser version; its cause is not confirmed.
+
+Follow-up local validation under Node 24.22.1:
+
+- `npm run check`: passed, 264 unit test files / 2,996 tests, types, lint and formatting.
+- `npm run test:e2e -- 'announcement.spec.ts|consent.spec.ts' --project=desktop --project=mobile --workers=4`: 40 passed, without retries.
+- `npm run test:lighthouse` with Playwright Chromium: all 16 assertions passed under Lighthouse 13.5.0 / Chrome 156. Home/About/hero/links median performance was **0.99 / 0.99 / 0.99 / 0.99**, LCP **1725 / 1651 / 1701 / 1658 ms**, and CLS **0 / 0 / 0 / 0.018774**. No budgets, throttling, content or public queries changed.
+
+Rerun Linux CI with these changes. If About still fails, inspect its retained `lcp-breakdown-insight` and browser version before proposing further performance changes.
