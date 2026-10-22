@@ -1721,7 +1721,55 @@ const galleryProfile = {
   image: image('Test Co logo'),
 }
 
+const heroLabelExamples = [
+  {
+    _key: 'hero-eyebrow-labels',
+    _type: 'hero',
+    title: 'Move your way',
+    eyebrow: 'Old eyebrow kept for later',
+    eyebrowLabels: ['Yoga', 'Pilates', 'Barre', 'Restorative movement', 'Breathwork'],
+    style: { tone: 'surface' },
+  },
+  {
+    _key: 'hero-eyebrow-labels-start',
+    _type: 'hero',
+    title: 'Find your practice',
+    variant: 'split',
+    eyebrowLabels: ['Yoga', 'Pilates', 'Barre'],
+    eyebrowDesign: {
+      separator: 'dot',
+      textColour: { colour: 'ink' },
+      separatorColour: { colour: 'custom', hex: '#654321' },
+    },
+  },
+  {
+    _key: 'hero-eyebrow-prose',
+    _type: 'hero',
+    title: 'Words as written',
+    eyebrow: 'Yoga · Pilates · Barre',
+    style: { tone: 'surface' },
+  },
+  {
+    _key: 'hero-eyebrow-empty',
+    _type: 'hero',
+    title: 'Empty labels keep text',
+    eyebrow: 'A moment for yourself',
+    eyebrowLabels: ['', '  '],
+    style: { tone: 'surface' },
+  },
+]
+
+documents.push({
+  _id: 'page-hero-labels',
+  _type: 'page',
+  title: 'Hero labels',
+  slug: { _type: 'slug', current: 'hero-labels' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: heroLabelExamples,
+})
+
 const gallerySections = [
+  ...heroLabelExamples.slice(0, 2),
   {
     _key: 'hero',
     _type: 'hero',

@@ -4,7 +4,7 @@ import { themeColourCss, type ThemeColour, type ThemeColourInput } from './theme
 
 /**
  * How a short list of labels is drawn in one row (components/ui/inline-list.tsx): the Link list's
- * Service categories ("Bodywork • Breathwork • Movement"). The separators are drawn by the page,
+ * Service categories and the hero’s optional eyebrow labels. The separators are drawn by the page,
  * never typed, so they can take their own colour and never dangle at the end of a line. Kept free of
  * Studio code so the site can import it; the schema is in features/pages/schemas/sections.
  */

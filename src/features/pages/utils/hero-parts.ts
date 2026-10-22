@@ -11,6 +11,7 @@ import {
   type SectionDefaults,
   type SectionStyleInput,
 } from '@/components/ui/section-style'
+import { inlineListItems } from '@/lib/sanity/inline-list-options'
 
 /**
  * The hero's animatable parts (README, "Animating individual parts"). The order is the Auto timing
@@ -60,6 +61,7 @@ type Picture = { asset?: unknown } | null | undefined
 export interface HeroPartsInput {
   variant?: string | null
   eyebrow?: string | null
+  eyebrowLabels?: readonly (string | null)[] | null
   description?: string | null
   ctas?: readonly unknown[] | null
   backgroundImage?: Picture
@@ -76,7 +78,7 @@ export function heroPartsPresent(hero: HeroPartsInput): HeroPart[] {
   const beside = hero.variant === 'split' || hero.variant === 'editorial'
   const picture = hero.variant === 'editorial' ? hero.secondaryImage : hero.backgroundImage
   const present: Record<HeroPart, boolean> = {
-    eyebrow: Boolean(hero.eyebrow),
+    eyebrow: Boolean(hero.eyebrow) || inlineListItems(hero.eyebrowLabels).length > 0,
     heading: true,
     description: Boolean(hero.description),
     buttons: Boolean(hero.ctas?.length),

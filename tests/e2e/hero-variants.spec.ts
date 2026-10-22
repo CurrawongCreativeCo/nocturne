@@ -91,7 +91,13 @@ for (const id of heroIds) {
       expect(section).toContain('<h1')
     }).toPass()
 
-    expect(section).toMatch(/<h1[^>]*>Welcome to Test Co<\/h1>/)
+    const title =
+      id === 'hero-eyebrow-labels'
+        ? 'Move your way'
+        : id === 'hero-eyebrow-labels-start'
+          ? 'Find your practice'
+          : 'Welcome to Test Co'
+    expect(section).toMatch(new RegExp(`<h1[^>]*>${title}</h1>`))
     // The image is in the HTML and not lazy, so the browser requests it at once. Layouts without a
     // picture (editorial, split with no image) have none to wait for.
     if (withImage.includes(id)) {

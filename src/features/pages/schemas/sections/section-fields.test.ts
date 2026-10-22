@@ -41,7 +41,12 @@ describe('hero', () => {
     })
 
   it('starts with the layout picker, then its content', () => {
-    expect(names(fields).slice(0, 3)).toEqual(['variant', 'eyebrow', 'heading'])
+    expect(names(fields.filter((field) => field.group === 'content')).slice(0, 4)).toEqual([
+      'variant',
+      'eyebrow',
+      'eyebrowLabels',
+      'heading',
+    ])
   })
 
   it('shows Image side only in Split, now in the Content tab', () => {

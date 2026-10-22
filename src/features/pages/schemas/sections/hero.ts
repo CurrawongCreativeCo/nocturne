@@ -29,6 +29,7 @@ import {
   HeroSplitThumbnail,
 } from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
+import { heroEyebrowDesignField } from './hero-eyebrow'
 import { heroPartMotionField } from './hero-part-motion'
 import { imageSideOptions } from './image-side'
 
@@ -219,6 +220,27 @@ export const hero = defineType({
         description: 'Small label above the title.',
         validation: (rule) => lengthWarning(rule, LIMITS.eyebrow, 'Labels'),
       }),
+      defineField({
+        name: 'eyebrowLabels',
+        title: 'Eyebrow labels',
+        type: 'array',
+        description:
+          'Optional short labels, one per item, e.g. Yoga, Pilates, Barre. Replaces the small label above when filled in; separators are drawn for you. Leave empty for ordinary text.',
+        of: [
+          defineArrayMember({
+            type: 'string',
+            validation: (rule) => [
+              rule.required().error('Type a label, or remove this item.'),
+              lengthWarning(rule, LIMITS.eyebrow, 'Labels'),
+            ],
+          }),
+        ],
+        validation: (rule) => [
+          rule.unique().error('Each label is listed once.'),
+          rule.max(6).warning('More than 6 labels is hard to take in at a glance.'),
+        ],
+      }),
+      heroEyebrowDesignField,
       // Select words in the title to highlight them. Replaces the plain `title` below, which is read
       // only until the "Hero titles to heading text" migration has run (migrations/README.md).
       headingField({
