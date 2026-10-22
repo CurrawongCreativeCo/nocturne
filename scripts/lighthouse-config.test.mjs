@@ -20,9 +20,7 @@ const report = (url, score = 0.95, lcp = 1000, cls = 0, accessibility = 1) => ({
 describe('Lighthouse budgets', () => {
   for (const url of ci.collect.url) {
     it(`enforces the score, LCP and CLS budgets on ${url}`, () => {
-      const good = getAllAssertionResults({ ...ci.assert, includePassedAssertions: true }, [
-        report(url),
-      ])
+      const good = getAllAssertionResults(ci.assert, [report(url)])
       expect(good).toHaveLength(4)
       expect(good.every((result) => result.passed)).toBe(true)
       const bad = getAllAssertionResults(ci.assert, [report(url, 0.5, 10000, 1)])

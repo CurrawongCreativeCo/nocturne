@@ -134,7 +134,7 @@ test('the interactive map loads only after a click, and says it comes from Googl
   )
   // Focus follows the press: the button is gone, so the map has it.
   await expect(frame).toBeFocused()
-  expect(google.some((url) => url.includes('output=embed'))).toBe(true)
+  await expect.poll(() => google.some((url) => url.includes('output=embed'))).toBe(true)
 })
 
 test('without JavaScript the details and directions are still there, and the button is not', async ({

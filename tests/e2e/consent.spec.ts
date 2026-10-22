@@ -246,7 +246,11 @@ test('the banner does not move the page', async ({ page }) => {
   await page.goto('/')
   const heading = page.locator('h1')
   await expect(banner(page)).toBeVisible()
+  // The banner can appear before the streamed page heading arrives.
+  await expect(heading).toBeVisible()
+  await expect.poll(() => heading.boundingBox()).not.toBeNull()
   const before = await heading.boundingBox()
+  expect(before).not.toBeNull()
   await banner(page).getByRole('button', { name: 'Choose' }).click()
   await expect(banner(page).getByRole('checkbox', { name: 'Analytics' })).toBeVisible()
   expect(await heading.boundingBox()).toEqual(before)

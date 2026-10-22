@@ -153,9 +153,9 @@ jobs:
       - name: End-to-end tests
         run: npx playwright test --project=desktop --project=mobile --shard=${{ matrix.shard }}/4
 
-      # Lighthouse scores on /, /about, /hero-parts and /links against the build Playwright just made. Budgets are in
+      # Lighthouse rebuilds public output, then scores /, /about, /hero-parts and /links. Budgets are in
       # lighthouserc.json; the JavaScript size budget is tests/e2e/performance.spec.ts.
-      # Runs once (shard 1); every shard leaves a build behind.
+      # Runs once (shard 1), after Playwright has stopped its servers.
       - name: Lighthouse CI
         if: matrix.shard == 1
         run: npx lhci autorun

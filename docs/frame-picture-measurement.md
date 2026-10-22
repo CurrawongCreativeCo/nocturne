@@ -36,7 +36,7 @@ The gallery uses an independent, small transparent WebP fixture (`tests/e2e/fixt
 
 ## Validation and the Lighthouse investigation
 
-Local Windows validation on 22 October 2026:
+Historical Windows validation on 22 October 2026, using Lighthouse 12.6.1:
 
 - `npm run check`: passed, including 262 unit test files / 2,985 tests.
 - `npm run test:e2e -- --workers=4`: 1,881 passed, 470 skipped by the existing platform/device rules. Raster rendering and frame-page axe checks pass on desktop and mobile. Linux visual baselines still need refreshing as above.
@@ -71,4 +71,22 @@ Two unnecessary downloads were also removed from public visits:
 - The Studio's Newsreader preload (58,779 transferred bytes in the local report) no longer leaks onto public pages. Studio font families and theme settings are retained; its font files load when its CSS uses them.
 - Browser tabs use a new 32 px PNG (1,644 file bytes), rather than the 512 px default (171,743 file bytes). The 192/512 px and Apple variants remain available, and client artwork still replaces all defaults.
 
-Diagnostic public font-display and inline-CSS experiments did not establish a consistent improvement and were reverted. No audit was disabled, no threshold was raised, and no throttling setting was relaxed. Final validation was interrupted when the owner needed to leave work. See [the handover prompt](raster-frames-handover-prompt.md) for the latest implementation, test results, unresolved failures and remaining validation; the historical runs above are not final acceptance.
+Diagnostic public font-display and inline-CSS experiments did not establish a consistent improvement and were reverted. No audit was disabled, no threshold was raised, and no throttling setting was relaxed. Windows validation was interrupted when the owner needed to leave work; the historical runs above are not final acceptance.
+
+### Resumed macOS validation, 22 October 2026
+
+The checkpoint was resumed with a clean lockfile install under Node 24.22.1. The initially installed dependencies still resolved Lighthouse 12.6.1; that diagnostic run is excluded from the final results below. Engine versions and host resources differ from the Windows investigation, so these figures do not establish a performance gain attributable to the frame changes.
+
+- `npm run check`: passed, including 264 unit test files / 2,996 tests, types, lint and formatting.
+- `npm run test:e2e -- --workers=4 --retries=1 --trace=off`: **1,886 passed, 471 skipped**, in 21.4 minutes. No retries were used. All dependent projects completed; the existing Linux/device skips remain. Trace recording was disabled after an earlier run exhausted this laptop's disk while writing artifacts; no tests or assertions were disabled. The final run used the locked dependencies and all readiness fixes, and its servers stopped cleanly.
+- Focused desktop/mobile frame, consent, business-info, location, launch-date and link-list checks: 274 passed, 6 skipped, without retries. A subsequent map/marquee/navigation trace run passed 52 tests, with 6 skipped.
+- `npm run test:lighthouse` with `CHROME_PATH` pointing to Playwright Chromium: passed under Lighthouse **13.5.0 / Chrome 156**, with the original applied `devtools` throttling. The harness rebuilt public output with the gallery disabled and stopped its servers afterwards. All **16 audit-rule results** across 12 reports passed. Passing assertions are now retained explicitly: LHCI otherwise saves only failures, so an empty results file alone cannot distinguish a passing run from missing rules. The regression test checks the actual configuration retains four results per URL.
+
+Three-run medians from that final Lighthouse invocation:
+
+| URL           | Performance | Accessibility | LCP     | TBT   | CLS      |
+| ------------- | ----------- | ------------- | ------- | ----- | -------- |
+| `/`           | 0.99        | 1             | 1754 ms | 82 ms | 0.000492 |
+| `/about`      | 0.98        | 1             | 1700 ms | 87 ms | 0.000492 |
+| `/hero-parts` | 0.99        | 1             | 1711 ms | 81 ms | 0        |
+| `/links`      | 0.99        | 1             | 1650 ms | 80 ms | 0.018774 |

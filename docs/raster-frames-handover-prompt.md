@@ -1,6 +1,8 @@
 # Resume prompt: raster frames and Lighthouse
 
-Continue the work described below. This handover was written on 22 October 2026 because the owner needed to leave work and resume on their home laptop. **The task is not complete.** Do not repeat the completed implementation or claim the final acceptance checks pass.
+**Resumed on macOS, 22 October 2026:** local acceptance now passes. `npm run check` passed 264 files / 2,996 tests; the complete browser suite passed 1,886 tests with 471 existing skips and no retries used (`--workers=4 --retries=1 --trace=off`). Lighthouse 13.5.0 / Chrome 156 passed all 16 retained audit-rule results across 12 reports. See [the final validation and medians](frame-picture-measurement.md#resumed-macos-validation-22-october-2026). The new picture-frame visual baselines still require the Linux **Update visual baselines** workflow. The branch has not been pushed.
+
+The remaining text preserves the original work-computer handover as historical context. Its unfinished-validation notes are superseded by the results above. This handover was written on 22 October 2026 because the owner needed to leave work and resume on their home laptop.
 
 ## Start here
 
