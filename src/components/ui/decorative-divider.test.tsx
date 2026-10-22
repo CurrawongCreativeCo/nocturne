@@ -1,3 +1,4 @@
+import { vercelStegaCombine } from '@vercel/stega'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
@@ -19,6 +20,21 @@ const render = (input: DividerInput, block?: string) => {
 }
 
 describe('DecorativeDivider', () => {
+  it('keeps preview metadata out of divider text while retaining click-to-edit', () => {
+    const encoded = vercelStegaCombine(
+      'Stay connected',
+      {
+        origin: 'sanity.io',
+        href: '/studio/intent/edit/id=page;path=dividerDesign.aboveSocial.text',
+      },
+      false,
+    )
+    const html = render({ style: 'line', centre: 'text', text: encoded })
+    expect(html).not.toContain(encoded)
+    expect(html).toContain('>Stay connected</span>')
+    expect(html).toContain('data-sanity="{&quot;origin&quot;:&quot;sanity.io&quot;')
+  })
+
   it('is decoration only, hidden from screen readers, in the line colour', () => {
     const html = render({ style: 'line' })
     expect(html).toMatch(/^<div aria-hidden="true" data-decorative-divider="line"/)

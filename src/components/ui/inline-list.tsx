@@ -8,6 +8,7 @@ import type {
   InlineSize,
   InlineWeight,
 } from '@/lib/sanity/inline-list-options'
+import { previewText } from '@/lib/sanity/preview-text'
 
 // Full class names, so Tailwind's scanner sees them.
 const SIZE: Record<InlineSize, string> = {
@@ -107,23 +108,27 @@ export function InlineList({
         .join(' ')}
       style={style}
     >
-      {items.map((item, index) => (
-        <li
-          // Labels are plain strings with no key of their own; the same label twice keeps its place.
-          key={`${String(index)}-${item}`}
-          className={`relative min-w-0 break-words ${centred ? 'grow text-center' : ''}`}
-        >
-          {index > 0 && separator !== 'none' && (
-            <span
-              aria-hidden="true"
-              data-inline-separator=""
-              className={`${SEPARATOR} ${SHAPE[separator]} ${stack ? 'max-sm:hidden' : ''}`}
-              style={separatorColour ? { color: separatorColour } : undefined}
-            />
-          )}
-          {item}
-        </li>
-      ))}
+      {items.map((item, index) => {
+        const { text, editInfo } = previewText(item)
+        return (
+          <li
+            // Labels are plain strings with no key of their own; the same label twice keeps its place.
+            key={`${String(index)}-${item}`}
+            data-sanity={editInfo}
+            className={`relative min-w-0 break-words ${centred ? 'grow text-center' : ''}`}
+          >
+            {index > 0 && separator !== 'none' && (
+              <span
+                aria-hidden="true"
+                data-inline-separator=""
+                className={`${SEPARATOR} ${SHAPE[separator]} ${stack ? 'max-sm:hidden' : ''}`}
+                style={separatorColour ? { color: separatorColour } : undefined}
+              />
+            )}
+            {text}
+          </li>
+        )
+      })}
     </ul>
   )
 }

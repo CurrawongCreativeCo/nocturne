@@ -5,6 +5,7 @@ import type {
   ResolvedCentre,
   ResolvedDivider,
 } from '@/lib/sanity/divider-options'
+import { previewText } from '@/lib/sanity/preview-text'
 
 import { BadgeIcon } from './badge-icon'
 import { SanityImage } from './sanity-image'
@@ -98,15 +99,18 @@ function Centre({
           className={`w-auto shrink-0 object-contain ${PICTURE[size]}`}
         />
       )
-    case 'text':
+    case 'text': {
       // Real words, so they are read out (a label such as "Stay connected"); only the lines are hidden.
+      const { text, editInfo } = previewText(centre.text)
       return (
         <span
+          data-sanity={editInfo}
           className={`text-center text-balance ${TEXT[size]} ${centre.textCase === 'uppercase' ? 'tracking-[0.2em] uppercase' : 'tracking-[0.08em]'}`}
         >
-          {centre.text}
+          {text}
         </span>
       )
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import { vercelStegaCombine } from '@vercel/stega'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -11,6 +12,19 @@ const render = (props: Parameters<typeof InlineList>[0]) =>
 const separators = (html: string) => html.match(/data-inline-separator/g)?.length ?? 0
 
 describe('InlineList', () => {
+  it('keeps preview metadata out of labels and retains their click-to-edit targets', () => {
+    const metadata = {
+      origin: 'sanity.io',
+      href: '/studio/intent/edit/id=page;path=profile.categories',
+    }
+    const encoded = vercelStegaCombine('Bodywork', metadata, false)
+    const html = render({ items: [encoded, 'Movement'] })
+    expect(html).not.toContain(encoded)
+    expect(html).toContain('>Bodywork</li>')
+    expect(html).toContain('data-sanity="{&quot;origin&quot;:&quot;sanity.io&quot;')
+    expect(separators(html)).toBe(1)
+  })
+
   it('draws nothing for an empty list, so no gap is left', () => {
     expect(render({ items: [] })).toBe('')
   })
