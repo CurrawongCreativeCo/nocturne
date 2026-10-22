@@ -20,6 +20,7 @@ you start a release.
 
 ### Added
 
+- **Transparent picture frames:** approved frames can use PNG or WebP artwork, with size validation, transparency warnings, Studio thumbnails and sized WebP masks from Sanity's image CDN. Existing SVG frames and their 50 KB limit remain supported. Refresh the new `media-text-image-frame-picture` desktop/mobile baselines with **Update visual baselines**.
 - **Studio theme API findings and download comparison:** `docs/studio-theme-spike.md` records the supported API, approved UI 4 scope and UI 5 styling/font exception.
 
 ### Changed
@@ -28,6 +29,11 @@ you start a release.
 
 ### Fixed
 
+- **Lighthouse budget enforcement:** audit rules now sit inside each matrix entry's `assertions` object, with median aggregation and regression tests against the installed LHCI engine. Previously the command could exit successfully without checking any budgets. About now shares the 2500 ms LCP limit; the other thresholds and applied throttling are retained.
+- **Lighthouse engine and production CSS:** pin the CLI's Lighthouse engine to 13.5.0 for Chrome 156, using the project's Node 24 runtime. Style-guide container-frame CSS is included in development, previews and the end-to-end gallery, and omitted from live production builds, including self-hosted builds.
+- **First-paint consent and public asset downloads:** the cookie banner reveals its complete markup before hydration while saved choices keep it hidden; keyboard focus and consent gating are retained. CMS fonts no longer leak unused Newsreader preloads into public pages. Default icons include a 1.6 KB browser-tab image alongside the existing large and Apple icons; client-uploaded artwork still replaces all defaults. The footer's opening-hours clock starts when its badge first enters view, with observer and timer cleanup.
+- **Windows end-to-end startup:** isolated production builds are copied with Node's filesystem API so the test harness no longer requires Unix `rm` and `cp` commands.
+- **Lighthouse startup:** start the fake Content Lake before building, build fresh with the gallery disabled, and launch children with the current Node executable. This avoids stale preview CSS and Windows shortcuts selecting a different runtime.
 - **Studio badge contrast:** generated badge labels now reach at least 4.5:1 on their actual fill in both schemes and every card tone, including the classic and low-contrast client palettes. The adapter adjusts label lightness with a 4.6:1 margin; badge fills and semantic hues are retained. Unit regression coverage includes all preview brands. Refresh Studio brand baselines using **Update visual baselines**.
 - **Mobile featured-link check:** waits for streamed links to become visible and polls their measured heights before comparing them, avoiding a premature zero-height result while retaining the featured-size assertion.
 

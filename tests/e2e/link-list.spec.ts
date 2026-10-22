@@ -233,8 +233,7 @@ test.describe('the Link page', () => {
 
   test('opens a link with Enter', async ({ page }) => {
     await page.goto('/links')
-    await link(page, 'Read the journal').focus()
-    await page.keyboard.press('Enter')
+    await link(page, 'Read the journal').press('Enter')
     await expect(page).toHaveURL(/\/about$/)
   })
 })
@@ -244,6 +243,7 @@ test.describe('at 375 px (the Link page is made for a phone first)', () => {
 
   test('fits without sideways scrolling, with buttons easy to tap', async ({ page }) => {
     await page.goto('/links')
+    await expect(link(page, 'Gift cards')).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375)
     const boxes = await main(page)
       .locator('li[data-track-event] > a')

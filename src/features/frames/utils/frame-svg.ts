@@ -8,7 +8,7 @@ import { CUSTOM_FRAME_MAX_BYTES } from '@/lib/sanity/image-design-options'
  */
 export function checkFrameSvg(source: string, bytes: number): string | true {
   if (bytes > CUSTOM_FRAME_MAX_BYTES) {
-    return `This file is ${Math.ceil(bytes / 1024)} KB. Frames must be under ${CUSTOM_FRAME_MAX_BYTES / 1024} KB: simplify the paths and export again.`
+    return `This file is ${Math.ceil(bytes / 1024)} KB. Frames must be under ${CUSTOM_FRAME_MAX_BYTES / 1024} KB: simplify the paths and export again, or choose Picture and upload a transparent PNG or WebP.`
   }
   // Ignore the XML declaration, doctype and comments in front of the root element.
   const root = /<svg\b[^>]*>/i.exec(source.replace(/<!--[\s\S]*?-->/g, ''))

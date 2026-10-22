@@ -114,6 +114,7 @@ function BusinessDetails({
           <div className="flex flex-col gap-2">
             <h2 className="text-small font-semibold text-ink">Opening hours</h2>
             <OpenNowBadge
+              deferUntilVisible
               hours={business.openingHours}
               special={business.specialHours}
               timeZone={timeZone}

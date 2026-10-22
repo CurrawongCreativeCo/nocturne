@@ -8,6 +8,7 @@ import { closeConsent, saveConsent, useConsentState } from '@/lib/consent/consen
 
 import type { ConsentCopy } from '../types'
 import { COOKIE_SETTINGS_ID } from './cookie-settings-button'
+import { CONSENT_REVEAL_SCRIPT } from '../utils/consent-reveal'
 
 const DEFAULTS = {
   title: 'Cookies on this site',
@@ -25,17 +26,25 @@ const OUTLINED = `${BUTTON} border border-ink-inverse text-ink-inverse hover:bg-
 
 /**
  * The consent banner: a fixed, labelled region (not a modal, so the page stays usable and nothing is
- * trapped). It takes no space in the page, so showing it never shifts content. The server can't know
- * the visitor's choice, so it renders nothing and the browser shows the banner after hydration.
+ * trapped). Cached HTML contains its hidden markup; a tiny script reveals it before first paint
+ * when no choice is stored. React takes over the controls and focus after hydration.
  */
 export function ConsentBanner({ copy }: { copy?: ConsentCopy | null }) {
   const state = useConsentState()
-  if (!state || (state.consent && !state.reopened)) return null
-  return <Banner copy={copy} current={state.consent} />
+  if (state?.consent && !state.reopened) return null
+  return <Banner copy={copy} current={state?.consent ?? null} visible={state !== undefined} />
 }
 
-/** Mounted only while visible, so its choices and open panel start fresh each time. */
-function Banner({ copy, current }: { copy?: ConsentCopy | null; current: StoredConsent | null }) {
+/** Unmounted after a choice, so its controls start fresh when reopened. */
+function Banner({
+  copy,
+  current,
+  visible,
+}: {
+  copy?: ConsentCopy | null
+  current: StoredConsent | null
+  visible: boolean
+}) {
   const region = useRef<HTMLElement>(null)
   // Changing an existing choice opens straight to the detail.
   const [choosing, setChoosing] = useState(current !== null)
@@ -52,8 +61,8 @@ function Banner({ copy, current }: { copy?: ConsentCopy | null; current: StoredC
   }
 
   useEffect(() => {
-    region.current?.focus({ preventScroll: true })
-  }, [])
+    if (visible) region.current?.focus({ preventScroll: true })
+  }, [visible])
 
   // Escape dismisses a reopened banner without changing the choice. Never on a first visit: no choice, no dismissal.
   useEffect(() => {
@@ -74,6 +83,8 @@ function Banner({ copy, current }: { copy?: ConsentCopy | null; current: StoredC
       ref={region}
       aria-labelledby="consent-title"
       tabIndex={-1}
+      hidden={!visible}
+      suppressHydrationWarning
       className="fixed inset-x-0 bottom-0 z-40 max-h-[90dvh] overflow-y-auto border-t border-ink-inverse/20 bg-surface-inverse text-ink-inverse shadow-raised"
     >
       <div className="mx-auto flex max-w-content flex-col gap-5 px-gutter py-5 lg:flex-row lg:items-start lg:justify-between">
@@ -150,6 +161,7 @@ function Banner({ copy, current }: { copy?: ConsentCopy | null; current: StoredC
           </button>
         </div>
       </div>
+      <script dangerouslySetInnerHTML={{ __html: CONSENT_REVEAL_SCRIPT }} />
     </section>
   )
 }

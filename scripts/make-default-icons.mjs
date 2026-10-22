@@ -4,13 +4,14 @@
  *   node scripts/make-default-icons.mjs
  *
  * Writes src/app/icon.png (512 × 512) and src/app/apple-icon.png (180 × 180) from
- * src/assets/brand/currawong/mark-no-text.webp. Next.js file-based icons can't be WebP, so the
+ * src/assets/brand/currawong/mark-no-text.webp, plus 32/192 px variants in public/icons/.
+ * Use --sizes-only after replacing icon.png to regenerate just those variants. Next.js file-based icons can't be WebP, so the
  * result is committed. Uses sharp, which Next.js already installs; it is not a project dependency
  * and nothing here runs at build or request time. The artwork is only cropped, scaled and placed on
  * paper (#F4EFE6); it is never redrawn.
  */
 import { createHash } from 'node:crypto'
-import { writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
 import sharp from 'sharp'
@@ -19,6 +20,7 @@ const SOURCE = fileURLToPath(
   new URL('../src/assets/brand/currawong/mark-no-text.webp', import.meta.url),
 )
 const APP = fileURLToPath(new URL('../src/app/', import.meta.url))
+const SMALL = fileURLToPath(new URL('../public/icons/', import.meta.url))
 const PAPER = '#F4EFE6'
 
 // The mark's bounds in the 2000 px source (measured, ignoring the stray wordmark fragments that
@@ -72,12 +74,24 @@ async function onPaper(art, size) {
     .toBuffer()
 }
 
-const files = {
-  'icon.png': await onPaper(await square(0.88), 512),
-  'apple-icon.png': await onPaper(await square(0.72), 180),
-}
+const files = process.argv.includes('--sizes-only')
+  ? {}
+  : {
+      'icon.png': await onPaper(await square(0.88), 512),
+      'apple-icon.png': await onPaper(await square(0.72), 180),
+    }
 for (const [name, data] of Object.entries(files)) {
   await writeFile(`${APP}${name}`, data)
   console.log(`src/app/${name}  sha256 ${createHash('sha256').update(data).digest('hex')}`)
+}
+// Resize the committed Android icon so a client's replacement is kept with --sizes-only.
+const icon = files['icon.png'] ?? (await readFile(`${APP}icon.png`))
+await mkdir(SMALL, { recursive: true })
+for (const size of [32, 192]) {
+  const data = await sharp(icon).resize(size, size).png().toBuffer()
+  await writeFile(`${SMALL}icon-${size}.png`, data)
+  console.log(
+    `public/icons/icon-${size}.png  sha256 ${createHash('sha256').update(data).digest('hex')}`,
+  )
 }
 console.log('Update DEFAULT_ICON_SHA256 in scripts/launch-check/leftovers.mjs with these hashes.')

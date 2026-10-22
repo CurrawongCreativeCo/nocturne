@@ -101,7 +101,7 @@ export default defineConfig({
       // The same build with enquiry storage off, to show a send then writes nothing. Playwright starts
       // the servers in order, so the build above has finished by now. It runs from its own copy: two
       // servers sharing one .next directory broke each other's pages.
-      command: `rm -rf ${OFF_DIST_DIR} && mkdir -p node_modules/.cache && cp -R .next ${OFF_DIST_DIR} && npx next start -p ${APP_PORT_ENQUIRIES_OFF}`,
+      command: `node scripts/e2e-copy-build.mjs enquiries-off && npx next start -p ${APP_PORT_ENQUIRIES_OFF}`,
       port: APP_PORT_ENQUIRIES_OFF,
       timeout: 120_000,
       reuseExistingServer: !CI,
@@ -115,7 +115,7 @@ export default defineConfig({
     {
       // The same build, started pre-launch by the hide-only override, to test the gate (README,
       // "Pre-launch and launch"). Its own copy of the build, for the reason above.
-      command: `rm -rf ${PRELAUNCH_DIST_DIR} && mkdir -p node_modules/.cache && cp -R .next ${PRELAUNCH_DIST_DIR} && npx next start -p ${APP_PORT_PRELAUNCH}`,
+      command: `node scripts/e2e-copy-build.mjs prelaunch && npx next start -p ${APP_PORT_PRELAUNCH}`,
       port: APP_PORT_PRELAUNCH,
       timeout: 120_000,
       reuseExistingServer: !CI,

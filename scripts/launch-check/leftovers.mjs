@@ -14,10 +14,12 @@ export const TEMPLATE_ICON_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><!-- Placeholder: replace with your logo mark. --><rect width="32" height="32" rx="7" fill="#4f46e5"/><circle cx="16" cy="16" r="7" fill="#fff"/></svg>'
 
 /**
- * SHA-256 of Currawong's default src/app/icon.png and apple-icon.png. A site still serving either
+ * SHA-256 of Currawong's default PNG icons, including the small tab variants. A site serving any
  * byte for byte has not set its own icon. `node scripts/make-default-icons.mjs` prints these.
  */
 export const DEFAULT_ICON_SHA256 = [
+  '0c6e74abed8496921144006f59201dd61e03ccb95af67cae5f6451a20ead8200',
+  'a85957952ec1ea03085a4653123a09656a26085edbe3ef77164a97d661e24325',
   'a0a23f975365fe17e43eee9f7da32135ec035a86111a14dc3e7e4990096c019d',
   '34f5f51f6777f1e90ab5d84763898832d3829be5046ef35e68a0770f31cf87c2',
 ]

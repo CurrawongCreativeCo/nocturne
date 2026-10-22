@@ -35,7 +35,7 @@ export const decorativeDividerFields = /* groq */ `
 
 /**
  * A section's `imageDesign` (schema: lib/sanity/schema/image-design.ts): project it as
- * `imageDesign { ${imageDesignFields} }`. The approved custom frame is resolved to its SVG's CDN URL
+ * `imageDesign { ${imageDesignFields} }`. The approved custom frame is resolved to its artwork's CDN URL
  * here, so a page needs no second request (it is tagged `frame`, so editing a frame expires the pages).
  */
 export const imageDesignFields = /* groq */ `
@@ -48,7 +48,7 @@ export const imageDesignFields = /* groq */ `
   frame,
   frameColour,
   frameInset,
-  "customFrameUrl": customFrame->svg.asset->url
+  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url
 `
 
 /**

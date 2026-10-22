@@ -9,8 +9,8 @@
  *     viewport no longer decides the layout. The frame sets `--sg-frame: 1`; it inherits to
  *     everything in it, and nothing outside a frame has it, so the rest of the site is unchanged.
  *
- * It runs on every build except Vercel production (see postcss.config.mjs): visitors to the live
- * site never receive the extra rules, and the style guide is a 404 there anyway.
+ * It runs only where the style guide can be opened (development, preview and E2E_GALLERY builds).
+ * Live production builds, including self-hosted ones, leave out these extra rules.
  */
 
 /** `(width >= 48rem)`, `(min-width: 48rem)`, `(width < 40rem)`: a single width condition, nothing else. */
@@ -19,6 +19,10 @@ const WIDTH_CONDITION =
 
 export const FRAME_CONTAINER = 'styleguide'
 export const FRAME_PROPERTY = '--sg-frame'
+
+/** Match the environments where the style guide can be available (src/lib/styleguide-access.ts). */
+export const includeContainerFrames = (env) =>
+  env.NODE_ENV === 'development' || env.E2E_GALLERY === '1' || env.VERCEL_ENV === 'preview'
 
 /**
  * `include` limits the plugin to stylesheets whose path matches it (the site's own, not Studio's

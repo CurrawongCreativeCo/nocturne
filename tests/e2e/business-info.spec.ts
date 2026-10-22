@@ -46,10 +46,19 @@ test.describe('business info', () => {
   test('the "Open now" badge follows the business time zone, not the browser', async ({ page }) => {
     await page.clock.setFixedTime(FRIDAY_MORNING)
     await page.goto('/')
+    const badge = page
+      .getByRole('heading', { name: 'Opening hours' })
+      .locator('..')
+      .locator('p')
+      .first()
+    await expect(badge).not.toBeInViewport()
+    await expect(badge).toBeEmpty()
+    await badge.scrollIntoViewIfNeeded()
     await expect(page.getByText('Open now · closes 5:30 pm')).toBeVisible()
 
     await page.clock.setFixedTime(SUNDAY)
     await page.goto('/')
+    await badge.scrollIntoViewIfNeeded()
     await expect(page.getByText('Closed now')).toBeVisible()
   })
 

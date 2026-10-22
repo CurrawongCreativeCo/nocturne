@@ -58,11 +58,14 @@ test.describe('default icon', () => {
   test('links the Currawong icon files, once each', async ({ page }) => {
     await page.goto('/')
     const links = await iconLinks(page)
-    expect(links.filter((link) => link.rel === 'icon').map((link) => link.href)).toHaveLength(1)
-    const icon = links.find((link) => link.rel === 'icon')
-    expect(new URL(icon?.href ?? '', 'http://x').pathname).toBe('/icon.png')
-    expect(icon?.sizes).toBe('512x512')
-    expect(icon?.type).toBe('image/png')
+    const icons = links.filter((link) => link.rel === 'icon')
+    expect(
+      icons.map((link) => [new URL(link.href, 'http://x').pathname, link.sizes, link.type]),
+    ).toEqual([
+      ['/icons/icon-32.png', '32x32', 'image/png'],
+      ['/icons/icon-192.png', '192x192', 'image/png'],
+      ['/icon.png', '512x512', 'image/png'],
+    ])
     const apple = links.filter((link) => link.rel === 'apple-touch-icon')
     expect(apple).toHaveLength(1)
     expect(new URL(apple[0]?.href ?? '', 'http://x').pathname).toBe('/apple-icon.png')
@@ -71,10 +74,17 @@ test.describe('default icon', () => {
   })
 
   test('serves the files as PNGs, and no longer the purple placeholder', async ({ request }) => {
-    for (const path of ['/icon.png', '/apple-icon.png']) {
+    for (const path of [
+      '/icons/icon-32.png',
+      '/icons/icon-192.png',
+      '/icon.png',
+      '/apple-icon.png',
+    ]) {
       const response = await request.get(path)
       expect(response.status()).toBe(200)
       expect(response.headers()['content-type']).toBe('image/png')
+      if (path === '/icons/icon-32.png')
+        expect((await response.body()).byteLength).toBeLessThan(5000)
     }
     expect((await request.get('/icon.svg')).status()).toBe(404)
   })

@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 
 import { expect, test, type Page } from '@playwright/test'
 
@@ -42,6 +42,14 @@ test.beforeEach(async ({ page }) => {
   // An approved custom frame is a mask: serve an outline, not the placeholder, which would cover the picture.
   await page.route('https://cdn.sanity.io/files/**/*.svg', (route) =>
     route.fulfill({ contentType: 'image/svg+xml', body: FRAME_FILE }),
+  )
+  await page.route(
+    'https://cdn.sanity.io/images/**/cccccccccccccccccccccccccccccccccccccccc-*',
+    (route) =>
+      route.fulfill({
+        contentType: 'image/webp',
+        body: readFileSync('tests/e2e/fixtures/frame-picture.webp'),
+      }),
   )
   await page.goto(GALLERY)
   await settle(page)

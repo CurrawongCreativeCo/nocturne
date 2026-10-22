@@ -1,11 +1,23 @@
 import postcss from 'postcss'
 import { describe, expect, it } from 'vitest'
 
-import containerFrames from './postcss-container-frames.mjs'
+import containerFrames, { includeContainerFrames } from './postcss-container-frames.mjs'
 
 const run = async (css) =>
   (await postcss([containerFrames()]).process(css, { from: undefined })).css
 const squash = (css) => css.replace(/\s+/g, ' ').trim()
+
+describe('style guide CSS availability', () => {
+  it.each([
+    [{ NODE_ENV: 'production' }, false],
+    [{ NODE_ENV: 'production', VERCEL_ENV: 'production' }, false],
+    [{ NODE_ENV: 'development' }, true],
+    [{ NODE_ENV: 'production', VERCEL_ENV: 'preview' }, true],
+    [{ NODE_ENV: 'production', E2E_GALLERY: '1' }, true],
+  ])('includes frame rules for %j: %s', (env, expected) => {
+    expect(includeContainerFrames(env)).toBe(expected)
+  })
+})
 
 describe('postcss-container-frames', () => {
   it('copies a nested width query onto the frame container and switches the original off in frames', async () => {

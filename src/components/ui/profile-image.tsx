@@ -39,7 +39,7 @@ const SHAPE_RADIUS: Record<ProfileImageShape, string> = {
  * - A ring is one decorative layer (`.image-ring` in globals.css): a solid colour or a gradient,
  *   masked to a band, with a see-through gap so it works over a photo or glass. The wrapper pads by
  *   the ring's width and gap, so the ring never overlaps the picture or the text below.
- * - A frame is an approved SVG (Design > Image frames) masked in a theme colour, as Image design
+ * - A frame is approved artwork (Design > Image frames) masked in a theme colour, as Image design
  *   draws it. The picture shrinks inside the size's box to make room, so the layout doesn't move.
  *
  * Renders nothing without an asset, so a missing picture leaves no empty circle.
@@ -98,6 +98,7 @@ export function ProfileImage({
         <ImageFrame
           frame={{ kind: 'custom', url: border.url, colour: 'accent', inset: 0 }}
           colour={colour}
+          width={request}
         />
       </span>
     )
