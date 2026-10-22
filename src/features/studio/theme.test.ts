@@ -24,6 +24,16 @@ describe('Studio UI 4 theme', () => {
         expect(card.button.default.primary.enabled.fg).toBe(roles.onAccent)
         expect(card.accent.fg).toBe(roles.accentText)
       })
+      it(`${id} ${scheme} keeps every badge label readable on each card tone`, () => {
+        for (const [cardTone, themedCard] of Object.entries(theme.v2?.color[scheme] ?? {})) {
+          for (const [badgeTone, badge] of Object.entries(themedCard.badge)) {
+            expect(
+              contrastRatio(badge.fg, badge.bg),
+              `${cardTone} card, ${badgeTone} badge: ${badge.fg} on ${badge.bg}`,
+            ).toBeGreaterThanOrEqual(4.5)
+          }
+        }
+      })
       it(`${id} ${scheme} keeps labels and focus readable on controls and selected states`, () => {
         expect(contrastRatio(card.focusRing, card.bg)).toBeGreaterThanOrEqual(3)
         expect(contrastRatio(card.muted.fg, card.bg)).toBeGreaterThanOrEqual(4.5)

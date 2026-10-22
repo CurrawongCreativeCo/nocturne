@@ -28,6 +28,9 @@ you start a release.
 
 ### Fixed
 
+- **Studio badge contrast:** generated badge labels now reach at least 4.5:1 on their actual fill in both schemes and every card tone, including the classic and low-contrast client palettes. The adapter adjusts label lightness with a 4.6:1 margin; badge fills and semantic hues are retained. Unit regression coverage includes all preview brands. Refresh Studio brand baselines using **Update visual baselines**.
+- **Mobile featured-link check:** waits for streamed links to become visible and polls their measured heights before comparing them, avoiding a premature zero-height result while retaining the featured-size assertion.
+
 ### Breaking changes / migration steps
 
 ## [1.7.1] - 2026-10-21

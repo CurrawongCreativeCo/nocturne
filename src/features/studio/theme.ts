@@ -57,6 +57,10 @@ function applyRoles(card: ThemeColorCard_v2, roles: StudioBrandRoles, neutral: b
       state.placeholder = adjustLightnessForContrast(card.muted.fg, roles.surface, 4.6).hex
     }
   }
+  // Generated badge colours can miss AA after blending onto a branded background.
+  for (const badge of Object.values(card.badge)) {
+    badge.fg = adjustLightnessForContrast(badge.fg, badge.bg, 4.6).hex
+  }
   card.focusRing = roles.focus
   const neutralFill = adjustLightnessForContrast(
     mix(0.65, roles.text, roles.background),

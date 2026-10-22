@@ -175,12 +175,25 @@ test.describe('the Link page', () => {
 
   test('shows one link large: the featured one', async ({ page }) => {
     await page.goto('/links')
-    const heights = await Promise.all(
-      ['Book a consultation', 'Read the journal'].map(
-        async (name) => (await link(page, name).boundingBox())?.height ?? 0,
-      ),
-    )
-    expect(heights[0]).toBeGreaterThan(heights[1] ?? Infinity)
+    const featured = link(page, 'Book a consultation')
+    const ordinary = link(page, 'Read the journal')
+    // The scheduled list streams in; DOM presence does not mean its links have been laid out yet.
+    await expect(featured).toBeVisible()
+    await expect(ordinary).toBeVisible()
+    await expect
+      .poll(
+        async () => {
+          const [large, normal] = await Promise.all([
+            featured.boundingBox(),
+            ordinary.boundingBox(),
+          ])
+          return (
+            large !== null && normal !== null && normal.height > 0 && large.height > normal.height
+          )
+        },
+        { message: 'The featured link should be taller than a visible ordinary link' },
+      )
+      .toBe(true)
   })
 
   test('is reached by keyboard: social icons, then the links in order, each with a visible focus', async ({
