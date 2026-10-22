@@ -137,7 +137,7 @@ export function DecorativeDivider({
     style === 'dots'
       ? 'w-fit gap-2'
       : centre
-        ? `gap-3 ${width === 'full' ? 'w-full' : 'w-fit'}`
+        ? `gap-3 ${width === 'full' ? 'w-full' : 'w-max'}`
         : RULE_WIDTH[width],
     block,
     className,
@@ -157,9 +157,9 @@ export function DecorativeDivider({
       ) : centre ? (
         <>
           <Line divider={divider} side="start" className={SIDE_WIDTH[width]} />
-          {/* Keeps its one-line width while the lines can give way; wraps only if the row is too narrow. */}
+          {/* Reserve the two minimum 1rem lines and two 0.75rem gaps; shrink lines before words. */}
           <span
-            className="flex min-w-0 items-center justify-center"
+            className="flex max-w-[calc(100%-3.5rem)] min-w-0 shrink-0 items-center justify-center"
             style={divider.centreColour ? { color: divider.centreColour } : undefined}
           >
             <Centre centre={centre} size={divider.centreSize} thickness={divider.thickness} />

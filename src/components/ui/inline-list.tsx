@@ -65,7 +65,8 @@ export interface InlineListProps {
  * edge, so its separator lands outside and is clipped; no separator is ever drawn after a label. For
  * that, every line must start at the edge: start-aligned lines do, and centred lines grow their
  * labels to fill the line (each label centred in its share), while a list that fits on one line is
- * only as wide as its labels (`w-fit`), so nothing spreads out. Long labels wrap inside themselves.
+ * only as wide as its labels (`w-max`, capped at the available width), so nothing spreads out.
+ * Long labels wrap inside themselves.
  * "One per line" stacks the labels below 640 px and hides the separators there.
  */
 export function InlineList({
@@ -95,7 +96,7 @@ export function InlineList({
       data-inline-list={separator}
       data-phone-layout={phoneLayout}
       className={[
-        'flex w-fit max-w-full flex-wrap gap-x-(--inline-list-gap) gap-y-1 overflow-hidden',
+        'flex w-max max-w-full flex-wrap gap-x-(--inline-list-gap) gap-y-1 overflow-hidden',
         stack && (centred ? 'max-sm:flex-col max-sm:items-center' : 'max-sm:flex-col'),
         SIZE[size],
         WEIGHT[weight],
