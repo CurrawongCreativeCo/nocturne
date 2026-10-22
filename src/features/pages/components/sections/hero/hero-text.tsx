@@ -3,11 +3,14 @@ import { Suspense, type ReactNode } from 'react'
 import { MotionDiv, MotionP, MotionSpan } from '@/components/motion/motion-elements'
 import { partProps, type PartPlan } from '@/components/motion/part-motion'
 import { CtaGroup } from '@/components/ui/cta-link'
+import { InlineList } from '@/components/ui/inline-list'
 import { PARAGRAPH_GAP, PlainLines } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { ctaSurfaceFor, type SectionTone } from '@/components/ui/section-style'
+import { resolveHeroEyebrowDesign } from '@/features/pages/utils/hero-eyebrow'
 import type { HeroPart } from '@/features/pages/utils/hero-parts'
 import { plainTextParagraphs } from '@/lib/plain-text'
+import { inlineListItems } from '@/lib/sanity/inline-list-options'
 
 import type { SectionProps } from '../../../types'
 
@@ -47,6 +50,9 @@ export function HeroText({
   slot,
 }: Props) {
   const { eyebrow, title, heading, headingPlain, description, ctas, showGreeting } = data
+  const labels = inlineListItems(data.eyebrowLabels)
+  const { textColour, ...eyebrowLook } = resolveHeroEyebrowDesign(data.eyebrowDesign)
+  const hasEyebrow = labels.length > 0 || Boolean(eyebrow)
   // One <h1> per page: a hero further down the page is a section heading.
   const Heading = isFirst ? 'h1' : 'h2'
 
@@ -55,7 +61,7 @@ export function HeroText({
       as={Heading}
       blocks={heading}
       fallback={title ?? headingPlain}
-      className={eyebrow ? `mt-2 ${headingClassName}` : headingClassName}
+      className={hasEyebrow ? `mt-2 ${headingClassName}` : headingClassName}
     />
   )
   const headingMotion = partProps(parts.heading)
@@ -66,7 +72,18 @@ export function HeroText({
 
   return (
     <>
-      {eyebrow && (
+      {labels.length > 0 ? (
+        <MotionDiv {...eyebrowMotion} className="text-accent-text">
+          <InlineList
+            items={labels}
+            {...eyebrowLook}
+            colour={textColour}
+            align={block === 'mx-auto' ? 'center' : 'start'}
+            label="Eyebrow labels"
+            className={block}
+          />
+        </MotionDiv>
+      ) : eyebrow ? (
         <p className="text-small font-semibold tracking-wide text-accent-text uppercase">
           {eyebrowMotion ? (
             <MotionSpan {...eyebrowMotion} className="inline-block">
@@ -76,7 +93,7 @@ export function HeroText({
             eyebrow
           )}
         </p>
-      )}
+      ) : null}
       {/* `heading` first; `title` is the old plain string, still read until the content migration has run. */}
       {headingMotion ? <MotionDiv {...headingMotion}>{richHeading}</MotionDiv> : richHeading}
       {/* Request-time (cookie) content: the page stays prerendered around this boundary. */}

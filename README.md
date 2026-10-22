@@ -3335,6 +3335,25 @@ link, so there is one Tab stop per row, and every row is at least 44 px tall.
 - **Icons.** The shared set gained Care, Sun, Community, Person, Location, Email, Calendar and Phone, so badge rows
   (the hero slot) offer them too. A new one is a line in `BADGE_ICONS` and a drawing in `badge-icon.tsx`.
 
+**Where inline lists are offered.** Link list → Profile → _Service categories_, and Hero → _Eyebrow labels_.
+These are explicit arrays of short labels; ordinary text is never split at punctuation. Add them one section at a
+time when a client asks. Event categories remain references with their existing pill/link treatment; the footer’s
+copyright text and team members’ role text remain prose. There is no separate footer or team tagline field today.
+
+**Hero eyebrow labels.** Optional, beside the existing _Eyebrow_ text: add one label per item (Yoga, Pilates, Barre),
+then drag to reorder. Non-empty labels replace the text above the heading; removing them brings the original text
+back. Empty arrays keep the old rendering, with no migration. Labels share the eyebrow’s 40-character warning,
+with a warning past six items and no duplicate labels. The default is small, bold capitals with Primary bullets,
+wrapping naturally on phones. Design → _Eyebrow labels_ (agency only, shown when labels exist) offers separator
+thumbnails: Bullet, Middle dot, Line, Diamond and None. Its collapsed _Advanced_ area has separate label and separator
+colours; separator colour disappears for None. The hero owns the size and alignment. Labels also follow its eyebrow
+part animation. Hidden Studio controls are UI guidance, not permissions.
+
+Developers: `eyebrowLabels` and `eyebrowDesign` live on the hero, projected in its existing query fragment. The
+shared server component emits a named list with decorative separators, adding no browser JavaScript or Sanity reads.
+Existing gallery entries and baselines stay unchanged; refresh only the new `hero-eyebrow-labels` and
+`hero-eyebrow-labels-start` desktop/mobile baselines using **Update visual baselines** on Linux.
+
 **Service categories.** _Content › Profile › Service categories_ is a list of short words for what the business offers
 (Bodywork, Breathwork, Movement, Retreats), one per line, using Sanity's own list: **Add item**, type, drag to reorder, and
 the menu on a line to remove it. The page draws them in one row under the name, with a separator between each two:

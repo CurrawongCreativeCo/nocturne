@@ -29,6 +29,12 @@ export const heroFragment = /* groq */ `
     style { ${sectionStyleFields} },
     variant,
     eyebrow,
+    eyebrowLabels,
+    eyebrowDesign {
+      separator,
+      textColour { colour, hex },
+      separatorColour { colour, hex }
+    },
     title,
     heading,
     "headingPlain": pt::text(heading),

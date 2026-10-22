@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Hero eyebrow labels:** optional short labels reuse `InlineList`, with separator thumbnails and collapsed agency-only colour controls. Existing eyebrow text remains the fallback; no migration or extra Sanity requests. Refresh the new `hero-eyebrow-labels` and `hero-eyebrow-labels-start` desktop/mobile baselines using **Update visual baselines**.
+
 - **Transparent picture frames:** approved frames can use PNG or WebP artwork, with size validation, transparency warnings, Studio thumbnails and sized WebP masks from Sanity's image CDN. Existing SVG frames and their 50 KB limit remain supported. Refresh the new `media-text-image-frame-picture` desktop/mobile baselines with **Update visual baselines**.
 - **Studio theme API findings and download comparison:** `docs/studio-theme-spike.md` records the supported API, approved UI 4 scope and UI 5 styling/font exception.
 
