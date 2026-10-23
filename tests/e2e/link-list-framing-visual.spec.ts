@@ -20,9 +20,15 @@ async function open(page: Page, width: number) {
   await page.setViewportSize({ width, height: 900 })
   await page.goto('/link-framing')
   await expect(page.locator('#main-content li[data-track-event]').first()).toBeVisible()
-  // Pictures decode before the shot, so a late one can't change the page's height.
+  // Pictures decode before the shot, so a late one can't change the page's height. Lazy ones below
+  // the fold never load (and `decode()` never settles) until they are near, so load them all now.
   await page.evaluate(() =>
-    Promise.all([...document.images].map((image) => image.decode().catch(() => undefined))),
+    Promise.all(
+      [...document.images].map((image) => {
+        image.loading = 'eager'
+        return image.decode().catch(() => undefined)
+      }),
+    ),
   )
 }
 
