@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react'
 
+import { SHAPE_CLASSES, SHAPE_FILL } from './shape-classes'
+
 import type {
   InlineCase,
   InlineGap,
@@ -30,13 +32,12 @@ const GAP: Record<InlineGap, string> = { compact: '0.9em', comfortable: '1.4em',
  * before its label. Forced-colours mode drops backgrounds, so it falls back to the system text colour.
  */
 const SHAPE: Record<Exclude<InlineSeparator, 'none'>, string> = {
-  bullet: 'size-[0.32em] rounded-full',
-  dot: 'size-[0.18em] rounded-full',
-  line: 'h-[0.9em] w-px',
-  diamond: 'size-[0.32em] rotate-45',
+  bullet: `size-[0.32em] ${SHAPE_CLASSES.dot}`,
+  dot: `size-[0.18em] ${SHAPE_CLASSES.dot}`,
+  line: `h-[0.9em] ${SHAPE_CLASSES.verticalLine}`,
+  diamond: `size-[0.32em] ${SHAPE_CLASSES.diamond}`,
 }
-const SEPARATOR =
-  'pointer-events-none absolute start-[calc(var(--inline-list-gap)/-2)] top-1/2 -translate-x-1/2 -translate-y-1/2 bg-current forced-colors:bg-[CanvasText]'
+const SEPARATOR = `pointer-events-none absolute start-[calc(var(--inline-list-gap)/-2)] top-1/2 -translate-x-1/2 -translate-y-1/2 ${SHAPE_FILL}`
 
 export interface InlineListProps {
   items: readonly string[]

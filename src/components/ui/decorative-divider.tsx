@@ -9,6 +9,7 @@ import { previewText } from '@/lib/sanity/preview-text'
 
 import { BadgeIcon } from './badge-icon'
 import { SanityImage } from './sanity-image'
+import { SHAPE_CLASSES, SHAPE_FILL } from './shape-classes'
 
 // Full class names, so Tailwind's scanner sees them.
 /** Length of the whole divider when it is a plain rule. */
@@ -25,7 +26,10 @@ const SIDE_WIDTH: Record<DividerWidth, string> = {
   long: 'w-28',
   full: 'flex-1',
 }
-const THICKNESS: Record<DividerThickness, string> = { thin: 'h-px', bold: 'h-0.5' }
+const THICKNESS: Record<DividerThickness, string> = {
+  thin: SHAPE_CLASSES.horizontalLine,
+  bold: 'h-0.5',
+}
 const ICON: Record<DividerCentreSize, string> = {
   small: 'size-4',
   medium: 'size-6',
@@ -38,7 +42,7 @@ const TEXT: Record<DividerCentreSize, string> = {
   large: 'text-lead',
 }
 // Forced-colours mode drops backgrounds, so the shapes fall back to the system text colour.
-const FILL = 'bg-current forced-colors:bg-[CanvasText]'
+const FILL = SHAPE_FILL
 
 /** One line: even, or fading towards its outer end (`side`), or towards both ends when it stands alone. */
 function Line({
@@ -80,7 +84,7 @@ function Centre({
       return (
         <span
           aria-hidden="true"
-          className={`block shrink-0 rotate-45 ${thickness === 'bold' ? 'size-2' : 'size-1.5'} ${FILL}`}
+          className={`block shrink-0 ${SHAPE_CLASSES.diamond} ${thickness === 'bold' ? 'size-2' : 'size-1.5'} ${FILL}`}
         />
       )
     case 'icon':
@@ -157,7 +161,9 @@ export function DecorativeDivider({
       style={divider.lineColour ? { color: divider.lineColour } : undefined}
     >
       {style === 'dots' ? (
-        [0, 1, 2].map((dot) => <span key={dot} className={`block size-1 rounded-full ${FILL}`} />)
+        [0, 1, 2].map((dot) => (
+          <span key={dot} className={`block size-1 ${SHAPE_CLASSES.dot} ${FILL}`} />
+        ))
       ) : centre ? (
         <>
           <Line divider={divider} side="start" className={SIDE_WIDTH[width]} />
