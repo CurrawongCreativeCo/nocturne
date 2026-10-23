@@ -265,6 +265,18 @@ test.describe('Screenshots', () => {
     }
   }
 
+  for (const scheme of SCHEMES) {
+    test(`Design inputs, ${scheme}`, async ({ page, isMobile }) => {
+      test.skip(isMobile, 'Desktop only')
+      await openPreview(page)
+      const examples = page.locator(`[data-design-input-scheme="${scheme}"]`)
+      await page.evaluate(() => document.fonts.ready)
+      await expect(examples).toHaveScreenshot(`studio-brand-design-inputs-${scheme}.png`)
+      await examples.getByRole('button', { name: 'Change Icon', exact: true }).click()
+      await expect(examples).toHaveScreenshot(`studio-brand-design-inputs-icons-${scheme}.png`)
+    })
+  }
+
   // The preset picker examples: the grid, the collapsed row and the preset bar, light and dark.
   for (const scheme of SCHEMES) {
     test(`Preset picker, ${scheme}`, async ({ page, isMobile }) => {
