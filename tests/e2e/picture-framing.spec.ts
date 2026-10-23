@@ -6,8 +6,8 @@ import { test } from './fixtures/test'
 /**
  * "Adjust picture" (src/features/studio/components/picture-framing), tested through
  * /studio-brand-preview because Studio needs a login. The examples there hold their own values in
- * memory, so Apply and Reset can be checked without a Content Lake. Screenshots are Linux-only,
- * like visual.spec.ts, and are refreshed by the "Update visual baselines" workflow.
+ * memory, so Apply and Reset can be checked without a Content Lake. The screenshots are in
+ * picture-framing-visual.spec.ts, so the "Update visual baselines" workflow finds them.
  */
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const SCHEMES = ['light', 'dark'] as const
@@ -166,22 +166,3 @@ for (const scheme of SCHEMES) {
     }
   })
 }
-
-test.describe('screenshots', () => {
-  test.skip(
-    process.platform !== 'linux' && !process.env.E2E_VISUAL_ANY_OS,
-    'Visual baselines are Linux-only; refresh them with the "Update visual baselines" workflow',
-  )
-  test.skip(({ isMobile }) => isMobile, 'Sized explicitly below')
-
-  for (const scheme of SCHEMES) {
-    for (const width of [390, 1280]) {
-      test(`the dialog at ${width}px, ${scheme}`, async ({ page }) => {
-        await page.setViewportSize({ width, height: width === 390 ? 844 : 900 })
-        await openPreview(page)
-        const dialog = await openDialog(page, scheme, 'circle')
-        await expect(dialog).toHaveScreenshot(`picture-framing-${scheme}-${width}.png`)
-      })
-    }
-  }
-})
