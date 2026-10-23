@@ -104,3 +104,23 @@ Follow-up local validation under Node 24.22.1:
 - `npm run test:lighthouse` with Playwright Chromium: all 16 assertions passed under Lighthouse 13.5.0 / Chrome 156. Home/About/hero/links median performance was **0.99 / 0.99 / 0.99 / 0.99**, LCP **1725 / 1651 / 1701 / 1658 ms**, and CLS **0 / 0 / 0 / 0.018774**. No budgets, throttling, content or public queries changed.
 
 Rerun Linux CI with these changes. If About still fails, inspect its retained `lcp-breakdown-insight` and browser version before proposing further performance changes.
+
+### 23 October: confirmed Linux rendering causes
+
+The retained Lighthouse reports from [CI run 39885870342](https://github.com/CurrawongCreativeCo/nocturne/actions/runs/39885870342)
+on `d9775be` identify both remaining causes under Chrome 156:
+
+- Home: `layout-shifts` attributes **0.056183 CLS** to the Features section moving when the public
+  Inter WOFF2 loads. The font swap changes wrapping above that section.
+- About: `lcp-breakdown-insight` identifies the first Process step's paragraph,
+  “We learn about your business and your customers.”, at **4003 ms**. The paragraph's ancestor
+  starts hidden for the step's reveal, so rendering waits for hydration and animation even though
+  this second section is already in the initial viewport.
+
+The public font now uses `display: 'optional'`, retaining preloading and metric-adjusted fallbacks
+while preventing a late swap on slow first visits. The first Process step stays visible in server
+HTML; later steps keep their existing reveals. No budget, throttling, fixture content or consent
+behaviour was changed.
+
+Tests and Lighthouse were **not run**, as requested by the owner. These are fixes based on the
+saved failing reports, not a claim of a passing rerun. Rerun Linux CI to verify the resulting metrics.

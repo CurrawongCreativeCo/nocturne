@@ -270,6 +270,11 @@ appears in its header beside the CMS brand's logo or mark (see [CMS branding](#c
 with `next/font` in `src/app/layout.tsx` (Inter by default). The browser icon is Currawong's until a site sets its
 own (see [Browser icon](#browser-icon-favicon)). The generated share image has its own copy of the font (Inter Bold, `src/assets/fonts/`), because `next/og` can't use `next/font`.
 
+The public font is preloaded with `display: 'optional'`: if it misses the browser's brief initial
+font-loading window, that navigation keeps the fallback rather than changing line wraps after paint.
+The downloaded font remains cached for later navigations. Keep this setting when changing the font;
+metric-adjusted local fallbacks alone cannot prevent shifts on systems where that local font is absent.
+
 ### Browser icon (favicon)
 
 The small picture in browser tabs, bookmarks, search results and on phone home screens.
@@ -3214,8 +3219,8 @@ is. Each step has a **title**, an optional short **label** above it ("Week 1"), 
 **icon or image** (decorative; the title says what it means). A section holds two to ten steps, in the order the page
 reads; Studio warns when text is too long and never blocks publishing. The agency-only **Layout** is _Vertical_ (one
 line down the left, every step beside it) or _Alternating_ (from tablet width the line runs down the middle and steps
-fall to the left and right in turn; phones always see the vertical layout). The steps appear one after another as they
-scroll into view (the _Stagger_ animation); set the Design tab's **Animation** to _None_ and they are simply there. The
+fall to the left and right in turn; phones always see the vertical layout). The first step is visible immediately;
+later steps appear as they scroll into view (the _Stagger_ animation). Set the Design tab's **Animation** to _None_ and they are simply there. The
 line fills as the page scrolls either way.
 
 **For developers.**
@@ -3236,7 +3241,7 @@ line fills as the page scrolls either way.
 - **No JavaScript or reduced motion:** the scale is attached only after hydration and never under
   `prefers-reduced-motion`, so the server HTML, visitors without JavaScript and visitors who ask for less motion all see
   the line fully drawn. Steps carry `data-reveal`, which `globals.css` forces visible in both cases.
-- **Steps reveal** with the section's animation preset (`stagger` by default, so `DEFAULTS.motion` is `'stagger'` in
+- **Later steps reveal** with the section's animation preset (`stagger` by default, so `DEFAULTS.motion` is `'stagger'` in
   `process-layout.tsx` and the schema's initial style). The section resolves it with `sectionMotion` and each step plays
   its child variant as it arrives, rather than the whole list waiting for its top to enter, which on a tall list would
   reveal steps before they are on screen. The `SectionFrame` itself is given `motion: 'none'` so nothing animates twice.

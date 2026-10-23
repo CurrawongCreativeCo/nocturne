@@ -13,10 +13,11 @@ export const metadata: Metadata = {
 
 /**
  * Brand font: self-hosted at build time by next/font (no request to Google from visitors),
- * with size-adjusted fallbacks so text doesn't shift when it loads. To change it, swap
+ * with size-adjusted fallbacks. Optional display prevents a late swap from changing line wraps
+ * on slow first visits, including systems without the metric-adjusted local fallback. To change it, swap
  * `Inter` for any Google font (or `next/font/local`) and keep `variable: '--font-inter'`.
  */
-const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'], display: 'optional', variable: '--font-inter' })
 
 /** Bare document shell shared by the site and the embedded Studio. */
 export default function RootLayout({ children }: LayoutProps<'/'>) {
