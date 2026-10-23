@@ -4715,3 +4715,7 @@ a disposable project and saved sign-in.
 
 When finished, revoke the throwaway tokens and remove the disposable project through Sanity Manage.
 No public sections or visual baselines are changed by this harness.
+
+The standalone `npm run typecheck` disables TypeScript incremental caching so a stale
+`tsconfig.tsbuildinfo` cannot hide diagnostics. Build info is already gitignored; CI must not
+restore it as a typecheck cache. Next.js may still use its own incremental build cache.
