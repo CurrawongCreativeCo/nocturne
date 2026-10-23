@@ -1,14 +1,10 @@
 import { Badge, Button, Flex, Stack, Text } from '@sanity/ui'
 import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 
-import {
-  cardLabelHex,
-  cardTextContrast,
-  layeredCardSurface,
-  type StoredCardSurface,
-} from '@/lib/color/card-contrast'
+import { cardSurface, type StoredCardSurface } from '@/lib/color/card-contrast'
 import { glassRowsStrength } from '@/lib/color/glass-contrast'
 import type { ColourSet } from '@/lib/color/heading-contrast'
+import { surfaceColourCheck } from '@/lib/color/surface-contrast'
 import { themeColourContrast, themeColourHex } from '@/lib/color/theme-colour-contrast'
 import { headingTone } from '@/lib/sanity/heading-text'
 import { itemPathOf, sectionPathOf } from '@/lib/sanity/schema/theme-colour'
@@ -84,62 +80,6 @@ function Swatch({
 }
 
 /**
- * The check for a card's text or background colour: the field's choice put into its own level (the
- * list's Cards box, or the link's Appearance when `own` is given), layered, and measured on the card's
- * background (lib/color/card-contrast.ts). Null when the card's background is the layout's own.
- */
-function cardCheck({
-  onCard,
-  current,
-  hex,
-  list,
-  own,
-  path,
-  tone,
-  glass,
-  site,
-}: {
-  onCard: 'text' | 'background'
-  current: string
-  hex: string | undefined
-  list: StoredCardSurface | undefined
-  own: StoredCardSurface | undefined
-  path: readonly unknown[]
-  tone: string | undefined
-  glass: ReturnType<typeof glassRowsStrength>
-  site: ColourSet
-}) {
-  const choice = { colour: current, hex }
-  // Text sits in eyebrow, label or description: the label's colour is what the background check reads.
-  const element = path[path.length - 2]
-  const put = (level: StoredCardSurface | undefined): StoredCardSurface =>
-    onCard === 'background'
-      ? { ...level, background: choice }
-      : element === 'label'
-        ? { ...level, label: { colour: choice } }
-        : (level ?? {})
-  const surface = own
-    ? layeredCardSurface(list, put(own))
-    : layeredCardSurface(put(list), undefined)
-  const foreground =
-    onCard === 'background'
-      ? cardLabelHex(surface, tone, site)
-      : themeColourHex(current, hex, tone, site)
-  if (!foreground) return null
-  const result = cardTextContrast({ foreground, surface, tone, glass, site })
-  if (!result) return null
-  const required = 4.5
-  return {
-    foreground,
-    background: result.background,
-    ratio: result.ratio,
-    required,
-    pass: result.ratio >= required,
-    suggestion: null,
-  }
-}
-
-/**
  * The colour choice of a `themeColourField` (lib/sanity/schema/theme-colour.ts): one button per
  * theme colour, each showing the colour this section's tone draws, and a contrast line for the one
  * chosen. Both use the site's Brand colours (Design settings), not tokens.json's, and say so; an
@@ -165,14 +105,15 @@ export function ThemeColourPickerInput(props: StringInputProps) {
   const item = useFormValue(itemPath ?? ['_type']) as
     { design?: StoredCardSurface & { appearance?: string } } | undefined
   const card = onCard
-    ? cardCheck({
-        onCard,
+    ? surfaceColourCheck({
+        role: onCard,
         current,
         hex: parent?.hex,
         // The field's own level: the link's Appearance, or the list's Cards box.
-        list: section?.cardDesign,
-        own: itemPath ? (item?.design?.appearance === 'custom' ? item.design : {}) : undefined,
-        path,
+        inherited: cardSurface(section?.cardDesign),
+        own: itemPath
+          ? cardSurface(item?.design?.appearance === 'custom' ? item.design : {})
+          : undefined,
         tone,
         glass: rowsGlass,
         site: colours,

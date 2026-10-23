@@ -1,4 +1,4 @@
-import { expect, test, type APIRequestContext, type Page, type TestInfo } from '@playwright/test'
+import { expect, type APIRequestContext, type Page, type TestInfo } from '@playwright/test'
 
 import {
   APP_PORT,
@@ -7,6 +7,7 @@ import {
   REJECTED_CONSENT,
   SANITY_WRITE_TOKEN,
 } from './constants'
+import { test } from './fixtures/test'
 import { waitForHydration } from './hydration'
 
 /**

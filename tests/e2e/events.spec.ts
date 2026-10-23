@@ -1,8 +1,9 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 import { SITE_URL } from './constants'
 import { eventDates } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Events: the Events section, event pages, the add-to-calendar files and the calendar feed (README,

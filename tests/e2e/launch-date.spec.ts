@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * The launch date line and its optional countdown (README, "Launch date"). The line is plain server

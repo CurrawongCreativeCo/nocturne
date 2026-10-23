@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * The touch slider (README, "Slider"), driven through the testimonials section's Slider layout on

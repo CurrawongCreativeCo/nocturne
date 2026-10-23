@@ -1,8 +1,9 @@
 import { readFileSync, readdirSync } from 'node:fs'
 
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Visual regression: one screenshot per section (and per variant) from the section gallery, on

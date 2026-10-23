@@ -20,12 +20,16 @@ you start a release.
 
 ### Added
 
+- **Link list clean-up:** service-category and divider-word letter spacing (Normal, Wide, Extra wide), accessible image headings above link groups, social navigation named by visible divider words, complete design-thumbnail coverage, and light/dark design-input browser checks. Existing defaults and baseline files are unchanged; new gallery and Studio input baselines need **Update visual baselines**.
+
 - **Hero eyebrow labels:** optional short labels reuse `InlineList`, with separator thumbnails and collapsed agency-only colour controls. Existing eyebrow text remains the fallback; no migration or extra Sanity requests. Refresh the new `hero-eyebrow-labels` and `hero-eyebrow-labels-start` desktop/mobile baselines using **Update visual baselines**.
 
 - **Transparent picture frames:** approved frames can use PNG or WebP artwork, with size validation, transparency warnings, Studio thumbnails and sized WebP masks from Sanity's image CDN. Existing SVG frames and their 50 KB limit remain supported. Refresh the new `media-text-image-frame-picture` desktop/mobile baselines with **Update visual baselines**.
 - **Studio theme API findings and download comparison:** `docs/studio-theme-spike.md` records the supported API, approved UI 4 scope and UI 5 styling/font exception.
 
 ### Changed
+
+- **Link list internals:** extracted profile, wordmark and per-link design modules; shared decorative shapes and nested-surface contrast; explicit social shadow/surface composition; shorter Studio help. Standalone typechecks no longer use incremental build info. Browser fixtures serve real local PNGs without changing existing visual mocks. The authenticated Design audit remains outstanding, documented in `docs/studio-audit/2026-10-23/link-list-review.md`.
 
 - **Studio palette, theme API and fonts (UI 4 scope):** Currawong's default CMS palette now follows the 21 October proposal, with contrast-tested borders and the previous palette retained as `currawongClassicBrand` (README: one-line rollback). The stable `@sanity/themer` generator and public v2 tokens replace `buildLegacyTheme`. The workspace theme uses self-hosted Inter for interface text and Newsreader for headings in both schemes. UI 5 alpha components retain Sanity's styling and CDN-hosted Inter, as explicitly agreed. Client palettes still replace defaults as a set, public-site font tokens are untouched, and there is no content migration. Refresh the Studio brand preview baselines using **Update visual baselines**; the findings document lists them.
 

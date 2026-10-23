@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 const section = (page: Page, name: string) =>
   page

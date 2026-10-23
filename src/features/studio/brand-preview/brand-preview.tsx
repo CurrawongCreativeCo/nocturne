@@ -22,6 +22,7 @@ import type { Scheme } from '@/config/studio-brand/types'
 import { studioFontFamilies } from '@/config/studio-fonts'
 
 import { brandPreviewCases, sampleAssets, type BrandPreviewCase } from './cases'
+import { DesignInputExamples } from './design-input-examples'
 import { LaunchExample } from './launch-example'
 import { PickerExamples } from './picker-examples'
 import { ThumbnailGallery, type SectionPreview } from './thumbnail-gallery'
@@ -250,6 +251,18 @@ function InputExamples({
             <ThemeProvider scheme={scheme} theme={theme}>
               <Card padding={4} radius={3} border>
                 <PickerExamples />
+              </Card>
+            </ThemeProvider>
+          </div>
+        ))}
+      </div>
+      <h3 className="mt-10 text-base font-semibold">Design inputs</h3>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {SCHEMES.map((scheme) => (
+          <div key={scheme} data-design-input-scheme={scheme}>
+            <ThemeProvider scheme={scheme} theme={theme}>
+              <Card padding={4} radius={3} border>
+                <DesignInputExamples />
               </Card>
             </ThemeProvider>
           </div>

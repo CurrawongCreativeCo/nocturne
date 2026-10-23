@@ -3,13 +3,9 @@ import { SanityLink } from '@/components/ui/sanity-link'
 import { ringSurfaceLook } from '@/lib/sanity/surface-options'
 import { textLook } from '@/lib/sanity/text-style-options'
 
-import {
-  LinkIcon,
-  LinkItem,
-  LinkListView,
-  linkShadow,
-  type LinkListLayout,
-} from './link-list-parts'
+import { LinkIcon, LinkItem, linkShadow } from './link-design'
+import { LinkListView } from './link-list-parts'
+import { type LinkListLayout } from './link-list-types'
 import type { SectionProps } from '../../../types'
 
 // How this section looks without a style. Keep `align` equal to the Compact preset's.

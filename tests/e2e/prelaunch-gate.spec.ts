@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 
 import {
   SITE_URL,
@@ -8,6 +8,7 @@ import {
   DRAFT_MODE_SECRET,
   PRELAUNCH_PREVIEW_TOKEN,
 } from './constants'
+import { test } from './fixtures/test'
 import { waitForHydration } from './hydration'
 
 /**

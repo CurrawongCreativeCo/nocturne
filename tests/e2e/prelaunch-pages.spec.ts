@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * The "Coming soon" and "Under construction" page templates (README, "Pre-launch pages"), built from

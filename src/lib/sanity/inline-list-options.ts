@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { letterSpacingOf, type LetterSpacing } from './letter-spacing'
 import { themeColourCss, type ThemeColour, type ThemeColourInput } from './theme-colour'
 
 /**
@@ -37,7 +38,7 @@ export const INLINE_WEIGHT_TITLES: Record<InlineWeight, string> = {
   semibold: 'Bold',
 }
 
-/** Uppercase adds a little letter spacing with it, so there is no separate spacing control. */
+/** Uppercase keeps its original spacing until Letter spacing is chosen. */
 export const INLINE_CASES = ['normal', 'uppercase'] as const
 export type InlineCase = (typeof INLINE_CASES)[number]
 export const INLINE_CASE_TITLES: Record<InlineCase, string> = {
@@ -70,6 +71,7 @@ export interface InlineListDesignInput {
   separator?: string | null
   size?: string | null
   weight?: string | null
+  letterSpacing?: string | null
   textCase?: string | null
   gap?: string | null
   phoneLayout?: string | null
@@ -81,6 +83,7 @@ export interface InlineListDesign {
   separator: InlineSeparator
   size: InlineSize
   weight: InlineWeight
+  letterSpacing?: LetterSpacing
   textCase: InlineCase
   gap: InlineGap
   phoneLayout: InlinePhoneLayout
@@ -103,6 +106,9 @@ export function resolveInlineListDesign(
   design: InlineListDesignInput | null | undefined,
 ): InlineListDesign {
   return {
+    ...(letterSpacingOf(design?.letterSpacing) && {
+      letterSpacing: letterSpacingOf(design?.letterSpacing),
+    }),
     separator: pick(INLINE_SEPARATORS, design?.separator) ?? 'bullet',
     size: pick(INLINE_SIZES, design?.size) ?? 'small',
     weight: pick(INLINE_WEIGHTS, design?.weight) ?? 'medium',

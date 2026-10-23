@@ -7,8 +7,18 @@ import { describe, expect, it } from 'vitest'
 import { sectionTypes } from '@/features/pages/schemas/sections'
 import { hero } from '@/features/pages/schemas/sections/hero'
 import { linkList } from '@/features/pages/schemas/sections/link-list'
+import { SHADOW_LEVELS } from '@/lib/sanity/depth-options'
+import { DIVIDER_STYLES } from '@/lib/sanity/divider-options'
+import { LINK_ARROWS } from '@/lib/sanity/link-arrow-options'
+import { decorativeDivider } from '@/lib/sanity/schema/decorative-divider'
 import { imageDesign } from '@/lib/sanity/schema/image-design'
 import { sectionStyle } from '@/lib/sanity/schema/section-style'
+import { dividerThumbnails } from '@/lib/sanity/schema/thumbnails/divider-thumbnails'
+import {
+  shadowThumbnails,
+  linkArrowThumbnails,
+  socialStyleThumbnails,
+} from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
 import {
   animationThumbnails,
   edgeThumbnails,
@@ -25,6 +35,7 @@ import {
   type Thumbnail,
 } from '@/lib/sanity/schema/thumbnails/registry'
 import { SECTION_EDGES, SECTION_MOTIONS, SECTION_TONES } from '@/lib/sanity/section-style-options'
+import { SOCIAL_STYLES } from '@/lib/sanity/social-style-options'
 
 /**
  * Lives in the route folder because it reads two features (the page builder's sections and Studio's
@@ -135,6 +146,37 @@ describe('thumbnails cover every option', () => {
     }
   })
 
+  it.each([
+    ['shadow', SHADOW_LEVELS, shadowThumbnails],
+    ['divider', DIVIDER_STYLES, dividerThumbnails],
+    ['link arrow', LINK_ARROWS, linkArrowThumbnails],
+    ['social style', SOCIAL_STYLES, socialStyleThumbnails],
+  ] as const)('has a thumbnail for every %s choice', (_name, values, thumbnails) => {
+    expect(Object.keys(thumbnails).sort()).toEqual([...values].sort())
+    for (const thumbnail of Object.values(thumbnails)) expect(render(thumbnail)).toContain('<svg')
+  })
+
+  it('wires every illustrated Link list field to those thumbnails', () => {
+    for (const [group, name, thumbnails] of [
+      ['depthDesign', 'linkShadow', shadowThumbnails],
+      ['linkDesign', 'arrowStyle', linkArrowThumbnails],
+      ['socialDesign', 'style', socialStyleThumbnails],
+    ] as const) {
+      const object = linkList.fields.find((field) => field.name === group) as
+        { fields?: { name: string; options?: unknown }[] } | undefined
+      const choices = listOf(object?.fields ?? [], name)
+      expect(Object.keys(choices).sort()).toEqual(Object.keys(thumbnails).sort())
+      for (const [value, thumbnail] of Object.entries<Thumbnail>(thumbnails)) {
+        expect(choices[value], `${group}.${name}.${value}`).toBe(thumbnail)
+      }
+    }
+    const dividers = listOf(decorativeDivider.fields, 'style')
+    expect(Object.keys(dividers).sort()).toEqual(Object.keys(dividerThumbnails).sort())
+    for (const [value, thumbnail] of Object.entries(dividerThumbnails)) {
+      expect(dividers[value], `divider.${value}`).toBe(thumbnail)
+    }
+  })
+
   it('has an animation thumbnail for every animation preset', () => {
     expect(Object.keys(animationThumbnails).sort()).toEqual([...SECTION_MOTIONS].sort())
   })
@@ -159,9 +201,13 @@ const everything: [string, Thumbnail][] = [
       ['image-motion', imageMotionThumbnails],
       ['image-frame', imageFrameThumbnails],
       ['panel-presentation', panelPresentationThumbnails],
+      ['shadow', shadowThumbnails],
+      ['divider', dividerThumbnails],
+      ['link-arrow', linkArrowThumbnails],
+      ['social-style', socialStyleThumbnails],
     ] as const
   ).flatMap(([group, thumbnails]) =>
-    Object.entries(thumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [
+    Object.entries<Thumbnail>(thumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [
       `${group}.${value}`,
       Thumbnail,
     ]),

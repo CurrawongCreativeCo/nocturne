@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * Glass rows, the Link list's sixth preset (README, "Link list"): frosted rows over a background photo.

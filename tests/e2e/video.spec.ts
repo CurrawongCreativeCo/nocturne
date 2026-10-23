@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * The Video section (README, "Video"), on /video: a YouTube and a Vimeo embed behind the click-to-load

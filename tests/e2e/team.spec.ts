@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 
 import { SITE_URL } from './constants'
+import { test } from './fixtures/test'
 
 /**
  * Team members, the Team section and profile pages (README, "Team"). The fixture team, in order:

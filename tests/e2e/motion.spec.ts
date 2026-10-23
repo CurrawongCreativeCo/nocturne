@@ -1,4 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /** The first hero fades up its description and buttons (src/features/pages/components/sections/hero.tsx). */
 const REVEALED = '[data-reveal]'

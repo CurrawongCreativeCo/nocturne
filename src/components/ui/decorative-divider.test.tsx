@@ -94,3 +94,13 @@ describe('DecorativeDivider', () => {
     expect(render({ style: 'line', centre: 'diamond' })).toContain('rotate-45')
   })
 })
+
+it.each([
+  ['normal', 'tracking-normal'],
+  ['wide', 'tracking-[0.1em]'],
+  ['extra-wide', 'tracking-[0.2em]'],
+] as const)('uses shared %s letter spacing for divider words', (letterSpacing, className) => {
+  const html = render({ style: 'line', centre: 'text', text: 'Stay connected', letterSpacing })
+  expect(html).toContain(className)
+  expect(html).not.toContain('tracking-[0.08em]')
+})

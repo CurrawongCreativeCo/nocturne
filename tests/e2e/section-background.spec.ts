@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Section backgrounds (README, "Section backgrounds"): a brand gradient and a picture with an

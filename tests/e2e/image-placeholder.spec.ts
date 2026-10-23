@@ -1,4 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * The blurred preview shown while a picture loads is only for pictures that are certainly opaque

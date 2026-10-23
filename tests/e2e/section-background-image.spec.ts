@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * Background image placement (README, "Section backgrounds"): size, position, repeat, strength, the

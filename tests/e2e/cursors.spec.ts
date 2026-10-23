@@ -1,4 +1,6 @@
-import { expect, test, type Locator } from '@playwright/test'
+import { expect, type Locator } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /** The cursor the browser would show over the control (globals.css, "Cursors"). */
 const cursorOf = (target: Locator) => target.evaluate((el) => getComputedStyle(el).cursor)

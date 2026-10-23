@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
+import { test } from './fixtures/test'
 import { brandPreviewCases } from '../../src/features/studio/brand-preview/cases'
 import { hexToOklch } from '../../src/lib/color/oklch'
 
@@ -368,3 +369,43 @@ test.describe('Studio brand preview', () => {
     await expect(root.locator('[data-role="accentFill"]')).toHaveAttribute('data-hex', '#ffd400')
   })
 })
+
+for (const scheme of SCHEMES) {
+  test(`design inputs work by keyboard and pass axe, ${scheme}`, async ({ page }) => {
+    const selector = `[data-design-input-scheme="${scheme}"]`
+    const scope = page.locator(selector)
+    const choices = scope.getByRole('group', { name: 'Border', exact: true })
+    await choices.getByRole('button', { name: 'Thin', exact: true }).focus()
+    await page.keyboard.press('Space')
+    await expect(choices.getByRole('button', { name: 'Thin', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    await choices.getByRole('button', { name: 'Inherit', exact: true }).click()
+    await expect(choices.getByRole('button', { name: 'Inherit', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    await scope.getByRole('button', { name: 'Change Icon', exact: true }).click()
+    const icons = scope.getByRole('radiogroup', { name: 'Icon', exact: true })
+    await expect(icons.getByRole('radio', { name: 'Lotus', exact: true })).toBeFocused()
+    await page.keyboard.press('Home')
+    await page.keyboard.press('Enter')
+    await expect(scope.getByRole('button', { name: 'Change Icon', exact: true })).toBeFocused()
+    const slider = scope.getByRole('slider', { name: 'Strength', exact: true })
+    await slider.focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(slider).toHaveValue('61')
+    await scope.getByRole('button', { name: 'Clear', exact: true }).click()
+    await expect(slider).toHaveAttribute('aria-valuetext', 'Follows the preset')
+    await scope.getByRole('button', { name: 'Change Overlay gradient', exact: true }).click()
+    await scope.getByRole('radio', { name: 'focus', exact: true }).click()
+    await expect(scope.locator('[data-overlay-preview] img')).toBeVisible()
+    const results = await new AxeBuilder({ page }).include(selector).withTags(WCAG).analyze()
+    expect(results.violations).toEqual([])
+    // Also scan the expanded icon grid, where focus and contrast differ from its summary.
+    await scope.getByRole('button', { name: 'Change Icon', exact: true }).click()
+    const expanded = await new AxeBuilder({ page }).include(selector).withTags(WCAG).analyze()
+    expect(expanded.violations).toEqual([])
+  })
+}

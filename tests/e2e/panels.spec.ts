@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * Panels (README, "Panels"): a button whose "Goes to" is "Open a panel" opens a native <dialog> from

@@ -40,7 +40,7 @@ function iconThumbnail(name: string) {
 }
 
 function NoIconThumbnail() {
-  return <span style={{ fontSize: 12, opacity: 0.6 }}>None</span>
+  return <span style={{ fontSize: 12 }}>None</span>
 }
 
 /** The picker's cards: "No icon", then each icon of the field's list with its drawing. */

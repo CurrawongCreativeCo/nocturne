@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * Typed link actions (README, "Link actions"): a link can jump to a section of the page, open a

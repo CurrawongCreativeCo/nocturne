@@ -2,14 +2,9 @@ import { buttonFeedback } from '@/components/ui/cta-link'
 import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 
-import {
-  LinkItem,
-  LinkListView,
-  LinkText,
-  ownEyebrow,
-  type LinkListLayout,
-  type OwnLinkText,
-} from './link-list-parts'
+import { LinkItem, LinkText, ownEyebrow, type OwnLinkText } from './link-design'
+import { LinkListView } from './link-list-parts'
+import { type LinkListLayout } from './link-list-types'
 import type { SectionProps } from '../../../types'
 
 // How this section looks without a style. Keep `align` equal to the Editorial preset's.

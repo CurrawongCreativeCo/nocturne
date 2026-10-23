@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * The Link list's Design options (README, "Link list"): arrow styles, the profile picture's size and

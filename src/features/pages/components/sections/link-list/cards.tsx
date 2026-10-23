@@ -6,15 +6,15 @@ import { ringSurfaceLook } from '@/lib/sanity/surface-options'
 import {
   LinkIcon,
   LinkItem,
-  LinkListView,
   LinkText,
   LinkVisual,
   hasThumbnail,
   linkShadow,
   ownEyebrow,
-  type LinkListLayout,
   type OwnLinkText,
-} from './link-list-parts'
+} from './link-design'
+import { LinkListView } from './link-list-parts'
+import { type LinkListLayout } from './link-list-types'
 import { PICTURE } from './stacked'
 import type { SectionProps } from '../../../types'
 

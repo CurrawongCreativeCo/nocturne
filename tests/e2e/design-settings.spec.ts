@@ -1,7 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import {
   expect,
-  test,
   type APIRequestContext,
   type Locator,
   type Page,
@@ -11,6 +10,7 @@ import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { FAKE_SANITY_PORT, REVALIDATE_SECRET } from './constants'
 import { SAMPLE_PRIMARY } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Studio brand colours (README, "Colour systems"): the designSettings singleton rendered by SiteShell

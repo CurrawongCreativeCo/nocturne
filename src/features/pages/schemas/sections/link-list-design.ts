@@ -33,6 +33,7 @@ import {
   INLINE_WEIGHTS,
   INLINE_WEIGHT_TITLES,
 } from '@/lib/sanity/inline-list-options'
+import { LETTER_SPACINGS, LETTER_SPACING_TITLES } from '@/lib/sanity/letter-spacing'
 import {
   LINK_ARROWS,
   LINK_ARROW_DESCRIPTIONS,
@@ -212,7 +213,7 @@ export const linkListDesignFields = [
     title: 'Profile',
     type: 'object',
     group: 'design',
-    description: 'The picture or logo at the top, and the colours of the name and bio.',
+    description: 'Picture, name and bio colours.',
     hidden: agencyOnly(),
     options: { collapsible: true, collapsed: false },
     fieldsets: [colours],
@@ -228,8 +229,7 @@ export const linkListDesignFields = [
         name: 'imageShape',
         title: 'Picture shape',
         type: 'string',
-        description:
-          'Circle suits a face. Logo, uncropped shows a logo whole, in its own proportions; use one with a transparent background.',
+        description: 'Circle suits a face; Logo, uncropped keeps the whole logo.',
         options: radio(PROFILE_IMAGE_SHAPES, PROFILE_IMAGE_SHAPE_TITLES),
       }),
       defineField({
@@ -269,8 +269,7 @@ export const linkListDesignFields = [
         type: 'reference',
         to: [{ type: 'frame' }],
         options: { disableNew: true },
-        description:
-          'An approved SVG frame, added by the agency under Design › Image frames. The picture shrinks a little inside it, so the layout stays the same.',
+        description: 'An approved frame from Design → Image frames. The picture fits inside it.',
         hidden: borderIs('frame'),
         validation: (rule) =>
           rule
@@ -311,7 +310,7 @@ export const linkListDesignFields = [
     type: 'object',
     group: 'design',
     description:
-      'The row of categories under the name. It follows the section’s alignment. Empty is small words with a bullet in Primary between them.',
+      'Categories below the name. Unset: small words, Primary bullets and the section’s alignment.',
     hidden: agencyOnly(
       ({ parent }) =>
         !(parent as { profile?: { categories?: unknown[] } } | undefined)?.profile?.categories
@@ -360,9 +359,15 @@ export const linkListDesignFields = [
         name: 'textCase',
         title: 'Letters',
         type: 'string',
-        description: 'Capitals are spaced out a little, as small capitals usually are.',
         fieldset: 'text',
         options: radio(INLINE_CASES, INLINE_CASE_TITLES),
+      }),
+      defineField({
+        name: 'letterSpacing',
+        title: 'Letter spacing',
+        type: 'string',
+        options: radio(LETTER_SPACINGS, LETTER_SPACING_TITLES),
+        fieldset: 'text',
       }),
       defineField({
         name: 'gap',
@@ -398,7 +403,7 @@ export const linkListDesignFields = [
     type: 'object',
     group: 'design',
     description:
-      'Every link’s background, border and text. Each starts on Inherit: the layout’s own look. Glass rows stay glass when tinted. A link can change any of these for itself (Content › the link › Appearance).',
+      'Shared background, border and text. Inherit uses the layout. Override one link in Content → Appearance.',
     hidden: agencyOnly(),
     options: { collapsible: true, collapsed: false },
     fieldsets: [
@@ -433,8 +438,7 @@ export const linkListDesignFields = [
     title: 'Arrows and icons',
     type: 'object',
     group: 'design',
-    description:
-      'The indicator at the end of each link, and each link’s icon: its colour and an optional container (circle, rounded or square) with its own fill and border.',
+    description: 'Link arrows and icons, with optional filled or outlined icon containers.',
     hidden: agencyOnly(),
     options: { collapsible: true, collapsed: false },
     fieldsets: [
@@ -587,7 +591,7 @@ export const linkListDesignFields = [
     type: 'object',
     group: 'design',
     description:
-      'Decorative rules, each with its own look: a line, a fading line or dots, with an icon, a few words or a picture in the middle. Each is only drawn between two things that show.',
+      'Rules between visible parts: lines, fading lines or dots, with an optional centre.',
     hidden: agencyOnly(),
     options: { collapsible: true, collapsed: false },
     fields: [
@@ -626,8 +630,7 @@ export const linkListDesignFields = [
     title: 'Depth and glow',
     type: 'object',
     group: 'design',
-    description:
-      'How far the links, social buttons and picture lift off the page, and an optional soft glow in a theme colour. Leave a shadow empty for the layout’s own.',
+    description: 'Shadows and a theme-coloured glow. Unset shadows follow the layout.',
     hidden: agencyOnly(),
     options: { collapsible: true, collapsed: true },
     fields: [

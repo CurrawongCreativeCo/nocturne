@@ -2920,11 +2920,14 @@ or a small picture. Not to be confused with [Section dividers](#section-dividers
 | Option              | Choices                                                                                                     |
 | ------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Divider             | None (default), Line, Fading line, Three dots, as pictures                                                  |
-| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals, letter-spaced), Picture     |
+| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals), Picture                    |
 | Size in the middle  | Small, Medium (default), Large, for an icon, the words or a picture                                         |
 | Length              | Short, Medium (default), Long, Full width: the whole rule, or each line beside a middle                     |
 | Thickness           | Thin (default), Bold                                                                                        |
 | Colours (collapsed) | Line colour (Inherit is the line colour) and Colour in the middle (Inherit follows the lines); theme or hex |
+
+Words also offer **Letter spacing**: Normal, Wide or Extra wide. Unset preserves the previous
+spacing (including the wider capitals). This is the same choice as Link list service categories.
 
 Each option appears only once it applies (three dots take no middle and no length). A fading line fades towards its outer
 ends around a middle. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
@@ -2940,6 +2943,12 @@ preview (no alt text: it is decoration). CSS and server components only, no Java
   `resolveDivider(data.divider)` with `DecorativeDivider` between the parts it divides, dropping their margin on that
   side. Empty is None, so nothing changes until a divider is chosen. Only the Link list offers dividers so far (build
   plan task 151 lists the candidates).
+
+**Shared surface contrast.** `src/lib/color/surface-contrast.ts` layers background, strength and
+foreground independently of section schemas, and checks solid or glass surfaces. Use
+`surfaceColourCheck` for a candidate text/background choice and `surfaceTextContrast` for an
+effective surface. `card-contrast.ts` maps the Link list’s label fields onto that contract; other
+sections should provide their own typed adapter, keeping schema paths out of the shared calculation.
 
 ### Section dividers
 
@@ -3279,7 +3288,7 @@ rendering: the **Link page** template is a page with this section and one page o
 | Description      | A line under the label. Not shown in the Compact layout.                                                                                                                                                                          |
 | Icon             | From the shared icon set (eighteen, including Lotus and Gift), picked from a grid that draws each icon above its name. Not shown in Editorial.                                                                                    |
 | Show large       | One link is drawn large: the first one ticked. A second tick is ignored (Studio warns). Not used by Compact.                                                                                                                      |
-| Heading above it | Optional group heading. Links under the same heading are grouped; a link with no heading joins the group above it.                                                                                                                |
+| Heading above it | Optional group heading, as Text or Image. Links under the same heading are grouped; a link with no heading joins the group above it.                                                                                              |
 | Show or Hide     | Hide takes a link off the page without deleting it. A hidden link never leaves the Content Lake.                                                                                                                                  |
 | Advanced         | A **thumbnail** (Minimal and Cards only; Glass rows draw it beside the icon, the other layouts instead of it), **Show from** / **Show until**, and **UTM** source, medium and campaign (shown for links to another website only). |
 | Appearance       | Agency only. _Use the Link list design_ (default) or _Customise this card_; see [Card design and overrides](#card-design-and-overrides).                                                                                          |
@@ -3384,17 +3393,18 @@ page without deleting them; hidden categories never leave the Content Lake. Stud
 empty is the look the section always had, so no content needs migrating. The colour overrides sit in a collapsed **Colours**
 inside each box, and every option that depends on another only shows once it applies.
 
-| Box                | Options                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Profile            | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG or transparent picture from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border.                                                                                                                                                                                                                                        |
-| Service categories | **Separator** Bullet (default), Middle dot, Line, Diamond or None, drawn in CSS so it looks the same in every font. **On a phone** One row that wraps (default) or One per line. Text (collapsed): **Size** Small (default), Medium or Large (the `small`, `body` and `lead` type tokens), **Weight** Regular, Medium (default) or Bold, **Letters** As typed (default) or Capitals (with a little letter spacing), **Space between** Compact, Comfortable (default) or Wide. Colours: category (Inherit is the text colour) and separator (Inherit is Primary), each Text, Muted text, Primary, Secondary, Highlight or Custom. It follows the section's alignment. Shown once there are categories. |
-| Cards              | Every link's **Background colour** (Primary, Secondary, Highlight, Text, Transparent or Custom), **Background strength** (Light, Medium, Strong, Solid), **Border** (None, Thin, Medium, Thick) and **Border colour**, then a collapsed **Text** with the **Eyebrow**, **Label** and **Description** (size Small, Medium or Large as steps from the layout's own, weight, colour; the eyebrow's capitals and letter spacing; the description's line height). Every option starts on _Inherit_ (the layout's own). Not offered for Editorial's ruled list. See [Card design and overrides](#card-design-and-overrides).                                                                                |
-| Arrows and icons   | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow. **Icons** (collapsed): **Icon container** No container, Circle, Rounded square or Square (the social icon shapes), its colour, strength, border and border colour, and the icon colour.                                                                                                                                                                                                                                                                          |
-| Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. **Button border** None, Thin, Medium or Thick. Colours: icon, button (a tint on glass: the blur stays), button strength, border.                                                                                                                                                                                                                                                                                                                                                                                         |
+| Box                | Options                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Profile            | **Picture size** Small, Medium (each layout's own size) or Large. **Shape** Circle, Rounded square, or Logo, uncropped (a logo in its own proportions). **Border** None, Solid ring, Gradient ring (a Brand colours gradient, else Primary to Secondary) or Decorative frame (an approved SVG or transparent picture from _Design › Image frames_, the same frames as Image design); rings have a thickness and a see-through gap. Colours: name, bio, border.                                                                                                                                                                                                                                                                                           |
+| Service categories | **Separator** Bullet (default), Middle dot, Line, Diamond or None, drawn in CSS so it looks the same in every font. **On a phone** One row that wraps (default) or One per line. Text (collapsed): **Size** Small (default), Medium or Large (the `small`, `body` and `lead` type tokens), **Weight** Regular, Medium (default) or Bold, **Letters** As typed (default) or Capitals, **Letter spacing** Normal, Wide or Extra wide (unset keeps the existing spacing), **Space between** Compact, Comfortable (default) or Wide. Colours: category (Inherit is the text colour) and separator (Inherit is Primary), each Text, Muted text, Primary, Secondary, Highlight or Custom. It follows the section's alignment. Shown once there are categories. |
+| Cards              | Every link's **Background colour** (Primary, Secondary, Highlight, Text, Transparent or Custom), **Background strength** (Light, Medium, Strong, Solid), **Border** (None, Thin, Medium, Thick) and **Border colour**, then a collapsed **Text** with the **Eyebrow**, **Label** and **Description** (size Small, Medium or Large as steps from the layout's own, weight, colour; the eyebrow's capitals and letter spacing; the description's line height). Every option starts on _Inherit_ (the layout's own). Not offered for Editorial's ruled list. See [Card design and overrides](#card-design-and-overrides).                                                                                                                                   |
+| Arrows and icons   | **Arrow style** Chevron, Arrow, External link (↗ for other websites, → for pages on this one) or None, for every link. Glass rows and Editorial default to the chevron; Minimal and Cards to none; Compact has none. Colours: arrow. **Icons** (collapsed): **Icon container** No container, Circle, Rounded square or Square (the social icon shapes), its colour, strength, border and border colour, and the icon colour.                                                                                                                                                                                                                                                                                                                             |
+| Social icons       | **Icon style** Plain icons, Circles, Rounded squares or Squares; with Glass rows the buttons are frosted glass at the rows' strength. **Position** above or below the links. **Button border** None, Thin, Medium or Thick. Colours: icon, button (a tint on glass: the blur stays), button strength, border.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 - **Dividers**: a divider of its own at each of four positions: **Between the categories and the bio** (shown once
   both exist), **After the profile**, **Above the social icons** (words here make a heading for the icons, such as "Stay
-  connected") and **Below the social icons**. Each is the shared `decorativeDivider` (see
+  connected", also used as the social navigation’s accessible name) and **Below the social icons**.
+  Without those visible words, the navigation keeps its “Social profiles” name. Each is the shared `decorativeDivider` (see
   [Decorative dividers](#decorative-dividers)). A divider only sits between two parts that are drawn: never first or
   last, never for social icons that aren't shown, and where two would meet (after the profile, right above the icons)
   the later one stays (`linkListParts` in `src/lib/sanity/divider-options.ts`). The part beside a divider drops its own
@@ -3420,11 +3430,19 @@ inside each box, and every option that depends on another only shows once it app
   changed). On **Glass rows** the arrow and icon colours are measured on the glass at its worst (over the darkest or lightest
   photo, at the section's glass strength). Over any other background picture the badge is still the background colour; check
   it by eye. Every check is a warning, never an error.
-- **Wordmarks.** _Content › Profile › Show as_ and the heading's _Show as_ offer **Image** for a client's wordmark. The text
+- **Wordmarks.** _Content › Profile › Show as_ and the section heading's _Show as_ offer **Image** for a client's wordmark. The text
   stays and becomes the image's alt text, inside the same heading element, so the heading hierarchy, the accessible name and
   the indexed words are unchanged and nothing is read twice. Studio warns if the image or the text is missing.
+- **Image headings above links.** A link’s _Heading above it_ offers _Show as → Image_ once text is entered.
+  The first visible link in a group supplies its heading image and size. Repeat the same heading text to
+  share one group; use different headings for separate images. Missing images fall back to text. Text is
+  the image’s alt text, so the heading keeps its accessible name. Hidden or not-yet-due links supply no image.
 - **The older "Arrow on each row"** is hidden but still read: Glass rows saved with it unticked draw no arrow until an Arrow
   style is chosen.
+- **Composition.** `link-list-parts.tsx` composes the profile, headings, groups, scheduling, dividers and depth.
+  `profile.tsx` and `wordmark-heading.tsx` render the profile and wordmarks; `link-design.tsx` owns link
+  text, icons, thumbnails and shadows, with layout contracts in `link-list-types.ts`. Small CSS shapes
+  are shared through `src/components/ui/shape-classes.ts`.
 - **Shared parts.** `LinkArrow`, `SocialLinks`, `ProfileImage` and `Wordmark` in `src/components/ui/` are server components
   with no JavaScript, ready for other sections (see the follow-up tasks in the build plan).
 
@@ -3736,6 +3754,10 @@ weekly [enquiry retention](#enquiries) clean-up.
 | `npm run test:e2e`        | End-to-end tests (Playwright; first run `npx playwright install chromium`)     |
 | `npm run test:e2e:update` | Refresh the visual regression baselines (Linux or Docker; see below)           |
 | `npm run test:lighthouse` | Lighthouse budgets on `/`, `/about`, `/hero-parts` and `/links` (needs Chrome) |
+
+The standalone `npm run typecheck` disables TypeScript incremental caching so stale build info
+cannot hide diagnostics. `*.tsbuildinfo` is already gitignored; CI must not restore it for typecheck.
+Next.js may still use its own incremental build cache.
 
 ### Link actions
 
@@ -4715,3 +4737,28 @@ a disposable project and saved sign-in.
 
 When finished, revoke the throwaway tokens and remove the disposable project through Sanity Manage.
 No public sections or visual baselines are changed by this harness.
+
+### Link list clean-up verification
+
+The browser specs import `test` from `tests/e2e/fixtures/test.ts`. Its context route serves real PNG
+pixels from the fake Content Lake for unmocked Sanity images; a spec’s page routes take precedence,
+so existing visual placeholder pixels stay unchanged. `fixture-images.spec.ts` checks both the PNG
+response and decoded page images. Explicit `browser.newContext()` contexts are independent; add their
+own image routes when a test needs loaded pictures. Public image handling and production Content Lake
+requests are unchanged. After editing fixture documents, restart the test servers and rebuild; use a
+fresh local Next.js build cache if old 404 responses persist.
+
+The brand preview’s separate **Design inputs** examples exercise InheritableChoiceInput, IconPickerInput,
+SliderInput and the actual OverlayPreview used by OverlayPreviewInput, without a Studio login or Content
+Lake. Keyboard and axe checks cover both schemes and the expanded icon grid. Screenshot cases are
+separate from the existing picker cases.
+
+Existing baseline files have not been edited. Run **Update visual baselines** on Linux to add:
+
+- `link-list-group-heading-image` and `link-list-spacing-{normal,wide,extra-wide}` in the section gallery,
+  desktop and mobile;
+- `studio-brand-design-inputs-{light,dark}` and `studio-brand-design-inputs-icons-{light,dark}` on desktop.
+
+The authenticated six-panel Design audit is still required; the source review, capture checklist and
+reason it could not be captured here are in
+[the 23 October audit note](docs/studio-audit/2026-10-23/link-list-review.md).

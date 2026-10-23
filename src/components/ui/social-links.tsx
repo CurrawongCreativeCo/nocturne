@@ -21,7 +21,6 @@ const PLAIN = 'rounded-button text-ink-muted hover:bg-surface-alt hover:text-ink
 // A solid button's fill and border, which a chosen design replaces one property at a time.
 const SOLID_FILL = 'bg-surface hover:bg-surface-alt'
 const SOLID_BORDER = 'ring-1 ring-inset ring-line'
-const SOLID = `${SOLID_FILL} text-ink ${SOLID_BORDER}`
 // The frosted surface of Glass rows (`.glass-row` in globals.css), so icons and rows match.
 const GLASS = 'glass-row text-ink'
 const GLASS_STRENGTH: Record<GlassStrength, string> = {
@@ -35,14 +34,15 @@ export function socialLinkClass(
   shape: SocialStyle,
   surface: 'solid' | 'glass' = 'solid',
   strength: GlassStrength = 'medium',
-  /** False leaves the solid button's shadow off, for a caller that draws its own. */
-  shadow = true,
+  /** The shadow this button draws on its own; none when the caller supplies depth. */
+  shadow: (typeof OWN_SHADOW)[keyof typeof OWN_SHADOW] = OWN_SHADOW.card,
+  surfaceLook?: Pick<ReturnType<typeof ringSurfaceLook>, 'className'>,
 ): string {
   if (shape === 'plain') return `${BASE} ${PLAIN}`
   const look =
     surface === 'glass'
       ? `${GLASS} ${GLASS_STRENGTH[strength]}`
-      : `${SOLID}${shadow ? ' shadow-card' : ''}`
+      : `${surfaceLook?.className ?? `${SOLID_FILL} ${SOLID_BORDER}`} text-ink${shadow === OWN_SHADOW.card ? ' shadow-card' : ''}`
   return `${BASE} ${look} ${SHAPE_RADIUS[shape]}`.trim()
 }
 
@@ -62,6 +62,7 @@ export function SocialLinks({
   design = {},
   className = '',
   label = 'Social profiles',
+  labelledBy,
   depth,
 }: {
   profiles: readonly SocialProfile[]
@@ -74,6 +75,7 @@ export function SocialLinks({
   /** Classes for the list: spacing and justification. */
   className?: string
   label?: string
+  labelledBy?: string
   /** Design › Depth and glow for the shaped buttons, given the shadow a button draws on its own. */
   depth?: BoxDepth
 }) {
@@ -91,16 +93,16 @@ export function SocialLinks({
     shape === 'plain' ? undefined : depth?.(OWN_SHADOW[surface === 'glass' ? 'glass' : 'card'])
   const style: CSSProperties | undefined =
     colour || look?.style || lift ? { color: colour, ...look?.style, ...lift?.style } : undefined
-  // The solid button's own fill and border, swapped for the chosen ones where there are any.
-  const linkClass = (withShadow: boolean) => {
-    const base = socialLinkClass(shape, surface, strength, withShadow)
-    return look?.className && surface !== 'glass'
-      ? base.replace(SOLID_FILL, '').replace(SOLID_BORDER, look.className)
-      : base
-  }
+  const linkClass = socialLinkClass(
+    shape,
+    surface,
+    strength,
+    lift ? OWN_SHADOW.none : OWN_SHADOW.card,
+    look,
+  )
 
   return (
-    <nav aria-label={label}>
+    <nav aria-label={labelledBy ? undefined : label} aria-labelledby={labelledBy}>
       <ul
         className={`flex flex-wrap ${shape === 'plain' ? 'gap-1' : 'gap-3'} ${className}`.trim()}
         data-social-style={shape}
@@ -113,7 +115,7 @@ export function SocialLinks({
                 href={stegaClean(profile.url) ?? undefined}
                 rel="me"
                 aria-label={socialPlatformTitle(platform)}
-                className={lift ? `${linkClass(false)} ${lift.className}` : linkClass(true)}
+                className={lift ? `${linkClass} ${lift.className}` : linkClass}
                 style={style}
               >
                 <SocialIcon platform={platform} />

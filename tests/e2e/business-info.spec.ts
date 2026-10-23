@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 
 import { SITE_URL } from './constants'
+import { test } from './fixtures/test'
 
 // The fixture's businessInfo document (tests/e2e/fixtures/dataset.mjs): Newtown NSW, Mon–Fri 8:00 am –
 // 5:30 pm, Saturday mornings, closed Sunday, Sydney time.

@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Hero variants (README, "Section variants"): every layout in the section gallery passes axe, and

@@ -1,4 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 test('public pages preload their Inter font without the unused Studio heading font', async ({
   request,
