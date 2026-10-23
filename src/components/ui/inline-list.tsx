@@ -1,7 +1,5 @@
 import type { CSSProperties } from 'react'
 
-import { SHAPE_CLASSES, SHAPE_FILL } from './shape-classes'
-
 import type {
   InlineCase,
   InlineGap,
@@ -12,6 +10,8 @@ import type {
 } from '@/lib/sanity/inline-list-options'
 import { LETTER_SPACING_CLASSES, type LetterSpacing } from '@/lib/sanity/letter-spacing'
 import { previewText } from '@/lib/sanity/preview-text'
+
+import { SHAPE_CLASSES, SHAPE_FILL } from './shape-classes'
 
 // Full class names, so Tailwind's scanner sees them.
 const SIZE: Record<InlineSize, string> = {

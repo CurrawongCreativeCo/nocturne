@@ -1,5 +1,6 @@
-import { LETTER_SPACINGS, LETTER_SPACING_TITLES } from '@/lib/sanity/letter-spacing'
 import { defineField, defineType, type ConditionalPropertyCallback } from 'sanity'
+
+import { LETTER_SPACINGS, LETTER_SPACING_TITLES } from '@/lib/sanity/letter-spacing'
 
 import {
   DIVIDER_CENTRES,

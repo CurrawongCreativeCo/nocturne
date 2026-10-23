@@ -1795,6 +1795,29 @@ documents.push({
   pageBuilder: linkHeadingExamples,
 })
 
+const linkSpacingExamples = ['normal', 'wide', 'extra-wide'].map((letterSpacing) => ({
+  _key: `link-list-spacing-${letterSpacing}`,
+  _type: 'linkList',
+  variant: 'stacked',
+  profile: { name: `Spacing: ${letterSpacing}`, categories: ['Bodywork', 'Movement'] },
+  categoryDesign: { textCase: 'uppercase', letterSpacing },
+  socialSource: 'custom',
+  socialLinks: [{ _key: 'instagram', platform: 'instagram', url: 'https://instagram.com/example' }],
+  dividerDesign: {
+    aboveSocial: { style: 'line', centre: 'text', text: 'Stay connected', letterSpacing },
+  },
+  style: { _type: 'sectionStyle', motion: 'none' },
+  links: [linkItem(`spacing-${letterSpacing}`, 'Book now', external('https://example.com/book'))],
+}))
+documents.push({
+  _id: 'page-link-spacing',
+  _type: 'page',
+  title: 'Link spacing',
+  slug: { _type: 'slug', current: 'link-spacing' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: linkSpacingExamples,
+})
+
 const gallerySections = [
   ...heroLabelExamples.slice(0, 2),
   {
@@ -2464,6 +2487,7 @@ const gallerySections = [
     url: EMBED_URL.typeform,
   }),
   linkHeadingExamples[0],
+  ...linkSpacingExamples,
   // new-section:gallery
 ]
 

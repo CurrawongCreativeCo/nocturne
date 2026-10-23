@@ -1,9 +1,9 @@
-import { letterSpacingOf, type LetterSpacing } from './letter-spacing'
 import { stegaClean } from 'next-sanity'
 
 import type { SanityImageData } from '@/types/sanity'
 
 import { BADGE_ICONS, type BadgeIconName } from './badge-icons'
+import { letterSpacingOf, type LetterSpacing } from './letter-spacing'
 import { themeColourCss, type ThemeColour, type ThemeColourInput } from './theme-colour'
 
 /**
