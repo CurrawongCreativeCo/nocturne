@@ -3,25 +3,16 @@ import { Fragment, Suspense, type ReactNode, type CSSProperties } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
 import { DecorativeDivider } from '@/components/ui/decorative-divider'
-import { InlineList } from '@/components/ui/inline-list'
-import { PlainText } from '@/components/ui/plain-text'
-import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
+import type { ProfileImageScale } from '@/components/ui/profile-image'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { SocialLinks } from '@/components/ui/social-links'
-import { Wordmark } from '@/components/ui/wordmark'
 import { trackAttributes } from '@/lib/analytics/track-script'
 import { glassStrengthOf, type GlassStrength } from '@/lib/color/glass-contrast'
-import { bioParagraphs, plainTextParagraphs } from '@/lib/plain-text'
 import { requestTime } from '@/lib/request-time'
-import {
-  OWN_SHADOW,
-  resolveDepth,
-  type BoxDepth,
-  type ElementDepth,
-} from '@/lib/sanity/depth-options'
+import { OWN_SHADOW, resolveDepth, type BoxDepth } from '@/lib/sanity/depth-options'
 import {
   LINK_LIST_DIVIDER_PLACEMENTS,
   linkListParts,
@@ -31,9 +22,7 @@ import {
   type LinkListPart,
   type ResolvedDivider,
 } from '@/lib/sanity/divider-options'
-import { inlineListItems, resolveInlineListDesign } from '@/lib/sanity/inline-list-options'
 import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
-import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { socialPositionOf, socialStyleOf } from '@/lib/sanity/social-style-options'
 import {
@@ -43,10 +32,12 @@ import {
   type OwnIcon,
 } from '@/lib/sanity/surface-options'
 import { textLook, type OwnText } from '@/lib/sanity/text-style-options'
-import { themeColourCss, themeColourStyle } from '@/lib/sanity/theme-colour'
-import { showsWordmark, wordmarkSizeOf } from '@/lib/sanity/wordmark-options'
+import { themeColourCss } from '@/lib/sanity/theme-colour'
+import { showsWordmark } from '@/lib/sanity/wordmark-options'
 import type { SanityImageData } from '@/types/sanity'
 
+import { Profile, hasProfile } from './profile'
+import { WordmarkHeading, type WordmarkImage } from './wordmark-heading'
 import type { SectionProps } from '../../../types'
 import {
   cardOverrides,
@@ -114,8 +105,6 @@ export function linkShadow(
 
 const clean = (value: string | null | undefined) => (value ? stegaClean(value).trim() : '')
 
-type WordmarkImage = SanityImageData & { size?: string | null }
-
 /** Each of Design › Dividers' placements, resolved (null where none is drawn). */
 function resolveLinkListDividers(
   design: Partial<Record<LinkListDividerPlacement, DividerInput | null>> | null | undefined,
@@ -126,130 +115,6 @@ function resolveLinkListDividers(
     aboveSocial: resolveDivider(design?.aboveSocial),
     belowSocial: resolveDivider(design?.belowSocial),
   }
-}
-
-/** Whether the profile draws anything: a picture, a name or wordmark, categories or a bio. */
-function hasProfile(data: Data): boolean {
-  const profile = data.profile
-  const nameImage = profile?.nameImage as WordmarkImage | null | undefined
-  return Boolean(
-    clean(profile?.name) ||
-    inlineListItems(profile?.categories).length > 0 ||
-    plainTextParagraphs(profile?.bio).length > 0 ||
-    (profile?.image as SanityImageData | null | undefined)?.asset ||
-    (showsWordmark(profile?.nameDisplay, nameImage) && nameImage),
-  )
-}
-
-/**
- * The picture, the name, the service categories and the bio. The name can be drawn as a wordmark
- * (Content › Profile › Show as); its text is then the picture's alt text, so the heading keeps its
- * name. The categories are their own list (Design › Service categories), and the bio is paragraphs.
- */
-function Profile({
-  data,
-  layout,
-  isFirst,
-  block,
-  align,
-  pictureDepth,
-  categoriesDivider,
-  className,
-  nameLevel: Name,
-}: {
-  data: Data
-  layout: LinkListLayout
-  isFirst: boolean
-  block: string
-  align: 'start' | 'center'
-  pictureDepth: ElementDepth | undefined
-  /** Design › Dividers › Between the categories and the bio; drawn only when both show. */
-  categoriesDivider: ResolvedDivider | null
-  /** The space below: none when a divider follows, which brings its own. */
-  className: string
-  nameLevel: 'h2'
-}) {
-  const name = clean(data.profile?.name)
-  const categories = inlineListItems(data.profile?.categories)
-  const bio = bioParagraphs(data.profile?.bio, categories)
-  const image = data.profile?.image as SanityImageData | null | undefined
-  const nameImage = data.profile?.nameImage as WordmarkImage | null | undefined
-  const wordmark = showsWordmark(data.profile?.nameDisplay, nameImage) ? nameImage : null
-  if (!hasProfile(data)) return null
-  const design = data.profileDesign
-  const { textColour, ...categoryLook } = resolveInlineListDesign(data.categoryDesign)
-  const hasHeading = Boolean(name || wordmark)
-  const bioGap = categories.length > 0 ? 'mt-3' : hasHeading ? 'mt-2' : ''
-
-  return (
-    <div className={className || undefined}>
-      <ProfileImage
-        image={image}
-        design={resolveProfileImage(design)}
-        scale={layout.profile.picture}
-        colour={themeColourCss(design?.borderColour)}
-        preload={isFirst}
-        className={`mb-4 ${block} ${pictureDepth?.className ?? ''}`}
-        style={pictureDepth?.style}
-      />
-      {wordmark ? (
-        // Without the name as text the picture is only decoration, so it is not a heading.
-        <WordmarkHeading
-          as={name ? Name : 'div'}
-          alt={name}
-          image={wordmark}
-          preload={isFirst && !image?.asset}
-        />
-      ) : name ? (
-        <Name
-          className={`${layout.profile.name} font-semibold text-balance`}
-          style={themeColourStyle(design?.nameColour)}
-        >
-          {name}
-        </Name>
-      ) : null}
-      <InlineList
-        items={categories}
-        {...categoryLook}
-        colour={textColour}
-        align={align}
-        label="Services"
-        className={`${hasHeading ? 'mt-2' : ''} ${block}`}
-      />
-      {categoriesDivider && categories.length > 0 && bio.length > 0 && (
-        <DecorativeDivider divider={categoriesDivider} block={block} className="my-4!" />
-      )}
-      <PlainText
-        paragraphs={bio}
-        className={`${bioGap} max-w-measure-narrow text-pretty text-ink-muted ${block}`}
-        style={themeColourStyle(design?.bioColour)}
-      />
-    </div>
-  )
-}
-
-/**
- * A wordmark standing in for a heading's text. The text is the picture's alt text: one heading, one
- * name, nothing read twice, and the words stay in the page for search engines.
- */
-function WordmarkHeading({
-  as: Element,
-  alt,
-  image,
-  preload,
-  className,
-}: {
-  as: 'h1' | 'h2' | 'h3' | 'div'
-  alt: string
-  image: WordmarkImage
-  preload: boolean
-  className?: string
-}) {
-  return (
-    <Element className={className}>
-      <Wordmark image={image} alt={alt} size={wordmarkSizeOf(image.size)} preload={preload} />
-    </Element>
-  )
 }
 
 /**
