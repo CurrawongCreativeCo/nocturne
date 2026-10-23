@@ -4,7 +4,7 @@
  *   npm run new:singleton site footer-banner
  *
  * Creates the schema, registers the type in the feature's schema list (and that list in
- * sanity.config.ts if needed) and in SINGLETON_TYPES, which stops editors creating, duplicating or
+ * sanity.config.ts if needed) and in SINGLETON_TYPES, gives it a title in SINGLETON_TITLES (singleton-titles.ts, shared with Start here), which stops editors creating, duplicating or
  * deleting it, and pins it in the desk structure at the fixed document id `<typeName>`. Then runs typegen.
  * Read it with `*[_id == "<typeName>"][0]`.
  */
@@ -41,6 +41,7 @@ if (!existsSync(join(root, 'src/features', feature)))
 const paths = {
   schema: join(root, 'src/features', feature, 'schemas', `${kebab}.ts`),
   singletons: join(root, 'src/features/studio/singletons.ts'),
+  titles: join(root, 'src/features/studio/singleton-titles.ts'),
   structure: join(root, 'src/features/studio/structure.ts'),
   gitkeep: join(root, 'src/features', feature, 'schemas/.gitkeep'),
 }
@@ -58,6 +59,11 @@ const touched = write({
     ...registration.edits,
     { file: paths.singletons, marker: '// new-singleton:register', text: `'${typeName}',\n` },
     {
+      file: paths.titles,
+      marker: '// new-singleton:title',
+      text: `${typeName}: '${escapeJs(title)}',\n`,
+    },
+    {
       file: paths.structure,
       marker: '// new-singleton:import',
       text: "import { DocumentIcon } from '@sanity/icons/Document'\n",
@@ -66,11 +72,7 @@ const touched = write({
     {
       file: paths.structure,
       marker: '// new-singleton:list',
-      text: `S.listItem()
-  .title('${escapeJs(title)}')
-  .id('${typeName}')
-  .icon(DocumentIcon)
-  .child(S.document().schemaType('${typeName}').documentId('${typeName}').title('${escapeJs(title)}')),
+      text: `singletonItem(S, '${typeName}', DocumentIcon),
 `,
     },
   ],

@@ -24,6 +24,9 @@ you start a release.
 
 ### Changed
 
+- Start here's recent changes name single-document screens by their Structure title ("Business info", "Navigation") instead of "Untitled business info". The titles live in `src/features/studio/singleton-titles.ts`; `npm run new:singleton` leaves a `// new-singleton:title` marker there. Pages and posts still show "Untitled page" when they have no title.
+- Start here's Help always offers a way to get help: with no `help.supportEmail` or `help.guideUrl` it names the studio (from the CMS brand) and says to include the page name and a screenshot.
+
 ### Fixed
 
 ### Breaking changes / migration steps
