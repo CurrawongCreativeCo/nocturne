@@ -32,16 +32,16 @@ const SIDE_CLASSES = {
 } as const
 
 /**
- * One step: a numbered marker on the line, an optional label, picture and text. It reveals with the
- * section's animation (the Stagger preset by default) as it scrolls into view, one step after
- * another because each plays as it arrives. `data-reveal` keeps it visible without JavaScript and
- * under reduced motion.
+ * One step: a numbered marker on the line, an optional label, picture and text. The first stays
+ * visible in the server HTML: even after another short section, its text can be the page's LCP.
+ * Later steps reveal with the section's animation (Stagger by default) as they scroll into view.
+ * `data-reveal` keeps them visible without JavaScript and under reduced motion.
  */
 export function ProcessStep({ step, index, side, plan }: Props) {
   const classes = SIDE_CLASSES[side]
   const variants = plan.kind === 'enter' ? (plan.childVariants ?? plan.variants) : undefined
   const reveal =
-    plan.kind === 'enter' && variants
+    index > 0 && plan.kind === 'enter' && variants
       ? plan.trigger === 'load'
         ? revealOnLoad(variants)
         : revealInView(variants, plan.viewport)

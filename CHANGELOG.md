@@ -37,6 +37,7 @@ you start a release.
 
 ### Fixed
 
+- **Linux Lighthouse rendering:** the public Inter font uses optional display to prevent late font swaps changing line wraps. The first Process step is visible in server-rendered HTML, even after a short preceding section, so its text does not wait for hydration and a reveal animation to become LCP. Budgets and throttling are unchanged; tests were not run for this fix at the owner's request.
 - **Announcement first paint and CI diagnostics:** reveal an announcement only after its message and dismiss control have been parsed. Lighthouse CI uses the installed Playwright Chromium and retains its hidden report directory in failure artifacts; budgets and throttling are unchanged.
 - **Lighthouse budget enforcement:** audit rules now sit inside each matrix entry's `assertions` object, with median aggregation and regression tests against the installed LHCI engine. Previously the command could exit successfully without checking any budgets. About now shares the 2500 ms LCP limit; the other thresholds and applied throttling are retained.
 - **Lighthouse engine and production CSS:** pin the CLI's Lighthouse engine to 13.5.0 for Chrome 156, using the project's Node 24 runtime. Style-guide container-frame CSS is included in development, previews and the end-to-end gallery, and omitted from live production builds, including self-hosted builds.
