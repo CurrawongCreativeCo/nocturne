@@ -26,6 +26,17 @@ import {
 } from '@/lib/sanity/schema/thumbnails/registry'
 import { SECTION_EDGES, SECTION_MOTIONS, SECTION_TONES } from '@/lib/sanity/section-style-options'
 
+import { SHADOW_LEVELS } from '@/lib/sanity/depth-options'
+import { DIVIDER_STYLES } from '@/lib/sanity/divider-options'
+import { LINK_ARROWS } from '@/lib/sanity/link-arrow-options'
+import { SOCIAL_STYLES } from '@/lib/sanity/social-style-options'
+import { dividerThumbnails } from '@/lib/sanity/schema/thumbnails/divider-thumbnails'
+import {
+  shadowThumbnails,
+  linkArrowThumbnails,
+  socialStyleThumbnails,
+} from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
+
 /**
  * Lives in the route folder because it reads two features (the page builder's sections and Studio's
  * thumbnails), which only src/app may compose.
@@ -135,6 +146,16 @@ describe('thumbnails cover every option', () => {
     }
   })
 
+  it.each([
+    ['shadow', SHADOW_LEVELS, shadowThumbnails],
+    ['divider', DIVIDER_STYLES, dividerThumbnails],
+    ['link arrow', LINK_ARROWS, linkArrowThumbnails],
+    ['social style', SOCIAL_STYLES, socialStyleThumbnails],
+  ] as const)('has a thumbnail for every %s choice', (_name, values, thumbnails) => {
+    expect(Object.keys(thumbnails).sort()).toEqual([...values].sort())
+    for (const thumbnail of Object.values(thumbnails)) expect(render(thumbnail)).toContain('<svg')
+  })
+
   it('has an animation thumbnail for every animation preset', () => {
     expect(Object.keys(animationThumbnails).sort()).toEqual([...SECTION_MOTIONS].sort())
   })
@@ -159,6 +180,10 @@ const everything: [string, Thumbnail][] = [
       ['image-motion', imageMotionThumbnails],
       ['image-frame', imageFrameThumbnails],
       ['panel-presentation', panelPresentationThumbnails],
+      ['shadow', shadowThumbnails],
+      ['divider', dividerThumbnails],
+      ['link-arrow', linkArrowThumbnails],
+      ['social-style', socialStyleThumbnails],
     ] as const
   ).flatMap(([group, thumbnails]) =>
     Object.entries(thumbnails).map(([value, Thumbnail]): [string, Thumbnail] => [
