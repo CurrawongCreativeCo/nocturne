@@ -236,7 +236,11 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
           ).toBeVisible()
           await expect(page.getByRole('checkbox', { name: 'Edit', exact: true })).toBeEnabled()
         })
-        await page.getByRole('checkbox', { name: 'Edit', exact: true }).uncheck()
+        // Presentation applies the change a moment after the click, so wait for it rather than
+        // using uncheck(), which reads the state immediately.
+        const edit = page.getByRole('checkbox', { name: 'Edit', exact: true })
+        if (await edit.isChecked()) await edit.click()
+        await expect(edit).not.toBeChecked()
         await measure(page, view, run, 'presentationSwitchFiveRoutes', async () => {
           for (let i = 1; i <= 5; i++) {
             const frame = page.frameLocator('iframe')
@@ -266,6 +270,7 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
         }
       } finally {
         await context.close()
+        console.log(`Finished ${view} run ${run} of 5`)
       }
     }
   }
