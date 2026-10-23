@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect as baseExpect, test, type Locator, type Page } from '@playwright/test'
+import { expect as baseExpect, type Locator, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * The style guide (README, "Style guide"): the sections view with tone, layout and width controls,

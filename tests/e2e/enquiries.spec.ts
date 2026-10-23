@@ -1,4 +1,6 @@
-import { expect, test, type APIRequestContext, type Page, type TestInfo } from '@playwright/test'
+import { expect, type APIRequestContext, type Page, type TestInfo } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 import {
   APP_PORT,

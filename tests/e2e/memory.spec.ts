@@ -1,4 +1,6 @@
-import { expect, test, type CDPSession, type Page } from '@playwright/test'
+import { expect, type CDPSession, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * Catches client-side leaks: a listener, node or payload that outlives the component that made it.

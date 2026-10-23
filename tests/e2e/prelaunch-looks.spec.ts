@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * The six pre-launch looks (README, "Pre-launch looks") on the Link page + coming soon and Coming soon

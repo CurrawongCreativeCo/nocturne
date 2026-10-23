@@ -2,7 +2,9 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 
-import { expect, test, type APIRequestContext } from '@playwright/test'
+import { expect, type APIRequestContext } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * Gzipped JavaScript the home page may load, in KB (1 KB = 1000 bytes). See README "Performance budgets".

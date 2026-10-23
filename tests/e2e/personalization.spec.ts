@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 test.describe('returning visitor greeting', () => {
   test('first visit shows no greeting, the second visit does', async ({ page, context }) => {

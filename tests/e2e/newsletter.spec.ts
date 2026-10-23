@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page, type TestInfo } from '@playwright/test'
+import { expect, type Page, type TestInfo } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 import { waitForHydration } from './hydration'
 

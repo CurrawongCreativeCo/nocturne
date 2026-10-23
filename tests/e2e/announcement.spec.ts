@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 // The fixture's window is 2026-01-01 to 2100-01-01 (tests/e2e/fixtures/dataset.mjs).
 const BEFORE_WINDOW = new Date('2025-06-01T00:00:00Z')

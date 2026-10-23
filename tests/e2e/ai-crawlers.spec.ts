@@ -1,4 +1,6 @@
-import { expect, test, type APIRequestContext, type TestInfo } from '@playwright/test'
+import { expect, type APIRequestContext, type TestInfo } from '@playwright/test'
+
+import { test } from './fixtures/test'
 import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { FAKE_SANITY_PORT, REVALIDATE_SECRET, SITE_URL } from './constants'

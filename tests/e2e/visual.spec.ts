@@ -1,6 +1,8 @@
 import { readFileSync, readdirSync } from 'node:fs'
 
-import { expect, test, type Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 import { galleryIds } from './fixtures/dataset.mjs'
 

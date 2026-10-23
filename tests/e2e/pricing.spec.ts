@@ -1,6 +1,8 @@
 import { createHmac } from 'node:crypto'
 
-import { expect, test, type APIRequestContext } from '@playwright/test'
+import { expect, type APIRequestContext } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 import { SANITY_WRITE_TOKEN, SITE_URL, STRIPE_WEBHOOK_SECRET } from './constants'
 

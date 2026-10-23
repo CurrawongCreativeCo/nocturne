@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs'
 
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
+
+import { test } from './fixtures/test'
 
 /**
  * Image design (README, "Image design"): a picture moves inside a still frame, and the decorative

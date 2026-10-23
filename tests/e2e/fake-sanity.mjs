@@ -4,6 +4,7 @@
  * SANITY_API_HOST (see playwright.config.ts). It behaves like a private dataset: queries need a
  * Bearer token (any value).
  */
+import { readFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 
 import { evaluate, parse } from 'groq-js'
@@ -18,6 +19,8 @@ import {
   releaseVersions,
   variantDocuments,
 } from './fixtures/dataset.mjs'
+
+const PICTURE = readFileSync(new URL('./fixtures/picture.png', import.meta.url))
 
 const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
 
@@ -77,6 +80,11 @@ async function readBody(req) {
 
 createServer(async (req, res) => {
   const url = new URL(req.url ?? '/', 'http://localhost')
+  if (req.method === 'GET' && url.pathname === '/__fixture/picture.png') {
+    res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'public, max-age=3600' })
+    res.end(PICTURE)
+    return
+  }
   // Test control: POST /__fixture/settings/<variant> picks which settings the lake serves.
   const variant = /^\/__fixture\/settings\/(\w+)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && variant && variant in SETTINGS_VARIANTS) {
