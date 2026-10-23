@@ -16,14 +16,17 @@ import { PickerView } from '../components/preset-picker/picker-view'
 import { SliderInput } from '../components/slider-input'
 
 /** Apply the same scalar set/unset patches these Studio inputs emit, without a Content Lake. */
-function scalarPatch<T>(
-  patch: Parameters<typeof PatchEvent.from>[0],
-  update: (value: T | undefined) => void,
-) {
+function scalarValue(patch: Parameters<typeof PatchEvent.from>[0]): string | number | undefined {
+  let value: string | number | undefined
   for (const operation of PatchEvent.from(patch).patches) {
-    if (operation.type === 'set') update(operation.value as T)
-    if (operation.type === 'unset') update(undefined)
+    if (
+      operation.type === 'set' &&
+      (typeof operation.value === 'string' || typeof operation.value === 'number')
+    )
+      value = operation.value
+    if (operation.type === 'unset') value = undefined
   }
+  return value
 }
 
 export function DesignInputExamples() {
@@ -71,7 +74,10 @@ export function DesignInputExamples() {
                 ],
               },
               border,
-              (patch) => scalarPatch(patch, setBorder),
+              (patch) => {
+                const value = scalarValue(patch)
+                setBorder(typeof value === 'string' ? value : undefined)
+              },
             ) as unknown as StringInputProps)}
           />
         </Stack>
@@ -87,7 +93,10 @@ export function DesignInputExamples() {
               'Icon',
               { iconPicker: true, list: BADGE_ICONS },
               icon,
-              (patch) => scalarPatch(patch, setIcon),
+              (patch) => {
+                const value = scalarValue(patch)
+                setIcon(typeof value === 'string' ? value : undefined)
+              },
             ) as unknown as StringInputProps)}
           />
         </Stack>
@@ -103,7 +112,10 @@ export function DesignInputExamples() {
               'Strength',
               { slider: { min: 0, max: 100, step: 1, unit: '%' } },
               strength,
-              (patch) => scalarPatch(patch, setStrength),
+              (patch) => {
+                const value = scalarValue(patch)
+                setStrength(typeof value === 'number' ? value : undefined)
+              },
             ) as unknown as NumberInputProps)}
           />
         </Stack>
