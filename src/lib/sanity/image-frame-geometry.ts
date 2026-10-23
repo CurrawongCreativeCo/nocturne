@@ -1,9 +1,11 @@
 import type { Placement } from './image-framing'
+import { thumbnailShapes } from './link-thumbnail-framing'
 import {
   resolveProfileImage,
   type ProfileImageDesignInput,
   type ProfileImageSize,
   type ResolvedProfileBorder,
+  type ResolvedProfileImage,
 } from './profile-image-options'
 
 /**
@@ -43,13 +45,41 @@ export const PROFILE_DRAWN_PX: Record<ProfileImageSize, number> = {
 /** The shapes a picture is drawn in: the main shape first, then any others. */
 export type FrameShapes = [FrameShape, ...FrameShape[]]
 
+/** A Studio form path: strings, indexes and `{ _key }` segments. */
+type FormPath = readonly unknown[]
+
 export interface FramingResolver {
-  /** Where the design sits, relative to the image field: drop this many segments off its path, then add `field`. */
-  designPath: { drop: number; field: string }
+  /**
+   * Where the design sits, relative to the image field: drop this many segments off its path, then
+   * add `field` (or, without one, read the object at the dropped path).
+   */
+  designPath: { drop: number; field?: string }
   /** The decorative frame document the design points at, if any: the Studio fetches its artwork. */
   frameRef?: (design: unknown) => string | undefined
-  /** The main shape first, then any others the picture is also drawn in; none when nothing is cropped. */
-  resolve: (design: unknown, frameUrl?: string | null) => FrameShape[]
+  /**
+   * The main shape first, then any others the picture is also drawn in; none when nothing is
+   * cropped. `path` is the image field's own path, for placements that depend on which item it sits in.
+   */
+  resolve: (design: unknown, frameUrl?: string | null, path?: FormPath) => FrameShape[]
+}
+
+/**
+ * The shape a profile picture is drawn in, or null for "Logo, uncropped", which keeps the upload's
+ * own proportions. `ProfileImage` draws from this too, so the page and the editor agree.
+ */
+export function profileFrameShape(resolved: ResolvedProfileImage): FrameShape | null {
+  if (resolved.shape === 'natural') return null
+  const frame = resolved.border?.kind === 'frame' ? resolved.border : undefined
+  const inset = frame ? PROFILE_FRAME_INSET_PCT : 0
+  return {
+    label: 'Profile picture',
+    aspect: 1,
+    corner: resolved.shape === 'circle' ? 'circle' : 'card',
+    insetPct: inset,
+    ...(resolved.border?.kind === 'ring' && { ring: resolved.border }),
+    ...(frame && { frameUrl: frame.url }),
+    drawnPx: Math.round(PROFILE_DRAWN_PX[resolved.size] * (1 - (inset * 2) / 100)),
+  }
 }
 
 /** The Link list's profile picture: Circle or Rounded square, with a ring or an approved frame. */
@@ -62,31 +92,49 @@ const linkListProfile: FramingResolver = {
       : undefined
   },
   resolve: (design, frameUrl) => {
-    const resolved = resolveProfileImage({
-      ...(design as ProfileImageDesignInput | null | undefined),
-      frameUrl,
-    })
+    const shape = profileFrameShape(
+      resolveProfileImage({
+        ...(design as ProfileImageDesignInput | null | undefined),
+        frameUrl,
+      }),
+    )
     // A logo keeps its own proportions, uncropped: nothing to adjust.
-    if (resolved.shape === 'natural') return []
-    const frame = resolved.border?.kind === 'frame' ? resolved.border : undefined
-    const inset = frame ? PROFILE_FRAME_INSET_PCT : 0
-    return [
-      {
-        label: 'Profile picture',
-        aspect: 1,
-        corner: resolved.shape === 'circle' ? 'circle' : 'card',
-        insetPct: inset,
-        ...(resolved.border?.kind === 'ring' && { ring: resolved.border }),
-        ...(frame && { frameUrl: frame.url }),
-        drawnPx: Math.round(PROFILE_DRAWN_PX[resolved.size] * (1 - (inset * 2) / 100)),
-      },
-    ]
+    return shape ? [shape] : []
+  },
+}
+
+interface StoredLinkListSection {
+  variant?: string | null
+  rowStyle?: string | null
+  thumbnailSize?: string | null
+  links?: { _key?: string; featured?: boolean | null; visibility?: string | null }[] | null
+}
+
+/**
+ * A Link list link's thumbnail: the section's layout, row style and Image-focused size say which
+ * shape it is drawn in, and the link's own featured flag picks the featured card's 16:9
+ * (lib/sanity/link-thumbnail-framing.ts). The section is three segments up: `links[_key].thumbnail`.
+ */
+const linkListThumbnail: FramingResolver = {
+  designPath: { drop: 3 },
+  resolve: (design, _frameUrl, path = []) => {
+    const section = design as StoredLinkListSection | null | undefined
+    const key = (path[path.length - 2] as { _key?: string } | undefined)?._key
+    // Only the first ticked, shown link is drawn large (features/pages/utils/link-list.ts, `featuredKey`).
+    const large = section?.links?.find((item) => item.featured && item.visibility !== 'hide')
+    return thumbnailShapes({
+      layout: section?.variant,
+      rowStyle: section?.rowStyle,
+      thumbnailSize: section?.thumbnailSize,
+      featured: Boolean(key) && large?._key === key,
+    })
   },
 }
 
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
+  linkListThumbnail,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 

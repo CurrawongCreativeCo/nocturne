@@ -1,3 +1,4 @@
+import { stegaClean } from 'next-sanity'
 import type { CSSProperties } from 'react'
 
 import { buttonFeedback } from '@/components/ui/cta-link'
@@ -5,7 +6,10 @@ import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
+import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { isFramed, visibleArea } from '@/lib/sanity/image-framing'
 import type { LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
+import { servedThumbnail } from '@/lib/sanity/link-thumbnail-framing'
 import type { SanityImageData } from '@/types/sanity'
 
 import { LinkIcon, LinkText, hasThumbnail, ownEyebrow, type OwnLinkText } from './link-design'
@@ -19,6 +23,10 @@ const STRENGTH: Record<GlassStrength, string> = {
   medium: '',
   strong: 'glass-row-strong',
 }
+// The strip's ratio follows the row's text: see thumbnailSpot. CSS places the served area on the
+// hotspot, or the centre when there is none.
+const thumbnailFor = (featured: boolean, framed: boolean) =>
+  servedThumbnail({ layout: 'stacked', rowStyle: 'glass', featured, framed })
 const ROW = `glass-row group flex w-full items-stretch overflow-hidden rounded-card text-left text-ink ${buttonFeedback}`
 // Round badges on the glass: opaque, so they read the same over any photo. The arrow's is fixed; the
 // icon's is the card's icon design over this.
@@ -63,6 +71,16 @@ export function GlassRow({
   className?: string
 }) {
   const thumbnail = link.item.thumbnail as SanityImageData | null | undefined
+  const served = thumbnailFor(link.large, isFramed(thumbnail))
+  const dimensions = stegaClean(thumbnail?.asset?.metadata?.dimensions)
+  const area =
+    thumbnail && dimensions
+      ? visibleArea(served, {
+          asset: dimensions,
+          crop: stegaClean(thumbnail.crop),
+          hotspot: stegaClean(thumbnail.hotspot),
+        })
+      : null
   return (
     <SanityLink
       link={link.link}
@@ -73,10 +91,17 @@ export function GlassRow({
           <SanityImage
             image={thumbnail}
             alt=""
-            width={600}
-            height={450}
-            sizes="128px"
+            width={served.width}
+            height={served.height}
+            placement={served}
+            sizes={served.sizes}
             className="absolute inset-0 size-full object-cover"
+            style={{
+              objectPosition:
+                dimensions && area
+                  ? hotspotObjectPosition(stegaClean(thumbnail), { asset: dimensions, area })
+                  : undefined,
+            }}
           />
         </span>
       )}

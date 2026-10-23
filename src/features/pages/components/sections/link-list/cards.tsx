@@ -1,6 +1,7 @@
 import { buttonFeedback } from '@/components/ui/cta-link'
 import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
+import { servedThumbnail } from '@/lib/sanity/link-thumbnail-framing'
 import { ringSurfaceLook } from '@/lib/sanity/surface-options'
 
 import {
@@ -59,6 +60,9 @@ const layout: LinkListLayout = {
     const ownBorder =
       design.surface.border === undefined && design.surface.borderColour === undefined
     const thumbnail = hasThumbnail(link)
+    // The picture is served at the ratio it is drawn at: 4:3 across a large card, 16:9 for the
+    // featured one, a square tile on small cards.
+    const served = servedThumbnail({ layout: 'cards', thumbnailSize, featured: link.large })
     // Small cards: the icon's container is the tile itself. Large ones keep their picture-shaped tile
     // and put a chosen container inside it.
     const icon = large ? (
@@ -94,7 +98,7 @@ const layout: LinkListLayout = {
               <LinkVisual
                 link={link}
                 thumbClass="size-full object-cover"
-                sizes="(min-width: 768px) 384px, 100vw"
+                served={served}
                 icon={icon}
               />
             </span>
@@ -103,7 +107,7 @@ const layout: LinkListLayout = {
               <LinkVisual
                 link={link}
                 thumbClass="size-full object-cover"
-                sizes="64px"
+                served={served}
                 icon={null}
               />
             </span>

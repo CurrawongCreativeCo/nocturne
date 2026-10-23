@@ -117,6 +117,9 @@ const PHOTO_ASSET_ID = 'image-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-800x600-j
 const LQIP =
   'data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
 const PATTERN_ASSET_ID = 'image-fedcba9876543210fedcba9876543210fedcba98-160x120-png'
+// Two uploads of different shapes for "Adjust picture" on the Link list (tests/e2e/link-list-framing.spec.ts).
+const LANDSCAPE_ASSET_ID = 'image-dddddddddddddddddddddddddddddddddddddddd-3000x2000-jpg'
+const PORTRAIT_ASSET_ID = 'image-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-1000x1600-jpg'
 const pattern = () => ({ _type: 'image', alt: '', asset: ref(PATTERN_ASSET_ID) })
 
 /** Four steps with labels, in a fixed order the tests check. The first has a picture. */
@@ -1112,6 +1115,18 @@ export const documents = [
     metadata: { lqip: LQIP, hasAlpha: false, dimensions: { width: 800, height: 600 } },
   },
   {
+    _id: LANDSCAPE_ASSET_ID,
+    _type: 'sanity.imageAsset',
+    url: 'https://cdn.sanity.io/images/test/test/dddddddddddddddddddddddddddddddddddddddd-3000x2000.jpg',
+    metadata: { lqip: LQIP, hasAlpha: false, dimensions: { width: 3000, height: 2000 } },
+  },
+  {
+    _id: PORTRAIT_ASSET_ID,
+    _type: 'sanity.imageAsset',
+    url: 'https://cdn.sanity.io/images/test/test/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-1000x1600.jpg',
+    metadata: { lqip: LQIP, hasAlpha: false, dimensions: { width: 1000, height: 1600 } },
+  },
+  {
     _id: PATTERN_ASSET_ID,
     _type: 'sanity.imageAsset',
     url: 'https://cdn.sanity.io/images/test/test/fedcba9876543210fedcba9876543210fedcba98-160x120.png',
@@ -1677,6 +1692,54 @@ const galleryImages = (id, count) =>
  * featured one comes first; "Shop" and "Follow along" are groups; thumbnails only matter to the layouts
  * that draw them.
  */
+/**
+ * "Adjust picture" on the Link list (tests/e2e/link-list-framing.spec.ts): the profile picture and
+ * thumbnails with an adjustment (a crop and hotspot, as the dialog writes them), with only a hotspot,
+ * and with neither, on a landscape and a portrait upload, in every layout.
+ */
+const ADJUSTED = {
+  // Zoom 2 on the landscape upload, centred on (0.4, 0.6).
+  crop: { _type: 'sanity.imageCrop', left: 0.2333, right: 0.4333, top: 0.35, bottom: 0.15 },
+  hotspot: { _type: 'sanity.imageHotspot', x: 0.4, y: 0.6, width: 0.3333, height: 0.5 },
+}
+const HOTSPOT_ONLY = {
+  hotspot: { _type: 'sanity.imageHotspot', x: 0.2, y: 0.3, width: 0.2, height: 0.2 },
+}
+const framedPicture = (assetId, alt, framing = {}) => ({
+  _type: 'image',
+  alt,
+  asset: ref(assetId),
+  ...framing,
+})
+const framingSection = (id, fields, links, profile = {}) => ({
+  _key: `fr-${id}`,
+  _type: 'linkList',
+  variant: 'stacked',
+  thumbnailSize: 'standard',
+  socialSource: 'none',
+  style: { _type: 'sectionStyle', align: 'center', spacing: 'compact' },
+  profile: { _type: 'object', name: `Framing: ${id}`, ...profile },
+  links,
+  ...fields,
+})
+const framingLinks = (id, thumbnails) =>
+  thumbnails.map(([name, picture, extra]) =>
+    linkItem(`fr-${id}-${name}`, `${id} ${name}`, external(`https://example.com/${id}/${name}`), {
+      icon: 'star',
+      thumbnail: picture,
+      ...extra,
+    }),
+  )
+const framingThumbnails = (id) =>
+  framingLinks(id, [
+    ['adjusted', framedPicture(LANDSCAPE_ASSET_ID, '', ADJUSTED)],
+    ['hotspot', framedPicture(LANDSCAPE_ASSET_ID, '', HOTSPOT_ONLY)],
+    ['landscape', framedPicture(LANDSCAPE_ASSET_ID, '')],
+    ['portrait', framedPicture(PORTRAIT_ASSET_ID, '')],
+  ])
+const framingProfile = (framing) => ({
+  image: framedPicture(LANDSCAPE_ASSET_ID, 'A portrait', framing),
+})
 const linkItem = (id, label, link, extra = {}) => ({
   _key: id,
   _type: 'linkItem',
@@ -3604,6 +3667,75 @@ documents.push(
       },
     ],
   })),
+  {
+    // Adjust picture on the Link list (tests/e2e/link-list-framing.spec.ts): every layout and profile shape.
+    _id: 'page-link-framing',
+    _type: 'page',
+    title: 'Framed links',
+    slug: { _type: 'slug', current: 'link-framing' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      framingSection('circle', {}, framingThumbnails('minimal'), framingProfile(ADJUSTED)),
+      // The same document data in Logo, uncropped (whole, no rect) and back in a circle (applied again).
+      framingSection(
+        'logo',
+        { profileDesign: { _type: 'object', imageShape: 'natural' } },
+        [],
+        framingProfile(ADJUSTED),
+      ),
+      framingSection(
+        'logo-back',
+        { profileDesign: { _type: 'object', imageShape: 'circle' } },
+        [],
+        framingProfile(ADJUSTED),
+      ),
+      // The same upload with no framing: framing belongs to the field, never to the asset.
+      framingSection(
+        'reuse',
+        {},
+        framingLinks('reuse', [['plain', framedPicture(LANDSCAPE_ASSET_ID, '')]]),
+        framingProfile({}),
+      ),
+      framingSection(
+        'rounded',
+        { profileDesign: { _type: 'object', imageShape: 'rounded', imageSize: 'large' } },
+        [],
+        framingProfile(ADJUSTED),
+      ),
+      framingSection(
+        'ring',
+        {
+          profileDesign: {
+            _type: 'object',
+            border: 'line',
+            borderWidth: 'medium',
+            borderGap: 'large',
+          },
+        },
+        [],
+        framingProfile(ADJUSTED),
+      ),
+      framingSection(
+        'frame',
+        { profileDesign: { _type: 'object', border: 'frame', frame: ref('frame-leaf') } },
+        [],
+        framingProfile(ADJUSTED),
+      ),
+      framingSection('cards', { variant: 'cards' }, framingThumbnails('cards')),
+      framingSection(
+        'image',
+        { variant: 'cards', thumbnailSize: 'large' },
+        framingLinks('image', [
+          ['featured', framedPicture(LANDSCAPE_ASSET_ID, ''), { featured: true }],
+          ['adjusted', framedPicture(LANDSCAPE_ASSET_ID, '', ADJUSTED)],
+          ['hotspot', framedPicture(LANDSCAPE_ASSET_ID, '', HOTSPOT_ONLY)],
+          ['portrait', framedPicture(PORTRAIT_ASSET_ID, '')],
+        ]),
+      ),
+      framingSection('glass', { rowStyle: 'glass' }, framingThumbnails('glass')),
+    ],
+  },
   {
     // Glass rows over a background photo, on a minimal page (tests/e2e/link-list-glass.spec.ts).
     _id: 'page-link-glass',

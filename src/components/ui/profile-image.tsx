@@ -1,10 +1,7 @@
 import type { CSSProperties } from 'react'
 
-import type {
-  ProfileImageShape,
-  ProfileImageSize,
-  ResolvedProfileImage,
-} from '@/lib/sanity/profile-image-options'
+import { profileFrameShape, type FrameCorner } from '@/lib/sanity/image-frame-geometry'
+import type { ProfileImageSize, ResolvedProfileImage } from '@/lib/sanity/profile-image-options'
 import type { SanityImageData } from '@/types/sanity'
 
 import { ImageFrame } from './image-frames'
@@ -25,17 +22,19 @@ const SIZES: Record<ProfileImageSize, { sizes: string; request: number }> = {
   large: { sizes: '160px', request: 384 },
 }
 
-const SHAPE_RADIUS: Record<ProfileImageShape, string> = {
+/** The classes for the corners the shared geometry (lib/sanity/image-frame-geometry.ts) describes. */
+const CORNER_RADIUS: Partial<Record<FrameCorner, string>> = {
   circle: 'rounded-full',
-  rounded: 'rounded-card',
-  natural: 'rounded-control',
+  card: 'rounded-card',
 }
 
 /**
  * A small portrait or logo with an optional ring or decorative frame, drawn with CSS only.
  *
- * - Circle and Rounded square crop to a square on the hotspot; Logo, uncropped keeps the upload's
- *   proportions at the size's height (for marks and wordmarks with transparent backgrounds).
+ * - The shape comes from the shared geometry (`profileFrameShape`), as the Studio's "Adjust picture"
+ *   draws it. Circle and Rounded square crop to a square on the picture's crop and hotspot; Logo,
+ *   uncropped keeps the whole upload's proportions at the size's height (for marks and wordmarks
+ *   with transparent backgrounds), whatever crop or hotspot is stored.
  * - A ring is one decorative layer (`.image-ring` in globals.css): a solid colour or a gradient,
  *   masked to a band, with a see-through gap so it works over a photo or glass. The wrapper pads by
  *   the ring's width and gap, so the ring never overlaps the picture or the text below.
@@ -66,8 +65,11 @@ export function ProfileImage({
 }) {
   if (!image?.asset) return null
   const { size, shape, border } = design
-  const radius = SHAPE_RADIUS[shape]
-  const natural = shape === 'natural'
+  const frameShape = profileFrameShape(design)
+  const natural = !frameShape
+  const radius = frameShape ? (CORNER_RADIUS[frameShape.corner] ?? '') : 'rounded-control'
+  // A logo is shown whole: a saved adjustment stays stored for when a cropping shape is chosen again.
+  const shown = natural ? { ...image, crop: null, hotspot: null } : image
   const { sizes, request } = SIZES[size]
   const imageClass = natural
     ? `w-auto max-w-full object-contain ${scale.height[size]}`
@@ -75,7 +77,8 @@ export function ProfileImage({
 
   const picture = (extra = '') => (
     <SanityImage
-      image={image}
+      image={shown}
+      whole={natural}
       {...(natural ? { height: request } : { width: request, height: request })}
       sizes={sizes}
       preload={preload}

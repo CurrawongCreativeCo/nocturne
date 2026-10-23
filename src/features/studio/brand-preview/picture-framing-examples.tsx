@@ -2,7 +2,11 @@ import { Card, Stack, Text } from '@sanity/ui'
 import { useState } from 'react'
 import type { FormPatch } from 'sanity'
 
-import type { FrameShapes } from '@/lib/sanity/image-frame-geometry'
+import {
+  FRAMING_RESOLVERS,
+  type FrameShape,
+  type FrameShapes,
+} from '@/lib/sanity/image-frame-geometry'
 import type { Crop, Hotspot } from '@/lib/sanity/image-framing'
 
 import { PictureFraming } from '../components/picture-framing/picture-framing'
@@ -30,6 +34,35 @@ const WIDE: FrameShapes = [
   { label: 'Wide card', aspect: 16 / 9, corner: 'card', insetPct: 0, drawnPx: 640 },
 ]
 
+// The Link list's own shapes, from the resolvers the Studio uses, so what is shown here is what an editor sees.
+const PROFILE = FRAMING_RESOLVERS.linkListProfile
+const THUMBNAIL = FRAMING_RESOLVERS.linkListThumbnail
+const FRAME_ARTWORK =
+  'https://cdn.sanity.io/files/test/test/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.svg'
+const thumbnailPath = ['sections', { _key: 's' }, 'links', { _key: 'a' }, 'thumbnail']
+const LINK_PROFILE_CIRCLE = PROFILE.resolve({})
+const LINK_PROFILE_FRAME = PROFILE.resolve(
+  { border: 'frame', imageShape: 'rounded' },
+  FRAME_ARTWORK,
+)
+// Logo, uncropped has no shape: the field says so, and keeps what is saved.
+const LINK_PROFILE_LOGO = PROFILE.resolve({ imageShape: 'natural' })
+const LINK_THUMBNAIL_CARDS = THUMBNAIL.resolve(
+  { variant: 'cards', thumbnailSize: 'large', links: [{ _key: 'a' }] },
+  null,
+  thumbnailPath,
+)
+const LINK_THUMBNAIL_GLASS = THUMBNAIL.resolve(
+  { variant: 'stacked', rowStyle: 'glass', links: [{ _key: 'a' }] },
+  null,
+  thumbnailPath,
+)
+/** A saved adjustment, to show Logo, uncropped keeping it. */
+const SAVED: Partial<Value> = {
+  crop: { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
+  hotspot: { x: 0.5, y: 0.5, width: 0.8, height: 0.8 },
+}
+
 /** Applies Sanity's set and unset patches to the two framing values, as the form would. */
 function apply(value: Value, patches: FormPatch[]): Value {
   let next = { ...value }
@@ -46,8 +79,21 @@ function apply(value: Value, patches: FormPatch[]): Value {
   return next
 }
 
-function Example({ id, title, shapes }: { id: string; title: string; shapes: FrameShapes }) {
-  const [value, setValue] = useState<Value>({ asset: { _ref: 'image-sample-1600x1200-svg' } })
+function Example({
+  id,
+  title,
+  shapes,
+  initial,
+}: {
+  id: string
+  title: string
+  shapes: FrameShape[]
+  initial?: Partial<Value>
+}) {
+  const [value, setValue] = useState<Value>({
+    asset: { _ref: 'image-sample-1600x1200-svg' },
+    ...initial,
+  })
   return (
     <Card padding={4} radius={3} border data-framing-example={id}>
       <Stack gap={3}>
@@ -79,6 +125,28 @@ export function PictureFramingExamples() {
     <Stack gap={4} data-framing-examples="">
       <Example id="circle" title="Adjust picture: circle" shapes={CIRCLE} />
       <Example id="wide" title="Adjust picture: 16:9" shapes={WIDE} />
+      <Example id="profile-circle" title="Link list profile: Circle" shapes={LINK_PROFILE_CIRCLE} />
+      <Example
+        id="profile-frame"
+        title="Link list profile: Decorative frame"
+        shapes={LINK_PROFILE_FRAME}
+      />
+      <Example
+        id="profile-logo"
+        title="Link list profile: Logo, uncropped"
+        shapes={LINK_PROFILE_LOGO}
+        initial={SAVED}
+      />
+      <Example
+        id="thumbnail-cards"
+        title="Link thumbnail: Image-focused cards"
+        shapes={LINK_THUMBNAIL_CARDS}
+      />
+      <Example
+        id="thumbnail-glass"
+        title="Link thumbnail: Glass rows"
+        shapes={LINK_THUMBNAIL_GLASS}
+      />
     </Stack>
   )
 }

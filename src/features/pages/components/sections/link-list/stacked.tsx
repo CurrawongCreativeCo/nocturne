@@ -1,6 +1,7 @@
 import { buttonFeedback, ctaColours } from '@/components/ui/cta-link'
 import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
+import { servedThumbnail } from '@/lib/sanity/link-thumbnail-framing'
 import { glassSurfaceLook, ringSurfaceLook } from '@/lib/sanity/surface-options'
 
 import { GlassRow } from './glass-row'
@@ -26,6 +27,8 @@ export const PICTURE = {
   box: { small: 'size-16', medium: 'size-24', large: 'size-32 sm:size-36' },
   height: { small: 'h-16', medium: 'h-24', large: 'h-32 sm:h-36' },
 } as const
+
+const THUMBNAIL = servedThumbnail({ layout: 'stacked' })
 
 const BUTTON = `group relative flex w-full items-center justify-center rounded-button px-14 text-center ${buttonFeedback}`
 // The shadow is added per link (`linkShadow`), so Depth and glow can replace it; the fill and border
@@ -90,7 +93,7 @@ const layout: LinkListLayout = {
             <LinkVisual
               link={link}
               thumbClass="size-10 rounded-control object-cover"
-              sizes="40px"
+              served={THUMBNAIL}
               icon={
                 <LinkIcon
                   link={link}
