@@ -1,4 +1,5 @@
 import { Flex, Text } from '@sanity/ui'
+import { useSyncExternalStore } from 'react'
 import { useColorSchemeValue } from 'sanity'
 
 import { brandAssets, type BrandImage } from '@/config/studio-brand/assets.generated'
@@ -10,8 +11,29 @@ import { fittedWidth, resolveBrandImage } from '../utils/brand-image'
 
 const LOGO_HEIGHT = 24
 const LOGO_MAX_WIDTH = 160
+/** Nocturne's wordmark is wider than a client logo: 24px high is about 166px wide. */
+const WORDMARK_MAX_WIDTH = 178
+/** Below this width the navbar has no room for the wordmark, so the bird mark stands in. */
+const WORDMARK_MIN_VIEWPORT = 768
+/** Currawong's own logo is Nocturne, its product brand, so that is its accessible name. */
+const PRODUCT_NAME = 'Nocturne'
 /** Room for the paper-coloured backing's padding when a lone logo is shown on the other scheme. */
 const BACKING_PADDING = 2
+
+const WIDE_QUERY = `(min-width: ${WORDMARK_MIN_VIEWPORT}px)`
+
+/** Whether the viewport is wide enough for the wordmark. Studio renders only in the browser, so there is no server value to match. */
+function useIsWide(): boolean {
+  return useSyncExternalStore(
+    (notify) => {
+      const query = window.matchMedia(WIDE_QUERY)
+      query.addEventListener('change', notify)
+      return () => { query.removeEventListener('change', notify); }
+    },
+    () => window.matchMedia(WIDE_QUERY).matches,
+    () => true,
+  )
+}
 
 /** An image or monogram from the brand, at `height`; the monogram stands in when the image is missing. */
 function BrandAsset({
@@ -19,11 +41,13 @@ function BrandAsset({
   height,
   alt,
   assets,
+  maxWidth = LOGO_MAX_WIDTH,
 }: {
   asset: LogoAsset
   height: number
   alt: string
   assets: Record<string, BrandImage>
+  maxWidth?: number
 }) {
   if (asset.kind === 'monogram') return <BrandMonogram monogram={asset} size={height} />
   const image = resolveBrandImage(assets, asset.src)
@@ -38,8 +62,8 @@ function BrandAsset({
       style={{
         display: 'block',
         height,
-        width: fittedWidth(image, height, LOGO_MAX_WIDTH) ?? 'auto',
-        maxWidth: LOGO_MAX_WIDTH,
+        width: fittedWidth(image, height, maxWidth) ?? 'auto',
+        maxWidth,
         objectFit: 'contain',
       }}
     />
@@ -51,7 +75,9 @@ function BrandAsset({
  * - A client logo file: the file alone, light or dark variant to match the Studio's colour scheme.
  *   A lone file is never recoloured; shown on the other scheme it sits on a small background in the
  *   colour it was drawn for.
- * - Otherwise a mark (the client's monogram, or Currawong's mark) beside the name.
+ * - Currawong's defaults: the Nocturne wordmark alone (up to 178px wide), or the bird mark alone
+ *   below 768px, named "Nocturne".
+ * - Otherwise a mark (the client's monogram) beside the name.
  * The brand name is the accessible label either way.
  */
 export function StudioLogo() {
@@ -73,6 +99,7 @@ export function StudioLogoView({
   assets?: Record<string, BrandImage>
 }) {
   const { name, logo, mark, logoSource, logoDrawnFor } = brand
+  const wide = useIsWide()
 
   if (logoSource === 'client' && logo[scheme].kind === 'image') {
     const backing =
@@ -97,6 +124,20 @@ export function StudioLogoView({
             assets={assets}
           />
         </span>
+      </Flex>
+    )
+  }
+
+  if (logoSource === 'currawong' && logo[scheme].kind === 'image') {
+    return (
+      <Flex align="center" style={{ height: LOGO_HEIGHT }}>
+        <BrandAsset
+          asset={wide ? logo[scheme] : mark[scheme]}
+          height={LOGO_HEIGHT}
+          alt={PRODUCT_NAME}
+          assets={assets}
+          maxWidth={wide ? WORDMARK_MAX_WIDTH : LOGO_MAX_WIDTH}
+        />
       </Flex>
     )
   }

@@ -25,8 +25,8 @@ export const currawongClassicBrand: StudioBrandDefaults = {
     dark: { kind: 'image', src: 'src/assets/brand/currawong/wordmark-on-dark.webp' },
   },
   mark: {
-    light: { kind: 'image', src: 'src/assets/brand/currawong/mark-no-text.webp' },
-    dark: { kind: 'image', src: 'src/assets/brand/currawong/mark-no-text-on-dark.webp' },
+    light: { kind: 'image', src: 'src/assets/brand/currawong/bird-on-light.webp' },
+    dark: { kind: 'image', src: 'src/assets/brand/currawong/bird-on-dark.webp' },
   },
   light: {
     background: currawongPalette.paper,

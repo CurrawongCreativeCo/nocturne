@@ -4,7 +4,7 @@
  *   node scripts/make-default-icons.mjs
  *
  * Writes src/app/icon.png (512 × 512) and src/app/apple-icon.png (180 × 180) from
- * src/assets/brand/currawong/mark-no-text.webp, plus 32/192 px variants in public/icons/.
+ * src/assets/brand/currawong/bird-on-light.webp, plus 32/192 px variants in public/icons/.
  * Use --sizes-only after replacing icon.png to regenerate just those variants. Next.js file-based icons can't be WebP, so the
  * result is committed. Uses sharp, which Next.js already installs; it is not a project dependency
  * and nothing here runs at build or request time. The artwork is only cropped, scaled and placed on
@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 
 const SOURCE = fileURLToPath(
-  new URL('../src/assets/brand/currawong/mark-no-text.webp', import.meta.url),
+  new URL('../src/assets/brand/currawong/bird-on-light.webp', import.meta.url),
 )
 const APP = fileURLToPath(new URL('../src/app/', import.meta.url))
 const SMALL = fileURLToPath(new URL('../public/icons/', import.meta.url))

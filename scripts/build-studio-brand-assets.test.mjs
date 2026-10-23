@@ -10,7 +10,7 @@ describe('studio brand asset map generator', () => {
   })
 
   it("lists Currawong's logo files", () => {
-    expect(listBrandImages()).toContain('src/assets/brand/currawong/wordmark-on-light.webp')
+    expect(listBrandImages()).toContain('src/assets/brand/currawong/logo-horizontal-on-light.webp')
   })
 
   it('maps each repo path to an import', () => {
