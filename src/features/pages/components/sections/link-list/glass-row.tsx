@@ -8,14 +8,8 @@ import type { GlassStrength } from '@/lib/color/glass-contrast'
 import type { LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import type { SanityImageData } from '@/types/sanity'
 
-import {
-  LinkIcon,
-  LinkText,
-  hasThumbnail,
-  ownEyebrow,
-  type ListLink,
-  type OwnLinkText,
-} from './link-list-parts'
+import { LinkIcon, LinkText, hasThumbnail, ownEyebrow, type OwnLinkText } from './link-design'
+import { type ListLink } from './link-list-types'
 import type { LinkCardDesign } from '../../../utils/link-card-design'
 
 // The glass itself (blur, surface, border, shadow) is `.glass-row` in globals.css, from the glass tokens;

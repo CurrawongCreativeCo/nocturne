@@ -13,7 +13,7 @@ import { themeColourCss, themeColourStyle } from '@/lib/sanity/theme-colour'
 import { showsWordmark } from '@/lib/sanity/wordmark-options'
 import type { SanityImageData } from '@/types/sanity'
 
-import type { LinkListLayout } from './link-list-parts'
+import type { LinkListLayout } from './link-list-types'
 import { WordmarkHeading, type WordmarkImage } from './wordmark-heading'
 import type { SectionProps } from '../../../types'
 

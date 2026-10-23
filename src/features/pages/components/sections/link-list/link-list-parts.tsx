@@ -1,18 +1,14 @@
 import { stegaClean } from 'next-sanity'
-import { Fragment, Suspense, type ReactNode, type CSSProperties } from 'react'
+import { Fragment, Suspense } from 'react'
 
-import { BadgeIcon } from '@/components/ui/badge-icon'
 import { DecorativeDivider } from '@/components/ui/decorative-divider'
-import type { ProfileImageScale } from '@/components/ui/profile-image'
 import { RichHeading } from '@/components/ui/rich-heading'
-import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
-import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { ctaSurfaceFor, sectionTraits } from '@/components/ui/section-style'
 import { SocialLinks } from '@/components/ui/social-links'
-import { trackAttributes } from '@/lib/analytics/track-script'
-import { glassStrengthOf, type GlassStrength } from '@/lib/color/glass-contrast'
+import { glassStrengthOf } from '@/lib/color/glass-contrast'
 import { requestTime } from '@/lib/request-time'
-import { OWN_SHADOW, resolveDepth, type BoxDepth } from '@/lib/sanity/depth-options'
+import { resolveDepth } from '@/lib/sanity/depth-options'
 import {
   LINK_LIST_DIVIDER_PLACEMENTS,
   linkListParts,
@@ -25,17 +21,11 @@ import {
 import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { socialPositionOf, socialStyleOf } from '@/lib/sanity/social-style-options'
-import {
-  iconLook,
-  resolveSurface,
-  type IconDesign,
-  type OwnIcon,
-} from '@/lib/sanity/surface-options'
-import { textLook, type OwnText } from '@/lib/sanity/text-style-options'
+import { resolveSurface } from '@/lib/sanity/surface-options'
 import { themeColourCss } from '@/lib/sanity/theme-colour'
 import { showsWordmark } from '@/lib/sanity/wordmark-options'
-import type { SanityImageData } from '@/types/sanity'
 
+import type { LinkContext, LinkListLayout, ListLink, StoredLink } from './link-list-types'
 import { Profile, hasProfile } from './profile'
 import { WordmarkHeading, type WordmarkImage } from './wordmark-heading'
 import type { SectionProps } from '../../../types'
@@ -44,64 +34,15 @@ import {
   layerLinkCardDesign,
   listCardDesignInput,
   resolveLinkCardDesign,
-  type LinkCardDesign,
 } from '../../../utils/link-card-design'
 import { defaultLinkArrow, headingLevels } from '../../../utils/link-list'
 import {
   drawableLinks,
   groupDrawn,
-  linkTrackProps,
   prepareLinks,
   resolveSocials,
-  type DrawnLink,
   type PreparedLink,
 } from '../../../utils/link-list-items'
-
-type Data = SectionProps<'linkList'>['data']
-type StoredLink = NonNullable<Data['links']>[number]
-export type ListLink = DrawnLink<StoredLink>
-
-/** What a layout supplies: how it starts, how its header and list look, and how a link is drawn. */
-export interface LinkListLayout {
-  /** How this layout looks without a style. Keep `align` equal to the matching preset's. */
-  defaults: SectionDefaults
-  /** Size of the profile block: the picture at each size (Medium is the layout's own), and the name. */
-  profile: { picture: ProfileImageScale; name: string }
-  /** Classes for the `<ul>` of one group. */
-  listClassName: string
-  renderLink: (link: ListLink, context: LinkContext) => ReactNode
-}
-
-export interface LinkContext {
-  /** Whether the section's background is dark, which decides the button colours. */
-  surface: 'dark' | 'light'
-  thumbnailSize: 'standard' | 'large'
-  /** Minimal only: plain buttons, or the frosted rows of the Glass rows preset. */
-  rowStyle: 'solid' | 'glass'
-  glassStrength: GlassStrength
-  /** The indicator at the end of this link: its own, else the list's Arrow style, else the layout's. */
-  arrow: LinkArrowStyle
-  /** The arrow's colour, as an inline style; undefined keeps the layout's colour. */
-  arrowStyle: CSSProperties | undefined
-  /** Depth and glow for this link (its own shadow, else the list's), given the shadow it draws on its own. */
-  linkDepth: BoxDepth
-  /** This link's card design: the list's Cards and icons, with the link's own Appearance over it. */
-  design: LinkCardDesign
-}
-
-/**
- * The shadow class for a link and the style its `<li>` carries: the layout's own class while Depth
- * and glow leaves links alone, else the chosen shadow (and glow), fed by a custom property on the
- * `<li>` that the link inherits. `ownClass` is the layout's class, `own` the shadow it draws.
- */
-export function linkShadow(
-  context: Pick<LinkContext, 'linkDepth'>,
-  own: keyof typeof OWN_SHADOW,
-  ownClass = '',
-): { className: string; style: CSSProperties | undefined } {
-  const depth = context.linkDepth(OWN_SHADOW[own])
-  return depth ?? { className: ownClass, style: undefined }
-}
 
 const clean = (value: string | null | undefined) => (value ? stegaClean(value).trim() : '')
 
@@ -115,203 +56,6 @@ function resolveLinkListDividers(
     aboveSocial: resolveDivider(design?.aboveSocial),
     belowSocial: resolveDivider(design?.belowSocial),
   }
-}
-
-/**
- * The shell of one link: the `<li>` that tells analytics what a click on it means (see
- * `TRACK_SCRIPT`, which listens once for the whole page).
- */
-export function LinkItem({
-  link,
-  className,
-  style,
-  children,
-}: {
-  link: ListLink
-  className?: string
-  /** Custom properties the link inherits (Depth and glow, its card surface); later ones win. */
-  style?: CSSProperties | readonly (CSSProperties | undefined)[]
-  children: ReactNode
-}) {
-  const merged = Array.isArray(style)
-    ? (style as readonly (CSSProperties | undefined)[]).reduce<CSSProperties | undefined>(
-        (all, next) => (next ? { ...all, ...next } : all),
-        undefined,
-      )
-    : (style as CSSProperties | undefined)
-  return (
-    <li
-      {...trackAttributes('link_click', linkTrackProps(link))}
-      className={className}
-      style={merged}
-    >
-      {children}
-    </li>
-  )
-}
-
-/**
- * The line under a link's label. It is part of the link's accessible name, so a visually hidden full
- * stop keeps it from running into the label when read aloud ("Book a consultation. Thirty minutes").
- */
-export function LinkDescription({
-  text,
-  className,
-  style,
-}: {
-  text: string | null | undefined
-  className: string
-  style?: CSSProperties
-}) {
-  if (!text) return null
-  return (
-    <span className={className} style={style}>
-      <span className="sr-only">. </span>
-      {text}
-    </span>
-  )
-}
-
-/** What a layout draws for a link's three lines with nothing chosen, and the classes it always adds. */
-export interface OwnLinkText {
-  eyebrow: OwnText
-  label: OwnText
-  description: OwnText
-  /** Classes the label always has (`text-balance`). */
-  labelClass?: string
-  /** Classes the description always has (spacing, `text-pretty`). */
-  descriptionClass?: string
-}
-
-/** The usual eyebrow: small spaced capitals in the medium weight, in the description's colour. */
-export function ownEyebrow(colour?: string): OwnText {
-  return {
-    size: 'text-small',
-    defaultSize: 'small',
-    weight: 'medium',
-    textCase: 'uppercase',
-    colour,
-  }
-}
-
-/**
- * A link's eyebrow, label and description, each in the layout's own look with the card's text design
- * over it. The eyebrow is read first, then a visually hidden full stop, so it doesn't run into the
- * label ("New. Book a consultation. Thirty minutes"); an empty one draws nothing and takes no space.
- */
-export function LinkText({
-  link,
-  design,
-  own,
-  className = '',
-}: {
-  link: ListLink
-  design: LinkCardDesign
-  own: OwnLinkText
-  /** The column's own classes (width, alignment). */
-  className?: string
-}) {
-  const eyebrowText = clean(link.item.eyebrow)
-  const eyebrow = textLook(design.eyebrow, own.eyebrow)
-  const label = textLook(design.label, own.label)
-  const description = textLook(design.description, own.description)
-  return (
-    <span className={`flex min-w-0 flex-col ${className}`.trim()}>
-      {eyebrowText && (
-        <span className={`mb-0.5 ${eyebrow.className}`} style={eyebrow.style} data-link-eyebrow="">
-          {link.item.eyebrow}
-          <span className="sr-only">. </span>
-        </span>
-      )}
-      <span className={`${label.className} ${own.labelClass ?? ''}`.trim()} style={label.style}>
-        {link.label}
-      </span>
-      <LinkDescription
-        text={link.item.description}
-        className={`${description.className} ${own.descriptionClass ?? ''}`.trim()}
-        style={description.style}
-      />
-    </span>
-  )
-}
-
-/**
- * A link's icon in its container (the card's icon design over the layout's own). `box` sizes the
- * container; `keepBox` keeps that box for a plain icon too, so rows with and without containers line
- * up (Glass rows, Cards). Draws nothing for a link without an icon.
- */
-export function LinkIcon({
-  link,
-  design,
-  own,
-  box,
-  iconClass,
-  keepBox = false,
-}: {
-  link: ListLink
-  design: IconDesign
-  own: OwnIcon
-  box: string
-  iconClass: string
-  keepBox?: boolean
-}) {
-  if (!link.item.icon) return null
-  const look = iconLook(design, own)
-  const icon = <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
-  if (look.shape === 'plain' && !keepBox) {
-    return look.className || look.style ? (
-      <span className={`contents ${look.className}`} style={look.style}>
-        {icon}
-      </span>
-    ) : (
-      icon
-    )
-  }
-  return (
-    <span
-      className={`grid shrink-0 place-items-center ${box} ${look.className}`}
-      style={look.style}
-      data-icon-shape={look.shape}
-    >
-      {icon}
-    </span>
-  )
-}
-
-/** A link's thumbnail if it has one, else its icon, else nothing. `thumbClass` shapes the picture. */
-export function LinkVisual({
-  link,
-  thumbClass,
-  sizes,
-  icon,
-  useThumbnail = true,
-}: {
-  link: ListLink
-  thumbClass: string
-  sizes: string
-  /** The icon, drawn when there is no thumbnail. */
-  icon: ReactNode
-  useThumbnail?: boolean
-}) {
-  const thumbnail = link.item.thumbnail as SanityImageData | null | undefined
-  if (useThumbnail && thumbnail?.asset) {
-    return (
-      <SanityImage
-        image={thumbnail}
-        alt=""
-        width={600}
-        height={450}
-        sizes={sizes}
-        className={thumbClass}
-      />
-    )
-  }
-  return icon
-}
-
-/** Whether a link has a picture to draw (a thumbnail, when the layout shows them). */
-export function hasThumbnail(link: ListLink): boolean {
-  return Boolean((link.item.thumbnail as SanityImageData | null | undefined)?.asset)
 }
 
 /** The groups of links, each under its heading, drawn by the layout. */

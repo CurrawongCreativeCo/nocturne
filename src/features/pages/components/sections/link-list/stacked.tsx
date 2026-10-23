@@ -7,15 +7,15 @@ import { GlassRow } from './glass-row'
 import {
   LinkIcon,
   LinkItem,
-  LinkListView,
   LinkText,
   LinkVisual,
   hasThumbnail,
   linkShadow,
   ownEyebrow,
-  type LinkListLayout,
   type OwnLinkText,
-} from './link-list-parts'
+} from './link-design'
+import { LinkListView } from './link-list-parts'
+import { type LinkListLayout } from './link-list-types'
 import type { SectionProps } from '../../../types'
 
 // How this section looks without a style. Keep `align` equal to the Minimal preset's.
