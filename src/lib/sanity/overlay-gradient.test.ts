@@ -60,6 +60,62 @@ describe('overlayGradientCss', () => {
     expect(css).toContain(' 72%')
   })
 
+  describe('the top stop', () => {
+    const custom = {
+      overlayGradientTop: { colour: 'custom', hex: '#F5F1E9', opacity: 6 },
+      overlayGradientMiddle: { colour: 'custom', hex: '#075C60', opacity: 8 },
+      overlayGradientBottom: { colour: 'custom', hex: '#02282B', opacity: 36 },
+    }
+    const draw = (input: Parameters<typeof resolveOverlayGradient>[0]) =>
+      overlayGradientCss(resolveOverlayGradient(input, 'medium'), stopColourCss('surface'))
+
+    it('draws an explicit non-zero opacity with its own colour at 0%, not transparent', () => {
+      const css = draw(custom)
+      expect(css).toContain(
+        'linear-gradient(to bottom, color-mix(in oklch, #f5f1e9 6%, transparent) 0%',
+      )
+      expect(css).toContain('color-mix(in oklch, #075c60 8%, transparent) 50%')
+      expect(css).toContain('color-mix(in oklch, #02282b 36%, transparent) 100%')
+    })
+
+    it('starts the eased stop between top and middle from the real top colour', () => {
+      expect(draw(custom)).toContain(
+        'color-mix(in oklch, color-mix(in oklch, #f5f1e9 6%, transparent), color-mix(in oklch, #075c60 8%, transparent) 35%) 25%',
+      )
+    })
+
+    it('draws transparent at 0% only when the opacity is explicitly 0', () => {
+      const css = draw({
+        ...custom,
+        overlayGradientTop: { ...custom.overlayGradientTop, opacity: 0 },
+      })
+      expect(css).toContain('linear-gradient(to bottom, transparent 0%')
+      expect(css).toContain(
+        'color-mix(in oklch, transparent, color-mix(in oklch, #075c60 8%, transparent) 35%) 25%',
+      )
+    })
+
+    it('converts the percentage to the stop’s opacity', () => {
+      for (const [opacity, written] of [
+        [1, '1%'],
+        [6, '6%'],
+        [12.5, '12.5%'],
+        [90, '90%'],
+      ] as const) {
+        const css = draw({
+          overlayGradientTop: { colour: 'custom', hex: '#F5F1E9', opacity },
+        })
+        expect(css).toContain(`#f5f1e9 ${written}, transparent) 0%`)
+      }
+    })
+
+    it('keeps the 25% and 72% easing stops', () => {
+      const css = draw(custom)
+      expect(css).toContain(' 25%')
+      expect(css).toContain(' 72%')
+    })
+  })
+
   it('draws Focused centre as an ellipse from the middle', () => {
     const css = overlayGradientCss(
       resolveOverlayGradient({ overlayGradient: 'focus' }, 'medium'),
