@@ -75,6 +75,14 @@ export const location = defineType({
         initialValue: true,
       }),
       defineField({
+        name: 'showSocial',
+        title: 'Show social icons',
+        type: 'boolean',
+        description:
+          'Shows the social profiles in Business info under the contact details. Nothing shows until Business info has some.',
+        initialValue: false,
+      }),
+      defineField({
         name: 'directionsLabel',
         title: 'Directions button label',
         type: 'string',

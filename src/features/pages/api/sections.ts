@@ -240,6 +240,7 @@ export const locationFragment = /* groq */ `
     showHours,
     showOpenNow,
     showContact,
+    showSocial,
     directionsLabel,
     interactiveMap
   }

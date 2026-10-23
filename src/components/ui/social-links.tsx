@@ -48,8 +48,9 @@ export function socialLinkClass(
 
 /**
  * A labelled list of social profile links, one icon each. Each link is named for its network
- * ("Instagram"), takes `rel="me"` (it is this person's or business's profile) and wraps onto more
- * lines on a narrow screen. `colour` is a CSS colour from the theme-colour field. `design` changes
+ * ("Instagram") or by `linkLabel`, takes `rel="me"` unless `rel` says otherwise (the default is for
+ * the site's own profiles; someone else's, such as a team member's, passes `noopener`) and wraps onto
+ * more lines on a narrow screen. `colour` is a CSS colour from the theme-colour field. `design` changes
  * the shaped buttons' fill, strength and border one property at a time (lib/sanity/surface-options.ts):
  * on glass it tints the glass and keeps the blur, the same way Glass rows are tinted.
  */
@@ -64,6 +65,8 @@ export function SocialLinks({
   label = 'Social profiles',
   labelledBy,
   depth,
+  rel = 'me',
+  linkLabel,
 }: {
   profiles: readonly SocialProfile[]
   shape?: SocialStyle
@@ -78,6 +81,10 @@ export function SocialLinks({
   labelledBy?: string
   /** Design › Depth and glow for the shaped buttons, given the shadow a button draws on its own. */
   depth?: BoxDepth
+  /** The links' `rel`. `me` claims the profile as the site's own, so only pass it for those. */
+  rel?: string
+  /** A link's accessible name, given its network title ("Jo Lee on Instagram"). */
+  linkLabel?: (networkTitle: string) => string
 }) {
   const links = profiles.filter((profile) => profile.url)
   if (links.length === 0) return null
@@ -109,12 +116,13 @@ export function SocialLinks({
       >
         {links.map((profile) => {
           const platform = stegaClean(profile.platform) ?? ''
+          const title = socialPlatformTitle(platform)
           return (
             <li key={profile._key}>
               <a
                 href={stegaClean(profile.url) ?? undefined}
-                rel="me"
-                aria-label={socialPlatformTitle(platform)}
+                rel={rel}
+                aria-label={linkLabel ? linkLabel(title) : title}
                 className={lift ? `${linkClass} ${lift.className}` : linkClass}
                 style={style}
               >

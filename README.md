@@ -2353,6 +2353,9 @@ set, and the details themselves are edited once, in _Business info_ (the section
   the address, contact and hours empty or switched off) renders nothing rather than an empty box.
 - **The map image** is a styled static map the designer exports, so no map service loads. It needs alt text, and the
   usual image guidance applies (4:3, 1200 px wide or more).
+- **Social icons.** _Show social icons_ (off by default, so existing sections are unchanged) draws Business info's
+  social profiles under the phone and email, in the shared `SocialLinks` (circles, `rel="me"`; see
+  [Social icons](#social-icons)). It adds no query, and shows nothing until Business info has a profile.
 - **Agencies** get **Offer an interactive map** in the Design tab's collapsed Advanced area (off by default).
 - **Directions.** A plain link to `https://www.google.com/maps/dir/?api=1&destination=…`, opened in a new tab (with the
   "opens in a new tab" notice for screen readers). The destination is the **map coordinates** from Business info
@@ -2383,6 +2386,25 @@ set, and the details themselves are edited once, in _Business info_ (the section
   section gallery has `location`, `location-image`, `location-interactive` and `location-address-only`; their screenshot
   baselines need the **Update visual baselines** workflow (macOS skips visual tests).
 
+### Social icons
+
+`SocialLinks` (`src/components/ui/social-links.tsx`) draws labelled icon links in four styles (plain, circles, rounded
+squares, squares), so social profiles look the same everywhere. It is used by the [Link list](#link-list), the footer,
+the [Location](#location) section and team profile pages.
+
+- **Footer** (Studio › Navigation › Footer, agency only): _Show social icons_ (off by default, so nothing changes) adds a
+  row of Business info's profiles above the copyright line, and _Social icon style_ picks the shape. The icons come from
+  Business info, so editors change them there. The flag rides in `SETTINGS_QUERY` (no extra request).
+- **Location:** _Show social icons_ in the section's content (off by default).
+- **Team profiles:** each member's social links are icons named "<name> on <network>" ("Ann Lee on LinkedIn"). A member
+  whose _Show social links as_ is _Text links_ keeps the visible text links.
+- **`rel`.** The site's own profiles (footer, Location, Link list) take `rel="me"`. A team member's links take
+  `rel="noopener"` only: the profile is theirs, not the site's, so the page must not claim it.
+- **Tests.** `social-links.test.tsx` and `location/index.test.tsx` (unit); `tests/e2e/social-icons.spec.ts` (each
+  placement, keyboard focus and axe). The footer test turns the switch on in the fake lake
+  (`POST /__fixture/footer-social/on`) and expires the cached settings, because the fixture leaves it off. No public
+  JavaScript is added: all three are server-rendered.
+
 ### Team
 
 Team members are documents (`teamMember`, in `src/features/team`), shown by the **Team** section and, when the site has
@@ -2392,7 +2414,7 @@ profile pages, on their own page at `/team/<slug>`.
   image guidance warns about size and shape), _Short bio_ (up to 300 characters; the cards and the page's search
   description) and _Order_ (a number; editors rarely touch it, see below). If the site has profile pages there are also
   two collapsed groups: **Profile page** (_Page address_, _Full bio_ in rich text, _Qualifications_ as tags) and
-  **Contact details** (_Public email_, _Phone_, _Social links_ with a platform and an https link). With
+  **Contact details** (_Public email_, _Phone_, _Social links_ with a platform and an https link, and _Show social links as_: icons by default, or text links). With
   [`teamProfiles`](#site-profile) off those fields are hidden, so editors are not asked for what the site never shows.
 - **Ordering.** _Team_ in the desk is a custom list (`src/features/studio/team-order/`), not the stock document list.
   Drag a row, or use its up and down buttons (keyboard and touch), and everyone is numbered 1, 2, 3… in `order`. Only the

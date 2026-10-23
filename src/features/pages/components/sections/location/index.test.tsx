@@ -85,6 +85,20 @@ describe('Location', () => {
     expect(html).toContain('1 King Street')
   })
 
+  it('shows Business info’s social icons under the contact details only when switched on', () => {
+    const social: LocationBusiness = {
+      ...business,
+      socialLinks: [{ _key: 'fb', platform: 'facebook', url: 'https://www.facebook.com/testco' }],
+    }
+    expect(render(section(), social)).not.toContain('facebook.com')
+    const html = render(section({ showSocial: true }), social)
+    expect(html).toContain('href="https://www.facebook.com/testco"')
+    expect(html).toContain('rel="me"')
+    expect(html.indexOf('mailto:')).toBeLessThan(html.indexOf('facebook.com'))
+    // Nothing to show: no profiles, no icons.
+    expect(render(section({ showSocial: true }))).not.toContain('Social profiles')
+  })
+
   it('shows a phone that is not dialable as text', () => {
     const html = render(section(), { ...business, phone: 'ask for Sam', phoneHref: null })
     expect(html).toContain('ask for Sam')

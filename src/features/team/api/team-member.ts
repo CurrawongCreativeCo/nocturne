@@ -26,7 +26,8 @@ export const TEAM_MEMBER_QUERY = defineQuery(/* groq */ `
     qualifications,
     publicEmail,
     phone,
-    socialLinks[] { _key, platform, url }
+    socialLinks[] { _key, platform, url },
+    socialDisplay
   }
 `)
 
