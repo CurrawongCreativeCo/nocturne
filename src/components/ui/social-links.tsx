@@ -35,14 +35,14 @@ export function socialLinkClass(
   shape: SocialStyle,
   surface: 'solid' | 'glass' = 'solid',
   strength: GlassStrength = 'medium',
-  /** False leaves the solid button's shadow off, for a caller that draws its own. */
-  shadow = true,
+  /** The shadow this button draws on its own; none when the caller supplies depth. */
+  shadow: (typeof OWN_SHADOW)[keyof typeof OWN_SHADOW] = OWN_SHADOW.card,
 ): string {
   if (shape === 'plain') return `${BASE} ${PLAIN}`
   const look =
     surface === 'glass'
       ? `${GLASS} ${GLASS_STRENGTH[strength]}`
-      : `${SOLID}${shadow ? ' shadow-card' : ''}`
+      : `${SOLID}${shadow === OWN_SHADOW.card ? ' shadow-card' : ''}`
   return `${BASE} ${look} ${SHAPE_RADIUS[shape]}`.trim()
 }
 
@@ -92,8 +92,8 @@ export function SocialLinks({
   const style: CSSProperties | undefined =
     colour || look?.style || lift ? { color: colour, ...look?.style, ...lift?.style } : undefined
   // The solid button's own fill and border, swapped for the chosen ones where there are any.
-  const linkClass = (withShadow: boolean) => {
-    const base = socialLinkClass(shape, surface, strength, withShadow)
+  const linkClass = (ownShadow: (typeof OWN_SHADOW)[keyof typeof OWN_SHADOW]) => {
+    const base = socialLinkClass(shape, surface, strength, ownShadow)
     return look?.className && surface !== 'glass'
       ? base.replace(SOLID_FILL, '').replace(SOLID_BORDER, look.className)
       : base
@@ -113,7 +113,11 @@ export function SocialLinks({
                 href={stegaClean(profile.url) ?? undefined}
                 rel="me"
                 aria-label={socialPlatformTitle(platform)}
-                className={lift ? `${linkClass(false)} ${lift.className}` : linkClass(true)}
+                className={
+                  lift
+                    ? `${linkClass(OWN_SHADOW.none)} ${lift.className}`
+                    : linkClass(OWN_SHADOW.card)
+                }
                 style={style}
               >
                 <SocialIcon platform={platform} />
