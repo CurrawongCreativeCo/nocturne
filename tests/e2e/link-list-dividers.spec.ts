@@ -50,6 +50,9 @@ test.describe('Link list dividers', () => {
     const mockup = section(page, 'Mock-up dividers')
     await expect(mockup.getByText('Stay connected', { exact: true })).toBeVisible()
     const words = mockup.locator('[data-divider-centre="text"]')
+    const nav = mockup.getByRole('navigation', { name: 'Stay connected', exact: true })
+    await expect(nav).toBeVisible()
+    await expect(nav).toHaveAttribute('aria-labelledby', (await words.getAttribute('id')) ?? '')
     await expect(words).not.toHaveAttribute('aria-hidden', 'true')
     await expect(words.locator('> span[aria-hidden="true"]')).toHaveCount(2)
     await expect(mockup.locator('[data-divider-centre="icon"]')).toHaveAttribute(

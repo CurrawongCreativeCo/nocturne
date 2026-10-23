@@ -62,6 +62,7 @@ export function SocialLinks({
   design = {},
   className = '',
   label = 'Social profiles',
+  labelledBy,
   depth,
 }: {
   profiles: readonly SocialProfile[]
@@ -74,6 +75,7 @@ export function SocialLinks({
   /** Classes for the list: spacing and justification. */
   className?: string
   label?: string
+  labelledBy?: string
   /** Design › Depth and glow for the shaped buttons, given the shadow a button draws on its own. */
   depth?: BoxDepth
 }) {
@@ -100,7 +102,7 @@ export function SocialLinks({
   )
 
   return (
-    <nav aria-label={label}>
+    <nav aria-label={labelledBy ? undefined : label} aria-labelledby={labelledBy}>
       <ul
         className={`flex flex-wrap ${shape === 'plain' ? 'gap-1' : 'gap-3'} ${className}`.trim()}
         data-social-style={shape}

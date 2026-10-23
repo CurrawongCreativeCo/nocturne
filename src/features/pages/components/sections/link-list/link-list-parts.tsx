@@ -1,5 +1,5 @@
 import { stegaClean } from 'next-sanity'
-import { Fragment, Suspense } from 'react'
+import { Fragment, Suspense, useId } from 'react'
 
 import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { RichHeading } from '@/components/ui/rich-heading'
@@ -111,6 +111,7 @@ export function LinkListView({
   isFirst,
   layout,
 }: SectionProps<'linkList'> & { layout: LinkListLayout }) {
+  const socialHeadingId = useId()
   const traits = sectionTraits(data.style, layout.defaults)
   const surface = ctaSurfaceFor(traits.tone)
   const prepared = prepareLinks(data.links)
@@ -175,9 +176,13 @@ export function LinkListView({
     : besideDivider('social', 1)
       ? ''
       : 'mb-8'
+  const socialHeading =
+    dividers.aboveSocial?.centre?.kind === 'text' &&
+    parts.some((part) => typeof part === 'object' && part.divider === 'aboveSocial')
   const socialRow = (
     <SocialLinks
       profiles={socials}
+      labelledBy={socialHeading ? socialHeadingId : undefined}
       shape={socialStyleOf(socialDesign?.style)}
       // Glass rows' icons are frosted glass too, at the rows' strength, so the two read as one design.
       surface={glassRows ? 'glass' : 'solid'}
@@ -250,7 +255,12 @@ export function LinkListView({
           default: {
             const divider = dividers[part.divider]
             return divider ? (
-              <DecorativeDivider key={part.divider} divider={divider} block={traits.block} />
+              <DecorativeDivider
+                key={part.divider}
+                divider={divider}
+                block={traits.block}
+                id={socialHeading && part.divider === 'aboveSocial' ? socialHeadingId : undefined}
+              />
             ) : null
           }
         }

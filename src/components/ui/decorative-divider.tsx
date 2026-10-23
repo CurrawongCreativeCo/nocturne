@@ -131,8 +131,10 @@ export function DecorativeDivider({
   divider,
   block = '',
   className = '',
+  id,
 }: {
   divider: ResolvedDivider
+  id?: string
   /** From `sectionTraits`: `mx-auto` in a centred section. */
   block?: string
   className?: string
@@ -155,6 +157,7 @@ export function DecorativeDivider({
     .join(' ')
   return (
     <div
+      id={id}
       aria-hidden={words ? undefined : true}
       data-decorative-divider={style}
       data-divider-centre={centre?.kind}
