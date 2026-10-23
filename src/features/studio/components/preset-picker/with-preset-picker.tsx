@@ -7,6 +7,8 @@ import {
   type InputProps,
 } from 'sanity'
 
+import { framingKeyOf } from '@/lib/sanity/schema/image-framing-option'
+
 import { PresetBarInput } from './preset-bar-input'
 import { PresetPickerInput } from './preset-picker-input'
 import { AnchorPickerInput } from '../anchor-picker/anchor-picker-input'
@@ -17,13 +19,14 @@ import { IconPickerInput } from '../icon-picker-input'
 import { InheritableChoiceInput } from '../inheritable-choice-input'
 import { OverlayPreviewInput } from '../overlay-preview-input'
 import { PanelUsageInput } from '../panel-usage-input'
+import { PictureFramingInput } from '../picture-framing/picture-framing-input'
 import { SliderInput } from '../slider-input'
 import { SlotInput } from '../slot-input'
 
 /**
  * Wraps the Studio-wide input override (`form.components.input`): a string field with
  * `options.presetPicker` gets the picture picker, `options.iconPicker` the icon grid, `options.inheritable` the Inherit-first buttons, an object type with `options.presets` gets the
- * preset bar above its fields, a string field with `options.gradientPicker` gets the gradient list, `options.headingGradientPicker` the heading highlight's gradient picker, an array with `options.slot` gets the one-item slot input, and everything else goes to `Fallback` (the role-aware input).
+ * preset bar above its fields, an image with `options.framing` gets "Adjust picture" under it, a string field with `options.gradientPicker` gets the gradient list, `options.headingGradientPicker` the heading highlight's gradient picker, an array with `options.slot` gets the one-item slot input, and everything else goes to `Fallback` (the role-aware input).
  */
 export function withPresetPicker(Fallback: ComponentType<InputProps>) {
   return function PresetAwareInput(props: InputProps) {
@@ -32,6 +35,9 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
       (props.schemaType.name === 'imageDesign' || props.path.at(-1) === 'profileDesign')
     ) {
       return <FrameReferenceInput {...props} />
+    }
+    if (isObjectInputProps(props) && framingKeyOf(props.schemaType.options)) {
+      return <PictureFramingInput {...props} />
     }
     if (isStringInputProps(props) && props.schemaType.options?.overlayPreview === true) {
       return <OverlayPreviewInput {...props} />

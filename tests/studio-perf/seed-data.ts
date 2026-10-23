@@ -56,6 +56,8 @@ export function seedDocuments(imageId: string) {
           _type: 'ctaBanner',
           heading: heading(`Call to action ${index}`),
           text: 'Repeatable content.',
+          // The Studio fills this in on a new banner (initialValue); a seeded one must too.
+          tone: 'brand',
         }
       default:
         return {

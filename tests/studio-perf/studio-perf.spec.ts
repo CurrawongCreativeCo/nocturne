@@ -119,7 +119,9 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
           )?.[1]
         if ((hostProject && hostProject !== project) || (dataset && dataset !== DATASET)) {
           await route.abort()
-          throw new Error('Blocked a request outside the throwaway project/dataset.')
+          throw new Error(
+            `Blocked a request outside the throwaway project/dataset: ${url.hostname}${url.pathname}`,
+          )
         }
         await route.continue()
       })

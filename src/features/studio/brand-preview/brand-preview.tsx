@@ -25,6 +25,7 @@ import { brandPreviewCases, sampleAssets, type BrandPreviewCase } from './cases'
 import { DesignInputExamples } from './design-input-examples'
 import { LaunchExample } from './launch-example'
 import { PickerExamples } from './picker-examples'
+import { PictureFramingExamples } from './picture-framing-examples'
 import { ThumbnailGallery, type SectionPreview } from './thumbnail-gallery'
 import { StudioLogoView } from '../components/studio-logo'
 import { buildStudioTheme } from '../theme'
@@ -263,6 +264,18 @@ function InputExamples({
             <ThemeProvider scheme={scheme} theme={theme}>
               <Card padding={4} radius={3} border>
                 <DesignInputExamples />
+              </Card>
+            </ThemeProvider>
+          </div>
+        ))}
+      </div>
+      <h3 className="mt-10 text-base font-semibold">Adjust picture</h3>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {SCHEMES.map((scheme) => (
+          <div key={scheme} data-framing-scheme={scheme}>
+            <ThemeProvider scheme={scheme} theme={theme}>
+              <Card padding={4} radius={3} border>
+                <PictureFramingExamples />
               </Card>
             </ThemeProvider>
           </div>

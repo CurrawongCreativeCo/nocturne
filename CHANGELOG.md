@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Adjust picture (Studio):** a dialog to drag and zoom a picture inside the exact shape the site draws it in, stored as the image field's own `crop` and `hotspot` (Sanity's crop tool stays as the precise fallback; Reset removes both). Shared framing maths (`image-framing.ts`, proven against `@sanity/image-url`), shape descriptors with a resolver for the Link list profile picture, an `options.framing` switch through the global input override, a brand-preview example, and Testing Library (`@testing-library/react`, `jsdom`) dev dependencies. **No field is opted in yet** (the Link list adopts it in the next release), so no page, Studio screen or content changes; the public JavaScript is unchanged. Refresh the new `picture-framing` baselines using **Update visual baselines**.
+
 - **Link list clean-up:** service-category and divider-word letter spacing (Normal, Wide, Extra wide), accessible image headings above link groups, social navigation named by visible divider words, complete design-thumbnail coverage, and light/dark design-input browser checks. Existing defaults and baseline files are unchanged; new gallery and Studio input baselines need **Update visual baselines**.
 
 - **Hero eyebrow labels:** optional short labels reuse `InlineList`, with separator thumbnails and collapsed agency-only colour controls. Existing eyebrow text remains the fallback; no migration or extra Sanity requests. Refresh the new `hero-eyebrow-labels` and `hero-eyebrow-labels-start` desktop/mobile baselines using **Update visual baselines**.
