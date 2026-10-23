@@ -113,13 +113,17 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
       await context.route(/https:\/\/[^/]*sanity\.io\//, async (route) => {
         const url = new URL(route.request().url())
         const hostProject = /^([a-z0-9]+)\.(?:api|apicdn)\.sanity\.io$/.exec(url.hostname)?.[1]
-        const dataset =
-          /\/(?:data\/(?:query|mutate|listen|live|doc)|assets\/(?:images|files))\/([^/]+)/.exec(
+        // Live events put the dataset after an extra `events` segment.
+        const datasetMatch =
+          /\/(?:data\/(?:query|mutate|listen|doc)|data\/live\/events|assets\/(?:images|files))\/([^/]+)/.exec(
             url.pathname,
-          )?.[1]
+          )
+        const dataset = datasetMatch?.[1]
         if ((hostProject && hostProject !== project) || (dataset && dataset !== DATASET)) {
           await route.abort()
-          throw new Error('Blocked a request outside the throwaway project/dataset.')
+          throw new Error(
+            `Blocked a request outside the throwaway project/dataset: ${url.hostname}${url.pathname}`,
+          )
         }
         await route.continue()
       })
@@ -222,23 +226,23 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
         })
         await measure(page, view, run, 'presentationLoad', async () => {
           await page.goto('/studio/presentation?preview=%2Fstudio-perf-small-0')
+          // Draft mode adds invisible Visual Editing markers to text, so the heading is matched by
+          // its words, not its exact name.
           await expect(
-            page
-              .frameLocator('iframe')
-              .getByRole('heading', { name: 'Performance heading 0', exact: true }),
+            page.frameLocator('iframe').getByRole('heading', { name: /Performance heading 0/ }),
           ).toBeVisible()
           await expect(
             page.frameLocator('iframe').getByRole('link', { name: 'Next performance page' }),
           ).toBeVisible()
-          await expect(page.getByRole('switch', { name: 'Edit', exact: true })).toBeEnabled()
+          await expect(page.getByRole('checkbox', { name: 'Edit', exact: true })).toBeEnabled()
         })
-        await page.getByRole('switch', { name: 'Edit', exact: true }).uncheck()
+        await page.getByRole('checkbox', { name: 'Edit', exact: true }).uncheck()
         await measure(page, view, run, 'presentationSwitchFiveRoutes', async () => {
           for (let i = 1; i <= 5; i++) {
             const frame = page.frameLocator('iframe')
             await frame.getByRole('link', { name: 'Next performance page' }).click()
             await expect(
-              frame.getByRole('heading', { name: `Performance heading ${i % 5}`, exact: true }),
+              frame.getByRole('heading', { name: new RegExp(`Performance heading ${i % 5}`) }),
             ).toBeVisible()
           }
         })

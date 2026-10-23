@@ -32,6 +32,8 @@ export default defineConfig({
   ],
   webServer: {
     command: 'node --experimental-strip-types tests/studio-perf/server.ts --serve',
+    // Playwright starts the server in the config file's folder by default; the paths assume the repo root.
+    cwd: process.cwd(),
     url: `${ORIGIN}/studio`,
     reuseExistingServer: false,
     timeout: 60_000,

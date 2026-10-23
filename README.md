@@ -3894,6 +3894,33 @@ The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn 
 
 The thumbnails sit in `src/lib/sanity/schema/` beside `presetField`, free of Studio code, so schema files import them directly: `hero.ts` gives each layout one, and `sectionStyle` gives each tone and animation one. `registry.ts` lists the same components for the brand preview page, and the test checks the two are identical.
 
+### Adjust picture (Studio)
+
+A dialog under an image field where an editor sees the picture inside the exact shape the site draws it in, drags it into place, zooms with a slider and applies. Nothing is uploaded and the file never changes. It is built, but **no field uses it yet**: the Link list's profile picture adopts it next (task 176), so no page or Studio screen changes until then.
+
+**What it changes.** Sanity's own `crop` and `hotspot` on that image field, and nothing else. The crop box is the visible area (zoom and position); the hotspot is set to the crop box's centre and size. Both live on the field in the document, never on the asset, so the same photo used elsewhere keeps its own framing. `SanityImage` already passes both to `@sanity/image-url`, so there is no new rendering path, no canvas, no new asset and no public JavaScript.
+
+**Sanity's crop tool.** It edits the same two values, so it stays the precise fallback: framing in either one opens correctly in the other. An adjustment replaces the field's earlier hotspot, so the last manual positioning wins. There is no separate "position" setting.
+
+**For editors.**
+
+- Under the picture: **Adjust picture**, and one line of state, "Automatic fit" or "Adjusted · Reset". Reset asks "Remove the saved positioning?" and unsets both values, which goes back to the component's default.
+- In the dialog: drag the picture (mouse, pen or touch), pinch with two fingers or ctrl + scroll (a trackpad pinch) to zoom, or use the slider and the − and + buttons. A plain scroll still scrolls the dialog. The arrow buttons are the single-pointer alternative to dragging. With the picture area focused: arrows move it (Shift for further), + and − zoom, 0 resets. **Apply** writes one change (so one Undo); **Cancel** and Escape change nothing, and closing after a change asks "Discard changes?".
+- The area outside the shape is dimmed and the shape outlined. A decorative frame and a ring are drawn as the page draws them (the colours are indicative: the Studio doesn't know the site's palette). Other shapes the same picture appears in are labelled outlines, never separate editors.
+- Zoom stops where the visible part has about one source pixel per drawn pixel (never more than 400%). Below two source pixels per drawn pixel the dialog says "Zooming further may make the picture look soft."
+- Logos are never cropped. When the design shows a picture whole ("Logo, uncropped"), the field says so instead of offering the button. A saved adjustment stays stored and applies again when a cropping shape is chosen again; changing a shape never clears or confirms anything.
+- A read-only field shows "View framing": the dialog has no controls. Clients and the agency both get the editor, because it edits content, not the design.
+
+**For developers.**
+
+- `src/lib/sanity/image-framing.ts` is the maths (plain TypeScript, no React or Studio code). `toCrop` and `fromImage` convert between the editor's state (zoom of at least 1 and a centre point) and the stored values; `servedRect` is `@sanity/image-url`'s `fit()` rule, step for step; `visibleArea(placement, image)` is the one answer to "what part of the upload shows?", for the editor and for the renderer: the adjustment, else the hotspot, else `defaultArea` (what the picture shows today), and null for an uncropped shape. Zoom 1 is "cover", so the shape is always full. `image-framing.test.ts` builds real URLs with `@sanity/image-url` and parses their `rect` to prove the parity.
+- `src/lib/sanity/image-frame-geometry.ts` describes shapes (`aspect`, `corner`, `insetPct`, `ring`, `frameUrl`, `drawnPx`). `FRAMING_RESOLVERS` has one resolver per placement, which turns the component's resolved design into descriptors (main shape first). `linkListProfile` does it for `resolveProfileImage`'s output; Logo, uncropped returns none. Components should draw from the same descriptor so the stage and the page can't drift (task 176 moves `ProfileImage` onto it). Add a placement beside the `// new-framing: resolver` marker, with a test.
+- Opt a field in with `options: { ...imageOptions, ...framing('linkListProfile') }` (`src/lib/sanity/schema/image-framing-option.ts`); schema files don't import Studio code. `withPresetPicker` (the global input override in `sanity.config.ts`) switches on `PictureFramingInput` for those fields. It reads the design from the document with `useFormValue`, at the resolver's `designPath` (relative to the image field), and fetches a decorative frame's artwork once per session.
+- The preview is the Sanity CDN at 1200 px (fit max, automatic format) with the asset's blurred placeholder while it loads, never the original upload. The dialog is `AdjustPictureDialog` (no Studio hooks, so `/studio-brand-preview` mounts it directly); the Studio wrapper only supplies the picture, shapes and `onChange`. The preview page's "Adjust picture" examples (a circle and 16:9, light and dark) hold their values in memory and are covered by `tests/e2e/picture-framing.spec.ts`.
+- Pointer events use pointer capture, so mouse, pen and touch share one path. Updates are batched to one per animation frame and only the picture's transform changes. Every listener and frame request is removed when the dialog closes.
+- Tests: Vitest (maths, geometry, style helpers, and Testing Library for the dialog), Playwright + axe on the brand preview page. The Testing Library tests use `jsdom` (`// @vitest-environment jsdom` at the top of the file); everything else stays in Node.
+- **Real Studio checks** (open, drag, keyboard, touch, Apply, Undo, reopen, Reset, publish, and the draft in Presentation against the published page) need a signed-in scratch project and are done by hand once a field is opted in; record them in the PR.
+
 ### Sanity workflow (migrations and schema deploy)
 
 `.github/workflows/sanity.yml` keeps the dataset and its deployed schema in step with the code. Set these in the

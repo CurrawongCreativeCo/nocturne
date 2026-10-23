@@ -58,7 +58,9 @@ export function appEnv(): NodeJS.ProcessEnv {
     NEXT_PUBLIC_SANITY_DATASET: DATASET,
     NEXT_PUBLIC_SITE_URL: ORIGIN,
     NEXT_DIST_DIR: 'node_modules/.cache/studio-perf',
-    SANITY_API_HOST: 'https://api.sanity.io',
+    // The site client turns off the project hostname when this is set (the e2e fake lake), so
+    // the real API needs the project in the host itself.
+    SANITY_API_HOST: `https://${project}.api.sanity.io`,
     SANITY_API_READ_TOKEN: token,
     SANITY_API_WRITE_TOKEN: '',
     SANITY_WRITE_TOKEN: '',
