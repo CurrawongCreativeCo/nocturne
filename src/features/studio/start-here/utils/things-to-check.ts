@@ -97,7 +97,7 @@ export function buildThingsToCheck(
             kind: 'link',
             id,
             type,
-            message: `${quote(displayTitle(title, typeTitle(type)))} links to ${
+            message: `${quote(displayTitle(title, typeTitle(type), type))} links to ${
               broken === 1 ? 'a page that is' : `${broken} pages that are`
             } not published yet`,
           },
@@ -128,7 +128,7 @@ export function buildThingsToCheck(
             kind: 'alt',
             id,
             type,
-            message: `${quote(displayTitle(title, typeTitle(type)))} has ${plural(count, 'image', 'images')} without a description`,
+            message: `${quote(displayTitle(title, typeTitle(type), type))} has ${plural(count, 'image', 'images')} without a description`,
           },
         ]
       : []
@@ -141,7 +141,7 @@ export function buildThingsToCheck(
       kind: 'draft',
       id: draft._id.replace(/^drafts\./, ''),
       type: draft._type,
-      message: `${quote(displayTitle(draft.title, typeTitle(draft._type)))} has had changes waiting to be published for ${plural(daysBetween(draft._updatedAt, now), 'day', 'days')}`,
+      message: `${quote(displayTitle(draft.title, typeTitle(draft._type), draft._type))} has had changes waiting to be published for ${plural(daysBetween(draft._updatedAt, now), 'day', 'days')}`,
     }))
 
   const all = [...links, ...images, ...drafts]

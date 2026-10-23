@@ -1741,7 +1741,7 @@ history request for the author names, and, only when notices are set up, one cal
   agency staff, because clients cannot open them. Each row has a **Fix it** link.
 - **Help tab:** the guide link (`help.guideUrl`) and _Ask Currawong_ with the support address (`help.supportEmail`) as
   selectable text and a **Copy email address** button. Each part is left out when the profile does not set it. The
-  support form replaces the address in a later release. Under them is this site's **editor guide** (next section).
+  support form replaces the address in a later release. With neither set, Help names the studio from the CMS brand and asks editors to include the page name and a screenshot. `supportRoute` (`start-here/utils/support.ts`) picks the one place errors and dialogs link: the address, else the guide, else this Help section. Under them is this site's **editor guide** (next section).
   The **Help** shortcut card opens this tab.
 - **Tabs:** Start here has two, **Overview** (shortcuts, recent changes, things to check) and **Help**.
 - **Notices:** set `OPS_NOTICES_URL` (an https endpoint) and, if it needs one, `OPS_NOTICES_KEY`. The site's

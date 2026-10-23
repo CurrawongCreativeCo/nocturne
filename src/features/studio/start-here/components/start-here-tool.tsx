@@ -477,7 +477,7 @@ function RecentChanges({
                 <Flex align="center" gap={2} wrap="wrap">
                   <Text size={1} weight="medium">
                     <IntentLink intent="edit" params={{ id: item.id, type: item.type }}>
-                      {displayTitle(item.title, typeTitle(item.type))}
+                      {displayTitle(item.title, typeTitle(item.type), item.type)}
                     </IntentLink>
                   </Text>
                   {item.isDraft && (

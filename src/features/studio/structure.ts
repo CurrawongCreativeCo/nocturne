@@ -36,6 +36,7 @@ import { downloadEnquiriesCsv } from './enquiries/download-csv'
 import { enquiriesTitle } from './enquiries/wording'
 import { LaunchPane } from './launch/components/launch-pane'
 import { currentAudience } from './roles'
+import { SINGLETON_TITLES } from './singleton-titles'
 import { SINGLETON_TYPES } from './singletons'
 import { TeamOrderPane } from './team-order/team-order-pane'
 import {
@@ -157,22 +158,21 @@ const LISTED_TYPES = new Set([
  * Design screens (brand colours now; motion presets arrive in a later task). Each shows under
  * "Design" only once its singleton type is in the schema, so the group never appears empty.
  */
-const DESIGN_SINGLETONS = [
-  { type: 'designSettings', title: 'Brand colours' },
-  { type: 'motionPresets', title: 'Motion presets' },
-] as const
+const DESIGN_SINGLETONS = ['designSettings', 'motionPresets'] as const
 
 type Item = ListItemBuilder | ReturnType<StructureBuilder['divider']>
 
 /** An item's id, or null for a divider (see filterStructureItems). */
 const idOf = (item: Item) => ('getId' in item ? item.getId() : null)
 
-const singletonItem = (S: StructureBuilder, type: string, title: string, icon: ComponentType) =>
-  S.listItem()
+const singletonItem = (S: StructureBuilder, type: string, icon: ComponentType) => {
+  const title = SINGLETON_TITLES[type] ?? type
+  return S.listItem()
     .title(title)
     .id(type)
     .icon(icon)
     .child(S.document().schemaType(type).documentId(type).title(title))
+}
 
 /** A sidebar group: one item that opens a list of its own. */
 const group = (
@@ -195,10 +195,10 @@ export const structure: StructureResolver = (S, context) => {
 
   const websiteSettings = filterStructureItems(
     [
-      singletonItem(S, 'siteIdentity', 'Name, logo & icon', SearchIcon),
-      singletonItem(S, 'siteNavigation', 'Navigation', MenuIcon),
-      singletonItem(S, 'announcement', 'Announcement bar', BellIcon),
-      singletonItem(S, 'cookieBanner', 'Cookie banner', LockIcon),
+      singletonItem(S, 'siteIdentity', SearchIcon),
+      singletonItem(S, 'siteNavigation', MenuIcon),
+      singletonItem(S, 'announcement', BellIcon),
+      singletonItem(S, 'cookieBanner', LockIcon),
       // Read-only: what visitors get today and what is left before launch. No document behind it.
       S.listItem()
         .title('Launch & visibility')
@@ -211,9 +211,7 @@ export const structure: StructureResolver = (S, context) => {
     CLIENT_WEBSITE_SETTINGS_IDS,
   )
   const design = [
-    ...DESIGN_SINGLETONS.filter(({ type }) => hasType(type)).map(({ type, title }) =>
-      singletonItem(S, type, title, ColorWheelIcon),
-    ),
+    ...DESIGN_SINGLETONS.filter(hasType).map((type) => singletonItem(S, type, ColorWheelIcon)),
     // The approved SVG frames a picture can use (agency only, like the rest of Design).
     ...(hasType('frame') ? [S.documentTypeListItem('frame').title('Image frames')] : []),
   ]
@@ -230,7 +228,7 @@ export const structure: StructureResolver = (S, context) => {
           ]),
         ]
       : []),
-    singletonItem(S, 'businessInfo', 'Business info', CaseIcon),
+    singletonItem(S, 'businessInfo', CaseIcon),
     ...(hasType('teamMember') && isTypeVisible('teamMember')
       ? [
           S.listItem()

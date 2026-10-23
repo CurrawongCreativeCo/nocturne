@@ -3,6 +3,10 @@ import { LaunchIcon } from '@sanity/icons/Launch'
 import { Button, Card, Flex, Heading, Stack, Text } from '@sanity/ui'
 import { forwardRef, useEffect, useRef, useState, type ReactNode } from 'react'
 
+import { studioBrand } from '@/config/studio-brand/client'
+
+import { helpFallbackWording } from '../utils/support'
+
 interface Props {
   guideUrl?: string
   supportEmail?: string
@@ -18,6 +22,7 @@ export const HelpPanel = forwardRef<HTMLHeadingElement, Props>(function HelpPane
   headingRef,
 ) {
   const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const fallback = helpFallbackWording(studioBrand.name)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(
@@ -105,9 +110,14 @@ export const HelpPanel = forwardRef<HTMLHeadingElement, Props>(function HelpPane
             </Stack>
           )}
           {!guideUrl && !supportEmail && (
-            <Text size={1} muted>
-              Ask your Currawong contact where to find help.
-            </Text>
+            <Stack gap={3}>
+              <Text size={1} weight="semibold">
+                {fallback.heading}
+              </Text>
+              <Text muted size={1}>
+                {fallback.body}
+              </Text>
+            </Stack>
           )}
         </Stack>
       </Card>
