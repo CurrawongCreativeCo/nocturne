@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.8.0] - 2026-10-23
+
+### Added
+
 - **Adjust picture on the Link list:** the profile picture and every link thumbnail now have **Adjust picture**, previewing the real shape (circle, rounded square, ring or frame for the profile; the layout's own square, 4:3, 16:9 or Glass rows strip for a thumbnail). Thumbnails are served at the shape they are drawn, at 2x their largest drawn size, instead of a fixed 600 × 450 that CSS cut again (`link-thumbnail-framing.ts`, `SanityImage`'s `placement`). **Intended visual changes:** a thumbnail with a Sanity hotspot (or crop) but no adjustment is now cut around it, so its subject stays in view; and in **Logo, uncropped** the whole picture is shown, with no crop, even when a crop was stored (the saved positioning stays stored and applies again in Circle or Rounded square). Unadjusted pictures show what they did, and `ProfileImage` is unchanged for Circle and Rounded square (snapshot-tested). No migration, no new queries, no public JavaScript. Refresh the new `link-list-framing` baselines and the `picture-framing` ones using **Update visual baselines**. Before upgrading, list any logo that has a stored crop (the `*[_type == "page"]` query in the README's "Link list pictures").
 
 - **Adjust picture (Studio):** a dialog to drag and zoom a picture inside the exact shape the site draws it in, stored as the image field's own `crop` and `hotspot` (Sanity's crop tool stays as the precise fallback; Reset removes both). Shared framing maths (`image-framing.ts`, proven against `@sanity/image-url`), shape descriptors with a resolver for the Link list profile picture, an `options.framing` switch through the global input override, a brand-preview example, and Testing Library (`@testing-library/react`, `jsdom`) dev dependencies. **No field is opted in yet** (the Link list adopts it in the next release), so no page, Studio screen or content changes; the public JavaScript is unchanged. Refresh the new `picture-framing` baselines using **Update visual baselines**.
@@ -50,6 +60,8 @@ you start a release.
 - **Mobile featured-link check:** waits for streamed links to become visible and polls their measured heights before comparing them, avoiding a premature zero-height result while retaining the featured-size assertion.
 
 ### Breaking changes / migration steps
+
+None.
 
 ## [1.7.1] - 2026-10-21
 
@@ -1049,7 +1061,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.5.0...v1.6.0
