@@ -151,3 +151,15 @@ describe('PlainText', () => {
     expect(html('<b>hi</b>')).toBe('<p class="mt-2 text-ink-muted">&lt;b&gt;hi&lt;/b&gt;</p>')
   })
 })
+
+it.each([
+  ['normal', 'tracking-normal'],
+  ['wide', 'tracking-[0.1em]'],
+  ['extra-wide', 'tracking-[0.2em]'],
+] as const)('lets %s letter spacing override the capitals default', (letterSpacing, className) => {
+  const design = resolveInlineListDesign({ textCase: 'uppercase', letterSpacing })
+  const html = render({ items: ['Bodywork', 'Movement'], ...design })
+  expect(html).toContain(className)
+  expect(html).not.toContain('tracking-wide')
+  expect(html).toContain('uppercase')
+})

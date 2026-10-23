@@ -1,3 +1,4 @@
+import { LETTER_SPACINGS, LETTER_SPACING_TITLES } from '@/lib/sanity/letter-spacing'
 import { defineField, type ConditionalPropertyCallback, type FieldDefinition } from 'sanity'
 
 import { BODY_TEXT_RATIO } from '@/lib/color/background-contrast'
@@ -360,9 +361,15 @@ export const linkListDesignFields = [
         name: 'textCase',
         title: 'Letters',
         type: 'string',
-        description: 'Capitals are spaced out a little, as small capitals usually are.',
         fieldset: 'text',
         options: radio(INLINE_CASES, INLINE_CASE_TITLES),
+      }),
+      defineField({
+        name: 'letterSpacing',
+        title: 'Letter spacing',
+        type: 'string',
+        options: radio(LETTER_SPACINGS, LETTER_SPACING_TITLES),
+        fieldset: 'text',
       }),
       defineField({
         name: 'gap',

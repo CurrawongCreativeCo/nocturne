@@ -10,6 +10,7 @@ import type {
   InlineSize,
   InlineWeight,
 } from '@/lib/sanity/inline-list-options'
+import { LETTER_SPACING_CLASSES, type LetterSpacing } from '@/lib/sanity/letter-spacing'
 import { previewText } from '@/lib/sanity/preview-text'
 
 // Full class names, so Tailwind's scanner sees them.
@@ -44,6 +45,7 @@ export interface InlineListProps {
   separator?: InlineSeparator
   size?: InlineSize
   weight?: InlineWeight
+  letterSpacing?: LetterSpacing
   textCase?: InlineCase
   gap?: InlineGap
   phoneLayout?: InlinePhoneLayout
@@ -77,6 +79,7 @@ export function InlineList({
   size = 'small',
   weight = 'medium',
   textCase = 'normal',
+  letterSpacing,
   gap = 'comfortable',
   phoneLayout = 'wrap',
   align = 'center',
@@ -102,7 +105,8 @@ export function InlineList({
         stack && (centred ? 'max-sm:flex-col max-sm:items-center' : 'max-sm:flex-col'),
         SIZE[size],
         WEIGHT[weight],
-        CASE[textCase],
+        textCase === 'uppercase' ? 'uppercase' : '',
+        letterSpacing ? LETTER_SPACING_CLASSES[letterSpacing] : CASE[textCase],
         className,
       ]
         .filter(Boolean)

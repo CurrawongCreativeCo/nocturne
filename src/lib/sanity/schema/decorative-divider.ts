@@ -1,3 +1,4 @@
+import { LETTER_SPACINGS, LETTER_SPACING_TITLES } from '@/lib/sanity/letter-spacing'
 import { defineField, defineType, type ConditionalPropertyCallback } from 'sanity'
 
 import {
@@ -103,6 +104,13 @@ export const decorativeDivider = defineType({
       title: 'Letters',
       type: 'string',
       options: radio(DIVIDER_TEXT_CASES, DIVIDER_TEXT_CASE_TITLES),
+      hidden: centreIs('text'),
+    }),
+    defineField({
+      name: 'letterSpacing',
+      title: 'Letter spacing',
+      type: 'string',
+      options: radio(LETTER_SPACINGS, LETTER_SPACING_TITLES),
       hidden: centreIs('text'),
     }),
     badgeIconField({ hidden: centreIs('icon') }),

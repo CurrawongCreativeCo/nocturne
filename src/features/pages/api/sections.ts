@@ -388,6 +388,7 @@ export const linkListFragment = /* groq */ `
       size,
       weight,
       textCase,
+      letterSpacing,
       gap,
       phoneLayout,
       textColour { colour, hex },

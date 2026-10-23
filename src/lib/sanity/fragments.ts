@@ -26,6 +26,7 @@ export const decorativeDividerFields = /* groq */ `
   centre,
   text,
   textCase,
+  letterSpacing,
   icon,
   centreSize,
   image { ${imageFields} },

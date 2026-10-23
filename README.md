@@ -4719,3 +4719,8 @@ No public sections or visual baselines are changed by this harness.
 The standalone `npm run typecheck` disables TypeScript incremental caching so a stale
 `tsconfig.tsbuildinfo` cannot hide diagnostics. Build info is already gitignored; CI must not
 restore it as a typecheck cache. Next.js may still use its own incremental build cache.
+
+**Link list letter spacing:** Design → Service categories → Text offers Normal, Wide and
+Extra wide, independently of capitals and the space between categories. Divider words use the
+same choices. Leaving Letter spacing unset preserves the existing look, including existing
+capitals and divider spacing; no content migration is needed.

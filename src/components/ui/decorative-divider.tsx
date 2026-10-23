@@ -5,6 +5,7 @@ import type {
   ResolvedCentre,
   ResolvedDivider,
 } from '@/lib/sanity/divider-options'
+import { LETTER_SPACING_CLASSES } from '@/lib/sanity/letter-spacing'
 import { previewText } from '@/lib/sanity/preview-text'
 
 import { BadgeIcon } from './badge-icon'
@@ -109,7 +110,7 @@ function Centre({
       return (
         <span
           data-sanity={editInfo}
-          className={`text-center text-balance ${TEXT[size]} ${centre.textCase === 'uppercase' ? 'tracking-[0.2em] uppercase' : 'tracking-[0.08em]'}`}
+          className={`text-center text-balance ${TEXT[size]} ${centre.textCase === 'uppercase' ? 'uppercase' : ''} ${centre.letterSpacing ? LETTER_SPACING_CLASSES[centre.letterSpacing] : centre.textCase === 'uppercase' ? 'tracking-[0.2em]' : 'tracking-[0.08em]'}`}
         >
           {text}
         </span>

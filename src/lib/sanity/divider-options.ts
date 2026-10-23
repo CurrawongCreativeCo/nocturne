@@ -1,3 +1,4 @@
+import { letterSpacingOf, type LetterSpacing } from './letter-spacing'
 import { stegaClean } from 'next-sanity'
 
 import type { SanityImageData } from '@/types/sanity'
@@ -95,6 +96,7 @@ export interface DividerInput {
   thickness?: string | null
   centre?: string | null
   text?: string | null
+  letterSpacing?: string | null
   textCase?: string | null
   icon?: string | null
   image?: SanityImageData | null
@@ -106,7 +108,7 @@ export interface DividerInput {
 export type ResolvedCentre =
   | { kind: 'diamond' }
   | { kind: 'icon'; icon: BadgeIconName }
-  | { kind: 'text'; text: string; textCase: DividerTextCase }
+  | { kind: 'text'; text: string; textCase: DividerTextCase; letterSpacing?: LetterSpacing }
   | { kind: 'image'; image: SanityImageData }
 
 export interface ResolvedDivider {
@@ -138,7 +140,14 @@ function resolveCentre(input: DividerInput): ResolvedCentre | null {
       // Stega stays on the words, so visual editing can find them; only empty text is dropped.
       const text = input.text && stegaClean(input.text).trim() ? input.text : ''
       return text
-        ? { kind: 'text', text, textCase: pick(DIVIDER_TEXT_CASES, input.textCase) ?? 'normal' }
+        ? {
+            kind: 'text',
+            text,
+            textCase: pick(DIVIDER_TEXT_CASES, input.textCase) ?? 'normal',
+            ...(letterSpacingOf(input.letterSpacing) && {
+              letterSpacing: letterSpacingOf(input.letterSpacing),
+            }),
+          }
         : null
     }
     case 'image':
