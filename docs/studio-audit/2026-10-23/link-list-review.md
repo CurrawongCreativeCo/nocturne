@@ -16,7 +16,9 @@ To finish item 9, use [task 89's capture method](../2026-10-17/notes.md) with an
 non-production document containing a profile picture, service categories, links and social icons:
 
 - Capture at 1440 × 900, agency view: `01-profile.png`, `02-service-categories.png`, `03-links.png`,
-  `04-social-icons.png`, `05-dividers.png`, `06-depth-and-glow.png`.
+  `04-social-icons.png`, `05-dividers.png`, `06-depth-and-glow.png`. The requested Links area now
+  spans **Cards** and **Arrows and icons**; capture both as `03a-cards.png` and `03b-arrows-and-icons.png`
+  if they do not fit together.
 - Expand one panel at a time, including its applicable Advanced fields. Repeat at 1024 × 768 for
   panels that overflow or become difficult to scan. Record the actual scheme and viewport.
 - Check keyboard focus, relevant conditional controls and the combined reading length. Add any
