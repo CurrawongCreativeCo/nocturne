@@ -62,7 +62,10 @@ export function PictureFramingInput(props: ObjectInputProps) {
   const resolver = key ? FRAMING_RESOLVERS[key] : undefined
 
   const designPath: Path = resolver
-    ? [...path.slice(0, -resolver.designPath.drop), resolver.designPath.field]
+    ? [
+        ...path.slice(0, -resolver.designPath.drop),
+        ...(resolver.designPath.field ? [resolver.designPath.field] : []),
+      ]
     : []
   const design = useFormValue(designPath)
   const frameRef = resolver?.frameRef?.(design)
@@ -71,8 +74,8 @@ export function PictureFramingInput(props: ObjectInputProps) {
     '*[_id == $id][0]{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url',
   )
   const shapes = useMemo(
-    () => resolver?.resolve(design, frameUrl) ?? [],
-    [resolver, design, frameUrl],
+    () => resolver?.resolve(design, frameUrl, path) ?? [],
+    [resolver, design, frameUrl, path],
   )
 
   const client = useClient({ apiVersion: API_VERSION })

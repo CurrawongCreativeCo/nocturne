@@ -20,7 +20,8 @@ import { accessField } from '@/lib/sanity/schema/access-field'
 import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -510,7 +511,8 @@ const linkItem = defineArrayMember({
       ...imageField({
         name: 'thumbnail',
         description:
-          'A picture for this link. Optional. Glass rows show it down the left of the row, beside the icon; Minimal and Cards show it in place of the icon.',
+          'A picture for this link. Optional. Glass rows show it down the left of the row, beside the icon; Minimal and Cards show it in place of the icon. Use Adjust picture to choose what shows.',
+        options: { ...imageOptions, ...framing('linkListThumbnail') },
         hidden: hiddenUnlessLayout(usesThumbnail),
         aspect: '4:3',
         minWidth: 600,
@@ -645,7 +647,8 @@ export const linkList = defineType({
             name: 'image',
             title: 'Picture or logo',
             description:
-              'Shown round unless the Design tab says otherwise, so centre the face or mark.',
+              'Shown round unless the Design tab says otherwise. Use Adjust picture to centre a face or mark.',
+            options: { ...imageOptions, ...framing('linkListProfile') },
             aspect: '1:1',
             minWidth: 400,
           }),

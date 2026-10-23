@@ -5,6 +5,7 @@ import { BadgeIcon } from '@/components/ui/badge-icon'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { trackAttributes } from '@/lib/analytics/track-script'
 import { OWN_SHADOW } from '@/lib/sanity/depth-options'
+import type { ThumbnailServed } from '@/lib/sanity/link-thumbnail-framing'
 import { iconLook, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { textLook, type OwnText } from '@/lib/sanity/text-style-options'
 import type { SanityImageData } from '@/types/sanity'
@@ -190,17 +191,21 @@ export function LinkIcon({
   )
 }
 
-/** A link's thumbnail if it has one, else its icon, else nothing. `thumbClass` shapes the picture. */
+/**
+ * A link's thumbnail if it has one, else its icon, else nothing. `thumbClass` shapes the picture;
+ * `served` is the shape it is drawn in (lib/sanity/link-thumbnail-framing.ts), so the CDN cuts the
+ * picture to that shape around its hotspot instead of CSS cutting a fixed 4:3 again.
+ */
 export function LinkVisual({
   link,
   thumbClass,
-  sizes,
+  served,
   icon,
   useThumbnail = true,
 }: {
   link: ListLink
   thumbClass: string
-  sizes: string
+  served: ThumbnailServed
   /** The icon, drawn when there is no thumbnail. */
   icon: ReactNode
   useThumbnail?: boolean
@@ -211,9 +216,10 @@ export function LinkVisual({
       <SanityImage
         image={thumbnail}
         alt=""
-        width={600}
-        height={450}
-        sizes={sizes}
+        width={served.width}
+        height={served.height}
+        placement={served}
+        sizes={served.sizes}
         className={thumbClass}
       />
     )

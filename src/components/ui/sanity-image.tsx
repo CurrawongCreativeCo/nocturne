@@ -2,6 +2,7 @@ import { stegaClean } from 'next-sanity'
 import { Image, type ImageProps } from 'next-sanity/image'
 
 import { urlFor } from '@/lib/sanity/image'
+import { visibleArea, type Placement } from '@/lib/sanity/image-framing'
 import { blurPlaceholder } from '@/lib/sanity/image-placeholder'
 import type { SanityImageData } from '@/types/sanity'
 
@@ -9,6 +10,17 @@ type Props = Omit<ImageProps, 'src' | 'alt' | 'width' | 'height'> & {
   image: SanityImageData | null | undefined
   /** Overrides the editor-supplied alt text. */
   alt?: string
+  /**
+   * The shape the picture is drawn in, when the CDN is asked for that shape's own ratio rather than
+   * a fixed one. The served area is `visibleArea`: the editor's positioning, else the hotspot, else
+   * the centre of what was served before (lib/sanity/image-framing.ts), sent as an explicit rect.
+   */
+  placement?: Placement
+  /**
+   * Serve the whole upload scaled to the size, with no crop, hotspot or rect (so not even the
+   * pixel of rounding a derived width and height can add): for pictures shown uncropped.
+   */
+  whole?: boolean
 } & (
     | { fill: true; width?: never; height?: never }
     | { fill?: false; width?: number; height?: number }
@@ -19,7 +31,16 @@ type Props = Omit<ImageProps, 'src' | 'alt' | 'width' | 'height'> & {
  * (via next-sanity's loader), not the Next.js optimizer; crop, hotspot,
  * intrinsic dimensions and LQIP blur placeholders (opaque pictures only) are applied automatically.
  */
-export function SanityImage({ image, alt, width, height, fill, ...props }: Props) {
+export function SanityImage({
+  image,
+  alt,
+  width,
+  height,
+  fill,
+  placement,
+  whole,
+  ...props
+}: Props) {
   // Asset metadata is never meant to carry Visual Editing markers.
   const clean = stegaClean(image)
   const asset = clean?.asset
@@ -42,8 +63,23 @@ export function SanityImage({ image, alt, width, height, fill, ...props }: Props
     ? undefined
     : (height ?? (w && dims ? Math.round((w * dims.height) / dims.width) : dims?.height))
 
-  const builder = urlFor(source)
-  const src = (w && h ? builder.width(w).height(h).fit('crop') : builder).url()
+  const area =
+    placement && dims
+      ? visibleArea(placement, { asset: dims, crop: clean.crop, hotspot: clean.hotspot })
+      : null
+  const builder = area
+    ? urlFor({ asset: source.asset }).rect(area.left, area.top, area.width, area.height)
+    : whole
+      ? urlFor({ asset: source.asset }).ignoreImageParams()
+      : urlFor(source)
+  const src = (
+    w && h
+      ? builder
+          .width(w)
+          .height(h)
+          .fit(whole ? 'max' : 'crop')
+      : builder
+  ).url()
 
   return (
     <Image

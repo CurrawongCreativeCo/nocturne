@@ -44,3 +44,28 @@ describe('hotspotObjectPosition', () => {
     expect(hotspotObjectPosition({ crop, hotspot: spot(0.5, 0.5) })).toBeUndefined()
   })
 })
+
+describe('hotspotObjectPosition within a served area', () => {
+  const asset = { width: 3000, height: 2000 }
+
+  it('measures the hotspot against the part of the upload that was served', () => {
+    // The served 1000 × 750 area starts at (500, 250): a hotspot at (1000, 625) is a half of the way in.
+    const area = { left: 500, top: 250, width: 1000, height: 750 }
+    expect(hotspotObjectPosition({ hotspot: spot(1 / 3, 0.3125) }, { asset, area })).toBe('50% 50%')
+    expect(hotspotObjectPosition({ hotspot: spot(0.25, 0.25) }, { asset, area })).toBe('25% 33.3%')
+  })
+
+  it('is the centre of the area for an adjusted picture, whose hotspot is the area’s centre', () => {
+    const area = { left: 1000, top: 500, width: 1200, height: 900 }
+    const centre = spot(
+      (area.left + area.width / 2) / asset.width,
+      (area.top + area.height / 2) / asset.height,
+    )
+    expect(hotspotObjectPosition({ hotspot: centre }, { asset, area })).toBe('50% 50%')
+  })
+
+  it('stays undefined without a hotspot, so the picture is centred', () => {
+    const area = { left: 0, top: 0, width: 100, height: 100 }
+    expect(hotspotObjectPosition({}, { asset, area })).toBeUndefined()
+  })
+})

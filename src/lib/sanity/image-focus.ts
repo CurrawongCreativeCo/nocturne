@@ -1,5 +1,7 @@
 import type { SanityImageCrop, SanityImageHotspot } from '@/types/sanity.types'
 
+import type { AssetSize, Rect } from './image-framing'
+
 interface FocusSource {
   crop?: SanityImageCrop | null
   hotspot?: SanityImageHotspot | null
@@ -14,9 +16,18 @@ const percent = (value: number) => `${Math.round(clamp(value) * 1000) / 10}%`
  * already cut to the editor's crop, so the hotspot, which is measured on the whole upload, is
  * re-measured against what is left of it.
  */
-export function hotspotObjectPosition(image: FocusSource | null | undefined): string | undefined {
+export function hotspotObjectPosition(
+  image: FocusSource | null | undefined,
+  /** The part of the upload actually served (explicit rect), when it is not the crop: the hotspot is measured against it. */
+  served?: { asset: AssetSize; area: Rect },
+): string | undefined {
   const hotspot = image?.hotspot
   if (!hotspot) return undefined
+
+  if (served) {
+    const { asset, area } = served
+    return `${percent((hotspot.x * asset.width - area.left) / area.width)} ${percent((hotspot.y * asset.height - area.top) / area.height)}`
+  }
 
   const left = image.crop?.left ?? 0
   const right = image.crop?.right ?? 0

@@ -166,3 +166,48 @@ for (const scheme of SCHEMES) {
     }
   })
 }
+
+test.describe('on the Link list', () => {
+  test.skip(({ isMobile }) => isMobile, 'Desktop only')
+
+  test('the profile picture previews a circle and a framed rounded square', async ({ page }) => {
+    await openPreview(page)
+    for (const id of ['profile-circle', 'profile-frame']) {
+      const dialog = await openDialog(page, 'light', id)
+      await expect(dialog.locator('[data-picture-shape]')).toBeVisible()
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toBeHidden()
+    }
+  })
+
+  test('Logo, uncropped says so, keeps the saved positioning and offers no button', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    for (const scheme of SCHEMES) {
+      const holder = example(page, scheme, 'profile-logo')
+      await holder.scrollIntoViewIfNeeded()
+      await expect(
+        holder.getByText('Your image positioning is saved but isn’t applied in uncropped mode.'),
+      ).toBeVisible()
+      await expect(holder.getByRole('button', { name: 'Adjust picture' })).toHaveCount(0)
+      // What is saved stays: only Reset removes it, and it asks first.
+      await expect(holder.locator('[data-framing-values]')).toContainText('"crop"')
+      await holder.getByRole('button', { name: 'Reset picture positioning' }).click()
+      await expect(holder.getByText('Remove the saved positioning?')).toBeVisible()
+      await holder.getByRole('button', { name: 'Keep' }).click()
+      await expect(holder.locator('[data-framing-values]')).toContainText('"crop"')
+    }
+  })
+
+  test('a thumbnail shows the shape the section draws, and the others as outlines', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    const cards = await openDialog(page, 'light', 'thumbnail-cards')
+    await expect(cards.getByText('Also shown as: Featured link')).toBeVisible()
+    await cards.getByRole('button', { name: 'Cancel' }).click()
+    const glass = await openDialog(page, 'light', 'thumbnail-glass')
+    await expect(glass.getByText('Also shown as: Tallest row')).toBeVisible()
+  })
+})

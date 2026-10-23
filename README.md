@@ -3669,6 +3669,39 @@ strength. The section gallery has one entry per preset (`link-list-stacked`, `-c
 `-image-focused`, `-glass-rows`), screenshot on desktop and mobile; macOS skips them, so refresh the baselines with the **Update visual baselines** workflow.
 `tests/e2e/prelaunch-pages.spec.ts` checks the Coming soon and Under construction fixtures at 375 and 1280 px (one `h1`, axe, no header or footer, `noindex`, left out of the sitemap); Vitest (`templates.test.ts`) checks all three new templates.
 
+#### Link list pictures
+
+The profile picture and every link's thumbnail have **Adjust picture** (see [Adjust picture (Studio)](#adjust-picture-studio)). The dialog shows the picture in the shape this section draws: a circle or rounded square for the profile (Design › Profile), with its ring or frame; for a thumbnail, the layout's own shape (a square in Minimal and Cards, 4:3 across an Image-focused card and 16:9 for the large link, the row's strip in Glass rows). Other shapes the same link can take are outlines ("Also shown as…"). Glass rows' strip changes with the text, so the dialog previews its shortest row and its tallest. The thumbnail shape follows the link's own **Show large** flag, and only the first ticked, shown link is drawn large, as on the page. Changing a shape never clears or confirms anything; only **Reset** under the field (after "Remove the saved positioning?") removes the saved positioning.
+
+**One set of rules**, from `src/lib/sanity/image-framing.ts`, for the editor and the site:
+
+1. **Positioned with Adjust picture:** its crop and hotspot decide. They replace the field's earlier hotspot, so the last manual positioning wins.
+2. **A hotspot (or crop) but no adjustment:** the thumbnail is cut to its drawn shape around the hotspot, so the subject stays in view. This is the one intended visual change.
+3. **Neither:** exactly what thumbnails showed before. Before, every thumbnail was requested as 600 × 450 (4:3) and CSS then cut it again; now the same area (the centre of the 4:3 cut, then the drawn shape from its centre) is requested as an explicit `rect` at the drawn ratio, so a portrait or near-square upload shows what it did. Only the file is smaller.
+4. **Logo, uncropped (profile):** the whole picture, `object-fit: contain`, no crop and no zoom, even with an adjustment saved. The adjustment stays stored and applies again when Circle or Rounded square is chosen. The field says "Your image positioning is saved but isn't applied in uncropped mode." with Reset. This also means a logo that had a stored crop (from Sanity's crop tool) now shows whole, which is intended.
+5. Nothing else changes: no other image, field or component uses these rules.
+
+**What the site asks the CDN for** (`servedThumbnail`; never the original upload). `SanityImage` takes a `placement` and sends `visibleArea` as an explicit `rect`; the CDN's own width and height then follow the shape:
+
+| Layout                    | Ratio | Requested (2x the largest drawn size)    | Drawn at most |
+| ------------------------- | ----- | ---------------------------------------- | ------------- |
+| Minimal                   | 1:1   | 80 × 80                                  | 40 px         |
+| Cards                     | 1:1   | 128 × 128                                | 64 px         |
+| Image-focused             | 4:3   | 1440 × 1080                              | about 720 px  |
+| Image-focused, large link | 16:9  | 1440 × 810                               | about 720 px  |
+| Glass rows, no framing    | 4:3   | 256 × 192                                | 128 px wide   |
+| Glass rows, framed        | strip | 256 × 112 (256 × 160 for the large link) | 128 px wide   |
+
+The browser still picks the width it needs from `sizes`, so those figures only fix the ratio and the ceiling. Glass rows' strip is as tall as the row's text, so its ratio varies: an unframed picture keeps the 4:3 cut it always had (no row moves), a framed one is requested at the shortest row's own area (the widest the strip gets) and CSS places it with `hotspotObjectPosition` (centred when there is no hotspot); a taller row shows a narrower slice of it. Framing belongs to the field: a second section reusing the same upload without framing is unchanged. The public JavaScript and layout (every size is fixed by the layout, not the picture) are unchanged.
+
+**Before upgrading a site:** find Link lists whose logo has a stored crop, because it will now show whole. Run this read-only query in Vision (it changes nothing):
+
+```groq
+*[_type == "page" && count(pageBuilder[_type == "linkList" && profileDesign.imageShape == "natural" && defined(profile.image.crop)]) > 0]{ title, "slug": slug.current }
+```
+
+**Tests.** Vitest: the layout map, the visible area for each rule on landscape, near-square and portrait uploads in every layout (rule 3 against today's 600 × 450 plus CSS crop, computed both ways), the resolvers, and that the editor opens on the area the renderer serves; `ProfileImage` classes and requested sizes for every design (a snapshot, so a change to a circle or rounded square is visible). Playwright: `tests/e2e/link-list-framing.spec.ts` reads the URLs `/link-framing` asks for (rect, width, height, format), checks no thumbnail is requested at more than 2x its drawn size at 375, 768 and 1280 px, and covers a circle, rounded square, ring and frame, axe, and one Tab stop per link; `picture-framing.spec.ts` covers the editors on the brand preview. Screenshots are `link-list-framing-visual.spec.ts` (Linux-only; refresh with **Update visual baselines**).
+
 ### Style guide
 
 `/section-gallery` is a living style guide for design reviews with a client, in two views:
@@ -3896,7 +3929,7 @@ The thumbnails sit in `src/lib/sanity/schema/` beside `presetField`, free of Stu
 
 ### Adjust picture (Studio)
 
-A dialog under an image field where an editor sees the picture inside the exact shape the site draws it in, drags it into place, zooms with a slider and applies. Nothing is uploaded and the file never changes. It is built, but **no field uses it yet**: the Link list's profile picture adopts it next (task 176), so no page or Studio screen changes until then.
+A dialog under an image field where an editor sees the picture inside the exact shape the site draws it in, drags it into place, zooms with a slider and applies. Nothing is uploaded and the file never changes. It is on the **Link list's profile picture and link thumbnails** (see [Link list pictures](#link-list-pictures)); any image field can opt in.
 
 **What it changes.** Sanity's own `crop` and `hotspot` on that image field, and nothing else. The crop box is the visible area (zoom and position); the hotspot is set to the crop box's centre and size. Both live on the field in the document, never on the asset, so the same photo used elsewhere keeps its own framing. `SanityImage` already passes both to `@sanity/image-url`, so there is no new rendering path, no canvas, no new asset and no public JavaScript.
 
@@ -3914,7 +3947,7 @@ A dialog under an image field where an editor sees the picture inside the exact 
 **For developers.**
 
 - `src/lib/sanity/image-framing.ts` is the maths (plain TypeScript, no React or Studio code). `toCrop` and `fromImage` convert between the editor's state (zoom of at least 1 and a centre point) and the stored values; `servedRect` is `@sanity/image-url`'s `fit()` rule, step for step; `visibleArea(placement, image)` is the one answer to "what part of the upload shows?", for the editor and for the renderer: the adjustment, else the hotspot, else `defaultArea` (what the picture shows today), and null for an uncropped shape. Zoom 1 is "cover", so the shape is always full. `image-framing.test.ts` builds real URLs with `@sanity/image-url` and parses their `rect` to prove the parity.
-- `src/lib/sanity/image-frame-geometry.ts` describes shapes (`aspect`, `corner`, `insetPct`, `ring`, `frameUrl`, `drawnPx`). `FRAMING_RESOLVERS` has one resolver per placement, which turns the component's resolved design into descriptors (main shape first). `linkListProfile` does it for `resolveProfileImage`'s output; Logo, uncropped returns none. Components should draw from the same descriptor so the stage and the page can't drift (task 176 moves `ProfileImage` onto it). Add a placement beside the `// new-framing: resolver` marker, with a test.
+- `src/lib/sanity/image-frame-geometry.ts` describes shapes (`aspect`, `corner`, `insetPct`, `ring`, `frameUrl`, `drawnPx`). `FRAMING_RESOLVERS` has one resolver per placement, which turns the component's resolved design into descriptors (main shape first). `linkListProfile` does it for `resolveProfileImage`'s output through `profileFrameShape`, which `ProfileImage` draws from too; Logo, uncropped returns none. `linkListThumbnail` reads the section (three segments up from the thumbnail) and the link's key, and takes its shapes from `thumbnailShapes` in `src/lib/sanity/link-thumbnail-framing.ts`, the same map the components use for what to ask the CDN. A resolver's `resolve(design, frameUrl, path)` also gets the field's path, for placements that depend on which item the picture sits in. Add a placement beside the `// new-framing: resolver` marker, with a test.
 - Opt a field in with `options: { ...imageOptions, ...framing('linkListProfile') }` (`src/lib/sanity/schema/image-framing-option.ts`); schema files don't import Studio code. `withPresetPicker` (the global input override in `sanity.config.ts`) switches on `PictureFramingInput` for those fields. It reads the design from the document with `useFormValue`, at the resolver's `designPath` (relative to the image field), and fetches a decorative frame's artwork once per session.
 - The preview is the Sanity CDN at 1200 px (fit max, automatic format) with the asset's blurred placeholder while it loads, never the original upload. The dialog is `AdjustPictureDialog` (no Studio hooks, so `/studio-brand-preview` mounts it directly); the Studio wrapper only supplies the picture, shapes and `onChange`. The preview page's "Adjust picture" examples (a circle and 16:9, light and dark) hold their values in memory and are covered by `tests/e2e/picture-framing.spec.ts`.
 - Pointer events use pointer capture, so mouse, pen and touch share one path. Updates are batched to one per animation frame and only the picture's transform changes. Every listener and frame request is removed when the dialog closes.
