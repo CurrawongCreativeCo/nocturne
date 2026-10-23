@@ -1,9 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { REJECTED_CONSENT } from './constants'
+import { test } from './fixtures/test'
 
 /**
  * The Embed section (README, "Embed"), on /embed: a Typeform form (tall), a Google map and a Spotify

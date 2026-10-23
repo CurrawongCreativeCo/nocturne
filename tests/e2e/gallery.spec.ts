@@ -1,9 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * The Gallery section and its lightbox (README, "Gallery"), on a real page (/gallery; the section

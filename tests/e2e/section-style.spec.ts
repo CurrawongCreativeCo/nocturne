@@ -1,9 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Shared section Design options (README, "Section style"): tone, spacing, anchor and motion, set on

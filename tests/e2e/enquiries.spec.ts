@@ -1,7 +1,5 @@
 import { expect, type APIRequestContext, type Page, type TestInfo } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import {
   APP_PORT,
   APP_PORT_ENQUIRIES_OFF,
@@ -9,6 +7,7 @@ import {
   REJECTED_CONSENT,
   SANITY_WRITE_TOKEN,
 } from './constants'
+import { test } from './fixtures/test'
 import { waitForHydration } from './hydration'
 
 /**

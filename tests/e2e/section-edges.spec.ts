@@ -1,9 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Locator, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Section dividers (README, "Section dividers"): a section's bottom edge is cut with a mask, the

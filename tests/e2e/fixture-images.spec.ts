@@ -13,7 +13,7 @@ test('the fake Content Lake serves a real PNG and ordinary page pictures decode'
   expect((await response.body()).subarray(0, 8)).toEqual(
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
   )
-  await page.goto('/links')
+  await page.goto('/image-placeholders')
   const pictures = page.locator('#main-content img')
   expect(await pictures.count()).toBeGreaterThan(0)
   const loaded = await pictures.evaluateAll(async (images) =>

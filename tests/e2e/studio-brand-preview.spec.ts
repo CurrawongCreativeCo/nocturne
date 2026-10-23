@@ -2,7 +2,6 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, type Locator, type Page } from '@playwright/test'
 
 import { test } from './fixtures/test'
-
 import { brandPreviewCases } from '../../src/features/studio/brand-preview/cases'
 import { hexToOklch } from '../../src/lib/color/oklch'
 

@@ -1,9 +1,8 @@
 import { expect, type APIResponse } from '@playwright/test'
-
-import { test } from './fixtures/test'
 import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { INDEXNOW_KEY, REVALIDATE_SECRET, SITE_URL } from './constants'
+import { test } from './fixtures/test'
 
 test.describe('mobile menu', () => {
   test.skip(({ isMobile }) => !isMobile, 'Mobile only')

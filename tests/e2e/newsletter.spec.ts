@@ -2,7 +2,6 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, type TestInfo } from '@playwright/test'
 
 import { test } from './fixtures/test'
-
 import { waitForHydration } from './hydration'
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']

@@ -1,9 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * The Logo strip's Marquee layout (README, "Logo strip"): an endless row moved by CSS, with a Pause

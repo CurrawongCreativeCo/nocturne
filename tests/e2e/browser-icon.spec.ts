@@ -1,9 +1,8 @@
 import { expect, type APIRequestContext, type Page, type TestInfo } from '@playwright/test'
-
-import { test } from './fixtures/test'
 import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { FAKE_SANITY_PORT, REVALIDATE_SECRET } from './constants'
+import { test } from './fixtures/test'
 
 // The tests switch the Site settings the fake Content Lake serves, so they run in order, once.
 test.describe.configure({ mode: 'serial' })

@@ -1,9 +1,8 @@
 import { expect, type APIRequestContext, type Page } from '@playwright/test'
-
-import { test } from './fixtures/test'
 import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { FAKE_SANITY_PORT, REVALIDATE_SECRET } from './constants'
+import { test } from './fixtures/test'
 
 /**
  * Visual regression with the Studio's brand colours: the same gallery sections as visual.spec.ts,

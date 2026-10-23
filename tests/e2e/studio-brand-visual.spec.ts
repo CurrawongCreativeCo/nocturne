@@ -1,7 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
 import { test } from './fixtures/test'
-
 import { brandPreviewCases } from '../../src/features/studio/brand-preview/cases'
 
 /**

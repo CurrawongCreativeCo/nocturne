@@ -1,8 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { SITE_URL } from './constants'
+import { test } from './fixtures/test'
 
 test.describe('pages', () => {
   test('home renders its sections with the hero as the only <h1>', async ({ page }) => {

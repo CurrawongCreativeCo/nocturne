@@ -1,9 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type APIRequestContext, type Locator, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { galleryIds } from './fixtures/dataset.mjs'
+import { test } from './fixtures/test'
 
 /**
  * Animated hero parts (README, "Animating individual parts") on two real pages: /hero-parts, whose

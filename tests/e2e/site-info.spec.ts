@@ -2,9 +2,8 @@ import { readFileSync } from 'node:fs'
 
 import { expect } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { APP_ENV } from './constants'
+import { test } from './fixtures/test'
 
 test.skip(({ isMobile }) => isMobile, 'Desktop only')
 

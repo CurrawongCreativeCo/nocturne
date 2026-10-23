@@ -1,8 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { SITE_URL } from './constants'
+import { test } from './fixtures/test'
 
 // Headings and text are looked up inside #main-content: under load React can leave its hidden streaming
 // segment (<div hidden id="S:n">) in the DOM beside the revealed copy, and strict locators match both.

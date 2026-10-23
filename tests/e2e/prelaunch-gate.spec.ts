@@ -1,8 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import {
   SITE_URL,
   APP_PORT,
@@ -10,6 +8,7 @@ import {
   DRAFT_MODE_SECRET,
   PRELAUNCH_PREVIEW_TOKEN,
 } from './constants'
+import { test } from './fixtures/test'
 import { waitForHydration } from './hydration'
 
 /**

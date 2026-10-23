@@ -4,9 +4,8 @@ import path from 'node:path'
 import AxeBuilder from '@axe-core/playwright'
 import { expect } from '@playwright/test'
 
-import { test } from './fixtures/test'
-
 import { APP_PORT, RELEASE_ID } from './constants'
+import { test } from './fixtures/test'
 
 /** Next's draft-mode cookie value, fixed per build; lets the test skip the Studio secret handshake. */
 const { previewModeId } = (
