@@ -1768,6 +1768,33 @@ documents.push({
   pageBuilder: heroLabelExamples,
 })
 
+const linkHeadingExamples = ['image', 'missing', 'text'].map((look) => ({
+  _key: `link-list-group-heading-${look}`,
+  _type: 'linkList',
+  variant: 'stacked',
+  title: `Link heading: ${look}`,
+  socialSource: 'none',
+  style: { _type: 'sectionStyle', motion: 'none' },
+  links: [
+    linkItem(`heading-${look}`, 'Book a session', external('https://example.com/book'), {
+      group: 'Sessions',
+      groupDisplay: look === 'text' ? 'text' : 'image',
+      ...(look !== 'missing' && {
+        groupImage: { _type: 'image', asset: ref(IMAGE_ASSET_ID), size: 'small' },
+      }),
+    }),
+    linkItem(`next-${look}`, 'Contact us', external('https://example.com/contact')),
+  ],
+}))
+documents.push({
+  _id: 'page-link-headings',
+  _type: 'page',
+  title: 'Link headings',
+  slug: { _type: 'slug', current: 'link-headings' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: linkHeadingExamples,
+})
+
 const gallerySections = [
   ...heroLabelExamples.slice(0, 2),
   {
@@ -2436,6 +2463,7 @@ const gallerySections = [
     provider: 'typeform',
     url: EMBED_URL.typeform,
   }),
+  linkHeadingExamples[0],
   // new-section:gallery
 ]
 

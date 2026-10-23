@@ -437,6 +437,8 @@ export const linkListFragment = /* groq */ `
       icon,
       featured,
       group,
+      groupDisplay,
+      groupImage { size, ${imageFields} },
       showFrom,
       showUntil,
       utmSource,

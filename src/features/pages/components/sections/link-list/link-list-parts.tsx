@@ -18,13 +18,14 @@ import {
   type LinkListPart,
   type ResolvedDivider,
 } from '@/lib/sanity/divider-options'
-import { linkArrowOf, type LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
+import { linkArrowOf } from '@/lib/sanity/link-arrow-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { socialPositionOf, socialStyleOf } from '@/lib/sanity/social-style-options'
 import { resolveSurface } from '@/lib/sanity/surface-options'
 import { themeColourCss } from '@/lib/sanity/theme-colour'
 import { showsWordmark } from '@/lib/sanity/wordmark-options'
 
+import { LinkGroupHeading } from './link-group-heading'
 import type { LinkContext, LinkListLayout, ListLink, StoredLink } from './link-list-types'
 import { Profile, hasProfile } from './profile'
 import { WordmarkHeading, type WordmarkImage } from './wordmark-heading'
@@ -75,11 +76,7 @@ function LinkGroups({
       key={group.heading ?? `links-${String(index)}`}
       className={index > 0 ? 'mt-10' : undefined}
     >
-      {group.heading && (
-        <GroupHeading className="mb-4 text-small font-semibold text-ink-muted">
-          {group.heading}
-        </GroupHeading>
-      )}
+      <LinkGroupHeading as={GroupHeading} heading={group.heading} first={group.links[0]} />
       <ul className={layout.listClassName}>
         {group.links.map((link) => (
           <Fragment key={link.item._key}>{layout.renderLink(link, context(link))}</Fragment>

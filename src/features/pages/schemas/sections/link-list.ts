@@ -485,6 +485,12 @@ const linkItem = defineArrayMember({
         'Optional. Links under the same heading are grouped, e.g. “Shop” or “Follow along”.',
       type: 'string',
     }),
+    ...textOrImageFields({
+      prefix: 'group',
+      what: 'the heading above it',
+      textField: 'group',
+      hidden: ({ parent }) => !(parent as { group?: string } | undefined)?.group?.trim(),
+    }),
     defineField({
       name: 'visibility',
       type: 'string',
