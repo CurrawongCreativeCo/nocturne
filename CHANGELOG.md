@@ -24,7 +24,7 @@ you start a release.
 
 ### Changed
 
-- With no client logo or colours, the Studio navbar shows the Nocturne wordmark (the bird mark alone below 768px) instead of the mark and "Currawong Creative". Client logos and monograms are unchanged. Currawong's brand images in `src/assets/brand/currawong/` are renamed `<kind>-on-<light|dark>` (`bird`, `wordmark`, `logo-horizontal`, `logo-stacked`), and `assets.generated.ts` is regenerated. Nothing outside the template references the old names unless a client site imports them directly.
+- With no client logo or colours, the Studio navbar shows the Nocturne wordmark (the bird mark alone below 768px) instead of the mark and "Currawong Creative", and the Studio's default name (browser tab, sign-in heading) is now "Nocturne". Set `name` in `studio-brand.json` or `NEXT_PUBLIC_STUDIO_TITLE` to override it. Client logos and monograms are unchanged. Currawong's brand images in `src/assets/brand/currawong/` are renamed `<kind>-on-<light|dark>` (`bird`, `wordmark`, `logo-horizontal`, `logo-stacked`), and `assets.generated.ts` is regenerated. Nothing outside the template references the old names unless a client site imports them directly.
 - Start here's recent changes name single-document screens by their Structure title ("Business info", "Navigation") instead of "Untitled business info". The titles live in `src/features/studio/singleton-titles.ts`; `npm run new:singleton` leaves a `// new-singleton:title` marker there. Pages and posts still show "Untitled page" when they have no title.
 - Start here's Help always offers a way to get help: with no `help.supportEmail` or `help.guideUrl` it names the studio (from the CMS brand) and says to include the page name and a screenshot.
 

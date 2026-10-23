@@ -433,7 +433,7 @@ It still needs the CORS step below.
    | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                       |
    | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                              |
    | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                             |
-   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Currawong Creative)               |
+   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Nocturne)                         |
    | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                        |
    | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                       |
    | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                             |
@@ -1236,7 +1236,7 @@ section covers the brand data it is built from, then [how it is applied](#how-th
 - **Identity falls back field by field.** Logo: the client's logo; otherwise a monogram (the first
   letter of the name) in the client's primary colour, if the client set any colour; otherwise the
   Nocturne wordmark. Compact mark: the client's mark, then their logo, then the monogram, then Currawong's
-  mark. Name: `name` in `studio-brand.json`, then `NEXT_PUBLIC_STUDIO_TITLE`, then "Currawong Creative".
+  mark. Name: `name` in `studio-brand.json`, then `NEXT_PUBLIC_STUDIO_TITLE`, then "Nocturne" (Currawong's product brand).
 - **Colours fall back as a whole set, never field by field.** Set any colour and the whole palette comes
   from the client: their secondary if given, otherwise one derived from their primary (same hue,
   lightness moved), with neutrals from Sanity's defaults tinted lightly toward the client's hue. A

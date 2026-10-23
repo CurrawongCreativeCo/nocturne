@@ -23,7 +23,7 @@ describe('resolveStudioBrand: precedence matrix', () => {
     const brand = resolve({})
     expect(brand).toEqual({
       source: 'currawong',
-      name: 'Currawong Creative',
+      name: 'Nocturne',
       logo: currawongBrand.logo,
       mark: currawongBrand.mark,
       logoSource: 'currawong',
@@ -43,11 +43,11 @@ describe('resolveStudioBrand: precedence matrix', () => {
     expect(brand.logo).toEqual(currawongBrand.logo)
   })
 
-  it('name text falls back to NEXT_PUBLIC_STUDIO_TITLE, then to Currawong Creative', () => {
+  it('name text falls back to NEXT_PUBLIC_STUDIO_TITLE, then to Nocturne', () => {
     expect(resolve({}, 'Acme CMS').name).toBe('Acme CMS')
     expect(resolve({ name: 'Acme Plumbing' }, 'Acme CMS').name).toBe('Acme Plumbing')
-    expect(resolve({}, '   ').name).toBe('Currawong Creative')
-    expect(resolve({}, undefined).name).toBe('Currawong Creative')
+    expect(resolve({}, '   ').name).toBe('Nocturne')
+    expect(resolve({}, undefined).name).toBe('Nocturne')
   })
 
   it('a logo only: the client logo, with Currawong colours', () => {
@@ -56,7 +56,7 @@ describe('resolveStudioBrand: precedence matrix', () => {
     expect(brand.logo.light).toEqual({ kind: 'image', src: CLIENT_LOGO })
     expect(brand.logo.dark).toEqual({ kind: 'image', src: CLIENT_DARK_LOGO })
     expect(brand.light).toEqual(currawongBrand.light)
-    expect(brand.name).toBe('Currawong Creative')
+    expect(brand.name).toBe('Nocturne')
   })
 
   it('a single logo file serves both schemes; the mark falls back to the client logo, not Currawong', () => {

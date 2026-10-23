@@ -19,7 +19,7 @@ export const currawongPalette = {
  * - Lilac is only ever a surface, and always with a border: against paper it is just 1.1:1.
  */
 export const currawongClassicBrand: StudioBrandDefaults = {
-  name: 'Currawong Creative',
+  name: 'Nocturne',
   logo: {
     light: { kind: 'image', src: 'src/assets/brand/currawong/wordmark-on-light.webp' },
     dark: { kind: 'image', src: 'src/assets/brand/currawong/wordmark-on-dark.webp' },
