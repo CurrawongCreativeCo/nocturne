@@ -28,7 +28,9 @@ function useIsWide(): boolean {
     (notify) => {
       const query = window.matchMedia(WIDE_QUERY)
       query.addEventListener('change', notify)
-      return () => { query.removeEventListener('change', notify); }
+      return () => {
+        query.removeEventListener('change', notify)
+      }
     },
     () => window.matchMedia(WIDE_QUERY).matches,
     () => true,
