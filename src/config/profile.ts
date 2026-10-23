@@ -31,6 +31,7 @@ export const FEATURE_NAMES = [
   'team',
   'teamProfiles',
   'events',
+  'releases',
 ] as const
 export type FeatureName = (typeof FEATURE_NAMES)[number]
 
@@ -107,9 +108,15 @@ export interface SiteProfile {
   templateVersion: string
 }
 
-/** Everything on: a site with no profile edits behaves as the template always has. */
+/**
+ * Features that depend on the Sanity plan rather than on what the site offers, so they start off:
+ * a site on a plan without them never meets an upgrade screen. Switch one on in `site.profile.ts`.
+ */
+export const PLAN_FEATURES: readonly FeatureName[] = ['releases']
+
+/** Everything on except the plan-dependent features: a site with no profile edits behaves as the template always has. */
 export const DEFAULT_FEATURES: Readonly<Features> = Object.fromEntries(
-  FEATURE_NAMES.map((name) => [name, true]),
+  FEATURE_NAMES.map((name) => [name, !PLAN_FEATURES.includes(name)]),
 ) as Features
 
 export const DEFAULT_TIER: Tier = 'custom'

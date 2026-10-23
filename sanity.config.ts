@@ -62,6 +62,7 @@ import {
   filterNewDocumentOptions,
 } from './src/features/studio/utils/document-access'
 import { hideDisabledFromNewMenu } from './src/features/studio/utils/feature-visibility'
+import { studioReleasesSettings } from './src/features/studio/utils/releases-config'
 import { filterTools } from './src/features/studio/utils/tool-access'
 import { teamSchemaTypes } from './src/features/team/schemas'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
@@ -124,6 +125,8 @@ export default defineConfig({
   // Clients only get the approved sections in the page builder's insert menu; presetPicker fields
   // and objects with presets get the picture picker; frameless objects drop their own box.
   form: { components: { input: StudioInput, field: FramelessAwareField } },
+  // Releases and scheduled drafts need a paid Sanity plan: on only when site.profile.ts says so.
+  ...studioReleasesSettings,
   // Content variants: lets editors create variants of a document, which A/B experiments serve.
   beta: { variants: { enabled: true } },
   schema: {

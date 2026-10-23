@@ -20,11 +20,15 @@ you start a release.
 
 ### Added
 
+- Site profile flag `features.releases`: Studio shows Releases and scheduled drafts only when it is on. It defaults to **off** for new sites (this template's profile keeps it on), so clients on plans without Releases never meet an upgrade screen. Set it to match the Sanity plan at handover.
+
 ### Changed
 
 ### Fixed
 
 ### Breaking changes / migration steps
+
+- Releases and scheduled drafts now start **off** in the Studio. A project that merges this and has a Sanity plan with Releases must add `releases: true` to `features` in `site.profile.ts`, or editors lose the Releases tool until it does. Projects on other plans need to do nothing.
 
 ## [1.8.0] - 2026-10-23
 

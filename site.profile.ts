@@ -2,7 +2,7 @@ import { defineSiteProfile } from './src/config/define-site-profile'
 
 /**
  * What this site uses (a Customize file: edit it per client). Studio, the routes and `/api/site-info`
- * read it through `src/config/profile.ts`. A feature left out stays on; a feature set to false
+ * read it through `src/config/profile.ts`. A feature left out stays on (except `releases`, which follows the Sanity plan and starts off); a feature set to false
  * answers 404 on the public site and disappears from the Studio. See "Site profile" in the README.
  */
 export const siteProfileInput = defineSiteProfile({
@@ -34,6 +34,8 @@ export const siteProfileInput = defineSiteProfile({
     team: true,
     teamProfiles: true,
     events: true,
+    // Sanity Releases and scheduled drafts: on only where the Sanity plan includes them (default off).
+    releases: true,
   },
   // Left out, the site is live. Before launch: a temporary page at "/" and everything else private.
   // Changing this is a reviewed commit and a deployment; Studio cannot change it. See "Site profile".

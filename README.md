@@ -166,7 +166,7 @@ Open http://localhost:3000/studio:
   - _Index:_ `/blog` shows 12 posts per page, newest first by _Published at_, with Previous / Next links (`?page=2`) and a filter of the categories that have a post. `/blog/category/<slug>` lists one category the same way. Page 1 has no `?page`, and every page is its own canonical URL.
   - _Summary_ is the card text, the RSS description and the search description unless the post's SEO group sets one. The main image is the share image unless the SEO group has its own; there is no generated image for blog URLs, so set a default in _Name, logo & icon_ if you want one on `/blog`.
   - _Related posts:_ up to three other posts that share a category, the most shared categories first (counting the post's first five), then newest. A post whose categories nobody else uses shows none.
-  - _Going live:_ a post is public once published; _Published at_ only sets the order and the date shown, so a future date doesn't hide it. Use a content release to schedule one. Studio only warns before deleting an author that posts still use; those posts keep working and just lose the byline.
+  - _Going live:_ a post is public once published; _Published at_ only sets the order and the date shown, so a future date doesn't hide it. To schedule one, use a content release (needs `features.releases`, see _Content releases_). Studio only warns before deleting an author that posts still use; those posts keep working and just lose the byline.
   - _RSS:_ `/feed.xml` is an RSS 2.0 feed of the newest 12 posts, with absolute URLs, and blog pages advertise it in their `<head>`. It takes the title and description from _Name, logo & icon_.
   - _Search engines:_ posts get `Article` JSON-LD (author, dates, image, categories; the publisher is the site's Organization). Posts and `/blog` are in the sitemap unless the post's _Hide from search engines_ is ticked; category pages are not.
   - _Bad URLs:_ an unknown post or category gets a real 404. A `?page` past the last page (or not a number) shows the 404 page with `noindex` but answers 200, because the page number can only be read after the response has started streaming.
@@ -262,6 +262,13 @@ reference it without it (they skip the gap rather than error).
 3. _Schedule:_ in the release, set _At time_ and choose _Schedule_ (or _Publish all_ to go live now). Scheduled releases publish on their own and trigger the usual live update or webhook revalidation.
 
 Releases and scheduled publishing need a paid Sanity plan (Growth or higher); on Free they aren't available, so editors publish documents individually. Check your project's plan for its release limits.
+
+**Switching Releases on or off (`features.releases`).** The Studio only shows Releases when `site.profile.ts` says the plan includes them, so clients on other plans never reach an upgrade screen. New sites start with it **off**; this template's own profile has it on.
+
+1. _Check the plan:_ sign in at [sanity.io/manage](https://www.sanity.io/manage), open the project's organisation and look under _Billing_ for the plan and whether Releases is included.
+2. _Switch the flag:_ in `site.profile.ts` set `features: { releases: true }` (or `false`), commit and deploy. Studio reads it when it builds; nothing in the dataset changes.
+3. _What turning it off removes:_ the Releases item in the Studio navigation, scheduled drafts (the single-document schedule action and its "Scheduled Drafts" list, which is the same tool under another name), and the release options in the version menu and _Copy to release_. Documents already in a release stay in the dataset untouched. A/B variants don't depend on releases (they use the Studio's separate `variants` setting), so they keep working.
+4. _Blog scheduling needs it:_ a post goes public when it is published, and _Published at_ only sets the order and date shown. With Releases off, schedule by publishing on the day.
 
 **Branding:** colours, type, spacing and radii are the design tokens in `src/styles/tokens.json` (see
 [Design tokens](#design-tokens)); the brand colour is the `accent` token. The Studio's name comes from
@@ -1432,7 +1439,7 @@ export const siteProfileInput = defineSiteProfile({
 
 - **`voice`**: the AI Assist tone summary and `do` / `dont` lists, all in Australian English (see _AI Assist_ above). Omitted in older profiles: clear, warm and practical defaults.
 - **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo`,
-  `team`, `teamProfiles` and `events`. A feature you leave out stays **on**, so a site that never edits the file behaves as the template always has.
+  `team`, `teamProfiles`, `events` and `releases`. A feature you leave out stays **on**, except `releases`, which depends on your Sanity plan and starts **off** (see _Content releases_). A site that never edits the file otherwise behaves as the template always has.
 - **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;
   see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
   Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
@@ -1461,6 +1468,7 @@ feature does:
 | `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                   |
 | `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                     |
 | `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page) |
+| `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                 |
 | `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                    |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
