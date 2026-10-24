@@ -111,6 +111,7 @@ test.describe('with ENQUIRIES_STORE=1', () => {
       ],
       // The referrer loses its query string; empty UTM values are left out.
       attribution: {
+        landing: '/contact',
         referrer: 'https://www.google.com/search',
         utmSource: 'e2e-news',
         utmMedium: 'email',
@@ -120,7 +121,7 @@ test.describe('with ENQUIRIES_STORE=1', () => {
     expect(new Date(String(enquiry.createdAt)).toISOString()).toBe(enquiry.createdAt)
   })
 
-  test('a send with no referrer or campaign stores no attribution', async ({
+  test('a send with no referrer or campaign stores only the landing page', async ({
     page,
     request,
   }, testInfo) => {
@@ -128,7 +129,37 @@ test.describe('with ENQUIRIES_STORE=1', () => {
     await send(page, `http://localhost:${APP_PORT}/contact`, name)
 
     const { enquiry } = await storedEnquiry(request, name)
-    expect(enquiry).not.toHaveProperty('attribution')
+    expect(enquiry).toMatchObject({ attribution: { landing: '/contact' } })
+    expect(enquiry.attribution).not.toHaveProperty('referrer')
+  })
+
+  test('attribution is first-touch: a campaign landing survives loading another page', async ({
+    page,
+    request,
+  }, testInfo) => {
+    const name = uniqueName(testInfo)
+    await page.addInitScript((value) => {
+      localStorage.setItem('consent', value)
+    }, REJECTED_CONSENT)
+    await page.goto(`http://localhost:${APP_PORT}/about?utm_source=first-touch&utm_campaign=spring`)
+    // A second full page load in the same tab: sessionStorage keeps the first one.
+    await page.goto(`http://localhost:${APP_PORT}/contact`)
+    await waitForHydration(page.getByLabel('Your name'))
+    await page.getByLabel('Your name').fill(name)
+    await page.getByLabel('Email address').fill('ann@example.com')
+    await page.getByLabel('Topic').selectOption('Support')
+    await page.getByLabel('Message').fill('Hello there.')
+    await page.getByLabel('I agree to be contacted').check()
+    await page.getByRole('button', { name: 'Send message' }).click()
+    await expect(
+      page.getByRole('status').filter({ hasText: 'We will reply within two days' }),
+    ).toBeVisible()
+
+    const { enquiry } = await storedEnquiry(request, name)
+    expect(enquiry).toMatchObject({
+      pagePath: '/contact',
+      attribution: { landing: '/about', utmSource: 'first-touch', utmCampaign: 'spring' },
+    })
   })
 
   test('a submission that fails validation stores nothing', async ({ page, request }, testInfo) => {

@@ -6,15 +6,11 @@ import { TRACK_SCRIPT, trackAttributes } from './track-script'
 
 type Handler = (event: { target: unknown }) => void
 
-/** A page with the script run on it, and the calls the providers received. */
-function setup(providers: Record<string, unknown> = {}) {
+/** A page with the script run on it, and the events its `window.trackEvent` received. */
+function setup(trackEvent: ((...args: unknown[]) => void) | undefined) {
   let click: Handler | undefined
-  const window: Record<string, unknown> = {
-    location: { pathname: '/links' },
-    ...providers,
-  }
   runInNewContext(TRACK_SCRIPT, {
-    window,
+    window: { location: { pathname: '/links' }, trackEvent },
     document: {
       addEventListener: (type: string, handler: Handler) => {
         if (type === 'click') click = handler
@@ -22,7 +18,7 @@ function setup(providers: Record<string, unknown> = {}) {
     },
     JSON,
   })
-  return { window, click: (target: unknown) => click?.({ target }) }
+  return (target: unknown) => click?.({ target })
 }
 
 /** An element whose `closest` finds a tracked item and a control, or neither. */
@@ -44,45 +40,32 @@ const target = ({
 })
 
 describe('TRACK_SCRIPT', () => {
-  it('sends a clicked item’s event to every provider that has loaded, with the page’s path', () => {
+  it('hands a clicked item’s event to window.trackEvent with the page’s path', () => {
     const calls: unknown[][] = []
-    const { click } = setup({
-      plausible: (...args: unknown[]) => calls.push(['plausible', ...args]),
-      posthog: { capture: (...args: unknown[]) => calls.push(['posthog', ...args]) },
-      gtag: (...args: unknown[]) => calls.push(['gtag', ...args]),
-    })
+    const click = setup((...args) => calls.push(args))
     click(target({ item: { event: 'link_click', props: '{"label":"Book"}' } }))
-
-    const props = { label: 'Book', page: '/links' }
-    expect(calls).toEqual([
-      ['plausible', 'link_click', { props }],
-      ['posthog', 'link_click', props],
-      ['gtag', 'event', 'link_click', props],
-    ])
+    expect(calls).toEqual([['link_click', { label: 'Book', page: '/links' }]])
   })
 
-  it('does nothing when no provider has loaded (no consent), and does not throw', () => {
-    const { click } = setup()
+  it('does nothing when there is no dispatcher, and does not throw', () => {
+    const click = setup(undefined)
     expect(() => {
       click(target({ item: { event: 'link_click', props: '{}' } }))
     }).not.toThrow()
   })
 
-  it('lets one failing provider leave the others alone', () => {
-    const calls: unknown[][] = []
-    const { click } = setup({
-      plausible: () => {
-        throw new Error('blocked')
-      },
-      gtag: (...args: unknown[]) => calls.push(args),
+  it('never lets a failing dispatcher break the click', () => {
+    const click = setup(() => {
+      throw new Error('blocked')
     })
-    click(target({ item: { event: 'link_click', props: '{}' } }))
-    expect(calls).toHaveLength(1)
+    expect(() => {
+      click(target({ item: { event: 'link_click', props: '{}' } }))
+    }).not.toThrow()
   })
 
   it('ignores a click outside a tracked item, or on one that isn’t a link or button', () => {
     const calls: unknown[][] = []
-    const { click } = setup({ gtag: (...args: unknown[]) => calls.push(args) })
+    const click = setup((...args) => calls.push(args))
     click(target({}))
     click(target({ item: { event: 'link_click', props: '{}' }, control: false }))
     click(null)
@@ -92,16 +75,9 @@ describe('TRACK_SCRIPT', () => {
 
   it('copes with props that aren’t JSON', () => {
     const calls: unknown[][] = []
-    const { click } = setup({ gtag: (...args: unknown[]) => calls.push(args) })
+    const click = setup((...args) => calls.push(args))
     click(target({ item: { event: 'link_click', props: 'not json' } }))
-    expect(calls).toEqual([['event', 'link_click', { page: '/links' }]])
-  })
-
-  it('also defines window.trackEvent for other code to call', () => {
-    const calls: unknown[][] = []
-    const { window } = setup({ gtag: (...args: unknown[]) => calls.push(args) })
-    ;(window.trackEvent as (name: string, props: object) => void)('sign_up', { plan: 'pro' })
-    expect(calls).toEqual([['event', 'sign_up', { plan: 'pro' }]])
+    expect(calls).toEqual([['link_click', { page: '/links' }]])
   })
 })
 

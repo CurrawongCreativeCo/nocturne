@@ -12,6 +12,8 @@ import { clearAnalyticsStorage } from '../utils/clear-analytics-storage'
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void
+    /** Whether analytics is accepted right now; the dispatcher's gate (utils/analytics-dispatcher.ts). */
+    __analyticsConsent?: boolean
     posthog?: { init: (token: string, options: Record<string, unknown>) => void }
   }
 }
@@ -29,6 +31,7 @@ export function AnalyticsScripts() {
   const wasLoaded = useRef(false)
 
   useEffect(() => {
+    window.__analyticsConsent = analytics
     if (analytics) {
       wasLoaded.current = true
       // Marketing changed after Google loaded; the first grant is covered by the inline script.
