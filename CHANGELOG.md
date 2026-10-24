@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Calmer empty lists and counts in Reusable content:** Shared sections, Forms and Panels show how many they hold in the sidebar (Sanity's own count badge), and every empty list of a whole document type says "Nothing here yet." instead of "No documents of this type". Native lists, search, sorting, permissions and Enquiries' CSV download are unchanged. Per-list purpose lines and role-aware create buttons are deferred (README, _Empty lists_).
+
 - **One-row Studio top bar:** from 900px the "Agency view" badge and the Preview client view switch sit at the end of the navbar instead of in a strip above it, saving 34px of height for agency staff. Below 900px the strip stays. Clients see neither.
 
 - **Enquiry attribution and conversion events.** Enquiries now keep first-touch attribution: the visit's landing page, referrer and UTM values are recorded once per tab in `sessionStorage` by a tiny inline script (only with `ENQUIRIES_STORE=1`) and sent as hidden fields from the contact form **and** the newsletter form (Studio: _Where they came from_ › _Landing page_; the CSV has a _Landing page_ column). After consent, and only for configured providers, `form_submit` (form title) and `cta_click` (label, destination) go to Plausible, PostHog and GA4 through one dispatcher (`src/features/consent/utils/analytics-dispatcher.ts`); events carry `experiment` and `variant` from `<main>` on A/B pages. No public JavaScript beyond one call in `ContactForm`. **Intended behaviour change:** attribution is now first-touch rather than the current page's, and the Link list's `link_click` also goes through the dispatcher, so it now checks the saved consent itself. See README _Enquiries_, _Conversion events_ and _Privacy notes_.
