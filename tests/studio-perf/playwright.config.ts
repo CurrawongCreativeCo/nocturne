@@ -10,10 +10,11 @@ if (!existsSync(AUTH_FILE))
 
 export default defineConfig({
   testDir: '.',
-  testMatch: 'studio-perf.spec.ts',
+  testMatch: ['studio-perf.spec.ts', 'preview.spec.ts'],
   workers: 1,
   retries: 0,
-  timeout: 600_000,
+  // Ten full runs (five each for the agency and client views), about 2 minutes apiece.
+  timeout: 3_600_000,
   expect: { timeout: 60_000 },
   reporter: 'list',
   outputDir: 'test-results/studio-perf',

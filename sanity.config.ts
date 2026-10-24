@@ -44,6 +44,7 @@ import { StudioIcon } from './src/features/studio/components/studio-icon'
 import { StudioInputBoundary } from './src/features/studio/components/studio-input-boundary'
 import { ThemeColourPickerInput } from './src/features/studio/components/theme-colour-picker/theme-colour-picker-input'
 import { contentHealth } from './src/features/studio/content-health/plugin'
+import { emptyListResources } from './src/features/studio/empty-list-wording'
 import { resolve } from './src/features/studio/presentation'
 import { currentAudience } from './src/features/studio/roles'
 import {
@@ -60,6 +61,7 @@ import {
   filterDocumentActions,
   filterNewDocumentOptions,
 } from './src/features/studio/utils/document-access'
+import { defaultDocumentNode } from './src/features/studio/utils/document-views'
 import { hideDisabledFromNewMenu } from './src/features/studio/utils/feature-visibility'
 import { studioReleasesSettings } from './src/features/studio/utils/releases-config'
 import { filterTools } from './src/features/studio/utils/tool-access'
@@ -118,6 +120,7 @@ export default defineConfig({
             'This address has no page in the Studio. It may be a redirect or a built-in page.',
         },
       },
+      { locale: 'en-US', namespace: 'structure', resources: emptyListResources },
     ],
   },
   // Sanity 6.19 never renders `logo` (deprecated, unread), so RoleNavbar draws the brand zone itself.
@@ -182,7 +185,7 @@ export default defineConfig({
   // Vision, AI settings and Content health are agency-only; clients open on Start here, then Presentation.
   tools: (prev, context) => filterTools(prev, currentAudience(context.currentUser)),
   plugins: [
-    structureTool({ structure }),
+    structureTool({ structure, defaultDocumentNode }),
     presentationTool({
       resolve,
       previewUrl: { previewMode: { enable: '/api/draft-mode/enable' } },

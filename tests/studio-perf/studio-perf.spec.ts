@@ -4,7 +4,7 @@ import { gzipSync } from 'node:zlib'
 
 import { expect, test, type Page, type Response } from '@playwright/test'
 
-import { assertTarget, DATASET } from './safety'
+import { assertTarget, blockOtherProjects, DATASET } from './safety'
 
 interface LongTask {
   startTime: number
@@ -53,6 +53,7 @@ async function measure(
   metric: string,
   action: () => Promise<void>,
 ) {
+  console.log(`Starting ${view} run ${run}: ${metric}`)
   for (const frame of page.frames())
     await frame.evaluate(() => {
       const state = window as unknown as Partial<PerfWindow>
@@ -109,24 +110,7 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
   for (const view of ['agency', 'client']) {
     for (let run = 1; run <= 5; run++) {
       const context = await browser.newContext({ ...testInfo.project.use })
-      // Block accidental cross-project Content Lake access, including mutations from Studio plugins.
-      await context.route(/https:\/\/[^/]*sanity\.io\//, async (route) => {
-        const url = new URL(route.request().url())
-        const hostProject = /^([a-z0-9]+)\.(?:api|apicdn)\.sanity\.io$/.exec(url.hostname)?.[1]
-        // Live events put the dataset after an extra `events` segment.
-        const datasetMatch =
-          /\/(?:data\/(?:query|mutate|listen|doc)|data\/live\/events|assets\/(?:images|files))\/([^/]+)/.exec(
-            url.pathname,
-          )
-        const dataset = datasetMatch?.[1]
-        if ((hostProject && hostProject !== project) || (dataset && dataset !== DATASET)) {
-          await route.abort()
-          throw new Error(
-            `Blocked a request outside the throwaway project/dataset: ${url.hostname}${url.pathname}`,
-          )
-        }
-        await route.continue()
-      })
+      await blockOtherProjects(context, project)
       await context.addInitScript(
         ({ clientView }) => {
           localStorage.setItem('currawong:studio:client-view', clientView ? '1' : '0')
@@ -149,6 +133,8 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
         { clientView: view === 'client' },
       )
       const page = await context.newPage()
+      // Actions (click, fill) wait forever by default; fail one that never finds its element.
+      page.setDefaultTimeout(60_000)
       const scripts: Promise<Buffer>[] = []
       const fonts: Promise<Buffer>[] = []
       const collectDownload = (response: Response) => {
@@ -236,7 +222,11 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
           ).toBeVisible()
           await expect(page.getByRole('checkbox', { name: 'Edit', exact: true })).toBeEnabled()
         })
-        await page.getByRole('checkbox', { name: 'Edit', exact: true }).uncheck()
+        // Presentation applies the change a moment after the click, so wait for it rather than
+        // using uncheck(), which reads the state immediately.
+        const edit = page.getByRole('checkbox', { name: 'Edit', exact: true })
+        if (await edit.isChecked()) await edit.click()
+        await expect(edit).not.toBeChecked()
         await measure(page, view, run, 'presentationSwitchFiveRoutes', async () => {
           for (let i = 1; i <= 5; i++) {
             const frame = page.frameLocator('iframe')
@@ -254,18 +244,19 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
         try {
           await measure(page, view, run, 'editToPreview', async () => {
             await description.fill(marker)
-            await expect(
-              page.frameLocator('iframe').getByText(marker, { exact: true }),
-            ).toBeVisible()
+            // Match the words: the update shows first without the invisible Visual Editing markers
+            // and is then replaced by the page's own text with them, so an exact match is a race.
+            await expect(page.frameLocator('iframe').getByText(marker).first()).toBeVisible()
           })
         } finally {
           await description.fill(original)
-          await expect(
-            page.frameLocator('iframe').getByText(original, { exact: true }),
-          ).toBeVisible()
+          // The page's own text carries invisible Visual Editing markers in draft mode (as the
+          // heading above does), so match its words, not the whole string.
+          await expect(page.frameLocator('iframe').getByText(original).first()).toBeVisible()
         }
       } finally {
         await context.close()
+        console.log(`Finished ${view} run ${run} of 5`)
       }
     }
   }
