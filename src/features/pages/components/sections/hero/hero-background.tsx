@@ -6,6 +6,8 @@ import { SanityImage } from '@/components/ui/sanity-image'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 import type { SanityImageData } from '@/types/sanity'
 
+import { backgroundImageClass } from './background-class'
+
 /**
  * The picture behind a hero's text, moved by the hero's `background` part (`resolveHeroParts`): the
  * section's Parallax or Float, or the part's own preset (README, "Animating individual parts"). The
@@ -43,7 +45,7 @@ export function HeroBackground({
       fill
       preload={isFirst}
       sizes="100vw"
-      className={`${plan?.kind === 'float' ? '' : '-z-10'}${className}`}
+      className={backgroundImageClass(plan?.kind === 'float', className)}
       style={{ objectPosition: hotspotObjectPosition(image) }}
     />
   )
