@@ -38,7 +38,9 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       headerNav[] { ${navItemFields} },
       headerCta { ${ctaFields} },
       footerNav[] { ${navItemFields} },
-      footerText
+      footerText,
+      footerShowSocial,
+      footerSocialStyle
     },
     "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {
       message,
@@ -98,6 +100,8 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "headerCta": navigation.headerCta,
     "footerNav": navigation.footerNav,
     "footerText": navigation.footerText,
+    "footerShowSocial": navigation.footerShowSocial == true,
+    "footerSocialStyle": navigation.footerSocialStyle,
     "consent": consent,
     "design": design,
     "business": business,

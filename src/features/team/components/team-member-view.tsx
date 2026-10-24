@@ -4,6 +4,7 @@ import { stegaClean } from 'next-sanity'
 import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
+import { SocialLinks } from '@/components/ui/social-links'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { PersonJsonLd } from './person-json-ld'
@@ -67,6 +68,8 @@ function ContactDetails({ member }: { member: TeamMemberData }) {
   const phone = stegaClean(member.phone)
   const phoneHref = telHref(phone)
   const links = member.socialLinks ?? []
+  // Icons unless the member's page asks for text links.
+  const asIcons = stegaClean(member.socialDisplay) !== 'text'
   if (!email && !(phone && phoneHref) && links.length === 0) return null
 
   return (
@@ -89,19 +92,30 @@ function ContactDetails({ member }: { member: TeamMemberData }) {
             </a>
           </li>
         )}
-        {links.map(({ _key, platform, url }) => (
-          <li key={_key}>
-            <a
-              href={stegaClean(url)}
-              rel="noopener noreferrer"
-              className={linkClass}
-              aria-label={`${member.name} on ${socialTitle(stegaClean(platform))}`}
-            >
-              {socialTitle(stegaClean(platform))}
-            </a>
-          </li>
-        ))}
+        {!asIcons &&
+          links.map(({ _key, platform, url }) => (
+            <li key={_key}>
+              <a
+                href={stegaClean(url)}
+                rel="noopener"
+                className={linkClass}
+                aria-label={`${member.name} on ${socialTitle(stegaClean(platform))}`}
+              >
+                {socialTitle(stegaClean(platform))}
+              </a>
+            </li>
+          ))}
       </ul>
+      {asIcons && links.length > 0 && (
+        <SocialLinks
+          profiles={links}
+          shape="circle"
+          rel="noopener"
+          label={`${member.name} on social media`}
+          linkLabel={(network) => `${member.name} on ${network}`}
+          className="mt-4"
+        />
+      )}
     </section>
   )
 }

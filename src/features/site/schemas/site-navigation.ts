@@ -1,6 +1,11 @@
 import { MenuIcon } from '@sanity/icons/Menu'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { hiddenFromClients } from '@/lib/sanity/roles'
+import { presetField } from '@/lib/sanity/schema/preset-field'
+import { socialStyleThumbnails } from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
+import { SOCIAL_STYLES, SOCIAL_STYLE_TITLES } from '@/lib/sanity/social-style-options'
+
 /** A singleton: the one document has `_id === 'siteNavigation'` (see SINGLETON_TYPES and the desk structure). */
 export const siteNavigation = defineType({
   name: 'siteNavigation',
@@ -46,6 +51,32 @@ export const siteNavigation = defineType({
       group: 'footer',
       description:
         'e.g. "Acme Ltd. All rights reserved." Shown after "© <current year>". Defaults to the site name.',
+    }),
+    // Agency only: the icons come from Business info, so editors change them there.
+    defineField({
+      name: 'footerShowSocial',
+      title: 'Show social icons',
+      type: 'boolean',
+      group: 'footer',
+      description:
+        'Adds a row of the social profiles in Business info above the copyright line. Off, the footer is unchanged.',
+      initialValue: false,
+      hidden: hiddenFromClients,
+    }),
+    presetField({
+      name: 'footerSocialStyle',
+      title: 'Social icon style',
+      group: 'footer',
+      options: SOCIAL_STYLES.map((value) => ({
+        value,
+        title: SOCIAL_STYLE_TITLES[value],
+        thumbnail: socialStyleThumbnails[value],
+      })),
+      required: false,
+      initialValue: 'plain',
+      hidden: (context) =>
+        hiddenFromClients(context) ||
+        !(context.document as { footerShowSocial?: boolean } | undefined)?.footerShowSocial,
     }),
   ],
   preview: { prepare: () => ({ title: 'Navigation' }) },

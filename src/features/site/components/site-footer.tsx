@@ -5,8 +5,10 @@ import type { ReactNode } from 'react'
 import { OpenNowBadge } from '@/components/ui/open-now-badge'
 import { OpeningHours } from '@/components/ui/opening-hours'
 import { SanityLink } from '@/components/ui/sanity-link'
+import { SocialLinks } from '@/components/ui/social-links'
 import { DEFAULT_TIME_ZONE, groupOpeningHours, upcomingSpecialHours } from '@/lib/opening-hours'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
+import { socialStyleOf } from '@/lib/sanity/social-style-options'
 
 import { getSettings } from '../api/get-settings'
 import { getToday } from '../api/get-today'
@@ -31,6 +33,14 @@ export async function SiteFooter({ extra, ...mode }: FetchMode & { extra?: React
           timeZone={timeZone}
           specialDays={upcomingSpecialHours(business.specialHours, today)}
         />
+      )}
+      {settings?.footerShowSocial && business?.socialLinks?.some((link) => link.url) && (
+        <div className="mx-auto max-w-content px-gutter pt-10">
+          <SocialLinks
+            profiles={business.socialLinks}
+            shape={socialStyleOf(settings.footerSocialStyle)}
+          />
+        </div>
       )}
       <div className="mx-auto flex max-w-content flex-col gap-6 px-gutter py-12 md:flex-row md:items-center md:justify-between">
         <p className="text-small text-ink-muted">

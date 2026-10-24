@@ -16,6 +16,7 @@ import {
   designSettingsVariants,
   documents,
   experimentRunning,
+  footerSocialOn,
   releaseVersions,
   variantDocuments,
 } from './fixtures/dataset.mjs'
@@ -33,6 +34,9 @@ let designPatch = null
 
 /** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */
 let experimentPatch = null
+
+/** Whether the footer's social icons are on; switched by POST /__fixture/footer-social/<on|off>. */
+let footerSocialPatch = null
 
 /** Writes the site made (the Stripe webhook syncing prices), served back by GET /__fixture/mutations. */
 const mutations = []
@@ -52,6 +56,9 @@ function datasetFor(perspective, variant) {
   ]
     .map((doc) =>
       settingsPatch && doc._id === 'siteIdentity' ? { ...doc, ...settingsPatch } : doc,
+    )
+    .map((doc) =>
+      footerSocialPatch && doc._id === 'siteNavigation' ? { ...doc, ...footerSocialPatch } : doc,
     )
     .map((doc) =>
       experimentPatch && doc._type === 'experiment' ? { ...doc, ...experimentPatch } : doc,
@@ -95,6 +102,12 @@ createServer(async (req, res) => {
   const design = /^\/__fixture\/design\/(off|light|dark)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && design) {
     designPatch = design === 'off' ? null : designSettingsVariants[design]
+    res.writeHead(204).end()
+    return
+  }
+  const footerSocial = /^\/__fixture\/footer-social\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && footerSocial) {
+    footerSocialPatch = footerSocial === 'on' ? footerSocialOn : null
     res.writeHead(204).end()
     return
   }

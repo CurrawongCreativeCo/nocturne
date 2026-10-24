@@ -150,6 +150,24 @@ export const teamMember = defineType({
       ],
     }),
     defineField({
+      name: 'socialDisplay',
+      title: 'Show social links as',
+      type: 'string',
+      fieldset: 'contact',
+      initialValue: 'icons',
+      options: {
+        list: [
+          { value: 'icons', title: 'Icons' },
+          { value: 'text', title: 'Text links' },
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      hidden: ({ document }) =>
+        !hasTeamProfiles() ||
+        !(document as { socialLinks?: unknown[] } | undefined)?.socialLinks?.length,
+    }),
+    defineField({
       name: 'order',
       type: 'number',
       description:

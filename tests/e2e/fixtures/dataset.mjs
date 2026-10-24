@@ -1449,6 +1449,9 @@ export const releaseVersions = [
 /** Fields the fake Content Lake applies to the experiment while it runs (tests/e2e/experiments.spec.ts). */
 export const experimentRunning = { active: true }
 
+/** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
+export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
+
 /**
  * Content variants, as the Content Lake serves them: a request with `variant=<id>` gets these
  * documents in place of the base ones with the same `_id`.
@@ -2376,6 +2379,15 @@ const gallerySections = [
     interactiveMap: true,
   },
   {
+    _key: 'location-social',
+    _type: 'location',
+    title: 'Follow along',
+    showHours: false,
+    showContact: true,
+    showSocial: true,
+    directionsLabel: 'Get directions',
+  },
+  {
     _key: 'location-address-only',
     _type: 'location',
     style: { _type: 'sectionStyle', tone: 'inverse' },
@@ -2809,6 +2821,15 @@ documents.push({
       showContact: true,
       directionsLabel: 'Directions',
     },
+    {
+      _key: 'location-social',
+      _type: 'location',
+      title: 'Follow along',
+      showHours: false,
+      showContact: true,
+      showSocial: true,
+      directionsLabel: 'Get directions',
+    },
   ],
 })
 
@@ -2846,6 +2867,12 @@ documents.push(
         platform: 'linkedin',
         url: 'https://www.linkedin.com/in/ann-lee-example',
       },
+      {
+        _key: 'ann-instagram',
+        _type: 'socialLink',
+        platform: 'instagram',
+        url: 'https://www.instagram.com/ann-lee-example',
+      },
     ],
   }),
   teamMember('ben', 'Ben Ng', 'Senior associate', {
@@ -2854,7 +2881,19 @@ documents.push(
     bio: [block(['Ben joined from a large city firm.'])],
   }),
   teamMember('cara', 'Cara Doyle', 'Office manager', { order: 3 }),
-  teamMember('dev', 'Dev Patel', 'Paralegal', memberSlug('dev-patel')),
+  // Dev's links are text, for a client who prefers them.
+  teamMember('dev', 'Dev Patel', 'Paralegal', {
+    ...memberSlug('dev-patel'),
+    socialDisplay: 'text',
+    socialLinks: [
+      {
+        _key: 'dev-linkedin',
+        _type: 'socialLink',
+        platform: 'linkedin',
+        url: 'https://www.linkedin.com/in/dev-patel-example',
+      },
+    ],
+  }),
 )
 
 /** Team sections on a real page, with a MotionProvider (tests/e2e/team.spec.ts). `team` alone is a legal page slug. */

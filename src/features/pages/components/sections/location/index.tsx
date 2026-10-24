@@ -9,6 +9,7 @@ import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { SocialLinks } from '@/components/ui/social-links'
 import { groupOpeningHours } from '@/lib/opening-hours'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import type { LocationBusiness } from '@/types/business'
@@ -46,7 +47,11 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
 
   const lines = addressLines(business.address)
   const directions = directionsUrl(business)
-  const hasContact = (data.showContact ?? true) && Boolean(business.phone || business.publicEmail)
+  const hasPhoneOrEmail =
+    (data.showContact ?? true) && Boolean(business.phone || business.publicEmail)
+  const hasSocial =
+    (data.showSocial ?? false) && Boolean(business.socialLinks?.some((link) => link.url))
+  const hasContact = hasPhoneOrEmail || hasSocial
   const hasHours = (data.showHours ?? true) && groupOpeningHours(business.openingHours).length > 0
   const hasAddress = lines.length > 0
   // An empty section is worse than none: with nothing from Business info to show, leave it out.
@@ -65,7 +70,9 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
       surface={ctaSurfaceFor(tone)}
     />
   )
-  const contact = hasContact && <ContactBlock business={business} />
+  const contact = hasContact && (
+    <ContactBlock business={business} showDetails={hasPhoneOrEmail} showSocial={hasSocial} />
+  )
   const hours = hasHours && (
     <HoursBlock business={business} showOpenNow={data.showOpenNow ?? true} />
   )
@@ -186,31 +193,49 @@ function AddressBlock({
   )
 }
 
-function ContactBlock({ business }: { business: LocationBusiness }) {
+function ContactBlock({
+  business,
+  showDetails,
+  showSocial,
+}: {
+  business: LocationBusiness
+  showDetails: boolean
+  showSocial: boolean
+}) {
   const { phone, phoneHref, publicEmail } = business
   return (
     <div className="flex flex-col gap-1 text-start">
       <h3 className="text-h4 font-semibold">Contact</h3>
-      <div className="mt-2 flex flex-col gap-1 text-lead">
-        {phone &&
-          (phoneHref ? (
-            <a href={`tel:${phoneHref}`} className={LINK}>
-              <span className="sr-only">Phone </span>
-              {phone}
+      {showDetails && (
+        <div className="mt-2 flex flex-col gap-1 text-lead">
+          {phone &&
+            (phoneHref ? (
+              <a href={`tel:${phoneHref}`} className={LINK}>
+                <span className="sr-only">Phone </span>
+                {phone}
+              </a>
+            ) : (
+              <p>
+                <span className="sr-only">Phone </span>
+                {phone}
+              </p>
+            ))}
+          {publicEmail && (
+            <a href={`mailto:${publicEmail}`} className={LINK}>
+              <span className="sr-only">Email </span>
+              {publicEmail}
             </a>
-          ) : (
-            <p>
-              <span className="sr-only">Phone </span>
-              {phone}
-            </p>
-          ))}
-        {publicEmail && (
-          <a href={`mailto:${publicEmail}`} className={LINK}>
-            <span className="sr-only">Email </span>
-            {publicEmail}
-          </a>
-        )}
-      </div>
+          )}
+        </div>
+      )}
+      {showSocial && (
+        <SocialLinks
+          profiles={business.socialLinks ?? []}
+          shape="circle"
+          className="mt-2"
+          label="Social profiles"
+        />
+      )}
     </div>
   )
 }

@@ -22,6 +22,8 @@ you start a release.
 
 - Site profile flag `features.releases`: Studio shows Releases and scheduled drafts only when it is on. It defaults to **off** for new sites (this template's profile keeps it on), so clients on plans without Releases never meet an upgrade screen. Set it to match the Sanity plan at handover.
 
+- **Social icons everywhere:** the shared `SocialLinks` now also draws the footer (Navigation › Footer: _Show social icons_ and a style picker, agency only, default off), the Location section (_Show social icons_, default off) and team profile pages. Team links are icons named "<name> on <network>" with `rel="noopener"` (no `me`; the footer, Location and Link list keep `rel="me"`); a member can choose _Text links_ instead. No new requests or public JavaScript. **Intended visual change:** team profile pages show icons instead of text links unless a member is set to _Text links_.
+
 ### Changed
 
 - With no client logo or colours, the Studio navbar shows the Nocturne wordmark (the bird mark alone below 768px) instead of the mark and "Currawong Creative", and the Studio's default name (browser tab, sign-in heading) is now "Nocturne". Set `name` in `studio-brand.json` or `NEXT_PUBLIC_STUDIO_TITLE` to override it. Client logos and monograms are unchanged. Currawong's brand images in `src/assets/brand/currawong/` are renamed `<kind>-on-<light|dark>` (`bird`, `wordmark`, `logo-horizontal`, `logo-stacked`), and `assets.generated.ts` is regenerated. Nothing outside the template references the old names unless a client site imports them directly.
@@ -32,6 +34,7 @@ you start a release.
 
 ### Breaking changes / migration steps
 
+- Social icons: none. Run `npm run typegen` after merging (new fields on Navigation, Location and Team member). Team pages switch to icons on their own; set a member's _Show social links as_ to _Text links_ to keep the old look.
 - Releases and scheduled drafts now start **off** in the Studio. A project that merges this and has a Sanity plan with Releases must add `releases: true` to `features` in `site.profile.ts`, or editors lose the Releases tool until it does. Projects on other plans need to do nothing.
 
 ## [1.8.0] - 2026-10-23
