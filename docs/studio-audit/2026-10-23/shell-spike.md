@@ -176,6 +176,9 @@ The public site's JavaScript budget isn't affected: the shell code is imported o
 
 Sizes: S ≈ half a day, M ≈ 1–2 days, L ≈ 3–5 days.
 
+Added to the build plan on 24 October 2026 (version 18): A = task 181, B = 182, C = 183, D = 184 (trigger-based),
+E = 185, and the small fixes in section 6 = 186.
+
 **A. Show the CMS wordmark in the real Studio navbar (brand zone)** — S, P0 bug, build now.
 What: replace the dead `studio.components.logo` with a fixed 232 px brand zone in the navbar from 900 px (the
 `ShellNavbar` brand zone, without the rail). It holds the Nocturne wordmark, or the client logo when one is
@@ -194,16 +197,16 @@ Why: 34 px more height for content on every screen, for both roles, and the conc
 Files: `role-navbar.tsx`, README (Studio roles), CHANGELOG.
 Done when: the switch works from the bar and the strip in both directions, and keyboard order is as in section 3.
 
-**C. Form and Preview side by side in Structure** — M, P1, needs one decision.
+**C. Form and Preview side by side in Structure** — M, P1.
 What: `structureTool({ defaultDocumentNode })` gives pages and posts `S.view.form().id('editor')` and a
 Preview view, opened with `.defaultPanes(['editor', 'preview'])`. Sanity's split view collapses Preview into
 a tab when there isn't room. The Preview view loads the page through `/api/draft-mode/enable` the same way
 Presentation does.
 Why: VD-009's "adaptive two-column form and preview", fully supported, without sending editors to
 Presentation.
-Decision first: Presentation creates its draft-mode secret with `@sanity/preview-url-secret`, which is
-installed only as a dependency of `sanity`. Using it means adding it to `package.json` (approval needed). The
-alternative is linking to Presentation instead of embedding.
+Decided 24 October 2026: add `@sanity/preview-url-secret` to `package.json` as a direct dependency, pinned to the
+version `sanity` and `next-sanity` already install (4.1.5). Note that `createPreviewSecret` is tagged `@internal`
+in that version, so the task verifies the supported way to create or reuse Presentation's secret first.
 Files: `src/features/studio/structure.ts`, a new `src/features/studio/components/preview-view.tsx`,
 `sanity.config.ts`, the route inventory test if any route changes, README, CHANGELOG.
 
