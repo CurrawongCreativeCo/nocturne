@@ -1,10 +1,9 @@
 import { stegaClean } from 'next-sanity'
 
+import { AttributionFields } from './attribution-fields'
 import { ContactForm } from './contact-form-lazy'
 import type { FormDefinition } from '../types'
-import { ATTRIBUTION_FIELDS, ATTRIBUTION_SCRIPT } from '../utils/attribution'
 import { getFormsConfig } from '../utils/config'
-import { isEnquiryStoreRequested } from '../utils/enquiry-config'
 
 interface Props {
   form: FormDefinition
@@ -60,22 +59,7 @@ export function FormView({ form, headingId }: Props) {
         config.testMode ? { kind: 'test' } : { kind: 'turnstile', siteKey: config.turnstileSiteKey }
       }
     >
-      {/* Only worth collecting when the server will keep it (README, "Enquiries"). */}
-      {isEnquiryStoreRequested() && (
-        <>
-          {ATTRIBUTION_FIELDS.map((name) => (
-            // The script sets the value before React hydrates; that is not a mismatch.
-            <input
-              key={name}
-              type="hidden"
-              name={name}
-              data-attribution={name.slice(1)}
-              suppressHydrationWarning
-            />
-          ))}
-          <script dangerouslySetInnerHTML={{ __html: ATTRIBUTION_SCRIPT }} />
-        </>
-      )}
+      <AttributionFields />
     </ContactForm>
   )
 }

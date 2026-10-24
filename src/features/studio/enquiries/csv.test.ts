@@ -38,7 +38,11 @@ describe('buildEnquiriesCsv', () => {
         { label: 'Your name', value: 'Ann' },
         { label: 'Message', value: 'Hi,\nthere' },
       ],
-      attribution: { referrer: 'https://google.com/search', utmSource: 'news' },
+      attribution: {
+        landing: '/pricing',
+        referrer: 'https://google.com/search',
+        utmSource: 'news',
+      },
     },
     {
       createdAt: '2026-10-16T01:00:00Z',
@@ -54,12 +58,12 @@ describe('buildEnquiriesCsv', () => {
   it('has the fixed columns, then one column per answer label across forms', () => {
     const lines = buildEnquiriesCsv(rows, format).replace('﻿', '').split('\r\n')
     expect(lines[0]).toBe(
-      'Received,Status,Form,Page,Referrer,UTM source,UTM medium,UTM campaign,UTM term,UTM content,Your name,Message,Budget',
+      'Received,Status,Form,Page,Landing page,Referrer,UTM source,UTM medium,UTM campaign,UTM term,UTM content,Your name,Message,Budget',
     )
     expect(lines[1]).toBe(
-      '2026-10-17T01:00:00Z,new,Contact,/contact,https://google.com/search,news,,,,,Ann,"Hi,\nthere",',
+      '2026-10-17T01:00:00Z,new,Contact,/contact,/pricing,https://google.com/search,news,,,,,Ann,"Hi,\nthere",',
     )
-    expect(lines[2]).toBe('2026-10-16T01:00:00Z,read,Quote,,,,,,,,Bob,,"$5,000"')
+    expect(lines[2]).toBe('2026-10-16T01:00:00Z,read,Quote,,,,,,,,,Bob,,"$5,000"')
   })
 
   it('starts with a byte order mark and ends with a line break', () => {
@@ -70,7 +74,7 @@ describe('buildEnquiriesCsv', () => {
 
   it('is just the header when there are no enquiries', () => {
     expect(buildEnquiriesCsv([], format)).toBe(
-      '﻿Received,Status,Form,Page,Referrer,UTM source,UTM medium,UTM campaign,UTM term,UTM content\r\n',
+      '﻿Received,Status,Form,Page,Landing page,Referrer,UTM source,UTM medium,UTM campaign,UTM term,UTM content\r\n',
     )
   })
 
@@ -86,7 +90,7 @@ describe('buildEnquiriesCsv', () => {
       ],
       format,
     )
-    expect(csv.split('\r\n')[1]).toBe(',,,,,,,,,,a; b')
+    expect(csv.split('\r\n')[1]).toBe(',,,,,,,,,,,a; b')
   })
 })
 

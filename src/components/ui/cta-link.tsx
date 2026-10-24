@@ -1,6 +1,8 @@
 import { stegaClean } from 'next-sanity'
 
+import { resolveLink } from '@/components/ui/resolve-link'
 import { SanityLink } from '@/components/ui/sanity-link'
+import { trackAttributes } from '@/lib/analytics/track-script'
 import type { CtaData } from '@/types/sanity'
 
 /**
@@ -53,14 +55,35 @@ interface Props {
   className?: string
 }
 
+/** Where a CTA goes, for the `cta_click` event: its address, or what it opens (`panel:<id>`, `booking`). */
+function ctaDestination(link: Props['cta']['link']) {
+  const resolved = resolveLink(link)
+  if (!resolved) return ''
+  if (resolved.kind === 'panel') return `panel:${resolved.panelId}`
+  if (resolved.kind === 'booking') return 'booking'
+  return resolved.href
+}
+
+/**
+ * Clicks send `cta_click` (label and destination) once the visitor has accepted analytics. The
+ * wrapper is `display: contents`, so it changes neither layout nor markup semantics.
+ */
 export function CtaLink({ cta, surface = 'dark', size = 'md', className = '' }: Props) {
   return (
-    <SanityLink
-      link={cta.link}
-      className={`${ctaClassName(surface, stegaClean(cta.variant), size)} ${className}`}
+    <span
+      className="contents"
+      {...trackAttributes('cta_click', {
+        label: stegaClean(cta.label),
+        destination: ctaDestination(cta.link),
+      })}
     >
-      {cta.label}
-    </SanityLink>
+      <SanityLink
+        link={cta.link}
+        className={`${ctaClassName(surface, stegaClean(cta.variant), size)} ${className}`}
+      >
+        {cta.label}
+      </SanityLink>
+    </span>
   )
 }
 

@@ -31,6 +31,12 @@ async function useFooterSocial(request: APIRequestContext, state: 'on' | 'off') 
   expect(webhook.status()).toBe(200)
 }
 
+/** The first request after an expiry may still get the old copy while the new one renders. */
+const footerFacebookCount = (page: Page) => async () => {
+  await page.goto('/')
+  return page.getByRole('contentinfo').getByRole('link', { name: 'Facebook' }).count()
+}
+
 const axe = (page: Page, include: string) =>
   new AxeBuilder({ page }).include(include).withTags(WCAG).analyze()
 
@@ -42,10 +48,7 @@ test.describe('the footer', () => {
   })
 
   test('shows no icons until the switch is on', async ({ page }) => {
-    await page.goto('/')
-    await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Facebook' })).toHaveCount(
-      0,
-    )
+    await expect.poll(footerFacebookCount(page)).toBe(0)
   })
 
   test('shows Business info’s profiles as me-links, reachable by keyboard, with no axe violations', async ({
@@ -53,7 +56,7 @@ test.describe('the footer', () => {
     request,
   }) => {
     await useFooterSocial(request, 'on')
-    await page.goto('/')
+    await expect.poll(footerFacebookCount(page)).toBe(1)
     const footer = page.getByRole('contentinfo')
     const facebook = footer.getByRole('link', { name: 'Facebook' })
     await expect(facebook).toHaveAttribute('href', 'https://www.facebook.com/testco')

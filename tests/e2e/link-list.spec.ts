@@ -270,9 +270,14 @@ test.describe('at 375 px (the Link page is made for a phone first)', () => {
 })
 
 test.describe('link_click analytics', () => {
-  /** Stands in for the providers that load once a visitor accepts analytics cookies. */
+  /**
+   * Stands in for a visitor who accepted analytics: the providers that then load, and the consent
+   * flag the dispatcher checks (pinned, because the banner would otherwise reset it to false on
+   * hydration, and accepting for real would replace the stubbed gtag with Google's own).
+   */
   async function withProviders(page: Page) {
     await page.addInitScript(() => {
+      Object.defineProperty(window, '__analyticsConsent', { get: () => true, set: () => undefined })
       const events: unknown[][] = []
       ;(window as unknown as { __events: unknown[][] }).__events = events
       Object.assign(window, {

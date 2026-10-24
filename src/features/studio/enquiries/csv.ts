@@ -5,6 +5,7 @@ export interface EnquiryRow {
   pagePath?: string | null
   fields?: { label?: string | null; value?: string | null }[] | null
   attribution?: {
+    landing?: string | null
     referrer?: string | null
     utmSource?: string | null
     utmMedium?: string | null
@@ -21,6 +22,7 @@ const FIXED_COLUMNS: { title: string; read: (row: EnquiryRow, format: DateFormat
     { title: 'Status', read: (row) => row.status ?? '' },
     { title: 'Form', read: (row) => row.formTitle ?? '' },
     { title: 'Page', read: (row) => row.pagePath ?? '' },
+    { title: 'Landing page', read: (row) => row.attribution?.landing ?? '' },
     { title: 'Referrer', read: (row) => row.attribution?.referrer ?? '' },
     { title: 'UTM source', read: (row) => row.attribution?.utmSource ?? '' },
     { title: 'UTM medium', read: (row) => row.attribution?.utmMedium ?? '' },

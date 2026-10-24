@@ -1134,6 +1134,7 @@ export type Enquiry = {
   pagePath?: string
   createdAt?: string
   attribution?: {
+    landing?: string
     referrer?: string
     utmSource?: string
     utmMedium?: string
