@@ -33,6 +33,8 @@ for (const viewport of VIEWPORTS) {
       localStorage.setItem('currawong:studio:client-view', '0')
     })
     const page = await context.newPage()
+    // Actions (click, fill) wait forever by default; fail one that never finds its element.
+    page.setDefaultTimeout(60_000)
     try {
       await openSmallPage(page)
 

@@ -53,6 +53,7 @@ async function measure(
   metric: string,
   action: () => Promise<void>,
 ) {
+  console.log(`Starting ${view} run ${run}: ${metric}`)
   for (const frame of page.frames())
     await frame.evaluate(() => {
       const state = window as unknown as Partial<PerfWindow>
@@ -132,6 +133,8 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
         { clientView: view === 'client' },
       )
       const page = await context.newPage()
+      // Actions (click, fill) wait forever by default; fail one that never finds its element.
+      page.setDefaultTimeout(60_000)
       const scripts: Promise<Buffer>[] = []
       const fonts: Promise<Buffer>[] = []
       const collectDownload = (response: Response) => {
