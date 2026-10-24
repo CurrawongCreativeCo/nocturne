@@ -40,9 +40,9 @@ describe('validateStudioBrand', () => {
   it('rejects logo paths outside src/assets/brand/client/', () => {
     const outside = [
       'public/logo.svg',
-      'src/assets/brand/currawong/mark.webp',
+      'src/assets/brand/currawong/logo-stacked-on-light.webp',
       '/etc/logo.svg',
-      'src/assets/brand/client/../currawong/mark.webp',
+      'src/assets/brand/client/../currawong/logo-stacked-on-light.webp',
       'src/assets/brand/client/../../../secret.svg',
       'src/assets/brand/client/',
       'src/assets/brand/clientele/logo.svg',

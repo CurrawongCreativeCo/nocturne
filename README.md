@@ -303,7 +303,7 @@ Changes go live with the usual live update or webhook revalidation.
 
 - **Default files.** `src/app/icon.png` (512 × 512) and `src/app/apple-icon.png` (180 × 180, on paper `#F4EFE6`)
   and `public/icons/icon-32.png` / `icon-192.png` are made from Currawong's mark
-  (`src/assets/brand/currawong/mark-no-text.webp`) by `node scripts/make-default-icons.mjs`.
+  (`src/assets/brand/currawong/bird-on-light.webp`) by `node scripts/make-default-icons.mjs`.
   Next.js icon files can't be WebP, so the PNGs are committed. The script uses `sharp`, which Next.js already
   installs; it is not a dependency and nothing runs at build or request time. It crops, scales and places the artwork
   on paper; it never redraws it. Re-run it only if the artwork changes, then paste the hashes it prints into
@@ -433,7 +433,7 @@ It still needs the CORS step below.
    | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                       |
    | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                              |
    | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                             |
-   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Currawong Creative)               |
+   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Nocturne)                         |
    | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                        |
    | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                       |
    | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                             |
@@ -1235,8 +1235,8 @@ section covers the brand data it is built from, then [how it is applied](#how-th
 
 - **Identity falls back field by field.** Logo: the client's logo; otherwise a monogram (the first
   letter of the name) in the client's primary colour, if the client set any colour; otherwise the
-  Currawong logo. Compact mark: the client's mark, then their logo, then the monogram, then Currawong's
-  mark. Name: `name` in `studio-brand.json`, then `NEXT_PUBLIC_STUDIO_TITLE`, then "Currawong Creative".
+  Nocturne wordmark. Compact mark: the client's mark, then their logo, then the monogram, then Currawong's
+  mark. Name: `name` in `studio-brand.json`, then `NEXT_PUBLIC_STUDIO_TITLE`, then "Nocturne" (Currawong's product brand).
 - **Colours fall back as a whole set, never field by field.** Set any colour and the whole palette comes
   from the client: their secondary if given, otherwise one derived from their primary (same hue,
   lightness moved), with neutrals from Sanity's defaults tinted lightly toward the client's hue. A
@@ -1309,12 +1309,12 @@ remain a separate decision.
 
 Only supported Sanity APIs are used, in four places:
 
-| What                      | Where                                               | Source of truth                        |
-| ------------------------- | --------------------------------------------------- | -------------------------------------- |
-| Theme (colours)           | `src/features/studio/theme.ts` -> `theme` in config | The resolved light and dark roles      |
-| Navbar logo               | `src/features/studio/components/studio-logo.tsx`    | `logo` (client) or `mark` + name       |
-| Workspace icon (the mark) | `src/features/studio/components/studio-icon.tsx`    | `mark`, light or dark by colour scheme |
-| Workspace title           | `title` in `sanity.config.ts`                       | The resolved name                      |
+| What                      | Where                                               | Source of truth                                       |
+| ------------------------- | --------------------------------------------------- | ----------------------------------------------------- |
+| Theme (colours)           | `src/features/studio/theme.ts` -> `theme` in config | The resolved light and dark roles                     |
+| Navbar logo               | `src/features/studio/components/studio-logo.tsx`    | `logo` (client), wordmark or bird, or monogram + name |
+| Workspace icon (the mark) | `src/features/studio/components/studio-icon.tsx`    | `mark`, light or dark by colour scheme                |
+| Workspace title           | `title` in `sanity.config.ts`                       | The resolved name                                     |
 
 - **Theme.** `src/features/studio/theme.ts` uses the stable `buildTheme` from `@sanity/themer`
   0.10.4, with separate light/dark brand colours and public `RootTheme_v2` tokens for exact runtime
@@ -1345,9 +1345,15 @@ Only supported Sanity APIs are used, in four places:
   settings; client-selectable Studio fonts remain deferred.
 - **Logo.** A client logo file is shown alone, the on-light or on-dark variant to match the colour scheme.
   If a client supplies only one file, it is never recoloured: on the other scheme it sits on a small
-  background in the colour it was drawn for. With no logo file, the navbar shows a mark (the client's
-  monogram, or Currawong's mark) beside the name. The box is 24px high and up to 160px wide, so it
-  doesn't shift the navbar; the name is the accessible label.
+  background in the colour it was drawn for. With no logo file and no colours, the navbar shows the
+  Nocturne wordmark alone (24px high, up to 178px wide), or the bird mark alone below 768px, named
+  "Nocturne". With colours but no logo it shows the client's monogram beside the name. Client logos sit in a
+  24px-high box up to 160px wide, so nothing shifts the navbar; the name is the accessible label. The
+  navbar keeps the `studio.components.logo` hook: Sanity 6.19 marks it deprecated, but a workspace icon is
+  too small for a wordmark and `navbar` can only wrap the default, which draws the logo itself.
+- **Currawong's image files** (`src/assets/brand/currawong/`) are named `<kind>-on-<light|dark>`: `bird`
+  (the bird alone, used as the mark and favicon), `wordmark` (the lettering alone, used as the logo),
+  `logo-horizontal` and `logo-stacked` (bird and lettering together, not shown in the Studio).
 - **Sign-in screen.** It shows the workspace icon and title, so it follows the mark and the resolved name.
   (It does not use the navbar logo.)
 - **Images.** `studio-brand.json` holds paths as text, which a bundler can't follow, so
