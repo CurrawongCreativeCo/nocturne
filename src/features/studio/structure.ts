@@ -251,6 +251,7 @@ export const structure: StructureResolver = (S, context) => {
                   .title('Upcoming events')
                   .schemaType('event')
                   .filter(UPCOMING_EVENTS_FILTER)
+                  .apiVersion(apiVersion)
                   .defaultOrdering([...UPCOMING_EVENTS_ORDER]),
               ),
             S.listItem()
@@ -263,6 +264,7 @@ export const structure: StructureResolver = (S, context) => {
                   .title('Past events')
                   .schemaType('event')
                   .filter(PAST_EVENTS_FILTER)
+                  .apiVersion(apiVersion)
                   .defaultOrdering([...PAST_EVENTS_ORDER]),
               ),
             S.documentTypeListItem('event').title('All events').icon(CalendarIcon),
