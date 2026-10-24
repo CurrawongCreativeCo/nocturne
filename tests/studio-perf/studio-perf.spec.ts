@@ -244,9 +244,9 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
         try {
           await measure(page, view, run, 'editToPreview', async () => {
             await description.fill(marker)
-            await expect(
-              page.frameLocator('iframe').getByText(marker, { exact: true }),
-            ).toBeVisible()
+            // Match the words: the update shows first without the invisible Visual Editing markers
+            // and is then replaced by the page's own text with them, so an exact match is a race.
+            await expect(page.frameLocator('iframe').getByText(marker).first()).toBeVisible()
           })
         } finally {
           await description.fill(original)
