@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Calmer empty lists and counts in Reusable content:** Shared sections, Forms and Panels show how many they hold in the sidebar (Sanity's own count badge), and every empty list of a whole document type says "Nothing here yet." instead of "No documents of this type". Native lists, search, sorting, permissions and Enquiries' CSV download are unchanged. Per-list purpose lines and role-aware create buttons are deferred (README, _Empty lists_).
+
 - **Preview tab in Structure:** pages and posts get Editor and Preview tabs (the form opens first; _Split pane right_ shows both at once), with Refresh, a phone/desktop width toggle and an _Open in Presentation_ link. No click-to-edit overlays (that stays in Presentation), and nothing loads until the tab is opened. No automatic split: Sanity's `defaultPanes` collapses the form behind Preview on narrower windows. New direct dependency `@sanity/preview-url-secret`, pinned to 4.1.5 (the copy next-sanity and sanity already install); no new routes or visitor requests. Clients get it too.
 
 - **One-row Studio top bar:** from 900px the "Agency view" badge and the Preview client view switch sit at the end of the navbar instead of in a strip above it, saving 34px of height for agency staff. Below 900px the strip stays. Clients see neither.

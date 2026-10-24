@@ -281,12 +281,12 @@ export const structure: StructureResolver = (S, context) => {
       // Clients edit panels' content; the rest stays with the agency (CLIENT_REUSABLE_IDS).
       filterStructureItems(
         [
-          S.documentTypeListItem('sharedSection').title('Shared sections'),
+          S.documentTypeListItem('sharedSection').title('Shared sections').showCount(),
           ...(isTypeVisible('form')
-            ? [S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon)]
+            ? [S.documentTypeListItem('form').title('Forms').icon(EnvelopeIcon).showCount()]
             : []),
           ...(hasType('panel')
-            ? [S.documentTypeListItem('panel').title('Panels').icon(ExpandIcon)]
+            ? [S.documentTypeListItem('panel').title('Panels').icon(ExpandIcon).showCount()]
             : []),
         ],
         audience,
