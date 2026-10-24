@@ -60,6 +60,7 @@ import {
   filterDocumentActions,
   filterNewDocumentOptions,
 } from './src/features/studio/utils/document-access'
+import { defaultDocumentNode } from './src/features/studio/utils/document-views'
 import { hideDisabledFromNewMenu } from './src/features/studio/utils/feature-visibility'
 import { studioReleasesSettings } from './src/features/studio/utils/releases-config'
 import { filterTools } from './src/features/studio/utils/tool-access'
@@ -182,7 +183,7 @@ export default defineConfig({
   // Vision, AI settings and Content health are agency-only; clients open on Start here, then Presentation.
   tools: (prev, context) => filterTools(prev, currentAudience(context.currentUser)),
   plugins: [
-    structureTool({ structure }),
+    structureTool({ structure, defaultDocumentNode }),
     presentationTool({
       resolve,
       previewUrl: { previewMode: { enable: '/api/draft-mode/enable' } },

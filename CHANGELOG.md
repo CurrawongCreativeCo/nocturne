@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Preview tab in Structure:** pages and posts get Editor and Preview tabs (the form opens first; _Split pane right_ shows both at once), with Refresh, a phone/desktop width toggle and an _Open in Presentation_ link. No click-to-edit overlays (that stays in Presentation), and nothing loads until the tab is opened. No automatic split: Sanity's `defaultPanes` collapses the form behind Preview on narrower windows. New direct dependency `@sanity/preview-url-secret`, pinned to 4.1.5 (the copy next-sanity and sanity already install); no new routes or visitor requests. Clients get it too.
+
 - **One-row Studio top bar:** from 900px the "Agency view" badge and the Preview client view switch sit at the end of the navbar instead of in a strip above it, saving 34px of height for agency staff. Below 900px the strip stays. Clients see neither.
 
 - **Enquiry attribution and conversion events.** Enquiries now keep first-touch attribution: the visit's landing page, referrer and UTM values are recorded once per tab in `sessionStorage` by a tiny inline script (only with `ENQUIRIES_STORE=1`) and sent as hidden fields from the contact form **and** the newsletter form (Studio: _Where they came from_ › _Landing page_; the CSV has a _Landing page_ column). After consent, and only for configured providers, `form_submit` (form title) and `cta_click` (label, destination) go to Plausible, PostHog and GA4 through one dispatcher (`src/features/consent/utils/analytics-dispatcher.ts`); events carry `experiment` and `variant` from `<main>` on A/B pages. No public JavaScript beyond one call in `ContactForm`. **Intended behaviour change:** attribution is now first-touch rather than the current page's, and the Link list's `link_click` also goes through the dispatcher, so it now checks the saved consent itself. See README _Enquiries_, _Conversion events_ and _Privacy notes_.
@@ -36,6 +38,8 @@ you start a release.
 - Start here's Help always offers a way to get help: with no `help.supportEmail` or `help.guideUrl` it names the studio (from the CMS brand) and says to include the page name and a screenshot.
 
 ### Fixed
+
+- **Hero background pictures sat over the hero's text and buttons.** A class-name join ran `-z-10` and the picture's own classes together as `-z-10object-cover`, which matches nothing, so the picture was not placed behind the content and took clicks meant for the buttons (since the element-level animation work on 2026-10-16). They are now separate classes. Heroes with a background picture that is not floating look different only where the picture was covering text: the picture now sits behind it. No schema or content change.
 
 ### Breaking changes / migration steps
 
