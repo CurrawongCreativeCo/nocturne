@@ -39,6 +39,8 @@ you start a release.
 
 ### Fixed
 
+- **Hero background pictures sat over the hero's text and buttons.** A class-name join ran `-z-10` and the picture's own classes together as `-z-10object-cover`, which matches nothing, so the picture was not placed behind the content and took clicks meant for the buttons (since the element-level animation work on 2026-10-16). They are now separate classes. Heroes with a background picture that is not floating look different only where the picture was covering text: the picture now sits behind it. No schema or content change.
+
 ### Breaking changes / migration steps
 
 - Social icons: none. Run `npm run typegen` after merging (new fields on Navigation, Location and Team member). Team pages switch to icons on their own; set a member's _Show social links as_ to _Text links_ to keep the old look.
