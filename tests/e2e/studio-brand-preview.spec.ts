@@ -63,8 +63,15 @@ test('shows the Launch & visibility screen for agency staff and clients, in both
   }
 })
 
+// The page renders every brand case in both schemes plus the input galleries, and each of the ~120
+// tests loads it afresh. Under a full parallel run that has taken over 30 s, which fails beforeEach
+// (it counts towards the test timeout) without any assertion being wrong. Only this spec gets the
+// longer limit; the global timeout stays as it is.
+test.describe.configure({ timeout: 60_000 })
+
 test.beforeEach(async ({ page }) => {
-  await page.goto(PATH)
+  // The two checks below are the real ready gate; waiting for every image's load event adds nothing.
+  await page.goto(PATH, { waitUntil: 'domcontentloaded' })
   await expect(page.locator('main[data-ready="true"]')).toBeVisible()
   await expect(page.locator('[data-case]')).toHaveCount(brandPreviewCases.length * SCHEMES.length)
 })
