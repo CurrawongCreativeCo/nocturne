@@ -1,53 +1,41 @@
-import { Badge, Button, Card, Flex, Stack, useMediaIndex } from '@sanity/ui'
+import { Flex, Stack, useMediaIndex } from '@sanity/ui'
 import { type NavbarProps, useCurrentUser } from 'sanity'
 
-import { isAgency, readClientViewPreview, writeClientViewPreview } from '../roles'
+import { isAgency } from '../roles'
+import { AgencyControls, AgencyStrip } from './agency-controls'
 import { BrandZone } from './brand-zone'
 import { showsBrandZone } from '../utils/brand-zone'
 
 /**
- * The Studio navbar. Agency staff get a thin strip above it with an "Agency view" badge and a
- * switch to preview what clients see; clients get the plain navbar. The tools, desk structure
- * and document actions are resolved when the Studio loads, so the switch reloads the page.
- * From 900px the navbar starts with a brand zone holding the wordmark or the client's logo.
+ * The Studio navbar. From 900px it is one row: a brand zone holding the wordmark or the client's
+ * logo, Sanity's navbar, then (agency staff only) the "Agency view" badge and a switch to preview
+ * what clients see. Below 900px agency staff get a thin strip with the same switch above the plain
+ * navbar. Clients never see either. The tools, desk structure and document actions are resolved
+ * when the Studio loads, so the switch reloads the page.
  */
 export function RoleNavbar(props: NavbarProps) {
   const user = useCurrentUser()
-  const navbar = showsBrandZone(useMediaIndex()) ? (
+  const wide = showsBrandZone(useMediaIndex())
+  const agency = isAgency(user)
+
+  if (!wide) {
+    return agency ? (
+      <Stack>
+        <AgencyStrip />
+        {props.renderDefault(props)}
+      </Stack>
+    ) : (
+      props.renderDefault(props)
+    )
+  }
+
+  return (
     <Flex align="stretch">
       <BrandZone />
       <Flex direction="column" flex={1} style={{ minWidth: 0 }}>
         {props.renderDefault(props)}
       </Flex>
+      {agency && <AgencyControls />}
     </Flex>
-  ) : (
-    props.renderDefault(props)
-  )
-  if (!isAgency(user)) return navbar
-
-  const previewing = readClientViewPreview()
-  const toggle = () => {
-    writeClientViewPreview(!previewing)
-    window.location.reload()
-  }
-
-  return (
-    <Stack>
-      <Card tone={previewing ? 'caution' : 'primary'} paddingX={3} paddingY={1} borderBottom>
-        <Flex align="center" gap={3}>
-          <Badge tone={previewing ? 'caution' : 'primary'} fontSize={1}>
-            {previewing ? 'Previewing client view' : 'Agency view'}
-          </Badge>
-          <Button
-            mode="bleed"
-            fontSize={1}
-            padding={2}
-            text={previewing ? 'Back to agency view' : 'Preview client view'}
-            onClick={toggle}
-          />
-        </Flex>
-      </Card>
-      {navbar}
-    </Stack>
   )
 }

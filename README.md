@@ -1897,6 +1897,15 @@ convenience. Someone with the Editor role who knows the API can still do what th
 | _New document_ menu                                                                                             | Everything                        | Page templates, Post, Author, Category                                                                                                                         | Same as Editor      | Studio                                         |
 | "Agency view" badge and client-view preview                                                                     | Yes                               | No                                                                                                                                                             | No                  | Studio                                         |
 
+**Agency badge and client-view switch.** Agency staff see an "Agency view" badge and a **Preview client
+view** button (**Back to agency** while previewing, with the badge reading "Client view" in the caution
+colour). From 900px wide (Sanity UI's third breakpoint) they sit at the end of the navbar, so the top is one
+row: brand zone, Sanity's controls, then the switch. Below 900px, where the bar has no room, the same switch
+is a thin strip above the navbar, worded "Previewing client view" and "Back to agency view". Clients see
+neither. The switch stores the choice in the browser and reloads, because tools and desk structure are
+resolved when the Studio loads. The code is `AgencyControls` and `AgencyStrip` in
+`src/features/studio/components/agency-controls.tsx`, chosen by `RoleNavbar`.
+
 Because the Studio-only limits can be bypassed, don't rely on them to protect secrets. Form recipient
 addresses, for example, stay readable to any Editor through the API. Real enforcement needs custom roles
 with GROQ filters, which are a separate Sanity plan feature.
