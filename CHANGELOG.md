@@ -37,6 +37,10 @@ you start a release.
 
 ### Fixed
 
+- Studio's navbar home link (the workspace icon) now has an accessible name, "<brand name> home". The workspace menu is unchanged, so its rows are not read twice.
+- The "No apiVersion specified for document type list with custom filter" Studio warning for the Upcoming and Past events lists.
+- `studio-brand-preview.spec.ts` no longer times out in `beforeEach` under a full run: it has its own 60 s timeout and does not wait for every image to load.
+
 ### Breaking changes / migration steps
 
 - Social icons: none. Run `npm run typegen` after merging (new fields on Navigation, Location and Team member). Team pages switch to icons on their own; set a member's _Show social links as_ to _Text links_ to keep the old look.
