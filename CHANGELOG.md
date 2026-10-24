@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Preview tab in Structure:** pages and posts get Editor and Preview tabs (the form opens first; _Split pane right_ shows both at once), with Refresh, a phone/desktop width toggle and an _Open in Presentation_ link. No click-to-edit overlays (that stays in Presentation), and nothing loads until the tab is opened. No automatic split: Sanity's `defaultPanes` collapses the form behind Preview on narrower windows. New direct dependency `@sanity/preview-url-secret`, pinned to 4.1.5 (the copy next-sanity and sanity already install); no new routes or visitor requests. Clients get it too.
+
 - Site profile flag `features.releases`: Studio shows Releases and scheduled drafts only when it is on. It defaults to **off** for new sites (this template's profile keeps it on), so clients on plans without Releases never meet an upgrade screen. Set it to match the Sanity plan at handover.
 
 - **Social icons everywhere:** the shared `SocialLinks` now also draws the footer (Navigation › Footer: _Show social icons_ and a style picker, agency only, default off), the Location section (_Show social icons_, default off) and team profile pages. Team links are icons named "<name> on <network>" with `rel="noopener"` (no `me`; the footer, Location and Link list keep `rel="me"`); a member can choose _Text links_ instead. No new requests or public JavaScript. **Intended visual change:** team profile pages show icons instead of text links unless a member is set to _Text links_.

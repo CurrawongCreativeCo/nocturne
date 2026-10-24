@@ -65,6 +65,25 @@ Create a page with slug `home` to populate `/`. After changing schemas or querie
 
 Open http://localhost:3000/studio:
 
+- **Preview in Structure:** pages and posts open in Structure (Pages, Blog) on the form, with **Editor** and
+  **Preview** tabs in the document header (other document types show the form alone). To see both at once, use
+  **Split pane right** in the document's toolbar and pick Preview in the new pane. Each document pane needs 600px, so on a narrow window Sanity collapses one to a thin strip (click it to bring it back). Edits show in Preview
+  before you save, through draft mode and `SanityLive`, as in Presentation. The toolbar has **Refresh**, a
+  desktop/phone width toggle (390px) and **Open in Presentation**, which opens the same page there. Preview shows
+  content only: there are no click-to-edit overlays or drag-to-reorder, which is what Presentation is for. It always
+  shows the drafts perspective, so a release chosen in Presentation isn't followed. A page or post with no address
+  shows "Add an address to preview this page". Nothing of the preview loads until its tab is opened, so opening a
+  document isn't slower. Clients get it too. **Why no automatic split:** Sanity's `defaultPanes` opens both panes
+  but, when the window is too narrow, keeps the _last_ one (Preview) and collapses the form, which at 1280px hid the
+  Title field; listing Preview first keeps the form but puts Preview on the left. Developers: the view is
+  `src/features/studio/components/preview-view.tsx`, wired in `defaultDocumentNode` (`utils/document-views.ts`). It
+  goes through `/api/draft-mode/enable` with a secret made by `createPreviewSecret` from
+  `@sanity/preview-url-secret`, the same `sanity.previewUrlSecret` documents Presentation writes (valid for an hour,
+  and reused until it is nearly out of date). That function is marked `@internal` in the package, so the dependency
+  is pinned to an exact version (the one next-sanity and sanity install, so there is one copy); keep it matching
+  `npm ls @sanity/preview-url-secret`, and `utils/preview-secret.test.ts` fails if a new version changes the document
+  it writes. `tests/studio-perf/preview.spec.ts` checks the real Studio at 1280×720 and 1920×1080 (the form opens
+  first; Preview loads, switches width and links to Presentation).
 - **Presentation** shows the site and the editor side by side. Click any text to edit it; drag sections to reorder.
   Presentation maps `/` to `launch.homepage` before launch and to `home` when live; `/links` and nested
   page addresses open their own documents. Blog, category, team profile and event addresses open their respective

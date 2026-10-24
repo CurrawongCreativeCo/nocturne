@@ -1,5 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 
+import type { BrowserContext } from '@playwright/test'
+
 export const DATASET = 'studio-perf'
 export const ORIGIN = 'http://localhost:3200'
 export const AUTH_FILE = 'tests/studio-perf/.auth/state.json'
@@ -69,4 +71,28 @@ export function appEnv(): NodeJS.ProcessEnv {
     E2E_GALLERY: '',
     SENTRY_DSN: '',
   }
+}
+
+/**
+ * Blocks accidental cross-project Content Lake access, including mutations from Studio plugins:
+ * any request to another project or dataset is aborted and fails the test.
+ */
+export async function blockOtherProjects(context: BrowserContext, project: string) {
+  await context.route(/https:\/\/[^/]*sanity\.io\//, async (route) => {
+    const url = new URL(route.request().url())
+    const hostProject = /^([a-z0-9]+)\.(?:api|apicdn)\.sanity\.io$/.exec(url.hostname)?.[1]
+    // Live events put the dataset after an extra `events` segment.
+    const datasetMatch =
+      /\/(?:data\/(?:query|mutate|listen|doc)|data\/live\/events|assets\/(?:images|files))\/([^/]+)/.exec(
+        url.pathname,
+      )
+    const dataset = datasetMatch?.[1]
+    if ((hostProject && hostProject !== project) || (dataset && dataset !== DATASET)) {
+      await route.abort()
+      throw new Error(
+        `Blocked a request outside the throwaway project/dataset: ${url.hostname}${url.pathname}`,
+      )
+    }
+    await route.continue()
+  })
 }

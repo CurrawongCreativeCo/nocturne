@@ -10,7 +10,7 @@ if (!existsSync(AUTH_FILE))
 
 export default defineConfig({
   testDir: '.',
-  testMatch: 'studio-perf.spec.ts',
+  testMatch: ['studio-perf.spec.ts', 'preview.spec.ts'],
   workers: 1,
   retries: 0,
   timeout: 600_000,

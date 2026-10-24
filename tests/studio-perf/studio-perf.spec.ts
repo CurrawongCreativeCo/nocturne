@@ -4,7 +4,7 @@ import { gzipSync } from 'node:zlib'
 
 import { expect, test, type Page, type Response } from '@playwright/test'
 
-import { assertTarget, DATASET } from './safety'
+import { assertTarget, blockOtherProjects, DATASET } from './safety'
 
 interface LongTask {
   startTime: number
@@ -109,24 +109,7 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
   for (const view of ['agency', 'client']) {
     for (let run = 1; run <= 5; run++) {
       const context = await browser.newContext({ ...testInfo.project.use })
-      // Block accidental cross-project Content Lake access, including mutations from Studio plugins.
-      await context.route(/https:\/\/[^/]*sanity\.io\//, async (route) => {
-        const url = new URL(route.request().url())
-        const hostProject = /^([a-z0-9]+)\.(?:api|apicdn)\.sanity\.io$/.exec(url.hostname)?.[1]
-        // Live events put the dataset after an extra `events` segment.
-        const datasetMatch =
-          /\/(?:data\/(?:query|mutate|listen|doc)|data\/live\/events|assets\/(?:images|files))\/([^/]+)/.exec(
-            url.pathname,
-          )
-        const dataset = datasetMatch?.[1]
-        if ((hostProject && hostProject !== project) || (dataset && dataset !== DATASET)) {
-          await route.abort()
-          throw new Error(
-            `Blocked a request outside the throwaway project/dataset: ${url.hostname}${url.pathname}`,
-          )
-        }
-        await route.continue()
-      })
+      await blockOtherProjects(context, project)
       await context.addInitScript(
         ({ clientView }) => {
           localStorage.setItem('currawong:studio:client-view', clientView ? '1' : '0')
@@ -236,7 +219,11 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
           ).toBeVisible()
           await expect(page.getByRole('checkbox', { name: 'Edit', exact: true })).toBeEnabled()
         })
-        await page.getByRole('checkbox', { name: 'Edit', exact: true }).uncheck()
+        // Overlays may already be off; `uncheck()` throws when a click changes nothing. Only click
+        // when it is on, then wait for it to be off, so a click that gets undone still fails.
+        const editToggle = page.getByRole('checkbox', { name: 'Edit', exact: true })
+        if (await editToggle.isChecked()) await editToggle.click()
+        await expect(editToggle).not.toBeChecked()
         await measure(page, view, run, 'presentationSwitchFiveRoutes', async () => {
           for (let i = 1; i <= 5; i++) {
             const frame = page.frameLocator('iframe')
