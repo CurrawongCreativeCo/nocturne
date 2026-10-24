@@ -16,6 +16,7 @@ export interface EnquiryDocument {
   createdAt: string
   status: (typeof ENQUIRY_STATUSES)[number]
   attribution?: {
+    landing?: string
     referrer?: string
     utmSource?: string
     utmMedium?: string
@@ -54,6 +55,7 @@ export function buildEnquiry({
 }: Input): EnquiryDocument {
   const attribution = cleanAttribution(submission)
   const stored = {
+    landing: attribution._landing,
     referrer: attribution._referrer,
     utmSource: attribution._utm_source,
     utmMedium: attribution._utm_medium,
