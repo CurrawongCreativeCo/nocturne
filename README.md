@@ -568,8 +568,8 @@ src/
       components/                  members-only (the gate), sign-in-prompt, sign-in-view, sign-out-view
       utils/                       allowed-members (AUTH_ALLOWED_EMAILS), providers (env), safe-path, messages
     consent/                       cookie banner, consent store (localStorage), analytics loader
-      components/                  consent-banner, cookie-settings-button, analytics-scripts
-      utils/                       analytics-snippets, clear-analytics-storage (the choice itself lives in src/lib/consent: consent-state, consent-store)
+      components/                  consent-banner, cookie-settings-button, analytics-scripts, analytics-dispatcher
+      utils/                       analytics-dispatcher (window.trackEvent), analytics-snippets, clear-analytics-storage (the choice itself lives in src/lib/consent: consent-state, consent-store)
     pricing/                       Stripe prices: webhook sync, Checkout action, stripePrice schema
       api/                         handle-webhook.ts, write-prices.ts, checkout.ts (server action), queries.ts
       components/                  checkout-button (client form)
@@ -701,7 +701,7 @@ visitor ─▶ proxy.ts ─ reads the running experiment (cached /api/experiment
 - **One test at a time.** Sanity serves one variant per query, so a page can only be in one test. Studio blocks a second running test; if two somehow run, the oldest wins.
 - **Proxy cost.** The proxy can't query Sanity on every request, so it asks `/api/experiments` (a cached route tagged `experiment`) and remembers the answer for `EXPERIMENT_CACHE_SECONDS` (60) per server instance. A failure means "no test". The rewrite response sends `Vary: Cookie`; if you put another CDN in front that caches HTML, make it vary on the `ab` cookie (Vercel needs nothing).
 - **What is skipped.** Draft mode, crawlers (`isCrawler` in `utils/assign.ts`), the blog, Studio, API routes and static files.
-- **Analytics hook.** `SiteShell` (`app/(site)/site-shell.tsx`) puts `data-experiment` and `data-variant` on `<main>` for pages rendered under `/ab/<code>`. Read them from your analytics script (for example after consent: `document.querySelector('main').dataset.variant`).
+- **Analytics hook.** `SiteShell` (`app/(site)/site-shell.tsx`) puts `data-experiment` and `data-variant` on `<main>` for pages rendered under `/ab/<code>`. The analytics dispatcher adds them to every `form_submit`, `cta_click` and `link_click` event as `experiment` and `variant` (see [Conversion events](#conversion-events)), so conversions can be split by variant in your analytics. Read them from your own script too, if you like: `document.querySelector('main').dataset.variant`.
 - **Reserved slug.** `ab` joins `blog` and `studio` as a first path segment a page can't use. (`team` is reserved only _under_ itself: a page called `team` is fine, `team/anything` is not. See [Team](#team).)
 
 ### Request budget
@@ -806,12 +806,16 @@ must be true, and both are the developer's job:
 still be deleted) and its title at the time, every field as `{ label, value }` (checkboxes as _Yes_ or _No_, as in the
 email), the page path, `createdAt`, `status` (`new`, `read`, `archived`) and, when present, the **attribution**: the
 referrer (origin and path only; the query string and fragment are dropped, because they can carry search terms and tokens)
-and the five UTM values (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`). A small inline script
-next to the form fills hidden inputs when the page loads and again just before a send, in case React replaced them while hydrating (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds
-nothing to the JavaScript budget); the server reads only those inputs, on one line and
-capped at 200 characters, because a visitor can forge anything. Attribution is the page's own address and referrer, not a
-visit history: a visitor who clicked a campaign link, browsed on and then wrote to you has none. Without JavaScript there
-is none either, and moving between pages on the site (client-side navigation) doesn't run the script. The page path comes from the `Referer` header.
+and the five UTM values (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`), plus the **landing page**: the
+path (no query string) of the first page of the visit. Attribution is **first-touch**: a small inline script the site shell adds
+once (`ATTRIBUTION_SCRIPT` in `utils/attribution.ts`, tested; inline so it adds nothing to the JavaScript budget, and only
+rendered when `ENQUIRIES_STORE=1`) records those values in `sessionStorage` (key `attribution`) on the first full page load of a
+visit and never overwrites them, so a visitor who clicked a campaign link, browsed on and then wrote to you is still attributed to
+the campaign. Every storage access is in a `try/catch`; if storage is blocked the values last for that page load only. When a form
+is sent, the script fills the hidden inputs `AttributionFields` renders in the **contact form and the newsletter form** (just before React
+reads the form, so client-side navigation and hydration don't matter). The server reads only those inputs, on one line and
+capped at 200 characters, because a visitor can forge anything, and keeps the landing page only if it is a path on your site.
+Newsletter signups carry the same inputs but aren't stored, so nothing from them is kept. Without JavaScript there is no attribution. The page path comes from the `Referer` header.
 
 **How a write goes** (`api/store-enquiry.ts`): after Resend has accepted the message, in Next's `after()`, so it never
 delays the visitor. A failed write (no token, public or unreachable dataset, Sanity refusing) is logged with
@@ -826,7 +830,7 @@ count (_Enquiries (3 new)_; it updates as enquiries arrive). Every field is read
 Editor role: with `liveEdit` there is no draft for a Contributor to save). There is no
 _create_ button and no _Duplicate_; _Delete_ stays, because people may ask for their details to be removed. **Download CSV**
 builds the file in the browser from the signed-in editor's own read access (`studio/enquiries/csv.ts`, tested), so
-nothing passes through the site's server. It has one column per answer label (forms that share a label share a column),
+nothing passes through the site's server. It has the landing page, referrer and UTM columns, then one column per answer label (forms that share a label share a column),
 UTF-8 with a byte order mark so Excel reads it correctly, and times in the editor's own time zone (en-AU). Text that
 starts with `=`, `@` or `+`/`-` followed by anything but digits gets a leading apostrophe, so a visitor can't plant a
 spreadsheet formula (phone numbers such as `+61 400 000 000` are left alone). **Start here** shows
@@ -863,10 +867,10 @@ Many small businesses are exempt, but a privacy policy and these habits are good
   details to reply to you, and keep your enquiry for up to 12 months. Our privacy policy at example.com.au/privacy explains
   how to see or correct it."_ It should say who you are, why you collect the details, who else may receive them (here: the
   email and hosting services below) and where to read the policy. Keep the retention wording in step with `ENQUIRY_RETENTION_DAYS`.
-- **Privacy policy (APP 1):** publish one, linked from the footer, and mention enquiries: what is kept, why, for how long,
+- **Privacy policy (APP 1):** publish one, linked from the footer, and mention enquiries: what is kept (including the page they first visited, where they came from and the campaign link they used), why, for how long,
   who can see it (the client's staff with Studio access) and how to ask for access, correction or deletion.
 - **Collect only what you need (APP 3):** each field you add to a form is personal information you will hold. Don't ask
-  for a phone number or date of birth you won't use. Campaign and referrer details are collected only when enquiries are stored.
+  for a phone number or date of birth you won't use. Landing page, referrer and campaign details are collected only when enquiries are stored.
 - **Overseas services (APP 8):** the dataset is hosted by Sanity, the email goes through Resend, and the site runs on Vercel,
   all of which may handle the data outside Australia. The policy should say so, and the providers should be chosen with that in mind.
 - **Security and destruction (APP 11):** the dataset is private and only people the client has added to the Sanity project
@@ -982,7 +986,7 @@ Analytics are chosen per project by environment variable, and nothing that sets 
 
 These are public values, baked in at build time: redeploy after changing them. Set any combination.
 
-- **Custom events:** `window.trackEvent(name, props)` and `data-track-event` / `data-track-props` on an element (`src/lib/analytics/track-script.ts`, an inline script the shell adds when a provider is configured) send an event to whichever provider has loaded, so they need no consent logic of their own: before consent none is on the page and nothing happens. The Link list's `link_click` uses them (see [Link list](#link-list)).
+- **Custom events:** `window.trackEvent(name, props)` and `data-track-event` / `data-track-props` on an element (`src/lib/analytics/track-script.ts`, an inline script the shell adds when a provider is configured, which hands a click to `trackEvent`). `trackEvent` is the dispatcher below. The Link list's `link_click` uses them (see [Link list](#link-list)).
 - **Vercel Analytics** (`@vercel/analytics`) is always on in the public site. It sets no cookies and stores nothing on the visitor's device, so it needs no consent. It does nothing off Vercel.
 - **Before consent:** no request to any provider and no provider `<script>` in the page. **Accept all** (or **Choose** with analytics ticked) mounts the `next/script` tags for each configured provider from `features/consent/components/analytics-scripts.tsx`; the choice is kept in `localStorage` (`consent`: analytics, marketing, version, time) and applies on later visits and in other tabs. **Reject all** keeps everything off and is remembered too. If storage is blocked the choice lasts until the page reloads.
 - **Google Analytics:** the inline script first sets Consent Mode v2 `ad_storage`, `ad_user_data`, `ad_personalization` and `analytics_storage` to `denied`, then updates them to the visitor's choice (the three advertising signals follow _Marketing_), all before `gtag.js` is requested.
@@ -991,7 +995,18 @@ These are public values, baked in at build time: redeploy after changing them. S
 - **No provider, no banner.** `hasConsentProviders` in `src/config/analytics.ts` is false when none of the three variables is set; the banner, the footer link and the loader are then not rendered at all.
 - **The banner** is a labelled region (`<section aria-labelledby>`), not a dialog: nothing is trapped and the page stays usable. It is fixed to the bottom of the viewport, so showing it never shifts content (no CLS). It sits first in the DOM and takes focus when it opens; Tab continues from there, and after a choice Tab reaches the skip link. A reopened banner returns focus to the footer link, and Escape closes it without changing the choice. Cached HTML contains the banner hidden. A small inline script reads the stored choice and reveals it before first paint when needed; React takes over its controls and focus after hydration. Saved choices keep it hidden, and no analytics provider loads before consent.
 - **Bundle:** the banner and the loader are a few KB; the provider code is third-party and arrives only after consent. PostHog is loaded from its CDN (`array.js`), not bundled.
-- **Your privacy policy** should name the providers you switch on, the `ab` cookie if you run A/B tests, and what a choice stores. This starter can't write that for you, and a banner is not legal advice.
+- **Your privacy policy** should name the providers you switch on, the `ab` cookie if you run A/B tests, what a choice stores, and (if enquiries are stored) that the first page of a visit, the referrer and campaign link are kept with an enquiry, using `sessionStorage` until the tab closes. This starter can't write that for you, and a banner is not legal advice.
+
+#### Conversion events
+
+Two events are sent for every site with a provider: **`form_submit`** (`form`: the form's title, when a send succeeds, for the contact form and the newsletter signup) and **`cta_click`** (`label` and `destination` of a button from a section's or the header's calls to action; a panel or booking button reports `panel:<id>` or `booking`). The Link list's `link_click` goes the same way.
+
+- **One dispatcher.** `analyticsDispatcherScript` (`src/features/consent/utils/analytics-dispatcher.ts`, unit tested) is an inline script that defines `window.trackEvent`; the shell adds it with `AnalyticsDispatcher`. Client code calls `trackEvent` from `src/lib/analytics/track-event.ts` (a few lines; `ContactForm` uses it), and server markup uses `trackAttributes` (`cta_click` is a wrapper with `display: contents` around the button). Nothing here is in the page's JavaScript budget beyond that one call.
+- **Nothing before consent.** On every call the dispatcher does nothing unless `window.__analyticsConsent` is `true`. `AnalyticsScripts` sets it from the consent store, the same state that mounts the provider scripts, so it is unset until the store has read the choice and `false` after **Reject all** or a withdrawal (events stop at once). It does not read `localStorage` itself, so if storage is blocked the in-memory choice still counts until the page reloads. It then calls only the providers configured by environment variable (Plausible `window.plausible`, PostHog `posthog.capture`, GA4 `gtag('event')`) that have loaded; one that throws never stops the others.
+- **A/B tests.** When `<main>` has `data-experiment` and `data-variant` (a page in a running test), they are added to the event as `experiment` and `variant`.
+- **In your reports.** Plausible shows an event once you add a goal of the same name (`form_submit`, `cta_click`, `link_click`) and, for the properties, a custom property; GA4 and PostHog record them straight away (GA4: mark `form_submit` as a key event to count it as a conversion).
+- **Adding an event.** Call `trackEvent('name', { ... })` (strings, numbers and booleans only) or put `trackAttributes('name', {...})` on a wrapper around a link or button. Never put personal information (names, email addresses, message text) in the props.
+- **Tests:** `tests/e2e/analytics-events.spec.ts` checks nothing fires before consent or after Reject all, and that `cta_click` and `form_submit` fire after Accept all. The providers' scripts are stubbed (the suite runs offline), so the test records the calls the dispatcher makes.
 
 ### Site search
 

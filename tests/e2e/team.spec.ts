@@ -166,7 +166,10 @@ test.describe('a profile page', () => {
       description: 'Ann leads the firm and has acted for local families for twenty years.',
       email: 'ann@example.com',
       telephone: '0298765432',
-      sameAs: ['https://www.linkedin.com/in/ann-lee-example'],
+      sameAs: [
+        'https://www.linkedin.com/in/ann-lee-example',
+        'https://www.instagram.com/ann-lee-example',
+      ],
       hasCredential: [
         { '@type': 'EducationalOccupationalCredential', name: 'LLB (Hons)' },
         { '@type': 'EducationalOccupationalCredential', name: 'GAICD' },

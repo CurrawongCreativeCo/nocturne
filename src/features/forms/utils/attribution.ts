@@ -5,6 +5,7 @@ import type { FieldSource } from './validate'
  * field name can start with (names begin with a lowercase letter), so they never collide.
  */
 export const ATTRIBUTION_FIELDS = [
+  '_landing',
   '_referrer',
   '_utm_source',
   '_utm_medium',
@@ -19,18 +20,35 @@ export type Attribution = Partial<Record<AttributionField, string>>
 const MAX_LENGTH = 200
 
 /**
- * Inline script that fills the inputs marked `data-attribution` in its own form: the referrer from
- * `document.referrer`, the others from the page address. It runs while the page loads, so it only
- * helps a visitor who arrived with a full page load, which is who a referrer or campaign link
- * describes; moving between pages on the site (client-side) renders it without running it.
+ * Inline script, added once by the site shell, that records first-touch attribution and fills the
+ * inputs marked `data-attribution` (`AttributionFields`) when a form is sent.
  *
- * React can replace the server-rendered inputs with new, empty ones while it hydrates (seen on slow
- * runners), which would drop the values. So the script also remembers them and, once per page, refills
- * the inputs of any form just before it is submitted (a capturing listener on `window` runs before
- * React reads the form).
+ * On a full page load it stores the landing path, the referrer and the UTM values in `sessionStorage`
+ * under `attribution`, unless a visit already did: the first page of a visit wins, so a visitor who
+ * lands on a campaign link, browses on and then writes to you is still attributed to the campaign.
+ * Storage is wrapped in try/catch; if it is blocked the values last for the page load only.
+ *
+ * A capturing listener on `window` fills the inputs of whichever form is being submitted, before React
+ * reads it. That also covers client-side navigation and inputs React replaced while hydrating.
+ * ES5 and self-contained, so it adds nothing to the JavaScript budget.
  */
 export const ATTRIBUTION_SCRIPT =
-  "var q=new URLSearchParams(location.search),r=document.referrer,f=function(form){form.querySelectorAll('[data-attribution]').forEach(function(i){var n=i.dataset.attribution;i.value=n==='referrer'?r:q.get(n)||''})};f(document.currentScript.closest('form'));if(!window.__attribution){window.__attribution=1;window.addEventListener('submit',function(e){f(e.target)},true)}"
+  '(function(w,d){var K="attribution",a;' +
+  'try{a=JSON.parse(w.sessionStorage.getItem(K))}catch(e){}' +
+  'if(!a||typeof a!=="object"){var q=new URLSearchParams(w.location.search);' +
+  'a={landing:w.location.pathname,referrer:d.referrer};' +
+  '["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(function(n){a[n]=q.get(n)||""});' +
+  'try{w.sessionStorage.setItem(K,JSON.stringify(a))}catch(e){}}' +
+  'w.addEventListener("submit",function(e){var f=e.target;if(!f||!f.querySelectorAll)return;' +
+  'f.querySelectorAll("[data-attribution]").forEach(function(i){' +
+  'var v=a[i.getAttribute("data-attribution")];i.value=typeof v==="string"?v:""})},true)' +
+  '})(window,document)'
+
+/** The path of a landing page, without query or fragment, or nothing if it isn't a site path. */
+function landingPath(value: string) {
+  if (!value.startsWith('/') || value.startsWith('//')) return undefined
+  return value.split(/[?#]/)[0]
+}
 
 /** `https://example.com/path` for a referrer URL, or nothing for an empty or non-web one. */
 function referrerOrigin(referrer: string) {
@@ -56,7 +74,12 @@ export function cleanAttribution(source: FieldSource): Attribution {
     if (typeof input !== 'string') continue
 
     const value = input.replace(/[\u0000-\u001F\u007F]+/g, ' ').trim()
-    const kept = field === '_referrer' ? referrerOrigin(value) : value
+    const kept =
+      field === '_referrer'
+        ? referrerOrigin(value)
+        : field === '_landing'
+          ? landingPath(value)
+          : value
     if (kept) result[field] = kept.slice(0, MAX_LENGTH)
   }
   return result

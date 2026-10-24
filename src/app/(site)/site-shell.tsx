@@ -6,9 +6,11 @@ import { MotionProvider } from '@/components/motion/motion-provider'
 import { RouteProgress } from '@/components/ui/route-progress'
 import { hasConsentProviders } from '@/config/analytics'
 import { isFeatureEnabled } from '@/config/profile'
+import { AnalyticsDispatcher } from '@/features/consent/components/analytics-dispatcher'
 import { AnalyticsScripts } from '@/features/consent/components/analytics-scripts'
 import { CookieSettingsButton } from '@/features/consent/components/cookie-settings-button'
 import { DraftModeTools } from '@/features/draft-mode/components/draft-mode-tools'
+import { AttributionScript } from '@/features/forms/components/attribution-fields'
 import { QuickSearch } from '@/features/search/components/quick-search'
 import { DesignStyle, DraftDesignStyle } from '@/features/site/components/design-style'
 import {
@@ -147,10 +149,17 @@ export async function SiteShell({
           {/* Cookieless, so it needs no consent. Providers needing consent load only after it. */}
           <Analytics />
           {hasConsentProviders && <AnalyticsScripts />}
-          {/* Custom events (the Link list's clicks) once a provider has loaded; no bundle, see track-script.ts. */}
-          {hasConsentProviders && <script dangerouslySetInnerHTML={{ __html: TRACK_SCRIPT }} />}
+          {/* Custom events (form_submit, cta_click, link_click): sent only after consent, to configured providers. No bundle. */}
+          {hasConsentProviders && (
+            <>
+              <AnalyticsDispatcher />
+              <script dangerouslySetInnerHTML={{ __html: TRACK_SCRIPT }} />
+            </>
+          )}
         </>
       )}
+      {/* First-touch attribution for enquiries (sessionStorage); nothing unless enquiries are stored. */}
+      <AttributionScript />
     </MotionProvider>
   )
 }

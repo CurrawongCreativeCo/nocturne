@@ -60,11 +60,13 @@ describe('buildEnquiry', () => {
 
   it('stores the cleaned attribution, only what is present', () => {
     const submission = new Map<string, unknown>([
+      ['_landing', '/pricing?utm_source=news'],
       ['_referrer', 'https://www.google.com/search'],
       ['_utm_source', 'news'],
       ['_utm_campaign', ''],
     ])
     expect(buildEnquiry({ ...base, submission }).attribution).toEqual({
+      landing: '/pricing',
       referrer: 'https://www.google.com/search',
       utmSource: 'news',
     })

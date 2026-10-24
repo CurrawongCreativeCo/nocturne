@@ -77,9 +77,11 @@ export const enquiry = defineType({
       title: 'Where they came from',
       type: 'object',
       readOnly: true,
-      description: 'The referrer and campaign links, when the visitor’s browser shared them.',
+      description:
+        'The first page of their visit, the referrer and the campaign links, when the visitor’s browser shared them.',
       options: { collapsible: true, collapsed: true },
       fields: [
+        defineField({ name: 'landing', title: 'Landing page', type: 'string', readOnly: true }),
         defineField({ name: 'referrer', type: 'string', readOnly: true }),
         defineField({ name: 'utmSource', title: 'UTM source', type: 'string', readOnly: true }),
         defineField({ name: 'utmMedium', title: 'UTM medium', type: 'string', readOnly: true }),

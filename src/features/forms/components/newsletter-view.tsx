@@ -1,3 +1,4 @@
+import { AttributionFields } from './attribution-fields'
 import { ContactForm } from './contact-form-lazy'
 import { subscribeNewsletter } from '../api/subscribe-newsletter'
 import { getNewsletterConfig } from '../utils/newsletter/config'
@@ -60,6 +61,8 @@ export function NewsletterView({ submitLabel, successMessage, headingId }: Props
       check={
         config.testMode ? { kind: 'test' } : { kind: 'turnstile', siteKey: config.turnstileSiteKey }
       }
-    />
+    >
+      <AttributionFields />
+    </ContactForm>
   )
 }
