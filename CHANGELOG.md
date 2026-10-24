@@ -41,6 +41,9 @@ you start a release.
 
 ### Fixed
 
+- Studio's navbar home link (the workspace icon) now has an accessible name, "<brand name> home". The workspace menu is unchanged, so its rows are not read twice.
+- The "No apiVersion specified for document type list with custom filter" Studio warning for the Upcoming and Past events lists.
+- `studio-brand-preview.spec.ts` no longer times out in `beforeEach` under a full run: it has its own 60 s timeout and does not wait for every image to load.
 - **Hero background pictures sat over the hero's text and buttons.** A class-name join ran `-z-10` and the picture's own classes together as `-z-10object-cover`, which matches nothing, so the picture was not placed behind the content and took clicks meant for the buttons (since the element-level animation work on 2026-10-16). They are now separate classes. Heroes with a background picture that is not floating look different only where the picture was covering text: the picture now sits behind it. No schema or content change.
 
 ### Breaking changes / migration steps
