@@ -1312,7 +1312,7 @@ Only supported Sanity APIs are used, in four places:
 | What                      | Where                                               | Source of truth                                       |
 | ------------------------- | --------------------------------------------------- | ----------------------------------------------------- |
 | Theme (colours)           | `src/features/studio/theme.ts` -> `theme` in config | The resolved light and dark roles                     |
-| Navbar logo               | `src/features/studio/components/studio-logo.tsx`    | `logo` (client), wordmark or bird, or monogram + name |
+| Navbar logo               | `studio-logo.tsx`, shown by `brand-zone.tsx`        | `logo` (client), wordmark or bird, or monogram + name |
 | Workspace icon (the mark) | `src/features/studio/components/studio-icon.tsx`    | `mark`, light or dark by colour scheme                |
 | Workspace title           | `title` in `sanity.config.ts`                       | The resolved name                                     |
 
@@ -1349,8 +1349,12 @@ Only supported Sanity APIs are used, in four places:
   Nocturne wordmark alone (24px high, up to 178px wide), or the bird mark alone below 768px, named
   "Nocturne". With colours but no logo it shows the client's monogram beside the name. Client logos sit in a
   24px-high box up to 160px wide, so nothing shifts the navbar; the name is the accessible label. The
-  navbar keeps the `studio.components.logo` hook: Sanity 6.19 marks it deprecated, but a workspace icon is
-  too small for a wordmark and `navbar` can only wrap the default, which draws the logo itself.
+  logo appears in a 210px **brand zone** at the start of the Studio navbar from 900px wide (Sanity UI's
+  third breakpoint, where Studio puts its tools in the top bar), as a link named "Studio home" to the
+  Studio's root; narrower screens keep Sanity's own navbar. Sanity 6.19 deprecates `studio.components.logo` and
+  never reads it, and the home button draws only the 25px workspace icon, so `RoleNavbar` wraps the default
+  navbar with the zone instead. The zone lines up with Sanity's top row; the Version and Variant row sits
+  under it, beside empty space.
 - **Currawong's image files** (`src/assets/brand/currawong/`) are named `<kind>-on-<light|dark>`: `bird`
   (the bird alone, used as the mark and favicon), `wordmark` (the lettering alone, used as the logo),
   `logo-horizontal` and `logo-stacked` (bird and lettering together, not shown in the Studio).
