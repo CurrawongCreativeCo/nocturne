@@ -1,16 +1,29 @@
-import { Badge, Button, Card, Flex, Stack } from '@sanity/ui'
+import { Badge, Button, Card, Flex, Stack, useMediaIndex } from '@sanity/ui'
 import { type NavbarProps, useCurrentUser } from 'sanity'
 
 import { isAgency, readClientViewPreview, writeClientViewPreview } from '../roles'
+import { BrandZone } from './brand-zone'
+import { showsBrandZone } from '../utils/brand-zone'
 
 /**
  * The Studio navbar. Agency staff get a thin strip above it with an "Agency view" badge and a
  * switch to preview what clients see; clients get the plain navbar. The tools, desk structure
  * and document actions are resolved when the Studio loads, so the switch reloads the page.
+ * From 900px the navbar starts with a brand zone holding the wordmark or the client's logo.
  */
 export function RoleNavbar(props: NavbarProps) {
   const user = useCurrentUser()
-  if (!isAgency(user)) return props.renderDefault(props)
+  const navbar = showsBrandZone(useMediaIndex()) ? (
+    <Flex align="stretch">
+      <BrandZone />
+      <Flex direction="column" flex={1} style={{ minWidth: 0 }}>
+        {props.renderDefault(props)}
+      </Flex>
+    </Flex>
+  ) : (
+    props.renderDefault(props)
+  )
+  if (!isAgency(user)) return navbar
 
   const previewing = readClientViewPreview()
   const toggle = () => {
@@ -34,7 +47,7 @@ export function RoleNavbar(props: NavbarProps) {
           />
         </Flex>
       </Card>
-      {props.renderDefault(props)}
+      {navbar}
     </Stack>
   )
 }

@@ -73,7 +73,8 @@ function BrandAsset({
 }
 
 /**
- * The Studio's navbar logo, in a fixed 24px-high box (up to 160px wide) so it never shifts the navbar.
+ * The Studio's navbar logo, shown by BrandZone from 900px wide. (`studio.components.logo` is
+ * deprecated and never read in Sanity 6.19, so it is not set in sanity.config.ts.) In a fixed 24px-high box (up to 160px wide) so it never shifts the navbar.
  * - A client logo file: the file alone, light or dark variant to match the Studio's colour scheme.
  *   A lone file is never recoloured; shown on the other scheme it sits on a small background in the
  *   colour it was drawn for.
