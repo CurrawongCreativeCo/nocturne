@@ -250,9 +250,9 @@ test('signed-in Studio performance', async ({ browser }, testInfo) => {
           })
         } finally {
           await description.fill(original)
-          await expect(
-            page.frameLocator('iframe').getByText(original, { exact: true }),
-          ).toBeVisible()
+          // The page's own text carries invisible Visual Editing markers in draft mode (as the
+          // heading above does), so match its words, not the whole string.
+          await expect(page.frameLocator('iframe').getByText(original).first()).toBeVisible()
         }
       } finally {
         await context.close()
