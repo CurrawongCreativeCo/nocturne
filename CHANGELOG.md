@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **One-row Studio top bar:** from 900px the "Agency view" badge and the Preview client view switch sit at the end of the navbar instead of in a strip above it, saving 34px of height for agency staff. Below 900px the strip stays. Clients see neither.
+
 - Site profile flag `features.releases`: Studio shows Releases and scheduled drafts only when it is on. It defaults to **off** for new sites (this template's profile keeps it on), so clients on plans without Releases never meet an upgrade screen. Set it to match the Sanity plan at handover.
 
 - **Social icons everywhere:** the shared `SocialLinks` now also draws the footer (Navigation › Footer: _Show social icons_ and a style picker, agency only, default off), the Location section (_Show social icons_, default off) and team profile pages. Team links are icons named "<name> on <network>" with `rel="noopener"` (no `me`; the footer, Location and Link list keep `rel="me"`); a member can choose _Text links_ instead. No new requests or public JavaScript. **Intended visual change:** team profile pages show icons instead of text links unless a member is set to _Text links_.
