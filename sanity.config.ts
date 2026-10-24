@@ -38,13 +38,10 @@ import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
 import { FramelessAwareField } from './src/features/studio/components/frameless-field'
 import { withPresetPicker } from './src/features/studio/components/preset-picker/with-preset-picker'
+import { RoleNavbar } from './src/features/studio/components/role-navbar'
 import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
-import { ShellNavbar } from './src/features/studio/components/shell/shell-navbar'
-import { ShellToolLayout } from './src/features/studio/components/shell/shell-rail'
-import { ShellToolMenu } from './src/features/studio/components/shell/shell-tool-menu'
 import { StudioIcon } from './src/features/studio/components/studio-icon'
 import { StudioInputBoundary } from './src/features/studio/components/studio-input-boundary'
-import { StudioLogo } from './src/features/studio/components/studio-logo'
 import { ThemeColourPickerInput } from './src/features/studio/components/theme-colour-picker/theme-colour-picker-input'
 import { contentHealth } from './src/features/studio/content-health/plugin'
 import { resolve } from './src/features/studio/presentation'
@@ -123,16 +120,8 @@ export default defineConfig({
       },
     ],
   },
-  // SPIKE (task 174): concept board 01's shell. Sanity 6.19 never renders `logo`; the brand zone
-  // in ShellNavbar shows the wordmark instead.
-  studio: {
-    components: {
-      logo: StudioLogo,
-      navbar: ShellNavbar,
-      activeToolLayout: ShellToolLayout,
-      toolMenu: ShellToolMenu,
-    },
-  },
+  // Sanity 6.19 never renders `logo` (deprecated, unread), so RoleNavbar draws the brand zone itself.
+  studio: { components: { navbar: RoleNavbar } },
   // Clients only get the approved sections in the page builder's insert menu; presetPicker fields
   // and objects with presets get the picture picker; frameless objects drop their own box.
   form: { components: { input: StudioInput, field: FramelessAwareField } },
