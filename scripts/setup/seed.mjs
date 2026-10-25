@@ -51,6 +51,13 @@ export function seedDocuments(siteName, { prelaunch = false } = {}) {
     _type: 'siteIdentity',
     title: siteName,
     description: `${siteName}: replace this with one sentence about what you do. It appears in search results.`,
+    // Agency-only placeholder; `launch:check --expect-marker=<value>` proves it reached the live site.
+    verificationMarker: `nocturne-${
+      siteName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'site'
+    }`,
   }
   const siteNavigation = {
     _id: 'siteNavigation',
