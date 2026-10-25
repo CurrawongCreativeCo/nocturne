@@ -31,6 +31,13 @@ describe('seedDocuments (live)', () => {
     expect(refs(docs).every((r) => !r.weak)).toBe(true)
   })
 
+  it('sets a placeholder verification marker from the site name, in both modes', () => {
+    expect(ids.siteIdentity.verificationMarker).toBe('nocturne-acme')
+    expect(
+      byId(seedDocuments('Acme & Sons!', { prelaunch: true })).siteIdentity.verificationMarker,
+    ).toBe('nocturne-acme-sons')
+  })
+
   it('is unchanged by an explicit prelaunch: false', () => {
     const strip = (list) => JSON.stringify(list, (k, v) => (k === '_key' ? undefined : v))
     expect(strip(seedDocuments('Acme', { prelaunch: false }))).toBe(strip(docs))

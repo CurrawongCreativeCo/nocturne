@@ -22,7 +22,7 @@ function privatePath(value, flag) {
 
 /**
  * `<url> [--json] [--max-urls=N] [--prelaunch] [--bypass] [--expect-origin=URL]
- * [--expect-private=/a,/b] [--expect-public=/c] [--help]`. The path flags can be repeated.
+ * [--expect-private=/a,/b] [--expect-public=/c] [--expect-marker=VALUE] [--help]`. The path flags can be repeated.
  */
 export function parseArgs(argv) {
   const options = {
@@ -35,6 +35,7 @@ export function parseArgs(argv) {
     expectOrigin: undefined,
     expectPrivate: [],
     expectPublic: [],
+    expectMarker: undefined,
   }
   for (const arg of argv) {
     if (arg === '--json') options.json = true
@@ -58,6 +59,10 @@ export function parseArgs(argv) {
       if (paths.length === 0)
         throw new Error('--expect-public needs at least one path, like /privacy.')
       options.expectPublic.push(...paths.map((path) => privatePath(path, '--expect-public')))
+    } else if (arg.startsWith('--expect-marker=')) {
+      const value = arg.slice('--expect-marker='.length).trim()
+      if (!value) throw new Error('--expect-marker needs the marker value from Studio.')
+      options.expectMarker = value
     } else if (arg === '--help' || arg === '-h') options.help = true
     else if (arg.startsWith('--max-urls=')) {
       const value = Number(arg.slice('--max-urls='.length))

@@ -136,6 +136,17 @@ describe('collectCheckableStrings', () => {
     expect(all).not.toContain('12:00 am')
   })
 
+  it('can leave out the site-wide address and hours but keeps nested addresses', () => {
+    const event: JsonLdNode = {
+      '@type': 'Event',
+      name: 'Pottery workshop',
+      location: { '@type': 'Place', address: '12 Rose St' },
+    }
+    expect(
+      collectCheckableStrings([organization, event], { siteDetails: false }).map((s) => s.value),
+    ).toEqual(['Test Co', 'Pottery workshop', '12 Rose St'])
+  })
+
   it('splits a plain-text address at commas and line breaks', () => {
     const event: JsonLdNode = {
       '@type': 'Event',

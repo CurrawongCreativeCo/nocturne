@@ -20,6 +20,7 @@ import {
 import { SiteFooter, DraftSiteFooter } from '@/features/site/components/site-footer'
 import { SiteHeader, DraftSiteHeader } from '@/features/site/components/site-header'
 import { SiteJsonLd } from '@/features/site/components/site-json-ld'
+import { SiteMarker } from '@/features/site/components/site-marker'
 import { TRACK_SCRIPT } from '@/lib/analytics/track-script'
 import { PUBLISHED, revalidateSecret, SanityLive } from '@/lib/sanity/live'
 import { expireLiveTags } from '@/lib/sanity/live-action'
@@ -70,6 +71,8 @@ export async function SiteShell({
         <DesignStyle {...PUBLISHED} />
       )}
       <SiteJsonLd />
+      {/* Proves CMS content rendered (launch:check --expect-marker); also on the pre-launch view. */}
+      <SiteMarker />
       {/* Navigation feedback for the public site only; useSearchParams needs the boundary. */}
       <Suspense fallback={null}>
         <RouteProgress />

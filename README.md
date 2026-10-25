@@ -116,7 +116,7 @@ Open http://localhost:3000/studio:
   - **Reusable content:** _Shared sections_ are sections you write once and place on many pages, and _Forms_ are the contact and newsletter forms (including where their messages go).
     Empty lists say "Nothing here yet." and Shared sections, Forms and Panels show a count beside their name.
   - **Website settings** (client, except _Cookie banner_) holds the things that appear on every page:
-    - _Name, logo & icon_ (client) is the site name, description, logo, default share image and browser icon, plus (agency only, under _Advanced_) whether AI crawlers may read the site.
+    - _Name, logo & icon_ (client) is the site name, description, logo, default share image and browser icon, plus (agency only, under _Advanced_) whether AI crawlers may read the site and the launch verification marker (see [Launch check](#launch-check)).
     - _Navigation_ (client) is the header menu and button, and the footer links and text.
     - _Announcement bar_ (client) is the one-line banner above the header.
     - _Cookie banner_ is the wording of the consent banner (agency only).
@@ -1087,6 +1087,7 @@ After each valid `page` or `post` webhook the route POSTs the document's URL to 
 Google requires structured data (JSON-LD) to describe content visitors can see. `tests/e2e/structured-data.spec.ts` crawls every page in the fixture sitemap and fails, naming the page and property, when it doesn't hold. The rules are pure functions in `src/lib/json-ld-visibility.ts`, unit-tested with a deliberately broken fixture.
 
 - **Visible text:** each `name` and `headline` (organisation, person, event, place, breadcrumb, FAQ question), each part of an address, the weekly opening and closing times (compared as the page shows them, "5:30 pm") and each line of an FAQ answer must appear in the page's `document.body.innerText`. Comparison ignores case, whitespace, HTML entities and curly versus straight quotes and dashes. Answers inside a closed `<details>` count: the test opens them first, as a visitor can.
+- **Minimal pages:** a Link page's "Minimal page" hides the footer with CSS, so the site-wide business address and hours aren't visible there. The spec skips those two (the Organization's top-level `address` and `openingHoursSpecification`) when the site chrome is hidden, and still checks names. An event's or place's own address is always checked.
 - **Not checked:** `legalName`, `description`, `areaServed`, links, dates and dated special days. Don't add structured data for something the page doesn't show; if a field is only for search engines, keep it out of the checked list on purpose.
 - **`@id`s:** unique within a page. Across pages the same `@id` may repeat only with an identical definition (the Organization and WebSite are on every page); two different things sharing one would merge into a single entity.
 - **WebPage:** every `WebPage` node (an Article's `mainEntityOfPage`) is `isPartOf` the site's `<origin>/#website` and names `<origin>/#organization` as its `publisher`.
@@ -4302,6 +4303,13 @@ have shared that address: keep it published or add a redirect).
 - **`--expect-origin=https://example.com.au`.** A preview deployment's canonicals, sitemap and share images name the
   production domain (`NEXT_PUBLIC_SITE_URL`), not the preview's address, so the canonical checks would fail. Pass the
   production domain and they compare against it. The run adds a note saying which it used.
+- **`--expect-marker=VALUE`** proves CMS content reached the live page, which a deployment ID or build log cannot. The
+  agency sets **Launch verification marker** in Studio (_Name, logo & icon_ › _Advanced_, agency only; the setup wizard
+  seeds a placeholder such as `nocturne-acme`, so replace it with something unique per launch if you like). SiteShell
+  then renders `<meta name="nocturne:marker" content="…">` on every page, including the pre-launch view, from the
+  cached settings query (no extra request, no client JavaScript). With the flag, either mode adds a _Verification
+  marker matches_ line that fails when the home page has no tag or a different value. Empty field, no tag. Works with
+  `--prelaunch`, `--bypass` and `--expect-origin`: `npm run launch:check -- https://example.com.au --expect-marker=nocturne-acme`.
 - **`--expect-private`, `--expect-public`.** Comma-separated paths, repeatable, each starting with `/`.
 - Nothing is crawled in this mode: about a dozen requests.
 

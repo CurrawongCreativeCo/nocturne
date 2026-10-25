@@ -92,6 +92,12 @@ const nodeLabel = (node: JsonLdNode) => {
 
 /** Not shown on the page: service areas are a description of reach, not a list visitors read. */
 const SKIPPED_KEYS = new Set(['areaServed'])
+/**
+ * The business's own address and hours, on its top-level node. A "Minimal page" hides the footer that
+ * shows them but the site-wide Organization still carries them, so the spec passes `siteDetails: false`
+ * there; an Event's or Place's address is nested and always checked.
+ */
+const SITE_DETAIL_KEYS = new Set(['address', 'openingHoursSpecification'])
 const ADDRESS_PARTS = ['streetAddress', 'addressLocality', 'addressRegion', 'postalCode'] as const
 
 /** Free text split into the lines and comma-separated parts that are shown separately ("1 Rose St, Newtown"). */
@@ -107,9 +113,14 @@ const textParts = (text: string, splitOnCommas: boolean) =>
  * - address parts (a plain-text address is split at commas and line breaks),
  * - the open and close times of the weekly opening hours, formatted as the page shows them ("5:30 pm"),
  * - each line of an FAQ answer.
+ * With `siteDetails: false` the top-level nodes' address and hours are skipped (see SITE_DETAIL_KEYS).
  * Dated special days, `legalName`, `description`, links, dates and `areaServed` are not checked.
  */
-export function collectCheckableStrings(nodes: readonly JsonLdNode[]): CheckableString[] {
+export function collectCheckableStrings(
+  nodes: readonly JsonLdNode[],
+  options: { siteDetails?: boolean } = {},
+): CheckableString[] {
+  const { siteDetails = true } = options
   const found: CheckableString[] = []
 
   const add = (path: string[], value: unknown, splitOnCommas = false) => {
@@ -130,6 +141,7 @@ export function collectCheckableStrings(nodes: readonly JsonLdNode[]): Checkable
 
     for (const [key, child] of Object.entries(value)) {
       if (key.startsWith('@') || SKIPPED_KEYS.has(key)) continue
+      if (!siteDetails && path.length === 1 && SITE_DETAIL_KEYS.has(key)) continue
       const childPath = [...path, key]
 
       if (key === 'name' || key === 'headline') add(childPath, child)

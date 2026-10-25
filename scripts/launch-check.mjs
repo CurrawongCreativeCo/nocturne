@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 import { parseEnv } from './check-dataset.mjs'
 import { normaliseSiteUrl, parseArgs } from './launch-check/args.mjs'
 import { discoverPages, onOrigin } from './launch-check/discover.mjs'
-import { getIconLinks } from './launch-check/html.mjs'
+import { checkMarker, getIconLinks } from './launch-check/html.mjs'
 import {
   checkHomePage,
   checkHttpRedirect,
@@ -74,6 +74,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const NOT_FOUND_PATH = '/launch-check-this-page-should-not-exist'
 const HELP = `Usage: npm run launch:check -- <url> [--json] [--max-urls=N]
        npm run launch:check -- <url> --prelaunch [--expect-private=/about,/blog] [--expect-public=/privacy] [--bypass] [--expect-origin=URL]
+       npm run launch:check -- <url> [--prelaunch] --expect-marker=VALUE
 
 Checks a deployed site before launch: HTTP and headers, SEO, template leftovers, 404s and Sanity,
 and that the site is live and "/" is the real home page. Exit code 1 means at least one check failed.
@@ -88,7 +89,9 @@ Set PSI_API_KEY (environment or .env.local) to add PageSpeed Insights scores.
               .env.local; never printed) to the site, to check a protected Vercel preview deployment.
               A preview's canonicals name the production domain, so also pass --expect-origin.
 --expect-public=/a,/b  Pages in launch.publicPages, so the sitemap may list them.
---expect-origin=URL  The production domain canonicals should use, e.g. https://example.com.au.`
+--expect-origin=URL  The production domain canonicals should use, e.g. https://example.com.au.
+--expect-marker=VALUE  The Launch verification marker set in Studio (Name, logo & icon → Advanced). Fails unless
+              the home page carries <meta name="nocturne:marker" content="VALUE">, proving CMS content rendered.`
 
 /** Only the values the checks read; .env.local first, the environment on top. */
 function loadEnv() {
@@ -127,7 +130,15 @@ export function makeNet(origin, bypassSecret) {
   }
 }
 
-export async function runLaunchChecks({ origin, env, maxUrls, expectOrigin, net, log = noop }) {
+export async function runLaunchChecks({
+  origin,
+  env,
+  maxUrls,
+  expectOrigin,
+  expectMarker,
+  net,
+  log = noop,
+}) {
   const { request, followRedirects } = net ?? makeNet(origin)
   const results = []
   const notes = []
@@ -148,6 +159,7 @@ export async function runLaunchChecks({ origin, env, maxUrls, expectOrigin, net,
     ...checkLaunchedHome({ response: home.final, origin: siteOrigin, homepage, expectOrigin }),
   )
   results.push(...checkTemporaryStillUp({ response: temporary, homepage }))
+  if (expectMarker) results.push(...checkMarker({ html: home.final.text, expected: expectMarker }))
 
   log('Checking redirects, headers, Studio and 404s…')
   const counterpart = wwwCounterpart(host)
@@ -299,6 +311,7 @@ export async function runLaunchChecks({ origin, env, maxUrls, expectOrigin, net,
 export async function runPrelaunchChecks({
   origin,
   expectOrigin,
+  expectMarker,
   privatePaths,
   publicPages = [],
   net,
@@ -332,6 +345,7 @@ export async function runPrelaunchChecks({
   const ogImage = await request(ogImageUrl, { follow: true })
   results.push(...checkTemporaryHome({ response: home, origin, homepage, expectOrigin }))
   results.push(...checkHomepageOwnPath({ response: own, homepage }))
+  if (expectMarker) results.push(...checkMarker({ html: home.text, expected: expectMarker }))
 
   log('Checking that unfinished pages are private…')
   const paths = privatePathsFor(privatePaths)
@@ -410,6 +424,7 @@ async function main() {
         ? await runPrelaunchChecks({
             origin,
             expectOrigin: options.expectOrigin,
+            expectMarker: options.expectMarker,
             privatePaths: options.expectPrivate,
             publicPages: options.expectPublic,
             net,
@@ -420,6 +435,7 @@ async function main() {
             env,
             maxUrls: options.maxUrls,
             expectOrigin: options.expectOrigin,
+            expectMarker: options.expectMarker,
             net,
             log,
           })

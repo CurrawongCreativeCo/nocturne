@@ -36,8 +36,16 @@ async function read(page: Page, path: string): Promise<Crawled> {
       .locator('script[type="application/ld+json"]')
       .evaluateAll((elements) => elements.map((element) => element.textContent))
     const text = await page.evaluate(() => document.body.innerText)
+    // A "Minimal page" hides the header and footer, where the business's address and hours are shown.
+    const chromeHidden = await page.evaluate(() => {
+      const chrome = document.querySelector('[data-site-chrome]')
+      return chrome !== null && getComputedStyle(chrome).display === 'none'
+    })
     const { nodes, errors } = parseJsonLd(scripts)
-    const hidden = findHiddenStrings(collectCheckableStrings(nodes), text)
+    const hidden = findHiddenStrings(
+      collectCheckableStrings(nodes, { siteDetails: !chromeHidden }),
+      text,
+    )
     return { nodes, errors, hidden }
   }
 

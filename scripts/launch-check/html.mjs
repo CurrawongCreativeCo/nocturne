@@ -2,6 +2,7 @@
  * Small, forgiving HTML readers for the launch checks. The pages come from Next.js, so the markup
  * is well-formed; these avoid a parser dependency and only read what the checks need.
  */
+import { fail, pass } from './result.mjs'
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' }
 
@@ -63,6 +64,25 @@ export function getMeta(html, key) {
     }
   }
   return ''
+}
+
+/** The home page's `<meta name="nocturne:marker">` against the expected value, as a result line. */
+export function checkMarker({ html, expected }) {
+  const id = 'launch-marker'
+  const title = 'Verification marker matches'
+  const found = getMeta(html ?? '', 'nocturne:marker')
+  if (found === expected) return [pass('Launch state', id, title, `Found "${found}".`)]
+  return [
+    fail(
+      'Launch state',
+      id,
+      title,
+      found
+        ? `The page carries "${found}", not "${expected}".`
+        : 'The page has no <meta name="nocturne:marker">.',
+      'Set Website settings → Name, logo & icon → Advanced → Launch verification marker, publish it, and check the deployment is this site. A page cached before the change may need a moment.',
+    ),
+  ]
 }
 
 /** href of the first `<link rel="canonical">`, or ''. */
