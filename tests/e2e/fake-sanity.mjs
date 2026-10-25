@@ -17,6 +17,7 @@ import {
   documents,
   experimentRunning,
   footerSocialOn,
+  markerUnset,
   releaseVersions,
   variantDocuments,
 } from './fixtures/dataset.mjs'
@@ -26,7 +27,7 @@ const PICTURE = readFileSync(new URL('./fixtures/picture.png', import.meta.url))
 const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
 
 /** Named variants of the siteIdentity document the tests switch between; `null` serves the fixture as is. */
-const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon }
+const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon, markerUnset }
 let settingsPatch = null
 
 /** The designSettings variant being served (`light` or `dark`), or null for none; POST /__fixture/design/<off|light|dark>. */

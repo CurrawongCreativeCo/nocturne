@@ -32,7 +32,8 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
           "background": coalesce(browserIcon.background, "transparent")
         }
       ),
-      allowAiCrawlers
+      allowAiCrawlers,
+      verificationMarker
     },
     "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {
       headerNav[] { ${navItemFields} },
@@ -105,6 +106,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "consent": consent,
     "design": design,
     "business": business,
-    "allowAiCrawlers": identity.allowAiCrawlers != false
+    "allowAiCrawlers": identity.allowAiCrawlers != false,
+    "verificationMarker": identity.verificationMarker
   }
 `)

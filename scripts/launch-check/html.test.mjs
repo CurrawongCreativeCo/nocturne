@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import {
+  checkMarker,
   countH1,
   decodeEntities,
   getCanonical,
@@ -15,6 +16,7 @@ import {
 } from './html.mjs'
 
 const good = readFileSync(new URL('./fixtures/home-good.html', import.meta.url), 'utf8')
+const marked = readFileSync(new URL('./fixtures/home-marker.html', import.meta.url), 'utf8')
 const leftovers = readFileSync(new URL('./fixtures/home-leftovers.html', import.meta.url), 'utf8')
 
 describe('html readers', () => {
@@ -75,5 +77,25 @@ describe('html readers', () => {
     expect(isNoindex('noindex, nofollow')).toBe(true)
     expect(isNoindex('index, follow')).toBe(false)
     expect(isNoindex('none')).toBe(true)
+  })
+})
+
+describe('checkMarker', () => {
+  it('passes when the page carries the expected marker', () => {
+    const [result] = checkMarker({ html: marked, expected: 'nocturne-test-co' })
+    expect(result.status).toBe('pass')
+  })
+
+  it('fails when the marker differs', () => {
+    const [result] = checkMarker({ html: marked, expected: 'nocturne-other' })
+    expect(result.status).toBe('fail')
+    expect(result.detail).toContain('nocturne-test-co')
+  })
+
+  it('fails when the page has no marker, or no HTML at all', () => {
+    expect(checkMarker({ html: good, expected: 'nocturne-test-co' })[0].detail).toContain(
+      'no <meta name="nocturne:marker">',
+    )
+    expect(checkMarker({ html: undefined, expected: 'x' })[0].status).toBe('fail')
   })
 })

@@ -116,7 +116,7 @@ Open http://localhost:3000/studio:
   - **Reusable content:** _Shared sections_ are sections you write once and place on many pages, and _Forms_ are the contact and newsletter forms (including where their messages go).
     Empty lists say "Nothing here yet." and Shared sections, Forms and Panels show a count beside their name.
   - **Website settings** (client, except _Cookie banner_) holds the things that appear on every page:
-    - _Name, logo & icon_ (client) is the site name, description, logo, default share image and browser icon, plus (agency only, under _Advanced_) whether AI crawlers may read the site.
+    - _Name, logo & icon_ (client) is the site name, description, logo, default share image and browser icon, plus (agency only, under _Advanced_) whether AI crawlers may read the site and the launch verification marker (see [Launch check](#launch-check)).
     - _Navigation_ (client) is the header menu and button, and the footer links and text.
     - _Announcement bar_ (client) is the one-line banner above the header.
     - _Cookie banner_ is the wording of the consent banner (agency only).
@@ -4292,6 +4292,13 @@ have shared that address: keep it published or add a redirect).
 - **`--expect-origin=https://example.com.au`.** A preview deployment's canonicals, sitemap and share images name the
   production domain (`NEXT_PUBLIC_SITE_URL`), not the preview's address, so the canonical checks would fail. Pass the
   production domain and they compare against it. The run adds a note saying which it used.
+- **`--expect-marker=VALUE`** proves CMS content reached the live page, which a deployment ID or build log cannot. The
+  agency sets **Launch verification marker** in Studio (_Name, logo & icon_ › _Advanced_, agency only; the setup wizard
+  seeds a placeholder such as `nocturne-acme`, so replace it with something unique per launch if you like). SiteShell
+  then renders `<meta name="nocturne:marker" content="…">` on every page, including the pre-launch view, from the
+  cached settings query (no extra request, no client JavaScript). With the flag, either mode adds a _Verification
+  marker matches_ line that fails when the home page has no tag or a different value. Empty field, no tag. Works with
+  `--prelaunch`, `--bypass` and `--expect-origin`: `npm run launch:check -- https://example.com.au --expect-marker=nocturne-acme`.
 - **`--expect-private`, `--expect-public`.** Comma-separated paths, repeatable, each starting with `/`.
 - Nothing is crawled in this mode: about a dozen requests.
 
