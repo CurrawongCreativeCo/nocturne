@@ -15,6 +15,7 @@ const PATH = '/studio-brand-preview'
 /** Currawong violet, the one colour a client's Studio must never show. */
 const CURRAWONG_VIOLET = 'rgb(95, 43, 212)'
 const SCHEMES = ['light', 'dark'] as const
+const READY_TIMEOUT = 45_000
 
 const hexToRgb = (hex: string) => {
   const value = Number.parseInt(hex.slice(1), 16)
@@ -71,9 +72,13 @@ test.describe.configure({ timeout: 60_000 })
 
 test.beforeEach(async ({ page }) => {
   // The two checks below are the real ready gate; waiting for every image's load event adds nothing.
+  // They get their own 45 s: the default 5 s expect timeout is shorter than this page takes to
+  // hydrate on a loaded CI runner (mobile in shard 4 failed there on main and on branches).
   await page.goto(PATH, { waitUntil: 'domcontentloaded' })
-  await expect(page.locator('main[data-ready="true"]')).toBeVisible()
-  await expect(page.locator('[data-case]')).toHaveCount(brandPreviewCases.length * SCHEMES.length)
+  await expect(page.locator('main[data-ready="true"]')).toBeVisible({ timeout: READY_TIMEOUT })
+  await expect(page.locator('[data-case]')).toHaveCount(brandPreviewCases.length * SCHEMES.length, {
+    timeout: READY_TIMEOUT,
+  })
 })
 
 const section = (page: Page, id: string, scheme: string) =>

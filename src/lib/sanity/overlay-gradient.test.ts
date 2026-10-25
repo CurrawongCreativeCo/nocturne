@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { overlayGradientCss, resolveOverlayGradient, stopColourCss } from './overlay-gradient'
+import {
+  inheritedStopOpacity,
+  overlayGradientCss,
+  resolveOverlayGradient,
+  stopColourCss,
+} from './overlay-gradient'
 
 describe('resolveOverlayGradient', () => {
   it('starts as Soft top, deep bottom: light at the top, deep brand at the bottom', () => {
@@ -128,5 +133,26 @@ describe('overlayGradientCss', () => {
     expect(stopColourCss('alt')({ colour: 'background', alpha: 1 })).toBe(
       'var(--color-surface-alt)',
     )
+  })
+})
+
+describe('inheritedStopOpacity', () => {
+  it('gives the preset’s opacity at the overlay’s strength, with where it comes from', () => {
+    expect(inheritedStopOpacity(undefined, 'bottom', 'medium')).toEqual({
+      value: 55,
+      source: 'Soft top, deep bottom preset, Medium overlay',
+    })
+    expect(inheritedStopOpacity({ overlayGradient: 'focus' }, 'top', 'strong')).toEqual({
+      value: 6,
+      source: 'Focused centre preset, Strong overlay',
+    })
+  })
+
+  it('matches what the page draws for an unset stop', () => {
+    for (const stop of ['top', 'middle', 'bottom'] as const) {
+      expect(inheritedStopOpacity(undefined, stop, 'light').value).toBe(
+        Math.round(resolveOverlayGradient(undefined, 'light').stops[stop].alpha * 100),
+      )
+    }
   })
 })

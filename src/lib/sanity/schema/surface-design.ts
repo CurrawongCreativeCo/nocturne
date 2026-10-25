@@ -37,6 +37,13 @@ declare module 'sanity' {
      */
     inheritable?: boolean | string
   }
+  interface ObjectOptions {
+    /**
+     * A link's Appearance: the Studio shows what the link changes and the resets above its fields
+     * (features/studio/components/link-design-summary-input).
+     */
+    linkDesignSummary?: boolean
+  }
 }
 
 /**
