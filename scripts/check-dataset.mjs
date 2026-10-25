@@ -1,7 +1,8 @@
 /**
  * Fails when the Sanity dataset is public. Datasets are private so members-only content and form
  * recipient addresses can't be read from the Content Lake with just the project ID (README, "Dataset
- * privacy"). Run with `npm run check:dataset`; reads .env.local. Dependency-free, like the setup wizard,
+ * privacy"). Run with `npm run check:dataset`; reads the environment, then .env.local (the daily health
+ * workflow sets the environment; README, "Health checks"). Dependency-free, like the setup wizard,
  * and it survives the wizard being deleted from a client site.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -103,15 +104,16 @@ export async function checkDataset({ projectId, dataset, token, fetchImpl = fetc
 async function main() {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..')
   const envPath = join(root, '.env.local')
-  if (!existsSync(envPath)) {
+  const file = existsSync(envPath) ? parseEnv(readFileSync(envPath, 'utf8')) : {}
+  const read = (key) => process.env[key] || file[key]
+  if (!existsSync(envPath) && !read('SANITY_API_READ_TOKEN')) {
     console.error('✗ No .env.local found. Copy .env.example and fill it in first.')
     process.exit(1)
   }
-  const env = parseEnv(readFileSync(envPath, 'utf8'))
   const result = await checkDataset({
-    projectId: env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-    dataset: env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-    token: env.SANITY_API_READ_TOKEN,
+    projectId: read('NEXT_PUBLIC_SANITY_PROJECT_ID'),
+    dataset: read('NEXT_PUBLIC_SANITY_DATASET') || 'production',
+    token: read('SANITY_API_READ_TOKEN'),
   })
   if (result.ok) {
     console.log(`✓ ${result.message}`)

@@ -4161,6 +4161,38 @@ npx sanity dataset delete restore-test
 
 Deleting the scratch dataset is permanent, so check the name first.
 
+### Health checks
+
+`.github/workflows/health.yml` checks production every day at 20:00 UTC (6 am in Sydney, 7 am in daylight saving), and
+on demand (_Actions → Health → Run workflow_). It runs `launch:check --json` against the production address and
+`npm run check:dataset`. A lapsed or downgraded Sanity plan makes private datasets public, and stored enquiries are
+personal data, so a broken deploy or an exposed dataset should reach you before it reaches the client.
+
+| Name                            | Kind     | Used for                                                                                                                                         |
+| ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `PRODUCTION_URL`                | variable | The live address, e.g. `https://example.com.au`                                                                                                  |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | variable | Same variable as the Sanity and backup workflows. `NEXT_PUBLIC_SANITY_DATASET` (variable) defaults to `production`                               |
+| `SANITY_AUTH_TOKEN`             | secret   | **Viewer** token, the same secret the backup uses. Both checks only read                                                                         |
+| `ENQUIRIES_STORE`               | variable | Optional. Set it to `1` when it is `1` on Vercel (repository variables can't read Vercel's), so a public dataset is flagged as exposed enquiries |
+
+- **What fails the run.** Any `launch:check` failure (warnings never do) and a public or unreadable dataset. With
+  `ENQUIRIES_STORE` at `1` a public dataset is also reported as _enquiries are exposed_, first in the list. Because it
+  checks the live site the way a launch does, a client who has not replaced the template favicon or copy will see those
+  failures daily; fix them, or leave `PRODUCTION_URL` unset until launch.
+- **One issue, labelled `health`.** On a failure it opens _Production health check failing_ with the failing lines and
+  how to fix each; while the problem persists later runs rewrite the same issue instead of adding more. The next
+  passing run closes it with a comment. Turn on GitHub notifications for issues, or you will not hear of it. The
+  workflow's permissions are contents read and issues write, nothing else.
+- **Skips, not fails.** With `PRODUCTION_URL`, the project ID or the token missing, the run skips with a notice and
+  succeeds (and leaves any open issue alone), like the backup.
+- **Trying it.** Run the workflow by hand with an address typed into _Check this address instead_. A bad address opens
+  the issue; a later run against the real one closes it. Run it on a repository that does not hold production data,
+  or expect that issue to appear there.
+- **Scheduled runs pause.** GitHub disables scheduled workflows after 60 days without repository activity. A quiet
+  site can go dark this way, and the daily check goes with it, so open _Actions → Health_ now and then: a
+  _Enable workflow_ button or a manual run turns it back on. The issue text is built by `scripts/health-report.mjs`
+  (Vitest-covered); `check:dataset` reads the environment first and `.env.local` second, so it runs the same in CI.
+
 ### Tests
 
 - **Unit** (`*.test.ts` next to the code, or `*.test.tsx` for a component rendered to HTML): design token generation, the WCAG contrast of every token pairing and the no-raw-palette guardrail, slug/URL mapping, redirect matching and the Edge Config map and proxy, the live-update
