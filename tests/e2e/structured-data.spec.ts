@@ -34,7 +34,13 @@ async function read(page: Page, path: string): Promise<Crawled> {
     })
     const scripts = await page
       .locator('script[type="application/ld+json"]')
-      .evaluateAll((elements) => elements.map((element) => element.textContent))
+      .evaluateAll((elements) =>
+        elements
+          // React can leave a streamed section's hidden copy (<div hidden id="S:n">) beside the
+          // revealed one; the served HTML has the script once.
+          .filter((element) => !element.closest('[hidden]'))
+          .map((element) => element.textContent),
+      )
     const text = await page.evaluate(() => document.body.innerText)
     // A "Minimal page" hides the header and footer, where the business's address and hours are shown.
     const chromeHidden = await page.evaluate(() => {
