@@ -1,0 +1,434 @@
+=== p-187 ===
+TASK
+Add a verification marker so a launch is proven by real HTTP: an agency-only `siteIdentity.verificationMarker` rendered as `<meta name="nocturne:marker" content="...">` on every page, seeded by the wizard and checked by `launch:check --expect-marker`.
+
+WHY
+A deployment ID or build log is not proof that CMS content renders. A marker that comes from Sanity proves CMS → query → render. It must work in pre-launch mode too (the site shell renders on the link page).
+
+REQUIREMENTS
+1. Schema: add `verificationMarker` (string) to src/features/site/schemas/site-identity.ts. Agency-only: use `hiddenFromClients` (or the task 205 registry if it is merged). Run `npm run typegen`.
+2. Render: in src/app/(site)/site-shell.tsx (server component), output the meta tag only when the field is set. No client JavaScript; the home page JS size must not change.
+3. Seed: scripts/setup/seed.mjs sets a placeholder marker on siteIdentity. Keep `--missing` behaviour.
+4. launch:check: add a pure `checkMarker` in scripts/launch-check/html.mjs and an `--expect-marker=<value>` argument (scripts/launch-check/args.mjs); fail when the value is absent or different. Fixture tests for pass and fail.
+5. Fixtures: tests/e2e/fixtures/dataset.mjs gets a marker; a new e2e spec checks the meta tag on `/` in live and pre-launch modes, and its absence when unset.
+6. README "Launch check": how to use the marker.
+
+ACCEPTANCE
+- `npm run check` and the new and affected e2e specs pass; performance spec shows no JS change.
+
+DONE WHEN
+Merged with a CHANGELOG Unreleased entry.
+=== p-188 ===
+TASK
+Prove that JSON-LD describes visible content: tests that every JSON-LD string appears in the page's visible text, that `@id`s are unique across sitemap fixtures, and that every WebPage references `#website` and `#organization`.
+
+WHY
+Google requires structured data to describe visible content. Nothing tests it today.
+
+REQUIREMENTS
+1. A small pure helper (unit-tested) that extracts JSON-LD strings worth checking (names, addresses, opening hours, FAQ questions and answers) and normalises text (whitespace, entities, case).
+2. An e2e spec over the fixture pages: compare against `document.body.innerText`; report page and property on failure.
+3. `@id` uniqueness across the sitemap fixture pages; WebPage nodes reference `#website` and `#organization`.
+4. A deliberately broken fixture case (in a unit test) proves the check fails.
+5. README: a short "Structured data rules" note.
+
+ACCEPTANCE
+- `npm run check` and the new spec pass.
+
+DONE WHEN
+Merged with a CHANGELOG entry.
+=== p-189 ===
+TASK
+Add a daily health workflow, `.github/workflows/health.yml`, that runs `launch:check --json` against production and `npm run check:dataset`, and opens or updates one GitHub issue when anything fails.
+
+WHY
+A lapsed or downgraded Sanity plan makes private datasets public (Sanity docs), and enquiries are personal data. A broken production deploy should also be noticed before the client does.
+
+REQUIREMENTS
+1. Triggers: daily schedule plus workflow_dispatch. Actions pinned to SHAs like the other workflows; `permissions` limited to contents read and issues write.
+2. Inputs from repository variables and secrets: PRODUCTION_URL, NEXT_PUBLIC_SANITY_PROJECT_ID, NEXT_PUBLIC_SANITY_DATASET, a Viewer token. Skip with a notice (and succeed) when missing, like backup.yml.
+3. Fail when ENQUIRIES_STORE is 1 (a repository variable mirroring the Vercel setting) and the dataset is public.
+4. One issue labelled `health`: create or update on failure with the failing lines; close it on the next green run.
+5. README: a "Health checks" section, including GitHub's pause of scheduled workflows after 60 days of repository inactivity.
+
+ACCEPTANCE
+- A dispatch against a known public URL passes; a dispatch with a bad URL opens an issue; missing secrets take the skip path.
+
+DONE WHEN
+Merged and included in the next template release.
+=== p-205 ===
+TASK
+Create one field classification registry, src/lib/sanity/client-editable.ts: per document type and section type, the fields clients may change. Client-mode hiding reads it, and a test fails when a field in a client-editable type is unclassified.
+
+WHY
+Agency-only marking is a UI denylist today (`hiddenFromClients` and the `design` group). A field added later is client-editable by default. The registry fails safe and is also used by the agency publish review (task 206) and any future publish gate.
+
+REQUIREMENTS
+1. Seed the allowlist from today's behaviour: every field not hidden from clients now is client-editable, so the client view does not change.
+2. Client-mode hiding (src/lib/sanity/roles.ts helpers and their callers) derives from the registry; remove duplicated lists where safe.
+3. A unit test walks schema.json and fails on any field of a client-editable type that is neither in the allowlist nor explicitly agency-only.
+4. README "Studio roles and permissions": how to classify a new field.
+
+ACCEPTANCE
+- `npm run check` and the client-view e2e specs pass; temporarily adding an unclassified field makes the test fail.
+
+DONE WHEN
+Merged with a CHANGELOG entry.
+=== p-206 ===
+TASK
+Make Contributor clients practical and safe: an agency Publish shows protected-field changes made since the last publish (with their authors) and asks for confirmation; an agency-only "Waiting for review" list; a message telling Contributors their changes go to Currawong.
+
+WHY
+Clients become Contributors (Sanity enforces drafts-only). Without this, an agency publish could release a client's hidden design change, and there is nowhere to see drafts waiting for review.
+
+REQUIREMENTS
+1. A pure diff (unit-tested) of draft against published, limited to fields outside the task 205 allowlist.
+2. Extend src/features/studio/actions/confirm-publish.tsx: when the diff is non-empty, show a dialog listing the fields and who changed them (document history through Studio's client; if authors are not available that way, list the fields and note it in the PR).
+3. An agency-only "Waiting for review" list in src/features/studio/utils/structure-access.ts: documents with drafts.
+4. Contributor messaging (src/features/studio/utils/document-access.ts already hides Publish for contributors): "Your changes are saved as a draft and sent to Currawong to publish."
+5. README role tables: clients are Contributors by default; Editor only by agreement.
+
+ACCEPTANCE
+- Unit tests for the diff; e2e as agency (dialog appears for a protected change) and as Contributor (message, no Publish).
+
+DONE WHEN
+Released; clients can be moved to Contributor (tasks 11 and 32).
+=== p-191 ===
+TASK
+Write a short content contract v2 design note in docs/: `service` and `location` entities, their fields and relationships (services, locations, team members, FAQs, articles), JSON-LD mapping with stable `@id`s, page templates, site-profile flags and a migration plan, and which parts the active client's site needs.
+
+WHY
+The full site's content should go in on the final model, not be migrated later. Structured data must come from visible content.
+
+REQUIREMENTS
+1. Base it on docs/nocturne/NOCTURNE_INTEGRATED_MASTER_PLAN.md §9.7 and the existing businessInfo, siteIdentity and JSON-LD code.
+2. Keep it to two pages; include an entity table and a JSON-LD example per new type.
+3. No code changes.
+
+DONE WHEN
+Approved by the owner; tasks 192 and 212 scoped (or deferred) from it.
+=== p-192 ===
+TASK
+Add a `service` document type behind a site-profile flag: a page template, relationships to team members and FAQs, Service JSON-LD built only from visible fields, fixtures and tests.
+
+WHY
+Services are central to most client businesses and to truthful structured data (docs from task 191).
+
+REQUIREMENTS
+1. Use `npm run new:feature` / `new:document`; follow task 191's note.
+2. Service JSON-LD: `@id` `<page url>#service`, provider `#organization`, only visible fields.
+3. Add the type to TAGS in src/lib/sanity/live.ts, every fetch's tags and the README webhook filter.
+4. Fixtures, section-gallery entries if relevant, e2e for the page and its JSON-LD (task 188's rules apply).
+
+ACCEPTANCE
+- `npm run check` and `npm run test:e2e` pass; typegen current.
+
+DONE WHEN
+In a template release.
+=== p-212 ===
+TASK
+Add a `location` document type (a branch or service area) related to services and team members, with LocalBusiness branch JSON-LD (stable `@id`, `parentOrganization`) and `areaServed` on services.
+
+WHY
+Multi-location businesses and service areas need first-class entities for accurate structured data.
+
+REQUIREMENTS
+1. Follow task 191's note; keep businessInfo as the primary place; migration dry run if any data moves (migrations/).
+2. JSON-LD only from visible fields; tests per task 188.
+3. Profile flag, fixtures, e2e, README.
+
+ACCEPTANCE
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+In a template release.
+=== p-193 ===
+TASK
+Section contract v2 for the split family (mediaText, imageSide): optional `supportingMedia` (for example a video below the image), named looks (layout, surface, motion and hover resolved from tokens), consistent actions (at most 2) and a glass legibility rule.
+
+WHY
+Adding a button or a video to an existing layout, or switching to glass, should be configuration, not code.
+
+REQUIREMENTS
+1. Classify new fields in the task 205 registry (looks and style are agency-only).
+2. Looks are a small named list; the renderer ignores unknown looks.
+3. Glass over images needs a wash or falls back to solid so text stays at least 4.5:1.
+4. A dry-run migration in migrations/ from existing options to looks; existing pages render the same until a look changes.
+5. Preset thumbnails and section-gallery entries; visual baselines (Linux workflow).
+
+ACCEPTANCE
+- `npm run check`, `npm run test:e2e`, migration dry run with no data loss.
+
+DONE WHEN
+In a template release.
+=== p-213 ===
+TASK
+Apply the section contract v2 conventions (looks and slots) to the hero family, keeping its presets and supporting slot.
+
+WHY
+One grammar across families keeps the Design Engine learnable and AI-proposable later.
+
+REQUIREMENTS
+1. Follow task 193's patterns; classify fields in the task 205 registry.
+2. Existing hero presets render unchanged (visual baselines).
+
+ACCEPTANCE
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+In a template release.
+=== p-194 ===
+TASK
+Add a theme-adaptation contract test: a fixture changes Brand colours, and every section's resolved colours change while text contrast stays at least 4.5:1 on every surface, glass on the accent tone included.
+
+WHY
+Global colour changes must adapt dependent sections intelligently, and stay accessible.
+
+REQUIREMENTS
+1. Reuse src/lib/color contrast helpers; fixture designSettings variants (including a deliberately poor palette).
+2. Report the failing section, surface and pair.
+
+ACCEPTANCE
+- The test passes on the default and a blue palette, and fails on the poor palette.
+
+DONE WHEN
+Merged.
+=== p-195 ===
+TASK
+Extend launch:check with structure checks: crawl the sitemap and report orphan pages, broken internal links and services no page links to.
+
+WHY
+Search-friendly structure needs deterministic checks, not guesses.
+
+REQUIREMENTS
+1. Pure functions in scripts/launch-check/seo.mjs with fixture tests; respect the existing URL caps and concurrency pool.
+2. Warnings for orphans, failures for broken internal links; include in `--json` output.
+
+ACCEPTANCE
+- Unit tests pass; a run against the active client's preview is clean or explained.
+
+DONE WHEN
+Merged and used in task 31.
+=== p-190 ===
+TASK
+Spike (only when a client needs to publish themselves): verify the publish gate's security assumptions on a scratch Sanity project with no real data.
+
+WHY
+A self-service gate must be proven safe before it is built (docs/nocturne/NOCTURNE_R3_INTEGRATION_REVIEW.md §4).
+
+REQUIREMENTS
+1. With a robot holding the Contributor role, probe by API: creating or updating non-draft documents, release versions, asset uploads, deletes.
+2. With the Editor robot: Actions API `sanity.action.document.publish` with `ifDraftRevisionId` and `ifPublishedRevisionId`, including a stale-revision failure.
+3. History API: do transactions report author user IDs? Access API: can a robot read members' current roles?
+4. A throwaway prototype Contributor Publish action.
+5. Never touch a client project. Ask before anything that costs money.
+
+DONE WHEN
+A findings note gives go or no-go for tasks 196 and 214 and the exact robot permissions.
+=== p-196 ===
+TASK
+Build the publish gate's server side: a pure policy and `POST /api/publish` that publishes a Contributor's draft only when every change is allowed.
+
+WHY
+Lets clients publish allowed changes themselves without trusting the Studio UI.
+
+REQUIREMENTS
+1. Policy (pure, unit-tested): task 205 allowlist; new documents' protected fields equal initial values; deletes, unpublishes and slug changes without a redirect go to review; required fields and slug uniqueness checked on the server.
+2. Identity: authors of every transaction since the last publish (History API), each with a current Contributor, Editor or agency role (Access API). Knowing draftRev is not identity.
+3. Publish exactly the validated revision via the Actions API with both revision guards, using src/lib/sanity/write-client.ts.
+4. Rate limit; one audit log line per request (requester, authors, revision, changed paths). Behind a site-profile flag.
+
+ACCEPTANCE
+- Unit tests per document type; race test (draft changes mid-request → refused); suspended-author test (refused).
+
+DONE WHEN
+Merged behind the flag.
+=== p-214 ===
+TASK
+Build the publish gate's Studio side: a Contributor Publish action that calls `/api/publish`, shows refusal reasons ("Sent to Currawong for review", naming the fields), and surfaces refused items in the "Waiting for review" list.
+
+WHY
+Client publishing should feel normal while staying enforced.
+
+REQUIREMENTS
+1. Only shown to Contributors when the profile flag is on.
+2. README role tables updated.
+3. e2e: allowed edit publishes; protected edit goes to review; stale revision refused.
+
+DONE WHEN
+In a template release and offered to a client.
+=== p-198 ===
+TASK
+Write the setup and deployment runbook from the real launch: new project to verified preview and launch, with the measured timings (task 128 and the launch) and the traps found.
+
+WHY
+A repeatable, documented process is a 90-day success criterion and the input to Foundation (task 199).
+
+REQUIREMENTS
+1. Steps with owner, time, verification and failure handling; plan-safety rules; Contributor setup.
+2. Link it from the README.
+
+DONE WHEN
+Linked and reviewed by the owner.
+=== p-199 ===
+TASK
+Create the nocturne-foundation repository (ask the owner first) and prove scripted provisioning to a verified preview on scratch accounts.
+
+WHY
+Setup is manual and error-prone. Absorbs task 42.
+
+REQUIREMENTS
+1. Steps: empty client repo; push the template history up to a pinned tag plus one configuration commit (never GitHub's template-generate); Sanity project, private dataset, robots, CORS and seed via the CLI session; Vercel project with every environment variable set before the push; wait for the deployment by commit SHA; verify with the marker, /api/site-info and `launch:check --json`.
+2. Each step idempotent, records a ledger entry (JSON or Postgres) and never prints secrets.
+3. Scratch accounts only.
+
+ACCEPTANCE
+- Two clean runs reach verified; timings recorded; no secrets in logs.
+
+DONE WHEN
+Both runs documented in the repo.
+=== p-211 ===
+TASK
+Harden provisioning: test Sanity organisation-robot provisioning (or keep the CLI session), inject failures after every create step and revoke a token mid-run, and prove resume leaves no duplicates or orphaned tokens.
+
+WHY
+Partial failures must never leave billed or unsafe resources.
+
+REQUIREMENTS
+1. Write-ahead intents; reconcile by listing before any create; undo removes only resources this run created.
+2. An injection matrix as automated tests where possible.
+
+ACCEPTANCE
+- Every injection point resumes cleanly.
+
+DONE WHEN
+The matrix is in the repo's tests and docs.
+=== p-200 ===
+TASK
+Make scripts/release.mjs write blueprint.json (tag, commit, required environment with scope and secrecy, seed profiles, verification spec, projectTypes) and validate it in check:version.
+
+WHY
+Foundation needs a machine-readable, versioned blueprint; projectTypes keeps mobile possible later.
+
+REQUIREMENTS
+1. Unit tests for generation and validation; no secrets in the file.
+
+DONE WHEN
+The next template release includes blueprint.json.
+=== p-201 ===
+TASK
+Foundation app version 0, core: a local Next.js 16 app in nocturne-foundation with a Neon Postgres ledger (Drizzle; org_id and actor on every row), an in-process step runner with resume, and the provider modules and verifier from tasks 199 and 211.
+
+WHY
+Browser-first Foundation without hosted operations yet; the same app is hosted later.
+
+REQUIREMENTS
+1. Server actions and route handlers only; no in-memory-only state; one credentials module reading .env.local.
+2. Migrations committed; tests for the runner and resume.
+
+ACCEPTANCE
+- A scripted launch runs through the app's runner and resumes after a restart.
+=== p-207 ===
+TASK
+Foundation: a projects screen listing every site with its links, template version and last verification, importing the client register (task 63).
+
+WHY
+One place to see every project.
+
+ACCEPTANCE
+- Existing sites imported; links open; accessible (WCAG 2.2 AA).
+=== p-208 ===
+TASK
+Foundation: a five-field new-site wizard (Vercel) and a live run timeline with blocked reasons, resume and undo of resources the run created.
+
+WHY
+Fast, verified setup from the browser.
+
+ACCEPTANCE
+- A rehearsal launch from the browser reaches verified.
+=== p-209 ===
+TASK
+Foundation: per-project verification and health views using the same functions as launch:check and health.yml, with a Run checks button.
+
+WHY
+See problems before clients do.
+
+ACCEPTANCE
+- Results match the command-line output for the same site.
+=== p-202 ===
+TASK
+Search Console import and URL mapping in Foundation: service-account access, 28-day windows of final data paged up to 25,000 rows with truncation flagged, and URLs mapped to Sanity documents with unmatched URLs listed.
+
+WHY
+Recommendations need real search data tied to documents. With task 210 this absorbs task 52.
+
+REQUIREMENTS
+1. Read-only; respect the documented API limits; store only derived metrics.
+
+ACCEPTANCE
+- At least 95% of URLs with clicks map to documents on a real property.
+=== p-210 ===
+TASK
+Search Health: deterministic opportunity cards (CTR gap, declining page, indexing anomaly, structured-data issue, stale facts; "query without a page" labelled heuristic) with evidence and caveats, an Open in Studio action that creates a draft, and before-and-after tracking by document revision.
+
+WHY
+Evidence-based SEO improvements without invented scores. Never publishes automatically; no scores or "LLM rank".
+
+ACCEPTANCE
+- Cards reproduce from stored data; at least three judged useful on a real site.
+=== p-197 ===
+TASK
+Site recipes: seed profiles that create a whole site structure for a business type (pages, sections, content types, navigation), built on content contract v2.
+
+WHY
+Stop recreating architecture and content models per project.
+
+REQUIREMENTS
+1. Extend scripts/setup/seed.mjs profiles with `--missing` safety and dry-run output; e2e per recipe.
+
+DONE WHEN
+At least one recipe used on a real project.
+=== p-203 ===
+TASK
+Cloudflare experiment in four resumable steps: C-1 the OpenNext #1400 patch via patch-package (or the upstream fix); C-2 cache bindings so dynamic pages render locally in workerd and revalidateTag works; C-3 next/og, Studio, the proxy gate, Auth.js and Sentry; C-4 one owner-approved Workers Paid (US$5 a month) scratch deploy running the verification suite.
+
+WHY
+Cloudflare is a long-term hosting choice; the local spike (master plan §2.7) found three precise blockers.
+
+REQUIREMENTS
+1. Work in a throwaway copy or branch; always minify (the Worker is about 9.5 MiB minified, limit 10 MiB).
+2. No paid deploy without approval.
+
+DONE WHEN
+A findings note says supported, supported with degradations, or wait.
+=== p-204 ===
+TASK
+Mobile proof (only with a real use case): an Expo SDK 58 starter builds an Android internal APK on the free plan, installed on an emulator and a phone, showing the content marker.
+
+WHY
+Mobile stays architecture-ready; prove the first step only when there is a reason.
+
+DONE WHEN
+Install verified on a physical device with model and OS recorded.
+=== ADD-11 ===
+ADDITION (revision 3, 25 October 2026)
+- Before importing real content: the client's Sanity project is on paid Growth (no trial; a lapse makes private datasets public), the dataset is private (`npm run check:dataset`), and the plan state is recorded in the register.
+- Invite the client as a Contributor (Currawong publishes their drafts; see task 206), never Administrator.
+=== ADD-31 ===
+ADDITION (revision 3, 25 October 2026)
+- `launch:check --expect-marker` passes (task 187), health.yml is enabled (task 189), the JSON-LD tests pass (task 188), and ENQUIRIES_STORE is only on with a private dataset.
+=== ADD-32 ===
+ADDITION (revision 3, 25 October 2026)
+- The client's role is Contributor; explain the "Waiting for review" routine and the plan-safety rules in the handover notes.
+=== ADD-64 ===
+ADDITION (revision 3, 25 October 2026)
+- State who owns each account and how it transfers at the end, and how publishing works (Contributor drafts reviewed and published by Currawong; self-publishing may be offered later).
+=== ADD-77 ===
+ADDITION (revision 3, 25 October 2026)
+- Add a Contributor-publishing scenario and one run with no live instructions.
+=== ADD-128 ===
+ADDITION (revision 3, 25 October 2026)
+- Time every step: wall-clock, hands-on time, clicks and failures; record a table in this task's notes. Once task 187 is merged, verify with `launch:check --expect-marker`.
+=== ADD-180 ===
+ADDITION (revision 3, 25 October 2026)
+- Run this in the first maintenance session: a 20-minute CI costs part-time sessions.
