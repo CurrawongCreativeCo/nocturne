@@ -64,6 +64,21 @@ export const siteIdentity = defineType({
         'On: AI crawlers (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, CCBot) may read the site, and /llms.txt lists your pages for AI tools. Off: robots.txt asks them to stay away and /llms.txt is removed. Search engines like Google and Bing are not affected. Crawlers choose whether to obey.',
       initialValue: true,
     }),
+    defineField({
+      name: 'verificationMarker',
+      title: 'Launch verification marker',
+      type: 'string',
+      fieldset: 'advanced',
+      hidden: hiddenFromClients,
+      description:
+        'Agency only. Added to every page as <meta name="nocturne:marker">, so `npm run launch:check -- <url> --expect-marker=<value>` can prove this content reached the live site. The setup wizard fills it in. Leave empty for no tag.',
+      validation: (rule) =>
+        rule
+          .max(120)
+          .custom((value) =>
+            value && /[\r\n]/.test(value) ? 'Keep the marker on one line' : true,
+          ),
+    }),
   ],
   preview: { prepare: () => ({ title: 'Name, logo & icon' }) },
 })

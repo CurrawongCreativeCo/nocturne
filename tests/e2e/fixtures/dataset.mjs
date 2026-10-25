@@ -238,6 +238,7 @@ export const documents = [
     _type: 'siteIdentity',
     title: 'Test Co',
     description: 'Default description for Test Co.',
+    verificationMarker: 'nocturne-e2e-marker',
   },
   {
     _id: 'siteNavigation',
@@ -1400,6 +1401,9 @@ export const designSettingsVariants = {
  * (tests/e2e/ai-crawlers.spec.ts): the fixture above allows AI crawlers, this one switches them off.
  */
 export const aiCrawlersBlocked = { allowAiCrawlers: false }
+
+/** The agency cleared the launch verification marker (tests/e2e/verification-marker.spec.ts). */
+export const markerUnset = { verificationMarker: undefined }
 
 /**
  * The same, for the Browser icon (tests/e2e/browser-icon.spec.ts): the editor uploaded a square PNG

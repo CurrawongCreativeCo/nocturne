@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Launch verification marker:** an agency-only field, _Name, logo & icon_ › _Advanced_ › _Launch verification marker_, rendered as `<meta name="nocturne:marker" content="…">` on every page (pre-launch view included) when set; nothing when empty. The setup wizard seeds a placeholder, and `npm run launch:check -- <url> --expect-marker=<value>` fails unless the home page carries it, proving CMS → query → render rather than just a deployment. No client JavaScript and no extra request (it folds into the settings query). Existing projects: nothing to do; set a value to use it. See README _Launch check_.
+
 - **Calmer empty lists and counts in Reusable content:** Shared sections, Forms and Panels show how many they hold in the sidebar (Sanity's own count badge), and every empty list of a whole document type says "Nothing here yet." instead of "No documents of this type". Native lists, search, sorting, permissions and Enquiries' CSV download are unchanged. Per-list purpose lines and role-aware create buttons are deferred (README, _Empty lists_).
 
 - **Preview tab in Structure:** pages and posts get Editor and Preview tabs (the form opens first; _Split pane right_ shows both at once), with Refresh, a phone/desktop width toggle and an _Open in Presentation_ link. No click-to-edit overlays (that stays in Presentation), and nothing loads until the tab is opened. No automatic split: Sanity's `defaultPanes` collapses the form behind Preview on narrower windows. New direct dependency `@sanity/preview-url-secret`, pinned to 4.1.5 (the copy next-sanity and sanity already install); no new routes or visitor requests. Clients get it too.
