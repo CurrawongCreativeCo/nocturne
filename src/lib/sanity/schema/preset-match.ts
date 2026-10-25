@@ -49,3 +49,62 @@ export function matchPreset<T extends Pick<PresetDefinition, 'set'>>(
     ) ?? null
   )
 }
+
+export interface PresetState<T> {
+  /** The preset every field matches, or null (Custom). */
+  preset: T | null
+  /** The preset with the fewest fields that differ: the preset itself while matched, else what Custom started from. */
+  nearest: T | null
+  /** The nearest preset's fields that hold something else now (empty while matched). */
+  differences: string[]
+}
+
+/**
+ * Which preset a value is on, and when it is Custom, which one it is closest to and which fields
+ * moved. `defaults` stands in for unset fields as in `matchPreset`. Fewest moved fields wins, then the
+ * most fields still matching (so a preset that sets more of what the value holds), then the earlier preset.
+ */
+export function describePresetState<T extends Pick<PresetDefinition, 'set'>>(
+  presets: readonly T[],
+  value: unknown,
+  defaults: Record<string, unknown> = {},
+): PresetState<T> {
+  let nearest: T | null = null
+  let differences: string[] = []
+  let matching = 0
+  for (const preset of presets) {
+    const moved = Object.entries(preset.set)
+      .filter(([key, expected]) => {
+        const current = getAtPath(value, splitPath(key))
+        return !isEqual(current === undefined ? defaults[key] : current, expected)
+      })
+      .map(([key]) => key)
+    const same = Object.keys(preset.set).length - moved.length
+    if (
+      nearest === null ||
+      moved.length < differences.length ||
+      (moved.length === differences.length && same > matching)
+    ) {
+      nearest = preset
+      differences = moved
+      matching = same
+    }
+  }
+  return { preset: differences.length === 0 ? nearest : null, nearest, differences }
+}
+
+/**
+ * "Full background image" while a preset matches, otherwise "Custom · based on Split, image right ·
+ * 1 change (tone)". `labels` names a field path for people ("style.tone" → "tone"); without one
+ * the path is shown.
+ */
+export function presetStateText<T extends Pick<PresetDefinition, 'set' | 'title'>>(
+  state: PresetState<T>,
+  labels: Record<string, string> = {},
+): string {
+  if (state.preset) return state.preset.title
+  if (!state.nearest) return 'Custom'
+  const names = state.differences.map((key) => labels[key] ?? key).join(', ')
+  const count = state.differences.length
+  return `Custom · based on ${state.nearest.title} · ${String(count)} ${count === 1 ? 'change' : 'changes'} (${names})`
+}

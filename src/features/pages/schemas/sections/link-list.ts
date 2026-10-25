@@ -15,6 +15,13 @@ import { listsCategories, looksLikeTypedCategories, plainTextParagraphs } from '
 import { SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { LINK_ARROWS, LINK_ARROW_TITLES } from '@/lib/sanity/link-arrow-options'
+import {
+  LINK_DESIGN_GROUP_TITLES,
+  countCustomisedLinks,
+  customisedLinksText,
+  scopedTitle,
+  summariseLinkDesign,
+} from '@/lib/sanity/link-design-summary'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
@@ -24,8 +31,9 @@ import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
 import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
+import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
-import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { joinSubtitle, toneTitle, variantField } from '@/lib/sanity/schema/section-variant'
 import {
   choiceField,
   iconDesignFields,
@@ -207,6 +215,46 @@ export const LINK_LIST_PRESETS = [
   },
 ] as const
 
+/** What an unset field means, so a list that was never touched still matches its preset (Minimal). */
+const LINK_LIST_DEFAULTS = {
+  variant: 'stacked',
+  rowStyle: 'solid',
+  thumbnailSize: 'standard',
+  'style.align': 'center',
+}
+
+/**
+ * The list subtitle: "Link list · Image-focused · Contrast · 2 links customised". It names the
+ * preset the fields match, or "Custom" and the layout when they no longer do, and how many links
+ * change the list's design (README, "Link list": Reading a link's design).
+ */
+export function linkListSubtitle(fields: {
+  variant?: string
+  rowStyle?: string
+  thumbnailSize?: string
+  align?: string
+  tone?: string
+  links?: readonly { design?: Record<string, unknown> | null }[] | null
+}) {
+  const preset = matchPreset(
+    LINK_LIST_PRESETS,
+    {
+      variant: fields.variant,
+      rowStyle: fields.rowStyle,
+      thumbnailSize: fields.thumbnailSize,
+      style: { align: fields.align },
+    },
+    LINK_LIST_DEFAULTS,
+  )
+  const layout = LINK_LIST_VARIANTS.find((candidate) => candidate.value === fields.variant)
+  return joinSubtitle(
+    'Link list',
+    preset?.title ?? joinSubtitle('Custom', (layout ?? LINK_LIST_VARIANTS[0]).title),
+    toneTitle(fields.tone),
+    customisedLinksText(countCustomisedLinks(fields.links)),
+  )
+}
+
 /** The layout and row style of the section a link sits in; unset ones are the defaults (Minimal, solid). */
 const looksOfLink = ({ document, path }: Parameters<ConditionalPropertyCallback>[0]) => {
   const section = enclosingOfArray(document, path, 'links')
@@ -304,17 +352,30 @@ const linkAppearanceField = defineField({
   description:
     'This link follows the Link list’s design (Design tab). Customise it to change only what you pick here.',
   hidden: hiddenFromClients,
-  options: { collapsible: true, collapsed: true },
+  // The summary and the resets above the fields (features/studio/components/link-design-summary-input).
+  options: { collapsible: true, collapsed: true, linkDesignSummary: true },
   fieldsets: [
-    { name: 'card', title: 'Card', options: { collapsible: true, collapsed: false } },
+    {
+      name: 'card',
+      title: scopedTitle(LINK_DESIGN_GROUP_TITLES.card, 'link'),
+      options: { collapsible: true, collapsed: false },
+    },
     {
       name: 'text',
-      title: 'Text',
+      title: scopedTitle(LINK_DESIGN_GROUP_TITLES.text, 'link'),
       description: 'Eyebrow, label and description.',
       options: { collapsible: true, collapsed: true },
     },
-    { name: 'icon', title: 'Icon', options: { collapsible: true, collapsed: true } },
-    { name: 'arrow', title: 'Arrow', options: { collapsible: true, collapsed: true } },
+    {
+      name: 'icon',
+      title: scopedTitle(LINK_DESIGN_GROUP_TITLES.icon, 'link'),
+      options: { collapsible: true, collapsed: true },
+    },
+    {
+      name: 'arrow',
+      title: scopedTitle(LINK_DESIGN_GROUP_TITLES.arrow, 'link'),
+      options: { collapsible: true, collapsed: true },
+    },
   ],
   fields: [
     defineField({
@@ -569,7 +630,7 @@ const linkItem = defineArrayMember({
   preview: {
     select: {
       title: 'label',
-      custom: 'design.appearance',
+      design: 'design',
       group: 'group',
       visibility: 'visibility',
       featured: 'featured',
@@ -585,10 +646,10 @@ const linkItem = defineArrayMember({
       from,
       until,
       media,
-      custom,
+      design,
     }: {
       title?: string
-      custom?: string
+      design?: Record<string, unknown>
       group?: string
       visibility?: string
       featured?: boolean
@@ -601,7 +662,7 @@ const linkItem = defineArrayMember({
         visibility === 'hide' && 'Hidden',
         (from || until) && 'Scheduled',
         featured && 'Large',
-        custom === 'custom' && 'Own design',
+        summariseLinkDesign(design).detail,
         group,
       ),
       media: media as never,
@@ -860,23 +921,24 @@ export const linkList = defineType({
       title: 'title',
       name: 'profile.name',
       variant: 'variant',
+      rowStyle: 'rowStyle',
+      thumbnailSize: 'thumbnailSize',
+      align: 'style.align',
       tone: 'style.tone',
+      links: 'links',
     },
     prepare: ({
       heading,
       title,
       name,
-      variant,
-      tone,
+      ...rest
     }: {
       heading?: Parameters<typeof headingPlainText>[0]
       title?: string
       name?: string
-      variant?: string
-      tone?: string
-    }) => ({
+    } & Parameters<typeof linkListSubtitle>[0]) => ({
       title: headingPlainText(heading) || title || name || 'Link list',
-      subtitle: variantSubtitle('Link list', LINK_LIST_VARIANTS, variant, tone),
+      subtitle: linkListSubtitle(rest),
     }),
   },
 })

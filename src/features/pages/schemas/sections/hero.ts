@@ -127,7 +127,7 @@ export const HERO_PRESETS = [
 ] as const
 
 /** What an unset field means, so a hero that was never touched still matches its preset (Full background image). */
-const HERO_DEFAULTS = { variant: 'overlay', imagePosition: 'right', 'style.tone': 'inverse' }
+export const HERO_DEFAULTS = { variant: 'overlay', imagePosition: 'right', 'style.tone': 'inverse' }
 
 /**
  * The list subtitle: "Hero · Split, image left" when the fields match a preset, otherwise the layout

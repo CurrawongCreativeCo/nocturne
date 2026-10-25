@@ -152,6 +152,34 @@ export function resolveOverlayGradient(
   return { shape, stops }
 }
 
+/** What a stop's opacity is while none is set, and where that comes from (the Studio slider shows both). */
+export interface InheritedOpacity {
+  /** Whole percent. */
+  value: number
+  /** "Soft top, deep bottom preset, Medium overlay". */
+  source: string
+}
+
+const STRENGTH_TITLES: Record<Strength, string> = {
+  light: 'Light',
+  medium: 'Medium',
+  strong: 'Strong',
+}
+
+/** The opacity the shape and the overlay's strength give `stop` when the editor has not set one. */
+export function inheritedStopOpacity(
+  input: OverlayGradientInput | null | undefined,
+  stop: GradientStop,
+  strength: Strength,
+): InheritedOpacity {
+  const shape =
+    OVERLAY_GRADIENTS.find((value) => value === stegaClean(input?.overlayGradient)) ?? 'deepen'
+  return {
+    value: Math.round(PRESETS[shape][stop].alpha[strength] * 100),
+    source: `${OVERLAY_GRADIENT_TITLES[shape]} preset, ${STRENGTH_TITLES[strength]} overlay`,
+  }
+}
+
 /** How a stop's colour is written: CSS variables on the page, hex in the Studio. */
 export type StopColourOf = (stop: ResolvedStop) => string
 

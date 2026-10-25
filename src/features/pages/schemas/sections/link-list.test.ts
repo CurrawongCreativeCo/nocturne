@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
+import { LINK_DESIGN_PROPERTIES } from '@/lib/sanity/link-design-summary'
+
 import {
   LINK_LIST_PRESETS,
   LINK_LIST_ROW_STYLES,
   LINK_LIST_VARIANTS,
   isGlassRows,
   linkList,
+  linkListSubtitle,
   usesDescription,
   usesFeatured,
   usesIcon,
@@ -209,5 +212,74 @@ describe('Design boxes and conditional fields', () => {
 
   it('keeps the older arrow switch for saved content, out of sight', () => {
     expect(field('showArrows').hidden).toBe(true)
+  })
+})
+
+describe('linkListSubtitle', () => {
+  it('names the preset each of the six sets, with nothing customised', () => {
+    for (const preset of LINK_LIST_PRESETS) {
+      const set: Record<string, string> = preset.set
+      expect(
+        linkListSubtitle({
+          variant: set.variant,
+          rowStyle: set.rowStyle,
+          thumbnailSize: set.thumbnailSize,
+          align: set['style.align'],
+        }),
+      ).toBe(`Link list · ${preset.title}`)
+    }
+  })
+
+  it('treats a new list as Minimal and adds the tone', () => {
+    expect(linkListSubtitle({ tone: 'inverse' })).toBe('Link list · Minimal · Contrast')
+  })
+
+  it('says Custom with the layout once the fields no longer match a preset', () => {
+    expect(linkListSubtitle({ variant: 'cards', align: 'start' })).toBe(
+      'Link list · Custom · Cards',
+    )
+  })
+
+  it('counts the links that change the list’s design', () => {
+    const links = [
+      { design: { appearance: 'custom', border: 'thin' } },
+      { design: { appearance: 'custom' } },
+      { design: { border: 'thin' } },
+      {},
+    ]
+    expect(linkListSubtitle({ links })).toBe('Link list · Minimal · 1 link customised')
+    expect(linkListSubtitle({ links: links.slice(0, 1).concat(links.slice(0, 1)) })).toBe(
+      'Link list · Minimal · 2 links customised',
+    )
+  })
+})
+
+describe('the link design summary', () => {
+  interface Field {
+    name: string
+    fieldset?: string
+    fields?: Field[]
+    of?: Field[]
+  }
+  const named = (list: Field[] | undefined, name: string) => {
+    const found = list?.find((candidate) => candidate.name === name)
+    if (!found) throw new Error(`No field ${name}`)
+    return found
+  }
+  const links = named(linkList.fields as unknown as Field[], 'links')
+  const appearance = named(links.of?.[0]?.fields, 'design')
+
+  it('knows every field of a link’s Appearance, in its group, and nothing else', () => {
+    const fromSchema = (appearance.fields ?? [])
+      .filter((field) => field.name !== 'appearance')
+      .flatMap((field) =>
+        field.fields?.some((part) => part.name === 'size')
+          ? field.fields.map((part) => `${field.fieldset}:${field.name}.${part.name}`)
+          : [`${field.fieldset}:${field.name}`],
+      )
+    const fromSummary = LINK_DESIGN_PROPERTIES.map(
+      (property) => `${property.group}:${property.key}${property.part ? `.${property.part}` : ''}`,
+    )
+    expect(fromSummary).toEqual(fromSchema)
   })
 })

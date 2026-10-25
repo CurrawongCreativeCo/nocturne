@@ -3570,6 +3570,40 @@ choices but the page ignores them (and the query never sends them).
   lightest photo. Transparent glass never passes on its own: its text sits on the photo. Warnings only.
 - **Rendering** is server-only CSS: classes plus custom properties on each link's `<li>`, no JavaScript.
 
+<a id="reading-a-links-design"></a>**Reading a link's design (agency only).** Where each value lives, lowest precedence first:
+
+| Level                 | Stored in                                                                      | Applies to                 | Unset means                                        |
+| --------------------- | ------------------------------------------------------------------------------ | -------------------------- | -------------------------------------------------- |
+| Site tokens           | `src/styles/tokens.json`                                                       | everything                 | (always present)                                   |
+| Layout preset         | the section's `variant`, `rowStyle`, `thumbnailSize` (code: `link-design.tsx`) | all links                  | Minimal                                            |
+| Link list design      | section `cardDesign`, `linkDesign`, `depthDesign.linkShadow` (Design tab)      | **All links in this list** | the layout's own                                   |
+| One link's Appearance | the link's `design` (only while `design.appearance` is `custom`)               | **This link only**         | follows the Link list design, property by property |
+
+Nothing about this changed. What is new is that it can be read:
+
+- **A link's preview** says _Uses the Link list design_ or _Customised · 2 changes (label colour, container strength)_ (the
+  first three names, then "and 2 more"). A link switched to _Customise this card_ with nothing changed says _Customised · no
+  changes yet_. A link that follows the list but still holds saved choices says how many are kept and not applied.
+- **The top of a link's Appearance** says the same, with the level (_This link only_) and every change, then the ways back:
+  **Reset this link** removes the link's whole Appearance, so it follows the list again, and **Reset card / text / icon /
+  arrow** clears only that group's saved choices. Both are ordinary patches on that link's own `design` object: undoable with
+  the Studio's undo, and they never touch another link or the list's Design tab. Group resets keep _Customise this card_ on.
+  They also clear saved choices a layout hides, so what is reset is what is saved, not only what shows.
+- **Group headings say their level:** the link's Appearance groups end _· This link only_; the Design tab's _Cards_ and
+  _Arrows and icons_ end _· All links in this list_.
+- **The list's preview** names the matching preset (or _Custom_ and the layout once the fields no longer match one) and how
+  many links change the list's design: _Link list · Image-focused · 2 links customised_. A link customised without a change is
+  not counted.
+- **Sliders** show what an empty value follows and why while unset: a gradient stop's _Opacity_ rests on the preset's value and
+  says "Following the Soft top, deep bottom preset, Medium overlay." (`slider.inherited`, a callback in the field's options
+  that receives the object above the number's own; a slider without one reads nothing from the form.)
+
+The summary is pure code (`src/lib/sanity/link-design-summary.ts`); its list of properties must match the fields of the link's
+Appearance in `link-list.ts` (a new Appearance field needs a line there; `link-list.test.ts` fails until it has one).
+Appearance, its summary and the resets stay hidden from clients. List previews cannot tell who is looking, so clients do see
+the subtitles: _Uses the Link list design_ on each link and the customised count on the section (before, only customised links
+said _Own design_). Nothing is stored differently, so there is no migration.
+
 **Scheduling and hiding.** Pages are cached, so the server can't know the time while it builds one.
 
 - _Hide_ is applied in the query (`links[visibility != "hide"]`), so a hidden link is never in the page.

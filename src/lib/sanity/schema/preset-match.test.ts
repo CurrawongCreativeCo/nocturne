@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { getAtPath, matchPreset, splitPath } from './preset-match'
+import {
+  describePresetState,
+  getAtPath,
+  matchPreset,
+  presetStateText,
+  splitPath,
+} from './preset-match'
 
 const split = {
   value: 'split',
@@ -47,5 +53,50 @@ describe('matchPreset', () => {
     const p = { set: { items: [1, { a: 2 }] } }
     expect(matchPreset([p], { items: [1, { a: 2 }] })).toBe(p)
     expect(matchPreset([p], { items: [1, { a: 3 }] })).toBeNull()
+  })
+})
+
+describe('describePresetState', () => {
+  const presets = [
+    { title: 'Split', ...split },
+    { title: 'Centred', ...centred },
+  ]
+
+  it('is on a preset while all its fields match', () => {
+    const state = describePresetState(presets, {
+      variant: 'centred',
+      style: { tone: 'surface' },
+    })
+    expect(state.preset?.value).toBe('centred')
+    expect(state.differences).toEqual([])
+    expect(presetStateText(state)).toBe('Centred')
+  })
+
+  it('names the nearest preset and the fields that moved when Custom', () => {
+    const state = describePresetState(presets, {
+      variant: 'split',
+      imagePosition: 'left',
+      style: { tone: 'inverse' },
+    })
+    expect(state.preset).toBeNull()
+    expect(state.nearest?.value).toBe('split')
+    expect(state.differences).toEqual(['style.tone'])
+    expect(presetStateText(state, { 'style.tone': 'tone' })).toBe(
+      'Custom · based on Split · 1 change (tone)',
+    )
+  })
+
+  it('lets defaults stand in for unset fields, and breaks ties towards the earlier preset', () => {
+    expect(
+      describePresetState(presets, {}, { variant: 'centred', 'style.tone': 'surface' }).preset
+        ?.value,
+    ).toBe('centred')
+    expect(describePresetState(presets, {}).nearest?.value).toBe('centred')
+  })
+
+  it('has no state without presets', () => {
+    const state = describePresetState([], {})
+    expect(state).toEqual({ preset: null, nearest: null, differences: [] })
+    expect(presetStateText(state)).toBe('Custom')
   })
 })
