@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Structured data is tested against the page:** a new end-to-end spec checks that the names, addresses, weekly opening times and FAQ questions and answers in every sitemap page's JSON-LD appear in the page's visible text, that `@id`s are unique per page and never reused for a different thing, and that every `WebPage` references the site's `#website` and `#organization`. The rules are a pure helper (`src/lib/json-ld-visibility.ts`) with unit tests, including a deliberately broken fixture. A blog post's Article now gives its `mainEntityOfPage` WebPage `isPartOf` (the WebSite) and `publisher` (the Organization). Existing projects: nothing to do. See README _Structured data rules_.
+
 - **Calmer empty lists and counts in Reusable content:** Shared sections, Forms and Panels show how many they hold in the sidebar (Sanity's own count badge), and every empty list of a whole document type says "Nothing here yet." instead of "No documents of this type". Native lists, search, sorting, permissions and Enquiries' CSV download are unchanged. Per-list purpose lines and role-aware create buttons are deferred (README, _Empty lists_).
 
 - **Preview tab in Structure:** pages and posts get Editor and Preview tabs (the form opens first; _Split pane right_ shows both at once), with Refresh, a phone/desktop width toggle and an _Open in Presentation_ link. No click-to-edit overlays (that stays in Presentation), and nothing loads until the tab is opened. No automatic split: Sanity's `defaultPanes` collapses the form behind Preview on narrower windows. New direct dependency `@sanity/preview-url-secret`, pinned to 4.1.5 (the copy next-sanity and sanity already install); no new routes or visitor requests. Clients get it too.
