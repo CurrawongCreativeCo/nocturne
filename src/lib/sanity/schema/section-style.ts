@@ -17,6 +17,7 @@ import {
   OVERLAY_GRADIENTS,
   OVERLAY_GRADIENT_DESCRIPTIONS,
   OVERLAY_GRADIENT_TITLES,
+  inheritedStopOpacity,
   resolveOverlayGradient,
   type GradientStop,
   type OverlayGradientInput,
@@ -27,6 +28,7 @@ import {
   EDGE_CUSTOM_MAX,
   EDGE_CUSTOM_MIN,
   RESERVED_ANCHORS,
+  SECTION_OVERLAYS,
   SECTION_MOTION_TITLES,
   MOTION_DELAYS,
   MOTION_DELAY_TITLES,
@@ -215,7 +217,19 @@ function gradientStopField(stop: GradientStop) {
         type: 'number',
         description: 'Empty follows the preset at the overlay strength above.',
         options: {
-          slider: { ...GRADIENT_OPACITY_RANGE, step: 1, unit: '%' },
+          slider: {
+            ...GRADIENT_OPACITY_RANGE,
+            step: 1,
+            unit: '%',
+            // The shape and the overlay's strength decide it while empty.
+            inherited: ({ container }) => {
+              const style = container as StyleWithGradient | undefined
+              const level =
+                SECTION_OVERLAYS.find((value) => value === style?.overlay) ??
+                defaultOverlayFor(style?.tone)
+              return level === 'none' ? undefined : inheritedStopOpacity(style, stop, level)
+            },
+          },
         },
         validation: (rule) =>
           rule.integer().min(GRADIENT_OPACITY_RANGE.min).max(GRADIENT_OPACITY_RANGE.max),
@@ -238,7 +252,17 @@ const radio = (values: readonly string[], titles: Record<string, string>) => ({
 declare module 'sanity' {
   interface NumberOptions {
     /** Draw the number as a slider (features/studio/components/slider-input). */
-    slider?: { min: number; max: number; step: number; unit: string }
+    slider?: {
+      min: number
+      max: number
+      step: number
+      unit: string
+      /**
+       * What the value is while unset, and where it comes from, read from `container`: the object
+       * above the number's own object (a gradient stop's section style). The Studio shows it on the slider.
+       */
+      inherited?: (context: { container: unknown }) => { value: number; source: string } | undefined
+    }
   }
   interface ObjectOptions {
     /** Show the object's fields without its own title and frame (the Studio field is in features/studio/components/frameless-field). */

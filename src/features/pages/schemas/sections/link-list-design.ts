@@ -39,6 +39,7 @@ import {
   LINK_ARROW_DESCRIPTIONS,
   LINK_ARROW_TITLES,
 } from '@/lib/sanity/link-arrow-options'
+import { scopedTitle } from '@/lib/sanity/link-design-summary'
 import {
   BORDER_GAPS,
   BORDER_GAP_TITLES,
@@ -399,7 +400,7 @@ export const linkListDesignFields = [
   }),
   defineField({
     name: 'cardDesign',
-    title: 'Cards',
+    title: scopedTitle('Cards', 'list'),
     type: 'object',
     group: 'design',
     description:
@@ -435,7 +436,7 @@ export const linkListDesignFields = [
   }),
   defineField({
     name: 'linkDesign',
-    title: 'Arrows and icons',
+    title: scopedTitle('Arrows and icons', 'list'),
     type: 'object',
     group: 'design',
     description: 'Link arrows and icons, with optional filled or outlined icon containers.',
