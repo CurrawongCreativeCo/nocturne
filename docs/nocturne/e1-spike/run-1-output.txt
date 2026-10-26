@@ -1,0 +1,50 @@
+seed                                           200
+C: create drafts.* doc                         200 [{"id":"drafts.e1-cdoc","operation":"create"}]
+C: create NON-draft doc                        403 "transaction failed: Insufficient permissions; permission \"create\" required"
+C: createOrReplace published e1-page1          403 "transaction failed: Insufficient permissions; permission \"update\" required"
+C: patch published e1-page1                    403 "transaction failed: Insufficient permissions; permission \"update\" required"
+C: createIfNotExists non-draft                 403 "transaction failed: Insufficient permissions; permission \"create\" required"
+C: patch own draft (drafts.e1-cdoc)            200 [{"id":"drafts.e1-cdoc","operation":"update"}]
+C: patch OTHER draft (drafts.e1-page2)         200 [{"id":"drafts.e1-page2","operation":"update"}]
+C: delete drafts.e1-cdoc                       200 [{"id":"drafts.e1-cdoc","operation":"delete"}]
+C: delete published e1-page2                   403 "transaction failed: Insufficient permissions; permission \"update\" required"
+C: release create (action)                     403 "Insufficient permissions; permission \"update\" required"
+C: create versions.rx.doc (mutate)             200 [{"id":"versions.e1rx.e1-cv","operation":"create"}]
+C: version.create action in release            200 {"transactionId":"7fdbr8tOKzCjSuW3JkC7dS"}
+C: publish action (draft e1-page2)             403 "transaction failed: Insufficient permissions; permission \"update\" required"
+C: unpublish action                            403 "transaction failed: Insufficient permissions; permission \"update\" required"
+C: discard action                              200 {"transactionId":"YNVH3USBiPjsywfIvO4OYA"}
+C: release publish action                      403 "Insufficient permissions; permission \"update\" required"
+C: asset image upload                          200 {"document":{"_createdAt":"2026-10-26T02:34:50Z","_id":"image-c7a9c45fd419815a5ab1998503a9f03514c0e229-1x1-png","_rev":"7fdbr8tOKzCjSuW3JkC7uI","_type":"sanity.
+C: asset file upload                           200 {"document":{"_createdAt":"2026-10-26T02:34:51Z","_id":"file-c22b5f9178342609428d6f51b2c5af4c0bde6a42-txt","_rev":"7fdbr8tOKzCjSuW3JkC8B8","_type":"sanity.fileA
+C: delete uploaded asset doc                   403 "transaction failed: Insufficient permissions; permission \"update\" required"
+C: create asset doc directly (sanity.imageAsset) 200 [{"id":"image-e1fakeasset0000000000000000000000000-1x1-png","operation":"create"}]
+C: query published                             200 {"query":"count(*)","result":92,"syncTags":["s1:BDaRTA"],"ms":2}
+revs                                           {"dr1":"YNVH3USBiPjsywfIvO4OzY","pr1":"7fdbr8tOKzCjSuW3JkC78a"}
+E: publish stale ifDraftRevisionId             409 "Document \"drafts.e1-page1\" has unexpected revision ID (\"YNVH3USBiPjsywfIvO4OzY\"), expected \"stale-rev\""
+E: publish stale ifPublishedRevisionId         409 "Document \"e1-page1\" has unexpected revision ID (\"7fdbr8tOKzCjSuW3JkC78a\"), expected \"stale-rev\""
+E: publish validated rev after draft moved     409 "Document \"drafts.e1-page1\" has unexpected revision ID (\"09UAgsvMZ2zNg1T9jPuLy8\"), expected \"YNVH3USBiPjsywfIvO4OzY\""
+E: publish with correct guards                 200 {"transactionId":"YNVH3USBiPjsywfIvO4Pnl"}
+published title now                            Contributor sneaked edit
+History(editor)                                200 [{"id":"YNVH3USB","author":"p-Q5jKZGqydbaJ","t":"02:34:54"},{"id":"09UAgsvM","author":"p-En8RseTCOVkq","t":"02:34:58"},{"id":"YNVH3USB","author":"p-Q5jKZGqydbaJ","t":"02:35:01"}]
+History(contributor)                           200 [{"id":"YNVH3USB","author":"p-Q5jKZGqydbaJ","t":"02:34:54"},{"id":"09UAgsvM","author":"p-En8RseTCOVkq","t":"02:34:58"},{"id":"YNVH3USB","author":"p-Q5jKZGqydbaJ","t":"02:35:01"}]
+History(access-manager)                        403 []
+History(access-manager) raw                    {"error":{"description":"User must have read permission to access transaction history","type":"permissionDeniedError"}}
+
+Access project(editor)                         200 members:7 roles:["editor"]
+Access /access users(editor)                   200 200 {"data":[{"profile":{"provider":"sanity","providerId":"u-dk8yxAEdZXim","id":"gBUaADYlK","displayName":"Ben Thompson","familyName":"Thompson","givenName":"Ben","
+Access users/me(editor)                        404 "Not Found"
+projects/users(editor)                         400 "Bad Request"
+Access project(contributor)                    200 members:7 roles:["editor"]
+Access /access users(contributor)              200 200 {"data":[{"profile":{"provider":"sanity","providerId":"u-dk8yxAEdZXim","id":"gBUaADYlK","displayName":"Ben Thompson","familyName":"Thompson","givenName":"Ben","
+Access users/me(contributor)                   404 "Not Found"
+projects/users(contributor)                    400 "Bad Request"
+Access project(access-manager)                 200 members:7 roles:["editor"]
+Access /access users(access-manager)           200 200 {"data":[{"profile":{"provider":"sanity","providerId":"u-dk8yxAEdZXim","id":"gBUaADYlK","displayName":"Ben Thompson","familyName":"Thompson","givenName":"Ben","
+Access users/me(access-manager)                404 "Not Found"
+projects/users(access-manager)                 400 "Bad Request"
+delete token                                   200
+delete token                                   200
+delete token                                   200
+cleanup docs                                   ["e1-page1","e1-page2","file-c22b5f9178342609428d6f51b2c5af4c0bde6a42-txt","image-c7a9c45fd419815a5ab1998503a9f03514c0e229-1x1-png"]
+cleanup delete                                 200
