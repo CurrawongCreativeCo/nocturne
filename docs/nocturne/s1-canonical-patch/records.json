@@ -1,0 +1,145 @@
+{
+  "task227": {
+    "t": "Feature configuration registry: contract, config:check and the core gate",
+    "what": "Typed per-feature registry entries (never values) for Sanity core, health monitoring and forms; npm run config:check (--strict, --build, --live, --json); a core build gate that enforces only what already fails today; a server-only getSetupStatus(); public /api/site-info reduced to its launch block. Revised in v21 (Settings S1): the other features are task 233, health diagnostics task 230.",
+    "why": "Missing configuration should be found before launch, in plain English, without telling the internet which credential is missing. It is the foundation of the Settings and Configuration Manager.",
+    "files": [
+      "src/config/feature-config.ts",
+      "src/features/forms/config.registry.ts",
+      "src/app/api/site-info/route.ts",
+      "src/config/env.ts",
+      "scripts/config-check.mjs"
+    ]
+  },
+  "tasks": [
+    {
+      "n": 230,
+      "s": "f",
+      "first": false,
+      "t": "Health results that tell a real run from a skip",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Small",
+      "what": "health.yml writes a versioned health-result.json (disabled, unconfigured, skipped, healthy, warning or failed; live or pre-launch mode) on every run, says plainly when nothing was checked, runs --prelaunch checks before launch, adds an optional marker check and a synthetic test mode that never touches issues, and finds exposed enquiries from the dataset itself instead of a duplicate GitHub variable.",
+      "why": "A green run can be a skip today, so a misconfigured monitor looks exactly like a healthy one.",
+      "files": [
+        ".github/workflows/health.yml",
+        "scripts/health-report.mjs",
+        "scripts/check-dataset.mjs",
+        "README.md"
+      ],
+      "deps": [
+        227
+      ]
+    },
+    {
+      "n": 231,
+      "s": "f",
+      "first": false,
+      "t": "config:check --github: GitHub-side setup and run status (read-only)",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Small",
+      "what": "A read-only report from a short-lived GitHub token: each workflow's state, variables and secrets present (secrets by name and date only), values that must match, and the latest real health result in the eight monitoring states. Written as pure modules Foundation can reuse.",
+      "why": "Verify that monitoring is really set up and really running without opening GitHub, and give Foundation's health views (209) the same logic.",
+      "files": [
+        "scripts/config-check/github.mjs",
+        "scripts/config-check.mjs"
+      ],
+      "deps": [
+        227,
+        230
+      ]
+    },
+    {
+      "n": 232,
+      "s": "f",
+      "first": false,
+      "t": "Studio Features & setup pane behind a verified identity check",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "A read-only Features & setup pane in Website settings, fed by a new GET /api/setup-status that answers only after the server verifies the caller's Sanity identity and agency role with Sanity. Verify the mechanism first; if it can't be proven, ship explanations only and no route (fail closed).",
+      "why": "The agency sees what this deployment has and lacks where it already works, without making setup details public or treating a hidden pane as security.",
+      "files": [
+        "src/app/api/setup-status/route.ts",
+        "src/features/studio/setup/",
+        "src/features/studio/structure.ts",
+        "src/app/route-inventory.test.ts"
+      ],
+      "deps": [
+        227
+      ]
+    },
+    {
+      "n": 235,
+      "s": "f",
+      "first": false,
+      "t": "Spike: Vercel project-scoped tokens for the operations Nocturne needs",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Small",
+      "what": "On a scratch Vercel project and Edge Config store only: test every operation Nocturne needs (the Edge Config item write, environment variable list and upsert including the Secret type, redeploy, deployments with commit, domains) with a project-scoped token against a team token, and record what else the token can do.",
+      "why": "The runtime Edge Config token and Foundation's provider writes depend on what a project-scoped token can and can't do; project-scoped is narrower, not read-only.",
+      "files": [
+        "scripts/spikes/vercel-tokens.mjs",
+        "docs/spikes/vercel-tokens.md"
+      ],
+      "deps": []
+    },
+    {
+      "n": 233,
+      "s": "f",
+      "first": false,
+      "t": "Registry for every feature, generated .env.example and README Configuration",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "Registry entries for every remaining feature and workflow, readiness for all of them in the protected setup status, generated .env.example and README Configuration table with a CI staleness check (replacing the hand-kept Vercel table), and the approved cleanups once task 235 confirms provider compatibility.",
+      "why": "The environment is documented in three hand-kept places that have already drifted by 20 names.",
+      "files": [
+        "src/features/*/config.registry.ts",
+        "scripts/config-docs.mjs",
+        ".env.example",
+        "README.md"
+      ],
+      "deps": [
+        227,
+        235
+      ]
+    },
+    {
+      "n": 234,
+      "s": "f",
+      "first": false,
+      "t": "Release and update prompts for new configuration",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Small",
+      "what": "config:check --since <version>, a New configuration section in each release's CHANGELOG, a block for client update PRs, a readiness compatibility test against the last release's registry, and a release rule that refuses new required settings without a warning period.",
+      "why": "New features should announce their setup, and no update should quietly switch off a working feature or make a site undeployable.",
+      "files": [
+        "scripts/release.mjs",
+        "scripts/release-utils.mjs",
+        "scripts/config-check.mjs"
+      ],
+      "deps": [
+        233,
+        29
+      ]
+    }
+  ],
+  "deps": {
+    "200": "add 233",
+    "209": "add 230, 231"
+  },
+  "added": [
+    30,
+    31,
+    39,
+    129,
+    200,
+    208,
+    209
+  ]
+}

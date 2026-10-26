@@ -1,0 +1,266 @@
+{
+  "stages": [
+    {
+      "id": "de",
+      "n": "DE",
+      "ws": "Website building",
+      "title": "Design Engine: site-wide design, families and proposals",
+      "where": "Template repo",
+      "desc": "Site-wide design decisions in Studio with contrast safety, section families with typed slots, and a generated design manifest with validated change proposals. Necessary work is driven by real sites; the AI experiment comes last.",
+      "milestone": "DE1: density, shape, heading style, motion level and section panels set once for the whole site, with contrast that explains itself (216–218, 168, 194). DE2: the split and hero families with shared slots (219, 193, 213). DE3: a generated design manifest and validated change proposals (215, 219, 220), then the design-reference experiment (221)."
+    },
+    {
+      "id": "ci",
+      "n": "CI",
+      "ws": "Website building",
+      "title": "Content Intelligence: correct structured data, explainable audits",
+      "where": "Template repo and client site",
+      "desc": "One entity graph with stable @ids and tested visible-content parity, a page audit that returns evidence-backed findings, improvement records, then Search Console evidence. No scores; nothing publishes automatically.",
+      "milestone": "CI1: one structured-data module with stable @ids and typed parity (188, 191, 222, then 192 and 212 when a site needs them). CI2: page audit, fact rules, improvement records and AI crawler controls (223–225, 228, 195). CI3: search evidence from a real site: Search Console (226, then 202 and 210 in FX) and the AI-search evidence spike (229)."
+    }
+  ],
+  "tasks": [
+    {
+      "n": 215,
+      "s": "de",
+      "first": false,
+      "t": "Design manifest generated from the schemas",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "design-manifest.generated.json built by npm run typegen from the section schemas, sectionStyle options, presets, layout rules, slots and the client-editable registry, with only purpose and example added by hand; CI fails when it is stale.",
+      "why": "Tools and future AI need a reliable description of what the Design Engine supports, without a second source of truth.",
+      "files": [
+        "scripts/build-design-manifest.mjs",
+        "scripts/build-editor-guide.mjs",
+        "src/features/pages/schemas/sections/index.ts",
+        "src/lib/sanity/schema/section-form.ts"
+      ],
+      "deps": [205]
+    },
+    {
+      "n": 216,
+      "s": "de",
+      "first": false,
+      "t": "Design settings v2: density, shape and heading style",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "Brand colours gains Density, Shape and Heading style as picture choices that render as :root CSS variables through resolveDesignTokens; unset keeps today's look, sections that set their own spacing keep it and are listed.",
+      "why": "\"More breathing room\", \"softer corners\" and \"more editorial headings\" should be one change for the whole site, not code.",
+      "files": [
+        "src/features/site/schemas/design-settings.ts",
+        "src/lib/color/resolve-design-tokens.ts",
+        "src/features/site/components/design-settings-input.tsx",
+        "src/styles/tokens.json"
+      ],
+      "deps": []
+    },
+    {
+      "n": 217,
+      "s": "de",
+      "first": false,
+      "t": "Site motion level, with a calmer setting on phones",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Small",
+      "what": "Design settings gains Motion (Calm, Standard, Expressive) and On phones (Same, Calmer, Off), multiplied into every section's animation and parallax without a new provider or request; reduced motion still wins.",
+      "why": "\"Reduce the animation on mobile\" is a site decision, not 30 section edits.",
+      "files": [
+        "src/components/motion/presets.ts",
+        "src/components/motion/parallax.tsx",
+        "src/app/(site)/site-shell.tsx"
+      ],
+      "deps": [216]
+    },
+    {
+      "n": 218,
+      "s": "de",
+      "first": false,
+      "t": "Glass and solid panels for any section",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "A Panel option in every section's Design tab (None, Glass, Solid card): glass over any suitable background, tinted with no blur over solid tones and frosted only where something varied is behind it, exact or guaranteed-bound contrast, and an automatic solid fallback with a warning that says what to fix.",
+      "why": "\"Make this section glass\" is the most requested treatment and today exists only inside the Link list.",
+      "files": [
+        "src/lib/sanity/schema/section-style.ts",
+        "src/components/ui/section-frame.tsx",
+        "src/lib/sanity/surface-options.ts",
+        "src/lib/color/glass-contrast.ts"
+      ],
+      "deps": [168]
+    },
+    {
+      "n": 219,
+      "s": "de",
+      "first": false,
+      "t": "Shared slot registry (from the hero slot), with a video block",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "The hero's supporting-slot registry becomes a shared registry any section family can use (schema, component, where allowed, client-editable), the hero renders identically, and a video block joins stats, logos and badges.",
+      "why": "\"Add a video under the image\" needs typed slots shared across families, not a new field per section.",
+      "files": [
+        "src/features/pages/components/sections/hero/slots.tsx",
+        "src/features/pages/slots/",
+        "src/features/pages/api/sections.ts"
+      ],
+      "deps": []
+    },
+    {
+      "n": 220,
+      "s": "de",
+      "first": false,
+      "t": "Change proposals: contract, validator and draft applier (no AI)",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "A ChangeProposal format with npm run proposal validate and apply: checked against the manifest, Sanity validation, contrast and the client-editable registry, then written only as drafts (or one release) with revision guards, to scratch datasets.",
+      "why": "Scripted and future AI-made changes must be validated, previewable and undoable before anyone publishes them.",
+      "files": ["src/lib/proposals/", "scripts/proposal.mjs", "design-manifest.generated.json"],
+      "deps": [215]
+    },
+    {
+      "n": 221,
+      "s": "de",
+      "first": false,
+      "t": "Experiment: design reference to a validated proposal",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "Three real references turned into proposals (design decisions, sections, a gap list) in a Claude Code session, applied to a scratch dataset, corrected by hand and timed against a manual build; stop if correction exceeds 70% of manual time.",
+      "why": "Tests whether design-reference import is worth building, with evidence instead of promises.",
+      "files": ["docs/experiments/"],
+      "deps": [220, 193, 213]
+    },
+    {
+      "n": 222,
+      "s": "ci",
+      "first": false,
+      "t": "One structured-data module with stable @ids",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "Every JSON-LD builder moves into src/lib/structured-data/ with document-keyed @ids that survive slug changes, a WebPage node on every page, authors linked to Person nodes where the 191 note allows, and typed, provenance-based parity in place of literal string matching.",
+      "why": "Services and locations will add more markup; one module prevents contradictory or duplicated entities.",
+      "files": [
+        "src/features/site/components/site-json-ld.tsx",
+        "src/features/site/utils/business-json-ld.ts",
+        "src/features/blog/components/article-json-ld.tsx",
+        "src/lib/structured-data/"
+      ],
+      "deps": [188, 191]
+    },
+    {
+      "n": 223,
+      "s": "ci",
+      "first": false,
+      "t": "Page audit with evidence-backed findings",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Large",
+      "what": "npm run audit:page returns findings in one shared contract (rule, basis, severity, evidence, why, fix with a Studio link, how to re-check), reusing launch:check, content health and the JSON-LD parity helper; Content health items carry the same rule IDs.",
+      "why": "Answers \"what is wrong with this page, why, and where do I fix it\" with evidence instead of a score.",
+      "files": [
+        "src/lib/audit/",
+        "scripts/audit-page.mjs",
+        "scripts/launch-check/",
+        "src/features/studio/content-health/utils/detect.ts"
+      ],
+      "deps": [222]
+    },
+    {
+      "n": 224,
+      "s": "ci",
+      "first": false,
+      "t": "Improvement records",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "An agency-only improvement document type and a Record improvement action that captures the finding, before and after values, the published revision and a review date; the health issue lists records due for review.",
+      "why": "\"Did the improvement work?\" needs a record of what changed, when and why.",
+      "files": ["src/features/studio/", "src/lib/audit/", "scripts/health-report.mjs"],
+      "deps": [223]
+    },
+    {
+      "n": 225,
+      "s": "ci",
+      "first": false,
+      "t": "Fact-consistency and completeness rules",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "Deterministic rules in the shared library: phone, email, ABN or address in page text that differs from Business info, stale facts, duplicate titles and summaries, and incomplete service and location pages once those types exist.",
+      "why": "Contradictory facts are objective errors that confuse visitors and search engines, and they can be found without AI.",
+      "files": [
+        "src/lib/audit/rules/",
+        "src/features/site/utils/phone.ts",
+        "src/features/site/utils/abn.ts"
+      ],
+      "deps": [223]
+    },
+    {
+      "n": 226,
+      "s": "ci",
+      "first": false,
+      "t": "Spike: Search Console evidence for one real site",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "A read-only local import of 28 days of Search Console data (final, paged, truncation flagged) into a git-ignored folder, URL-to-document mapping, and CTR-gap and declining-page findings with caveats (AI Overviews and AI Mode impressions can't be separated through the API), written up for tasks 202 and 210.",
+      "why": "Tests the evidence model on real data before Foundation's Search Health is built.",
+      "files": ["scripts/search-console/", "docs/experiments/"],
+      "deps": [223, 224]
+    },
+    {
+      "n": 227,
+      "s": "f",
+      "first": false,
+      "t": "Feature configuration registry and diagnostics",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "A declarative registry of what each feature needs (settings, kind, where set, never values), readiness from the existing config functions, npm run config:check, per-feature readiness in /api/site-info, health-workflow setup diagnostics and a generated README environment table.",
+      "why": "Missing configuration should be found before launch, in plain English; it is the foundation of the Settings and Configuration Manager.",
+      "files": [
+        "src/features/forms/utils/config.ts",
+        "src/app/api/site-info/route.ts",
+        "src/config/env.ts",
+        ".github/workflows/health.yml"
+      ],
+      "deps": []
+    },
+    {
+      "n": 228,
+      "s": "ci",
+      "first": false,
+      "t": "AI crawler controls: training separate from search",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Small",
+      "what": "Two Site identity switches, AI training and AI search answers, with user agents grouped by purpose as the vendors document them, llms.txt following the search switch, and a migration that keeps every site's current behaviour.",
+      "why": "Today opting out of AI training also removes a site from Perplexity's answers, and OpenAI's and Anthropic's search crawlers are not listed.",
+      "files": [
+        "src/lib/ai-crawlers.ts",
+        "src/app/robots.ts",
+        "src/features/site/schemas/site-identity.ts",
+        "tests/e2e/ai-crawlers.spec.ts"
+      ],
+      "deps": []
+    },
+    {
+      "n": 229,
+      "s": "ci",
+      "first": false,
+      "t": "Spike: AI-search evidence for one real site",
+      "w": "Template",
+      "ctx": "template",
+      "size": "Medium",
+      "what": "Manual exports from Search Console's generative AI report and Bing AI Performance, AI referrals from analytics and crawler fetches, joined with page-audit findings into evidence-backed findings (no score), written up with a recommendation for Foundation.",
+      "why": "Tests whether the AI-search signals that exist today are actionable before anything is built to import them.",
+      "files": ["scripts/ai-search/", "docs/experiments/"],
+      "deps": [223, 55, 228]
+    }
+  ]
+}

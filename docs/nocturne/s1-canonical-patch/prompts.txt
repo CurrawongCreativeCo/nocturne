@@ -1,0 +1,217 @@
+=== p-227 ===
+TASK
+Task 227 (revised in v21): create the feature configuration registry contract, `npm run config:check`, a core-settings build gate that adds no new way for a site to fail, a server-only setup status, and a smaller public /api/site-info. Read docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R (it wins over everything below it), then §B.3, §B.7 and §D.2, then NOCTURNE_PRODUCT_ARCHITECTURE.md §9. This is separate from the design manifest (task 215): don't merge them. The original v20 prompt is in docs/nocturne/e-canonical-patch/prompts.txt; this one replaces it.
+
+READ FIRST
+src/features/forms/utils/config.ts, src/config/env.ts, src/app/api/site-info/route.ts and tests/e2e/site-info.spec.ts, scripts/launch-check/prelaunch.mjs (parseSiteInfoLaunch, the only consumer of site-info), site.profile.ts, src/config/profile.ts, scripts/check-dataset.mjs (env reader), scripts/launch-check.mjs (loadEnv), scripts/build-editor-guide.mjs (jiti loading and staleness check), .github/workflows/*.yml (CI uses NEXT_PUBLIC_SANITY_PROJECT_ID=ci-placeholder and no token), eslint.config.mjs (shared code can't import features).
+
+REQUIREMENTS
+1. src/config/feature-config.ts: types and `defineFeatureConfig` only. Feature fields: id, title, summary, why, withoutIt, profileFlag, tier ('core' | 'optional'), since, docs, settings[], readiness (the name of an existing function), verify[]. Setting fields: name, kind ('public-env' | 'server-env' | 'secret' | 'github-var' | 'github-secret' | 'sanity' | 'profile' | 'system'), where, targets, buildTime, required (boolean | { when }), requiredIn (environments), enforceFrom (template version), default (a description, never a secret), format (a named validator from a small fixed set), generate, source, since, deprecated ({ replacedBy, removeIn }), docs. NEVER values.
+2. Entries for three features only: forms (src/features/forms/config.registry.ts), Sanity core (compose in src/app if shared code can't hold it) and health monitoring (github-var PRODUCTION_URL, NEXT_PUBLIC_SANITY_PROJECT_ID, NEXT_PUBLIC_SANITY_DATASET, optional HEALTH_CHECKS and HEALTH_EXPECT_MARKER; github-secret SANITY_AUTH_TOKEN, Viewer; ENQUIRIES_STORE as a github-var marked deprecated, replacedBy the dataset evidence in task 230). The other features are task 233: until then, list their names on a temporary `pending` list.
+3. Compose the registry once and use it in two places: a server-only `getSetupStatus()` (src/app/…, never imported by a client component, never prerendered into a public response) and scripts/config-check.mjs loaded with jiti. Readiness calls the existing functions; don't re-parse env. If a readiness module imports 'server-only', extract a pure helper.
+4. `npm run config:check [--strict] [--build] [--live] [--json]`: a plain-English table (Ready / Not set up: <why> / Off in profile / Can't check here). Environment first, then .env.local (like check-dataset). Exit non-zero with --strict on any required gap. --live checks only Sanity core for now (reuse checkDataset); other features print "not implemented yet". GitHub-side settings print "Can't check here: run with --github (task 231)".
+5. The core gate, `config:check --build`, run as part of `npm run build`, with the safeguards in §R.3:
+   - environment detection: local build, CI and fake data (CI, SANITY_API_HOST, or a placeholder project id such as ci-placeholder or e2etest1), Vercel Preview, Vercel Production;
+   - the ENFORCED set is exactly NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET, which env.ts already throws on, so no site gains a new failure mode; keep env.ts's throw as a backstop;
+   - settings with requiredIn: ['production'] (start with SANITY_API_READ_TOKEN) are warnings in this release; enforceFrom records the version they become enforced (never this one);
+   - optional settings never affect the build anywhere; placeholders are accepted in CI and fake-data builds;
+   - NOCTURNE_CONFIG_GATE=warn turns gate failures into loud warnings for an emergency fix (env.ts's two values still fail);
+   - the message names each missing setting and where to set it (Vercel → Settings → Environment Variables), says the live deployment stays as it is, and never prints a value.
+6. Public /api/site-info becomes `{ schema: 2, launch: { status, homepage } }`. Remove templateVersion, tier, enabled, features, commit and builtAt from the public body (the protected route in task 232 and Foundation get them elsewhere). Keep it prerendered. Update tests/e2e/site-info.spec.ts. CHANGELOG: a breaking change to the response shape with the reason (it disclosed which integrations are missing and the release); launch:check is unaffected. No reason codes, no readiness and no setting names in any public response.
+7. Completeness test (Vitest): every process.env name under src/ and scripts/, and every vars.X / secrets.X in .github/workflows/, is registered, on a documented ignore list (tests and tooling, §A.2's last row) or on the temporary pending list. It fails if a `secret` setting's name starts with NEXT_PUBLIC_.
+8. Canary test: set every registered secret to `CANARY_9f3a…`; assert it appears in no output of site-info's GET, getSetupStatus(), config:check (table and --json) or any generated text. A second test asserts the public site-info body has exactly the keys schema and launch.
+
+ACCEPTANCE
+- `npm run check` and `npm run test:e2e` pass; site-info still prerenders; launch:check tests pass unchanged.
+- A build without NEXT_PUBLIC_SANITY_PROJECT_ID fails with the plain-English message; a build without TURNSTILE_SECRET_KEY or SANITY_API_READ_TOKEN succeeds (the token shows a warning only for VERCEL_ENV=production); CI's placeholder build passes.
+- README gains a short "Configuration" section (hand-written; task 233 generates it later). CHANGELOG Unreleased entry.
+
+DONE WHEN
+Merged, and `npm run config:check` has been run on the active client's repo with its output recorded in task 31's notes. Resume note in the task's notes at the end of each session.
+
+=== p-230 ===
+TASK
+Task 230: make the daily health workflow record what actually happened. Every run writes a versioned health-result.json that distinguishes disabled, unconfigured, skipped, healthy, warning and failed runs; pre-launch sites get real pre-launch checks; synthetic tests never touch real issues; and exposed enquiries are found from the dataset itself. Read docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.2 (it wins) and §C.4 first.
+
+READ FIRST
+.github/workflows/health.yml, scripts/health-report.mjs (+ test), scripts/check-dataset.mjs, scripts/launch-check.mjs (--json, --prelaunch, --expect-marker), scripts/launch-check/prelaunch.mjs (parseSiteInfoLaunch), the health-monitoring registry entry from task 227, README "Health checks".
+
+REQUIREMENTS
+1. health-result.json, schema 1: { schema: 1, outcome: 'disabled' | 'unconfigured' | 'skipped' | 'healthy' | 'warning' | 'failed', reason?, skipReason?, mode: 'live' | 'prelaunch' | null, synthetic: boolean, checkedAt, url, repoTemplateVersion (template-version.json in the checkout, labelled as the repository's version), setup: { missing: [names] }, summary: { pass, warn, fail }, failures: [{ id, area, title, fix }], dataset: { private: true | false | null }, enquiriesExposed: boolean }. Build it with a pure, unit-tested function next to buildReport. A launch:check that printed no results is `failed` with that reason, as today.
+2. Intent: the repository variable HEALTH_CHECKS = off means intentionally disabled (outcome `disabled`, optional HEALTH_CHECKS_REASON). Not off and setup missing means `unconfigured` with setup.missing. Both write the result and succeed; neither opens an issue. The job summary and a ::warning:: annotation say plainly "Nothing was checked" and why. Set HEALTH_CHECKS=off on the template repo itself (document it; don't change any repo's settings yourself).
+3. Configured but skipped: if the run is cancelled or times out before the checks, write `skipped` with skipReason where a step can still run (if: always()); document that readers treat a cancelled or skipped run with no result file as "configured but skipped".
+4. Mode: read <PRODUCTION_URL>/api/site-info's launch block first. When it says prelaunch, run `launch:check --prelaunch` (the privacy proof) instead of the live checks, with mode 'prelaunch'.
+5. Optional HEALTH_EXPECT_MARKER repository variable: pass `--expect-marker` (proves CMS → query → render). Register it as optional.
+6. Exposed enquiries without the duplicate variable: when check:dataset finds the dataset public, use the same Viewer token to ask whether any `enquiry` documents exist (a count only, never their content). Public dataset plus enquiries present = enquiriesExposed, reported first. Keep reading ENQUIRIES_STORE for one minor release with a deprecation line in the summary.
+7. Synthetic tests: a workflow_dispatch input `synthetic` (boolean, default false). When true: run the checks (usually with "Check this address instead"), write the result with synthetic: true, put the issue text it would have written into the job summary, and never create, edit or close an issue. Readers ignore synthetic results. Replace the README's "Trying it" advice (which opens the real issue) with this; anything that needs a real issue is tested on a scratch repository only.
+8. Upload health-result.json as the artifact `health-result` (retention 30 days) on every run, including disabled and unconfigured. Add the outcome and counts to $GITHUB_STEP_SUMMARY.
+9. README "Health checks": the six outcomes plus how readers derive Stale and Unknown; HEALTH_CHECKS; synthetic tests; and the pause wording corrected after checking GitHub's current docs (the automatic 60-day disable is documented for public repositories). Don't change the schedule, the permissions block or the issue behaviour for real failures.
+
+ACCEPTANCE
+- Unit tests for every outcome, both modes, a synthetic run (no issue calls), a malformed launch JSON, the enquiry count path, and that no env value can appear in the result.
+- `npm run check` passes. On a scratch repository only: a dispatch with PRODUCTION_URL unset gives `unconfigured` and no issue; HEALTH_CHECKS=off gives `disabled`; a synthetic dispatch against a bad address gives `failed`, synthetic: true and no issue. Record the run URLs in this task's notes.
+
+DONE WHEN
+Merged, README and CHANGELOG updated (the deprecation included). Resume note in the task's notes.
+
+=== p-231 ===
+TASK
+Task 231: add `npm run config:check -- --github [--repo owner/name]`, a read-only report of each workflow-backed feature's GitHub setup and its latest real result, in the eight monitoring states. Read docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.2 (it wins), §B.5, §B.7 and §C.4.
+
+READ FIRST
+scripts/config-check.mjs and the registry (task 227), health-result.json (task 230), .github/workflows/{health,backup,enquiry-retention,sanity}.yml, scripts/launch-check/net.mjs (fetch helpers).
+
+REQUIREMENTS
+1. scripts/config-check/github.mjs: dependency-free. Pure functions turn GitHub API JSON into statuses (unit-tested with saved fixtures); a thin layer does the fetches. No process.exit or console in the pure part, so Foundation (tasks 201 and 209) can reuse it unchanged.
+2. Token: GITHUB_TOKEN from the environment only, for this run. If it's missing, print how to create a fine-grained, read-only token limited to this repository (Actions read, Variables read, Secrets read, Issues read, Metadata read) and exit. Never write, cache or print it. Repo from --repo or `git remote get-url origin`.
+3. For each feature with github-var or github-secret settings:
+   - setup status: the workflow file exists; `state` shown verbatim (active, disabled_manually, disabled_inactivity…); each variable present, and whether PRODUCTION_URL and NEXT_PUBLIC_SANITY_PROJECT_ID match .env.local's NEXT_PUBLIC_SITE_URL and project id; each secret present, by name and updated_at only; HEALTH_CHECKS=off reported as intentionally disabled;
+   - monitoring status (health): the newest non-synthetic health-result artifact mapped to Intentionally disabled, Expected but unconfigured, Configured but skipped (including a cancelled or skipped run with no result), Healthy, Warning or Failed; Stale when the newest real result is older than 36 hours or the workflow isn't active; Unknown when nothing can be read or no run exists; any open `health` issue with its URL.
+4. Output: config:check's plain-English table with setup and monitoring as separate columns; --json for Foundation.
+
+ACCEPTANCE
+- Fixture tests for every setup and monitoring state, a synthetic result being ignored, 401 and 403 (name the missing permission), a 404 repository, and rate-limit headers (stop and say when to retry).
+- A run against the active client's repository matches what Actions shows; record it in task 30's notes. `npm run check` passes.
+
+DONE WHEN
+Merged, README "Configuration" updated. Resume note in the task's notes.
+
+=== p-232 ===
+TASK
+Task 232: a read-only "Features & setup" pane in Studio's Website settings, next to Launch & visibility, fed by a protected GET /api/setup-status that answers only after the server has verified the caller's Sanity identity and agency role with Sanity. If that verification can't be proven, ship the pane with explanations only and no route. Read docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.1 (it wins), §C.1, §C.2 and §C.7.
+
+READ FIRST
+src/features/studio/structure.ts, src/features/studio/launch/ (pane, view model, wording tests), src/features/studio/start-here/, src/features/studio/utils/structure-access.ts and tool-access.ts, src/lib/sanity/roles.ts (isAgency), getSetupStatus() from task 227, src/app/route-inventory.test.ts, src/proxy.ts (the matcher skips /api), next-sanity's Studio auth in node_modules.
+
+REQUIREMENTS
+1. Verify first, at most one session, and write the answers in the PR:
+   - how the embedded Studio authenticates in this Sanity version (token or cookie), and whether the pane can obtain the signed-in user's token through a supported API;
+   - whether the site's server can verify that token with Sanity (for example the project's users/me endpoint) and get the user's id and current project roles in one request;
+   - how this behaves for an expired or revoked session.
+   If any answer is no, stop: build no route, and do requirement 5's "explanations only" variant. Never fall back to a shared secret in the browser, a header the client sets itself, or the pane being hidden.
+2. GET /api/setup-status (only if step 1 passed): read the bearer token, verify it with Sanity on every request (no caching of identity across requests), require the agency role as isAgency defines it, then return getSetupStatus(): readiness with reason codes, profile switches, template version, commit and build time. 401 for no or invalid identity, 403 for a non-agency user. Response headers `Cache-Control: private, no-store` and `Vary: Authorization`; dynamic (never prerendered). Never log the token or the response; rate-limit per IP with the existing limiter. Classify it in the route inventory as 'infrastructure', with the reason.
+3. A pure view model (unit-tested) from the status and the bundled registry text: Needs attention, Ready, Off in profile, Can't be checked from here, New in <current minor> (from `since`, no stored state).
+4. Detail view per feature: what it does, why, what happens without it, what it needs (name, where, build-time, present in this deployment), numbered setup steps ending "Redeploy, then reopen this pane", and a Technical details disclosure. Header "This deployment: <commit 7> · <build time in en-AU>"; footer "Changes to these settings apply after the next deployment." GitHub-backed features (health, backup, retention) always say "Can't be checked from here", with the Actions path and `npm run config:check -- --github`; never Ready.
+5. Explanations-only variant (step 1 failed, or the route answers 401 or 403): every feature shows its explanation and setup steps from the registry text, plus "Check readiness with npm run config:check or Foundation", and no status at all. Never read readiness from /api/site-info.
+6. Agency-only through the existing structure filters (for relevance; the route is the boundary). Start here shows "N features need setup" to agency users only, when the route answered and something needs attention.
+
+ACCEPTANCE
+- Route tests with a mocked Sanity: valid agency token → 200; client role → 403; invalid or expired → 401; no token → 401; the canary secret never appears; cache headers present.
+- e2e: an agency user sees the pane (fake env: forms "Not set up"); a client user doesn't; the route failing shows the explanations-only state. Visual baseline added. `npm run check` and `npm run test:e2e` pass; Studio download size before and after in the PR.
+
+DONE WHEN
+Merged, editor guide and README updated, CHANGELOG entry. Resume note in the task's notes.
+
+=== p-235 ===
+TASK
+Task 235, spike: find out exactly what a Vercel project-scoped token can and can't do for the operations Nocturne needs, against a team token, on a scratch project only. A decision record; no production change. Read docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.4 first.
+
+REQUIREMENTS
+1. A scratch Vercel project and a scratch Edge Config store that I create (never a client's). scripts/spikes/vercel-tokens.mjs refuses to run unless VERCEL_SPIKE_PROJECT_ID is set and matches --project; every write needs --yes; --dry-run prints the request. Tokens come only from the environment and are never printed.
+2. For a project-scoped token and a team token, record the request, response status and error shape (tokens redacted) for:
+   a. the Edge Config item PATCH that src/lib/edge-config-sync.ts sends (Edge Config stores are team-level resources; Vercel's docs say project-scoped tokens deny team-level requests, so expect a refusal and record it);
+   b. listing the project's environment variables (names, targets, updatedAt), and creating and upserting one, including the Secret type, per target;
+   c. creating a redeployment and listing deployments with their commit and ready state;
+   d. the domain calls task 129 lists, and whether VERCEL_TEAM_ID can be dropped when the token implies its team;
+   e. the blast radius: what else the project token can change (environment, deployments, domains, protection settings, project deletion).
+3. Check Vercel's current docs for an Edge Config–scoped write token or another narrower credential, and whether EDGE_CONFIG's connection string carries the store id (so EDGE_CONFIG_ID can be derived).
+4. Write docs/spikes/vercel-tokens.md: the matrix, the security implications of each runtime option (keep page-route redirects as the default; a project-scoped token in the runtime; moving the redirect sync out of the runtime), and the decisions this unblocks for task 233's cleanups, task 129 and milestone MS.
+5. Clean up everything in the scratch project and list what was removed.
+
+DONE WHEN
+The decision record is committed and tasks 233 and 129 have notes pointing to it. No production configuration, credential or VERCEL_TEAM_ID was changed.
+
+=== p-233 ===
+TASK
+Task 233: complete the feature configuration registry for every feature and workflow, report readiness for all of them through the protected setup status, generate .env.example and the README "Configuration" table, and apply the approved cleanups only where task 235 has confirmed provider compatibility. Read docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R (it wins), §A.2, §A.3 and §B.3.
+
+READ FIRST
+The registry, getSetupStatus() and config:check from task 227; docs/spikes/vercel-tokens.md (task 235); .env.example; README "Deploying (Vercel)" and every feature section that lists variables; .github/workflows/*.yml; src/lib/edge-config-sync.ts; src/config/studio-brand/; src/config/env.ts; scripts/build-editor-guide.mjs (generation and staleness pattern).
+
+REQUIREMENTS
+1. Registry entries for newsletter, enquiries, pricing (checkout and webhook), members, analytics and consent, Sentry, revalidation (webhook mode), IndexNow, Edge Config redirects, pre-launch passes, style guide, experiments, Ops notices (status 'dormant', with a one-line reason), backup, retention, schema deploy and migrations, and launch:check's local values (PSI_API_KEY, VERCEL_AUTOMATION_BYPASS_SECRET). Use §A.2 and §A.3 for kind, where, targets, build-time and defaults. STYLEGUIDE_PREVIEW_TOKEN targets Preview only.
+2. Readiness from existing functions; small pure helpers where none exist (revalidation: revalidateSecret; redirects: canSyncRedirects; pre-launch: previewSecret moved to a pure module without 'server-only'; experiments: FLAGS_SECRET present). Readiness reaches only getSetupStatus() and config:check, never a public response.
+3. `npm run config:docs` writes .env.example and the README block between markers; CI fails when either is stale. Keep today's grouping and comments (from summary and source), never real values.
+4. Replace the hand-written table in README "Deploying (Vercel)" step 2 with a link to the generated table; keep the other steps.
+5. Cleanups (S-D7):
+   - NEXT_PUBLIC_SANITY_API_VERSION becomes a constant in env.ts, with the variable still read for one minor release and a deprecation warning in config:check;
+   - NEXT_PUBLIC_STUDIO_TITLE deprecated (studio-brand.json's name already wins);
+   - only if task 235 confirmed it: EDGE_CONFIG_ID derived from EDGE_CONFIG, and VERCEL_TEAM_ID documented as unneeded with a project-scoped token. Otherwise leave both and note why;
+   - the README's VERCEL_API_TOKEN guidance follows task 235's recommendation, including the remaining risk of a write-capable token in the runtime and that page-route redirects need no token.
+6. Empty the completeness test's pending list.
+
+ACCEPTANCE
+- `npm run check` (with the staleness check) and `npm run test:e2e` pass; the canary test covers every secret; the public site-info body still has only schema and launch.
+- `npm run config:check` on the fake environment lists every feature with a correct state.
+
+DONE WHEN
+Merged and in a template release, with a CHANGELOG note for each deprecation. Resume note in the task's notes.
+
+=== p-234 ===
+TASK
+Task 234: make releases and client update PRs announce configuration changes, and make sure an update can never quietly switch off a working feature or make a site undeployable. Read docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.3 (it wins) and §B.9.
+
+READ FIRST
+scripts/release.mjs and release-utils.mjs (+ tests), scripts/check-version.mjs, the registry and config:check, task 30's update steps.
+
+REQUIREMENTS
+1. A pure diff over the composed registry by since, deprecated, required, requiredIn and enforceFrom, unit-tested.
+2. `config:check --since <version> [--markdown]`: optional features "available, not set up", newly required or newly enforced settings first, deprecations with their replacement and removal version; --markdown prints a "Configuration changes" block for the client update PR (task 30).
+3. Release: write a "New configuration in X.Y.Z" CHANGELOG section. Refuse the release when a setting becomes enforced without at least one earlier release in which it was a warning, when an optional feature gains a required setting with no default and no deprecation window, or when a tier:'core' feature is added without an enforceFrom later than this version.
+4. Readiness compatibility: the release script saves the released registry as config-registry.snapshot.json; a test builds environment fixtures that were ready under the snapshot and asserts they are still ready under the current registry, unless a deprecation window is declared.
+
+ACCEPTANCE
+- Unit tests for the diff, each refusal, the compatibility test and the markdown. `npm run check` passes.
+
+DONE WHEN
+Merged and used in one real client update PR (link it in the notes). Resume note in the task's notes.
+
+=== ADD-30 ===
+ADDITION (v21, Settings S1, docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §D.3)
+After merging, run `npm run config:check -- --since <old version>` and act on any newly required or newly enforced setting before deploying. Once health checks are set up on this repository, run `npm run config:check -- --github` (task 231) and record its output in this task's notes; set HEALTH_CHECKS=off only with a reason.
+
+=== ADD-31 ===
+ADDITION (v21, Settings S1, docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §D.3)
+- `npm run config:check -- --strict` passes, or every gap is explained.
+- `npm run config:check -- --github` shows health monitoring's setup as Ready and its latest non-synthetic result as Healthy or Warning; Expected but unconfigured, Configured but skipped or Stale are not acceptable for launch.
+
+=== ADD-129 ===
+ADDITION (v21, Settings S1, docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.4)
+Project-scoped Vercel tokens now exist. Task 235 tests the environment, deployment and Edge Config operations with them; read docs/spikes/vercel-tokens.md first and cover only the domain and DNS questions it leaves open.
+
+=== ADD-200 ===
+ADDITION (v21, Settings S1, docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §D.3)
+Generate blueprint.json's "required environment" from the feature configuration registry (tasks 227 and 233): names, kind, targets, build-time, required and requiredIn, never values. Don't write the list by hand.
+
+=== ADD-209 ===
+ADDITION (v21, Settings S1, docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.1 and §R.2)
+This replaces the E-series addition above. Readiness comes from provider APIs and the registry (Vercel variable names, targets and updatedAt; GitHub through task 231's module), not from public /api/site-info, which carries only the launch block from task 227. Health comes from the newest non-synthetic health-result.json (task 230), shown in the eight monitoring states; a green run is never shown as healthy by itself.
+
+=== ADD-208 ===
+ADDITION (v21, Settings S1, docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.1 and §B.8)
+Public /api/site-info no longer carries the commit, build time or readiness (task 227). Confirm a redeploy through the Vercel API instead (the new deployment is ready with the expected commit), and compute readiness from the provider's variable names and the registry. Milestone MS's acceptance test applies to the setup flow.
+
+=== ADD-39 ===
+ADDITION (v21, Settings S1, docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md §R.1)
+From task 227, public /api/site-info returns only { schema, launch }. Read the template version from the repository at the deployed commit, and readiness from provider APIs, instead.
+
+=== F_MS ===
+MV: every launch verified (marker, health checks, configuration readiness through task 227). MP: safe publishing (Contributor review now, the hardened gate when needed). MS0: setup is visible and honest: the configuration registry, a core build gate that adds no new failure modes, health results that tell a real run from a skip, GitHub-side checks, a Studio pane behind a verified identity check, generated docs and release prompts (227, 230–235). Design Engine and Content Intelligence milestones are in stages DE and CI.
+
+=== FX_MS_OLD ===
+ MS: Settings and Configuration Manager: guided feature setup, readiness, secure provider-side configuration and deployment-aware updates, built on task 227; its tasks are specified once task 201 exists.
+
+=== FX_MS_NEW ===
+ MS: Settings and Configuration Manager in Foundation (built on MS0, tasks 227 and 230–235; its tasks are specified once task 201 exists). Done only when, from Foundation's local browser interface, one real integration (Daily Health Monitoring first) is configured, its settings are saved securely to the right provider, the provider is verified to have accepted them, the screen shows whether the configuration is live, and it offers the required deployment action, all without editing an environment file by hand. No generic secrets platform.
+
+=== FOOTER ===
+Updated on 26 October 2026 (version 21), after the Settings, Configuration and Feature Setup review, revision r2 (docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md in the template repo), approved by the owner with six refinements: task 227 narrowed to the registry contract, config:check and a core build gate that adds no new failure modes, with public /api/site-info reduced to its launch block; new tasks 230 (health results that tell a real run from a skip, with eight monitoring states and synthetic tests that never open real issues), 231 (read-only GitHub-side checks), 232 (a Studio Features & setup pane behind a server-verified identity check, or explanations only), 233 (every feature, generated .env.example and README), 234 (release and update prompts) and 235 (a Vercel project-scoped token spike before any token change), all in stage F as milestone MS0; milestone MS in stage FX now has its acceptance test (configure one real integration from Foundation's browser interface without editing an environment file). Tasks 30, 31, 129, 200 and 209 gained additions; 200 now follows 233, and 209 follows 230 and 231. Every earlier task, status and note kept. Earlier, on 26 October 2026 (version 20),
+
+=== DIRECTION ===
+<li>26 October 2026: Settings and configuration (docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md, r2). Values stay provider-managed (Vercel and GitHub), with no new secret store. Studio never edits deployment configuration and no public site gets a configuration write path. Public /api/site-info carries only the launch block; detailed diagnostics need authentication. A green workflow run is never shown as health when its checks didn't run. The build gate only enforces what already fails today. Editing configuration from the UI comes in Foundation (milestone MS).</li>
+
+=== CONTEXT ===
+- Configuration (once task 227 exists): every new process.env read gets a config.registry.ts entry (never values); public /api/site-info carries only the launch block; secrets never go in Sanity or a NEXT_PUBLIC_ name; optional features degrade and never fail a build.
+
+=== OPSCTX ===
+- Settings and configuration (milestone MS): write values only to the provider (Vercel Secret type, GitHub sealed secrets); test a value at entry, then never read it back, store or hash it; record every write as an audit_event without the value; show "saved, not live" until a deployment confirms it. While local: bind to 127.0.0.1, check Host and Origin, and require a per-session CSRF token on every mutation.

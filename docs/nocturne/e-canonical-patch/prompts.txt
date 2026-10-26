@@ -1,0 +1,452 @@
+=== p-215 ===
+TASK
+Generate design-manifest.generated.json from the existing schemas so tools (and later AI) can read what the Design Engine supports, without a second source of truth. Read docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md §6.1 first.
+
+READ FIRST
+scripts/build-editor-guide.mjs (the jiti loading pattern and its --check flag), src/features/pages/schemas/sections/index.ts, src/lib/sanity/schema/section-style.ts, src/lib/sanity/section-style-options.ts, src/lib/sanity/schema/preset-field.ts, src/lib/sanity/schema/section-form.ts, src/features/site/schemas/design-settings.ts, the CLIENT_EDITABLE registry from task 205, src/styles/tokens.json.
+
+REQUIREMENTS
+1. scripts/build-design-manifest.mjs writes design-manifest.generated.json at the repo root: { manifestVersion (template-version.json), sections: [{ type, title, purpose?, example?, fields: [{ path, kind, required, max?, list?: [{ value, title }], clientEditable }], variants?, presets: [{ value, title, set }], rules: [{ variant, hasPicture, fixesAlignment, hasOwnBackgroundImage }], slots? }], sectionStyle: { fields }, designSettings: { fields }, tokens: { <group>: [names] } }.
+2. Walk field definitions recursively (objects, arrays, named types from the schema list). Option lists come from options.list; limits from exported LIMITS constants where they exist. Where a limit lives only inside a validation function, leave it out and list what the manifest does not capture in the README. Do not execute validation functions with fake rules.
+3. Rules are functions: evaluate each registered section's rules once per variant value (and once with no variant) and record the booleans.
+4. Optional `options.manifest = { purpose: string, example?: object }` on a section type. Add it to hero and mediaText now. FAMILY_TYPES = ['hero', 'mediaText'] must have a purpose, or the check fails.
+5. Wire it into `npm run typegen` after the editor guide, add `--check`, and make CI fail when the committed file is stale (as for the editor guide).
+6. Unit tests: a tiny in-memory schema (enum lists, nested objects, preset set maps, rule evaluation per variant, clientEditable flags), plus assertions on the real output: every entry in sectionTypes is present, and every value a preset sets is in its field's list. A test fails if anything under src/app imports the manifest (JS budget).
+7. README "Design manifest": what it is, how it is generated, what it does not capture, and that it is read-only documentation for tools.
+
+ACCEPTANCE
+- `npm run check` and `npm run test:e2e` pass; CI's staleness check passes on the committed file.
+
+DONE WHEN
+Merged and in a template release.
+=== p-216 ===
+TASK
+Add Density, Shape and Heading style to Brand colours (designSettings) as site-wide named choices, rendered as :root CSS variables through resolveDesignTokens, so one change restyles the whole site while sections that chose their own value keep it. Read docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md §3 (Experience B) and §5 first.
+
+READ FIRST
+src/features/site/schemas/design-settings.ts, src/lib/color/resolve-design-tokens.ts, src/features/site/components/design-settings-input.tsx and design-style.tsx, src/styles/tokens.json (space, radius, type), scripts/build-tokens.mjs, src/lib/sanity/schema/section-style.ts (spacing), src/features/studio/components/panel-usage-input.tsx.
+
+REQUIREMENTS
+1. Fields, agency-only, as picture choices through the preset picker:
+   - density: compact | standard | airy;
+   - shape: sharp | soft | round;
+   - headingStyle: standard | editorial | modern | classic.
+   Unset means today's values exactly.
+2. One pure module, src/lib/design/site-decisions.ts, maps each choice to CSS variable values for existing token names: space.section-y*, gutter, radius roles, and the type tokens' size ratio, letter spacing and weight. Section-level spacing (compact, default, spacious) stays relative to the density, so a section's own choice still works.
+3. resolveDesignTokens includes these variables, server-side as today: no client JavaScript, no flash, no new request. Add the fields to the settings query (no new query) and run typegen.
+4. Heading styles only change variables. Fonts stay those in tokens.json and next/font. When Editorial needs a display font the site doesn't have, use the body font, and show a Studio note asking Currawong to add one.
+5. Studio: a sample preview (a heading, body text, a button and a card) at the chosen values in DesignSettingsInput, and "N sections set their own spacing" with links, using the panel-usage pattern and one GROQ count.
+6. README "Brand colours and design": each choice and inheritance ("unset inherits; a section's own choice wins"). Put six to eight vetted next/font pairings in src/config/font-pairings.ts as data: id, display and body family, next/font import names, and mood tags such as editorial, modern or classic. The README table and task 13 read it, and task 215's manifest includes it, so design-reference and AI font selection can use it later. Don't load new fonts in this task.
+7. Contrast policy (E1 §5, "When a global change breaks contrast"):
+   - On designSettings, a failing pair where both colours were explicitly chosen under Advanced becomes a validation error, with a one-click "Use suggested". Every other contrast problem stays a warning.
+   - Derived text picks near-black or white, as today. Brand-coloured text (links, eyebrows) renders a lightness-adjusted shade of the same hue (adjustLightnessForContrast, accent-text), and Studio says so, offering "Use as chosen".
+   - Never add contrast errors to page or section fields: they would block content publishing.
+   - README: keep site-wide design changes in their own release, because a release publishes all or nothing.
+
+ACCEPTANCE
+- Unit tests for the mapping tables.
+- e2e: with density airy, a section without spacing gains vertical padding while a Compact section doesn't change; shape round changes --radius-card; editorial changes h2's computed letter-spacing and weight.
+- Unit tests: an explicitly chosen failing pair gives an error; a derived pair never does; a pale Primary renders links in a darker shade of the same hue at 4.5:1 or better.
+- Visual baselines are unchanged with nothing set; add baselines for the new choices with the "Update visual baselines" workflow.
+- Home page JavaScript is unchanged. `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release, with the README updated.
+=== p-217 ===
+TASK
+Add a site-wide Motion level (Calm, Standard, Expressive) and an On phones setting (Same, Calmer, Off) to Brand colours, multiplied into every section's animation and parallax. Read docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md §3 (the last row of the Experience B table) first.
+
+READ FIRST
+src/components/motion/presets.ts (INTENSITY_FACTOR, PARALLAX_SPEEDS, customRange), src/components/motion/parallax.tsx, motion-provider.tsx, src/app/(site)/site-shell.tsx, src/features/site/schemas/design-settings.ts.
+
+REQUIREMENTS
+1. Two agency-only fields, motionLevel and motionOnPhones, as picture choices. Unset means Standard and Same, which is today's behaviour exactly.
+2. The site shell renders data-motion-level and data-motion-phones on its root element from the cached settings: no new request, nothing cached that depends on the request.
+3. The motion presets read the site factor once on the client and multiply it with each section's intensity: distances, durations and parallax travel. "Calmer" halves travel and shortens durations under the phone media query; "Off" renders final states on phones. Use matchMedia inside the existing hooks and clean up listeners (the memory test).
+4. prefers-reduced-motion still wins over everything.
+5. README: what each level does, and that a section's own intensity still applies within the site level. Note in task 86's card whether saved motion presets are still needed.
+
+ACCEPTANCE
+- Unit tests for the factor maths.
+- e2e: at 390 and 1280 px widths, the reveal translate distance differs as specified; Off renders final states on phones.
+- tests/e2e/memory.spec.ts passes; home page JavaScript grows by at most 0.3 KB gzipped.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release.
+=== p-218 ===
+TASK
+Add a Panel option to every section's Design tab — None (default), Glass, Solid card — that puts the section's content on a panel over its background, tinted from the section's tone. Glass blurs only where blur is visible. Contrast is exact where it can be and bounded over pictures, with an automatic solid fallback. Read docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md §5 and decision DE-6 first.
+
+READ FIRST
+src/lib/sanity/surface-options.ts (glassSurfaceLook and strengths), src/features/pages/components/sections/link-list/glass-row.tsx, src/styles/globals.css (.glass-row), src/lib/color/glass-contrast.ts, src/lib/sanity/schema/section-style.ts and section-form.ts, src/components/ui/section-style.ts, section-frame.tsx, section-background.tsx, and task 168's warning format.
+
+REQUIREMENTS
+1. sectionStyle gains panel ('none' | 'glass' | 'solid') and, under Advanced, panelStrength (light | medium | strong; unset follows the glass tokens). Unset renders exactly as today.
+2. Glass is offered on any section background. The resolver chooses how to render it:
+   - over a solid tone: "tinted", a translucent fill flattened against the tone, with a highlight border and no backdrop-filter;
+   - over a picture, gradient, video, pattern or overlapping content (a section edge, a parallax layer): "frosted", with blur.
+   Sections that draw their own surfaces (the Link list) register `ownsSurfaces` and don't show Panel.
+3. The tint comes from the section's tone (inverse gives dark glass, accent gives an accent tint); text colours on the panel are derived, never chosen.
+4. Contrast:
+   - over solids, exact against the flattened colour;
+   - over gradients, at the stops and at sampled points between them;
+   - over pictures and video, a guaranteed bound: text must pass against the panel colour composited over both black and white. If it passes both, it's guaranteed; if it fails both, it fails; otherwise it's "not guaranteed: check visually". Never claim to have measured the photo.
+   When body text isn't guaranteed at 4.5:1, raise the panel opacity up to its strength's maximum. If that still isn't enough, render the panel solid, and show a Studio warning naming the fix (a stronger overlay, a higher strength, or Solid card) in task 168's format. Warnings only, never validation errors: the section lives in a page document.
+5. Put the resolver in src/lib/sanity/ (importable by the site) so task 159 can reuse it. prefers-reduced-transparency and prefers-contrast: more render solid.
+6. SectionFrame renders the panel for every section, with no per-section code. Add fixtures, section-gallery entries and visual baselines (Linux workflow).
+
+ACCEPTANCE
+- Unit tests for the resolver: the tinted and frosted choice, the bound maths (both extremes), the opacity raise and the solid fallback.
+- e2e with axe on four panel fixtures (a solid tone, an image, a gradient, an inverse tone). The solid-tone panel's computed backdrop-filter is "none".
+- Home page JavaScript is unchanged. `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release, with README "Section panels".
+=== p-219 ===
+TASK
+Generalise the hero's supporting-slot registry into a shared slot registry that any section family can use, keep the hero rendering identically, and add a video block. Read docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md §4 first.
+
+READ FIRST
+src/features/pages/components/sections/hero/slots.tsx, the `supporting` field in src/features/pages/schemas/sections/hero.ts, README "Adding a hero slot", src/features/pages/components/sections/video/, src/components/ui/stats-bar.tsx, logo-row.tsx, badge-row.tsx, inline-list.tsx, src/features/pages/api/sections.ts.
+
+REQUIREMENTS
+1. src/features/pages/slots/: registry.ts (block type → schema type, component, allowedIn such as 'hero.supporting', 'split.media' and 'split.supporting', and clientEditable), slot-field.ts (slotField({ name, slot }) builds the field, insert menu and thumbnails), render-slot.tsx.
+2. The hero uses the registry. Stored data is unchanged and needs no migration; hero e2e and visual baselines must not change.
+3. A new block, slotVideo, reuses the video section's click-to-load facade (YouTube and Vimeo) and its native video with captions, and stays consent-aware as today.
+4. One GROQ fragment per block, folded into the existing page query: no new request.
+5. Classify the block fields in the task 205 registry: content is client-editable, layout is not.
+6. Update the README: "Adding a slot block" replaces "Adding a hero slot".
+
+ACCEPTANCE
+- A unit test that every registry entry has a schema, a component and allowedIn, and that every allowedIn value names a known slot.
+- Hero specs and visual baselines are unchanged; a new fixture shows slotVideo in the hero.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release.
+=== p-220 ===
+TASK
+Create a change-proposal format with a validator and a draft-only applier — `npm run proposal -- validate <file>` and `npm run proposal -- apply <file> --dataset <scratch> --yes` — so scripted (and later AI-made) changes are checked and land only as drafts. Read docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md §6.2 first.
+
+READ FIRST
+design-manifest.generated.json (task 215), src/lib/color/resolve-design-tokens.ts, the CLIENT_EDITABLE registry (task 205), scripts/setup/seed.mjs (writing with a token), migrations/README.md.
+
+REQUIREMENTS
+1. src/lib/proposals/types.ts: ChangeProposal as in E1 §6.2.
+2. A pure validator (src/lib/proposals/validate.ts):
+   - manifest: paths exist, values are in their lists, slot blocks are allowed, array limits are respected;
+   - design: contrast through resolveDesignTokens for designSettings changes, and the panel rules (task 218) where present;
+   - permissions: annotate needsAgencyReview from CLIENT_EDITABLE.
+   It returns accepted and rejected patches, with reasons. A proposal that mixes content and design patches is split into two parts before validation, so a rejected design part never blocks the content part (E1 §5).
+3. Sanity validation: first spend at most 30 minutes checking whether `validateDocument` from 'sanity' can run in Node with this schema. If not, apply to drafts, run `sanity documents validate` on the scratch dataset, and discard the drafts on failure. Record what you found in the README.
+4. The applier (scripts/proposal.mjs):
+   - dry-run by default, and --yes to write;
+   - a token from SANITY_PROPOSAL_TOKEN;
+   - drafts only, with ifRevisionID set to baseRev, in one transaction per proposal;
+   - with --release, when the profile's releases flag is on, the changes go into one release;
+   - it refuses any dataset whose name doesn't start with "scratch" (no documented override);
+   - it never publishes.
+5. Three fixture proposals: make a section glass with the image on the left; set density to airy; add a supporting video. Tests use a mocked client.
+6. README "Change proposals": the format, the checks, how to preview (Presentation) and undo (discard the draft).
+
+SAFETY
+Never run against a client or production dataset in this task.
+
+ACCEPTANCE
+- Unit tests for every rejection reason and for the revision guard.
+- `npm run check` passes.
+
+DONE WHEN
+Merged (no release is needed until a site uses it).
+=== p-221 ===
+TASK
+Run a bounded experiment: turn three design references into validated proposals and measure correction time against building the same page by hand. No product code. Read docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md §3 (Experience A) and §6 first.
+
+STEPS
+1. The owner supplies three references with rights to use them: a screenshot or mock-up, a Figma file if available, and a moodboard.
+2. For each: give the model the reference, design-manifest.generated.json and the E1 rules. Ask for a ChangeProposal with design decisions (a palette mapped to Brand colours roles, the nearest documented font pairing, density, shape, heading style, motion), a page of sections (families, presets, slot contents, placeholder copy) and a gap list.
+3. Validate and apply it to a scratch dataset with task 220's tool, then preview it in Presentation at desktop and mobile widths.
+4. Correct it by hand in Studio until it's acceptable. Time the proposal, the correction, and a manual build of a comparable page (or a recorded estimate from a similar real page).
+5. Stop rule: if correction takes more than 70% of the manual time on two of the three, stop and write up why.
+
+OUTPUT
+docs/experiments/<date>-design-reference.md: screenshots, a times table, the gap list (what couldn't be represented and how it was handled) and a recommendation: build it into Foundation, extend the families first, or stop.
+
+DONE WHEN
+The write-up is committed and the decision is in this card's notes.
+=== p-222 ===
+TASK
+Move every JSON-LD builder into src/lib/structured-data/ with stable @ids, add a WebPage node to every page, link blog authors to Person nodes where the task 191 note allows, and replace literal-string parity with typed, provenance-based validation. Read docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §3 (especially §3.2 and §3.5) and the 191 note first.
+
+READ FIRST
+src/features/site/components/site-json-ld.tsx, src/features/site/utils/business-json-ld.ts, src/features/blog/components/article-json-ld.tsx, src/features/team/components/person-json-ld.tsx, src/features/events/utils/json-ld.ts, src/features/pages/components/breadcrumbs.tsx, src/features/pages/components/sections/faq.tsx, src/lib/json-ld-visibility.ts and tests/e2e/structured-data.spec.ts (task 188), src/features/site/utils/phone.ts, src/lib/opening-hours.ts.
+
+REQUIREMENTS
+1. ids.ts: one function per @id in E2 §3.2.
+   - Persistent entities (service, location, person, event, article) are keyed by the published document _id, with drafts. and version prefixes removed: `{origin}/#service-{id}`. They don't change when a slug changes. Draft and release-version ids (drafts.*, versions.*) must never appear in an emitted @id. A test renders the same document in draft mode and published, and asserts identical @ids (approved R2-3).
+   - WebPage, BreadcrumbList and FAQPage are keyed by URL.
+   - The origin is siteUrl.
+   A unit test scans src/ and fails if '#organization', '#website' or '#webpage' strings are built anywhere else.
+2. nodes/: pure builders (organization or local business, website, webPage, breadcrumb, article, person, event, faqPage), each with unit tests for required and recommended properties.
+   - business-json-ld.ts moves here, keeping its behaviour.
+   - Each builder also returns a provenance map (JSON-LD property path → document id and field path), which is never rendered.
+   - An entity is described in full only on its canonical page, and referenced by @id elsewhere; its `url` carries the current URL.
+3. Every page renders a WebPage node: isPartOf the #website, about its main entity when it has one, breadcrumb by @id, inLanguage.
+4. Authors: if the 191 note approved `author` referencing a teamMember, Article.author is that Person's @id; otherwise a named Person without an @id, as today. Change the schema only if the note approved it (with typegen and a fixture).
+5. parity.ts replaces literal comparisons in task 188's helper, by property class (E2 §3.5):
+   - visible facts compare typed values: E.164 phones; addresses by component, with St/Street and state abbreviations; hours as day and time ranges; dates; amount plus currency; folded names;
+   - descriptive text must come from a field rendered on the page (provenance);
+   - areaServed must be visible somewhere on the site;
+   - identity and technical properties must be valid but are exempt from visibility.
+   "Visible" means present in the rendered page and reachable by a visitor: collapsed accordions and tabs count. Keep 188's normaliser. Keep the contradiction checks (the same @id with different values across pages; a JSON-LD value different from its owning field) and the deny list (self-serving ratings and reviews, offers without a visible price, FAQs not on the page, credentials not shown).
+6. Components keep rendering where they do, with stegaClean as today. No visible change and no client JavaScript.
+7. Add a graph-integrity check to the structured-data spec: every @id reference on a page resolves to a node on that page or in the site graph.
+
+ACCEPTANCE
+- Unit tests for typed parity (5:30 pm = 17:30; +61 2 9000 0000 = (02) 9000 0000; St = Street), provenance and the deny list.
+- A fixture slug change keeps the @id and changes the url. A collapsed FAQ answer passes.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release.
+=== p-223 ===
+TASK
+Create a page audit that returns evidence-backed findings — `npm run audit:page -- <url> [--json] [--sample=N]` — on a shared Finding contract, reusing the existing launch-check and content-health pure functions. Read docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §4, §6 and §11 first.
+
+READ FIRST
+scripts/launch-check/ (args, html, seo, result, pool), scripts/health-report.mjs, .github/workflows/health.yml, src/features/studio/content-health/utils/detect.ts and build-report.ts, src/lib/json-ld-visibility.ts, src/lib/structured-data/ (task 222).
+
+REQUIREMENTS
+1. src/lib/audit/finding.ts: the Finding type (E2 §6), the order (severity, then basis), and a ruleId registry with a title and README anchor for each. ruleIds never change meaning.
+2. Page rules in src/lib/audit/rules/, each pure and unit-tested:
+   - indexability (status, noindex, robots, a self-canonical that answers 200);
+   - title and description present, and unique against the sitemap sample;
+   - a single H1 and heading order;
+   - JSON-LD that parses;
+   - visible parity (task 188's helper);
+   - graph integrity;
+   - the main entity matches the document type (once task 192 exists);
+   - internal links on the page resolve (HEAD requests through the existing pool);
+   - images without alt text;
+   - AI-search readiness (E2 §8.2): no unintended noindex, nosnippet, max-snippet or data-nosnippet on the main content; the main text is present in the server HTML; robots.txt matches the site's AI crawler choices (task 228 once it exists; until then, report that the single switch also blocks PerplexityBot's search crawling). llms.txt is checked only for consistency with the sitemap, when present.
+   Reuse launch:check functions instead of copying them.
+3. Content side: read the page's published document by path with the read token, through a server-only script client (never a browser token), and attach documentId, path and a Studio intent to each finding where the fix is a field.
+4. Output: readable text grouped by severity, with --json writing audit.json. Exit non-zero only for blockers. --sample=N audits the home page plus N sitemap pages. Add a short audit summary to the health workflow's issue (scripts/health-report.mjs).
+5. Content health: give its items the same ruleIds where the check is the same, with no other UI change.
+6. Fixtures: five deliberately broken pages, as in E2 §11 test 1, and the existing clean fixtures. Tests assert that no Sanity mutation is ever sent.
+
+ACCEPTANCE
+- The broken fixtures produce exactly those five ruleIds. The clean fixtures produce no deterministic finding at warning or above. Every finding has observed, source, at, why and fix.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release, with README "Page audit".
+=== p-224 ===
+TASK
+Add improvement records: an agency-only `improvement` document type and a "Record improvement" action that captures a fix's finding, before and after values, published revision and a review date, so outcomes can be reviewed later. Read docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §9 first.
+
+READ FIRST
+src/features/studio/actions/, src/features/studio/utils/structure-access.ts, the task 205 registry, src/lib/audit/finding.ts (task 223), scripts/health-report.mjs, site.profile.ts and src/config/define-site-profile.ts.
+
+REQUIREMENTS
+1. A schema with these fields: ruleId, title, page (a reference), fieldPath, before, after, evidence (text), publishedRev, publishedAt, reviewOn (defaults to 28 days after publishedAt), outcome (not reviewed | improved | no change | worse | inconclusive) and outcomeNotes.
+2. Behind a profile feature flag, `improvements`, which is on by default. Agency-only in structure and in the task 205 registry. Never queried by public routes: the route inventory and TAGS are unchanged.
+3. A "Record improvement" document action on pages (and services once they exist). It's prefilled from the difference between the last two published revisions for seo.* and title fields, and from a pasted Finding JSON (optional).
+4. Content health shows a "Due for review" list. The health workflow reads due records with the read token, and lists them in its issue.
+5. README: when to record an improvement, and how to review it honestly (see E2 §7's caveats).
+
+ACCEPTANCE
+- Unit tests for the prefill diff and the due logic. The e2e suite shows the public site is unchanged.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release.
+=== p-225 ===
+TASK
+Add deterministic content rules F-1 to F-5 and F-8 from docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §5 to the shared rule library, run by Content health and the page audit.
+
+READ FIRST
+src/lib/audit/ (task 223), src/features/site/utils/phone.ts, abn.ts, src/lib/opening-hours.ts, src/lib/plain-text.ts, src/features/studio/content-health/utils/detect.ts.
+
+REQUIREMENTS
+1. F-3, fact conflicts: find AU phone numbers, emails, ABNs and street addresses in Portable Text and headings. Normalise them with the existing parsers, and report each one that differs from Business info, or from the page's location once task 212 exists. The same number in a different format isn't a conflict.
+2. F-4, stale facts: past special hours still shown; past events still featured.
+3. F-5, duplicates: exact duplicate titles, descriptions and summaries (deterministic). Near-duplicates are heuristic and need a similarity threshold, documented.
+4. F-1, F-2 and F-8: only when service or location types exist; otherwise the rules report nothing.
+5. Content health groups items by rule.
+
+ACCEPTANCE
+- Positive and negative unit fixtures for every rule. An e2e fixture page with a conflicting phone number gives one finding.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release.
+=== p-226 ===
+TASK
+Spike: import 28 days of Search Console data for one real site into a local, git-ignored folder, map its URLs to Sanity documents, and produce ctr_gap and declining_page findings, to test the evidence model before Foundation's Search Health is built. Read docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §7 first.
+
+BEFORE YOU START (owner, by hand)
+- The site has been live for at least 28 days, and the client has agreed to read-only Search Console access.
+- A Google Cloud service account is added to the property as a restricted user. Its key file is outside the repo; its path goes in .env.local as GSC_KEY_FILE.
+
+REQUIREMENTS
+1. scripts/search-console/import.mjs, dependency-free: sign a service-account JWT with node:crypto (RS256), scope https://www.googleapis.com/auth/webmasters.readonly, then call searchAnalytics.query with dimensions [page, query, date], dataState "final" and rowLimit 25000, paging by startRow. Record truncation and the count of anonymised queries. Write .search-console/<property>/<start>_<end>.json, and add .search-console/ to .gitignore.
+   Data minimisation (approved E-A9): request only the metrics and dimensions the findings need, and only the windows being compared. Keep the key file outside the repo, readable only by you (chmod 600). Never log rows or keys. The write-up states the data's limits: sampling, anonymised queries, AI features inside Web totals, and averaged positions.
+2. Map URLs to documents through a published GROQ read with the read token (path to page slug). List unmatched URLs.
+3. Findings in task 223's contract, source 'search-console':
+   - ctr_gap: the site's own CTR by position bucket (1–3, 4–6, 7–10, 11–20), at least 200 impressions for the page and query in 28 days;
+   - declining_page: the last 28 days against the previous 28, aligned by weekday, with at least 100 clicks in the earlier window.
+   Always attach the caveats from E2 §7, including that AI Overviews and AI Mode impressions sit inside the Web totals and can't be separated through the API. Make the thresholds named constants.
+4. Tests with a mocked fetch: JWT claims, paging, truncation, the baseline and the thresholds. Never call Google in tests.
+5. README "Search Console spike": the setup, and how to delete the data afterwards.
+6. Write up docs/experiments/<date>-search-console.md: which findings were useful, which were false positives, what you acted on (record it with task 224), and what tasks 202 and 210 should change.
+
+SAFETY
+Read-only. Never commit Search Console data. Delete the local folder when the write-up is done.
+
+DONE WHEN
+The write-up is committed, and tasks 202 and 210 have notes pointing to it.
+=== p-227 ===
+TASK
+Create a feature configuration registry and diagnostics: one declarative list of what each feature needs (never the values), with readiness from the existing config functions, `npm run config:check`, per-feature readiness in /api/site-info, and setup diagnostics in the health workflow. Read docs/nocturne/NOCTURNE_PRODUCT_ARCHITECTURE.md §9 first. This is separate from the design manifest (task 215): don't merge them.
+
+READ FIRST
+src/features/forms/utils/config.ts, src/features/forms/utils/newsletter/config.ts, src/features/forms/utils/enquiry-config.ts, src/features/pricing/utils/config.ts, src/app/api/site-info/route.ts, src/config/env.ts, site.profile.ts, scripts/setup/, .github/workflows/health.yml, scripts/health-report.mjs, README environment tables.
+
+REQUIREMENTS
+1. A `config.registry.ts` per feature (forms, newsletter, enquiries, pricing, members and auth, analytics and consent, Sentry, Sanity core, revalidation, health monitoring). Each entry has a feature id, a plain-English purpose, the profile flag, and settings: [{ name, kind: 'public-env' | 'server-env' | 'secret' | 'sanity' | 'github-var' | 'github-secret' | 'profile', where: 'vercel' | 'sanity' | 'github' | 'site.profile.ts', required, docs }]. Never values.
+2. Compose the list in src/app (for /api/site-info) and in a script loaded with jiti, because shared code can't import features. Readiness comes from each feature's existing get*Config() result and its `missing` reason; don't duplicate parsing.
+3. `npm run config:check [--strict]`: a table of features with ready, not configured (and why, in plain English) or off in the profile. It exits non-zero only with --strict.
+4. /api/site-info adds `readiness: { <feature>: { ready: boolean, reason?: <code> } }` (codes, not values) and `configRegistryVersion`.
+5. The health workflow checks its own setup first (PRODUCTION_URL, the Sanity variables and the token secret present), and reports missing ones in the issue in plain English.
+6. Generate the README's environment table from the registry, with a CI staleness check like the editor guide's.
+
+ACCEPTANCE
+- A completeness test: every process.env name read under src/ is in the registry or on a documented ignore list.
+- A test plants a fake secret in the environment and asserts it never appears in /api/site-info or config:check output.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release, with README "Configuration".
+=== p-228 ===
+TASK
+Split the single "Allow AI crawlers" setting into two: AI training, and AI search answers. Group user agents by purpose, as the vendors document them, and migrate existing values without changing any site's behaviour. Read docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §8.3 first.
+
+READ FIRST
+src/lib/ai-crawlers.ts, src/app/robots.ts, src/app/llms.txt, src/features/site/schemas/site-identity.ts (allowAiCrawlers), tests/e2e/ai-crawlers.spec.ts, migrations/README.md.
+
+REQUIREMENTS
+1. ai-crawlers.ts exports groups:
+   - TRAINING: GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot;
+   - SEARCH: OAI-SearchBot, Claude-SearchBot, PerplexityBot;
+   - USER_FETCHERS: ChatGPT-User, Claude-User, Perplexity-User, documented only, never relied on.
+   Each has a comment linking the vendor's documentation.
+2. Site identity: `allowAiTraining` ("Let AI companies train on this site's content") and `allowAiSearch` ("Show this site in AI search answers"), with plain-English descriptions. Googlebot and Bingbot are never affected. Note that Google's AI Overviews and AI Mode are controlled in Search Console's "Search generative AI control", not here.
+3. robots.ts disallows each group according to its switch. llms.txt is served only when AI search is allowed.
+4. Preserve effective behaviour exactly (approved R2-4). Add aiCrawlerPolicy: unset means legacy. Legacy sites keep today's robots.txt output byte for byte: the same five agents (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, CCBot), driven by allowAiCrawlers. The new groups, including OAI-SearchBot, Claude-SearchBot and Applebot-Extended, apply only once a person saves the two new switches, which sets aiCrawlerPolicy to 2. A migration (dry run first) may pre-fill the switches from allowAiCrawlers, but it never sets the policy version. While a site is on the legacy policy, Studio shows "Review AI crawler settings". A test asserts that robots.txt is identical before and after the migration, for both on and off.
+5. README "AI crawlers": the three purposes, what each switch does, that user-triggered fetchers may ignore robots.txt, and that changes take about a day to apply at the vendors.
+
+ACCEPTANCE
+- Unit and e2e tests for all four switch combinations, plus the fallback.
+- `npm run check` and `npm run test:e2e` pass.
+
+DONE WHEN
+Merged and in a template release.
+=== p-229 ===
+TASK
+Spike: gather the AI-search evidence that's actually available for one real site, and test whether any of it supports actionable, evidence-backed findings. No scores. Read docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §8 first.
+
+BEFORE YOU START (owner, by hand)
+- The client agrees. Export CSVs from Search Console's Generative AI performance report (Search) and from Bing Webmaster Tools' AI Performance, for the same 28 days, into .ai-search/ (git-ignored).
+- Check whether Google or Microsoft has since documented API access for these reports. If so, note it and use it read-only instead.
+
+REQUIREMENTS
+1. scripts/ai-search/import.mjs reads the CSVs into a normalised shape: page, date, surface, impressions or citations, and grounding query where present. Tests use fixture CSVs.
+2. Join it with AI referral sessions from the site's analytics (task 55's classification), and with the page audit's findings (task 223) for the same pages.
+3. Produce Findings with source 'ai-report', each with evidence and caveats. Examples:
+   - "Cited by Copilot 14 times; the page has no summary (F-1)";
+   - "AI Overview impressions on a page whose phone number conflicts (F-3)".
+   Never produce a visibility score, and never imply ranking or causation.
+4. Write up docs/experiments/<date>-ai-search.md. For each signal: availability, coverage, actionability, false positives. Then a recommendation for Foundation (import now, wait for an API, or ignore), and any change to task 210.
+
+SAFETY
+Read-only. Never commit exported data, and delete .ai-search/ when the write-up is done.
+
+DONE WHEN
+The write-up is committed, and tasks 210 and the CI3 milestone have notes pointing to it.
+=== ADD-193 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+This replaces requirements 2–4 above.
+- No `look` field. Looks are the preset mechanism: add SPLIT_PRESETS (Media right, Media left, Stacked, Text over media) through presetsOption, matched by preset-match. First fix task 167's tie (describePresetState ties when presets differ by one field).
+- `media` (image or video) and one optional `supporting` slot come from task 219's shared slot registry. Migrate `image` into `media` with a dry-run migration; existing pages render identically.
+- Glass and solid panels come from task 218; no split-only glass rule.
+- Show an override summary with Reset in the Design tab (task 167's mechanism).
+- imageSide.ts is the options file for Image + text (mediaText), not a section.
+- Contrast problems in the Design tab are warnings with render-time fallbacks, never validation errors (E1 §5).
+=== ADD-213 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Same conventions as task 193: HERO_PRESETS are its looks (no `look` field), its supporting slot uses task 219's registry, panels (task 218) apply where the layout has a background, and the Design tab gets an override summary with Reset.
+=== ADD-194 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Cover every tone × panel (task 218: none, tinted glass, frosted glass, solid) × text role combination at each Density and Heading style (task 216), with the default brand and two fixture brands (one light, one dark), on solid colours and gradients. Over pictures and video, test only the guaranteed-bound states (E1 §5): passes against both the black and white extremes, fails against both, or reported as "check visually". Never claim to measure a photograph.
+=== ADD-191 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Start from docs/nocturne/NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md §3: the fact-ownership table; document-keyed @ids for persistent entities (they survive slug changes; draft and version ids are never emitted); URL-keyed page nodes; page versus site entities; type-selection rules; typed, provenance-based parity. Decide whether `author` may reference a `teamMember`. Confirm improvement records (task 224) as an agency-only type.
+=== ADD-192 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Build Service nodes through src/lib/structured-data/ (task 222) with the @id `{origin}/#service-{documentId}`. Add rules F-1 and F-2 for services once task 225 exists.
+=== ADD-212 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Build branch and service-area nodes through task 222's module (`{origin}/#location-{documentId}`). Migrate businessInfo.serviceAreas strings into service-area locations with a dry run. Add rule F-8.
+=== ADD-195 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Don't re-implement content health's orphan and broken-link detection: reuse src/features/studio/content-health/utils/detect.ts. Add only what rendered HTML shows (navigation and footer links, links inside shared sections), and emit Findings in task 223's contract.
+=== ADD-202 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Start from task 226's import code and write-up, keeping its thresholds, caveats and data-minimisation rules. AI Overviews and AI Mode impressions are inside the Web totals and can't be separated through the API (as of October 2026).
+=== ADD-210 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Cards are Findings (task 223) with source 'search-console'. Changes link to improvement records (task 224). Comparisons follow E2 §7: the site's own CTR by position bucket, weekday-aligned 28-day windows, year-on-year only with 13 months of data, confounders listed. Take task 229's recommendation on AI-report data into account. No scores, no automatic publishing.
+=== ADD-57 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+The deterministic checks are tasks 223 and 225's rules. The AI pass is rule F-7 (judgement), producing Findings with basis 'judgement'; it never writes to Sanity.
+=== ADD-14 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Build inside SectionFrame with sectionFields, use the shared slot components (task 219) where they fit, declare options.manifest (task 215) and classify fields in CLIENT_EDITABLE (task 205). Note in the client README whether the section should be promoted to the template (task 50).
+=== ADD-50 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+A promoted section carries its options.manifest entry (task 215) and its CLIENT_EDITABLE classification (task 205).
+=== ADD-13 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Choose the font pairing from src/config/font-pairings.ts (task 216) and record it in tokens.json. If the brand needs a pairing that isn't listed, add it to that list in the template first.
+=== ADD-108 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Also wire placement 'background' to the shared section Background image, so "subtle parallax on the background" works on any section with a background picture.
+=== ADD-159 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Reuse task 218's panel resolver: tinted or frosted glass, exact or guaranteed-bound contrast, and the solid fallback.
+=== ADD-86 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Before starting, check whether task 217's site-wide motion level has removed the need. If it has, mark this task skip with a note.
+=== ADD-55 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Classify AI-assistant referrers (chatgpt.com, perplexity.ai, copilot.microsoft.com, gemini.google.com, claude.ai) as their own source in attribution and events; don't rely on utm_source alone. Task 229 uses this.
+=== ADD-188 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+No scope change before merge. This task's literal-string helper is the first layer; task 222 replaces literal comparisons with typed, provenance-based parity (E2 §3.5). Collapsed accordions and tabs count as visible.
+=== ADD-32 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+At handover, record the client's choices for AI training and AI search (task 228) and for Google's Search generative AI control in Search Console. Check Bing Places beside Google Business Profile for consistent name, address, phone and hours. Record consent for read-only Search Console access (tasks 226 and 229).
+=== ADD-208 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Guided feature setup reads the feature configuration registry (task 227). Values are written directly to providers (Vercel environment variables, GitHub Actions variables and secrets) with least-scope tokens: never read back, and never stored except as this context allows. No generic secret store. An environment change shows "saved, not yet live" until a redeploy is confirmed through /api/site-info.
+=== ADD-209 ===
+ADDITION (26 October 2026, Design Engine and Content Intelligence r2, docs/nocturne/NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md §3)
+Show per-feature readiness with plain-English reasons from /api/site-info (task 227), and the health workflow's own setup diagnostics.
+=== FOOTER ===
+Updated on 26 October 2026 (version 20), after the Design Engine and Content Intelligence planning review, revision r2 (docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md, NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md, NOCTURNE_PRODUCT_ARCHITECTURE.md and NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md in the template repo), approved by the owner: added stage DE, the Design Engine (tasks 215–221: a design manifest generated from the schemas, site-wide density, shape, heading style and motion level, glass and solid panels for any section, a shared slot registry, validated draft-only change proposals, and a design-reference experiment), stage CI, Content Intelligence (tasks 222–226, 228 and 229: one structured-data module with stable document-keyed @ids and typed parity, a page audit with evidence-backed findings, improvement records, fact-consistency rules, a Search Console spike, AI training and AI search as separate crawler choices, and an AI-search evidence spike), and task 227 in stage F (a feature configuration registry, the start of the Settings and Configuration Manager milestone MS in stage FX). Tasks 193, 213 and 194 moved to stage DE and 188, 191, 192, 212 and 195 to stage CI. Tasks 13, 14, 32, 50, 55, 57, 86, 108, 159, 188, 191–195, 202, 208–210, 212 and 213 gained additions; revision 3's stored `look` field is replaced by presets as looks. No AI SEO score and nothing publishes automatically. Every earlier task, status and note kept. Earlier, on 25 October 2026 (version 19),
+=== DIRECTION ===
+<li>26 October 2026: Design Engine and Content Intelligence direction (docs/nocturne E1–E4, r2). Design values reference named site decisions. Sections are families with typed slots, and presets are their looks. The design manifest is generated from schemas. Changes from scripts or AI are validated drafts that a person publishes. Contrast errors only ever block the design change itself. One structured-data graph with stable entity ids. Findings with evidence, never scores, and no AI visibility score. AI training and AI search are separate crawler choices. The feature configuration registry is separate from the design manifest.</li>
+=== CONTEXT ===
+- Design values reference named site decisions (tone, panel, density, radius role); unset inherits (src/lib/sanity/design-overrides.ts). Raw values belong only under Advanced. Contrast errors belong only on the Brand colours document; section-level contrast problems are warnings with render-time fallbacks, and contrast over pictures is a guaranteed bound or "check visually", never a measurement. New section types and slot blocks declare options.manifest and their CLIENT_EDITABLE classification (once tasks 215 and 219 exist). Build JSON-LD only through src/lib/structured-data/, with document-keyed @ids for persistent entities (once task 222 exists).
