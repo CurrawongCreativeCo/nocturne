@@ -17,6 +17,7 @@ import {
 } from 'sanity'
 
 import { colorHex } from '@/config/tokens.generated'
+import { documentPath, joinUrl, readSlug } from '@/lib/sanity/document-address'
 
 import {
   qrColours,
@@ -26,7 +27,6 @@ import {
   qrSvg,
   type QrColours,
 } from '../qr-code/qr-code'
-import { documentPath, joinUrl, readSlug } from '../utils/publish-redirect'
 import { siteOrigin } from '../utils/site-origin'
 
 const PAGE_LINK_TYPES = new Set(['page'])

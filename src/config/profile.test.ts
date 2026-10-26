@@ -150,6 +150,16 @@ describe('isFeatureEnabled', () => {
     expect(isFeatureEnabled('blog', off)).toBe(true)
   })
 
+  it('starts the publish gate off, like the plan-dependent features, until the profile turns it on', () => {
+    expect(isFeatureEnabled('publishGate', resolveSiteProfile(valid))).toBe(false)
+    expect(
+      isFeatureEnabled(
+        'publishGate',
+        resolveSiteProfile({ ...valid, features: { publishGate: true } }),
+      ),
+    ).toBe(true)
+  })
+
   it('has the real profile resolve, with every feature a switch', () => {
     expect(Object.keys(siteProfile.features).sort()).toEqual([...FEATURE_NAMES].sort())
   })

@@ -3,7 +3,11 @@
  * replayed revision by revision: a protected field belongs to the author of the latest revision
  * that changed it. Pure; `fetchChangeHistory` does the reading.
  */
-import { changeKey, diffProtectedFields, type ProtectedChange } from './protected-changes'
+import {
+  changeKey,
+  diffProtectedFields,
+  type ProtectedChange,
+} from '@/lib/sanity/protected-changes'
 
 export interface Revision {
   /** Sanity user id of the transaction's author. */

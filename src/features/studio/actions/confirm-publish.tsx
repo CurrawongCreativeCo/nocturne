@@ -21,22 +21,24 @@ import {
 } from 'sanity'
 
 import { apiVersion } from '@/config/env'
+import {
+  detectAddressChange,
+  documentPath,
+  joinUrl,
+  readSlug,
+  type AddressChange,
+} from '@/lib/sanity/document-address'
+import { diffProtectedFields, type ProtectedChange } from '@/lib/sanity/protected-changes'
 
 import { ProtectedChangesList } from '../components/protected-changes-list'
 import { resolveVersions, type RedirectRule } from '../content-health/utils/detect'
 import { isAgency } from '../roles'
 import { fetchChangeAuthors } from '../utils/fetch-change-history'
-import { diffProtectedFields, type ProtectedChange } from '../utils/protected-changes'
 import {
   buildRedirectDocument,
   CONFIRMED_PUBLISH_TYPES,
-  detectAddressChange,
-  documentPath,
-  joinUrl,
   needsPublishConfirmation,
   planRedirect,
-  readSlug,
-  type AddressChange,
   type RedirectPlan,
 } from '../utils/publish-redirect'
 import { siteOrigin } from '../utils/site-origin'

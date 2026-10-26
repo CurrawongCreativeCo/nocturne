@@ -41,6 +41,7 @@ const features = [
   'events',
   'frames',
   'panels',
+  'publish-gate',
   // new-feature:register
 ]
 

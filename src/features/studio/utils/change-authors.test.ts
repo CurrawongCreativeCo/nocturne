@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { diffProtectedFields } from '@/lib/sanity/protected-changes'
+
 import { attributeChanges, authorsOf } from './change-authors'
-import { diffProtectedFields } from './protected-changes'
 
 const page = (extra: Record<string, unknown> = {}) => ({ _type: 'page', title: 'Home', ...extra })
 

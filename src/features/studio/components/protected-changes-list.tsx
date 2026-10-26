@@ -1,7 +1,7 @@
 import { Card, Stack, Text } from '@sanity/ui'
 import { useUser } from 'sanity'
 
-import { describeChange, changeKey, type ProtectedChange } from '../utils/protected-changes'
+import { describeChange, changeKey, type ProtectedChange } from '@/lib/sanity/protected-changes'
 
 /** A Sanity user's name, or a neutral fallback while it loads or when the user has left the project. */
 function AuthorName({ id }: { id: string }) {
