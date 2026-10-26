@@ -15,7 +15,7 @@ export const healthMonitoringConfig = defineFeatureConfig({
   setup: [
     'Add the PRODUCTION_URL and NEXT_PUBLIC_SANITY_PROJECT_ID repository variables on GitHub.',
     'Create a Viewer token in Sanity and save it as the SANITY_AUTH_TOKEN repository secret.',
-    'Run the Health workflow once from the Actions tab and read its result file: a run that skipped is not a health check.',
+    'Run the Health workflow once from the Actions tab and read its result file (the health-result artifact): a run that skipped is not a health check.',
   ],
   settings: [
     {
@@ -60,17 +60,23 @@ export const healthMonitoringConfig = defineFeatureConfig({
       where: 'github',
       required: false,
       format: 'off-switch',
-      planned: 'task 230',
       purpose:
         'Switches monitoring off on purpose (the template repository, scratch repositories, forks).',
       default: 'On. Set it to "off" to switch monitoring off deliberately',
+    },
+    {
+      name: 'HEALTH_CHECKS_REASON',
+      kind: 'github-var',
+      where: 'github',
+      required: false,
+      purpose: 'Why monitoring is off, shown with the intentionally disabled result.',
+      default: 'No reason is recorded',
     },
     {
       name: 'HEALTH_EXPECT_MARKER',
       kind: 'github-var',
       where: 'github',
       required: false,
-      planned: 'task 230',
       purpose: 'Text the home page must contain, so a blank or wrong page is caught.',
       default: 'No marker is expected on the home page',
     },
@@ -82,11 +88,12 @@ export const healthMonitoringConfig = defineFeatureConfig({
       purpose: 'Tells the workflow that stored enquiries make a public dataset more serious.',
       default: 'Off. A copy of the Vercel setting, kept only so the health workflow knows',
       deprecated: {
-        replacedBy: 'the dataset evidence the health result will record (task 230)',
+        replacedBy:
+          'the anonymous enquiry-exposure probe in the health check (task 230); the run summary carries the deprecation line',
         migration:
-          'Nothing yet. Keep it set to match Vercel until task 230 ships; after that, delete the GitHub variable.',
+          'Nothing is needed: a public dataset whose enquiries visitors can count is now found by an anonymous request. Delete the GitHub variable.',
         removeWhen:
-          'Task 230 has shipped in a release, the workflow no longer reads it, and the removal is approved as its own versioned decision.',
+          'One minor release after task 230 has shipped, the workflow no longer reads it, and the removal is approved as its own versioned decision.',
       },
     },
   ],

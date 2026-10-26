@@ -1,6 +1,6 @@
 /**
  * What a daily health run can mean (docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md, §R.2). The names
- * are the `outcome` values `health-result.json` will carry (task 230, which writes them). This is
+ * are the `outcome` values `health-result.json` carries (task 230; scripts/health-report.mjs writes them). This is
  * only the vocabulary and its one rule: a run that checked nothing is never a healthy site. A green
  * workflow run is not evidence; only these outcomes are.
  */
