@@ -97,7 +97,6 @@ export function createGateDeps(args: {
 
     async transactions(draftId) {
       const query = new URLSearchParams({
-        tag: 'nocturne.publish-gate',
         excludeContent: 'true',
         reverse: 'true',
         limit: String(MAX_TRANSACTIONS),

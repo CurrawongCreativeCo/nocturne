@@ -1894,28 +1894,29 @@ agreement (they then publish themselves, so the review below doesn't apply to th
 **Two kinds of limit.** Sanity's roles are enforced by Sanity's servers; hiding things in the Studio is a
 convenience. Someone with the Editor role who knows the API can still do what the Studio hides.
 
-| What                                                                                                            | Agency (Administrator, Developer) | Editor                                                                                                                                                         | Contributor         | Enforced by                                    |
-| --------------------------------------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------- |
-| Publish, unpublish                                                                                              | Yes                               | Yes                                                                                                                                                            | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
-| **Waiting for review** list (every document with a draft)                                                       | Yes (top of the sidebar)          | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| Protected-change check on Publish (design fields changed since the last publish, and by whom)                   | Yes (asks first)                  | Not applicable                                                                                                                                                 | Not applicable      | Studio                                         |
-| "Sent to Currawong" message in place of Publish                                                                 | No                                | No                                                                                                                                                             | Yes                 | Studio                                         |
-| Project settings, members, API tokens, CORS, datasets                                                           | Administrator only                | No                                                                                                                                                             | No                  | **Sanity**                                     |
-| Edit, create and delete content through the API or Vision                                                       | Yes                               | Yes (any document)                                                                                                                                             | Drafts only         | **Sanity**                                     |
-| Studio tools                                                                                                    | All                               | Start here (first), Presentation, Structure                                                                                                                    | Same as Editor      | Studio                                         |
-| Vision, AI settings, Content health                                                                             | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| Sidebar                                                                                                         | Everything                        | Pages, Blog, Reusable content (Panels only), Website settings (Name, logo & icon, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                         |
-| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections                               | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| Enquiries (read; status, Download CSV, delete)                                                                  | Yes                               | Yes                                                                                                                                                            | Read only           | Studio                                         |
-| Cookie banner, and _Allow AI crawlers_ in Name, logo & icon                                                     | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| _Who can see this_ (members-only) fields                                                                        | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| Section **Layout** picker, **Design** tab (background, animation, more layout options) and **Advanced** options | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| SEO _Hide from search engines_                                                                                  | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| A page's slug once it has a value                                                                               | Editable                          | Read-only                                                                                                                                                      | Read-only           | Studio                                         |
-| Sections in the _Add item_ menu                                                                                 | All                               | Approved list below                                                                                                                                            | Approved list below | Studio                                         |
-| Delete, Duplicate on pages, posts, panels and singletons                                                        | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
-| _New document_ menu                                                                                             | Everything                        | Page templates, Post, Author, Category                                                                                                                         | Same as Editor      | Studio                                         |
-| "Agency view" badge and client-view preview                                                                     | Yes                               | No                                                                                                                                                             | No                  | Studio                                         |
+| What                                                                                                             | Agency (Administrator, Developer) | Editor                                                                                                                                                         | Contributor         | Enforced by                                                      |
+| ---------------------------------------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------- |
+| Publish, unpublish                                                                                               | Yes                               | Yes                                                                                                                                                            | No (drafts only)    | **Sanity** (the Studio also hides the buttons)                   |
+| **Waiting for review** list (every document with a draft)                                                        | Yes (top of the sidebar)          | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| Protected-change check on Publish (design fields changed since the last publish, and by whom)                    | Yes (asks first)                  | Not applicable                                                                                                                                                 | Not applicable      | Studio                                                           |
+| "Sent to Currawong" message in place of Publish (publish gate off)                                               | No                                | No                                                                                                                                                             | Yes                 | Studio                                                           |
+| **Publish** that asks the publish gate (`features.publishGate` on): live if every change is one clients may make | No (uses Sanity's Publish)        | No (uses Sanity's Publish)                                                                                                                                     | Yes                 | **The gate** (`POST /api/publish`); Studio only shows the button |
+| Project settings, members, API tokens, CORS, datasets                                                            | Administrator only                | No                                                                                                                                                             | No                  | **Sanity**                                                       |
+| Edit, create and delete content through the API or Vision                                                        | Yes                               | Yes (any document)                                                                                                                                             | Drafts only         | **Sanity**                                                       |
+| Studio tools                                                                                                     | All                               | Start here (first), Presentation, Structure                                                                                                                    | Same as Editor      | Studio                                                           |
+| Vision, AI settings, Content health                                                                              | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| Sidebar                                                                                                          | Everything                        | Pages, Blog, Reusable content (Panels only), Website settings (Name, logo & icon, Navigation, Announcement bar); Team and Business info when the site has them | Same as Editor      | Studio                                                           |
+| Redirects, A/B tests, Stripe prices, Forms (recipient addresses), Shared sections                                | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| Enquiries (read; status, Download CSV, delete)                                                                   | Yes                               | Yes                                                                                                                                                            | Read only           | Studio                                                           |
+| Cookie banner, and _Allow AI crawlers_ in Name, logo & icon                                                      | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| _Who can see this_ (members-only) fields                                                                         | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| Section **Layout** picker, **Design** tab (background, animation, more layout options) and **Advanced** options  | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| SEO _Hide from search engines_                                                                                   | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| A page's slug once it has a value                                                                                | Editable                          | Read-only                                                                                                                                                      | Read-only           | Studio                                                           |
+| Sections in the _Add item_ menu                                                                                  | All                               | Approved list below                                                                                                                                            | Approved list below | Studio                                                           |
+| Delete, Duplicate on pages, posts, panels and singletons                                                         | Yes                               | Hidden                                                                                                                                                         | Hidden              | Studio                                                           |
+| _New document_ menu                                                                                              | Everything                        | Page templates, Post, Author, Category                                                                                                                         | Same as Editor      | Studio                                                           |
+| "Agency view" badge and client-view preview                                                                      | Yes                               | No                                                                                                                                                             | No                  | Studio                                                           |
 
 **Which fields clients can change.** One registry, `src/lib/sanity/client-editable.ts`, lists for every document,
 page section and shared object type the fields clients may change (`editable`) and the ones that stay with
@@ -1939,10 +1940,82 @@ nothing published to compare with). Fields nobody has classified count as protec
 it's in the registry.
 
 **Publish gate (`features.publishGate`, off by default).** `POST /api/publish` lets a Contributor's draft go live
-without the agency, when every change in it is one clients may make. This is the server side; the Studio
-button that calls it arrives separately, so until then the route is only reachable by a script. Hidden Studio
-fields are not a permission, so the route decides everything itself.
+without the agency, when every change in it is one clients may make. Contributors reach it through the
+Studio's **Publish** button (below); the route can also be called by a script. Hidden Studio fields are not a
+permission, so the route decides everything itself, and the button is only a convenience.
 
+- _What a Contributor sees:_ with the flag on, **Publish** replaces "Sent to Currawong" for Contributors only
+  (`actions/publish-through-gate.tsx`; Editors and agency staff keep Sanity's Publish). It waits for the draft
+  to finish saving, sends the document id and the person's own Studio token to the route, and shows one of:
+  _Published_ (a toast); **Sent to Currawong for review** with the fields that need Currawong; **Fix these
+  before publishing** with the missing or clashing items; "Someone changed this while you were publishing.
+  Review the latest changes and try again."; or a plain "Sign in again" / "Too many tries" / "Not published"
+  message. Nothing is ever lost: whatever is not published stays a draft. Inside a release, or with no draft,
+  the button is disabled. If Studio uses cookie sign-in (no token in the browser), the person is asked to
+  sign in again, since the route needs the token to know who is asking.
+- _Waiting for review:_ a change that goes to review (or is refused) stays a draft, and **Waiting for review**
+  lists every document with a draft, so agency staff find it there without anything extra being stored.
+  The reasons are shown to the Contributor when they press Publish; they are not saved on the document (a
+  write by the server would count as an edit and change the revision the gate guards).
+- _Tests (what proves the gate):_
+  - `src/app/publish-gate-route.test.ts` runs the real `POST /api/publish` handler, `createGateDeps` and
+    `runPublishGate` over real HTTP against a stateful fake of Sanity's API (`src/app/publish-gate-fake-sanity.ts`:
+    users/me, documents, GROQ, History, Access and Actions with revision guards and injectable faults). Every
+    refusal checks the dataset, not the status: the live document is unchanged, the draft is still there and no
+    publish reached Sanity. It covers a permitted publish; protected fields however they were written (page,
+    section, tone, search visibility, unknown fields, removed fields, a section swapped under its key, a copied
+    section, an unknown document type, a changed `_type`); addresses and redirects; unverifiable assets; deletes
+    and unpublishes; missing, wrong, misplaced and borrowed tokens (the Editor token, a token in the body or a
+    cookie, identity claimed in the body); Viewers, custom roles and authors who are removed, robots or unknown;
+    unattributable or over-long history; hostile document ids; a colleague saving, or the live page changing,
+    between the read and the publish; two simultaneous publishes; every Sanity lookup and the publish call
+    failing; empty and clashing required fields; Editors; the feature off; rate limiting; and that tokens, hosts
+    and document text never appear in a response or the audit log.
+  - `src/app/publish-gate-secrets.test.ts` checks that Studio and shared components never name the Editor token
+    or the gate's server modules, and that no `NEXT_PUBLIC_` name could carry a secret.
+  - `src/app/publish-gate-studio.test.ts` sends the button's request through the gate; `publish-gate-client.test.ts`,
+    `publish-through-gate.test.tsx` and `publish-through-gate-flow.test.tsx` cover the answers, who sees the button
+    and the Contributor's states in a DOM (wait, success toast, review with named fields, fix-these, stale
+    revision, sign in again, network failure).
+  - `tests/e2e/publish-gate.spec.ts` (Playwright, production build) shows the shipped default: the route answers
+    404 to everyone and writes nothing.
+  - _Why not Playwright for the rest:_ the flag is fixed at build time and Studio cannot sign in against the
+    fake Content Lake, so a browser test of the Studio button would need a second build and a fake Sanity
+    login. The route and the button's states are covered at the layers above instead.
+- _Checked against Sanity's documentation (26 October 2026):_ the Actions API's publish action takes
+  `ifPublishedRevisionId` and answers `409` on a mismatch, runs as one transaction (nothing partial), and
+  needs a role that can write the document type. `draftId` and `ifDraftRevisionId` are **deprecated** in favour
+  of `versionId` and `ifVersionRevisionId`; the gate still uses the old names, which work (E1 spike), and
+  the new ones were confirmed in the smoke test below, so a later change can move over. The History API requires `excludeContent=true`
+  and returns NDJSON; its `tag` parameter and the entries' `id`, `author` and `timestamp` fields are not in
+  the reference page. The Access API lists project users with `resourceUserId` and `roleNames`, pages with
+  `nextCursor`, and needs the members-read permission; the reference does not say history authors equal
+  `resourceUserId`, and `GET /users/me` is not on the reference page. Those points rest on the E1 spike.
+- _Smoke test against real Sanity (26 October 2026, scratch project, not a client):_ the route and the gate's real
+  code ran against the E1 scratch project with `e1-smoke-` documents, one Editor robot token and one Contributor
+  robot token (both deleted afterwards, along with the documents; nothing was left behind). Confirmed live:
+  - `GET /users/me` on the project host answers `id` and `roles` (so a bad token is `401` and a Viewer is refused);
+  - the History API's `author` for a real person's edits equals the Access API's `resourceUserId`
+    (`pbSwUC7fg` for the tester), so the authors check passes for real members;
+  - a permitted edit by a real person published (`200`) and the draft was removed; a protected change (`access`)
+    returned `202` and the live page and draft were untouched;
+  - a draft changed by a colleague after the gate read it was refused with `409` and the live page was unchanged;
+  - a draft that a robot token also edited was refused (`403`: robots are not members);
+  - an unknown token was `401`;
+  - the non-deprecated Actions fields (`versionId`, `ifVersionRevisionId`, `ifPublishedRevisionId`) answer `409` on
+    a stale revision and `200` on the right one, so the move off `draftId` and `ifDraftRevisionId` is safe to make.
+    - A robot **Contributor** token passes `/users/me` as a Contributor (id `p-…`), so anyone holding such a token
+      can ask the gate to publish a draft that real members wrote. That is the token holder's existing power to
+      ask, not to change anything: the gate still checks every change and every author. Treat Contributor tokens as
+      secrets and do not hand them out.
+- _Still not verified:_ a real **Contributor person** (the scratch project's only member is the tester, an
+  Administrator), so the Contributor path is shown with the robot token and the Administrator person rather than
+  a human Contributor; **Studio's token**: that Studio keeps the signed-in token under
+  `__studio_auth_token_<projectId>` and that the Publish button finds it (needs a real signed-in Studio; with
+  cookie sign-in the button asks the person to sign in again). The history request sends only parameters the
+  reference lists (`excludeContent`, `reverse`, `limit`); an undocumented `tag` label was removed. Before enabling the gate for a client, sign in to their
+  Studio as a Contributor, press Publish on a permitted edit and on a protected one, and check the audit line in
+  the host's log. **Enable it for one pilot client first.**
 - _Switch on:_ set `features: { publishGate: true }` in `site.profile.ts`, create a Sanity token with the
   **Editor** role (nothing higher: no Administrator or Developer token), set it as `SANITY_WRITE_TOKEN`, and
   redeploy. Off, or with no token, the route answers `404` as if it did not exist. Move clients to the
