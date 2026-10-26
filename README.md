@@ -1886,12 +1886,19 @@ _client editor_: **Editor** (can publish) or **Contributor** (drafts only; Viewe
 client view too). **Clients must hold Editor or Contributor on a Growth plan, never Administrator.** An
 Administrator sees the agency view, can manage members, tokens, CORS and datasets, and can delete the project.
 
+**Which role clients get.** Clients are **Contributors** by default: they edit freely, Sanity saves
+everything as a draft, and Currawong reviews and publishes it. Give a client **Editor** only by
+agreement (they then publish themselves, so the review below doesn't apply to their publishes).
+
 **Two kinds of limit.** Sanity's roles are enforced by Sanity's servers; hiding things in the Studio is a
 convenience. Someone with the Editor role who knows the API can still do what the Studio hides.
 
 | What                                                                                                            | Agency (Administrator, Developer) | Editor                                                                                                                                                         | Contributor         | Enforced by                                    |
 | --------------------------------------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------- |
 | Publish, unpublish                                                                                              | Yes                               | Yes                                                                                                                                                            | No (drafts only)    | **Sanity** (the Studio also hides the buttons) |
+| **Waiting for review** list (every document with a draft)                                                       | Yes (top of the sidebar)          | Hidden                                                                                                                                                         | Hidden              | Studio                                         |
+| Protected-change check on Publish (design fields changed since the last publish, and by whom)                   | Yes (asks first)                  | Not applicable                                                                                                                                                 | Not applicable      | Studio                                         |
+| "Sent to Currawong" message in place of Publish                                                                 | No                                | No                                                                                                                                                             | Yes                 | Studio                                         |
 | Project settings, members, API tokens, CORS, datasets                                                           | Administrator only                | No                                                                                                                                                             | No                  | **Sanity**                                     |
 | Edit, create and delete content through the API or Vision                                                       | Yes                               | Yes (any document)                                                                                                                                             | Drafts only         | **Sanity**                                     |
 | Studio tools                                                                                                    | All                               | Start here (first), Presentation, Structure                                                                                                                    | Same as Editor      | Studio                                         |
@@ -1917,6 +1924,18 @@ field has. A field nobody has classified is therefore invisible to clients, and 
 (`src/app/client-editable-schema.test.ts`, which reads `schema.json`) fails until someone classifies it. The
 registry is also the list the agency publish review (task 206) and any future publish gate should read
 (`isClientEditable(type, field)`). It decides what the Studio shows; it is not a permission (see above).
+
+**Reviewing a client's drafts.** Contributors can only save drafts (Sanity enforces it), and they are told
+"Your changes are saved as a draft and sent to Currawong to publish." where Publish would be
+(`actions/contributor-message.tsx`). Agency staff find those drafts under **Waiting for review** at the top
+of the sidebar (a count shows how many). When staff press Publish, the dialog compares the draft with the
+published version (`utils/protected-changes.ts`) and lists every changed field outside the registry's
+`editable` lists, such as a section's Design tab, with the person who made each change, read from Sanity's
+transaction history for the last 25 edits (`utils/fetch-change-history.ts`). If the history can't be read, or
+the edit was older, the field is listed without a name. Publishing then needs a click on **Publish** in that
+dialog. Removing or reordering sections is not flagged, and a document's first publish is not checked (there is
+nothing published to compare with). Fields nobody has classified count as protected, so a new field is flagged until
+it's in the registry.
 
 **Classifying a new field.** When you add a field to a document or section:
 

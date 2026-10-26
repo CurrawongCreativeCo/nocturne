@@ -43,3 +43,21 @@ export function filterNewDocumentOptions<T extends NewOptionLike>(
     ? [...options]
     : options.filter((option) => allowedTemplateIds.has(option.templateId))
 }
+
+/** What a Contributor is told where Publish would be. */
+export const CONTRIBUTOR_MESSAGE =
+  'Your changes are saved as a draft and sent to Currawong to publish.'
+
+/**
+ * For contributors, swaps the Publish action for `replacement` (the message above), in the same
+ * place. Everyone else keeps their actions as they were.
+ */
+export function replacePublishForContributor<T extends ActionLike>(
+  actions: readonly T[],
+  audience: Audience,
+  replacement: T,
+): T[] {
+  return audience === 'contributor'
+    ? actions.map((action) => (action.action === 'publish' ? replacement : action))
+    : [...actions]
+}

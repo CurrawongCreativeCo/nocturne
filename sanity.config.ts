@@ -32,6 +32,7 @@ import { ColourInput } from './src/features/site/components/colour-input'
 import { siteSchemaTypes } from './src/features/site/schemas'
 import { confirmDeletePageActions } from './src/features/studio/actions/confirm-delete-page'
 import { confirmPublishActions } from './src/features/studio/actions/confirm-publish'
+import { contributorMessageActions } from './src/features/studio/actions/contributor-message'
 import { pageLinkActions } from './src/features/studio/actions/page-link-actions'
 import { publishValidationActions } from './src/features/studio/actions/publish-validation'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
@@ -153,11 +154,14 @@ export default defineConfig({
   document: {
     actions: (prev, context) =>
       filterDocumentActions(
-        pageLinkActions(
-          confirmDeletePageActions(
-            publishValidationActions(
-              confirmPublishActions(
-                singletonDocumentActions(withoutEnquiryDuplicate(prev, context), context),
+        contributorMessageActions(
+          pageLinkActions(
+            confirmDeletePageActions(
+              publishValidationActions(
+                confirmPublishActions(
+                  singletonDocumentActions(withoutEnquiryDuplicate(prev, context), context),
+                  context,
+                ),
                 context,
               ),
               context,

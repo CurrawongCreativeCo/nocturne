@@ -9,6 +9,7 @@ import { DocumentsIcon } from '@sanity/icons/Documents'
 import { DownloadIcon } from '@sanity/icons/Download'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
 import { ExpandIcon } from '@sanity/icons/Expand'
+import { EyeOpenIcon } from '@sanity/icons/EyeOpen'
 import { FolderIcon } from '@sanity/icons/Folder'
 import { InboxIcon } from '@sanity/icons/Inbox'
 import { LockIcon } from '@sanity/icons/Lock'
@@ -51,6 +52,9 @@ import {
   CLIENT_REUSABLE_IDS,
   CLIENT_WEBSITE_SETTINGS_IDS,
   filterStructureItems,
+  WAITING_FOR_REVIEW_FILTER,
+  WAITING_FOR_REVIEW_ID,
+  waitingForReviewTitle,
 } from './utils/structure-access'
 // new-singleton:import
 
@@ -130,6 +134,32 @@ const enquiriesList = (
                   void downloadEnquiriesCsv(getClient({ apiVersion }))
                 }),
             ]),
+        ),
+      ),
+    )
+
+const WAITING_COUNT_QUERY = `count(*[${WAITING_FOR_REVIEW_FILTER}])`
+
+/**
+ * Agency-only list of documents with drafts: what Contributors have saved for Currawong to
+ * publish, and any other unpublished work. The count is listener-backed, like Enquiries, and the
+ * item is left out of CLIENT_STRUCTURE_IDS so clients never see it.
+ */
+const waitingForReview = (S: StructureBuilder, { documentStore }: StructureResolverContext) =>
+  S.listItem()
+    .title('Waiting for review')
+    .id(WAITING_FOR_REVIEW_ID)
+    .icon(EyeOpenIcon)
+    .child(
+      documentStore.listenQuery(WAITING_COUNT_QUERY, {}, {}).pipe(
+        map((count: number | null) =>
+          S.documentList()
+            .id(WAITING_FOR_REVIEW_ID)
+            .title(waitingForReviewTitle(count ?? 0))
+            .filter(WAITING_FOR_REVIEW_FILTER)
+            .apiVersion(apiVersion)
+            .defaultOrdering([{ field: '_updatedAt', direction: 'desc' }])
+            .initialValueTemplates([]),
         ),
       ),
     )
@@ -218,6 +248,7 @@ export const structure: StructureResolver = (S, context) => {
 
   const items: Item[] = [
     // new-singleton:list
+    ...(audience === 'agency' ? [waitingForReview(S, context), S.divider()] : []),
     pagesTree(S, context),
     ...(isTypeVisible('post')
       ? [

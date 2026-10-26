@@ -1,14 +1,19 @@
 /**
- * Publish confirmation for pages and posts. Wraps Sanity's own Publish action (so validation,
- * labels and progress stay Sanity's) behind a dialog naming the address that goes live, shown for a
- * first publish and for an address change only (needsPublishConfirmation). When the published slug
- * and the draft's differ, the dialog offers to leave a redirect from the old address.
+ * Publish confirmation. Wraps Sanity's own Publish action (so validation, labels and progress stay
+ * Sanity's) behind a dialog naming the address that goes live for pages and posts, shown for a first
+ * publish and for an address change only (needsPublishConfirmation). When the published slug and
+ * the draft's differ, the dialog offers to leave a redirect from the old address.
+ *
+ * For agency staff, on every document type, the dialog also lists changes to fields outside the
+ * client-editable allowlist and who made them, since a Contributor's draft can carry a design
+ * change they should not have been able to save (utils/protected-changes.ts).
  */
 import { Box, Button, Card, Checkbox, Flex, Spinner, Stack, Text } from '@sanity/ui'
 import { useToast } from '@sanity/ui/toast'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   useClient,
+  useCurrentUser,
   type DocumentActionComponent,
   type DocumentActionDescription,
   type DocumentActionProps,
@@ -17,7 +22,11 @@ import {
 
 import { apiVersion } from '@/config/env'
 
+import { ProtectedChangesList } from '../components/protected-changes-list'
 import { resolveVersions, type RedirectRule } from '../content-health/utils/detect'
+import { isAgency } from '../roles'
+import { fetchChangeAuthors } from '../utils/fetch-change-history'
+import { diffProtectedFields, type ProtectedChange } from '../utils/protected-changes'
 import {
   buildRedirectDocument,
   CONFIRMED_PUBLISH_TYPES,
@@ -42,14 +51,24 @@ interface Lookup {
   result: { error: true } | { plan: RedirectPlan }
 }
 
+/** Who made the protected changes found when Publish was pressed; `authors` is null if the history could not be read. */
+interface Authorship {
+  draftRev: string | undefined
+  authors: ReadonlyMap<string, string> | null
+}
+
 export function withConfirmPublish(Publish: DocumentActionComponent): DocumentActionComponent {
   const ConfirmPublish: DocumentActionComponent = (props: DocumentActionProps) => {
     const { draft, published, type, release } = props
     const client = useClient({ apiVersion })
     const toast = useToast()
+    const currentUser = useCurrentUser()
     const [open, setOpen] = useState(false)
     const [createRedirect, setCreateRedirect] = useState(true)
     const [lookup, setLookup] = useState<Lookup | null>(null)
+    // Protected-field changes found when Publish was pressed, and who made them.
+    const [protectedChanges, setProtectedChanges] = useState<ProtectedChange[]>([])
+    const [authorship, setAuthorship] = useState<Authorship | null>(null)
     // The change being published, held until the draft has become the published version.
     const pending = useRef<AddressChange | null>(null)
     const original = Publish(props)
@@ -89,6 +108,25 @@ export function withConfirmPublish(Publish: DocumentActionComponent): DocumentAc
       }
     }, [open, changeFrom, changeTo, key, fetchPlan])
 
+    const draftRev = draft?._rev
+    const hasProtectedChanges = protectedChanges.length > 0
+    useEffect(() => {
+      if (!open || !hasProtectedChanges || !draft || !published) return
+      const controller = new AbortController()
+      fetchChangeAuthors(client, type, draft._id, published, controller.signal)
+        .then((authors) => {
+          setAuthorship({ draftRev, authors })
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setAuthorship({ draftRev, authors: null })
+        })
+      return () => {
+        controller.abort()
+      }
+      // The draft and published documents change identity on every keystroke; a revision is enough.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, hasProtectedChanges, draftRev, client, type])
+
     // Once the draft is gone the publish has gone through; only then is it safe to leave the redirect.
     useEffect(() => {
       const target = pending.current
@@ -113,7 +151,8 @@ export function withConfirmPublish(Publish: DocumentActionComponent): DocumentAc
         })
     }, [draft, published, client, toast, fetchPlan])
 
-    if (!original || release || !CONFIRMED_PUBLISH_TYPES.has(type)) return original
+    if (!original || release) return original
+    const addressTyped = CONFIRMED_PUBLISH_TYPES.has(type)
 
     const plan: Plan =
       lookup?.key !== key
@@ -135,8 +174,15 @@ export function withConfirmPublish(Publish: DocumentActionComponent): DocumentAc
       label: original.label,
       // Sanity's own state (validation errors, nothing to publish) still decides whether it can run.
       onHandle: () => {
+        // Staff are the only people whose Publish can release a client's protected change.
+        const found =
+          draft && published && isAgency(currentUser)
+            ? diffProtectedFields(type, published, draft)
+            : []
+        setProtectedChanges(found)
         // An edit to a live page at the same address has nothing to confirm.
-        if (!needsPublishConfirmation(Boolean(published), change)) {
+        const addressCheck = addressTyped && needsPublishConfirmation(Boolean(published), change)
+        if (!addressCheck && found.length === 0) {
           original.onHandle?.()
           return
         }
@@ -153,6 +199,13 @@ export function withConfirmPublish(Publish: DocumentActionComponent): DocumentAc
         content: (
           <Stack gap={4}>
             <Text>{url ? `Publish changes to ${url}?` : 'Publish changes to this document?'}</Text>
+            {hasProtectedChanges ? (
+              <ProtectedChangesList
+                changes={protectedChanges}
+                authors={authorship && authorship.draftRev === draftRev ? authorship.authors : null}
+                loading={authorship?.draftRev !== draftRev}
+              />
+            ) : null}
             {change ? (
               <Card padding={3} radius={2} tone="caution" border>
                 <Stack gap={3}>
@@ -269,8 +322,6 @@ function RedirectChoice({
   )
 }
 
-/** Wraps Publish on pages and posts; every other action and type is left as it was. */
-export const confirmPublishActions: DocumentActionsResolver = (prev, { schemaType }) =>
-  CONFIRMED_PUBLISH_TYPES.has(schemaType)
-    ? prev.map((action) => (action.action === 'publish' ? withConfirmPublish(action) : action))
-    : prev
+/** Wraps Publish on every type; every other action is left as it was. */
+export const confirmPublishActions: DocumentActionsResolver = (prev) =>
+  prev.map((action) => (action.action === 'publish' ? withConfirmPublish(action) : action))

@@ -5,6 +5,9 @@ import {
   CLIENT_STRUCTURE_IDS,
   CLIENT_WEBSITE_SETTINGS_IDS,
   filterStructureItems,
+  WAITING_FOR_REVIEW_FILTER,
+  WAITING_FOR_REVIEW_ID,
+  waitingForReviewTitle,
 } from './structure-access'
 
 const idOf = (item: string) => (item === '---' ? null : item)
@@ -86,5 +89,24 @@ describe('filterStructureItems', () => {
     expect(
       filterStructureItems(['pages', 'x'], 'editor', (i) => (i === 'x' ? undefined : i)),
     ).toEqual(['pages'])
+  })
+})
+
+describe('Waiting for review', () => {
+  it('is agency only: clients never see it, whatever the list', () => {
+    expect(CLIENT_STRUCTURE_IDS.has(WAITING_FOR_REVIEW_ID)).toBe(false)
+    const items = ['pages', WAITING_FOR_REVIEW_ID]
+    expect(filterStructureItems(items, 'contributor', idOf)).toEqual(['pages'])
+    expect(filterStructureItems(items, 'editor', idOf)).toEqual(['pages'])
+    expect(filterStructureItems(items, 'agency', idOf)).toEqual(items)
+  })
+
+  it('lists documents that have drafts', () => {
+    expect(WAITING_FOR_REVIEW_FILTER).toBe('_id in path("drafts.**")')
+  })
+
+  it('counts what is waiting in the title', () => {
+    expect(waitingForReviewTitle(0)).toBe('Waiting for review')
+    expect(waitingForReviewTitle(3)).toBe('Waiting for review (3)')
   })
 })
