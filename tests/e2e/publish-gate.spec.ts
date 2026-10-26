@@ -36,11 +36,4 @@ test.describe('POST /api/publish with the publish gate off', () => {
     ).json()) as unknown[]
     expect(mutationsAfter).toEqual(mutationsBefore)
   })
-
-  test('is reported off by /api/site-info', async ({ request }) => {
-    const body = (await (await request.get('/api/site-info')).json()) as {
-      enabled: Record<string, boolean>
-    }
-    expect(body.enabled.publishGate).toBeFalsy()
-  })
 })

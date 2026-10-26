@@ -6,7 +6,7 @@ import { siteProfileInput } from '../../site.profile'
 /**
  * The site profile: what this site uses. `site.profile.ts` at the repo root (a Customize file) is
  * where it is written; this module (Core) holds the types, defaults and validation and exports the
- * resolved `siteProfile`. Studio, the routes and the Ops dashboard (`/api/site-info`) all read it.
+ * resolved `siteProfile`. Studio, the routes and the agency's setup status (`getSetupStatus()`) all read it.
  *
  * The profile controls visibility, never schema registration: every document and section type stays
  * registered, so `schema.json`, typegen and the generators don't change with it. A disabled feature

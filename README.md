@@ -509,6 +509,84 @@ Server errors are logged as one JSON line each (`src/instrumentation.ts`): searc
 
 Every deploy runs `npm run build`, which regenerates Sanity types from the schema first.
 
+### Configuration
+
+`npm run config:check` says which features are set up and, when one isn't, what is missing and where to set it. It
+reads the environment first and `.env.local` second (like `check:dataset`), and it prints names and words, never a value.
+
+```
+Configuration (a local build)
+
+✓ Sanity content           Ready
+✗ Contact forms            Not set up: TURNSTILE_SECRET_KEY, RESEND_API_KEY not set
+                           Without it: Form sections show "unavailable" to visitors. Nothing else changes.
+? Daily health monitoring  Can't check here: run with --github (task 231)
+```
+
+Each line is **Ready**, **Not set up: <why>**, **Off in profile** (the feature's switch in `site.profile.ts` is false) or
+**Can't check here** (GitHub-side settings, which need `--github`, task 231). Options: `--strict` exits 1 when a feature
+that is on is missing something it needs; `--json` prints the same report as JSON; `--live` also asks Sanity about the
+dataset's privacy (the other features say "not implemented yet"); `--build` runs only the build gate below.
+
+**The build gate.** `npm run build` runs `config:check --build` first. It enforces exactly two settings,
+`NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATASET`, which `src/config/env.ts` already throws on, so no site
+gains a new way to fail: the gate only replaces that stack trace with a message naming each missing setting and where
+to set it. On Vercel it also says the live deployment stays as it is, because a failed build never replaces it.
+
+| Where the build runs                                                                                                  | What the gate does                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Locally (no `VERCEL_ENV`, no `CI`)                                                                                    | The two settings above                                                                                                                                                                      |
+| CI and fake-data builds (`CI`, `SANITY_API_HOST`, or a placeholder project ID such as `ci-placeholder` or `e2etest1`) | The same two. Placeholders are accepted, and no real service is ever required                                                                                                               |
+| Vercel Preview                                                                                                        | The same two                                                                                                                                                                                |
+| Vercel Production                                                                                                     | The same two, and a **warning** when `SANITY_API_READ_TOKEN` is missing (datasets are private, so the site can't read content without it). It becomes required from template version 1.10.0 |
+
+A missing `TURNSTILE_SECRET_KEY` (or anything else for an optional feature) never affects a build, and neither does a
+malformed `FORMS_FROM_EMAIL`: that makes `config:check` report forms as not set up, because Resend would refuse the
+sender, but it was never a build requirement.
+
+**Why the read token only warns.** A production site can't show content from a private dataset without
+`SANITY_API_READ_TOKEN`, so it is a genuine requirement and the warning says so. It is a warning in 1.9.0 only so that no
+site that builds today stops building by surprise; it becomes required from 1.10.0 (`enforceFrom`). **A version number never
+enforces anything by itself.** The gate doesn't read the template version. Promoting a setting means changing the gate
+and writing a release note, and a test (`config-gate.test.ts`) fails when the template reaches a setting's `enforceFrom`
+to make sure somebody reviews it: see the release checklist under [Cutting a release](#cutting-a-release-template-maintainers).
+
+**`NOCTURNE_CONFIG_GATE=warn`** is an emergency control, listed under _Configuration controls_ in `config:check` (not
+under Sanity, and never enforced by the gate it controls). It turns the gate's failures into warnings so an urgent fix can
+ship while a non-essential core setting is missing. It cannot skip `NEXT_PUBLIC_SANITY_PROJECT_ID` or
+`NEXT_PUBLIC_SANITY_DATASET`, which `env.ts` needs anyway, and it changes nothing else: not the dataset-privacy check, the
+health workflow or `launch:check`. Remove it once the fix has shipped.
+
+**Checks that need the network are explicit.** Plain `config:check`, `--strict`, `--json` and `--build` never make a
+request. `--live` makes read-only requests (today, one to the Sanity datasets API) and only for Sanity content.
+
+**Health monitoring states.** `config:check` can't see GitHub, so it says "Can't check here". `HEALTH_CHECKS` and
+`HEALTH_EXPECT_MARKER` are registered but not read by the workflow yet (task 230), and are listed as "not implemented
+yet", not as missing. Task 230 writes `health-result.json`; its outcomes are `disabled` (on purpose), `unconfigured`
+(enabled but set up wrongly), `skipped` (nothing was checked), `healthy`, `warning` and `failed`
+(`src/lib/ops/health-states.ts`). Only `healthy` counts as healthy: a green workflow run that skipped is not a health
+check.
+
+**For developers.** Each feature describes its settings in a `config.registry.ts` next to it (`defineFeatureConfig` in
+`src/config/feature-config.ts`): names, where each one lives, what it's for and where to get it. **Never a value.** The
+entries are composed in `src/app/feature-registry.ts`, which `config:check` and the server-only `getSetupStatus()`
+(`src/app/setup-status.ts`) both read. `getSetupStatus()` names missing settings, so it is private: only an
+authenticated route may return it (task 232), never a public one. A feature's readiness is the function the feature
+already uses (for forms, `getFormsConfig`), not a second copy of the rules. A test fails when code or a workflow reads an
+environment variable or GitHub variable or secret that is neither registered, on the `pending` list (features still to
+be registered, task 233) nor on the ignore list (tests, tooling, platform variables). Add the entry in the same change
+as the new variable, and never give a secret a `NEXT_PUBLIC_` name.
+
+Registry entries also carry what a future Settings screen needs, as data: a plain name (`title`) and purpose
+(`summary`, `purpose`), required versus optional, the validation rule (`format`), setup steps (`setup`), documentation
+links (`docs`), whether a change needs a redeploy (derived from `where`, in `src/lib/config/guidance.ts`), and whether
+it's managed locally, at a provider, or one day through Foundation (`managedBy`). Values and secrets never appear.
+A deprecated setting names its replacement, how to migrate and what must be true before removal; a removal
+version (`removeIn`) is added only once somebody has approved it.
+
+Registered so far: Sanity content, contact forms, daily health monitoring and the configuration controls. The README tables elsewhere stay the
+reference for the rest until task 233 generates this section and `.env.example`.
+
 ### Cloudflare (not supported yet)
 
 There is no Deploy to Cloudflare button. The OpenNext Cloudflare adapter builds this site (Cache Components
@@ -4966,33 +5044,18 @@ for when to extract it into a versioned package.
 site was last brought up to. `src/config/template-version.ts` reads it. It is a core file: when you merge a template tag,
 take the template's copy.
 
-`GET /api/site-info` reports it for the Ops dashboard:
+`GET /api/site-info` reports only the launch state, for `launch:check` and the health workflow:
 
 ```json
-{
-  "templateVersion": "1.2.0",
-  "tier": "content",
-  "enabled": { "blog": true, "forms": true, "pricing": false, "…": "…" },
-  "features": {
-    "forms": true,
-    "newsletter": false,
-    "pricing": false,
-    "members": true,
-    "analytics": true,
-    "sentry": false
-  },
-  "commit": "9f53519…",
-  "builtAt": "2026-10-14T03:21:09.412Z"
-}
+{ "schema": 2, "launch": { "status": "live", "homepage": "links" } }
 ```
 
-- `tier` and `enabled` come from the site profile (`site.profile.ts`): what the site has switched on, for every feature in the profile.
-- `features` says whether each feature's environment is complete, using the checks the features themselves use (forms:
-  Turnstile, Resend and the from address; newsletter: also a provider; pricing: `STRIPE_SECRET_KEY`; members: at least one
-  sign-in provider; analytics: at least one provider; sentry: `SENTRY_DSN`). It never contains a key or any other env value.
-- `commit` is `VERCEL_GIT_COMMIT_SHA` (`null` off Vercel); `builtAt` is stamped by `next.config.ts` when the site is built.
-- The response is prerendered and cached, so it costs no Sanity request and reflects the environment of the **last build**:
-  after changing an environment variable, redeploy.
+- It used to carry the template version, tier, switched-on features, which integrations were configured, the commit and
+  the build time. That told anyone which integrations were missing and which release (and so which known bugs) a site
+  ran, so those fields moved to `getSetupStatus()` (server-only, for the agency; see [Configuration](#configuration)) and
+  to `npm run config:check`. No reason codes, readiness or setting names appear in any public response.
+- The response is prerendered and cached, so it costs no Sanity request and reflects the launch state of the **last
+  build**: after changing `launch` in `site.profile.ts`, redeploy.
 - A CMS page with a slug starting `api/` would clash with it, as with the other `/api` routes.
 
 ### Cutting a release (template maintainers)
@@ -5003,7 +5066,10 @@ take the template's copy.
    subsections are dropped; _Breaking changes / migration steps_ is kept and says "None." when empty), refreshes the
    compare links and `template-version.json`, and leaves a fresh _Unreleased_ block. Write the migration steps in
    _Unreleased_ **before** running it.
-3. Review the diff, then `npm run format`, `npm run check` and `npm run test:e2e`.
+3. Review the diff, then `npm run format`, `npm run check` and `npm run test:e2e`. **Review configuration enforcement:** run
+   `npm run config:check` and look at `enforceFrom` in the `config.registry.ts` files. If this release reaches one (the
+   `config-gate.test.ts` test will fail), decide deliberately whether to enforce it now, move `enforceFrom` later, or
+   promote it (change the gate, add the release note, tell owners to set it first). Never let it pass by editing the version.
 4. The script prints the git commands to commit, then tag and push (`git tag -a vx.y.z -m "vx.y.z"`,
    `git push origin main vx.y.z`). It never runs git or pushes. Never force-push a tag or `main`.
 
