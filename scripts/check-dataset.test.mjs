@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { checkDataset, evaluateDataset, parseEnv } from './check-dataset.mjs'
+import {
+  checkDataset,
+  evaluateDataset,
+  evaluateEnquiryProbe,
+  probeEnquiryExposure,
+  parseEnv,
+} from './check-dataset.mjs'
 
 const base = { projectId: 'abc123', dataset: 'production', token: 'sk-test' }
 
@@ -96,5 +102,78 @@ describe('parseEnv', () => {
       C: 'three',
       NEXT_PUBLIC_SANITY_DATASET: 'production',
     })
+  })
+})
+
+describe('privacy flag', () => {
+  const answer = (aclMode) =>
+    evaluateDataset({ dataset: 'production', status: 200, body: [{ name: 'production', aclMode }] })
+
+  it('is true, false or null, never a guess', () => {
+    expect(answer('private').private).toBe(true)
+    expect(answer('public').private).toBe(false)
+    expect(answer('custom').private).toBeNull()
+    expect(evaluateDataset({ dataset: 'production', status: 401, body: null }).private).toBeNull()
+    expect(evaluateDataset({ dataset: 'x', status: 200, body: [] }).private).toBeNull()
+  })
+})
+
+describe('enquiry exposure probe', () => {
+  it('confirms exposure only from a count above zero', () => {
+    expect(evaluateEnquiryProbe({ status: 200, body: { result: 4 } })).toEqual({
+      state: 'exposed',
+      count: 4,
+    })
+  })
+
+  it('finds none only from a valid count of zero', () => {
+    expect(evaluateEnquiryProbe({ status: 200, body: { result: 0 } })).toEqual({
+      state: 'none-found',
+      count: 0,
+    })
+  })
+
+  it('calls a refusal "refused", never "none found"', () => {
+    for (const status of [401, 403]) {
+      expect(evaluateEnquiryProbe({ status, body: null })).toEqual({
+        state: 'refused',
+        count: null,
+      })
+      expect(evaluateEnquiryProbe({ status, body: { result: 0 } }).state).toBe('refused')
+    }
+  })
+
+  it('is unverified, never "none", for anything it cannot read as a count', () => {
+    for (const input of [
+      { status: 500, body: { result: 4 } },
+      { status: 200, body: { result: [{ email: 'a@b.c' }] } },
+      { status: 200, body: null },
+      { status: 200, body: { result: -1 } },
+      { status: 200, body: { result: 1.5 } },
+      { status: 200, body: { result: '0' } },
+      { status: 404, body: { result: 0 } },
+      { status: 200, body: {} },
+    ]) {
+      expect(evaluateEnquiryProbe(input)).toEqual({ state: 'unverified', count: null })
+    }
+  })
+
+  it('sends no credentials and asks only for a count of published enquiries', async () => {
+    const fetchImpl = mockFetch(200, { result: 2 })
+    expect(await probeEnquiryExposure({ ...base, fetchImpl })).toEqual({
+      state: 'exposed',
+      count: 2,
+    })
+    const [url, init] = fetchImpl.mock.calls[0]
+    expect(url).toContain('abc123.api.sanity.io')
+    expect(url).toContain('/data/query/production')
+    expect(decodeURIComponent(url)).toContain('count(*[_type == "enquiry"')
+    expect(decodeURIComponent(url)).toContain('drafts.**')
+    expect(JSON.stringify(init)).not.toMatch(/authorization|sk-test/i)
+  })
+
+  it('is unverified when the request fails', async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new Error('offline'))
+    expect((await probeEnquiryExposure({ ...base, fetchImpl })).state).toBe('unverified')
   })
 })

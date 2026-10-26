@@ -1,16 +1,21 @@
-# Daily health check of the production site: `launch:check --json` against PRODUCTION_URL and
-# `npm run check:dataset`. A lapsed or downgraded Sanity plan makes private datasets public, and
-# enquiries are personal data, so a public dataset fails the run (and is called out when
-# ENQUIRIES_STORE is 1). Any failure opens or updates one issue labelled `health`; the next green run
-# closes it. The issue text is built by scripts/health-report.mjs (unit-tested). Documented in the
-# README ("Health checks").
-# Skips with a notice, and succeeds, when PRODUCTION_URL, the project ID or the token is missing.
+# Daily health check of the production site. Every run writes health-result.json (schema 1) saying what
+# actually happened: disabled, unconfigured, skipped, healthy, warning or failed, in live or pre-launch
+# mode. A green run is not evidence of health; the result file is (README, "Health checks").
+#
+# Checks: `launch:check --json` against PRODUCTION_URL (`--prelaunch` when /api/site-info says the site
+# is pre-launch) and `npm run check:dataset`. A lapsed or downgraded Sanity plan makes private datasets
+# public, and enquiries are personal data, so a public dataset fails the run, and is called out when the
+# dataset holds enquiries. A real failure opens or updates one issue labelled `health`; the next green
+# run closes it. A synthetic dispatch (`synthetic: true`) never touches an issue. The result and issue
+# text are built by scripts/health-report.mjs (unit-tested).
+# Disabled (HEALTH_CHECKS=off) and unconfigured runs write the result and succeed, with a warning that
+# nothing was checked.
 name: Health
 
 on:
   schedule:
-    # Every day 20:00 UTC (6 am Sydney, 7 am in daylight saving). GitHub pauses scheduled runs after
-    # 60 days without repository activity.
+    # Every day 20:00 UTC (6 am Sydney, 7 am in daylight saving). GitHub can disable scheduled runs in a
+    # public repository after 60 days without repository activity.
     - cron: '0 20 * * *'
   workflow_dispatch:
     inputs:
@@ -18,10 +23,21 @@ on:
         description: Check this address instead of the PRODUCTION_URL variable
         type: string
         required: false
+      synthetic:
+        description: Synthetic test. Runs the checks, but never opens, edits or closes an issue, and readers ignore the result
+        type: boolean
+        default: false
+      expected_outcome:
+        description: Synthetic test only. The outcome the test must observe (default failed). The test itself fails if it differs
+        type: choice
+        options: [failed, warning, healthy, unconfigured, disabled, skipped]
+        default: failed
 
+# Nothing is writable by default. The `health` job, which every run (including a synthetic one)
+# executes, can only read issues; the one job that can write them is `issues`, which a synthetic run
+# never starts. So a synthetic run cannot touch an issue even if a step were wrong: GitHub refuses it.
 permissions:
   contents: read
-  issues: write
 
 # One run at a time; a manual run waits for the scheduled one instead of cancelling it.
 concurrency:
@@ -32,78 +48,157 @@ jobs:
   health:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      checked: ${{ steps.result.outputs.checked }}
+      failed: ${{ steps.result.outputs.failed }}
+      issue_body: ${{ steps.result.outputs.issue_body }}
     env:
       PRODUCTION_URL: ${{ inputs.production_url || vars.PRODUCTION_URL }}
       NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
       NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET || 'production' }}
       # A Viewer token is enough: both checks only read. The same secret the backup uses.
       SANITY_API_READ_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
-      # Mirrors the Vercel setting so a public dataset is reported as exposed personal data.
+      # Intent: HEALTH_CHECKS=off switches monitoring off on purpose (template repo, scratch repos, forks).
+      HEALTH_CHECKS: ${{ vars.HEALTH_CHECKS }}
+      HEALTH_CHECKS_REASON: ${{ vars.HEALTH_CHECKS_REASON }}
+      # Optional: text the home page must contain, which proves CMS -> query -> render.
+      HEALTH_EXPECT_MARKER: ${{ vars.HEALTH_EXPECT_MARKER }}
+      # Deprecated: the anonymous enquiry-exposure probe replaces it. Still read for one minor release.
       ENQUIRIES_STORE: ${{ vars.ENQUIRIES_STORE }}
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
+      # Synthetic runs prove they never touch issues: the health issues are listed before and after.
+      - name: Snapshot issues
+        id: issues-before
+        if: inputs.synthetic == true
+        run: gh issue list --label health --state all --limit 100 --json number,state,title,updatedAt > issues-before.json
+
       - name: Check configuration
         id: gate
         run: |
-          if [ -z "$PRODUCTION_URL" ] || [ -z "$NEXT_PUBLIC_SANITY_PROJECT_ID" ] || [ -z "$SANITY_API_READ_TOKEN" ]; then
-            echo "::notice title=Health check skipped::Set the PRODUCTION_URL and NEXT_PUBLIC_SANITY_PROJECT_ID variables and the SANITY_AUTH_TOKEN secret (Viewer role) to check the production site and its dataset every day."
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            exit 0
+          missing=""
+          [ -n "$PRODUCTION_URL" ] || missing="$missing,PRODUCTION_URL"
+          [ -n "$NEXT_PUBLIC_SANITY_PROJECT_ID" ] || missing="$missing,NEXT_PUBLIC_SANITY_PROJECT_ID"
+          [ -n "$SANITY_API_READ_TOKEN" ] || missing="$missing,SANITY_AUTH_TOKEN"
+          missing="${missing#,}"
+          if [ "$HEALTH_CHECKS" = "off" ]; then
+            state=disabled
+          elif [ -n "$missing" ]; then
+            state=unconfigured
+          else
+            state=ready
           fi
-          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "state=$state" >> "$GITHUB_OUTPUT"
+          echo "missing=$missing" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: steps.gate.outputs.enabled == 'true'
         with:
           persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        if: steps.gate.outputs.enabled == 'true'
         with:
           node-version-file: .nvmrc
 
-      # No `npm ci`: both checks use only Node's built-ins. Neither step fails the job; the report
-      # step turns what they found into an issue, and the last step fails the run when it was unhealthy.
+      # The site says whether it is pre-launch. An unreadable answer means the live checks, which fail clearly.
+      - name: Detect the launch mode
+        id: mode
+        if: steps.gate.outputs.state == 'ready'
+        run: node scripts/health-report.mjs mode
+
+      # No `npm ci`: the checks use only Node's built-ins. Neither command fails the step; the result
+      # step turns what they found into the outcome. `ran` is only set when both finished.
       - name: Run the checks
-        if: steps.gate.outputs.enabled == 'true'
+        id: checks
+        if: steps.gate.outputs.state == 'ready'
+        env:
+          CHECK_MODE: ${{ steps.mode.outputs.mode }}
         run: |
+          args=(--json)
+          [ "$CHECK_MODE" = "prelaunch" ] && args+=(--prelaunch)
+          [ -n "$HEALTH_EXPECT_MARKER" ] && args+=("--expect-marker=$HEALTH_EXPECT_MARKER")
           status=0
-          npm run --silent launch:check -- "$PRODUCTION_URL" --json > launch.json 2> launch.err || status=$?
-          echo "launch:check exited $status"
+          if [ "$CHECK_MODE" = "unknown" ]; then
+            echo "Launch state unknown: skipping launch:check, checking the dataset only."
+          else
+            npm run --silent launch:check -- "$PRODUCTION_URL" "${args[@]}" > launch.json 2> launch.err || status=$?
+            echo "launch:check exited $status"
+          fi
           status=0
-          npm run --silent check:dataset > dataset.txt 2>&1 || status=$?
+          npm run --silent check:dataset -- --json > dataset.json 2> dataset.err || status=$?
           echo "check:dataset exited $status"
-          echo "$status" > dataset.exit
+          echo "ran=true" >> "$GITHUB_OUTPUT"
 
-      - name: Build the report
-        id: report
-        if: steps.gate.outputs.enabled == 'true'
+      # Always runs, so a cancelled or timed-out run still says so. With no result file at all (the
+      # checkout itself failed) readers treat the run as configured but skipped.
+      - name: Write the result
+        id: result
+        if: always()
         env:
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SKIP_REASON: ${{ job.status == 'cancelled' && 'The run was cancelled or timed out before the checks finished.' || 'The checks did not finish.' }}
         run: |
-          node scripts/health-report.mjs --launch=launch.json --launch-stderr=launch.err \
-            --dataset=dataset.txt --dataset-exit="$(cat dataset.exit)" --out=issue.md
+          node scripts/health-report.mjs result \
+            --state='${{ steps.gate.outputs.state }}' --missing='${{ steps.gate.outputs.missing }}' \
+            --mode='${{ steps.mode.outputs.mode }}' --mode-source='${{ steps.mode.outputs.source }}' \
+            --expect='${{ inputs.expected_outcome }}' --checks-ran='${{ steps.checks.outputs.ran }}' \
+            --synthetic='${{ inputs.synthetic && 'true' || 'false' }}' --skip-reason="$SKIP_REASON" \
+            --launch=launch.json --launch-stderr=launch.err --dataset=dataset.json \
+            --out=health-result.json --issue=issue.md
 
+      # A synthetic run is itself a test: it fails when the outcome differs from the expected one, the
+      # result is missing or invalid, or an issue changed. The health outcome alone never fails it.
+      - name: Verify the synthetic test
+        id: verify
+        if: always() && inputs.synthetic == true
+        run: |
+          gh issue list --label health --state all --limit 100 --json number,state,title,updatedAt > issues-after.json || rm -f issues-after.json
+          node scripts/health-report.mjs verify --result=health-result.json --expect='${{ inputs.expected_outcome }}' \
+            --issues-before=issues-before.json --issues-after=issues-after.json
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: health-result
+          path: health-result.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # The only job that can write issues. A synthetic run, and any run that checked nothing, skips it.
+  issues:
+    needs: health
+    if: needs.health.outputs.checked == 'true' && inputs.synthetic != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      FAILED: ${{ needs.health.outputs.failed }}
+      ISSUE_BODY: ${{ needs.health.outputs.issue_body }}
+    steps:
       - name: Open, update or close the issue
-        if: steps.gate.outputs.enabled == 'true'
-        env:
-          FAILED: ${{ steps.report.outputs.failed }}
         run: |
           gh label create health --description "Daily production health check" --color B60205 --force
           number=$(gh issue list --label health --state open --limit 1 --json number --jq '.[0].number // empty')
           if [ "$FAILED" = "true" ]; then
+            printf '%s\n' "$ISSUE_BODY" > issue.md
             if [ -n "$number" ]; then
               gh issue edit "$number" --title "Production health check failing" --body-file issue.md
             else
               gh issue create --title "Production health check failing" --label health --body-file issue.md
             fi
           elif [ -n "$number" ]; then
-            gh issue close "$number" --comment "The daily health check passed again on $(date -u +%F), so this is closed. See ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+            gh issue close "$number" --comment "The daily health check passed again on $(date -u +%F), so this is closed. See ${RUN_URL}."
           fi
 
       - name: Fail the run when unhealthy
-        if: steps.report.outputs.failed == 'true'
+        if: env.FAILED == 'true'
         run: |
           echo "::error title=Health check failed::See the issue labelled health, or the report above."
           exit 1

@@ -4415,30 +4415,83 @@ on demand (_Actions → Health → Run workflow_). It runs `launch:check --json`
 `npm run check:dataset`. A lapsed or downgraded Sanity plan makes private datasets public, and stored enquiries are
 personal data, so a broken deploy or an exposed dataset should reach you before it reaches the client.
 
-| Name                            | Kind     | Used for                                                                                                                                         |
-| ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `PRODUCTION_URL`                | variable | The live address, e.g. `https://example.com.au`                                                                                                  |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | variable | Same variable as the Sanity and backup workflows. `NEXT_PUBLIC_SANITY_DATASET` (variable) defaults to `production`                               |
-| `SANITY_AUTH_TOKEN`             | secret   | **Viewer** token, the same secret the backup uses. Both checks only read                                                                         |
-| `ENQUIRIES_STORE`               | variable | Optional. Set it to `1` when it is `1` on Vercel (repository variables can't read Vercel's), so a public dataset is flagged as exposed enquiries |
+| Name                            | Kind     | Used for                                                                                                                                                                                             |
+| ------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PRODUCTION_URL`                | variable | The live address, e.g. `https://example.com.au`                                                                                                                                                      |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | variable | Same variable as the Sanity and backup workflows. `NEXT_PUBLIC_SANITY_DATASET` (variable) defaults to `production`                                                                                   |
+| `SANITY_AUTH_TOKEN`             | secret   | **Viewer** token, the same secret the backup uses. Both checks only read                                                                                                                             |
+| `HEALTH_CHECKS`                 | variable | Optional. `off` switches monitoring off on purpose (see below). `HEALTH_CHECKS_REASON` (variable, optional) says why                                                                                 |
+| `HEALTH_EXPECT_MARKER`          | variable | Optional. The _Launch verification marker_ from Studio (Name, logo & icon → Advanced). Passed as `--expect-marker`, so a pass proves CMS → query → render                                            |
+| `ENQUIRIES_STORE`               | variable | **Deprecated.** The check now asks Sanity anonymously whether visitors can count stored enquiries. Still read for one minor release; delete it. The run summary carries a deprecation line while set |
 
-- **What fails the run.** Any `launch:check` failure (warnings never do) and a public or unreadable dataset. With
-  `ENQUIRIES_STORE` at `1` a public dataset is also reported as _enquiries are exposed_, first in the list. Because it
-  checks the live site the way a launch does, a client who has not replaced the template favicon or copy will see those
-  failures daily; fix them, or leave `PRODUCTION_URL` unset until launch.
-- **One issue, labelled `health`.** On a failure it opens _Production health check failing_ with the failing lines and
+**The result file.** Every run writes `health-result.json` (schema 1) and uploads it as the `health-result` artifact
+for 30 days, including disabled and unconfigured runs. The run's colour is not evidence of health; the file is.
+It holds `outcome`, `reason`, `skipReason`, `mode` (`live`, `prelaunch`, `unknown` or `null`), `modeSource` (`site-info`, `profile` or `null`), `synthetic`, `test` (synthetic runs only: `expectedOutcome`, `healthStatus`, `testStatus`, `problems`), `checkedAt`, `url`,
+`repoTemplateVersion` (the repository's own `template-version.json`, not necessarily what is deployed), `setup.missing`
+(names only), `summary` (`pass`, `warn`, `fail`), `failures` (`id`, `area`, `title`, `fix`), `dataset.private`, `enquiries` (`exposed`, `none-found`, `refused`, `unverified` or `not-checked`) and
+`enquiriesExposed` (true only when `enquiries` is `exposed`). It never carries a value from the environment except the site's own address.
+
+| Outcome        | Means                                                                                           | Run              | Issue                 |
+| -------------- | ----------------------------------------------------------------------------------------------- | ---------------- | --------------------- |
+| `disabled`     | `HEALTH_CHECKS` is `off`, on purpose. Neutral                                                   | green            | none                  |
+| `unconfigured` | Not disabled, and `PRODUCTION_URL`, the project ID or `SANITY_AUTH_TOKEN` is missing. A problem | green            | none                  |
+| `skipped`      | Setup is present but no checks ran: cancelled, or timed out first. A problem                    | red or cancelled | left alone            |
+| `healthy`      | Checks ran and found nothing                                                                    | green            | closes the open issue |
+| `warning`      | Checks ran with warnings only. Warnings never fail a run                                        | green            | closes the open issue |
+| `failed`       | Any failure, including `launch:check` printing no results                                       | red              | opens or updates it   |
+
+`disabled`, `unconfigured` and `skipped` runs say **Nothing was checked** in the job summary and in a `::warning::`
+annotation, with the reason. Readers (the future Studio and Foundation panels) add two more states: **Stale**, when the
+newest non-synthetic result is older than 36 hours, or GitHub has paused or turned off the workflow while
+`HEALTH_CHECKS` isn't `off`; and **Unknown**, when the reader can't see GitHub or no run has happened yet. A cancelled
+or skipped run with **no** result file (the checkout itself failed, say) also counts as configured but skipped. Only a
+non-synthetic `healthy` or `warning` result is ever shown as health.
+
+- **Turning it off.** Set the `HEALTH_CHECKS` variable to `off` (and optionally `HEALTH_CHECKS_REASON`) on repositories that
+  should not be monitored: this template repository, scratch repositories and forks. Nothing is checked and the run stays
+  green. Without it, a repository that has not been set up reports `unconfigured`, which is a problem, so turning monitoring
+  off is always an explicit choice. The template repository should have `HEALTH_CHECKS=off` set in its settings (that is a
+  GitHub setting, not part of the code).
+- **Pre-launch sites and the launch state.** The workflow works out the launch state before it checks anything, and an
+  unreadable endpoint is never taken as proof that a site has launched. In order: a readable `<PRODUCTION_URL>/api/site-info`
+  decides (`prelaunch` runs `launch:check --prelaunch`, the privacy proof, and records `mode: "prelaunch"`; a template
+  that predates the launch block is live); if the endpoint is down, errors or isn't JSON, an **explicit**
+  `launch: { status: ... }` in `site.profile.ts` decides (`modeSource: "profile"`), so a launched site with
+  `status: 'live'` written out still has its outage reported as a failure; with neither, the state is `unknown`. An
+  unknown run skips the launch checks, checks the dataset only, and ends as a **warning** (`mode: "unknown"`) saying why,
+  rather than opening an incident for a project that may not have launched. To get outage detection for a launched site
+  that omits the block, write `launch: { status: 'live' }` in `site.profile.ts` when it launches.
+- **What fails the run.** Any `launch:check` failure (warnings never do) and a public or unreadable dataset. Whenever the
+  dataset isn't known to be private, the workflow also makes an **anonymous** request (no token) for a count of published
+  `enquiry` documents: what a visitor could do, so it tests real exposure where a token would not. It reads and prints a
+  count only, never a document or a name. Three answers are kept apart: **exposed** (a count above zero; reported first),
+  **none found** (only when Sanity returned a valid count of zero), **refused** (Sanity answered 401 or 403) and
+  **unverified** (the request failed or wasn't a count). The last two are reported as a failure of their own, never as
+  "none". The deprecated `ENQUIRIES_STORE` only adds a sentence to the
+  unverified line. Because the live checks run the way a launch does, a client who has not replaced the template favicon or
+  copy will see those failures daily; fix them, or set `HEALTH_CHECKS=off` until launch.
+- **One issue, labelled `health`.** On a real failure it opens _Production health check failing_ with the failing lines and
   how to fix each; while the problem persists later runs rewrite the same issue instead of adding more. The next
-  passing run closes it with a comment. Turn on GitHub notifications for issues, or you will not hear of it. The
-  workflow's permissions are contents read and issues write, nothing else.
-- **Skips, not fails.** With `PRODUCTION_URL`, the project ID or the token missing, the run skips with a notice and
-  succeeds (and leaves any open issue alone), like the backup.
-- **Trying it.** Run the workflow by hand with an address typed into _Check this address instead_. A bad address opens
-  the issue; a later run against the real one closes it. Run it on a repository that does not hold production data,
-  or expect that issue to appear there.
-- **Scheduled runs pause.** GitHub disables scheduled workflows after 60 days without repository activity. A quiet
-  site can go dark this way, and the daily check goes with it, so open _Actions → Health_ now and then: a
-  _Enable workflow_ button or a manual run turns it back on. The issue text is built by `scripts/health-report.mjs`
-  (Vitest-covered); `check:dataset` reads the environment first and `.env.local` second, so it runs the same in CI.
+  healthy or warning run closes it with a comment. Disabled, unconfigured and skipped runs leave it alone. Turn on GitHub
+  notifications for issues, or you will not hear of it. Permissions are split so a synthetic run can't write an issue: the `health` job that every run executes has contents read and
+  issues read only, and the separate `issues` job, the only one with issues write, never starts for a synthetic run or a run
+  that checked nothing.
+- **Synthetic tests.** Run the workflow by hand with **Synthetic test** ticked, usually with a deliberately wrong address in
+  _Check this address instead_, and choose the **Expected outcome** (default `failed`). The run is itself a test, so two
+  things are kept apart: `healthStatus` (the simulated health outcome, in `outcome` and `test.healthStatus`) and
+  `testStatus` (`passed` or `failed`, whether the test behaved as expected). The Actions run stays **green** when the
+  simulated failure is the expected one, and goes **red** when the observed outcome differs from the expected one, the
+  result file is missing or invalid, a `health` issue was created, edited or closed (the issues are listed before and after
+  and compared), or the test itself broke. The artifact says `synthetic: true` and carries the `test` block, the job summary
+  opens with **SYNTHETIC TEST: not a real health result** and includes the issue it would have written, and readers ignore
+  the result. Anything that needs a real issue is tested on a scratch repository, never on a client's.
+- **Scheduled runs can pause.** GitHub documents that it automatically disables scheduled workflows in a **public**
+  repository after 60 days without repository activity; check GitHub's current docs for private repositories. A quiet
+  public repository can go dark this way, so open _Actions → Health_ now and then: an _Enable workflow_ button or a manual
+  run turns it back on. Readers report a paused workflow as Stale. The result and issue text are built by
+  `scripts/health-report.mjs` (Vitest-covered); `check:dataset` reads the environment first and `.env.local` second, so it
+  runs the same in CI, and `check:dataset -- --json` is what the workflow reads. Every outcome has a stated reason in the
+  result and the job summary; none of `disabled`, `unconfigured` or `skipped` is ever shown as health.
 
 ### Tests
 
