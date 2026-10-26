@@ -68,11 +68,9 @@ const registered = [
   ...sharedSchemaTypes,
 ].filter((type): type is SchemaTypeDefinition & { fields: unknown[] } => 'fields' in type)
 
-describe('client-editable registry', () => {
-  it('has a schema.json to check against (run `npm run typegen` if not)', () => {
-    expect(schema.length).toBeGreaterThan(0)
-  })
-
+// Without a schema.json there is nothing to compare against. CI extracts it (`npm run typegen`)
+// before `npm run check`; the smoke jobs that only generate route types do not.
+describe.skipIf(schema.length === 0)('client-editable registry', () => {
   it('classifies every registered document and object type', () => {
     const unclassified = [
       ...new Set([...registered.map((type) => type.name), ...documents]),
@@ -89,13 +87,15 @@ describe('client-editable registry', () => {
     expect(unclassified, 'classify these fields in src/lib/sanity/client-editable.ts').toEqual([])
   })
 
-  it('lists no field twice, and none that no longer exists', () => {
+  it('lists no field twice, and none that no longer exists on a type the site has', () => {
     const problems: string[] = []
     for (const [type, entry] of Object.entries(CLIENT_EDITABLE_FIELDS)) {
+      // A client site may drop a feature (Team, Events…); its registry entry then has nothing to check.
       const stored = new Set(storedFields(type))
-      if (stored.size === 0) problems.push(`${type}: not in schema.json`)
-      for (const field of [...entry.editable, ...entry.agencyOnly]) {
-        if (!stored.has(field)) problems.push(`${type}.${field}: not in schema.json`)
+      if (stored.size > 0) {
+        for (const field of [...entry.editable, ...entry.agencyOnly]) {
+          if (!stored.has(field)) problems.push(`${type}.${field}: not in schema.json`)
+        }
       }
       for (const field of entry.editable) {
         if (entry.agencyOnly.includes(field)) problems.push(`${type}.${field}: in both lists`)
@@ -103,7 +103,6 @@ describe('client-editable registry', () => {
     }
     for (const type of AGENCY_ONLY_TYPES) {
       if (type in CLIENT_EDITABLE_FIELDS) problems.push(`${type}: in both registries`)
-      if (storedFields(type).length === 0) problems.push(`${type}: not in schema.json`)
     }
     expect(problems).toEqual([])
   })
