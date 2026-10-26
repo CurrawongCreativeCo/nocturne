@@ -1,0 +1,17 @@
+access top-level keys                        ["data","totalCount","nextCursor"]
+user keys                                    ["profile","sanityUserId","memberships"]
+membership sample                            [{"addedAt":"2026-10-23T02:50:26.334Z","resourceId":"r4kwvgkz","resourceType":"project","roleNames":["developer"],"resourceUserId":"pArxe4gnH"}]
+totalCount/nextCursor                        [2,null]
+resourceUserId/roles                         [[["pArxe4gnH"],[["developer"]]],[["pbSwUC7fg"],[["administrator"]]]]
+access users as editor                       200 n=2 roles visible=true
+access users as contributor                  200 n=2 roles visible=true
+history human author                         ["pbSwUC7fg","p-TPndygJJenPa","pbSwUC7fg","pbSwUC7fg"]
+1 human author, no protected change          {"ok":true,"status":200,"authors":["pbSwUC7fg"],"roles":{"pbSwUC7fg":["administrator"]}}
+contributor createOrReplace draft            200
+2 robot/non-member author                    {"ok":false,"why":"author not a current member (robot or removed): p-UyvxkOZr3mlM","authors":["p-UyvxkOZr3mlM"],"roles":{"p-UyvxkOZr3mlM":"NOT A MEMBER"}}
+3 protected field changed                    {"ok":false,"why":"author not a current member (robot or removed): p-UyvxkOZr3mlM","authors":["p-UyvxkOZr3mlM","pbSwUC7fg"],"roles":{"p-UyvxkOZr3mlM":"NOT A MEMBER"}}
+delete token                                 200
+delete token                                 200
+delete token                                 200
+cleanup                                      200
+left behind                                  0
