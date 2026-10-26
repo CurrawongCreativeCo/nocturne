@@ -110,3 +110,21 @@ describe('Waiting for review', () => {
     expect(waitingForReviewTitle(3)).toBe('Waiting for review (3)')
   })
 })
+
+describe('Features & setup', () => {
+  it('is agency only: clients never get it in Website settings, and the list they see is unchanged', () => {
+    const ids = [
+      'siteIdentity',
+      'siteNavigation',
+      'announcement',
+      'cookieBanner',
+      'launch',
+      'setup',
+    ]
+    const seen = filterStructureItems(ids, 'editor', (id) => id, CLIENT_WEBSITE_SETTINGS_IDS)
+    expect(seen).toEqual(['siteIdentity', 'siteNavigation', 'announcement', 'launch'])
+    expect(filterStructureItems(ids, 'agency', (id) => id, CLIENT_WEBSITE_SETTINGS_IDS)).toEqual(
+      ids,
+    )
+  })
+})

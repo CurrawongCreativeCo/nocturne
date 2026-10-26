@@ -288,4 +288,15 @@ test.describe('Screenshots', () => {
       await expect(examples).toHaveScreenshot(`studio-brand-preset-picker-${scheme}.png`)
     })
   }
+
+  // Features & setup: with a status and as explanations only, light and dark.
+  for (const scheme of SCHEMES) {
+    test(`Features & setup, ${scheme}`, async ({ page, isMobile }) => {
+      test.skip(isMobile, 'Desktop only')
+      await openPreview(page)
+      const examples = page.locator(`[data-setup-scheme="${scheme}"]`)
+      await page.evaluate(() => document.fonts.ready)
+      await expect(examples).toHaveScreenshot(`studio-brand-setup-${scheme}.png`)
+    })
+  }
 })
