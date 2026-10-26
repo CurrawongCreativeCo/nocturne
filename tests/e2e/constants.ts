@@ -30,6 +30,15 @@ export const MEMBER_PASSWORD = 'e2e-member-password'
 /** Not on the members list (AUTH_ALLOWED_EMAILS below), though the password is right. */
 export const OUTSIDER_EMAIL = 'outsider@elsewhere.test'
 export const STRIPE_WEBHOOK_SECRET = 'whsec_e2e_secret'
+/** Studio tokens the fake Content Lake's /users/me knows (fake-sanity.mjs): the role is the suffix. */
+export const STUDIO_TOKENS = {
+  administrator: 'e2e-studio-administrator',
+  developer: 'e2e-studio-developer',
+  editor: 'e2e-studio-editor',
+  contributor: 'e2e-studio-contributor',
+  viewer: 'e2e-studio-viewer',
+  revocable: 'e2e-studio-revocable',
+} as const
 export const SANITY_WRITE_TOKEN = 'e2e-write-token'
 /** Content release the perspective test previews; Studio puts its id in the perspective cookie. */
 export const RELEASE_ID = 'rSummer'

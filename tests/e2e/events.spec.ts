@@ -356,7 +356,12 @@ test.describe('an event page', () => {
       )
     expect(dates.length).toBeGreaterThanOrEqual(3)
     expect(dates).not.toContain(eventDates.skipped)
-    for (const date of dates) expect(eventDates.club).toContain(date)
+    // The fixture leaves out a Tuesday less than three hours away (it may pass mid-run), but the page
+    // lists it until it has passed, so a date before the fixture's first one is that Tuesday, not a stray.
+    const [firstClub = ''] = eventDates.club
+    for (const date of dates.filter((day) => day >= firstClub)) {
+      expect(eventDates.club).toContain(date)
+    }
     // The structured data describes the next date, not the day the series began.
     const event = await eventJsonLd(page)
     expect(event.startDate.slice(0, 10)).toBe(dates[0])

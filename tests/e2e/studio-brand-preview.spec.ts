@@ -43,6 +43,45 @@ const hueDistance = (a: string, b: string) => {
 const rgbToHexString = (rgb: string) =>
   `#${(rgb.match(/\d+/g) ?? []).map((v) => Number(v).toString(16).padStart(2, '0')).join('')}`
 
+test('shows Features & setup with a status and as explanations only, in both schemes', async ({
+  page,
+}) => {
+  for (const scheme of SCHEMES) {
+    const holder = page.locator(`[data-setup-scheme="${scheme}"]`)
+    const withStatus = holder.locator('[data-setup-example="status"]')
+    await expect(withStatus.getByText(/^This deployment: abc1234 · /)).toBeVisible()
+    await expect(withStatus.getByRole('heading', { name: 'Needs attention (1)' })).toBeVisible()
+    await expect(withStatus.getByText('Not set up: SAMPLE_SECRET not set')).toBeVisible()
+    // GitHub-backed: never Ready.
+    await expect(
+      withStatus.getByRole('heading', { name: "Can't be checked from here (1)" }),
+    ).toBeVisible()
+    await expect(withStatus.getByRole('heading', { name: 'Ready (1)' })).toBeVisible()
+    await expect(
+      withStatus.getByText('Changes to these settings apply after the next deployment.'),
+    ).toBeVisible()
+
+    const plain = holder.locator('[data-setup-example="explanations"]')
+    await expect(plain.getByText(/Check readiness with/)).toBeVisible()
+    await expect(plain.getByRole('button', { name: 'Details: Contact forms' })).toBeVisible()
+    // No status of any kind, and no deployment details.
+    for (const text of [/This deployment/, /Needs attention/, /Not set up/, /Can't be checked/]) {
+      await expect(plain.getByText(text)).toHaveCount(0)
+    }
+
+    const { violations } = await new AxeBuilder({ page })
+      .include(`[data-setup-scheme="${scheme}"]`)
+      .withTags(WCAG)
+      .disableRules('color-contrast')
+      .analyze()
+    expect(
+      violations.map(
+        ({ id, nodes }) => `${id}: ${nodes.map((n) => n.target.join(' ')).join(', ')}`,
+      ),
+    ).toEqual([])
+  }
+})
+
 test('shows the Launch & visibility screen for agency staff and clients, in both schemes', async ({
   page,
 }) => {

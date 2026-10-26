@@ -26,6 +26,19 @@ const PICTURE = readFileSync(new URL('./fixtures/picture.png', import.meta.url))
 
 const PORT = Number(process.env.FAKE_SANITY_PORT) || 9999
 
+/** Studio tokens /users/me knows, and the project roles each holds (the same tokens as constants.ts). */
+const STUDIO_USERS = {
+  'e2e-studio-administrator': ['administrator'],
+  'e2e-studio-developer': ['developer'],
+  'e2e-studio-editor': ['editor'],
+  'e2e-studio-contributor': ['contributor'],
+  'e2e-studio-viewer': ['viewer'],
+  // Only the revocation test uses this one (POST /__fixture/studio-token/<token>/<revoke|restore>).
+  'e2e-studio-revocable': ['administrator'],
+}
+const revokedTokens = new Set()
+let usersMeCalls = 0
+
 /** Named variants of the siteIdentity document the tests switch between; `null` serves the fixture as is. */
 const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon, markerUnset }
 let settingsPatch = null
@@ -119,6 +132,32 @@ createServer(async (req, res) => {
     return
   }
   if (await handleStripe(req, res, url, readBody, `http://localhost:${PORT}`)) return
+  // Who a Studio token belongs to, like Sanity's /users/me: the id and project roles, or 401 for any
+  // other token (setup-status.spec.ts). Studio itself can't sign in here; only the site's route asks.
+  if (req.method === 'GET' && /^\/v[\w-]+\/users\/me$/.test(url.pathname)) {
+    usersMeCalls += 1
+    const token = /^Bearer (\S+)$/.exec(req.headers.authorization ?? '')?.[1]
+    const roles = token && !revokedTokens.has(token) ? STUDIO_USERS[token] : undefined
+    res.writeHead(roles ? 200 : 401, { 'content-type': 'application/json' })
+    res.end(
+      JSON.stringify(
+        roles ? { id: `user-${roles[0]}`, roles: roles.map((name) => ({ name })) } : {},
+      ),
+    )
+    return
+  }
+  const revocation = /^\/__fixture\/studio-token\/([\w-]+)\/(revoke|restore)$/.exec(url.pathname)
+  if (req.method === 'POST' && revocation) {
+    if (revocation[2] === 'revoke') revokedTokens.add(revocation[1])
+    else revokedTokens.delete(revocation[1])
+    res.writeHead(204).end()
+    return
+  }
+  if (req.method === 'GET' && url.pathname === '/__fixture/users-me-calls') {
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify(usersMeCalls))
+    return
+  }
   if (req.method === 'GET' && url.pathname === '/__fixture/mutations') {
     res.writeHead(200, { 'content-type': 'application/json' })
     res.end(JSON.stringify(mutations))

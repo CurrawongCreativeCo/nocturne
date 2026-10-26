@@ -96,6 +96,10 @@ export const ROUTES: Record<string, [Classification, string]> = {
     'infrastructure',
     'The launch state for launch:check and the health workflow (schema 2); nothing else.',
   ],
+  'api/setup-status/route.ts': [
+    'infrastructure',
+    "The agency's Features & setup pane (GET): Sanity confirms the caller's identity and agency role on every request, private no-store, rate limited. It names missing settings, so it is never public.",
+  ],
   'api/ops-notices/route.ts': ['infrastructure', 'Ops notices; needs its shared secret.'],
   'api/experiments/route.ts': [
     'infrastructure',

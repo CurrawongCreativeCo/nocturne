@@ -38,6 +38,9 @@ import { newEnquiriesMessage } from '../../enquiries/wording'
 import { findLinkListPage } from '../../launch/utils/launch-checklist'
 import { domainOf, launchBanner } from '../../launch/utils/launch-wording'
 import { currentAudience } from '../../roles'
+import { useSetupStatus } from '../../setup/api/use-setup-status'
+import { attentionCount } from '../../setup/utils/setup-view'
+import { featuresNeedSetupLine } from '../../setup/utils/setup-wording'
 import { isTypeVisible } from '../../utils/feature-visibility'
 import { siteOrigin } from '../../utils/site-origin'
 import { fetchLastChanges } from '../api/last-changes'
@@ -100,6 +103,15 @@ export function StartHereTool() {
   const router = useRouter()
   const audience = currentAudience(user)
   const notices = useOpsNotices()
+  // Agency only, and only a count when the route answered: no status means no line (never a guess).
+  const setup = useSetupStatus(audience === 'agency')
+  const needSetup = featuresNeedSetupLine(
+    attentionCount(
+      setup.state.status === 'done' && setup.state.answer.kind === 'status'
+        ? setup.state.answer.status
+        : null,
+    ),
+  )
   const helpHeading = useRef<HTMLHeadingElement>(null)
   const focusHelpHeading = useRef(false)
   const [tab, setTab] = useState<TabName>('overview')
@@ -203,6 +215,8 @@ export function StartHereTool() {
           </Stack>
 
           {banner && <LaunchBanner message={banner} audience={audience} />}
+
+          {needSetup && audience === 'agency' && <SetupLine message={needSetup} />}
 
           <OpsNotices notices={notices} />
 
@@ -409,6 +423,36 @@ function LaunchBanner({ message, audience }: { message: string; audience: string
             fontSize={1}
           />
         )}
+      </Flex>
+    </Card>
+  )
+}
+
+/** Agency only: how many features need setting up, with a way to the Features & setup screen. */
+function SetupLine({ message }: { message: string }) {
+  const router = useRouter()
+  const href = toolHref(
+    { kind: 'tool', tool: 'structure', path: '/websiteSettings;setup' },
+    studioUrl,
+  )
+  return (
+    <Card tone="caution" padding={3} radius={3} border role="status" data-setup-line="">
+      <Flex align="center" justify="space-between" gap={3} wrap="wrap">
+        <Text size={1} weight="medium">
+          {message}
+        </Text>
+        <Button
+          as="a"
+          href={href}
+          onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+            studioClick(event, () => {
+              router.navigateUrl({ path: href })
+            })
+          }}
+          text="Features & setup"
+          mode="ghost"
+          fontSize={1}
+        />
       </Flex>
     </Card>
   )

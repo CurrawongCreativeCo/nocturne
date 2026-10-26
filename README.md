@@ -594,8 +594,9 @@ workflow file listed in `WORKFLOWS` there.
 **For developers.** Each feature describes its settings in a `config.registry.ts` next to it (`defineFeatureConfig` in
 `src/config/feature-config.ts`): names, where each one lives, what it's for and where to get it. **Never a value.** The
 entries are composed in `src/app/feature-registry.ts`, which `config:check` and the server-only `getSetupStatus()`
-(`src/app/setup-status.ts`) both read. `getSetupStatus()` names missing settings, so it is private: only an
-authenticated route may return it (task 232), never a public one. A feature's readiness is the function the feature
+(`src/app/setup-status.ts`) both read. `getSetupStatus()` names missing settings, so it is private: only
+`GET /api/setup-status` returns it, after Sanity has confirmed the caller is agency staff (see
+[Features & setup (Studio)](#features--setup-studio)), never a public route. A feature's readiness is the function the feature
 already uses (for forms, `getFormsConfig`), not a second copy of the rules. A test fails when code or a workflow reads an
 environment variable or GitHub variable or secret that is neither registered, on the `pending` list (features still to
 be registered, task 233) nor on the ignore list (tests, tooling, platform variables). Add the entry in the same change
@@ -1874,6 +1875,116 @@ presentational `LaunchScreen`). The brand preview (`/studio-brand-preview`) show
 client, in light and dark, so axe and screenshots cover them. Tests: `launch-checklist.test.ts`, `launch-wording.test.ts`
 and `launch-view.test.ts`.
 
+### Features & setup (Studio)
+
+**Website settings → Features & setup** is a read-only screen for agency staff, next to Launch & visibility. It answers
+"which features are set up on this deployment, and what do I do about the ones that aren't?" It stores nothing and has no
+field: settings live in Vercel, GitHub and `site.profile.ts`, and the screen says where. Clients never see it (it isn't in
+`CLIENT_WEBSITE_SETTINGS_IDS`), but that is for relevance: **the boundary is the server** (below).
+
+**Two sources.** The explanations (what a feature does, why, what happens without it, what it needs, numbered setup steps
+and a _Technical details_ list) come from the feature registry (`src/app/feature-registry.ts`), which is bundled with the
+Studio: names and words, never a value. Readiness comes from `GET /api/setup-status`, which returns `getSetupStatus()`.
+
+**What it shows**
+
+- **Header:** "This deployment: abc1234 · 26 Oct 2026, 9:14 am AEDT" (the commit's first seven characters and the build
+  time in Sydney time), and the footer "Changes to these settings apply after the next deployment."
+- **Groups:** _Needs attention_ (a feature that is on and missing something, with the reason), _Can't be checked from
+  here_, _Ready_ and _Off in this site's profile_. A line "New in 1.9" names features introduced in the deployed
+  template's current minor version; it is worked out from each entry's `since`, with no stored state.
+- **Can't be checked from here:** anything that needs GitHub (health monitoring today; backup and retention when they are
+  registered) is **never Ready**, because Studio can't see GitHub. The screen says to check _Actions_ in the repository or
+  run `npm run config:check -- --github`.
+- **Details** for each feature: what it does, why you'd use it, what happens without it, what it needs (the name, where to
+  set it, whether it's read while building or while the site runs, and whether this deployment has it), numbered steps
+  ending "Redeploy, then reopen this pane.", and the _Technical details_ disclosure. Steps come from the entry's `setup`,
+  or are written from its needed settings.
+- **If the route fails** (busy, Sanity unreachable, a malformed answer) it says "Couldn't load the setup status. Your
+  settings are unchanged." with **Try again**; it doesn't blame the deployment.
+
+**Explanations only.** If the site can't prove who is asking, every feature still shows its explanation and steps, with
+no status at all, plus "Check readiness with `npm run config:check` or Foundation." That happens when Studio signed in
+with a cookie (it has no token to send), or when the route answers 401 or 403. Readiness is never taken from
+`/api/site-info`, which says nothing but the launch state.
+
+**Start here** shows "N features need setup" (with a button to this screen) to agency staff only, and only when the route
+answered and something is not set up. No answer, no line.
+
+**The route.** `GET /api/setup-status` (`src/app/api/setup-status/route.ts`):
+
+1. Rate limited per address (30 a minute per server instance, the publish gate's limiter), before anyone is identified.
+2. Reads `Authorization: Bearer …`. No token is `401`. Nothing else (a cookie, a query string, a header the client makes
+   up) is read as identity.
+3. Asks Sanity who the token belongs to, **on every request** (`verifyStudioUser`, `src/lib/sanity/verify-studio-user.ts`):
+   one `GET /users/me` on the project host, which answers the user's id and their current roles on this project. Nothing is
+   cached, so a removed member or a revoked token stops working at once. Sanity refusing the token is `401`; Sanity not
+   answering is `503` (never read as a yes).
+4. Requires the agency role as `isAgency` defines it (Administrator or Developer). Anyone else, including an Editor,
+   Contributor, Viewer or a user with no role here, is `403`.
+5. Returns `getSetupStatus()`: readiness with reasons, the profile switches, the template version, the tier, the commit and
+   the build time. Every response, including the refusals, has `Cache-Control: private, no-store` and `Vary: Authorization`.
+   The handler waits for the request (`connection()`), so it is never prerendered. It never logs the token or the answer.
+
+**Where Studio runs (supported topology).** Nocturne embeds Studio in the same Next.js deployment as the site, at `/studio`
+(`studioUrl`, `src/app/studio/[[...tool]]/page.tsx`). That is the only supported setup, and it is what makes this screen
+safe: the pane asks a **relative** URL, `/api/setup-status`, so the person's token goes to the site that serves Studio and
+to Sanity, nowhere else. Nothing deploys Studio on its own (CI runs `sanity schema deploy`, which publishes the schema, not
+a hosted Studio). If someone hosts Studio elsewhere (`sanity deploy`, another domain, a different site at the root), the
+pane sees it is not under `/studio`, **sends nothing**, and shows explanations only, with "Studio isn't running inside the
+website here". There is no cross-origin token forwarding and no second sign-in; adding either would be its own decision.
+
+**How Studio proves who is asking** (checked 27 October 2026 against Sanity 6.19 and next-sanity 13.3; from the source and
+the types, not a signed-in browser):
+
+- _Which credential:_ the embedded Studio's default login method is `dual`. After sign-in it exchanges the session for a
+  token and keeps it in the browser (`__studio_auth_token_<projectId>`), building its client with that token. If a project
+  or browser ends up on cookies, there is no token. The pane reads the token with `useClient().config().token`, the public
+  `@sanity/client` accessor, and **not** from storage (that key is Sanity's internal detail). The Studio's `auth.token`
+  observable is marked beta and hidden, so it isn't used. With no token the pane shows explanations only; it never falls
+  back to a shared secret in the browser, a header the client sets itself, or hiding the pane.
+- _Whether the server can verify it:_ yes, in one request. `GET /users/me` on the project host answers `id` and `roles`;
+  the publish gate already relies on it and its smoke test (26 October 2026, scratch project) confirmed it, including `401`
+  for an unknown token and a Viewer being identifiable as one. The token is sent only to the Studio's own origin
+  (`/api/setup-status`, a relative URL) and from there only to Sanity.
+- _Expired or revoked:_ Sanity answers `401` for a token it doesn't accept, the route passes that on, and the pane drops to
+  explanations only. A Studio whose token has expired shows its own sign-in screen first. **Not tested live:** an
+  individual expired or revoked token (the smoke test used an unknown one), and a person signed in to a real Studio.
+  Before relying on the screen for a client, open it signed in as an Administrator and as an Editor.
+
+**Updating an existing project.** The template's `sanity.config.ts` changed in three places. If you merge it, there is
+nothing to do. If you keep your own `sanity.config.ts`, make the same edits:
+
+```ts
+import { featureRegistry } from './src/app/feature-registry'
+import { createStructure } from './src/features/studio/structure' // was: { structure }
+// …
+structureTool({ structure: createStructure(featureRegistry), defaultDocumentNode }),
+```
+
+Nothing breaks if you don't: `structure` is still exported (deprecated), so an old config builds and every other
+screen, document form, role filter and the client view behave exactly as before. Features & setup then shows "Studio
+wasn't given the feature list" until the edit is made. A project that adds its own `config.registry.ts` entries
+registers them in `src/app/feature-registry.ts`, and they appear here with no other change.
+
+**Where it lives.** `src/features/studio/setup/`: `utils/setup-view.ts` (the view model and each feature's detail, pure),
+`utils/setup-wording.ts` (every sentence), `api/request-setup-status.ts` (the request and what each answer means),
+`api/use-setup-status.ts` (the hook; with `enabled` false it makes no request, so clients never call the route) and
+`components/`. `createStructure(featureRegistry)` in `sanity.config.ts` hands the registry text to the pane, because a
+Studio module may not import the features that own it. Tests: `setup-view.test.ts`, `request-setup-status.test.ts`, and
+`src/app/setup-status-route.test.ts`, which runs the real handler and `verifyStudioUser` over HTTP against the publish
+gate's fake of Sanity: an Administrator and a Developer get `200`; an Editor, Contributor, Viewer and role-less user get
+`403`; an unknown token, no token, an empty one and the wrong scheme get `401`; a removed member is refused on the next
+request; Sanity failing or unreachable is `503`; the cache headers are on every answer; a canary secret and the tokens never
+appear in a response or a log; and the limiter stops the thirty-first request. `setup-pane.test.tsx` renders the pane in a
+DOM with Studio's hooks stubbed: an agency user sees the status; a client sees nothing from the site and the route is never
+called; 401, 403, no token and a separately hosted Studio show explanations only; a failure shows "Try again"; and the agency
+details disappear when the session ends, when someone else signs in (their answer is awaited, never the last person's) and
+when the person stops being agency staff. Playwright (`tests/e2e/setup-status.spec.ts`, a production build against the fake
+Content Lake's `/users/me`) covers the route end to end, including a revoked token being refused on the very next request;
+Studio can't sign in against the fake lake, so the screen's static states are on `/studio-brand-preview` (axe, and
+screenshots in `studio-brand-visual.spec.ts`, Linux baselines).
+
 ### Start here (Studio home screen)
 
 A Studio tool (`src/features/studio/start-here/`, registered in `sanity.config.ts` as `startHere()`). Clients land on
@@ -1883,6 +1994,7 @@ history request for the author names, and, only when notices are set up, one cal
 
 - **Greeting:** the first word of the person's Sanity name ("Hello, Ben"; just "Hello" if the name is blank or an email
   address) and the site name from `site.profile.ts` (`client.name`).
+- **Setup:** agency staff also see "N features need setup" with a **Features & setup** button, only when `/api/setup-status` answered and something is not set up (see [Features & setup](#features--setup-studio)); clients never trigger that request.
 - **Before launch** a banner under the greeting says what visitors get (the client sentence above); agency staff also get a **Launch & visibility** button. **Your links** is a card for the page that uses the Link list: first for clients, after _Edit your website_ for agency staff, and absent when no page has one.
 - **Shortcut cards** (bordered, with an icon and a chevron; the first, _Edit your website_, is the primary card; icons are mapped by action id in `start-here-tool.tsx`), built from the site profile by `buildQuickActions`: _Edit your website_ (Presentation at `/`),
   _Write a blog post_ (opens a new post; needs `features.blog`), _Update the team_ (needs `features.team` **and** a
