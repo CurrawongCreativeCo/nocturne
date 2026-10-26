@@ -5,11 +5,23 @@
  * Studio hides those fields, but only the server decides who can write them), so an agency Publish
  * lists these before releasing the draft. No Studio imports, so it can be unit tested.
  */
-import { AGENCY_ONLY_TYPES, CLIENT_EDITABLE_FIELDS } from '@/lib/sanity/client-editable'
+import { AGENCY_ONLY_TYPES, CLIENT_EDITABLE_FIELDS } from './client-editable'
 
 /** One protected field that differs. `path` names the field from the document down, e.g. ['pageBuilder', 'hero', 'style']. */
 export interface ProtectedChange {
   path: string[]
+}
+
+/**
+ * A protected change with what the publish gate needs to judge it: the typed object that holds the
+ * field, the field's name and new value, and whether that object is new (absent from the published
+ * version). `field` is unset when a whole agency-only object inside a page is the change.
+ */
+export interface ProtectedChangeDetail extends ProtectedChange {
+  owner: string
+  field?: string
+  value: unknown
+  isNew: boolean
 }
 
 type Json = unknown
@@ -49,16 +61,23 @@ function keyedItems(value: Json): Map<string, Plain> | null {
   return map
 }
 
-function diffObject(type: string, published: Plain, draft: Plain, path: string[], out: string[][]) {
+function diffObject(
+  type: string,
+  published: Plain,
+  draft: Plain,
+  path: string[],
+  out: ProtectedChangeDetail[],
+) {
+  const isNew = Object.keys(published).length === 0
   if (AGENCY_ONLY_TYPES.has(type)) {
     // A whole document of an agency-only type lists its fields; one inside a page is a single change.
     if (path.length > 0) {
-      if (protectedDiffers(published, draft)) out.push(path)
+      if (protectedDiffers(published, draft)) out.push({ path, owner: type, value: draft, isNew })
       return
     }
     for (const field of new Set([...Object.keys(published), ...Object.keys(draft)])) {
       if (!field.startsWith('_') && protectedDiffers(published[field], draft[field])) {
-        out.push([field])
+        out.push({ path: [field], owner: type, field, value: draft[field], isNew })
       }
     }
     return
@@ -71,12 +90,14 @@ function diffObject(type: string, published: Plain, draft: Plain, path: string[]
     const before = published[field]
     const after = draft[field]
     if (registry?.editable.includes(field)) diffValue(before, after, [...path, field], out)
-    else if (protectedDiffers(before, after)) out.push([...path, field])
+    else if (protectedDiffers(before, after)) {
+      out.push({ path: [...path, field], owner: type, field, value: after, isNew })
+    }
   }
 }
 
 /** Looks inside an editable value for protected fields on the typed objects it holds. */
-function diffValue(published: Json, draft: Json, path: string[], out: string[][]) {
+function diffValue(published: Json, draft: Json, path: string[], out: ProtectedChangeDetail[]) {
   if (sameValue(published, draft)) return
   const drafted = keyedItems(draft)
   if (drafted) {
@@ -103,20 +124,30 @@ function diffValue(published: Json, draft: Json, path: string[], out: string[][]
 }
 
 /**
- * Protected fields that differ between `published` and `draft` of a document of `type`. Fields
- * outside the allowlist count as protected, including fields nobody has classified yet. A field on
- * a section a client removed is not reported (removing a section is their content), and neither is
- * reordering. With no published version every protected field that has a value is reported.
+ * Protected fields that differ between `published` and `draft` of a document of `type`, with the
+ * detail the publish gate judges them by. Fields outside the allowlist count as protected,
+ * including fields nobody has classified yet. A field on a section a client removed is not
+ * reported (removing a section is their content), and neither is reordering. With no published
+ * version every protected field that has a value is reported.
  */
+export function diffProtectedDetails(
+  type: string,
+  published: unknown,
+  draft: unknown,
+): ProtectedChangeDetail[] {
+  if (!isPlain(draft)) return []
+  const out: ProtectedChangeDetail[] = []
+  diffObject(type, isPlain(published) ? published : {}, draft, [], out)
+  return out
+}
+
+/** The paths of the protected fields that differ (see `diffProtectedDetails`). */
 export function diffProtectedFields(
   type: string,
   published: unknown,
   draft: unknown,
 ): ProtectedChange[] {
-  if (!isPlain(draft)) return []
-  const out: string[][] = []
-  diffObject(type, isPlain(published) ? published : {}, draft, [], out)
-  return out.map((path) => ({ path }))
+  return diffProtectedDetails(type, published, draft).map(({ path }) => ({ path }))
 }
 
 /** "pageBuilder" -> "Page builder". */

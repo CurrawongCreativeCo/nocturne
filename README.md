@@ -446,43 +446,43 @@ It still needs the CORS step below.
    `engines` in `package.json` (`.nvmrc` pins the same for local work and CI).
 2. **Environment variables** (Production and Preview):
 
-   | Variable                         | Value                                                                                   |
-   | -------------------------------- | --------------------------------------------------------------------------------------- |
-   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                                                       |
-   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                                                       |
-   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                       |
-   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                              |
-   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                             |
-   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Nocturne)                         |
-   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                        |
-   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                       |
-   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                             |
-   | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                                        |
-   | `RESEND_API_KEY`                 | only for forms: Resend API key                                                          |
-   | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`                           |
-   | `NEWSLETTER_PROVIDER`            | only for newsletter signup: `resend`, `loops` or `mailchimp` (see below)                |
-   | `STRIPE_SECRET_KEY`              | only for pricing: Stripe secret or restricted key (see below)                           |
-   | `STRIPE_WEBHOOK_SECRET`          | only for pricing: the webhook endpoint's `whsec_…` signing secret                       |
-   | `SANITY_WRITE_TOKEN`             | only for pricing: Editor token the Stripe webhook writes with                           |
-   | `STRIPE_SUCCESS_URL`             | optional: where buyers land after paying (default `/?checkout=success`)                 |
-   | `STRIPE_CANCEL_URL`              | optional: where "back" from Stripe leads (default: the pricing page they came from)     |
-   | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | optional: Plausible site domain (see Analytics, below)                                  |
-   | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                                         |
-   | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                                               |
-   | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`                                      |
-   | `SENTRY_DSN`                     | optional: turns on Sentry error tracking (see Error tracking, below)                    |
-   | `OPS_NOTICES_URL`                | optional: https endpoint for notices on the Studio's Start here screen (see Start here) |
-   | `OPS_NOTICES_KEY`                | optional: bearer key sent to that endpoint from the server; never reaches the browser   |
-   | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                      |
-   | `STYLEGUIDE_PREVIEW_TOKEN`       | optional: opens the style guide on Vercel preview deployments (see Style guide)         |
-   | `PREVIEW_ACCESS_SECRET`          | optional: signs the pre-launch preview pass (see Pre-launch and launch); 16+ characters |
-   | `PRELAUNCH_PREVIEW_TOKEN`        | optional: the client preview link's token (see Pre-launch and launch); 16+ characters   |
-   | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                             |
-   | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                            |
-   | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                             |
-   | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id                                |
-   | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store                          |
-   | `VERCEL_TEAM_ID`                 | optional: Edge Config redirects; only for team-owned stores                             |
+   | Variable                         | Value                                                                                        |
+   | -------------------------------- | -------------------------------------------------------------------------------------------- |
+   | `NEXT_PUBLIC_SANITY_PROJECT_ID`  | from `.env.local`                                                                            |
+   | `NEXT_PUBLIC_SANITY_DATASET`     | from `.env.local`                                                                            |
+   | `NEXT_PUBLIC_SANITY_API_VERSION` | from `.env.local`                                                                            |
+   | `NEXT_PUBLIC_SITE_URL`           | your production URL, e.g. `https://example.com` (no slash)                                   |
+   | `NEXT_PUBLIC_SITE_LANGUAGE`      | optional: content language for `<html lang>` (default `en`)                                  |
+   | `NEXT_PUBLIC_STUDIO_TITLE`       | optional: name in the Studio header and tab (default: Nocturne)                              |
+   | `SANITY_API_READ_TOKEN`          | from `.env.local` (Viewer token)                                                             |
+   | `SANITY_REVALIDATE_SECRET`       | only for webhook mode (see below)                                                            |
+   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | only for forms: Turnstile site key (public)                                                  |
+   | `TURNSTILE_SECRET_KEY`           | only for forms: Turnstile secret                                                             |
+   | `RESEND_API_KEY`                 | only for forms: Resend API key                                                               |
+   | `FORMS_FROM_EMAIL`               | only for forms: verified sender, e.g. `Site <forms@site.com>`                                |
+   | `NEWSLETTER_PROVIDER`            | only for newsletter signup: `resend`, `loops` or `mailchimp` (see below)                     |
+   | `STRIPE_SECRET_KEY`              | only for pricing: Stripe secret or restricted key (see below)                                |
+   | `STRIPE_WEBHOOK_SECRET`          | only for pricing: the webhook endpoint's `whsec_…` signing secret                            |
+   | `SANITY_WRITE_TOKEN`             | only for pricing, stored enquiries and the publish gate: Editor token the server writes with |
+   | `STRIPE_SUCCESS_URL`             | optional: where buyers land after paying (default `/?checkout=success`)                      |
+   | `STRIPE_CANCEL_URL`              | optional: where "back" from Stripe leads (default: the pricing page they came from)          |
+   | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | optional: Plausible site domain (see Analytics, below)                                       |
+   | `NEXT_PUBLIC_POSTHOG_KEY`        | optional: PostHog project token                                                              |
+   | `NEXT_PUBLIC_POSTHOG_HOST`       | optional: PostHog host (default US cloud)                                                    |
+   | `NEXT_PUBLIC_GA_ID`              | optional: Google Analytics 4 measurement ID, `G-…`                                           |
+   | `SENTRY_DSN`                     | optional: turns on Sentry error tracking (see Error tracking, below)                         |
+   | `OPS_NOTICES_URL`                | optional: https endpoint for notices on the Studio's Start here screen (see Start here)      |
+   | `OPS_NOTICES_KEY`                | optional: bearer key sent to that endpoint from the server; never reaches the browser        |
+   | `INDEXNOW_KEY`                   | optional: IndexNow key (see below)                                                           |
+   | `STYLEGUIDE_PREVIEW_TOKEN`       | optional: opens the style guide on Vercel preview deployments (see Style guide)              |
+   | `PREVIEW_ACCESS_SECRET`          | optional: signs the pre-launch preview pass (see Pre-launch and launch); 16+ characters      |
+   | `PRELAUNCH_PREVIEW_TOKEN`        | optional: the client preview link's token (see Pre-launch and launch); 16+ characters        |
+   | `FLAGS_SECRET`                   | optional: signs A/B variant URLs; needed to run an A/B test                                  |
+   | `EXPERIMENT_CACHE_SECONDS`       | optional: how long the proxy remembers the running test (60)                                 |
+   | `EDGE_CONFIG`                    | optional: Edge Config redirects (see below); Vercel adds it                                  |
+   | `EDGE_CONFIG_ID`                 | optional: Edge Config redirects; the store's `ecfg_…` id                                     |
+   | `VERCEL_API_TOKEN`               | optional: Edge Config redirects; token that can edit the store                               |
+   | `VERCEL_TEAM_ID`                 | optional: Edge Config redirects; only for team-owned stores                                  |
 
 3. **Allow the production origin in Sanity**, or Studio and live updates won't connect:
    `npx sanity cors add https://example.com --credentials` (or sanity.io/manage → API → CORS
@@ -1495,7 +1495,7 @@ export const siteProfileInput = defineSiteProfile({
 
 - **`voice`**: the AI Assist tone summary and `do` / `dont` lists, all in Australian English (see _AI Assist_ above). Omitted in older profiles: clear, warm and practical defaults.
 - **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo`,
-  `team`, `teamProfiles`, `events` and `releases`. A feature you leave out stays **on**, except `releases`, which depends on your Sanity plan and starts **off** (see _Content releases_). A site that never edits the file otherwise behaves as the template always has.
+  `team`, `teamProfiles`, `events`, `releases` and `publishGate`. A feature you leave out stays **on**, except `releases` (which depends on your Sanity plan, see _Content releases_) and `publishGate` (which needs an Editor token and Contributor clients, see _Publish gate_), which start **off**. A site that never edits the file otherwise behaves as the template always has.
 - **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;
   see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
   Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
@@ -1525,6 +1525,7 @@ feature does:
 | `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                     |
 | `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page) |
 | `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                 |
+| `publishGate`                | `POST /api/publish` answers 404 (off by default). See _Publish gate_ under _Studio roles and permissions_                                                                                                                                                                          |
 | `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                    |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
@@ -1929,13 +1930,62 @@ registry is also the list the agency publish review (task 206) and any future pu
 "Your changes are saved as a draft and sent to Currawong to publish." where Publish would be
 (`actions/contributor-message.tsx`). Agency staff find those drafts under **Waiting for review** at the top
 of the sidebar (a count shows how many). When staff press Publish, the dialog compares the draft with the
-published version (`utils/protected-changes.ts`) and lists every changed field outside the registry's
+published version (`src/lib/sanity/protected-changes.ts`) and lists every changed field outside the registry's
 `editable` lists, such as a section's Design tab, with the person who made each change, read from Sanity's
 transaction history for the last 25 edits (`utils/fetch-change-history.ts`). If the history can't be read, or
 the edit was older, the field is listed without a name. Publishing then needs a click on **Publish** in that
 dialog. Removing or reordering sections is not flagged, and a document's first publish is not checked (there is
 nothing published to compare with). Fields nobody has classified count as protected, so a new field is flagged until
 it's in the registry.
+
+**Publish gate (`features.publishGate`, off by default).** `POST /api/publish` lets a Contributor's draft go live
+without the agency, when every change in it is one clients may make. This is the server side; the Studio
+button that calls it arrives separately, so until then the route is only reachable by a script. Hidden Studio
+fields are not a permission, so the route decides everything itself.
+
+- _Switch on:_ set `features: { publishGate: true }` in `site.profile.ts`, create a Sanity token with the
+  **Editor** role (nothing higher: no Administrator or Developer token), set it as `SANITY_WRITE_TOKEN`, and
+  redeploy. Off, or with no token, the route answers `404` as if it did not exist. Move clients to the
+  Contributor role (_Studio roles and permissions_ above).
+- _Calling it:_ `POST /api/publish` with `{ "documentId": "<id>" }` as JSON and the signed-in person's own
+  Sanity token as `Authorization: Bearer …`. The token only proves who is asking (Sanity's `/users/me`); the
+  Editor token does the reading and the publishing. Knowing a document's revision is not identity.
+- _What it checks, in order:_
+  1. **The caller** has a current Contributor, Editor or agency role (Viewers, custom roles and unknown tokens
+     are refused), and is under the rate limit (ten publishes a minute per person, thirty requests a minute
+     per address, per server instance).
+  2. **Every author.** The History API lists who wrote each transaction on the draft since the published
+     version's last update; the Access API (all pages) gives each author's role today. Any author who is a
+     robot token, a removed member, a Viewer or on a custom role refuses the publish, as does a draft with
+     more than 500 edits since its last publish or no attributable edits.
+  3. **The changes** (`src/features/publish-gate/utils/policy.ts`, pure and unit tested):
+     - fields outside the client-editable lists (`src/lib/sanity/client-editable.ts`) must be unchanged; on a
+       new document or section they must equal the value Studio gives them (`utils/document-rules.ts`,
+       `INITIAL_VALUES`). Unknown types and fields go to review;
+     - deleting and unpublishing are never done here: they always go to review;
+     - changing a page or post's address needs a published redirect from the old address to the new one;
+       other slugs (events, team, categories) cannot change without review;
+     - required fields are present, a page slug follows the page rules (and is not a reserved path), and the
+       slug is not used by another published document of the same type;
+     - a picture or file the draft newly references must be a genuine asset of this project (Contributors can
+       forge asset documents, so its hash, size, extension and CDN address are checked against its id).
+  4. **The publish** uses the Actions API with `ifDraftRevisionId` and `ifPublishedRevisionId` (only the draft
+     guard on a first publish) for the exact revision that was validated. If the draft or the live version
+     changes after the gate read it, Sanity answers 409, the route answers `409`, and nothing goes live.
+- _Answers:_ `200` published; `202` sent to review (with the reasons); `401` unknown token; `403` the caller or
+  an author may not; `409` changed while publishing ("Someone changed this while you were publishing. Review the
+  latest changes and try again."); `422` fix first (with the problems); `429` too many tries; `502` Sanity could
+  not be read, so nothing was published. Responses are never cached.
+- _Audit log:_ one line per request in the host's log, `publish-gate {…}`: time, outcome, status, requester,
+  authors, document id and type, the validated revision and the changed _paths_ (names only, never values or
+  tokens). On Vercel, search the function logs for `publish-gate`.
+- _Known gaps (from the E1 security spike):_ Contributors can still create release versions
+  (`versions.*` documents), upload files and discard colleagues' drafts. The gate never publishes releases;
+  the agency's review should check releases before publishing them, and clear orphaned uploads occasionally.
+- _Keeping the rules honest:_ `utils/document-rules.ts` lists each type's required fields and initial protected
+  values. `src/app/publish-gate-rules.test.ts` compares them with `schema.json` and the schemas, so a schema
+  change fails the test until the file follows. Add a new document type's required fields there when you
+  add the type.
 
 **Classifying a new field.** When you add a field to a document or section:
 
