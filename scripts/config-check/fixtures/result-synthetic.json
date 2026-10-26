@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "outcome": "healthy",
+  "mode": "live",
+  "synthetic": true,
+  "checkedAt": "2026-10-26T09:05:00Z",
+  "failures": [],
+  "setup": { "missing": [] }
+}

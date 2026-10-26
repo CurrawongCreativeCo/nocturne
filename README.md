@@ -560,12 +560,36 @@ health workflow or `launch:check`. Remove it once the fix has shipped.
 **Checks that need the network are explicit.** Plain `config:check`, `--strict`, `--json` and `--build` never make a
 request. `--live` makes read-only requests (today, one to the Sanity datasets API) and only for Sanity content.
 
-**Health monitoring states.** `config:check` can't see GitHub, so it says "Can't check here". `HEALTH_CHECKS` and
-`HEALTH_EXPECT_MARKER` are registered but not read by the workflow yet (task 230), and are listed as "not implemented
-yet", not as missing. Task 230 writes `health-result.json`; its outcomes are `disabled` (on purpose), `unconfigured`
-(enabled but set up wrongly), `skipped` (nothing was checked), `healthy`, `warning` and `failed`
-(`src/lib/ops/health-states.ts`). Only `healthy` counts as healthy: a green workflow run that skipped is not a health
-check.
+**GitHub setup and monitoring (`--github`).** `config:check` can't see GitHub, so features whose settings live there say
+"Can't check here". `npm run config:check -- --github [--repo owner/name] [--json] [--strict]` reads GitHub instead, read-only,
+and prints each workflow-backed feature's **Setup** and **Monitoring** as separate columns (the repository comes from `--repo`,
+else `git remote get-url origin`).
+
+It needs a token in `GITHUB_TOKEN`, for that one command only: it is never read from `.env.local`, written, cached or
+printed. Without one, the command prints how to create a **fine-grained token, limited to this repository, with read-only
+Actions, Variables, Secrets, Issues and Metadata**, and stops. Run it as `GITHUB_TOKEN=<token> npm run config:check -- --github`.
+
+- **Setup:** whether the workflow file is on GitHub and its `state` verbatim (`active`, `disabled_manually`,
+  `disabled_inactivity`…); each repository variable present or missing, with `PRODUCTION_URL` and
+  `NEXT_PUBLIC_SANITY_PROJECT_ID` checked against `NEXT_PUBLIC_SITE_URL` and the project ID in `.env.local` (it says
+  _matches_ or _differs_, never the values); each secret present by name and last-updated date only (GitHub never returns a
+  value); `HEALTH_CHECKS=off` is shown as intentionally disabled, with its reason. Only repository-level variables and
+  secrets are visible: one set at organisation or environment level shows as missing.
+- **Monitoring (health):** the eight states of the settings spec, §R.2. The newest **non-synthetic** `health-result` artifact
+  decides **Intentionally disabled**, **Expected but unconfigured**, **Configured but skipped**, **Healthy**, **Warning** or
+  **Failed**. **Stale** means that result is over 36 hours old, or GitHub has the workflow paused. **Unknown** means nothing
+  could be read, or no run has produced a result yet. A scheduled run that was cancelled, skipped or crashed and left no
+  result counts as skipped (a manual run with no result is ignored, because it may have been a synthetic test). Any open
+  `health` issue is listed with its link, and a run in progress is noted beside the state, not instead of it. The other
+  workflows (backup, enquiry retention, Sanity) show their newest run only.
+- **Stops:** a token GitHub refuses (401), a repository it can't see (404) and a rate limit all stop the run, the last
+  saying when to try again. A missing permission (403) names the permission and the report carries on with what it can read.
+
+`--strict` exits 1 when anything is not set up or a monitoring state is a problem. The logic lives in
+`scripts/config-check/github.mjs`: pure functions over GitHub's JSON (tested against saved fixtures in
+`scripts/config-check/fixtures/`) plus a thin fetch layer, with no `process.exit` or `console` in the pure part so
+Foundation can reuse it. A feature gains a row by having `github-var` or `github-secret` settings in its registry and a
+workflow file listed in `WORKFLOWS` there.
 
 **For developers.** Each feature describes its settings in a `config.registry.ts` next to it (`defineFeatureConfig` in
 `src/config/feature-config.ts`): names, where each one lives, what it's for and where to get it. **Never a value.** The

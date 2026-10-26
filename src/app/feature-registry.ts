@@ -125,6 +125,11 @@ export const ignored: readonly { name: string; reason: string }[] = [
   { name: 'VERCEL_PROJECT_PRODUCTION_URL', reason: 'Set by Vercel' },
   { name: 'GITHUB_OUTPUT', reason: 'Set by GitHub Actions' },
   { name: 'GITHUB_STEP_SUMMARY', reason: 'Set by GitHub Actions' },
+  {
+    name: 'GITHUB_TOKEN',
+    reason:
+      'Tooling: config:check --github reads it from the environment for one run; never stored or printed',
+  },
   { name: 'GH_TOKEN', reason: "Workflow plumbing: the job's own github.token" },
   { name: 'GH_REPO', reason: 'Workflow plumbing: the repository the job runs in' },
   { name: 'RUN_URL', reason: 'Workflow plumbing: the link to the run, for the issue text' },

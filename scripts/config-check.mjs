@@ -8,9 +8,12 @@
  *   --strict     exit 1 when a feature that is on is missing something it needs
  *   --build      only the core gate (README, "Configuration"); `npm run build` runs it first
  *   --live       also asks Sanity about the dataset (the other features: "not implemented yet")
+ *   --github     read-only report of each workflow-backed feature's GitHub setup and latest real result
+ *                (needs GITHUB_TOKEN in the environment; --repo owner/name, default: the origin remote)
  *   --json       the same report as JSON, for tools
  *   --no-env-file  ignore .env.local (the tests use it)
  */
+import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -18,6 +21,14 @@ import { fileURLToPath } from 'node:url'
 import { createJiti } from 'jiti'
 
 import { checkDataset, parseEnv } from './check-dataset.mjs'
+import {
+  collectGithubReport,
+  createGithubClient,
+  formatGithubTable,
+  hasGithubProblem,
+  parseRepo,
+  tokenHelp,
+} from './config-check/github.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -53,8 +64,59 @@ export async function addLiveChecks(report, env, { check = checkDataset } = {}) 
   return report
 }
 
+/** `--repo owner/name` or `--repo=owner/name`; otherwise the origin remote. */
+function repoFromArgs(argv) {
+  const index = argv.findIndex((arg) => arg === '--repo' || arg.startsWith('--repo='))
+  if (index >= 0) {
+    return parseRepo(argv[index].includes('=') ? argv[index].split('=')[1] : argv[index + 1])
+  }
+  try {
+    const url = execFileSync('git', ['remote', 'get-url', 'origin'], {
+      cwd: root,
+      encoding: 'utf8',
+    })
+    return parseRepo(url)
+  } catch {
+    return null
+  }
+}
+
+async function runGithub(argv, args, env, registry) {
+  const repo = repoFromArgs(argv)
+  // The token comes from the environment only (never .env.local), is used for this run, and is never printed or stored.
+  const token = process.env.GITHUB_TOKEN
+  if (!token) {
+    console.error(tokenHelp(repo))
+    process.exit(1)
+  }
+  if (!repo) {
+    console.error(
+      'Which repository? Pass --repo owner/name, or run this where `git remote get-url origin` works.',
+    )
+    process.exit(1)
+  }
+  const features = registry.filter((feature) =>
+    feature.settings.some((s) => s.kind === 'github-var' || s.kind === 'github-secret'),
+  )
+  try {
+    const report = await collectGithubReport({
+      client: createGithubClient({ token, repo }),
+      repo,
+      features,
+      env,
+    })
+    console.log(args.has('--json') ? JSON.stringify(report, null, 2) : formatGithubTable(report))
+    if (args.has('--strict') && hasGithubProblem(report)) process.exit(1)
+  } catch (error) {
+    if (!error?.problem) throw error
+    console.error(error.message)
+    process.exit(1)
+  }
+}
+
 async function main() {
-  const args = new Set(process.argv.slice(2))
+  const argv = process.argv.slice(2)
+  const args = new Set(argv)
   const env = loadEnv(root, { envFile: !args.has('--no-env-file') })
 
   const { featureRegistry, pending, readinessFunctions } = await jiti.import(
@@ -63,6 +125,8 @@ async function main() {
   const { siteProfile } = await jiti.import(join(root, 'src/config/profile.ts'))
   const { detectBuildEnvironment } = await jiti.import(join(root, 'src/lib/config/environment.ts'))
   const environment = detectBuildEnvironment(env)
+
+  if (args.has('--github')) return runGithub(argv, args, env, featureRegistry)
 
   if (args.has('--build')) {
     const { evaluateGate, formatGate } = await jiti.import(join(root, 'src/lib/config/gate.ts'))

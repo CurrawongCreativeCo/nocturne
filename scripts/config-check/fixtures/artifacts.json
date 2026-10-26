@@ -1,0 +1,7 @@
+{
+  "total_count": 2,
+  "artifacts": [
+    { "id": 9002, "name": "health-result", "expired": false, "workflow_run": { "id": 302 } },
+    { "id": 9001, "name": "health-result", "expired": false, "workflow_run": { "id": 301 } }
+  ]
+}
