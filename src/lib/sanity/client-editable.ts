@@ -20,7 +20,11 @@ export interface FieldClassification {
   agencyOnly: readonly string[]
 }
 
-/** Types whose fields clients never change. Every field on them is agency only, now and later. */
+/**
+ * Types whose fields clients never change. Every field on them is agency only, now and later. The
+ * generators (`new:section`, `new:document`, `new:singleton`) add new types here; move one to
+ * `CLIENT_EDITABLE_FIELDS` when clients should change some of its fields.
+ */
 export const AGENCY_ONLY_TYPES: ReadonlySet<string> = new Set([
   'sharedSection',
   'redirect',
@@ -33,6 +37,7 @@ export const AGENCY_ONLY_TYPES: ReadonlySet<string> = new Set([
   'sectionStyle',
   'imageDesign',
   'decorativeDivider',
+  // new-type:agency-only
 ])
 
 /** Types with a mix: classify each of their stored fields. */

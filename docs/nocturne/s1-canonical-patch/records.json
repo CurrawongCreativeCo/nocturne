@@ -28,9 +28,7 @@
         "scripts/check-dataset.mjs",
         "README.md"
       ],
-      "deps": [
-        227
-      ]
+      "deps": [227]
     },
     {
       "n": 231,
@@ -42,14 +40,8 @@
       "size": "Small",
       "what": "A read-only report from a short-lived GitHub token: each workflow's state, variables and secrets present (secrets by name and date only), values that must match, and the latest real health result in the eight monitoring states. Written as pure modules Foundation can reuse.",
       "why": "Verify that monitoring is really set up and really running without opening GitHub, and give Foundation's health views (209) the same logic.",
-      "files": [
-        "scripts/config-check/github.mjs",
-        "scripts/config-check.mjs"
-      ],
-      "deps": [
-        227,
-        230
-      ]
+      "files": ["scripts/config-check/github.mjs", "scripts/config-check.mjs"],
+      "deps": [227, 230]
     },
     {
       "n": 232,
@@ -67,9 +59,7 @@
         "src/features/studio/structure.ts",
         "src/app/route-inventory.test.ts"
       ],
-      "deps": [
-        227
-      ]
+      "deps": [227]
     },
     {
       "n": 235,
@@ -81,10 +71,7 @@
       "size": "Small",
       "what": "On a scratch Vercel project and Edge Config store only: test every operation Nocturne needs (the Edge Config item write, environment variable list and upsert including the Secret type, redeploy, deployments with commit, domains) with a project-scoped token against a team token, and record what else the token can do.",
       "why": "The runtime Edge Config token and Foundation's provider writes depend on what a project-scoped token can and can't do; project-scoped is narrower, not read-only.",
-      "files": [
-        "scripts/spikes/vercel-tokens.mjs",
-        "docs/spikes/vercel-tokens.md"
-      ],
+      "files": ["scripts/spikes/vercel-tokens.mjs", "docs/spikes/vercel-tokens.md"],
       "deps": []
     },
     {
@@ -103,10 +90,7 @@
         ".env.example",
         "README.md"
       ],
-      "deps": [
-        227,
-        235
-      ]
+      "deps": [227, 235]
     },
     {
       "n": 234,
@@ -118,28 +102,13 @@
       "size": "Small",
       "what": "config:check --since <version>, a New configuration section in each release's CHANGELOG, a block for client update PRs, a readiness compatibility test against the last release's registry, and a release rule that refuses new required settings without a warning period.",
       "why": "New features should announce their setup, and no update should quietly switch off a working feature or make a site undeployable.",
-      "files": [
-        "scripts/release.mjs",
-        "scripts/release-utils.mjs",
-        "scripts/config-check.mjs"
-      ],
-      "deps": [
-        233,
-        29
-      ]
+      "files": ["scripts/release.mjs", "scripts/release-utils.mjs", "scripts/config-check.mjs"],
+      "deps": [233, 29]
     }
   ],
   "deps": {
     "200": "add 233",
     "209": "add 230, 231"
   },
-  "added": [
-    30,
-    31,
-    39,
-    129,
-    200,
-    208,
-    209
-  ]
+  "added": [30, 31, 39, 129, 200, 208, 209]
 }

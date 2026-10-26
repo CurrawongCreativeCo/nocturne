@@ -1925,10 +1925,10 @@ registry is also the list the agency publish review (task 206) and any future pu
 2. In `client-editable.ts`, add the field name to the type's `editable` list if clients should change it
    (their content: text, pictures, links), or to `agencyOnly` if it is a design, layout, SEO-control or
    technical choice. When unsure, use `agencyOnly`; moving it later is a one-word change.
-3. A new document, section or shared object type needs an entry too: add it to `CLIENT_EDITABLE_FIELDS`
-   with its fields, or to `AGENCY_ONLY_TYPES` when clients never touch it (every field on it, now and
-   later, is then agency only). The generators (`npm run new:section`, `new:document`, `new:singleton`)
-   do not edit the registry, so the test is your reminder.
+3. A new document, section or shared object type needs an entry too. The generators (`npm run new:section`,
+   `new:document`, `new:singleton`) add it to `AGENCY_ONLY_TYPES`, where every field on it, now and later, is
+   agency only. When clients should change some of its fields, move it to `CLIENT_EDITABLE_FIELDS` and list
+   its fields. Types you write by hand need an entry added yourself; the test is your reminder.
 4. Keep a field's own `hidden` for layout rules ("only for Split"): it still applies to clients on top of
    the registry. Fields inside inline objects (an item of a list, for example a Link list link's
    _Appearance_) are not classified one by one; their parent field is, and anything agency only there keeps

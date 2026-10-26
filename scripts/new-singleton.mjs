@@ -43,6 +43,7 @@ const paths = {
   singletons: join(root, 'src/features/studio/singletons.ts'),
   titles: join(root, 'src/features/studio/singleton-titles.ts'),
   structure: join(root, 'src/features/studio/structure.ts'),
+  clientEditable: join(root, 'src/lib/sanity/client-editable.ts'),
   gitkeep: join(root, 'src/features', feature, 'schemas/.gitkeep'),
 }
 
@@ -57,6 +58,7 @@ const touched = write({
   create: { ...registration.create, [paths.schema]: schema() },
   edits: [
     ...registration.edits,
+    { file: paths.clientEditable, marker: '// new-type:agency-only', text: `'${typeName}',\n` },
     { file: paths.singletons, marker: '// new-singleton:register', text: `'${typeName}',\n` },
     {
       file: paths.titles,

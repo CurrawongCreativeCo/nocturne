@@ -31,6 +31,7 @@ vi.hoisted(() => {
 
 interface SchemaEntry {
   name: string
+  type?: string
   // Documents keep their fields at the top level, other types under `value`.
   attributes?: Record<string, unknown>
   value?: { attributes?: Record<string, unknown> }
@@ -47,6 +48,11 @@ function storedFields(name: string): string[] {
   const attributes = entry?.attributes ?? entry?.value?.attributes ?? {}
   return Object.keys(attributes).filter((field) => !field.startsWith('_'))
 }
+
+/** Documents from schema.json, so a document type in a feature this file doesn't import is still caught. */
+const documents = schema
+  .filter((item) => item.type === 'document' && !/^(sanity|assist)\./.test(item.name))
+  .map((item) => item.name)
 
 const registered = [
   ...pageSchemaTypes,
@@ -68,9 +74,9 @@ describe('client-editable registry', () => {
   })
 
   it('classifies every registered document and object type', () => {
-    const unclassified = registered
-      .map((type) => type.name)
-      .filter((name) => !AGENCY_ONLY_TYPES.has(name) && !(name in CLIENT_EDITABLE_FIELDS))
+    const unclassified = [
+      ...new Set([...registered.map((type) => type.name), ...documents]),
+    ].filter((name) => !AGENCY_ONLY_TYPES.has(name) && !(name in CLIENT_EDITABLE_FIELDS))
     expect(unclassified, 'add these types to src/lib/sanity/client-editable.ts').toEqual([])
   })
 
@@ -97,7 +103,7 @@ describe('client-editable registry', () => {
     }
     for (const type of AGENCY_ONLY_TYPES) {
       if (type in CLIENT_EDITABLE_FIELDS) problems.push(`${type}: in both registries`)
-      if (!registered.some(({ name }) => name === type)) problems.push(`${type}: not registered`)
+      if (storedFields(type).length === 0) problems.push(`${type}: not in schema.json`)
     }
     expect(problems).toEqual([])
   })

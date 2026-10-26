@@ -44,6 +44,7 @@ const paths = {
   api: join(root, 'src/features', feature, 'api', `${kebab}.ts`),
   live: join(root, 'src/lib/sanity/live.ts'),
   structure: join(root, 'src/features/studio/structure.ts'),
+  clientEditable: join(root, 'src/lib/sanity/client-editable.ts'),
   gitkeeps: ['schemas', 'api'].map((dir) => join(root, 'src/features', feature, dir, '.gitkeep')),
 }
 
@@ -62,6 +63,7 @@ const touched = write({
   edits: [
     ...registration.edits,
     { file: paths.live, marker: '// new-document:tag', text: `${typeName}: '${typeName}',\n` },
+    { file: paths.clientEditable, marker: '// new-type:agency-only', text: `'${typeName}',\n` },
     { file: paths.structure, marker: '// new-document:listed', text: `'${typeName}',\n` },
     {
       file: paths.structure,
