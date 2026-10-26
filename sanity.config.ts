@@ -66,6 +66,7 @@ import { hideDisabledFromNewMenu } from './src/features/studio/utils/feature-vis
 import { studioReleasesSettings } from './src/features/studio/utils/releases-config'
 import { filterTools } from './src/features/studio/utils/tool-access'
 import { teamSchemaTypes } from './src/features/team/schemas'
+import { withClientEditableHiding } from './src/lib/sanity/client-editable'
 import { sharedSchemaTypes } from './src/lib/sanity/schema'
 // new-registry:import
 
@@ -133,7 +134,7 @@ export default defineConfig({
   // Content variants: lets editors create variants of a document, which A/B experiments serve.
   beta: { variants: { enabled: true } },
   schema: {
-    types: [
+    types: withClientEditableHiding([
       ...pageSchemaTypes,
       ...blogSchemaTypes,
       ...formSchemaTypes,
@@ -146,7 +147,7 @@ export default defineConfig({
       ...panelsSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,
-    ],
+    ]),
     templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],
   },
   document: {

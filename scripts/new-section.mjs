@@ -53,6 +53,7 @@ const paths = {
   preview: join(root, 'public/section-previews', `${typeName}.svg`),
   placeholder: join(root, 'public/section-previews/_placeholder.svg'),
   fixtures: join(root, 'tests/e2e/fixtures/dataset.mjs'),
+  clientEditable: join(root, 'src/lib/sanity/client-editable.ts'),
 }
 
 if (
@@ -76,6 +77,7 @@ const edits = [
   [paths.renderer, '// new-section:import', `import { ${Component} } from './sections/${kebab}'\n`],
   [paths.renderer, '  // new-section:register', `  ${typeName}: ${Component},\n`],
   [paths.fixtures, '  // new-section:gallery', galleryTemplate(names, variants)],
+  [paths.clientEditable, '  // new-type:agency-only', `  '${typeName}',\n`],
 ]
 for (const [file, marker] of edits) {
   if (!readFileSync(file, 'utf8').includes(marker)) {
