@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "npm run typegen && next build",
+    "build": "npm run config:check -- --build && npm run typegen && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit --incremental false",
     "tokens": "node scripts/build-tokens.mjs",
@@ -16,6 +16,7 @@
     "lint": "eslint . --max-warnings 0",
     "predev": "npm run tokens && npm run brand-assets && node scripts/setup/index.mjs",
     "setup": "node scripts/setup/index.mjs",
+    "config:check": "node scripts/config-check.mjs",
     "check:dataset": "node scripts/check-dataset.mjs",
     "check:version": "node scripts/check-version.mjs",
     "check:studio-brand": "node scripts/check-studio-brand.mjs",

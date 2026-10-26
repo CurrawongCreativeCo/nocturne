@@ -94,7 +94,7 @@ export const ROUTES: Record<string, [Classification, string]> = {
   'api/stripe/webhook/route.ts': ['infrastructure', 'Stripe webhook; verifies its signature.'],
   'api/site-info/route.ts': [
     'infrastructure',
-    'Ops dashboard: booleans and public identifiers only.',
+    'The launch state for launch:check and the health workflow (schema 2); nothing else.',
   ],
   'api/ops-notices/route.ts': ['infrastructure', 'Ops notices; needs its shared secret.'],
   'api/experiments/route.ts': [

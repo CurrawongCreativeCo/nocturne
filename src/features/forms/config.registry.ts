@@ -1,0 +1,61 @@
+import { defineFeatureConfig } from '@/config/feature-config'
+
+export const formsConfig = defineFeatureConfig({
+  id: 'forms',
+  title: 'Contact forms',
+  summary: 'Sends form submissions to your inbox, with a spam check.',
+  why: 'Visitors can contact the business without an email address on the page.',
+  withoutIt: 'Form sections show "unavailable" to visitors. Nothing else changes.',
+  profileFlag: 'forms',
+  tier: 'optional',
+  since: '1.0.0',
+  docs: 'README.md#forms-setup',
+  setup: [
+    'Create a Turnstile widget in Cloudflare and copy its site key and secret key.',
+    'Create a Resend API key, and verify the domain the forms will send from.',
+    'Add the four settings to Vercel (Production and Preview), then redeploy.',
+  ],
+  settings: [
+    {
+      name: 'NEXT_PUBLIC_TURNSTILE_SITE_KEY',
+      kind: 'public-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      buildTime: true,
+      required: true,
+      purpose: 'Shows the spam check on the form. Public by design.',
+      source: 'Cloudflare → Turnstile → your widget → Site key',
+    },
+    {
+      name: 'TURNSTILE_SECRET_KEY',
+      kind: 'secret',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: true,
+      purpose: 'Lets the server confirm a visitor passed the spam check.',
+      source: 'Cloudflare → Turnstile → your widget → Secret key',
+    },
+    {
+      name: 'RESEND_API_KEY',
+      kind: 'secret',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: true,
+      purpose: 'Lets the server send each submission to your inbox.',
+      source: 'Resend → API Keys',
+    },
+    {
+      name: 'FORMS_FROM_EMAIL',
+      kind: 'server-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: true,
+      format: 'email-with-name',
+      purpose:
+        'The address submissions are sent from. Resend refuses a malformed or unverified one, so sending fails.',
+      source: 'A sender verified in Resend, for example Site name <forms@example.com.au>',
+    },
+  ],
+  readiness: 'getFormsConfig',
+  verify: [],
+})
