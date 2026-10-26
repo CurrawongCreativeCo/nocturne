@@ -76,7 +76,7 @@ jobs:
       - name: Snapshot issues
         id: issues-before
         if: inputs.synthetic == true
-        run: gh issue list --label health --state all --limit 100 --json number,state,title,updatedAt > issues-before.json
+        run: gh issue list --label health --state all --limit 100 --json number,state,title,updatedAt > "$RUNNER_TEMP/issues-before.json"
 
       - name: Check configuration
         id: gate
@@ -155,9 +155,9 @@ jobs:
         id: verify
         if: always() && inputs.synthetic == true
         run: |
-          gh issue list --label health --state all --limit 100 --json number,state,title,updatedAt > issues-after.json || rm -f issues-after.json
+          gh issue list --label health --state all --limit 100 --json number,state,title,updatedAt > "$RUNNER_TEMP/issues-after.json" || rm -f "$RUNNER_TEMP/issues-after.json"
           node scripts/health-report.mjs verify --result=health-result.json --expect='${{ inputs.expected_outcome }}' \
-            --issues-before=issues-before.json --issues-after=issues-after.json
+            --issues-before="$RUNNER_TEMP/issues-before.json" --issues-after="$RUNNER_TEMP/issues-after.json"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()

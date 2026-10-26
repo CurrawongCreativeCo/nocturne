@@ -623,6 +623,11 @@ describe('health.yml', () => {
     for (const step of reading) expect(step).toContain('inputs.synthetic == true')
   })
 
+  it('keeps the issue snapshots outside the workspace, which actions/checkout cleans', () => {
+    expect(workflow).not.toMatch(/(?<!\/)issues-(before|after)\.json/)
+    expect(workflow.match(/\$RUNNER_TEMP\/issues-(before|after)\.json/g)).not.toBeNull()
+  })
+
   it('verifies every synthetic run, even when earlier steps failed', () => {
     const verify = steps(jobs.health).find((step) => step.includes('health-report.mjs verify'))
     expect(verify).toContain('always() && inputs.synthetic == true')

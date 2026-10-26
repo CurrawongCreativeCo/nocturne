@@ -7,8 +7,8 @@
  * and the environment. Dependency-free. Always exits 0: whether the run was healthy is the `failed`
  * output and the result file, not the exit code.
  */
-import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { randomBytes } from 'node:crypto'
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import { parseSiteInfoLaunch } from './launch-check/prelaunch.mjs'
