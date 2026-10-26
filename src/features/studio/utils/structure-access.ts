@@ -57,3 +57,14 @@ export function filterStructureItems<T>(
     return index > 0 && index < kept.length - 1 && previous !== undefined && idOf(previous) !== null
   })
 }
+
+/** Id of the agency-only "Waiting for review" list (not in CLIENT_STRUCTURE_IDS, so clients never see it). */
+export const WAITING_FOR_REVIEW_ID = 'waitingForReview'
+
+/** Every document with a draft: a Contributor's saved changes, and anyone's unpublished work. */
+export const WAITING_FOR_REVIEW_FILTER = '_id in path("drafts.**")'
+
+/** The list title: "Waiting for review (3)", or just the name when nothing is waiting. */
+export function waitingForReviewTitle(count: number): string {
+  return count > 0 ? `Waiting for review (${count})` : 'Waiting for review'
+}

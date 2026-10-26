@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { filterDocumentActions, filterNewDocumentOptions } from './document-access'
+import {
+  CONTRIBUTOR_MESSAGE,
+  filterDocumentActions,
+  filterNewDocumentOptions,
+  replacePublishForContributor,
+} from './document-access'
 
 const actions = ['publish', 'unpublish', 'discardChanges', 'duplicate', 'delete', 'restore'].map(
   (action) => ({ action }),
@@ -59,5 +64,43 @@ describe('filterNewDocumentOptions', () => {
       'page-content',
       'post',
     ])
+  })
+})
+
+describe('replacePublishForContributor', () => {
+  const message: { action?: string; label: string } = { label: CONTRIBUTOR_MESSAGE }
+
+  it('puts the message where Publish was for contributors', () => {
+    const result = replacePublishForContributor<{ action?: string }>(
+      actions,
+      'contributor',
+      message,
+    )
+    expect(result[0]).toBe(message)
+    expect(names(result)).toEqual([undefined, ...names(actions).slice(1)])
+  })
+
+  it('leaves agency staff and editors with Publish', () => {
+    expect(replacePublishForContributor<{ action?: string }>(actions, 'agency', message)).toEqual(
+      actions,
+    )
+    expect(replacePublishForContributor<{ action?: string }>(actions, 'editor', message)).toEqual(
+      actions,
+    )
+  })
+
+  it('survives the contributor filter, which only removes named actions', () => {
+    const result = replacePublishForContributor<{ action?: string }>(
+      actions,
+      'contributor',
+      message,
+    )
+    expect(filterDocumentActions(result, 'contributor', false)).toContain(message)
+  })
+
+  it('tells contributors their changes go to Currawong', () => {
+    expect(CONTRIBUTOR_MESSAGE).toBe(
+      'Your changes are saved as a draft and sent to Currawong to publish.',
+    )
   })
 })
