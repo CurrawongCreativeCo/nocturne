@@ -125,6 +125,9 @@ describe('transactions', () => {
     expect(result.transactions).toHaveLength(2)
     expect(requests[0]?.url).toContain('/data/history/production/transactions/drafts.about?')
     expect(requests[0]?.url).toContain('excludeContent=true')
+    // Only parameters Sanity's reference documents.
+    const query = new URL(requests[0]?.url ?? '').searchParams
+    expect([...query.keys()].sort()).toEqual(['excludeContent', 'limit', 'reverse'])
 
     answer(new Response(Array.from({ length: 500 }, (_, n) => line(n)).join('\n'), { status: 200 }))
     expect((await deps.transactions('drafts.about')).complete).toBe(false)

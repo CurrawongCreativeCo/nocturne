@@ -1,13 +1,13 @@
 /**
  * Where a Contributor's Publish button would be: a message that their changes go to Currawong.
  * Sanity refuses Publish for the role, so the button is gone; this says why and what happens next.
+ * Used when the publish gate is off (publish-through-gate.tsx swaps it for the gate's Publish when on).
  */
 import { Button, Stack, Text } from '@sanity/ui'
 import { useState } from 'react'
-import type { DocumentActionComponent, DocumentActionsResolver } from 'sanity'
+import type { DocumentActionComponent } from 'sanity'
 
-import { currentAudience } from '../roles'
-import { CONTRIBUTOR_MESSAGE, replacePublishForContributor } from '../utils/document-access'
+import { CONTRIBUTOR_MESSAGE } from '../utils/document-access'
 
 export const SentToCurrawong: DocumentActionComponent = () => {
   const [open, setOpen] = useState(false)
@@ -47,7 +47,3 @@ export const SentToCurrawong: DocumentActionComponent = () => {
   }
 }
 SentToCurrawong.displayName = 'SentToCurrawongAction'
-
-/** Contributors see the message in place of Publish; other roles are untouched. */
-export const contributorMessageActions: DocumentActionsResolver = (prev, { currentUser }) =>
-  replacePublishForContributor(prev, currentAudience(currentUser), SentToCurrawong)
