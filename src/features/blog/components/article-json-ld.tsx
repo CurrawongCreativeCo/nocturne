@@ -11,10 +11,12 @@ import { authorName } from '../utils/author'
 
 /**
  * schema.org Article for a post. The publisher points at the Organization that the site layout
- * already describes (site-json-ld.tsx), so it isn't repeated here.
+ * already describes (site-json-ld.tsx), so it isn't repeated here. The nested WebPage points at that
+ * WebSite and Organization too (tests/e2e/structured-data.spec.ts checks every WebPage does).
  */
 export function ArticleJsonLd({ post }: { post: PostData }) {
   const { mainImage } = post
+  const homeUrl = new URL('/', siteUrl).toString()
   const image = mainImage.asset
     ? urlFor({
         asset: { _ref: mainImage.asset._id },
@@ -34,6 +36,8 @@ export function ArticleJsonLd({ post }: { post: PostData }) {
         mainEntityOfPage: {
           '@type': 'WebPage',
           '@id': new URL(postPath(stegaClean(post.slug)), siteUrl).toString(),
+          isPartOf: { '@id': `${homeUrl}#website` },
+          publisher: { '@id': `${homeUrl}#organization` },
         },
         headline: stegaClean(post.title),
         description: stegaClean(post.excerpt),
@@ -41,7 +45,7 @@ export function ArticleJsonLd({ post }: { post: PostData }) {
         datePublished: stegaClean(post.publishedAt),
         dateModified: stegaClean(post._updatedAt),
         ...(author && { author: { '@type': 'Person', name: stegaClean(author) } }),
-        publisher: { '@id': `${new URL('/', siteUrl).toString()}#organization` },
+        publisher: { '@id': `${homeUrl}#organization` },
         ...(post.categories?.length && {
           articleSection: post.categories.map((category) => stegaClean(category.title)),
         }),

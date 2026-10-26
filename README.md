@@ -1082,6 +1082,17 @@ Search engines that support [IndexNow](https://www.indexnow.org) (Bing, Yandex a
 
 After each valid `page` or `post` webhook the route POSTs the document's URL to `api.indexnow.org` once the response has been sent, so a slow or failing IndexNow never delays or fails the webhook (failures are logged with `console.error`). Only pages and blog posts are sent, not other types. Nothing is sent when the site URL is localhost. A page's URL is the site URL plus its slug (`home` is the root); a post's is the site URL plus `/blog/<slug>`. The standard projection `{_type, "slug": slug.current}` already carries a post's slug.
 
+### Structured data rules
+
+Google requires structured data (JSON-LD) to describe content visitors can see. `tests/e2e/structured-data.spec.ts` crawls every page in the fixture sitemap and fails, naming the page and property, when it doesn't hold. The rules are pure functions in `src/lib/json-ld-visibility.ts`, unit-tested with a deliberately broken fixture.
+
+- **Visible text:** each `name` and `headline` (organisation, person, event, place, breadcrumb, FAQ question), each part of an address, the weekly opening and closing times (compared as the page shows them, "5:30 pm") and each line of an FAQ answer must appear in the page's `document.body.innerText`. Comparison ignores case, whitespace, HTML entities and curly versus straight quotes and dashes. Answers inside a closed `<details>` count: the test opens them first, as a visitor can.
+- **Minimal pages:** a Link page's "Minimal page" hides the footer with CSS, so the site-wide business address and hours aren't visible there. The spec skips those two (the Organization's top-level `address` and `openingHoursSpecification`) when the site chrome is hidden, and still checks names. An event's or place's own address is always checked.
+- **Not checked:** `legalName`, `description`, `areaServed`, links, dates and dated special days. Don't add structured data for something the page doesn't show; if a field is only for search engines, keep it out of the checked list on purpose.
+- **`@id`s:** unique within a page. Across pages the same `@id` may repeat only with an identical definition (the Organization and WebSite are on every page); two different things sharing one would merge into a single entity.
+- **WebPage:** every `WebPage` node (an Article's `mainEntityOfPage`) is `isPartOf` the site's `<origin>/#website` and names `<origin>/#organization` as its `publisher`.
+- **Adding structured data:** build it from the same fields the page renders, put it in the fixtures so the spec covers it, and if it adds a new kind of visible string, teach `collectCheckableStrings` about it.
+
 ### Edge Config redirects
 
 By default a redirect is answered by the page route: the request renders, finds no page and redirects.
