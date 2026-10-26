@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "outcome": "failed",
+  "mode": "live",
+  "synthetic": false,
+  "checkedAt": "2026-10-25T20:05:00Z",
+  "failures": [{ "id": "a" }, { "id": "b" }],
+  "setup": { "missing": [] }
+}

@@ -1,0 +1,20 @@
+{
+  "total_count": 3,
+  "variables": [
+    {
+      "name": "PRODUCTION_URL",
+      "value": "https://example.com.au",
+      "updated_at": "2026-10-01T00:00:00Z"
+    },
+    {
+      "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+      "value": "abc123xy",
+      "updated_at": "2026-10-01T00:00:00Z"
+    },
+    {
+      "name": "NEXT_PUBLIC_SANITY_DATASET",
+      "value": "production",
+      "updated_at": "2026-10-01T00:00:00Z"
+    }
+  ]
+}
