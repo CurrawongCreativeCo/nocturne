@@ -135,6 +135,8 @@ The new task **235** is a spike on a scratch Vercel project and scratch Edge Con
 4. The domain operations task 129 needs.
 5. What else the token _can_ do. This measures the blast radius.
 
+> **Task 235 status (27 Oct 2026):** the script and the decision record exist (`docs/spikes/vercel-tokens.md`); the live measurements are pending a scratch project. Vercel's docs already say a project-scoped token is denied team-level resources, so expect row (a) to be refused.
+
 **Until 235 reports:**
 
 - `VERCEL_TEAM_ID` stays;
@@ -958,6 +960,7 @@ Then task 233 covers all the features and generates the docs, and task 234 adds 
     - `VERCEL_TEAM_ID` is documented as unnecessary with a project-scoped token.
 - **Acceptance:** the generated files have no diff in CI; `site-info` reports every feature; the deprecations warn in `config:check`.
 - **Done when:** merged and released.
+- **Note (task 235):** the `EDGE_CONFIG_ID` and `VERCEL_TEAM_ID` cleanups and the Vercel token guidance follow `docs/spikes/vercel-tokens.md`. Provisional reading: the `EDGE_CONFIG` connection string carries the store id, and team- and project-scoped tokens need no `teamId`, but the Edge Config write is probably refused for a project-scoped token. Wait for the measured cells.
 
 ---
 

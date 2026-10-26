@@ -150,4 +150,9 @@ export const ignored: readonly { name: string; reason: string }[] = [
   { name: 'NEXT_DIST_DIR', reason: 'Tooling: a scratch build directory' },
   { name: 'E2E_*', reason: 'Tests: end-to-end switches' },
   { name: 'STUDIO_PERF_*', reason: 'Tests: the Studio performance harness' },
+  {
+    name: 'VERCEL_SPIKE_*',
+    reason:
+      'Tooling: scripts/spikes/vercel-tokens.mjs (task 235), scratch project and tokens, read for one run and never printed',
+  },
 ]
