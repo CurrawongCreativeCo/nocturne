@@ -5,10 +5,11 @@ import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
 import { isCdnUrl } from './image-design-options'
 
 /**
- * A small portrait or logo at the top of a section (components/ui/profile-image.tsx): the Link
- * list's profile picture today, and the shape a team or testimonial avatar could share. Sizes are
- * relative to the layout's own (Medium is what each layout always drew), so they stay in proportion.
- * Kept free of Studio code so the site can import it.
+ * A small portrait or logo (components/ui/profile-image.tsx): the Link list's profile picture, the
+ * Team list's portraits and the testimonial avatars. Larger pictures use Image design instead
+ * (README, "Image design"), never both on one picture. Sizes are relative to the layout's own
+ * (Medium is what each layout always drew), so they stay in proportion. Kept free of Studio code
+ * so the site can import it.
  */
 export const PROFILE_IMAGE_SIZES = ['small', 'medium', 'large'] as const
 export type ProfileImageSize = (typeof PROFILE_IMAGE_SIZES)[number]
@@ -88,15 +89,17 @@ export interface ResolvedProfileImage {
 }
 
 /**
- * What to draw. Unset everywhere is Medium, Circle, no border: the original picture. A gradient
+ * What to draw. Unset everywhere is Medium, Circle, no border: the original picture (a component
+ * whose picture isn't round names its own `shape` fallback). A gradient
  * ring with no gradient chosen runs from Primary to Secondary; a frame whose file is missing (or not
  * on the CDN) draws no border rather than a broken one.
  */
 export function resolveProfileImage(
   input: ProfileImageDesignInput | null | undefined,
+  fallback: { shape?: ProfileImageShape } = {},
 ): ResolvedProfileImage {
   const size = pick(PROFILE_IMAGE_SIZES, input?.imageSize) ?? 'medium'
-  const shape = pick(PROFILE_IMAGE_SHAPES, input?.imageShape) ?? 'circle'
+  const shape = pick(PROFILE_IMAGE_SHAPES, input?.imageShape) ?? fallback.shape ?? 'circle'
   const kind = pick(PROFILE_BORDERS, input?.border) ?? 'none'
   const frameUrl = input?.frameUrl
   let border: ResolvedProfileBorder | null = null
@@ -117,4 +120,10 @@ export function resolveProfileImage(
     border = { kind: 'frame', url: frameUrl }
   }
   return { size, shape, border }
+}
+
+/** Whether a stored profile design names anything: the Team list keeps its older look until it does. */
+export function hasProfileImageChoice(input: ProfileImageDesignInput | null | undefined): boolean {
+  const border = typeof input?.border === 'string' ? stegaClean(input.border) : undefined
+  return Boolean(input?.imageSize || input?.imageShape || (border && border !== 'none'))
 }

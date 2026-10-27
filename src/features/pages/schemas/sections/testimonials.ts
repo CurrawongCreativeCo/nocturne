@@ -5,6 +5,7 @@ import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
+import { profileImageDesignField } from '@/lib/sanity/schema/profile-image-design'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import {
@@ -78,6 +79,12 @@ export const testimonials = defineType({
             preview: { select: { title: 'name', subtitle: 'quote', media: 'avatar' } },
           }),
         ],
+      }),
+      // Size and ring for the small round avatars: agency only, in the Design tab.
+      profileImageDesignField({
+        name: 'avatarDesign',
+        title: 'Avatars',
+        description: 'Size and an optional ring for the round pictures beside each name.',
       }),
       accessField,
       // Shown first in the Content tab.

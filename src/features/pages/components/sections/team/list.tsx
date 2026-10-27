@@ -20,6 +20,7 @@ export function TeamList({ data, isFirst }: SectionProps<'team'>) {
             <TeamRow
               member={member}
               design={data.imageDesign}
+              portraitDesign={data.portraitDesign}
               headingLevel={headingLevelFor(data)}
               eager={isFirst && index === 0}
             />

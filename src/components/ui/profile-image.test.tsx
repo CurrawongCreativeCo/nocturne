@@ -119,3 +119,26 @@ describe('ProfileImage', () => {
     expect(draw({ border: 'frame', frameUrl: FRAME_URL })).toContain('inset-[14%]')
   })
 })
+
+describe('ProfileImage at avatar sizes', () => {
+  const AVATAR: ProfileImageScale = {
+    ...SCALE,
+    pixels: { small: 40, medium: 48, large: 64 },
+  }
+  const avatar = (input: Parameters<typeof resolveProfileImage>[0]) =>
+    renderToStaticMarkup(
+      <ProfileImage image={IMAGE} design={resolveProfileImage(input)} scale={AVATAR} />,
+    )
+
+  it('asks the image CDN for twice the drawn width, not the Link list’s widths', () => {
+    expect(avatar({ imageSize: 'small' })).toContain('sizes="40px"')
+    expect(avatar(undefined)).toContain('sizes="48px"')
+    expect(avatar({ imageSize: 'large' })).toContain('sizes="64px"')
+    expect(avatar(undefined)).toContain('width="96"')
+  })
+
+  it('draws a solid ring around a circle, and no ring by default', () => {
+    expect(avatar(undefined)).not.toContain('image-ring')
+    expect(avatar({ border: 'line' })).toContain('image-ring')
+  })
+})

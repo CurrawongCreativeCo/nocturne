@@ -21,7 +21,7 @@ export function TestimonialsSlider({ data, isFirst }: SectionProps<'testimonials
       )}
       <LazySlider label="Customer testimonials" perView={{ base: 1, md: 2, lg: 3 }} gap>
         {items.map((item) => (
-          <QuoteCard key={item._key} item={item} />
+          <QuoteCard key={item._key} item={item} design={data.avatarDesign} />
         ))}
       </LazySlider>
     </SectionFrame>

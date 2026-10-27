@@ -2118,6 +2118,20 @@ const gallerySections = [
       avatar: image(name),
     })),
   },
+  // Small profile pictures (README, "Image design"): a Large avatar with a ring, the default Medium one above.
+  {
+    _key: 'testimonials-avatar-ring',
+    _type: 'testimonials',
+    title: 'Avatars with a ring',
+    avatarDesign: { _type: 'object', imageSize: 'large', border: 'line', borderWidth: 'medium' },
+    items: ['Alex', 'Sam'].map((name) => ({
+      _key: key(),
+      quote: 'Great.',
+      name,
+      role: 'CEO',
+      avatar: image(name),
+    })),
+  },
   {
     _key: 'faq',
     _type: 'faq',
@@ -2439,6 +2453,29 @@ const gallerySections = [
     variant: 'list',
     selection: 'all',
     title: 'Who we are',
+  },
+  // The list's small portraits: a circle with a ring, then an Image design that takes precedence over Portraits.
+  {
+    _key: 'team-list-portrait-ring',
+    _type: 'team',
+    variant: 'list',
+    selection: 'picked',
+    title: 'Portraits with a ring',
+    portraitDesign: { _type: 'object', imageShape: 'circle', border: 'line', borderWidth: 'medium' },
+    members: [
+      { _key: 'pick-ring-dev', ...ref('teamMember-dev') },
+      { _key: 'pick-ring-ann', ...ref('teamMember-ann') },
+    ],
+  },
+  {
+    _key: 'team-list-image-design',
+    _type: 'team',
+    variant: 'list',
+    selection: 'picked',
+    title: 'Image design over Portraits',
+    imageDesign: imageDesign({ appearance: 'arch' }),
+    portraitDesign: { _type: 'object', imageShape: 'circle', border: 'line' },
+    members: [{ _key: 'pick-over-dev', ...ref('teamMember-dev') }],
   },
   videoSection('video-embed', {
     variant: 'embed',

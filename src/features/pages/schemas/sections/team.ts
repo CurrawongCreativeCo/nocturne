@@ -5,6 +5,7 @@ import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
+import { profileImageDesignField } from '@/lib/sanity/schema/profile-image-design'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import {
@@ -12,6 +13,8 @@ import {
   TeamListThumbnail,
   TeamSliderThumbnail,
 } from '@/lib/sanity/schema/thumbnails/team-thumbnails'
+
+import { hasImageDesign, type PortraitDesigns } from '../../utils/team-portrait'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -46,6 +49,19 @@ export const TEAM_VARIANTS = [
     thumbnail: TeamListThumbnail,
   },
 ] as const
+
+interface DesignState extends PortraitDesigns {
+  variant?: string
+}
+
+/**
+ * One picture, one design (README, "Image design"): the grid and slider portraits are large, so they
+ * use Image design; the list's small portraits use the profile picture design. A list that already
+ * has an Image design keeps it, and shows only that, until it is cleared.
+ */
+const portraitsAreSmall = ({ parent }: { parent?: unknown }) =>
+  (parent as DesignState | undefined)?.variant === 'list' &&
+  !hasImageDesign(parent as DesignState | undefined)
 
 export const team = defineType({
   name: 'team',
@@ -96,7 +112,15 @@ export const team = defineType({
           ),
       }),
       // Shape, motion and frames for the portraits: agency only, in the Design tab.
-      imageDesignField(),
+      imageDesignField({ hidden: ({ parent }) => portraitsAreSmall({ parent }) }),
+      profileImageDesignField({
+        name: 'portraitDesign',
+        title: 'Portraits',
+        description:
+          'Size, shape and an optional ring for the list’s small portraits. The grid and slider use Image design.',
+        shapes: ['rounded', 'circle'],
+        hidden: ({ parent }) => !portraitsAreSmall({ parent }),
+      }),
       accessField,
       // Shown first in the Content tab.
       variantField(TEAM_VARIANTS),

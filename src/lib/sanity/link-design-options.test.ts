@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveProfileImage } from './profile-image-options'
+import { hasProfileImageChoice, resolveProfileImage } from './profile-image-options'
 import { socialPositionOf, socialStyleOf } from './social-style-options'
 import { showsWordmark, wordmarkSizeOf } from './wordmark-options'
 
@@ -66,5 +66,23 @@ describe('social icons and wordmarks', () => {
     expect(showsWordmark('text', image)).toBe(false)
     expect(showsWordmark(undefined, image)).toBe(false)
     expect(wordmarkSizeOf('huge')).toBe('medium')
+  })
+})
+
+describe('small portraits beyond the Link list', () => {
+  it('keeps a component’s own shape until one is chosen', () => {
+    expect(resolveProfileImage(undefined, { shape: 'rounded' }).shape).toBe('rounded')
+    expect(resolveProfileImage({ imageShape: 'circle' }, { shape: 'rounded' }).shape).toBe('circle')
+    expect(resolveProfileImage({ imageShape: 'nonsense' }, { shape: 'rounded' }).shape).toBe(
+      'rounded',
+    )
+  })
+
+  it('treats a design with nothing chosen, or only nulls, as no choice', () => {
+    expect(hasProfileImageChoice(undefined)).toBe(false)
+    expect(hasProfileImageChoice({ imageSize: null, imageShape: null, border: null })).toBe(false)
+    expect(hasProfileImageChoice({ border: 'none' })).toBe(false)
+    expect(hasProfileImageChoice({ imageSize: 'small' })).toBe(true)
+    expect(hasProfileImageChoice({ border: 'line' })).toBe(true)
   })
 })

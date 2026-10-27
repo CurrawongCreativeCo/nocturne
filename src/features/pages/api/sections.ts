@@ -117,6 +117,15 @@ export const logoCloudFragment = /* groq */ `
   }
 `
 
+/** A small portrait's design (components/ui/profile-image.tsx): size, shape, ring. */
+const profileImageDesignFields = /* groq */ `
+  imageSize,
+  imageShape,
+  border,
+  borderWidth,
+  borderColour { colour, hex }
+`
+
 export const testimonialsFragment = /* groq */ `
   _type == "testimonials" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -124,6 +133,7 @@ export const testimonialsFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    avatarDesign { ${profileImageDesignFields} },
     items[] {
       _key,
       quote,
@@ -274,6 +284,7 @@ export const teamFragment = /* groq */ `
     "headingPlain": pt::text(heading),
     text,
     imageDesign { ${imageDesignFields} },
+    portraitDesign { ${profileImageDesignFields} },
     "members": select(
       selection == "picked" => members[defined(@->_id)]->{ ${teamCardFields} },
       *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { ${teamCardFields} }

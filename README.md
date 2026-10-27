@@ -2815,10 +2815,22 @@ parts at rest and prove the wrappers change nothing about the layout. `/hero-par
 
 ### Image design
 
+**Which design a picture gets.** Choose by what the picture is for, and never give one picture both:
+
+- **`ProfileImage` (Profile picture)** is for compact, identity-focused pictures: a face, an avatar or a logo shown small beside a name. It offers a size, a shape and an optional ring, and nothing moves. Used by the Link list profile, the Team list portraits and the testimonial avatars.
+- **`FramedImage` (Image design)** is for larger editorial or decorative imagery: Image + text, the Hero's Split layout, Gallery and the Team grid and slider portraits. It offers shapes, picture motion and decorative frames.
+
+Below about 160px wide is a guide, not a hard limit: a picture that identifies a person or brand at a small size is a profile picture; a picture that carries the section's look is Image design. A new component picks one, using `profileImageDesignField` or `imageDesignField` (not both), and no new image-configuration layer is needed. Both fields are agency only, and empty means the picture as it always looked. `ProfileImage` draws through the shared shape geometry (`src/lib/sanity/image-frame-geometry.ts`), so "Adjust picture" can follow without changes to the components (task 177).
+
+**Profile pictures (agency only: Design tab).**
+
+- **Testimonials → Avatars:** _Picture size_ Small (40px), Medium (48px, the original) or Large (64px), and an optional _Ring_ (solid, with a thickness and a colour). Avatars are always round. Default: Medium, no ring. A ring adds its thickness and gap around the picture, so the box grows by that on every side while the picture keeps its size.
+- **Team → Portraits** (List layout only): _Picture size_ Small, Medium (96px, 128px from the small breakpoint: the original) or Large, _Picture shape_ Rounded square (the original corner) or Circle, and an optional _Ring_. The Team grid and slider show _Image design_ instead, and the List shows only one of the two. A list that already has an _Image design_ keeps it (and keeps showing only it) until it is cleared; until then _Portraits_ is hidden. Until _Portraits_ names a choice the list draws its original portrait.
+
 One treatment for a section's main picture: a **still frame with the picture moving gently inside it**, a handful of
 **shapes**, and **decorative frames** that stay put while the picture drifts behind them. It lives on **Image + text**,
 the **Hero's Split layout**, **Gallery** (Grid and Slider) and **Team** portraits. Not on logos, icons, Masonry pictures
-or the small testimonial avatars, where it would not make sense. It is one component (`FramedImage`,
+or the small pictures that use _Profile pictures_ (below), where it would not make sense. It is one component (`FramedImage`,
 `src/components/ui/framed-image.tsx`) used by all of them, so there is one implementation.
 
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and

@@ -190,7 +190,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   testimonials: {
     editable: ['heading', 'title', 'items'],
-    agencyOnly: ['variant', 'access', 'style'],
+    agencyOnly: ['variant', 'avatarDesign', 'access', 'style'],
   },
   faq: {
     editable: ['heading', 'title', 'intro', 'items'],
@@ -236,7 +236,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   team: {
     editable: ['heading', 'title', 'text', 'selection', 'members'],
-    agencyOnly: ['variant', 'imageDesign', 'access', 'style'],
+    agencyOnly: ['variant', 'imageDesign', 'portraitDesign', 'access', 'style'],
   },
   video: {
     editable: [

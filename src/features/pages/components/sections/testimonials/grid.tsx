@@ -27,7 +27,7 @@ export function TestimonialsGrid({ data, isFirst }: SectionProps<'testimonials'>
       <ul className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <li key={item._key}>
-            <QuoteCard item={item} />
+            <QuoteCard item={item} design={data.avatarDesign} />
           </li>
         ))}
       </ul>

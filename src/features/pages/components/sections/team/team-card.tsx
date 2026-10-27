@@ -4,17 +4,29 @@ import { stegaClean } from 'next-sanity'
 import { HoverLift } from '@/components/motion/hover-lift'
 import { FramedImage } from '@/components/ui/framed-image'
 import { PlainText } from '@/components/ui/plain-text'
+import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
 import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { resolveImageDesign } from '@/lib/sanity/image-design-options'
+import { resolveProfileImage } from '@/lib/sanity/profile-image-options'
+import { themeColourCss } from '@/lib/sanity/theme-colour'
 
 import type { SectionProps } from '../../../types'
+import { listUsesProfilePortrait } from '../../../utils/team-portrait'
 
 export type Member = NonNullable<SectionProps<'team'>['data']['members']>[number]
 
 const surface = 'relative rounded-card bg-surface shadow-card ring-1 ring-line'
 
-type Design = SectionProps<'team'>['data']['imageDesign']
+type Data = SectionProps<'team'>['data']
+type Design = Data['imageDesign']
+
+/** The list portrait at each size; Medium (96px, 128px from sm) is what the list always drew. */
+const PORTRAIT: ProfileImageScale = {
+  box: { small: 'size-20 sm:size-24', medium: 'size-24 sm:size-32', large: 'size-32 sm:size-40' },
+  height: { small: 'h-20 sm:h-24', medium: 'h-24 sm:h-32', large: 'h-32 sm:h-40' },
+  pixels: { small: 96, medium: 128, large: 160 },
+}
 
 /** A portrait's corners are the card's until the design names a shape. */
 const PORTRAIT_SHAPE = { fallbackShape: 'square' } as const
@@ -73,23 +85,45 @@ export function TeamCard({ member, design, headingLevel, eager }: CardProps) {
   )
 }
 
-/** The list layout: a small portrait beside the text. */
-export function TeamRow({ member, design, headingLevel, eager }: CardProps) {
+/**
+ * The list layout: a small portrait beside the text. It is drawn with the profile picture design
+ * (Design › Portraits) once that names something, else with Image design as it always was; never both.
+ */
+export function TeamRow({
+  member,
+  design,
+  portraitDesign,
+  headingLevel,
+  eager,
+}: CardProps & { portraitDesign?: Data['portraitDesign'] }) {
+  const profile = listUsesProfilePortrait({ imageDesign: design, portraitDesign })
   return (
     <HoverLift className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6`}>
-      <div className="size-24 shrink-0 sm:size-32">
-        <FramedImage
+      {profile ? (
+        <ProfileImage
           image={member.portrait}
-          // Too small to move in; the shape and frame still apply.
-          design={{ ...design, motion: 'none' }}
-          context={{ fallbackShape: 'standard' }}
-          width={256}
-          height={256}
-          sizes="(min-width: 640px) 128px, 96px"
+          // Rounded square is the list's own corner; a circle suits a face.
+          design={resolveProfileImage(portraitDesign, { shape: 'rounded' })}
+          scale={PORTRAIT}
+          colour={themeColourCss(portraitDesign?.borderColour)}
           preload={eager}
-          aspect="1/1"
+          className="shrink-0"
         />
-      </div>
+      ) : (
+        <div className="size-24 shrink-0 sm:size-32">
+          <FramedImage
+            image={member.portrait}
+            // Too small to move in; the shape and frame still apply.
+            design={{ ...design, motion: 'none' }}
+            context={{ fallbackShape: 'standard' }}
+            width={256}
+            height={256}
+            sizes="(min-width: 640px) 128px, 96px"
+            preload={eager}
+            aspect="1/1"
+          />
+        </div>
+      )}
       <div className="min-w-0">
         <MemberName member={member} headingLevel={headingLevel} />
         {member.role && <p className="mt-1 text-small font-medium text-ink-muted">{member.role}</p>}
