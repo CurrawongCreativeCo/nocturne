@@ -150,6 +150,27 @@ describe('buildHealthResult', () => {
     repoTemplateVersion: '1.8.0',
   }
 
+  it('makes an accepted public dataset a warning, not a failure and not a pass', () => {
+    const result = buildHealthResult({
+      ...run,
+      dataset: { exitCode: 0, private: false, accepted: true, enquiries: 'none-found' },
+    })
+    expect(result.outcome).toBe('warning')
+    expect(result.failures).toEqual([])
+    expect(result.summary).toMatchObject({ warn: 1, fail: 0 })
+    expect(result.dataset).toEqual({ private: false, accepted: true })
+    expect(result.reason).toContain('accepted on purpose')
+  })
+
+  it('still fails a public dataset that is not accepted', () => {
+    const result = buildHealthResult({
+      ...run,
+      dataset: { exitCode: 1, private: false, enquiries: 'none-found' },
+    })
+    expect(result.outcome).toBe('failed')
+    expect(result.dataset.accepted).toBeUndefined()
+  })
+
   it('records a disabled run with its reason, even when setup is also missing', () => {
     const result = buildHealthResult({
       ...run,

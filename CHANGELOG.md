@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Acknowledge a public dataset on purpose (`ACCEPT_PUBLIC_DATASET`):** a site on a plan without private datasets no longer has a health check that fails every day. Set the GitHub variable (and `.env.local` for local runs) to a written reason. That records a decision that the dataset is public and everything in it is readable; it does not make the content safe. `check:dataset`, `launch:check` and the Health workflow then ask Sanity, with no token, how many published enquiries, forms with a recipient address and members-only pages or sections an anonymous visitor can find. If all are zero the dataset is reported as accepted, the Health run ends as a warning (no issue is opened) and `launch:check` warns. If any is above zero, a count can't be read, or there is no reason, it fails as before and says which. The counts cover only the sensitive things the template knows about. `scripts/dataset-exposure.json` classifies every document type, and `src/app/dataset-exposure.test.ts` fails when a new type is added unclassified or a field that looks personal or secret appears on an unprobed type, so a new feature can't silently skip the check. Registered under Daily health monitoring (since 1.10.0). Existing projects: nothing to do (README, _Dataset privacy_).
+
 ### Changed
 
 ### Fixed

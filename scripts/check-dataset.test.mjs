@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   checkDataset,
+  evaluateAcceptance,
   evaluateDataset,
   evaluateEnquiryProbe,
   probeEnquiryExposure,
@@ -175,5 +176,95 @@ describe('enquiry exposure probe', () => {
   it('is unverified when the request fails', async () => {
     const fetchImpl = vi.fn().mockRejectedValue(new Error('offline'))
     expect((await probeEnquiryExposure({ ...base, fetchImpl })).state).toBe('unverified')
+  })
+})
+
+describe('accepting a public dataset on purpose', () => {
+  const PUBLIC = [{ name: 'production', aclMode: 'public' }]
+  const REASON = 'Free plan: no private datasets'
+
+  /** Answers the datasets list, then each anonymous count with `counts` (enquiries, recipients, members). */
+  function fetchWith(counts, { datasets = PUBLIC } = {}) {
+    let call = 0
+    return vi.fn().mockImplementation(async (url) => {
+      if (String(url).endsWith('/datasets')) return { status: 200, json: async () => datasets }
+      const result = counts[call++]
+      return result === 'error'
+        ? Promise.reject(new Error('offline'))
+        : { status: 200, json: async () => ({ result }) }
+    })
+  }
+
+  it('accepts only with a reason and nothing readable by anyone', async () => {
+    const result = await checkDataset({
+      ...base,
+      acceptPublic: REASON,
+      fetchImpl: fetchWith([0, 0, 0]),
+    })
+    expect(result).toMatchObject({ ok: true, private: false, accepted: true })
+    expect(result.message).toContain('PUBLIC')
+    expect(result.message).toContain(REASON)
+  })
+
+  it('still fails with no reason, and makes no anonymous request', async () => {
+    const fetchImpl = fetchWith([0, 0, 0])
+    const result = await checkDataset({ ...base, acceptPublic: '   ', fetchImpl })
+    expect(result).toMatchObject({ ok: false, private: false })
+    expect(result.accepted).toBeUndefined()
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([
+    ['stored enquiries', [3, 0, 0]],
+    ['form recipient addresses', [0, 2, 0]],
+    ['members-only content', [0, 0, 1]],
+  ])('refuses while %s are readable, and says which', async (label, counts) => {
+    const result = await checkDataset({
+      ...base,
+      acceptPublic: REASON,
+      fetchImpl: fetchWith(counts),
+    })
+    expect(result.ok).toBe(false)
+    expect(result.accepted).toBeUndefined()
+    expect(result.message).toContain('cannot apply')
+    expect(result.message).toContain(label)
+  })
+
+  it('refuses when an anonymous count could not be answered', async () => {
+    const result = await checkDataset({
+      ...base,
+      acceptPublic: REASON,
+      fetchImpl: fetchWith([0, 'error', 0]),
+    })
+    expect(result.ok).toBe(false)
+    expect(result.message).toContain('could not be checked')
+  })
+
+  it('does not change a private dataset or an unreadable one', async () => {
+    const priv = await checkDataset({
+      ...base,
+      acceptPublic: REASON,
+      fetchImpl: fetchWith([], { datasets: [{ name: 'production', aclMode: 'private' }] }),
+    })
+    expect(priv).toMatchObject({ ok: true, private: true })
+    expect(priv.accepted).toBeUndefined()
+    const refused = await checkDataset({
+      ...base,
+      acceptPublic: REASON,
+      fetchImpl: mockFetch(401, null),
+    })
+    expect(refused.ok).toBe(false)
+  })
+
+  it('evaluateAcceptance needs a reason and every state to be none-found', () => {
+    const clean = { enquiries: 'none-found', recipients: 'none-found', members: 'none-found' }
+    expect(evaluateAcceptance({ reason: '', states: clean }).accepted).toBe(false)
+    expect(evaluateAcceptance({ reason: REASON, states: clean }).accepted).toBe(true)
+    expect(
+      evaluateAcceptance({ reason: REASON, states: { ...clean, members: 'refused' } }).accepted,
+    ).toBe(false)
+    expect(
+      evaluateAcceptance({ reason: 'x\n'.repeat(200), states: clean }).reason.length,
+    ).toBeLessThanOrEqual(160)
   })
 })

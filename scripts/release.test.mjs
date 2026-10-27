@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, existsSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -7,9 +7,9 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import { parseSnapshot, prepareRelease, serialiseSnapshot } from './release-utils.mjs'
-import { loadRules } from './release.mjs'
+import { loadRules, runRelease } from './release.mjs'
 
-const { rules: realRules } = await loadRules()
+const { rules: realRules, registry: realRegistry } = await loadRules()
 
 const setting = (name, extra = {}) => ({
   name,
@@ -212,58 +212,155 @@ describe('prepareRelease: the seven cases', () => {
   })
 })
 
-describe('the real script', () => {
+describe('runRelease: the whole release against real files', () => {
+  const PROJECT = setting('PROJECT_ID', { required: true })
+  /** A core setting that warned in the last release and is enforced from this one. */
+  const token = (extra = {}) =>
+    setting('READ_TOKEN', {
+      required: true,
+      requiredIn: ['production'],
+      enforceFrom: '1.10.0',
+      ...extra,
+    })
+  const previous = [core([PROJECT, token()])]
+  const stampText = (version) => `{ "version": "${version}", "released": "2026-10-23" }\n`
+  const changelogFor = (version) => CHANGELOG.replaceAll('1.8.0', version)
+  /** A configuration that worked in 1.9.0 and has no token. */
+  const tokenless = {
+    id: 'core@1.9.0',
+    featureId: 'core',
+    env: { PROJECT_ID: 'p' },
+    note: 'worked',
+  }
+
+  function project({ snapshot = previous, version = '1.9.0' } = {}) {
+    const dir = mkdtempSync(join(tmpdir(), 'run-release-'))
+    writeFileSync(join(dir, 'CHANGELOG.md'), changelogFor(version))
+    writeFileSync(join(dir, 'template-version.json'), stampText(version))
+    if (snapshot)
+      writeFileSync(
+        join(dir, 'config-registry.snapshot.json'),
+        serialiseSnapshot(version, snapshot),
+      )
+    const files = ['CHANGELOG.md', 'template-version.json', 'config-registry.snapshot.json']
+    const read = () =>
+      Object.fromEntries(
+        files.map((f) => [f, existsSync(join(dir, f)) ? readFileSync(join(dir, f), 'utf8') : null]),
+      )
+    return { dir, read }
+  }
+  const release = (dir, registry, ruleOverrides, ...argv) =>
+    runRelease({ cwd: dir, argv, registry, rules: rules(ruleOverrides), now: () => '2026-11-10' })
+
+  it('a valid release writes the changelog, the stamp and the new snapshot, and a repeat changes nothing', () => {
+    const { dir, read } = project()
+    const result = release(dir, previous, {}, '1.10.0')
+    expect(result.status).toBe(0)
+    const after = read()
+    expect(after['CHANGELOG.md']).toContain('## [1.10.0] - 2026-11-10')
+    expect(after['template-version.json']).toBe(
+      stampText('1.10.0').replace('2026-10-23', '2026-11-10'),
+    )
+    expect(JSON.parse(after['config-registry.snapshot.json'])).toMatchObject({ version: '1.10.0' })
+
+    const again = release(dir, previous, {}, '1.10.0')
+    expect(again.status).toBe(1)
+    expect(again.stderr).toContain('must be greater')
+    expect(read()).toEqual(after)
+  })
+
+  it('--dry-run on a valid release prints the update text and leaves every file as it was', () => {
+    const { dir, read } = project()
+    const before = read()
+    const result = release(dir, previous, {}, '1.10.0', '--dry-run')
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Nothing was written')
+    expect(read()).toEqual(before)
+  })
+
+  it('a deliberately refused 1.10.0 is a passing safety check: it explains itself and writes nothing', () => {
+    // Enforcing the token would leave a configuration that worked in 1.9.0 not ready.
+    const { dir, read } = project()
+    const before = read()
+    const readiness = {
+      check: (env) =>
+        env.READ_TOKEN ? { ready: true } : { ready: false, missing: ['READ_TOKEN'] },
+    }
+    const enforced = [core([PROJECT, token({ readiness: undefined })])].map((f) => ({
+      ...f,
+      readiness: 'check',
+    }))
+    const result = release(dir, enforced, { fixtures: [tokenless], readiness }, '1.10.0')
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('Not releasing 1.10.0. Nothing was written.')
+    expect(result.stderr).toContain('core@1.9.0')
+    expect(read()).toEqual(before)
+  })
+
+  it('refuses an unwarned required setting and an unsafe new requirement, naming both, and changes nothing', () => {
+    const { dir, read } = project({ snapshot: [...previous, feature('forms', [setting('OLD')])] })
+    const before = read()
+    const now = [
+      core([PROJECT, token(), setting('SURPRISE', { required: true })]),
+      feature('forms', [setting('OLD'), setting('NEW_KEY', { required: true })]),
+    ]
+    const result = release(dir, now, {}, '1.10.0')
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('SURPRISE')
+    expect(result.stderr).toContain('NEW_KEY')
+    expect(read()).toEqual(before)
+  })
+
+  it('refuses with no snapshot unless --baseline, and --baseline once one exists', () => {
+    const none = project({ snapshot: null })
+    expect(release(none.dir, previous, {}, '1.10.0').stderr).toContain('--baseline')
+    expect(Object.values(none.read()).filter(Boolean)).toHaveLength(2)
+
+    const have = project()
+    const result = release(have.dir, previous, {}, '1.10.0', '--baseline')
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('only for the first release')
+  })
+
+  it('a half-finished earlier run is refused as inconsistent rather than repeated', () => {
+    const { dir } = project()
+    // The changelog moved but the stamp did not.
+    writeFileSync(join(dir, 'CHANGELOG.md'), changelogFor('1.10.0'))
+    const result = release(dir, previous, {}, '1.10.0')
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('template-version.json says 1.9.0')
+  })
+})
+
+describe('the command line', () => {
   const root = join(fileURLToPath(import.meta.url), '..', '..')
   const script = join(root, 'scripts', 'release.mjs')
-  const dir = mkdtempSync(join(tmpdir(), 'release-'))
-  // The repo's own files change with every release, so the script runs against a fixed changelog that
-  // sits at the repo's current version, releasing the next patch with the real registry.
+  const dir = mkdtempSync(join(tmpdir(), 'release-cli-'))
   const current = JSON.parse(readFileSync(join(root, 'template-version.json'), 'utf8')).version
-  const [major, minor, patch] = current.split('.').map(Number)
-  const next = `${major}.${minor}.${patch + 1}`
   writeFileSync(join(dir, 'CHANGELOG.md'), CHANGELOG.replaceAll('1.8.0', current))
   writeFileSync(
     join(dir, 'template-version.json'),
     `{ "version": "${current}", "released": "2026-10-23" }\n`,
   )
   const go = (...args) => spawnSync('node', [script, ...args], { cwd: dir, encoding: 'utf8' })
-  const headings = () => read('CHANGELOG.md').split(`## [${next}]`).length - 1
-  const read = (file) => readFileSync(join(dir, file), 'utf8')
 
-  it('refuses without a snapshot or --baseline, and writes nothing', () => {
-    const before = read('CHANGELOG.md')
-    const result = go(next)
+  it('exits 1 with a usage line and with no snapshot, writing nothing', () => {
+    expect(go().status).toBe(1)
+    const result = go('99.0.0')
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('Nothing was written')
-    expect(read('CHANGELOG.md')).toBe(before)
     expect(existsSync(join(dir, 'config-registry.snapshot.json'))).toBe(false)
   })
 
-  it('--dry-run checks everything and writes nothing', () => {
-    const before = read('template-version.json')
-    const result = go(next, '--baseline', '--dry-run')
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Nothing was written')
-    expect(read('template-version.json')).toBe(before)
-    expect(existsSync(join(dir, 'config-registry.snapshot.json'))).toBe(false)
-  })
-
-  it('writes the baseline once, then refuses to run again', () => {
-    expect(go(next, '--baseline').status).toBe(0)
-    expect(JSON.parse(read('config-registry.snapshot.json'))).toMatchObject({
-      version: next,
-      baseline: true,
-    })
-    expect(headings()).toBe(1)
-
-    const again = go(next)
-    expect(again.status).toBe(1)
-    expect(headings()).toBe(1)
-    expect(
-      execFileSync('node', [join(root, 'scripts', 'check-version.mjs')], {
-        cwd: dir,
-        encoding: 'utf8',
-      }),
-    ).toContain('matches')
+  it('refuses --baseline once a snapshot exists', () => {
+    writeFileSync(
+      join(dir, 'config-registry.snapshot.json'),
+      serialiseSnapshot(current, realRegistry),
+    )
+    const before = readFileSync(join(dir, 'CHANGELOG.md'), 'utf8')
+    const result = go('99.0.0', '--baseline')
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('only for the first release')
+    expect(readFileSync(join(dir, 'CHANGELOG.md'), 'utf8')).toBe(before)
   })
 })

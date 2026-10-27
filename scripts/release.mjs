@@ -29,11 +29,6 @@ const jiti = createJiti(import.meta.url, {
   interopDefault: true,
 })
 
-function fail(message) {
-  console.error(message)
-  process.exit(1)
-}
-
 function today() {
   const now = new Date()
   const pad = (n) => String(n).padStart(2, '0')
@@ -60,52 +55,62 @@ export async function loadRules() {
   }
 }
 
-async function main() {
-  const args = process.argv.slice(2)
-  const dateFlag = args.indexOf('--date')
-  const date = dateFlag === -1 ? today() : (args[dateFlag + 1] ?? '')
-  const version = args.find(
+/**
+ * The whole release, against files in `cwd` and a given registry, returning what to print and the
+ * exit status. Nothing is written unless every check passed. The command line below is a thin wrapper;
+ * tests call this with a scratch directory and a registry they control.
+ */
+export function runRelease({ cwd, argv, registry, rules, now = today }) {
+  const out = []
+  const err = []
+  const done = (status) => ({ status, stdout: out.join('\n'), stderr: err.join('\n') })
+  const at = (file) => join(cwd, file)
+
+  const dateFlag = argv.indexOf('--date')
+  const date = dateFlag === -1 ? now() : (argv[dateFlag + 1] ?? '')
+  const version = argv.find(
     (arg, index) => !arg.startsWith('--') && (dateFlag === -1 || index !== dateFlag + 1),
   )
   if (!version) {
-    fail(
+    err.push(
       'Usage: npm run release -- <version> [--date YYYY-MM-DD] [--dry-run] [--baseline]   e.g. npm run release -- 1.2.0',
     )
+    return done(1)
   }
 
-  const stamp = JSON.parse(readFileSync(STAMP_FILE, 'utf8'))
-  const { registry, rules } = await loadRules()
+  const stamp = JSON.parse(readFileSync(at(STAMP_FILE), 'utf8'))
   const result = prepareRelease({
     stamp,
-    changelog: readFileSync(CHANGELOG_FILE, 'utf8'),
-    snapshotText: existsSync(SNAPSHOT_FILE) ? readFileSync(SNAPSHOT_FILE, 'utf8') : null,
+    changelog: readFileSync(at(CHANGELOG_FILE), 'utf8'),
+    snapshotText: existsSync(at(SNAPSHOT_FILE)) ? readFileSync(at(SNAPSHOT_FILE), 'utf8') : null,
     version,
     date,
-    baseline: args.includes('--baseline'),
+    baseline: argv.includes('--baseline'),
     registry,
     rules,
   })
 
   if (result.problems.length > 0) {
-    fail(
+    err.push(
       `Not releasing ${version}. Nothing was written.\n\n${result.problems.map((p) => `  - ${p}`).join('\n')}\n\nFor configuration problems see docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md, §R.3.`,
     )
+    return done(1)
   }
-  for (const note of result.notes) console.log(`${note}\n`)
+  for (const note of result.notes) out.push(`${note}\n`)
 
-  if (args.includes('--dry-run')) {
-    console.log(`Dry run: ${stamp.version} -> ${version} (${date}) passes. Nothing was written.`)
+  if (argv.includes('--dry-run')) {
+    out.push(`Dry run: ${stamp.version} -> ${version} (${date}) passes. Nothing was written.`)
     if (result.markdown.length > 0)
-      console.log(`\nThe client update PR will get:\n\n${result.markdown.join('\n')}`)
-    return
+      out.push(`\nThe client update PR will get:\n\n${result.markdown.join('\n')}`)
+    return done(0)
   }
 
   // The stamp goes last: until it moves, a rerun is refused as inconsistent rather than repeated.
-  writeFileSync(CHANGELOG_FILE, result.files.changelog)
-  writeFileSync(SNAPSHOT_FILE, result.files.snapshot)
-  writeFileSync(STAMP_FILE, result.files.stamp)
+  writeFileSync(at(CHANGELOG_FILE), result.files.changelog)
+  writeFileSync(at(SNAPSHOT_FILE), result.files.snapshot)
+  writeFileSync(at(STAMP_FILE), result.files.stamp)
 
-  console.log(`Released ${stamp.version} -> ${version} (${date}) in ${CHANGELOG_FILE}, ${STAMP_FILE} and ${SNAPSHOT_FILE}.
+  out.push(`Released ${stamp.version} -> ${version} (${date}) in ${CHANGELOG_FILE}, ${STAMP_FILE} and ${SNAPSHOT_FILE}.
 
 Next, by hand (this script never runs git):
 
@@ -117,6 +122,15 @@ Next, by hand (this script never runs git):
      git tag -a v${version} -m "v${version}"
      git push origin main v${version}
 `)
+  return done(0)
+}
+
+async function main() {
+  const { registry, rules } = await loadRules()
+  const result = runRelease({ cwd: process.cwd(), argv: process.argv.slice(2), registry, rules })
+  if (result.stdout) console.log(result.stdout)
+  if (result.stderr) console.error(result.stderr)
+  process.exit(result.status)
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) await main()

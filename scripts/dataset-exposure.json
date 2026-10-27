@@ -1,0 +1,91 @@
+{
+  "_about": "What a public dataset exposes. check-dataset.mjs runs `probes` anonymously; src/app/dataset-exposure.test.ts makes every document type in the Studio schema appear under `types`, so a new type or sensitive field cannot be added without deciding how it is handled. A passing probe is a tripwire for the sensitive things the template knows about. It does not prove a public dataset is safe.",
+  "probes": {
+    "enquiries": {
+      "label": "stored enquiries",
+      "groq": "count(*[_type == \"enquiry\" && !(_id in path(\"drafts.**\"))])"
+    },
+    "recipients": {
+      "label": "form recipient addresses",
+      "groq": "count(*[_type == \"form\" && defined(recipientEmail) && !(_id in path(\"drafts.**\"))])"
+    },
+    "members": {
+      "label": "members-only content",
+      "groq": "count(*[!(_id in path(\"drafts.**\")) && (access == \"members\" || section.access == \"members\" || count(pageBuilder[access == \"members\"]) > 0)])"
+    }
+  },
+  "types": {
+    "enquiry": {
+      "class": "probed",
+      "probe": "enquiries",
+      "why": "A visitor's name and email address."
+    },
+    "form": {
+      "class": "probed",
+      "probe": "recipients",
+      "why": "Holds the recipient email address."
+    },
+    "page": {
+      "class": "probed",
+      "probe": "members",
+      "why": "Page or section marked members-only."
+    },
+    "sharedSection": {
+      "class": "probed",
+      "probe": "members",
+      "why": "A reusable section marked members-only."
+    },
+    "post": { "class": "published", "why": "Shown on the website." },
+    "author": { "class": "published", "why": "Shown on the website." },
+    "category": { "class": "published", "why": "Shown on the website." },
+    "event": { "class": "published", "why": "Shown on the website." },
+    "eventCategory": { "class": "published", "why": "Shown on the website." },
+    "teamMember": {
+      "class": "published",
+      "why": "Shown on the website, including the public email and phone."
+    },
+    "businessInfo": {
+      "class": "published",
+      "why": "Shown on the website: trading details, public email, phone and address."
+    },
+    "siteIdentity": { "class": "published", "why": "Shown on the website." },
+    "siteNavigation": { "class": "published", "why": "Shown on the website." },
+    "announcement": { "class": "published", "why": "Shown on the website." },
+    "cookieBanner": { "class": "published", "why": "Shown on the website." },
+    "designSettings": { "class": "published", "why": "Shapes the website's look." },
+    "panel": { "class": "published", "why": "Shown on the website." },
+    "frame": { "class": "published", "why": "Shown on the website." },
+    "redirect": {
+      "class": "published",
+      "why": "Every redirect is visible to anyone who follows it."
+    },
+    "stripePrice": { "class": "published", "why": "Prices are shown on the website." },
+    "experiment": {
+      "class": "internal",
+      "why": "Test configuration; no personal data. Visible if the dataset is public."
+    },
+    "assist.instruction.context": {
+      "class": "system",
+      "why": "Studio AI instructions. Visible if the dataset is public; keep secrets out of them."
+    },
+    "sanity.fileAsset": {
+      "class": "system",
+      "why": "Uploaded files and their original filenames. File URLs are public on Sanity's CDN whatever the dataset's setting."
+    },
+    "sanity.imageAsset": {
+      "class": "system",
+      "why": "Uploaded images and their original filenames. Image URLs are public on Sanity's CDN whatever the dataset's setting."
+    }
+  },
+  "publicFields": {
+    "_about": "Fields on non-probed types whose names suggest personal or secret data, and why each is fine to publish. A new field matching the pattern fails the test until it is listed here or its type is probed.",
+    "pattern": "e-?mail|phone|mobile|token|secret|password|recipient|address|birth|medical",
+    "fields": {
+      "teamMember.publicEmail": "A public contact address, shown on the website.",
+      "teamMember.phone": "A public contact number, shown on the website.",
+      "businessInfo.publicEmail": "A public contact address, shown on the website.",
+      "businessInfo.phone": "A public contact number, shown on the website.",
+      "businessInfo.address": "The business address, shown on the website."
+    }
+  }
+}

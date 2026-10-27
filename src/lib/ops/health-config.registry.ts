@@ -65,6 +65,17 @@ export const healthMonitoringConfig = defineFeatureConfig({
       default: 'On. Set it to "off" to switch monitoring off deliberately',
     },
     {
+      name: 'ACCEPT_PUBLIC_DATASET',
+      kind: 'github-var',
+      where: 'github',
+      required: false,
+      since: '1.10.0',
+      purpose:
+        'Records that a public dataset is on purpose (a plan without private datasets). The value is the reason. It does not make the content safe: it only applies while an anonymous request finds none of the known sensitive things (enquiries, form recipients, members-only content), and then the run is a warning, not a failure.',
+      default: 'A public dataset fails the health check',
+      docs: 'README.md#dataset-privacy',
+    },
+    {
       name: 'HEALTH_CHECKS_REASON',
       kind: 'github-var',
       where: 'github',
