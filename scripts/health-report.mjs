@@ -255,8 +255,8 @@ export function buildHealthResult({
   const enquiries = ENQUIRY_STATES.includes(dataset?.enquiries) ? dataset.enquiries : 'not-checked'
   const failures = collectFailures({ launch, dataset, enquiries, skipLaunch: unknownMode })
   const summary = {
-    pass: count('pass') + (dataset && dataset.exitCode === 0 ? 1 : 0),
-    warn: count('warn') + (unknownMode ? 1 : 0),
+    pass: count('pass') + (dataset && dataset.exitCode === 0 && !dataset.accepted ? 1 : 0),
+    warn: count('warn') + (unknownMode ? 1 : 0) + (dataset?.accepted ? 1 : 0),
     fail: failures.length,
   }
   const outcome = failures.length > 0 ? 'failed' : summary.warn > 0 ? 'warning' : 'healthy'
@@ -266,9 +266,13 @@ export function buildHealthResult({
     modeSource: ['site-info', 'profile'].includes(modeSource) ? modeSource : null,
     summary,
     failures,
-    dataset: { private: datasetPrivate },
+    dataset: { private: datasetPrivate, ...(dataset?.accepted ? { accepted: true } : {}) },
     enquiries,
     enquiriesExposed: enquiries === 'exposed',
+  }
+  if (dataset?.accepted && !unknownMode && Array.isArray(launch?.results)) {
+    out.reason =
+      'The dataset is public, accepted on purpose (ACCEPT_PUBLIC_DATASET): everything in it is readable by anyone. None of the known sensitive things (enquiries, form recipient addresses, members-only content) was found; that does not make the rest safe. Make it private before the site uses any of them.'
   }
   if (unknownMode) out.reason = UNKNOWN_MODE_REASON
   else if (!Array.isArray(launch?.results)) out.reason = NO_RESULTS

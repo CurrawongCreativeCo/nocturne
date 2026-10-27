@@ -4,6 +4,11 @@
  * privacy"). Run with `npm run check:dataset`; reads the environment, then .env.local (the daily health
  * workflow sets the environment; README, "Health checks"). Dependency-free, like the setup wizard,
  * and it survives the wizard being deleted from a client site.
+ *
+ * ACCEPT_PUBLIC_DATASET (a written reason) acknowledges a public dataset on purpose, for a site on a
+ * plan without private datasets. It is allowed only while an anonymous request finds none of the
+ * sensitive things in scripts/dataset-exposure.json, and is reported as accepted, never as private.
+ * Those probes are a tripwire, not a safety proof.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -91,6 +96,64 @@ export function evaluateEnquiryProbe({ status, body }) {
 }
 
 /**
+ * What an anonymous visitor could read from a public dataset that matters, from
+ * scripts/dataset-exposure.json (the same file a test checks against the Studio's schema).
+ */
+const EXPOSURE = JSON.parse(
+  readFileSync(new URL('./dataset-exposure.json', import.meta.url), 'utf8'),
+)
+const SENSITIVE_PROBES = Object.entries(EXPOSURE.probes).map(([key, probe]) => ({ key, ...probe }))
+
+/** One line of free text from a variable, short enough to sit in a log and an issue. */
+function oneLineReason(value) {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160)
+}
+
+/**
+ * Whether a public dataset may be accepted. Pure. It needs a written reason AND an anonymous request
+ * that found none of the sensitive things; anything exposed, refused or unanswered blocks it, because
+ * a query that didn't answer proves nothing. Returns `{ accepted, reason, blockers }`.
+ */
+export function evaluateAcceptance({ reason, states }) {
+  const why = oneLineReason(reason)
+  const blockers = []
+  if (!why) return { accepted: false, reason: '', blockers }
+  for (const probe of SENSITIVE_PROBES) {
+    const state = states[probe.key]
+    if (state === 'exposed') blockers.push(`${probe.label} are readable by anyone`)
+    else if (state !== 'none-found') blockers.push(`${probe.label} could not be checked`)
+  }
+  return { accepted: blockers.length === 0, reason: why, blockers }
+}
+
+/** The anonymous count for each sensitive thing: no token, counts only, nothing read or printed. */
+export async function probeSensitive({ projectId, dataset, fetchImpl = fetch }) {
+  const states = {}
+  for (const probe of SENSITIVE_PROBES) {
+    const query = encodeURIComponent(probe.groq)
+    try {
+      const response = await fetchImpl(
+        `https://${projectId}.api.sanity.io/${API_VERSION}/data/query/${encodeURIComponent(dataset)}?query=${query}`,
+        { signal: AbortSignal.timeout(10_000) },
+      )
+      let body = null
+      try {
+        body = await response.json()
+      } catch {
+        // Left null: not a count, so unverified.
+      }
+      states[probe.key] = evaluateEnquiryProbe({ status: response.status, body }).state
+    } catch {
+      states[probe.key] = 'unverified'
+    }
+  }
+  return states
+}
+
+/**
  * Asks Sanity, with no token at all, how many published `enquiry` documents a visitor could count.
  * This is what an anonymous visitor can do, so it tests real exposure; a token would see private
  * data too. A count only: no document, field or name is read, printed or saved.
@@ -115,7 +178,13 @@ export async function probeEnquiryExposure({ projectId, dataset, fetchImpl = fet
 }
 
 /** Asks the Sanity API for the dataset's visibility. `fetchImpl` is injectable for tests. */
-export async function checkDataset({ projectId, dataset, token, fetchImpl = fetch }) {
+export async function checkDataset({
+  projectId,
+  dataset,
+  token,
+  acceptPublic = '',
+  fetchImpl = fetch,
+}) {
   const missing = [
     !projectId && 'NEXT_PUBLIC_SANITY_PROJECT_ID',
     !dataset && 'NEXT_PUBLIC_SANITY_DATASET',
@@ -144,7 +213,28 @@ export async function checkDataset({ projectId, dataset, token, fetchImpl = fetc
   } catch {
     // Leave null: evaluateDataset reports an unreadable response.
   }
-  return evaluateDataset({ dataset, status: response.status, body })
+  const result = evaluateDataset({ dataset, status: response.status, body })
+
+  // A public dataset can be accepted on purpose (README, "Dataset privacy"): only with a written
+  // reason, and only while an anonymous request finds none of the sensitive things. It is a warning,
+  // never a pass, and anything found puts the failure back.
+  if (result.private !== false || !oneLineReason(acceptPublic)) return result
+  const states = await probeSensitive({ projectId, dataset, fetchImpl })
+  const decision = evaluateAcceptance({ reason: acceptPublic, states })
+  if (decision.accepted) {
+    return {
+      ok: true,
+      private: false,
+      accepted: true,
+      states,
+      message: `Dataset "${dataset}" is PUBLIC, and that is accepted on purpose (${decision.reason}). This acknowledges a public dataset; it does not mean its content is safe. An anonymous request found none of the sensitive things this template knows about (${SENSITIVE_PROBES.map((probe) => probe.label).join(', ')}). Keep anything private out of the dataset, and make it private before the site uses any of them.`,
+    }
+  }
+  return {
+    ...result,
+    states,
+    message: `${result.message} ACCEPT_PUBLIC_DATASET is set but cannot apply: ${decision.blockers.join('; ')}.`,
+  }
 }
 
 async function main() {
@@ -159,15 +249,22 @@ async function main() {
   const projectId = read('NEXT_PUBLIC_SANITY_PROJECT_ID')
   const dataset = read('NEXT_PUBLIC_SANITY_DATASET') || 'production'
   const token = read('SANITY_API_READ_TOKEN')
-  const result = await checkDataset({ projectId, dataset, token })
+  const result = await checkDataset({
+    projectId,
+    dataset,
+    token,
+    acceptPublic: read('ACCEPT_PUBLIC_DATASET'),
+  })
   // `--json` is for the health workflow: one object, with the anonymous enquiry-exposure probe when the dataset isn't known to be private.
   if (process.argv.includes('--json')) {
     // Anything that isn't known to be private is probed without the token. A project ID is needed.
-    const probe =
-      result.private !== true && projectId
+    const probe = result.accepted
+      ? { state: 'none-found', count: 0 }
+      : result.private !== true && projectId
         ? await probeEnquiryExposure({ projectId, dataset })
         : { state: 'not-checked', count: null }
-    console.log(JSON.stringify({ ...result, enquiries: probe.state, enquiryCount: probe.count }))
+    const { states: _states, ...shown } = result
+    console.log(JSON.stringify({ ...shown, enquiries: probe.state, enquiryCount: probe.count }))
     process.exit(result.ok ? 0 : 1)
   }
   if (result.ok) {

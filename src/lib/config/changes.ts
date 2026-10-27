@@ -359,8 +359,10 @@ export function checkRelease(
   previous: RegistrySnapshot | null,
   current: readonly FeatureConfig[],
   version: string,
+  { versions = true }: { versions?: boolean } = {},
 ): string[] {
-  const problems = checkVersions(current, version)
+  // `versions: false` is for the early warning in `npm run check`, before the release's version is known.
+  const problems = versions ? checkVersions(current, version) : []
   if (!previous) return problems
   const before = new Map(previous.features.map((feature) => [feature.id, feature]))
 
