@@ -18,7 +18,7 @@ findings and a proposal. The numbers come from two local runs (below), so read t
   that, the mobile scope change and a rebalanced shard split, worker time falls 23.5% and the slowest shard falls from
   33% of the work to 26%.
 - **Cheap, measured extras:** `.next/cache` is 1.6 GB of the 1.8 GB build and is copied twice per Playwright run for
-  nothing (15 s a copy locally, 6 s without the cache); the isolated CI job builds three times to run 171 s of tests;
+  nothing (the time saving claimed here was wrong: see the correction in e2e-speed-follow-ups.md); the isolated CI job builds three times to run 171 s of tests;
   more than six workers gave no speed-up on this machine.
 - **Not measured:** real CI timings. `gh` is not installed here and CI logs were not available, so per-shard minutes
   are modelled from local durations. The first follow-up records them in CI.
@@ -265,8 +265,9 @@ shard once.
 
 - **`.next/cache` is copied twice per run.** `scripts/e2e-copy-build.mjs` copies the whole `.next` (1.8 GB here) for the
   enquiries-off and pre-launch servers. 1.6 GB of that is `.next/cache`, which `next start` never reads. Copying
-  without it took 6 s instead of 15 s (178 MB). Two copies x 9 s is 18 s per Playwright run locally, and there are seven
-  runs per CI pipeline (4 shards + 3 isolated steps).
+  without it took 6 s instead of 15 s (178 MB). **Correction (27 October):** that compared a copy into an empty folder
+  with a copy over the previous one. Measured like for like, a copy takes 18.2 s with the cache and 17.1 s without,
+  because removing the previous copy dominates on Windows. See e2e-speed-follow-ups.md.
 - **Eight builds per pipeline.** Each `npx playwright test` builds the site: four shards, three isolated steps, and
   Lighthouse rebuilds once more. Startup (build and four servers) was 66 to 79 s warm and 180 s cold locally.
 - **The isolated job pays that three times for at least 171 s of tests** (experiments 4.6 s, design 16 s for the 3 tests

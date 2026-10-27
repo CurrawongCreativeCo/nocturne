@@ -20,9 +20,16 @@ you start a release.
 
 ### Added
 
+- **End-to-end speed spike:** `docs/spikes/e2e-speed.md` measures which Playwright specs need only one of the desktop and mobile projects, models the CI shard balance, and proposes follow-up tasks. No test behaviour changed.
+- **CI end-to-end timings:** every Playwright job writes a JSON report and a new `e2e timings` job summarises wall time, build and server startup, the slowest job, retries, failures and the slowest specs in the run summary (`scripts/e2e-timings.mjs`). Results of the first follow-ups are in `docs/spikes/e2e-speed-follow-ups.md`.
+
 ### Changed
 
 ### Fixed
+
+- **End-to-end tests:** the build now clears cached Sanity responses first, so a local run no longer reuses days-old event dates; the screenshot specs stop waiting after 10 s for a picture that never loads and name it.
+
+
 
 ### Breaking changes / migration steps
 
@@ -129,7 +136,6 @@ you start a release.
 
 - **Transparent picture frames:** approved frames can use PNG or WebP artwork, with size validation, transparency warnings, Studio thumbnails and sized WebP masks from Sanity's image CDN. Existing SVG frames and their 50 KB limit remain supported. Refresh the new `media-text-image-frame-picture` desktop/mobile baselines with **Update visual baselines**.
 - **Studio theme API findings and download comparison:** `docs/studio-theme-spike.md` records the supported API, approved UI 4 scope and UI 5 styling/font exception.
-- **End-to-end speed spike:** `docs/spikes/e2e-speed.md` measures which Playwright specs need only one of the desktop and mobile projects, models the CI shard balance, and proposes follow-up tasks. No test behaviour changed.
 
 ### Changed
 
