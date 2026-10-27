@@ -8,12 +8,13 @@
  * deleting it, and pins it in the desk structure at the fixed document id `<typeName>`. Then runs typegen.
  * Read it with `*[_id == "<typeName>"][0]`.
  */
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import {
   createContext,
+  classifyNewDocument,
   findTypeNameUsage,
   planSchemaRegistration,
   toFeatureName,
@@ -44,6 +45,7 @@ const paths = {
   titles: join(root, 'src/features/studio/singleton-titles.ts'),
   structure: join(root, 'src/features/studio/structure.ts'),
   clientEditable: join(root, 'src/lib/sanity/client-editable.ts'),
+  exposure: join(root, 'scripts/dataset-exposure.json'),
   gitkeep: join(root, 'src/features', feature, 'schemas/.gitkeep'),
 }
 
@@ -55,7 +57,12 @@ const registration = planSchemaRegistration({ root, feature, typeName, kebab })
 if (registration.error) exit(registration.error)
 
 const touched = write({
-  create: { ...registration.create, [paths.schema]: schema() },
+  create: {
+    ...registration.create,
+    [paths.schema]: schema(),
+    // A public dataset exposes this type too: record the decision (see src/app/dataset-exposure.test.ts).
+    [paths.exposure]: classifyNewDocument(readFileSync(paths.exposure, 'utf8'), typeName),
+  },
   edits: [
     ...registration.edits,
     { file: paths.clientEditable, marker: '// new-type:agency-only', text: `'${typeName}',\n` },
@@ -97,6 +104,8 @@ Next:
   2. Read it with a query in the feature's api folder: \`*[_id == "${typeName}"][0] { … }\`, fetched
      through cachedSanityFetch with \`tags: [TAGS.${typeName}]\` (add ${typeName} to TAGS in
      src/lib/sanity/live.ts and to the webhook filter in the README), then run \`npm run typegen\`
+  3. Check scripts/dataset-exposure.json: "${typeName}" is recorded as published. If it can hold
+     personal or secret data, add a probe there and mark it probed (README, "Dataset privacy")
 `)
 
 // ---------------------------------------------------------------------------

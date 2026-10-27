@@ -502,23 +502,27 @@ dataset's privacy (the other features say "not implemented yet"); `--build` runs
 gains a new way to fail: the gate only replaces that stack trace with a message naming each missing setting and where
 to set it. On Vercel it also says the live deployment stays as it is, because a failed build never replaces it.
 
-| Where the build runs                                                                                                  | What the gate does                                                                                                                                                                          |
-| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Locally (no `VERCEL_ENV`, no `CI`)                                                                                    | The two settings above                                                                                                                                                                      |
-| CI and fake-data builds (`CI`, `SANITY_API_HOST`, or a placeholder project ID such as `ci-placeholder` or `e2etest1`) | The same two. Placeholders are accepted, and no real service is ever required                                                                                                               |
-| Vercel Preview                                                                                                        | The same two                                                                                                                                                                                |
-| Vercel Production                                                                                                     | The same two, and a **warning** when `SANITY_API_READ_TOKEN` is missing (datasets are private, so the site can't read content without it). It becomes required from template version 1.10.0 |
+| Where the build runs                                                                                                  | What the gate does                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Locally (no `VERCEL_ENV`, no `CI`)                                                                                    | The two settings above                                                                                                                                                                                                                                            |
+| CI and fake-data builds (`CI`, `SANITY_API_HOST`, or a placeholder project ID such as `ci-placeholder` or `e2etest1`) | The same two. Placeholders are accepted, and no real service is ever required                                                                                                                                                                                     |
+| Vercel Preview                                                                                                        | The same two                                                                                                                                                                                                                                                      |
+| Vercel Production                                                                                                     | The same two, and a **warning** when `SANITY_API_READ_TOKEN` is missing. The site already fails without it in every environment, on a public dataset as much as a private one; the build only warns, and only in Production, until it starts refusing from 1.11.0 |
 
 A missing `TURNSTILE_SECRET_KEY` (or anything else for an optional feature) never affects a build, and neither does a
 malformed `FORMS_FROM_EMAIL`: that makes `config:check` report forms as not set up, because Resend would refuse the
 sender, but it was never a build requirement.
 
-**Why the read token only warns.** A production site can't show content from a private dataset without
-`SANITY_API_READ_TOKEN`, so it is a genuine requirement and the warning says so. It is a warning in 1.9.0 only so that no
-site that builds today stops building by surprise; it becomes required from 1.10.0 (`enforceFrom`). **A version number never
-enforces anything by itself.** The gate doesn't read the template version. Promoting a setting means changing the gate
-and writing a release note, and a test (`config-gate.test.ts`) fails when the template reaches a setting's `enforceFrom`
-to make sure somebody reviews it: see the release checklist under [Cutting a release](#cutting-a-release-template-maintainers).
+**The read token: needed now, enforced by the build later.** `SANITY_API_READ_TOKEN` is already required to run. The client
+imports it (`src/lib/sanity/token.ts` throws when it is missing), every content read goes through that client, and none of
+this depends on the dataset being private: a site without the token has never worked, public dataset or not. So the gate
+is not what makes it required. What the gate does is decide when the **build** starts to say so in plain English instead
+of the site failing at run time. Today it only warns, and only in Production (`requiredIn`); it will refuse a missing one
+from 1.11.0 (`enforceFrom`). Every diagnostic (`config:check`, the gate's message, `config:check --since`) says "the site
+already fails without it" and none may suggest a site without it works. **A version number never enforces anything by
+itself.** The gate doesn't read `enforceFrom` yet. Promoting a setting means changing the gate and writing a release
+note, and a test (`config-gate.test.ts`) fails when the template reaches a setting's `enforceFrom` to make sure somebody
+reviews it: see the release checklist under [Cutting a release](#cutting-a-release-template-maintainers).
 
 **`NOCTURNE_CONFIG_GATE=warn`** is an emergency control, listed under _Configuration controls_ in `config:check` (not
 under Sanity, and never enforced by the gate it controls). It turns the gate's failures into warnings so an urgent fix can
@@ -611,7 +615,7 @@ unwritten (it used to write `true`), so a fresh starter shows each as _Not in us
 A site that never will writes `false`, which also hides it from the Studio.
 
 **What `--strict` means.** `config:check --strict` exits 1 when a feature reports **Not set up**, and with `--live` when the
-live check fails. That is: a core setting is missing (`SANITY_API_READ_TOKEN` is required for a private dataset),
+live check fails. That is: a core setting is missing (`SANITY_API_READ_TOKEN` is required to read content),
 a feature the profile writes as on has nothing set, or any feature is partly set up or set to a malformed value
 (a short secret, a bad sender address, an `EDGE_CONFIG_ID` that names a different store). It does not fail for Not in use,
 Dormant, Off in profile or Can't check here. It never makes a network request without `--live`.
@@ -633,7 +637,7 @@ _Generated by `npm run config:docs` from the feature registries: change the regi
 | --------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------- | -------------------------------- | ----- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SANITY_PROJECT_ID`   | Sanity content                                                                                        | Vercel          | Production, Preview, Development | Build | Required                    | Says which Sanity project holds the content. Get it from: sanity.io/manage → your project → Project ID.                                                                                                                                                                                                                                                                                                                                                  |
 | `NEXT_PUBLIC_SANITY_DATASET`      | Sanity content                                                                                        | Vercel          | Production, Preview, Development | Build | Required                    | Says which dataset in that project is this site. Default: None in the app. The GitHub workflows assume "production". Get it from: sanity.io/manage → your project → API → Datasets.                                                                                                                                                                                                                                                                      |
-| `SANITY_API_READ_TOKEN`           | Sanity content                                                                                        | Vercel          | Production, Preview              | Run   | Required                    | Lets the server read content from a private dataset. Without it a production site has nothing to show. Get it from: sanity.io/manage → your project → API → Tokens (Viewer role)                                                                                                                                                                                                                                                                         |
+| `SANITY_API_READ_TOKEN`           | Sanity content                                                                                        | Vercel          | Production, Preview              | Run   | Required                    | Lets the server read content. The site fails without it in every environment, whether the dataset is private or public; the build only starts to refuse a missing one from 1.11.0. Get it from: sanity.io/manage → your project → API → Tokens (Viewer role)                                                                                                                                                                                             |
 | `NEXT_PUBLIC_SANITY_API_VERSION`  | Sanity content                                                                                        | Vercel          | Production, Preview, Development | Build | Deprecated                  | Pins the Sanity API date. It is now a constant in src/config/env.ts. Default: The date pinned in src/config/env.ts. **Deprecated:** replaced by the API_VERSION constant in src/config/env.ts, bumped deliberately in a release. Delete the variable from Vercel and .env.local. The pinned date applies.                                                                                                                                                |
 | `NEXT_PUBLIC_SITE_URL`            | Site address and language                                                                             | Vercel          | Production, Preview              | Build | Optional                    | The site's public address, used in canonical links, the sitemap and structured data. Default: Vercel's production domain, then http://localhost:3000 in development. Get it from: The live address, for example https://example.com.au (no trailing slash)                                                                                                                                                                                               |
 | `NEXT_PUBLIC_SITE_LANGUAGE`       | Site address and language                                                                             | Vercel          | Production, Preview              | Build | Optional                    | The language of the content, for &lt;html lang&gt;, so screen readers pronounce it properly. Default: "en"                                                                                                                                                                                                                                                                                                                                               |
@@ -689,6 +693,7 @@ _Generated by `npm run config:docs` from the feature registries: change the regi
 | `NEXT_PUBLIC_SANITY_DATASET`      | Daily health monitoring, Weekly dataset backup, Enquiry retention, Schema deploy and migration checks | GitHub variable | —                                | —     | Optional                    | Which dataset to look at. Default: "production"                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `SANITY_AUTH_TOKEN`               | Daily health monitoring, Weekly dataset backup                                                        | GitHub secret   | —                                | —     | Required                    | Lets the check read the dataset. Read-only; the backup uses the same secret. Get it from: sanity.io/manage → your project → API → Tokens (Viewer role). The backup uses the same secret.                                                                                                                                                                                                                                                                 |
 | `HEALTH_CHECKS`                   | Daily health monitoring                                                                               | GitHub variable | —                                | —     | Optional                    | Switches monitoring off on purpose (the template repository, scratch repositories, forks). Default: On. Set it to "off" to switch monitoring off deliberately.                                                                                                                                                                                                                                                                                           |
+| `ACCEPT_PUBLIC_DATASET`           | Daily health monitoring                                                                               | GitHub variable | —                                | —     | Optional                    | Records that a public dataset is on purpose (a plan without private datasets). The value is the reason. It does not make the content safe: it only applies while an anonymous request finds none of the known sensitive things (enquiries, form recipients, members-only content), and then the run is a warning, not a failure. Default: A public dataset fails the health check.                                                                       |
 | `HEALTH_CHECKS_REASON`            | Daily health monitoring                                                                               | GitHub variable | —                                | —     | Optional                    | Why monitoring is off, shown with the intentionally disabled result. Default: No reason is recorded.                                                                                                                                                                                                                                                                                                                                                     |
 | `HEALTH_EXPECT_MARKER`            | Daily health monitoring                                                                               | GitHub variable | —                                | —     | Optional                    | Text the home page must contain, so a blank or wrong page is caught. Default: No marker is expected on the home page.                                                                                                                                                                                                                                                                                                                                    |
 | `ENQUIRIES_STORE`                 | Daily health monitoring                                                                               | GitHub variable | —                                | —     | Deprecated                  | Tells the workflow that stored enquiries make a public dataset more serious. Default: Off. A copy of the Vercel setting, kept only so the health workflow knows. **Deprecated:** replaced by the anonymous enquiry-exposure probe in the health check (task 230); the run summary carries the deprecation line. Nothing is needed: a public dataset whose enquiries visitors can count is now found by an anonymous request. Delete the GitHub variable. |
@@ -910,6 +915,28 @@ On a private dataset those requests need a token, and only the Viewer token the 
 - **Enquiries need it.** With `ENQUIRIES_STORE=1` the dataset holds visitors' names and email addresses. The server refuses to write them to a dataset it can't confirm is private ([Enquiries](#enquiries)).
 - **Plan.** Sanity's Free plan offers only public datasets, so members-only content and forms with recipient addresses
   need a paid plan (check sanity.io/pricing). On the Free plan, keep only content that is fine to publish in the dataset.
+- **Acknowledging a public dataset on purpose.** A site on a plan without private datasets can set the GitHub variable
+  `ACCEPT_PUBLIC_DATASET` to a written reason (for example `Free plan: no private datasets`). This records a decision:
+  **the dataset is public, on purpose, and everything in it can be read by anyone with the project ID.** It does not make
+  the content safe. Nothing in the dataset is protected, so keep anything private out of it.
+  - **What the check does.** `check:dataset`, `launch:check` and the daily Health workflow then ask Sanity, **with no
+    token**, how many published enquiries, forms with a recipient address and members-only pages or sections an anonymous
+    visitor can find (`scripts/dataset-exposure.json`). If all are zero the check reports the dataset as accepted, the
+    Health run ends as a **warning** (no issue is opened) and `launch:check` warns. If any is above zero, a count can't
+    be read, or there is no reason, it fails exactly as before and says why. A private dataset is unaffected.
+  - **What it cannot show.** The counts cover the sensitive things this template knows about, and only those. They don't
+    look at other document types, at fields someone adds, at draft content (drafts are not readable anonymously),
+    at uploaded files and their original filenames (file URLs are public on Sanity's CDN whatever the setting), or at
+    anything a future feature stores. Passing means "none of the known sensitive things is exposed today", not "nothing
+    sensitive is exposed".
+  - **New features can't skip it.** `src/app/dataset-exposure.test.ts` fails if a document type is added to the schema
+    without being classified in `scripts/dataset-exposure.json` (probed, published, internal or system, with a reason),
+    or if a field whose name looks personal or secret (email, phone, token, secret, password, recipient, address…)
+    appears on an unprobed type without a reason. When it fails, decide whether the new data needs a probe. The field
+    check is a name heuristic, so a badly named field can get past it: review new schema with this in mind.
+  - **Review it.** Make the dataset private before the site uses enquiries, form recipients or members-only content (with
+    a public dataset the server already refuses to store enquiries). Run `check:dataset` locally with the variable in
+    `.env.local` to see the same result.
 - **Switch an existing project to private:** sanity.io/manage → your project → API → Datasets → set the dataset to
   _Private_, or run `npx sanity dataset visibility set <dataset> private`. Deploy this version first, because a private
   dataset refuses reads without a token. Previews and Studio are unaffected (editors are signed in).
@@ -5476,6 +5503,12 @@ take the template's copy.
    then prints the enforced set and everything that only warns. **Read that output before committing:** it is the
    evidence that existing sites gain no requirement. The snapshot is taken from the registry in the release commit,
    so tag that commit and publish it; if the tag moves, regenerate nothing: fix forward in the next release.
+   **Prerequisite for 1.11.0: enforce `SANITY_API_READ_TOKEN` in the build gate.** The setting carries
+   `enforceFrom: '1.11.0'`, but the gate ignores `enforceFrom` and only warns, only in Production. Before 1.11.0 is
+   released, make the gate refuse a missing token in every environment (the site fails without it everywhere), keep
+   CI and fake-data builds on their placeholder token and `NOCTURNE_CONFIG_GATE=warn` as the emergency override, and
+   write the regression tests listed as `todo` in `src/app/config-gate.test.ts`. `config-gate.test.ts` fails once the
+   template version reaches 1.11.0 to force this; do not "fix" it by moving the number again without deciding.
    **Review configuration enforcement:** run
    `npm run config:check` and look at `enforceFrom` in the `config.registry.ts` files. If this release reaches one (the
    `config-gate.test.ts` test will fail), decide deliberately whether to enforce it now, move `enforceFrom` later, or
@@ -5485,8 +5518,11 @@ take the template's copy.
    `git push origin main vx.y.z`). It never runs git or pushes. Never force-push a tag or `main`.
 
 CI runs `npm run check:version` and fails when `template-version.json` doesn't match the latest `CHANGELOG.md` version
-heading (or its date), or when `config-registry.snapshot.json` is for a different release, so a release can't be
-tagged with one of them forgotten.
+heading (or its date), when `config-registry.snapshot.json` is for a different release, or, in the template itself (a
+package named `nocturne`; a client site keeps its own name and version), when `package.json` or `package-lock.json` says
+another version, so a release can't be tagged with one of them forgotten. `npm run release` sets the version in
+`package.json` and `package-lock.json` along with the others (add them to the commit it prints), and refuses to start if
+they have already drifted.
 
 **What the configuration tests prove, and what they can't.**
 

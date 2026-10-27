@@ -8,6 +8,22 @@ import { dirname, join, relative } from 'node:path'
 
 import { toSectionNames } from './section-names.mjs'
 
+/**
+ * The text of scripts/dataset-exposure.json with `typeName` classified, for a new document type. A
+ * generator can't know whether the type will hold personal or secret data, so it records the default
+ * with a reason that says so; a test (src/app/dataset-exposure.test.ts) would otherwise refuse the
+ * unclassified type. Leaves the file alone when the type is already there.
+ */
+export function classifyNewDocument(source, typeName) {
+  const exposure = JSON.parse(source)
+  if (exposure.types[typeName]) return source
+  exposure.types[typeName] = {
+    class: 'published',
+    why: 'Added by a generator and assumed to be shown on the website. REVIEW: if it can hold personal or secret data, add a probe in scripts/dataset-exposure.json and mark it probed.',
+  }
+  return `${JSON.stringify(exposure, null, 2)}\n`
+}
+
 /** "blogPost" -> "BLOG_POST", for query constant names. */
 export function constantCase(typeName) {
   return typeName.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase()

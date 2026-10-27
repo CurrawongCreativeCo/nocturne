@@ -52,6 +52,19 @@ describe('the enforced set', () => {
   })
 })
 
+// PREREQUISITE for release 1.11.0 (src/lib/sanity/config.registry.ts, SANITY_API_READ_TOKEN): the gate
+// does not read `enforceFrom` yet, and today it only warns, only in production. Before 1.11.0 can ship
+// it must enforce the token in every environment (the site fails without it everywhere), with these
+// regression tests. The test below that fails when the template reaches an `enforceFrom` forces the
+// decision; these name the work.
+describe('1.11.0 prerequisite: the gate enforces SANITY_API_READ_TOKEN', () => {
+  it.todo('fails a Production build without the token, in plain English, naming where to set it')
+  it.todo('fails a Preview build without the token')
+  it.todo('accepts a CI or fake-data build, where the placeholder token is enough')
+  it.todo('NOCTURNE_CONFIG_GATE=warn downgrades it to a warning, the way it does other failures')
+  it.todo('still passes a site that has the token, on a public dataset as much as a private one')
+})
+
 describe('evaluateGate', () => {
   it('fails a local build without the project ID, naming it and not its neighbours', () => {
     const result = run({ NEXT_PUBLIC_SANITY_DATASET: 'production' })
@@ -88,7 +101,12 @@ describe('evaluateGate', () => {
     const production = run({ ...CORE, VERCEL_ENV: 'production' })
     expect(production.failures).toEqual([])
     expect(names(production.warnings)).toEqual(['SANITY_API_READ_TOKEN'])
-    expect(formatGate(production).join('\n')).toContain('Becomes required from template version')
+    const text = formatGate(production).join('\n')
+    // The site already fails without it; the version only says when the build starts to refuse.
+    expect(text).toContain('already fails at run time without it, in every environment')
+    expect(text).toContain('refuse a missing one from template version 1.11.0')
+    expect(text).toContain('the site will fail without it')
+    expect(text).not.toContain('will need')
     expect(run({ ...CORE, VERCEL_ENV: 'production', SANITY_API_READ_TOKEN: 'x' }).warnings).toEqual(
       [],
     )

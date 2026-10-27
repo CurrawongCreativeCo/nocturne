@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  classifyNewDocument,
   applyEdits,
   constantCase,
   insertAtMarker,
@@ -102,5 +103,20 @@ describe('applyEdits', () => {
       read,
     )
     expect(result.files.get('b.ts')).toBe('import z\n// m3\n')
+  })
+})
+
+describe('classifyNewDocument', () => {
+  const source = JSON.stringify({ probes: {}, types: { page: { class: 'probed' } } })
+
+  it('records the new type as published, with a reason that asks for a review', () => {
+    const out = JSON.parse(classifyNewDocument(source, 'caseStudy'))
+    expect(out.types.caseStudy.class).toBe('published')
+    expect(out.types.caseStudy.why).toContain('REVIEW')
+    expect(out.types.page).toEqual({ class: 'probed' })
+  })
+
+  it('leaves an existing classification alone', () => {
+    expect(classifyNewDocument(source, 'page')).toBe(source)
   })
 })

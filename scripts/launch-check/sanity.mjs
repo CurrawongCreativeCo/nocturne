@@ -22,7 +22,18 @@ export async function checkDatasetPrivate({ env, fetchImpl }) {
       ),
     ]
   }
-  const result = await checkDataset({ projectId, dataset, token, fetchImpl })
+  const result = await checkDataset({
+    projectId,
+    dataset,
+    token,
+    acceptPublic: env.ACCEPT_PUBLIC_DATASET,
+    fetchImpl,
+  })
+  if (result.accepted) {
+    return [
+      warn(area, id, title, result.message, 'Make the dataset private when the plan allows it.'),
+    ]
+  }
   return [
     result.ok
       ? pass(area, id, title, result.message)
