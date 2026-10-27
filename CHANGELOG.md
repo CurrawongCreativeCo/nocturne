@@ -129,6 +129,7 @@ you start a release.
 
 - **Transparent picture frames:** approved frames can use PNG or WebP artwork, with size validation, transparency warnings, Studio thumbnails and sized WebP masks from Sanity's image CDN. Existing SVG frames and their 50 KB limit remain supported. Refresh the new `media-text-image-frame-picture` desktop/mobile baselines with **Update visual baselines**.
 - **Studio theme API findings and download comparison:** `docs/studio-theme-spike.md` records the supported API, approved UI 4 scope and UI 5 styling/font exception.
+- **End-to-end speed spike:** `docs/spikes/e2e-speed.md` measures which Playwright specs need only one of the desktop and mobile projects, models the CI shard balance, and proposes follow-up tasks. No test behaviour changed.
 
 ### Changed
 
