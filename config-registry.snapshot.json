@@ -1,0 +1,1542 @@
+{
+  "schema": 1,
+  "version": "1.9.0",
+  "baseline": true,
+  "features": [
+    {
+      "id": "sanity-core",
+      "title": "Sanity content",
+      "summary": "Connects the site and the Studio to their content.",
+      "why": "Every page, post and setting an editor changes is read from Sanity.",
+      "withoutIt": "The site cannot be built, and the Studio cannot open.",
+      "profileFlag": null,
+      "tier": "core",
+      "since": "1.0.0",
+      "docs": "README.md#deploying-vercel",
+      "setup": [
+        "Create the project at sanity.io/manage and copy its Project ID.",
+        "Add NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET to Vercel and .env.local.",
+        "Create a Viewer token and add it as SANITY_API_READ_TOKEN: datasets are private, so the site reads content with it."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview",
+            "development"
+          ],
+          "buildTime": true,
+          "required": true,
+          "format": "sanity-project-id",
+          "purpose": "Says which Sanity project holds the content.",
+          "source": "sanity.io/manage → your project → Project ID",
+          "envExample": {
+            "placeholder": "your-project-id"
+          }
+        },
+        {
+          "name": "NEXT_PUBLIC_SANITY_DATASET",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview",
+            "development"
+          ],
+          "buildTime": true,
+          "required": true,
+          "format": "sanity-dataset",
+          "purpose": "Says which dataset in that project is this site.",
+          "default": "None in the app. The GitHub workflows assume \"production\".",
+          "source": "sanity.io/manage → your project → API → Datasets",
+          "envExample": {
+            "placeholder": "production"
+          }
+        },
+        {
+          "name": "SANITY_API_READ_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "requiredIn": [
+            "production"
+          ],
+          "enforceFrom": "1.10.0",
+          "purpose": "Lets the server read content from a private dataset. Without it a production site has nothing to show.",
+          "source": "sanity.io/manage → your project → API → Tokens (Viewer role)",
+          "docs": "README.md#dataset-privacy"
+        },
+        {
+          "name": "NEXT_PUBLIC_SANITY_API_VERSION",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview",
+            "development"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "Pins the Sanity API date. It is now a constant in src/config/env.ts.",
+          "default": "The date pinned in src/config/env.ts.",
+          "deprecated": {
+            "since": "1.9.0",
+            "replacedBy": "the API_VERSION constant in src/config/env.ts, bumped deliberately in a release",
+            "migration": "Delete the variable from Vercel and .env.local. The pinned date applies.",
+            "removeWhen": "One minor release after this deprecation has shipped, the setup wizard no longer writes it, and the removal is approved as its own versioned decision."
+          },
+          "envExample": false
+        }
+      ],
+      "verify": [
+        "check-dataset"
+      ]
+    },
+    {
+      "id": "site",
+      "title": "Site address and language",
+      "summary": "Tells the site its public address, the language of its content and, in an emergency, to hide itself.",
+      "why": "Canonical links, the sitemap, share cards and screen readers all depend on them.",
+      "withoutIt": "On Vercel the project's production domain is used. Elsewhere a production server refuses to start rather than publish links that point at localhost.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#deploying-vercel",
+      "setup": [
+        "Add NEXT_PUBLIC_SITE_URL to Vercel (Production and Preview) with the site's live address and no trailing slash.",
+        "Leave NEXT_PUBLIC_SITE_LANGUAGE unset unless the content is not in English.",
+        "Redeploy so the address is built into the pages."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_SITE_URL",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "The site's public address, used in canonical links, the sitemap and structured data.",
+          "default": "Vercel's production domain, then http://localhost:3000 in development",
+          "source": "The live address, for example https://example.com.au (no trailing slash)",
+          "envExample": {
+            "placeholder": "http://localhost:3000"
+          }
+        },
+        {
+          "name": "NEXT_PUBLIC_SITE_LANGUAGE",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "The language of the content, for <html lang>, so screen readers pronounce it properly.",
+          "default": "\"en\"",
+          "envExample": {
+            "placeholder": "en",
+            "commented": true
+          }
+        },
+        {
+          "name": "SITE_LAUNCH_OVERRIDE",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "An emergency \"hide now\": the only value it accepts is prelaunch, which makes a live site private again. It can hide a site, never reveal one.",
+          "default": "Unset: the launch state in site.profile.ts applies",
+          "docs": "README.md#launch-state",
+          "envExample": false
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "studio-brand",
+      "title": "Studio name",
+      "summary": "The name in the Studio's header and browser tab.",
+      "why": "The client's Studio carries their name instead of Currawong's.",
+      "withoutIt": "The Studio is named by studio-brand.json, then Nocturne.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#cms-branding",
+      "setup": [
+        "Set \"name\" in studio-brand.json (the name field of the CMS brand) and deploy.",
+        "Delete NEXT_PUBLIC_STUDIO_TITLE from Vercel and .env.local once the name is in studio-brand.json."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_STUDIO_TITLE",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview",
+            "development"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "The Studio's name, used only while studio-brand.json has no name.",
+          "default": "Nocturne",
+          "deprecated": {
+            "since": "1.9.0",
+            "replacedBy": "the name in studio-brand.json, which already wins over it",
+            "migration": "Copy the value into \"name\" in studio-brand.json, deploy, then delete the variable from Vercel and .env.local.",
+            "removeWhen": "One minor release after this deprecation has shipped, the setup wizard no longer writes it, and the removal is approved as its own versioned decision."
+          },
+          "envExample": false
+        }
+      ],
+      "verify": [
+        "check-studio-brand"
+      ]
+    },
+    {
+      "id": "webhook-mode",
+      "title": "Webhook mode (cache refresh on publish)",
+      "summary": "Sanity tells the site when something is published, instead of every visitor holding a live connection open.",
+      "why": "A high-traffic site stays fast and cheap while edits still reach it within moments.",
+      "withoutIt": "Live mode: visitors open a live connection to Sanity and edits appear as they are made.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#live-mode-vs-webhook-mode",
+      "setup": [
+        "Generate a secret and add it to Vercel as SANITY_REVALIDATE_SECRET.",
+        "In sanity.io/manage → API → Webhooks, add a webhook to <site>/api/revalidate and use the same value as its secret.",
+        "Redeploy, then publish a change and check it reaches the live site."
+      ],
+      "settings": [
+        {
+          "name": "SANITY_REVALIDATE_SECRET",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "generate": "hex-32",
+          "purpose": "Proves a publish notice came from Sanity. It must equal the webhook's secret, so it lives in two places.",
+          "default": "Unset: live mode",
+          "source": "Generate one (for example openssl rand -hex 32) and enter it in Sanity and Vercel"
+        }
+      ],
+      "readiness": "getRevalidateReadiness",
+      "verify": []
+    },
+    {
+      "id": "redirects",
+      "title": "Edge Config redirects",
+      "summary": "Answers the Studio's redirects before any page renders, from a map kept in Vercel Edge Config.",
+      "why": "Redirects reach visitors with a single clean response, and quickly, on a site with a lot of traffic.",
+      "withoutIt": "The page route answers redirects instead: the request renders, finds no page and redirects. No token is needed and nothing is lost.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#edge-config-redirects",
+      "setup": [
+        "Only for a site whose traffic needs it: the page route's redirects are the default and need no token.",
+        "In Vercel → Storage, create an Edge Config store and connect it to the project. Vercel adds EDGE_CONFIG.",
+        "Add VERCEL_API_TOKEN: it must be a team token, because a project-scoped token cannot write Edge Config (measured, task 235). It is a write-capable token in a public site's runtime: read the risk in the README first.",
+        "Set up webhook mode, then publish a redirect to seed the map."
+      ],
+      "settings": [
+        {
+          "name": "EDGE_CONFIG",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "The connection string the proxy reads redirects with. It contains a read token, so it is a secret; it also shows the store's id, which is how the site finds the store to write to.",
+          "default": "Unset: the page route answers redirects",
+          "source": "Added by Vercel when you connect an Edge Config store to the project",
+          "managedBy": "provider"
+        },
+        {
+          "name": "EDGE_CONFIG_ID",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "The store's ecfg_ id. Usually not needed: the site reads it from EDGE_CONFIG. Set it only if the connection string doesn't show one; if both are set they must name the same store, or nothing is written.",
+          "default": "Derived from EDGE_CONFIG",
+          "source": "Vercel → Storage → your Edge Config → Settings, the id starting ecfg_"
+        },
+        {
+          "name": "VERCEL_API_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": {
+            "when": "EDGE_CONFIG"
+          },
+          "purpose": "Lets a publish rewrite the redirects map. Only a team token can: a project-scoped token is refused (task 235). Whoever controls the site's runtime can use it on every project in that team, so this is not recommended; page-route redirects need no token.",
+          "default": "Unset: the map is never written, and the page route answers redirects",
+          "source": "vercel.com/account/tokens, scoped to the team that owns the store",
+          "docs": "README.md#edge-config-redirects"
+        },
+        {
+          "name": "VERCEL_TEAM_ID",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Needed only with a full-account token. A team token or a project-scoped token infers the team, and sending the id as well does no harm.",
+          "default": "Unset: the token decides the team",
+          "source": "Vercel → team Settings → Team ID"
+        }
+      ],
+      "readiness": "getRedirectsReadiness",
+      "verify": []
+    },
+    {
+      "id": "forms",
+      "title": "Contact forms",
+      "summary": "Sends form submissions to your inbox, with a spam check.",
+      "why": "Visitors can contact the business without an email address on the page.",
+      "withoutIt": "Form sections show \"unavailable\" to visitors. Nothing else changes.",
+      "profileFlag": "forms",
+      "tier": "optional",
+      "since": "1.0.0",
+      "docs": "README.md#forms-setup",
+      "setup": [
+        "Create a Turnstile widget in Cloudflare and copy its site key and secret key.",
+        "Create a Resend API key, and verify the domain the forms will send from.",
+        "Add the four settings to Vercel (Production and Preview), then redeploy."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": true,
+          "purpose": "Shows the spam check on the form. Public by design.",
+          "source": "Cloudflare → Turnstile → your widget → Site key"
+        },
+        {
+          "name": "TURNSTILE_SECRET_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Lets the server confirm a visitor passed the spam check.",
+          "source": "Cloudflare → Turnstile → your widget → Secret key"
+        },
+        {
+          "name": "RESEND_API_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Lets the server send each submission to your inbox.",
+          "source": "Resend → API Keys"
+        },
+        {
+          "name": "FORMS_FROM_EMAIL",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "format": "email-with-name",
+          "purpose": "The address submissions are sent from. Resend refuses a malformed or unverified one, so sending fails.",
+          "source": "A sender verified in Resend, for example Site name <forms@example.com.au>"
+        }
+      ],
+      "readiness": "getFormsConfig",
+      "verify": []
+    },
+    {
+      "id": "enquiries",
+      "title": "Stored enquiries",
+      "summary": "Keeps each form submission as an enquiry the client reads in Studio, as well as emailing it.",
+      "why": "Nothing is lost if an email goes astray, and clients can see their leads in one place.",
+      "withoutIt": "Form submissions are emailed only. Nothing is stored.",
+      "profileFlag": null,
+      "switchedBy": [
+        "ENQUIRIES_STORE"
+      ],
+      "tier": "optional",
+      "docs": "README.md#enquiries",
+      "setup": [
+        "Make sure the dataset is private: nothing is stored unless it refuses anonymous reads.",
+        "Create a Sanity token with the Editor role (never higher) and add it to Vercel as SANITY_WRITE_TOKEN.",
+        "Add ENQUIRIES_STORE=1 to Vercel, add a privacy notice to the form, then redeploy."
+      ],
+      "settings": [
+        {
+          "name": "ENQUIRIES_STORE",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Switches on storing submissions. Set it to 1.",
+          "default": "Unset: submissions are emailed only",
+          "envExample": {
+            "placeholder": "1",
+            "commented": true
+          }
+        },
+        {
+          "name": "SANITY_WRITE_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Lets the server write the enquiry document. The Stripe webhook and the publish gate use it too. Never give it a higher role than Editor.",
+          "source": "sanity.io/manage → your project → API → Tokens (Editor role)"
+        }
+      ],
+      "readiness": "getEnquiryConfig",
+      "verify": []
+    },
+    {
+      "id": "newsletter",
+      "title": "Newsletter signup",
+      "summary": "Adds visitors to the client's mailing list from a signup section, with a spam check.",
+      "why": "The business can grow its list from the site without handling addresses by hand.",
+      "withoutIt": "Newsletter sections show \"unavailable\" to visitors. Nothing else changes.",
+      "profileFlag": "newsletter",
+      "switchedBy": [
+        "NEWSLETTER_PROVIDER",
+        "NEWSLETTER_RESEND_SEGMENT_ID",
+        "LOOPS_API_KEY",
+        "LOOPS_MAILING_LIST_ID",
+        "MAILCHIMP_API_KEY",
+        "MAILCHIMP_LIST_ID"
+      ],
+      "tier": "optional",
+      "docs": "README.md#newsletter-signup",
+      "setup": [
+        "Set up the spam check first: it is the same Turnstile widget the contact forms use.",
+        "Choose one provider (resend, loops or mailchimp) and set NEWSLETTER_PROVIDER to its name.",
+        "Add that provider's key (and Mailchimp's audience id) to Vercel, then redeploy."
+      ],
+      "settings": [
+        {
+          "name": "NEWSLETTER_PROVIDER",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Which service holds the list: resend, loops or mailchimp.",
+          "source": "One of resend, loops or mailchimp"
+        },
+        {
+          "name": "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": true,
+          "purpose": "Shows the spam check on the signup. The same key as the contact forms.",
+          "source": "Cloudflare → Turnstile → your widget → Site key"
+        },
+        {
+          "name": "TURNSTILE_SECRET_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Lets the server confirm a visitor passed the spam check. The same key as the contact forms.",
+          "source": "Cloudflare → Turnstile → your widget → Secret key"
+        },
+        {
+          "name": "RESEND_API_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Needed when the provider is resend. The contact forms use the same key.",
+          "source": "Resend → API Keys"
+        },
+        {
+          "name": "NEWSLETTER_RESEND_SEGMENT_ID",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "resend only: the segment new subscribers are added to.",
+          "default": "Subscribers are added without a segment",
+          "source": "Resend dashboard → Segments"
+        },
+        {
+          "name": "LOOPS_API_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Needed when the provider is loops.",
+          "source": "Loops → Settings → API"
+        },
+        {
+          "name": "LOOPS_MAILING_LIST_ID",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "loops only: the mailing list new subscribers join.",
+          "default": "Subscribers are added without a list"
+        },
+        {
+          "name": "MAILCHIMP_API_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Needed when the provider is mailchimp. It ends in its datacentre, for example …-us21.",
+          "source": "Mailchimp → Profile → Extras → API keys"
+        },
+        {
+          "name": "MAILCHIMP_LIST_ID",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Needed when the provider is mailchimp: the audience subscribers join.",
+          "source": "Mailchimp → Audience → Settings → Audience name and defaults"
+        }
+      ],
+      "readiness": "getNewsletterConfig",
+      "verify": []
+    },
+    {
+      "id": "pricing",
+      "title": "Pricing table and checkout",
+      "summary": "Shows prices from Stripe and sends buyers to Stripe to pay, then records the payment.",
+      "why": "The business can sell from the site without building a shop.",
+      "withoutIt": "Pricing sections cannot start a checkout, and payments are not recorded.",
+      "profileFlag": "pricing",
+      "switchedBy": [
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_SUCCESS_URL",
+        "STRIPE_CANCEL_URL"
+      ],
+      "tier": "optional",
+      "docs": "README.md#pricing-table",
+      "setup": [
+        "Create a Stripe secret or restricted key and add it to Vercel as STRIPE_SECRET_KEY.",
+        "In Stripe → Developers → Webhooks, add the endpoint <site>/api/stripe/webhook and copy its signing secret.",
+        "Add that as STRIPE_WEBHOOK_SECRET, add an Editor-role SANITY_WRITE_TOKEN, then redeploy."
+      ],
+      "settings": [
+        {
+          "name": "STRIPE_SECRET_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Lets the server read prices and start a checkout.",
+          "source": "Stripe → Developers → API keys (a restricted key is better than the secret key)"
+        },
+        {
+          "name": "STRIPE_WEBHOOK_SECRET",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Proves a payment notice came from Stripe. It is the endpoint's signing secret, beginning whsec_.",
+          "source": "Stripe → Developers → Webhooks → your endpoint → Signing secret"
+        },
+        {
+          "name": "SANITY_WRITE_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Lets the webhook record a paid order. Never give it a higher role than Editor.",
+          "source": "sanity.io/manage → your project → API → Tokens (Editor role)"
+        },
+        {
+          "name": "STRIPE_SUCCESS_URL",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Where buyers land after paying: a path or a full https:// URL.",
+          "default": "/?checkout=success",
+          "envExample": {
+            "placeholder": "/thanks",
+            "commented": true
+          }
+        },
+        {
+          "name": "STRIPE_CANCEL_URL",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Where buyers go when they come back from Stripe without paying: a path or a full https:// URL.",
+          "default": "The pricing page they came from",
+          "envExample": {
+            "placeholder": "/pricing",
+            "commented": true
+          }
+        }
+      ],
+      "readiness": "getPricingConfig",
+      "verify": []
+    },
+    {
+      "id": "publish-gate",
+      "title": "Publish gate for Contributors",
+      "summary": "Lets a Contributor publish changes that clients may make, and sends the rest to the agency.",
+      "why": "Clients can publish routine edits without waiting, while design changes stay with the agency.",
+      "withoutIt": "A Contributor's changes are saved as drafts and the agency publishes them.",
+      "profileFlag": "publishGate",
+      "tier": "optional",
+      "docs": "README.md#publish-gate",
+      "setup": [
+        "Switch features.publishGate on in site.profile.ts.",
+        "Create a Sanity token with the Editor role (never higher) and add it to Vercel as SANITY_WRITE_TOKEN.",
+        "Redeploy, then check a Contributor can publish an allowed change."
+      ],
+      "settings": [
+        {
+          "name": "SANITY_WRITE_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "purpose": "Lets the server publish a validated draft on a Contributor's behalf. Never give it a higher role than Editor.",
+          "source": "sanity.io/manage → your project → API → Tokens (Editor role)"
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "indexnow",
+      "title": "IndexNow (tell search engines about new pages)",
+      "summary": "Pings participating search engines when a page or post is published.",
+      "why": "New pages can be found sooner than a crawler would get to them.",
+      "withoutIt": "Search engines find new pages by crawling, which is slower. Nothing else changes.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#indexnow",
+      "setup": [
+        "Set up webhook mode first: the ping is sent when Sanity calls /api/revalidate.",
+        "Generate a key of 8 to 128 letters, digits and dashes and add it to Vercel as INDEXNOW_KEY.",
+        "Redeploy. The key file is served at /api/indexnow/<key> for search engines to check."
+      ],
+      "settings": [
+        {
+          "name": "INDEXNOW_KEY",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "generate": "hex-32",
+          "purpose": "The key search engines check against the key file the site serves. Public by protocol, so it is not a secret.",
+          "default": "Unset: no pings are sent",
+          "source": "Generate one, for example openssl rand -hex 16"
+        }
+      ],
+      "readiness": "getIndexNowReadiness",
+      "verify": []
+    },
+    {
+      "id": "style-guide",
+      "title": "Style guide on preview deployments",
+      "summary": "Opens the section gallery on a Vercel preview deployment with a token.",
+      "why": "Designers and clients can review every section without it being public.",
+      "withoutIt": "The style guide is open in development and answers 404 on Vercel, which is the safe default.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#style-guide",
+      "setup": [
+        "Generate a token of 16 or more characters, for example openssl rand -hex 16.",
+        "Add it to Vercel as STYLEGUIDE_PREVIEW_TOKEN for the Preview environment only.",
+        "Redeploy a preview and open /section-gallery?preview=<token>."
+      ],
+      "settings": [
+        {
+          "name": "STYLEGUIDE_PREVIEW_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "preview"
+          ],
+          "required": true,
+          "generate": "hex-32",
+          "purpose": "Opens /section-gallery on a preview deployment. Never set it on Production, where the page is always a 404.",
+          "default": "Unset: the style guide answers 404 on Vercel",
+          "source": "Generate one: openssl rand -hex 16 (16 or more characters)"
+        }
+      ],
+      "readiness": "getStyleguideReadiness",
+      "verify": []
+    },
+    {
+      "id": "prelaunch",
+      "title": "Pre-launch preview access",
+      "summary": "Lets the team and the client see the whole site before launch, while visitors see a temporary page.",
+      "why": "A site can be reviewed on its real domain without being public.",
+      "withoutIt": "No preview pass can be issued: pre-launch pages stay private, even in Presentation.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#pre-launch-and-launch",
+      "setup": [
+        "Generate PREVIEW_ACCESS_SECRET (16 or more characters, for example openssl rand -hex 32) and add it to Vercel.",
+        "Optionally generate PRELAUNCH_PREVIEW_TOKEN the same way for the client preview link, /api/preview-access?token=<it>.",
+        "Redeploy. Changing either later revokes every pass it issued."
+      ],
+      "settings": [
+        {
+          "name": "PREVIEW_ACCESS_SECRET",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "generate": "hex-32",
+          "purpose": "Signs the preview pass that Presentation and the client link issue. Rotating it revokes every pass, by design.",
+          "default": "Unset: no pass is ever valid and pre-launch pages stay private",
+          "source": "Generate one: openssl rand -hex 32 (16 or more characters)"
+        },
+        {
+          "name": "PRELAUNCH_PREVIEW_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "generate": "hex-32",
+          "purpose": "The client preview link's token. Anyone with the link has the same access as a pass.",
+          "default": "Unset: there is no client link",
+          "source": "Generate one: openssl rand -hex 32 (16 or more characters)"
+        }
+      ],
+      "readiness": "getPrelaunchReadiness",
+      "verify": [
+        "launch-check"
+      ]
+    },
+    {
+      "id": "experiments",
+      "title": "A/B tests",
+      "summary": "Shows some visitors a different version of a page and measures which one works better.",
+      "why": "Changes to a page can be tested before they are rolled out to everyone.",
+      "withoutIt": "No test runs and every visitor sees the published content.",
+      "profileFlag": "experiments",
+      "tier": "optional",
+      "docs": "README.md#ab-tests-how-it-works",
+      "setup": [
+        "Generate FLAGS_SECRET (32 random bytes, base64url) and add it to Vercel.",
+        "Redeploy, then start an experiment in Studio."
+      ],
+      "settings": [
+        {
+          "name": "FLAGS_SECRET",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "generate": "base64url-32",
+          "purpose": "Signs the variant codes in prerendered URLs, so a visitor cannot forge one.",
+          "source": "Generate one: node -e \"console.log(crypto.randomBytes(32).toString('base64url'))\""
+        },
+        {
+          "name": "EXPERIMENT_CACHE_SECONDS",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "How long the proxy remembers whether a test is running, so starting or stopping one can take this long to show.",
+          "default": "60",
+          "envExample": {
+            "placeholder": "60",
+            "commented": true
+          }
+        }
+      ],
+      "readiness": "getExperimentsReadiness",
+      "verify": []
+    },
+    {
+      "id": "analytics",
+      "title": "Analytics and cookie consent",
+      "summary": "Loads Plausible, PostHog or Google Analytics after a visitor accepts analytics cookies.",
+      "why": "The business sees how the site is used, and visitors choose whether to be counted.",
+      "withoutIt": "No analytics provider loads and no cookie banner appears. Vercel Analytics is cookieless and always on.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#analytics-and-cookie-consent",
+      "setup": [
+        "Pick a provider and add its public id to Vercel: a Plausible domain, a PostHog project token or a Google Analytics 4 measurement id.",
+        "Redeploy: these are built into the pages. The cookie banner appears once any provider is set.",
+        "Check the banner, accept analytics, and see the visit in the provider."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_PLAUSIBLE_DOMAIN",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "Turns on Plausible. Public, but whoever controls it receives visitor analytics.",
+          "source": "Plausible → Site settings → the site's domain, for example example.com.au"
+        },
+        {
+          "name": "NEXT_PUBLIC_POSTHOG_KEY",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "Turns on PostHog. Public, but whoever controls it receives visitor analytics.",
+          "source": "PostHog → Project settings → Project token"
+        },
+        {
+          "name": "NEXT_PUBLIC_POSTHOG_HOST",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "Which PostHog cloud receives events. Use https://eu.i.posthog.com for the EU cloud.",
+          "default": "https://us.i.posthog.com",
+          "envExample": {
+            "placeholder": "https://us.i.posthog.com",
+            "commented": true
+          }
+        },
+        {
+          "name": "NEXT_PUBLIC_GA_ID",
+          "kind": "public-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "Turns on Google Analytics 4. Public, but whoever controls it receives visitor analytics.",
+          "source": "Google Analytics → Admin → Data streams → Measurement ID (G-…)"
+        }
+      ],
+      "readiness": "getAnalyticsReadiness",
+      "verify": []
+    },
+    {
+      "id": "members",
+      "title": "Members-only content",
+      "summary": "Lets chosen people sign in to see members-only pages and sections.",
+      "why": "Some content is for clients, students or staff only.",
+      "withoutIt": "Members-only pages and sections stay hidden, and nobody can sign in.",
+      "profileFlag": "members",
+      "tier": "optional",
+      "docs": "README.md#members-only-content",
+      "setup": [
+        "Generate AUTH_SECRET (for example openssl rand -base64 32) and add it to Vercel.",
+        "Create an OAuth app with GitHub or Google and add its id and secret (the callback is <site>/api/auth/callback/<provider>).",
+        "Optionally list who counts as a member in AUTH_ALLOWED_EMAILS, then redeploy."
+      ],
+      "settings": [
+        {
+          "name": "AUTH_SECRET",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": true,
+          "generate": "base64url-32",
+          "purpose": "Signs the session cookie.",
+          "source": "Generate one: openssl rand -base64 32"
+        },
+        {
+          "name": "AUTH_GITHUB_ID",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Turns on GitHub sign-in with AUTH_GITHUB_SECRET. One provider's pair is needed.",
+          "source": "GitHub → Settings → Developer settings → OAuth Apps"
+        },
+        {
+          "name": "AUTH_GITHUB_SECRET",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "The GitHub OAuth app's client secret.",
+          "source": "GitHub → Settings → Developer settings → OAuth Apps"
+        },
+        {
+          "name": "AUTH_GOOGLE_ID",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Turns on Google sign-in with AUTH_GOOGLE_SECRET. One provider's pair is needed.",
+          "source": "Google Cloud console → APIs & Services → Credentials"
+        },
+        {
+          "name": "AUTH_GOOGLE_SECRET",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "The Google OAuth client's secret.",
+          "source": "Google Cloud console → APIs & Services → Credentials"
+        },
+        {
+          "name": "AUTH_ALLOWED_EMAILS",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Who counts as a member: addresses and whole domains, comma-separated (\"ann@example.com, @example.org\"). An access list, so it stays here and not in Sanity.",
+          "default": "Anyone who can sign in with an enabled provider"
+        },
+        {
+          "name": "AUTH_TRUST_HOST",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Needed when the site is not hosted on Vercel. Set it to true.",
+          "default": "Unset: fine on Vercel",
+          "envExample": {
+            "placeholder": "true",
+            "commented": true
+          }
+        }
+      ],
+      "readiness": "getMembersReadiness",
+      "verify": []
+    },
+    {
+      "id": "error-tracking",
+      "title": "Error tracking (Sentry)",
+      "summary": "Sends server and browser errors to Sentry, tagged with the reference shown on the error page.",
+      "why": "Problems visitors hit reach the agency with the detail needed to fix them.",
+      "withoutIt": "Errors are logged as one JSON line each in Vercel. Nothing is sent anywhere and no Sentry code loads.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#error-tracking",
+      "setup": [
+        "Create a project in Sentry and copy its DSN into Vercel as SENTRY_DSN.",
+        "For readable stack traces, add SENTRY_AUTH_TOKEN, SENTRY_ORG and SENTRY_PROJECT to the Vercel build environment.",
+        "Redeploy: the DSN is built into the pages."
+      ],
+      "settings": [
+        {
+          "name": "SENTRY_DSN",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": true,
+          "format": "https-url",
+          "purpose": "Turns Sentry on. A DSN only lets events be sent, so it is public by design; the build copies it into the browser.",
+          "source": "Sentry → Project settings → Client Keys (DSN)"
+        },
+        {
+          "name": "SENTRY_TRACES_SAMPLE_RATE",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "The share of requests traced, from 0 to 1.",
+          "default": "0.1",
+          "envExample": {
+            "placeholder": "0.1",
+            "commented": true
+          }
+        },
+        {
+          "name": "SENTRY_AUTH_TOKEN",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "Uploads source maps during the build only. Add it to the Vercel build environment, not .env.local.",
+          "default": "Unset: no source maps are uploaded",
+          "source": "Sentry → Settings → Auth Tokens",
+          "envExample": {
+            "commented": true
+          }
+        },
+        {
+          "name": "SENTRY_ORG",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "The Sentry organisation the source maps belong to.",
+          "source": "Sentry → Settings → Organization slug",
+          "envExample": {
+            "commented": true
+          }
+        },
+        {
+          "name": "SENTRY_PROJECT",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "The Sentry project the source maps belong to.",
+          "source": "Sentry → Project settings → Project slug",
+          "envExample": {
+            "commented": true
+          }
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "start-here",
+      "title": "Ops notices on Start here",
+      "summary": "Shows notices from the Ops dashboard on the Studio's Start here screen.",
+      "why": "The agency can tell a client something (a renewal, a maintenance window) where they will see it.",
+      "withoutIt": "The notices panel is skipped. Nothing else on Start here changes.",
+      "dormant": "No Ops endpoint exists yet, and Foundation is local, so nothing can serve notices.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#start-here-studio-home-screen",
+      "setup": [
+        "Nothing to do yet: the settings are registered for when an Ops endpoint exists.",
+        "Then add OPS_NOTICES_URL (an https endpoint that answers { \"notices\": [...] } for ?site=<client slug>) and, if it needs one, OPS_NOTICES_KEY."
+      ],
+      "settings": [
+        {
+          "name": "OPS_NOTICES_URL",
+          "kind": "server-env",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "The https endpoint the notices come from.",
+          "default": "Unset: the notices panel is skipped"
+        },
+        {
+          "name": "OPS_NOTICES_KEY",
+          "kind": "secret",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "required": false,
+          "purpose": "Sent to that endpoint as a bearer token from the server. It never reaches the browser."
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "health-monitoring",
+      "title": "Daily health monitoring",
+      "summary": "Checks the live site and its dataset every day and opens an issue when something is wrong.",
+      "why": "A broken deploy or an exposed dataset reaches the agency before it reaches the client.",
+      "withoutIt": "Nothing checks the live site. Problems are found by visitors.",
+      "profileFlag": null,
+      "tier": "optional",
+      "since": "1.9.0",
+      "docs": "README.md#health-checks",
+      "setup": [
+        "Add the PRODUCTION_URL and NEXT_PUBLIC_SANITY_PROJECT_ID repository variables on GitHub.",
+        "Create a Viewer token in Sanity and save it as the SANITY_AUTH_TOKEN repository secret.",
+        "Run the Health workflow once from the Actions tab and read its result file (the health-result artifact): a run that skipped is not a health check."
+      ],
+      "settings": [
+        {
+          "name": "PRODUCTION_URL",
+          "kind": "github-var",
+          "where": "github",
+          "required": true,
+          "format": "https-url",
+          "purpose": "The live address the daily check opens.",
+          "source": "The live address, for example https://example.com.au"
+        },
+        {
+          "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+          "kind": "github-var",
+          "where": "github",
+          "required": true,
+          "format": "sanity-project-id",
+          "purpose": "Lets the check look at the dataset. Must match the value on Vercel.",
+          "source": "The same value as on Vercel: sanity.io/manage → your project → Project ID"
+        },
+        {
+          "name": "NEXT_PUBLIC_SANITY_DATASET",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "format": "sanity-dataset",
+          "purpose": "Which dataset to look at.",
+          "default": "\"production\""
+        },
+        {
+          "name": "SANITY_AUTH_TOKEN",
+          "kind": "github-secret",
+          "where": "github",
+          "required": true,
+          "purpose": "Lets the check read the dataset. Read-only; the backup uses the same secret.",
+          "source": "sanity.io/manage → your project → API → Tokens (Viewer role). The backup uses the same secret"
+        },
+        {
+          "name": "HEALTH_CHECKS",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "format": "off-switch",
+          "purpose": "Switches monitoring off on purpose (the template repository, scratch repositories, forks).",
+          "default": "On. Set it to \"off\" to switch monitoring off deliberately"
+        },
+        {
+          "name": "HEALTH_CHECKS_REASON",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "purpose": "Why monitoring is off, shown with the intentionally disabled result.",
+          "default": "No reason is recorded"
+        },
+        {
+          "name": "HEALTH_EXPECT_MARKER",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "purpose": "Text the home page must contain, so a blank or wrong page is caught.",
+          "default": "No marker is expected on the home page"
+        },
+        {
+          "name": "ENQUIRIES_STORE",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "purpose": "Tells the workflow that stored enquiries make a public dataset more serious.",
+          "default": "Off. A copy of the Vercel setting, kept only so the health workflow knows",
+          "deprecated": {
+            "since": "1.9.0",
+            "replacedBy": "the anonymous enquiry-exposure probe in the health check (task 230); the run summary carries the deprecation line",
+            "migration": "Nothing is needed: a public dataset whose enquiries visitors can count is now found by an anonymous request. Delete the GitHub variable.",
+            "removeWhen": "One minor release after task 230 has shipped, the workflow no longer reads it, and the removal is approved as its own versioned decision."
+          }
+        }
+      ],
+      "verify": [
+        "launch-check",
+        "check-dataset"
+      ]
+    },
+    {
+      "id": "backups",
+      "title": "Weekly dataset backup",
+      "summary": "Exports the dataset every Sunday and keeps it as a download, or in the client's own storage.",
+      "why": "Content can be restored if it is deleted or overwritten by mistake.",
+      "withoutIt": "Nothing exports the dataset. Sanity keeps its own history, but there is no copy the business holds.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#backups",
+      "setup": [
+        "Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.",
+        "Create a Viewer token in Sanity and save it as the SANITY_AUTH_TOKEN repository secret (the health check uses the same one).",
+        "Optional: add the S3 or R2 bucket secrets to keep backups outside GitHub. Without them each backup is an Actions artifact for 30 days."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+          "kind": "github-var",
+          "where": "github",
+          "required": true,
+          "format": "sanity-project-id",
+          "purpose": "Says which Sanity project to export. The same value as on Vercel.",
+          "source": "sanity.io/manage → your project → Project ID"
+        },
+        {
+          "name": "NEXT_PUBLIC_SANITY_DATASET",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "format": "sanity-dataset",
+          "purpose": "Which dataset to export.",
+          "default": "\"production\""
+        },
+        {
+          "name": "SANITY_AUTH_TOKEN",
+          "kind": "github-secret",
+          "where": "github",
+          "required": true,
+          "purpose": "Lets the export read the dataset. Read-only; the health check uses the same secret.",
+          "source": "sanity.io/manage → your project → API → Tokens (Viewer role)"
+        },
+        {
+          "name": "BACKUP_S3_BUCKET",
+          "kind": "github-secret",
+          "where": "github",
+          "required": false,
+          "purpose": "The bucket to store backups in. Stored as a secret, so it can't be displayed or checked.",
+          "default": "Unset: backups are kept as an Actions artifact for 30 days"
+        },
+        {
+          "name": "BACKUP_S3_ENDPOINT",
+          "kind": "github-secret",
+          "where": "github",
+          "required": false,
+          "purpose": "The storage endpoint, for Cloudflare R2 or another S3-compatible service. Stored as a secret, so it can't be displayed or checked.",
+          "default": "Unset: Amazon S3"
+        },
+        {
+          "name": "BACKUP_S3_ACCESS_KEY_ID",
+          "kind": "github-secret",
+          "where": "github",
+          "required": false,
+          "purpose": "The access key id for the bucket."
+        },
+        {
+          "name": "BACKUP_S3_SECRET_ACCESS_KEY",
+          "kind": "github-secret",
+          "where": "github",
+          "required": false,
+          "purpose": "The secret access key for the bucket."
+        },
+        {
+          "name": "BACKUP_S3_REGION",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "purpose": "The bucket's region.",
+          "default": "\"auto\" with an endpoint, otherwise \"us-east-1\""
+        },
+        {
+          "name": "BACKUP_S3_PREFIX",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "purpose": "The folder in the bucket backups are written to.",
+          "default": "\"sanity-backups\""
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "enquiry-retention",
+      "title": "Enquiry retention",
+      "summary": "Deletes stored enquiries older than the retention period, every Monday.",
+      "why": "The business does not keep people's details for longer than it said it would.",
+      "withoutIt": "Stored enquiries are kept until someone deletes them.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#enquiries",
+      "setup": [
+        "Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.",
+        "Save the Editor-role token as the SANITY_WRITE_TOKEN repository secret: deleting needs write access.",
+        "Optionally set ENQUIRY_RETENTION_DAYS (at least 30). Run the workflow once as a dry run to see what it would delete."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+          "kind": "github-var",
+          "where": "github",
+          "required": true,
+          "format": "sanity-project-id",
+          "purpose": "Says which Sanity project holds the enquiries. The same value as on Vercel.",
+          "source": "sanity.io/manage → your project → Project ID"
+        },
+        {
+          "name": "NEXT_PUBLIC_SANITY_DATASET",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "format": "sanity-dataset",
+          "purpose": "Which dataset holds the enquiries.",
+          "default": "\"production\""
+        },
+        {
+          "name": "SANITY_WRITE_TOKEN",
+          "kind": "github-secret",
+          "where": "github",
+          "required": true,
+          "purpose": "Lets the workflow delete old enquiries. A copy of the Vercel value; never a higher role than Editor.",
+          "source": "sanity.io/manage → your project → API → Tokens (Editor role)"
+        },
+        {
+          "name": "ENQUIRY_RETENTION_DAYS",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "purpose": "How many days an enquiry is kept: a whole number of at least 30.",
+          "default": "365"
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "sanity-workflow",
+      "title": "Schema deploy and migration checks",
+      "summary": "Deploys the schema when it changes on main, and dry-runs migrations on pull requests.",
+      "why": "Studio always matches the code, and a migration is tried against real content before it is merged.",
+      "withoutIt": "The schema is deployed by hand with the Sanity CLI, and migrations are not tried before merging.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#sanity-workflow-migrations-and-schema-deploy",
+      "setup": [
+        "Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.",
+        "For schema deploys, save an Editor-role token as the SANITY_DEPLOY_TOKEN repository secret.",
+        "For migration dry runs, save a Viewer-role token as the SANITY_MIGRATION_READ_TOKEN repository secret."
+      ],
+      "settings": [
+        {
+          "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+          "kind": "github-var",
+          "where": "github",
+          "required": true,
+          "format": "sanity-project-id",
+          "purpose": "Says which Sanity project to deploy to and dry-run against. The same value as on Vercel.",
+          "source": "sanity.io/manage → your project → Project ID"
+        },
+        {
+          "name": "NEXT_PUBLIC_SANITY_DATASET",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "format": "sanity-dataset",
+          "purpose": "Which dataset migrations are dry-run against.",
+          "default": "\"production\""
+        },
+        {
+          "name": "SANITY_DEPLOY_TOKEN",
+          "kind": "github-secret",
+          "where": "github",
+          "required": false,
+          "purpose": "Lets the workflow deploy the schema when it changes on main. Needs the Editor role.",
+          "default": "Unset: the schema is not deployed from CI",
+          "source": "sanity.io/manage → your project → API → Tokens (Editor role)"
+        },
+        {
+          "name": "SANITY_MIGRATION_READ_TOKEN",
+          "kind": "github-secret",
+          "where": "github",
+          "required": false,
+          "purpose": "Lets pull requests dry-run migrations. Read-only. Pull requests from forks never receive it.",
+          "default": "Unset: migration dry runs are skipped",
+          "source": "sanity.io/manage → your project → API → Tokens (Viewer role)"
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "launch-check",
+      "title": "Launch check",
+      "summary": "Checks a deployed site before and after launch, with an optional PageSpeed run.",
+      "why": "Problems are found by the agency, not by the first visitors.",
+      "withoutIt": "The launch check still runs. It skips PageSpeed, and cannot reach a protected preview.",
+      "profileFlag": null,
+      "tier": "optional",
+      "docs": "README.md#launch-check",
+      "setup": [
+        "Optional: create a Google PageSpeed Insights API key and put it in .env.local as PSI_API_KEY.",
+        "Only for a Vercel deployment with protection on: add the Protection Bypass secret to .env.local as VERCEL_AUTOMATION_BYPASS_SECRET and run launch:check with --bypass."
+      ],
+      "settings": [
+        {
+          "name": "PSI_API_KEY",
+          "kind": "secret",
+          "where": "local",
+          "required": false,
+          "purpose": "Lets the launch check run PageSpeed Insights.",
+          "default": "Unset: PageSpeed is skipped",
+          "source": "Google Cloud console → APIs & Services → PageSpeed Insights API → Credentials",
+          "envExample": false
+        },
+        {
+          "name": "VERCEL_AUTOMATION_BYPASS_SECRET",
+          "kind": "secret",
+          "where": "local",
+          "required": false,
+          "purpose": "Lets the launch check past Vercel's deployment protection when run with --bypass.",
+          "default": "Unset: --bypass has nothing to send",
+          "source": "Vercel → project Settings → Deployment Protection → Protection Bypass for Automation",
+          "envExample": false
+        }
+      ],
+      "verify": []
+    },
+    {
+      "id": "config-controls",
+      "title": "Configuration controls",
+      "summary": "Emergency switches for the build-time configuration check.",
+      "why": "An urgent fix can still ship while a non-essential setting is missing.",
+      "withoutIt": "The build check always enforces. That is the normal state.",
+      "profileFlag": null,
+      "tier": "optional",
+      "since": "1.9.0",
+      "docs": "README.md#configuration",
+      "setup": [
+        "Leave it unset. Set NOCTURNE_CONFIG_GATE to warn on Vercel only to ship an urgent fix, then remove it."
+      ],
+      "settings": [
+        {
+          "name": "NOCTURNE_CONFIG_GATE",
+          "kind": "system",
+          "where": "vercel",
+          "targets": [
+            "production",
+            "preview"
+          ],
+          "buildTime": true,
+          "required": false,
+          "purpose": "Turns the build check's failures into warnings. It cannot skip a value the build itself needs, and it never affects dataset privacy or any other check.",
+          "default": "Unset: the build check enforces",
+          "docs": "README.md#configuration",
+          "envExample": false
+        }
+      ],
+      "verify": []
+    }
+  ]
+}
