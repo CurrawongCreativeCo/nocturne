@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page } from '@playwright/test'
 
 import { test } from './fixtures/test'
+import { settleImagesAndFonts } from './settle'
 
 /**
  * Glass rows, the Link list's sixth preset (README, "Link list"): frosted rows over a background photo.
@@ -181,13 +182,7 @@ test.describe('Glass rows, visual', () => {
       )
       await page.setViewportSize({ width, height: 900 })
       await page.goto(PAGE)
-      await page.evaluate(async () => {
-        for (const img of document.querySelectorAll('img')) img.loading = 'eager'
-        await Promise.all(
-          [...document.querySelectorAll('img')].map((img) => img.decode().catch(() => undefined)),
-        )
-        await document.fonts.ready
-      })
+      await settleImagesAndFonts(page)
       await expect(page).toHaveScreenshot(`link-glass-${String(width)}.png`, {
         fullPage: true,
         maxDiffPixelRatio: 0.01,
