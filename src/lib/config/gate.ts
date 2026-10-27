@@ -99,8 +99,16 @@ function describe({ setting }: GateFinding) {
   const lines = [`  ${setting.name}`]
   if (setting.source) lines.push(`    Where to find it: ${setting.source}`)
   lines.push(`    Set it in: ${whereToSet(setting)}`)
-  if (setting.enforceFrom)
+  if (setting.requiredAtRuntime) {
+    lines.push('    The site already fails at run time without it, in every environment.')
+    if (setting.enforceFrom) {
+      lines.push(
+        `    The build starts to refuse a missing one from template version ${setting.enforceFrom}.`,
+      )
+    }
+  } else if (setting.enforceFrom) {
     lines.push(`    Becomes required from template version ${setting.enforceFrom}.`)
+  }
   return lines
 }
 
@@ -134,7 +142,9 @@ export function formatGate(result: GateResult): string[] {
   }
   if (warnings.length > 0) {
     out.push(
-      `⚠ ${warnings.length === 1 ? 'A setting is' : 'Settings are'} missing${overridden ? '' : ' that this site will need'}. The build goes ahead.`,
+      warnings.some(({ setting }) => setting.requiredAtRuntime)
+        ? `⚠ ${warnings.length === 1 ? 'A setting is' : 'Settings are'} missing that the site needs to run. The build goes ahead, but the site will fail without ${warnings.length === 1 ? 'it' : 'them'}.`
+        : `⚠ ${warnings.length === 1 ? 'A setting is' : 'Settings are'} missing${overridden ? '' : ' that this site will need'}. The build goes ahead.`,
       '',
       ...warnings.flatMap((finding) => describe(finding)),
     )

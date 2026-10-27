@@ -170,8 +170,15 @@ const code = (name: string, markdown: boolean) => (markdown ? `\`${name}\`` : na
 
 function settingLine({ setting, feature }: SettingChange, markdown: boolean) {
   const parts = [`${code(setting.name, markdown)} (${feature}): set it in ${whereToSet(setting)}`]
-  if (setting.enforceFrom) parts.push(`required from ${setting.enforceFrom}`)
-  if (setting.requiredIn) parts.push(`in ${setting.requiredIn.join(' and ')}`)
+  if (setting.requiredAtRuntime) {
+    // The site already fails without it; the version only says when the build starts to say so.
+    parts.push('the site already fails without it, in every environment')
+    if (setting.enforceFrom)
+      parts.push(`the build refuses a missing one from ${setting.enforceFrom}`)
+  } else {
+    if (setting.enforceFrom) parts.push(`required from ${setting.enforceFrom}`)
+    if (setting.requiredIn) parts.push(`in ${setting.requiredIn.join(' and ')}`)
+  }
   if (setting.source) parts.push(`find it: ${setting.source}`)
   return parts.join('; ')
 }
@@ -218,8 +225,16 @@ export function formatChanges(changes: ConfigChanges, { markdown = false } = {})
     changes.newRequired.map((change) => settingLine(change, markdown)),
   )
   section(
+    'Needed for the site to run: the build only starts to enforce them later',
+    changes.upcoming
+      .filter(({ setting }) => setting.requiredAtRuntime)
+      .map((change) => settingLine(change, markdown)),
+  )
+  section(
     'Required from a later version: set them now, the build only warns',
-    changes.upcoming.map((change) => settingLine(change, markdown)),
+    changes.upcoming
+      .filter(({ setting }) => !setting.requiredAtRuntime)
+      .map((change) => settingLine(change, markdown)),
   )
   section(
     'New features',

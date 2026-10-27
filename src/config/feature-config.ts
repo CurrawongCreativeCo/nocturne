@@ -53,6 +53,13 @@ export interface FeatureSetting {
    * build is the gate's decision (`src/lib/config/gate.ts`), never this flag's.
    */
   required: boolean | { when: string }
+  /**
+   * The code already fails without it, in every environment, whatever the build gate says. Then
+   * `requiredIn` and `enforceFrom` only describe when the *build* starts to refuse or warn with a plain
+   * message: they never mean the setting is optional before then, and diagnostics must not suggest
+   * a site without it works.
+   */
+  requiredAtRuntime?: boolean
   /** Environments in which a missing value is a problem on top of the feature not working. */
   requiredIn?: readonly RequiredEnvironment[]
   /** Template version from which the build refuses to run without it. Always later than the release that adds it. */

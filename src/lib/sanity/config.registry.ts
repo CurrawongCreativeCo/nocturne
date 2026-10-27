@@ -14,7 +14,7 @@ export const sanityCoreConfig = defineFeatureConfig({
   setup: [
     'Create the project at sanity.io/manage and copy its Project ID.',
     'Add NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET to Vercel and .env.local.',
-    'Create a Viewer token and add it as SANITY_API_READ_TOKEN: datasets are private, so the site reads content with it.',
+    'Create a Viewer token and add it as SANITY_API_READ_TOKEN: the site needs it to read content, whether the dataset is private or public.',
   ],
   settings: [
     {
@@ -48,10 +48,15 @@ export const sanityCoreConfig = defineFeatureConfig({
       where: 'vercel',
       targets: ['production', 'preview'],
       required: true,
+      // The site fails without it in every environment (src/lib/sanity/token.ts throws on import), a
+      // public dataset included. These two only say when the build starts to enforce it and warns now in
+      // production. PREREQUISITE for 1.11.0: the gate must honour `enforceFrom` in every environment,
+      // with regression tests (README, "Cutting a release"); config-gate.test.ts fails until then.
+      requiredAtRuntime: true,
       requiredIn: ['production'],
-      enforceFrom: '1.10.0',
+      enforceFrom: '1.11.0',
       purpose:
-        'Lets the server read content from a private dataset. Without it a production site has nothing to show.',
+        'Lets the server read content. The site fails without it in every environment, whether the dataset is private or public; the build only starts to refuse a missing one from 1.11.0.',
       source: 'sanity.io/manage → your project → API → Tokens (Viewer role)',
       docs: 'README.md#dataset-privacy',
     },

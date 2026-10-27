@@ -14,8 +14,9 @@ export const historicalFixtures: readonly HistoricalFixture[] = [
     env: {
       NEXT_PUBLIC_SANITY_PROJECT_ID: 'abc12345',
       NEXT_PUBLIC_SANITY_DATASET: 'production',
+      SANITY_API_READ_TOKEN: 'sk-made-up-viewer-token',
     },
-    note: 'The two values env.ts needs and nothing else: SANITY_API_READ_TOKEN only warns until its enforceFrom.',
+    note: 'A working site: the two values env.ts needs and the Viewer token, which src/lib/sanity/token.ts has always required to read content, on a public dataset as much as a private one. A site without the token has never worked.',
   },
   {
     id: 'forms@1.8.0',
