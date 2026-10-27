@@ -36,7 +36,14 @@ export default defineConfig({
     toHaveScreenshot: { animations: 'disabled', caret: 'hide', scale: 'css' },
   },
   retries: CI ? 1 : 0,
-  reporter: CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+  // CI also writes the JSON report that scripts/e2e-timings.mjs summarises; each job names its own file.
+  reporter: CI
+    ? [
+        ['github'],
+        ['html', { open: 'never' }],
+        ['json', { outputFile: process.env.E2E_TIMINGS_FILE ?? 'e2e-timings/results.json' }],
+      ]
+    : 'list',
   use: {
     baseURL: `http://localhost:${APP_PORT}`,
     trace: 'retain-on-failure',

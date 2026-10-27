@@ -17,6 +17,7 @@ AGENTS.md
 # Test output
 test-results/
 playwright-report/
+e2e-timings/
 blob-report/
 
 # Lighthouse CI output

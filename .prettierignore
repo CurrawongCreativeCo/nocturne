@@ -19,6 +19,7 @@ public
 test-results
 .lighthouseci
 playwright-report
+e2e-timings
 blob-report
 
 # Saved credentials and generated performance measurements

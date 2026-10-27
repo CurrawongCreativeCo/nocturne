@@ -161,6 +161,18 @@ jobs:
       # in shard 1 and none in the others.
       - name: End-to-end tests
         run: npx playwright test --project=desktop --project=mobile --shard=${{ matrix.shard }}/4
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/shard-${{ matrix.shard }}.json
+
+      # Timings for every run, pass or fail: the e2e-timings job below summarises them.
+      - name: Upload timings
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-timings-shard-${{ matrix.shard }}
+          path: e2e-timings
+          if-no-files-found: ignore
+          retention-days: 30
 
       # Lighthouse rebuilds public output, then scores /, /about, /hero-parts and /links. Budgets are in
       # lighthouserc.json; the JavaScript size budget is tests/e2e/performance.spec.ts.
@@ -208,12 +220,27 @@ jobs:
 
       - name: A/B tests
         run: npx playwright test --project=experiments --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-experiments.json
 
       - name: Design settings
         run: npx playwright test --project=design --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-design.json
 
       - name: Design settings (screenshots)
         run: npx playwright test --project=design-visual --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-design-visual.json
+
+      - name: Upload timings
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-timings-isolated
+          path: e2e-timings
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: Upload report on failure
         if: failure()
@@ -224,3 +251,40 @@ jobs:
             playwright-report
             test-results
           retention-days: 7
+
+  # Per-job and per-spec timings, the slowest job, retries and failures, in the run's summary. It never
+  # fails the pipeline: it only reads what the jobs above uploaded (docs/spikes/e2e-speed.md).
+  e2e-timings:
+    name: e2e timings
+    runs-on: ubuntu-latest
+    needs: [e2e, e2e-isolated]
+    if: always()
+    continue-on-error: true
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Summarise
+        run: |
+          gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --pattern 'e2e-timings-*' --dir reports || true
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --paginate > jobs.json || echo '{}' > jobs.json
+          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload summary
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-timings-summary
+          path: e2e-timings.json
+          if-no-files-found: ignore
+          retention-days: 90
