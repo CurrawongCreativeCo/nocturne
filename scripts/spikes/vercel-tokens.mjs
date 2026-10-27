@@ -314,7 +314,8 @@ export async function runSteps(run, ctx) {
       path: '/v6/deployments',
       query: { projectId: project, limit: '1' },
     })
-    const source = list.raw?.deployments?.[0]?.uid
+    const latest = list.raw?.deployments?.[0]
+    const source = latest?.uid
     if (!source) {
       list.note =
         'No deployment to redeploy: deploy the scratch project once, then re-run this step.'
@@ -324,7 +325,12 @@ export async function runSteps(run, ctx) {
       method: 'POST',
       path: '/v13/deployments',
       query: { forceNew: '1' },
-      body: { name: info.raw?.name ?? 'nocturne-spike', deploymentId: source, target: 'preview' },
+      // `target` accepts only production, staging or a custom environment: omit it for a preview.
+      body: {
+        name: info.raw?.name ?? 'nocturne-spike',
+        deploymentId: source,
+        ...(latest.target === 'production' ? { target: 'production' } : {}),
+      },
     })
   }
 
