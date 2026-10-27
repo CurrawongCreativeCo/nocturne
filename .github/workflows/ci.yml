@@ -292,7 +292,7 @@ jobs:
 
       - name: Summarise
         run: |
-          gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --pattern 'e2e-timings-*' --dir reports || true
+          gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --pattern 'e2e-timings-shard-*' --pattern 'e2e-timings-isolated' --dir reports || true
           gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --paginate > jobs.json || echo '{}' > jobs.json
           node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,isolated-experiments,isolated-design,isolated-design-visual $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
 
