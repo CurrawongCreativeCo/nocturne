@@ -220,6 +220,8 @@ export function prepareRelease({
   baseline = false,
   registry,
   rules,
+  packageText = null,
+  lockText = null,
 }) {
   const refused = (...problems) => ({ problems, files: null, notes: [], markdown: [] })
 
@@ -228,6 +230,12 @@ export function prepareRelease({
   // Start from a consistent state, so a half-finished earlier run can't hide behind a new one.
   const inconsistent = checkVersionStamp(stamp, changelog)
   if (inconsistent) return refused(inconsistent)
+  const drift = checkPackageVersions(
+    stamp,
+    packageText ? JSON.parse(packageText) : null,
+    lockText ? JSON.parse(lockText) : null,
+  )
+  if (drift) return refused(drift)
   if (compareVersions(version, stamp.version) <= 0) {
     return refused(`${version} must be greater than the current version ${stamp.version}.`)
   }
@@ -305,6 +313,46 @@ export function prepareRelease({
       changelog: released,
       stamp: `{ "version": "${version}", "released": "${date}" }\n`,
       snapshot: serialiseSnapshot(version, registry, { baseline: !previous }),
+      // Only the template's own package moves; a client's keeps its version.
+      package:
+        packageText && JSON.parse(packageText).name === TEMPLATE_PACKAGE
+          ? setPackageVersion(packageText, version)
+          : null,
+      lock:
+        lockText && packageText && JSON.parse(packageText).name === TEMPLATE_PACKAGE
+          ? setPackageVersion(lockText, version)
+          : null,
     },
   }
+}
+
+/** The template's own package name. A client site renames its package and keeps its own version. */
+export const TEMPLATE_PACKAGE = 'nocturne'
+
+/**
+ * Why package.json or package-lock.json disagree with template-version.json, or null. Only the
+ * template itself is checked: a package with another name belongs to a client site, whose version
+ * is its own (README, "Customize vs core files").
+ */
+export function checkPackageVersions(stamp, pkg, lock) {
+  if (!pkg || pkg.name !== TEMPLATE_PACKAGE) return null
+  const found = [
+    ['package.json', pkg.version],
+    ...(lock
+      ? [
+          ['package-lock.json', lock.version],
+          ['package-lock.json (packages[""])', lock.packages?.['']?.version],
+        ]
+      : []),
+  ].filter(([, version]) => version !== stamp.version)
+  if (found.length === 0) return null
+  return `${found.map(([file, version]) => `${file} says ${version}`).join(', ')} but template-version.json says ${stamp.version}. Run \`npm run release\` or set them to ${stamp.version}.`
+}
+
+/** package.json or package-lock.json text with its version set, in the format npm writes. */
+export function setPackageVersion(text, version) {
+  const json = JSON.parse(text)
+  json.version = version
+  if (json.packages?.['']) json.packages[''].version = version
+  return `${JSON.stringify(json, null, 2)}\n`
 }

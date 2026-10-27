@@ -206,6 +206,44 @@ describe('prepareRelease: the seven cases', () => {
     expect(run(base, base, { baseline: true }).problems.join('\n')).toContain('only for the first')
   })
 
+  it('moves package.json and the lockfile with the release, and refuses when they have drifted', () => {
+    const pkg = (version) => `${JSON.stringify({ name: 'nocturne', version }, null, 2)}\n`
+    const lock = (version) =>
+      `${JSON.stringify({ name: 'nocturne', version, packages: { '': { version } } }, null, 2)}\n`
+    const inputs = { stamp: STAMP, changelog: CHANGELOG, version: '1.9.0', date: '2026-10-27' }
+    const ok = prepareRelease({
+      ...inputs,
+      snapshotText: released(base),
+      registry: base,
+      rules: rules(),
+      packageText: pkg('1.8.0'),
+      lockText: lock('1.8.0'),
+    })
+    expect(ok.files.package).toBe(pkg('1.9.0'))
+    expect(ok.files.lock).toBe(lock('1.9.0'))
+
+    const drifted = prepareRelease({
+      ...inputs,
+      snapshotText: released(base),
+      registry: base,
+      rules: rules(),
+      packageText: pkg('1.7.1'),
+      lockText: lock('1.8.0'),
+    })
+    expect(drifted.files).toBeNull()
+    expect(drifted.problems[0]).toContain('package.json says 1.7.1')
+
+    const client = prepareRelease({
+      ...inputs,
+      snapshotText: released(base),
+      registry: base,
+      rules: rules(),
+      packageText: `${JSON.stringify({ name: 'acme', version: '0.1.0' })}\n`,
+    })
+    expect(client.problems).toEqual([])
+    expect(client.files.package).toBeNull()
+  })
+
   it('does not accept an entry claiming a later version than the release', () => {
     const future = [base[0], feature('forms', [base[1].settings[0]], { since: '1.10.0' })]
     expect(run(future, base).problems.join('\n')).toContain('later than this release')
@@ -221,6 +259,8 @@ describe('the real script', () => {
   const current = JSON.parse(readFileSync(join(root, 'template-version.json'), 'utf8')).version
   const [major, minor, patch] = current.split('.').map(Number)
   const next = `${major}.${minor}.${patch + 1}`
+  const pkgText = (version) => `${JSON.stringify({ name: 'nocturne', version }, null, 2)}\n`
+  writeFileSync(join(dir, 'package.json'), pkgText(current))
   writeFileSync(join(dir, 'CHANGELOG.md'), CHANGELOG.replaceAll('1.8.0', current))
   writeFileSync(
     join(dir, 'template-version.json'),
@@ -255,6 +295,7 @@ describe('the real script', () => {
       baseline: true,
     })
     expect(headings()).toBe(1)
+    expect(read('package.json')).toBe(pkgText(next))
 
     const again = go(next)
     expect(again.status).toBe(1)

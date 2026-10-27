@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  checkPackageVersions,
   checkVersionStamp,
   compareVersions,
   isValidDate,
@@ -9,6 +10,7 @@ import {
   parseVersion,
   releaseChangelog,
   serialiseSnapshot,
+  setPackageVersion,
 } from './release-utils.mjs'
 
 const BASE = 'https://github.com/example/site'
@@ -288,5 +290,38 @@ describe('the registry snapshot', () => {
     expect(() => parseSnapshot(text, '1.9.0')).toThrow(/released in 1\.8\.0/)
     expect(() => parseSnapshot('{', '1.8.0')).toThrow(/not valid JSON/)
     expect(() => parseSnapshot('{"schema":2}', '1.8.0')).toThrow(/needs/)
+  })
+})
+
+describe('package versions', () => {
+  const stamp = { version: '1.9.0', released: '2026-10-27' }
+  const pkg = (version, name = 'nocturne') => ({ name, version })
+  const lock = (version, inner = version) => ({ version, packages: { '': { version: inner } } })
+
+  it('passes when package.json and the lockfile match the stamp', () => {
+    expect(checkPackageVersions(stamp, pkg('1.9.0'), lock('1.9.0'))).toBeNull()
+  })
+
+  it('names each file that disagrees', () => {
+    const problem = checkPackageVersions(stamp, pkg('1.7.1'), lock('1.9.0', '1.8.0'))
+    expect(problem).toContain('package.json says 1.7.1')
+    expect(problem).toContain('packages[""]) says 1.8.0')
+    expect(problem).not.toContain('package-lock.json says')
+  })
+
+  it('works without a lockfile', () => {
+    expect(checkPackageVersions(stamp, pkg('1.9.0'), null)).toBeNull()
+    expect(checkPackageVersions(stamp, pkg('1.8.0'), null)).toContain('package.json says 1.8.0')
+  })
+
+  it("ignores a client site's own package and version", () => {
+    expect(checkPackageVersions(stamp, pkg('0.1.0', 'acme-site'), lock('0.1.0'))).toBeNull()
+    expect(checkPackageVersions(stamp, null, null)).toBeNull()
+  })
+
+  it('sets the version in the format npm writes, changing nothing else', () => {
+    const text = `${JSON.stringify({ name: 'nocturne', version: '1.8.0', packages: { '': { name: 'nocturne', version: '1.8.0' } } }, null, 2)}\n`
+    const out = setPackageVersion(text, '1.9.0')
+    expect(out).toBe(text.replaceAll('1.8.0', '1.9.0'))
   })
 })

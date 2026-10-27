@@ -5435,8 +5435,11 @@ take the template's copy.
    `git push origin main vx.y.z`). It never runs git or pushes. Never force-push a tag or `main`.
 
 CI runs `npm run check:version` and fails when `template-version.json` doesn't match the latest `CHANGELOG.md` version
-heading (or its date), or when `config-registry.snapshot.json` is for a different release, so a release can't be
-tagged with one of them forgotten.
+heading (or its date), when `config-registry.snapshot.json` is for a different release, or, in the template itself (a
+package named `nocturne`; a client site keeps its own name and version), when `package.json` or `package-lock.json` says
+another version, so a release can't be tagged with one of them forgotten. `npm run release` sets the version in
+`package.json` and `package-lock.json` along with the others (add them to the commit it prints), and refuses to start if
+they have already drifted.
 
 **What the configuration tests prove, and what they can't.**
 

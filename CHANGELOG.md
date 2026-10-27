@@ -22,6 +22,8 @@ you start a release.
 
 ### Changed
 
+- **Release keeps `package.json` in step:** `npm run release` now sets the version in `package.json` and `package-lock.json` (they had stayed at 1.7.1) and refuses to start if they disagree with `template-version.json`; `npm run check:version` fails on the same disagreement. It applies only to the template's own package (named `nocturne`): a client site keeps its own name and version. Existing projects: nothing to do.
+
 ### Fixed
 
 ### Breaking changes / migration steps
