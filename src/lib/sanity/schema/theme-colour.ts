@@ -1,5 +1,6 @@
 import { defineField, type ConditionalProperty, type Path } from 'sanity'
 
+import { inheritedThemeColour } from '@/lib/color/contrast-remedy'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import type { ColourUsage } from '@/lib/color/theme-colour-contrast'
 
@@ -23,6 +24,14 @@ declare module 'sanity' {
     themeColourCard?: 'text' | 'background'
     /** The field sits inside one item of the section (a link), not on the section itself. */
     themeColourInItem?: boolean
+    /** The field's title, so a contrast message can name it: the child fields' own title is only "Colour". */
+    themeColourTitle?: string
+    /** What Inherit means for the field, in words ("the text colour"), so a message can say what the element now follows. */
+    themeColourInherits?: string
+    /** The element is decoration and carries no meaning: no contrast target applies to it. */
+    themeColourDecorative?: boolean
+    /** The theme colour an Inherit draws, where the inherits-text names an exact token; otherwise unset and not measured. */
+    themeColourInheritedColour?: 'ink' | 'muted'
   }
 }
 
@@ -64,6 +73,12 @@ interface ThemeColourFieldConfig {
   inItem?: boolean
   /** What Inherit means here, e.g. "the text colour", so the editor knows what they get. */
   inherits: string
+  /**
+   * The element is decoration (a separator, a glow, a divider): it carries no meaning, so no contrast
+   * target is applied and the Studio says so. Leave it off for anything that tells someone where to
+   * look or what to press: that is an icon or a line, and needs 3:1.
+   */
+  decorative?: boolean
   fieldset?: string
   hidden?: ConditionalProperty
 }
@@ -84,6 +99,7 @@ export function themeColourField({
   onCard,
   inItem,
   inherits,
+  decorative,
   fieldset,
   hidden,
 }: ThemeColourFieldConfig) {
@@ -106,6 +122,10 @@ export function themeColourField({
           themeColourRows: onRows,
           themeColourCard: onCard,
           themeColourInItem: inItem,
+          themeColourTitle: title,
+          themeColourInherits: inherits,
+          themeColourDecorative: decorative,
+          themeColourInheritedColour: inheritedThemeColour(inherits) ?? undefined,
           list: THEME_COLOURS.filter((value) => offered.includes(value)).map((value) => ({
             value,
             title: THEME_COLOUR_TITLES[value],
@@ -124,6 +144,10 @@ export function themeColourField({
           themeColourRows: onRows,
           themeColourCard: onCard,
           themeColourInItem: inItem,
+          themeColourTitle: title,
+          themeColourInherits: inherits,
+          themeColourDecorative: decorative,
+          themeColourInheritedColour: inheritedThemeColour(inherits) ?? undefined,
         },
         hidden: ({ parent }: { parent?: { colour?: string } }) => parent?.colour !== 'custom',
         validation: (rule) =>

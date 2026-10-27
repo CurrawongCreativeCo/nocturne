@@ -51,6 +51,7 @@ export const heroEyebrowDesignField = defineField({
       name: 'separatorColour',
       title: 'Separator colour',
       usage: 'graphic',
+      decorative: true,
       inherits: 'Primary',
       choices: INLINE_COLOUR_CHOICES,
       fieldset: 'advanced',

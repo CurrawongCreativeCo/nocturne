@@ -16,6 +16,7 @@ export function OverlayPreview({
   tone,
   gradient,
   colours,
+  problemNote,
 }: {
   url: string
   position?: string
@@ -23,6 +24,8 @@ export function OverlayPreview({
   tone: string
   gradient: ResolvedOverlayGradient
   colours: ColourSet
+  /** Words the contrast problem when the input says it with a fix (overlay-preview-input). */
+  problemNote?: (message: string) => string
 }) {
   const css = overlayGradientCss(gradient, stopColourHex(tone, colours))
   const problem = overlayGradientContrastProblem({ tone, gradient, strength, site: colours })
@@ -81,7 +84,7 @@ export function OverlayPreview({
         A preview over this section’s picture (cropped to a phone). The page draws your real content
         over the same gradient.
         {problem
-          ? ` ${problem.message}`
+          ? ` ${problemNote ? problemNote(problem.message) : problem.message}`
           : ' Text passes 4.5:1 here even over the darkest or lightest part of a photo.'}
       </Text>
     </Stack>

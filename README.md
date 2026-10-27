@@ -1382,6 +1382,54 @@ Keep the map within your plan's Edge Config size limit; with thousands of redire
 Results are tagged by document type (`TAGS` in `lib/sanity/live.ts`). When you add a document type
 that pages query, add it to `TAGS`, to the `tags` of every fetch that reads it, and to the webhook filter.
 
+### Contrast fixes
+
+A contrast warning on a Link list (or any colour field made with `themeColourField`) says what it measured and offers a
+way out. Nothing changes until someone presses a button, and every button can be undone.
+
+- **What it says.** The property (for example _Arrow colour_), what it was measured against (the section's background, the
+  card's background, the card's label, or the glass over the lightest or darkest part of a photo), the ratio, and the target:
+  4.5:1 for text, 3:1 for large text, icons and lines. Over a background picture only the background colour is measured,
+  and the line says to check it over the picture.
+- **Use suggested colour.** For a colour that fails, the nearest shade that reaches the target (the same lightness search
+  Brand colours uses, `adjustLightnessForContrast`), saved as a **Custom colour**. It says the ratio the new colour measures,
+  and that a Custom colour **overrides the Link list design** for that element until it is reset. Not offered for a card's
+  background, where the label is what is measured, and not offered when the colour already passes.
+- **Reset to Link list design.** Clears the choice, so the element follows the design the Link list sets for it. It is
+  offered for any explicit choice that fails, including a Custom colour. It is **measured again straight afterwards**: an
+  inherited colour is never assumed to pass. Where Inherit follows an exact theme token (the text colour, the muted text
+  colour, or a card's own surface) the new ratio is shown; where it follows something the Studio cannot reproduce exactly
+  (Primary, "the link's own colour"), the line says it is not measured here and to check the page.
+- **Fixes are measured again.** Right after any fix a line says whether the warning is _resolved_, _not fixed_ or
+  _improved, not fixed_, or that the inherited colour needs checking on the page. A fix that only improves things is never
+  shown as done, and when a colour cannot be rescued it says what would: a different text colour, a solid panel behind it,
+  or a different treatment.
+- **Gradient over a photo.** Measured at the worst point (each stop over pure black and pure white). The fix is a stronger
+  overlay and not a new colour: each failing stop's opacity is raised to the lowest whole percent that reaches 4.5:1 (up to
+  the 90% an editor may set), and the line names each stop ("at the top from 4% to 71%") and says the picture shows less. A
+  stop whose colour sits between the text and the photo's extremes (a mid-tone Primary) cannot be fixed by any opacity; it
+  is named and left alone, and the button then reads **Improve with a stronger overlay** (not _Use_), because it improves
+  the gradient without fully fixing it. The line says so, and that the rest needs a different text colour, a solid panel
+  behind the text, a calmer picture or a different treatment.
+- **Undo.** After a fix a line says what changed and offers **Undo**, which puts back exactly what was there. The line goes
+  as soon as the field changes again, so Undo never overwrites a later edit. The fixes live in the colour choice, which
+  stays on screen when the Custom hex field is hidden, so Undo is never lost with it.
+- **Which target applies.** _Normal text_ (names, bios, category labels, eyebrows) needs 4.5:1. _Large text_ needs 3:1, which
+  the heading highlight's gradient colours use; the profile name is not treated as large, because its weight and size depend
+  on the layout. _Meaningful non-text elements_ (arrows, icons, card and button borders, container colours) need 3:1.
+  _Decoration_ (separators between categories and in the hero eyebrow, the glow, decorative dividers) carries no meaning,
+  so it has **no target** and shows a note instead of a ratio. A field is decorative only if its schema says so
+  (`themeColourField({ decorative: true })`); anything that shows someone where to look or what to press is not.
+- **What it never says.** The words describe a measurement: a ratio against a target. They never say a page conforms to a
+  standard, because these checks are the editor's own, against the colours it knows about (UX-004). A pass is "Meets
+  target", not a certificate.
+
+Developers: the wording and suggestions are pure code in `src/lib/color/contrast-remedy.ts` (and
+`strongerGradientStops` in `overlay-gradient-contrast.ts`), with unit tests that also fail if a sentence contains a
+conformance claim. `src/lib/sanity/schema/use-element-contrast.ts` measures one element colour for both the choice and its
+hex; `contrast-fix-panel.tsx` is the buttons and Undo. `themeColourField` stores its own title in `options.themeColourTitle`
+so a message can name the property.
+
 ### Design tokens
 
 Every colour, font, type size, space, radius, shadow and motion value the site uses is a **semantic
@@ -1502,9 +1550,10 @@ Studio access; see _Studio roles and permissions_).
 - **Advanced** (collapsed): _Background_, _Alternate background_, _Inverse background_, _Text_, _Muted text_ and
   _Borders_, and **gradients**: a name, an angle and two or three colours each. Each gradient becomes a CSS variable
   `--gradient-<name>` (for example `--gradient-forest-dusk`) for headings and backgrounds to use.
-- **Colour input:** a colour picker plus a hex field (stored as validated `#rrggbb`), contrast badges (AA pass or
-  fail, with the ratio) for the colours it sits on, and **Suggest an accessible shade**, which moves OKLCH
-  lightness (hue and chroma stay) by the smallest amount that reaches 4.5:1. A mock-up above the form redraws as you
+- **Colour input:** a colour picker plus a hex field (stored as validated `#rrggbb`), contrast badges (_Meets target_ or
+  _Below target_, with the ratio and the target) for the colours it sits on, and **Use suggested colour**, which moves OKLCH
+  lightness (hue and chroma stay) by the smallest amount that reaches 4.5:1, with an **Undo** after it (see
+  [Contrast fixes](#contrast-fixes)). A mock-up above the form redraws as you
   edit; use the Presentation tool for the real pages, which update live.
 - **Derived automatically:** text on Primary (near-black or white, whichever reads better), accent-coloured text
   (`accent-text`: a darker or lighter shade of Primary when Primary alone fails 4.5:1 on the page, while buttons and
@@ -3500,7 +3549,8 @@ did: Fill the section, the hotspot, Full, the background colour.
   Deep Primary, Secondary, Highlight or Custom) and opacity (a 0 to 90% slider); anything empty follows the preset. The
   CSS adds eased in-between stops so it never bands. Studio shows a preview under the picker over the section's own
   picture (a phone-shaped crop, in the site's Brand colours), and the background contrast warning measures each stop over
-  the darkest and lightest photo: a soft top usually warns, because there the text sits on the photo itself.
+  the darkest and lightest photo: a soft top usually warns, because there the text sits on the photo itself. Under the
+  preview, the warning names the worst point and offers **Use a stronger overlay** (see [Contrast fixes](#contrast-fixes)).
 - **Advanced: background** (shown only where they apply): _Position_ (up and down: Top, Middle, Bottom; left and right: Left,
   Centre, Right; for Show the whole picture and Actual size only, since Fill the section uses the hotspot), _Repeat_ (Actual
   size only: No repeat, Repeat across, Repeat down, Tile), _Exact strength (%)_ (5 to 100, wins over the named strength) and
@@ -3719,8 +3769,8 @@ Choose **Gradient → Custom** to blend your own colours across the words.
 **For editors.** Custom shows two or three colours (a swatch and a hex code, like Brand colours: type `3266e4` or use
 the picker) and, in the collapsed _Advanced_ area, the **Angle** (90 is left to right, the default; 180 is top to
 bottom). Any colour is allowed: Studio never blocks one. Instead each colour shows a contrast badge against the
-section's background (large text needs 3:1), the field warns when a colour is hard to read, and **Suggest an accessible
-shade** moves the colour's lightness (OKLCH, as Brand colours does) to the nearest shade that reaches 3:1. Changing the
+section's background (large text needs 3:1), the field warns when a colour is hard to read, and **Use suggested colour**
+moves the colour's lightness (OKLCH, as Brand colours does) to the nearest shade that reaches 3:1 (undoable). Changing the
 section's background (its tone) changes the check. A gradient from Brand colours is checked the same way, stop by stop.
 The built-in gradients, the Brand highlight and the other treatments are measured with the site's Brand colours too.
 
@@ -4069,7 +4119,7 @@ inside each box, and every option that depends on another only shows once it app
   Primary, Secondary, Highlight or Custom (a hex field appears only then). Each element offers only the choices that suit it.
   Every choice but Custom is a token, so it follows the section's tone; the site draws it with `themeColourCss`, which ignores
   anything not offered and lets only a valid six-digit hex through. The swatch picker shows the colour on this section's tone
-  and a contrast badge (4.5:1 for text, 3:1 for icons), measured on the background colour. The swatches and badges use the
+  and a contrast badge (4.5:1 for text, 3:1 for icons), measured on the background colour, on the glass, or on the card (see [Contrast fixes](#contrast-fixes)). The swatches and badges use the
   site's **Brand colours** (Design settings, published), not `tokens.json`: a site that changed Primary sees its own Primary,
   and the picker says which it used ("Swatches and contrast use this site's Brand colours", or the defaults when nothing is
   changed). On **Glass rows** the arrow and icon colours are measured on the glass at its worst (over the darkest or lightest

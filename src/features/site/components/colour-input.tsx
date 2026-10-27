@@ -4,8 +4,7 @@ import { Badge, Button, Card, Flex, Stack, Text, TextInput } from '@sanity/ui'
 import { useState } from 'react'
 import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 
-import { adjustLightnessForContrast } from '@/lib/color/contrast'
-import { glassRowsStrength, type GlassStrength } from '@/lib/color/glass-contrast'
+import { describeSuggestion, suggestColour } from '@/lib/color/contrast-remedy'
 import { stopContrast, type ColourSet } from '@/lib/color/heading-contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import {
@@ -13,9 +12,8 @@ import {
   type ContrastCheck,
   type DesignOverrides,
 } from '@/lib/color/resolve-design-tokens'
-import { USAGE_RATIO, themeColourContrast } from '@/lib/color/theme-colour-contrast'
 import { headingSectionPath, headingTone } from '@/lib/sanity/heading-text'
-import { sectionPathOf } from '@/lib/sanity/schema/theme-colour'
+import { ContrastFixPanel, type ContrastFixAction } from '@/lib/sanity/schema/contrast-fix-panel'
 import { useBrandColours } from '@/lib/sanity/schema/use-brand-colours'
 
 import { defaultColourFor } from '../utils/default-colour'
@@ -51,29 +49,6 @@ function headingStopCheck(hex: string, tone: string | undefined, site: ColourSet
   }
 }
 
-/** An element's Custom colour (themeColourField) on its section's background: 4.5:1 for text, 3:1 for icons. */
-function elementCheck(
-  hex: string,
-  tone: string | undefined,
-  usage: 'text' | 'graphic',
-  site: ColourSet,
-  glass: GlassStrength | null,
-): ContrastCheck {
-  const check = themeColourContrast('custom', hex, tone, usage, { site, glass })
-  const surface = glass ? 'the glass, over a photo' : "the section's background"
-  return {
-    id: 'element-colour',
-    fields: [],
-    label: usage === 'text' ? `Text on ${surface}` : `Icon on ${surface}`,
-    foreground: hex,
-    background: check?.background ?? '#ffffff',
-    ratio: check?.ratio ?? 1,
-    required: USAGE_RATIO[usage],
-    pass: check?.pass ?? false,
-    adjustable: true,
-  }
-}
-
 function CheckBadge({ check }: { check: ContrastCheck }) {
   return (
     <Flex align="center" gap={2}>
@@ -95,7 +70,8 @@ function CheckBadge({ check }: { check: ContrastCheck }) {
         Aa
       </span>
       <Badge tone={check.pass ? 'positive' : 'critical'} fontSize={1}>
-        {check.pass ? 'AA pass' : 'AA fail'} · {check.ratio.toFixed(1)}:1
+        {check.pass ? 'Meets target' : 'Below target'} · {check.ratio.toFixed(1)}:1 (needs{' '}
+        {check.required}:1)
       </Badge>
       <Text size={1} muted>
         {check.label}
@@ -109,7 +85,10 @@ function CheckBadge({ check }: { check: ContrastCheck }) {
  * the colours it sits on (from resolveDesignTokens, the same code the site runs), and a button that
  * suggests the nearest accessible shade by moving OKLCH lightness. With `options.headingStop` (a
  * colour of a heading highlight's custom gradient) the badge is large text, 3:1, on the section's
- * background; a failing colour is only a warning, never blocked.
+ * background; a failing colour is only a warning, never blocked. A Custom colour of an element
+ * (`options.themeColourHex`) shows no check here: its colour choice above (ThemeColourPickerInput)
+ * measures it against the right surface and offers the undoable fixes, so it stays mounted when this
+ * field is hidden.
  */
 export function ColourInput(props: StringInputProps) {
   const { value, onChange, elementProps, path, readOnly } = props
@@ -125,37 +104,40 @@ export function ColourInput(props: StringInputProps) {
   const invalid = draft !== null && draft.trim() !== '' && toHex(draft) === null
 
   // A colour of a heading highlight's custom gradient is checked against its section's background.
-  // An element's Custom colour (themeColourField) is checked the same way, at its own ratio.
   const headingStop = props.schemaType.options?.headingStop === true
-  const elementUsage = props.schemaType.options?.themeColourHex
-  const onRows = props.schemaType.options?.themeColourRows === true
-  const inItem = props.schemaType.options?.themeColourInItem === true
-  const section = headingStop
-    ? headingSectionPath(path)
-    : elementUsage
-      ? sectionPathOf(path, { inItem })
-      : null
+  const isElement = Boolean(props.schemaType.options?.themeColourHex)
+  const section = headingStop ? headingSectionPath(path) : null
   const sectionValue = useFormValue(section ?? ['_type'])
   const tone = section ? headingTone(sectionValue as Parameters<typeof headingTone>[0]) : undefined
-  const glass = onRows
-    ? glassRowsStrength(sectionValue as Parameters<typeof glassRowsStrength>[0])
-    : null
-  const sectionCheck = !hex
-    ? null
-    : headingStop
-      ? headingStopCheck(hex, tone, site)
-      : elementUsage
-        ? elementCheck(hex, tone, elementUsage, site, glass)
-        : null
+  const sectionCheck = hex && headingStop ? headingStopCheck(hex, tone, site) : null
 
   const checks = sectionCheck
     ? [sectionCheck]
-    : field
+    : field && !isElement
       ? resolveDesignTokens(document).checks.filter((check) => check.fields.includes(field))
       : []
   const fixable = hex ? checks.find((check) => check.adjustable && !check.pass) : undefined
   const suggestion =
-    hex && fixable ? adjustLightnessForContrast(hex, fixable.background, fixable.required) : null
+    hex && fixable ? suggestColour(hex, fixable.background, fixable.required) : null
+  const actions: ContrastFixAction[] =
+    suggestion && fixable
+      ? [
+          {
+            id: 'suggest',
+            label: 'Use suggested colour',
+            detail: describeSuggestion(suggestion, fixable.required),
+            after: suggestion.hex,
+            apply: () => {
+              setDraft(null)
+              onChange(set(suggestion.hex))
+            },
+            undo: () => {
+              setDraft(null)
+              onChange(set(hex ?? suggestion.hex))
+            },
+          },
+        ]
+      : []
 
   const commit = (text: string) => {
     if (text.trim() === '') {
@@ -240,27 +222,14 @@ export function ColourInput(props: StringInputProps) {
       )}
       {hex && checks.length > 0 && (
         <Card padding={2} radius={2} border>
-          <Stack gap={2} role="group" aria-label="Contrast against WCAG 2.2 AA">
+          <Stack gap={2} role="group" aria-label="Contrast checks">
             {checks.map((check) => (
               <CheckBadge key={check.id} check={check} />
             ))}
           </Stack>
         </Card>
       )}
-      {suggestion?.adjusted && !readOnly && (
-        <div>
-          <Button
-            mode="ghost"
-            tone="primary"
-            fontSize={1}
-            text={`Suggest an accessible shade (${suggestion.hex})`}
-            onClick={() => {
-              setDraft(null)
-              onChange(set(suggestion.hex))
-            }}
-          />
-        </div>
-      )}
+      <ContrastFixPanel actions={actions} current={hex ?? ''} readOnly={readOnly} />
     </Stack>
   )
 }
