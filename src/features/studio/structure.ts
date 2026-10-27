@@ -5,6 +5,7 @@ import { CaseIcon } from '@sanity/icons/Case'
 import { CogIcon } from '@sanity/icons/Cog'
 import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { ComposeIcon } from '@sanity/icons/Compose'
+import { ControlsIcon } from '@sanity/icons/Controls'
 import { DocumentsIcon } from '@sanity/icons/Documents'
 import { DownloadIcon } from '@sanity/icons/Download'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
@@ -32,11 +33,14 @@ import type {
 } from 'sanity/structure'
 
 import { apiVersion } from '@/config/env'
+import type { FeatureConfig } from '@/config/feature-config'
 
 import { downloadEnquiriesCsv } from './enquiries/download-csv'
 import { enquiriesTitle } from './enquiries/wording'
 import { LaunchPane } from './launch/components/launch-pane'
 import { currentAudience } from './roles'
+import { SetupPane } from './setup/components/setup-pane'
+import { SETUP_TITLE } from './setup/utils/setup-wording'
 import { SINGLETON_TITLES } from './singleton-titles'
 import { SINGLETON_TYPES } from './singletons'
 import { TeamOrderPane } from './team-order/team-order-pane'
@@ -219,7 +223,11 @@ const group = (
  * CLIENT_STRUCTURE_IDS (utils/structure-access.ts), and inside Website settings only
  * CLIENT_WEBSITE_SETTINGS_IDS.
  */
-export const structure: StructureResolver = (S, context) => {
+const buildStructure = (
+  S: StructureBuilder,
+  context: StructureResolverContext,
+  features: readonly FeatureConfig[],
+) => {
   const audience = currentAudience(context.currentUser)
   const hasType = (name: string) => Boolean(context.schema.get(name))
 
@@ -235,6 +243,13 @@ export const structure: StructureResolver = (S, context) => {
         .id('launch')
         .icon(RocketIcon)
         .child(S.component(LaunchPane).id('launch').title('Launch & visibility')),
+      // Read-only and agency only: which features are set up, from the registry text and the
+      // protected /api/setup-status. Not in CLIENT_WEBSITE_SETTINGS_IDS, so clients never see it.
+      S.listItem()
+        .title(SETUP_TITLE)
+        .id('setup')
+        .icon(ControlsIcon)
+        .child(S.component(SetupPane).id('setup').title(SETUP_TITLE).options({ features })),
     ],
     audience,
     idOf,
@@ -350,3 +365,21 @@ export const structure: StructureResolver = (S, context) => {
     .title('Content')
     .items(filterStructureItems(items, audience, idOf))
 }
+
+/**
+ * The desk structure for a site. `features` is the registry text (names and words, never a value),
+ * composed in sanity.config.ts because a Studio module may not import the features that own it.
+ */
+export const createStructure =
+  (features: readonly FeatureConfig[]): StructureResolver =>
+  (S, context) =>
+    buildStructure(S, context, features)
+
+/**
+ * The structure without the feature list, for a `sanity.config.ts` written before `createStructure`.
+ * Everything else works as before; Features & setup says it wasn't given the list. New code passes
+ * `featureRegistry` to `createStructure`.
+ *
+ * @deprecated Use `createStructure(featureRegistry)` (README, "Features & setup (Studio)").
+ */
+export const structure: StructureResolver = createStructure([])

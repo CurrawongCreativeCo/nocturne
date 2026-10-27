@@ -14,6 +14,7 @@ import { defineConfig, isStringInputProps, type InputProps } from 'sanity'
 import { presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
+import { featureRegistry } from './src/app/feature-registry'
 import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
 import { studioBrand } from './src/config/studio-brand/client'
 import { blogSchemaTypes } from './src/features/blog/schemas'
@@ -55,7 +56,7 @@ import {
   withoutSingletonTemplates,
 } from './src/features/studio/singletons'
 import { startHere } from './src/features/studio/start-here/plugin'
-import { structure } from './src/features/studio/structure'
+import { createStructure } from './src/features/studio/structure'
 import { buildStudioTheme } from './src/features/studio/theme'
 import {
   CLIENT_PROTECTED_TYPES,
@@ -190,7 +191,7 @@ export default defineConfig({
   // Vision, AI settings and Content health are agency-only; clients open on Start here, then Presentation.
   tools: (prev, context) => filterTools(prev, currentAudience(context.currentUser)),
   plugins: [
-    structureTool({ structure, defaultDocumentNode }),
+    structureTool({ structure: createStructure(featureRegistry), defaultDocumentNode }),
     presentationTool({
       resolve,
       previewUrl: { previewMode: { enable: '/api/draft-mode/enable' } },

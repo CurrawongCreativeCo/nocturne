@@ -26,6 +26,7 @@ import { DesignInputExamples } from './design-input-examples'
 import { LaunchExample } from './launch-example'
 import { PickerExamples } from './picker-examples'
 import { PictureFramingExamples } from './picture-framing-examples'
+import { SetupExample } from './setup-example'
 import { ThumbnailGallery, type SectionPreview } from './thumbnail-gallery'
 import { StudioLogoView } from '../components/studio-logo'
 import { buildStudioTheme } from '../theme'
@@ -303,6 +304,21 @@ function InputExamples({
               </Card>
               <Card padding={2} radius={3} border marginTop={4}>
                 <LaunchExample audience="client" />
+              </Card>
+            </ThemeProvider>
+          </div>
+        ))}
+      </div>
+      <h3 className="mt-10 text-base font-semibold">Features &amp; setup</h3>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {SCHEMES.map((scheme) => (
+          <div key={scheme} data-setup-scheme={scheme}>
+            <ThemeProvider scheme={scheme} theme={theme}>
+              <Card padding={2} radius={3} border>
+                <SetupExample mode="status" />
+              </Card>
+              <Card padding={2} radius={3} border marginTop={4}>
+                <SetupExample mode="explanations" />
               </Card>
             </ThemeProvider>
           </div>
