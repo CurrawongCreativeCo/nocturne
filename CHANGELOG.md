@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.9.0] - 2026-10-27
+
+### Added
+
 - **Releases and update PRs announce configuration changes (task 234):** `npm run config:check -- --since <version> [--markdown]` reads the composed registry's `since`, `deprecated`, `required`, `requiredIn` and `enforceFrom` and prints what an update changes in configuration: settings the build now refuses to run without first, new required settings, settings that will be required from a later version, optional features as "available, not set up" (or "already set up here"), new optional settings, and deprecations announced since that version, with their replacement and removal version. `--markdown` prints a "Configuration changes" block for the client update PR (README, _Updating from the template_). A new optional `deprecated.since` records when a deprecation was announced (set to 1.9.0 for the three deprecations that ship with this registry; never guessed elsewhere); a deprecation without one, or announced earlier, is not described again as news (the `config:check` table still warns when a site sets one). `npm run release` now validates before writing anything and lists every reason it refuses: a core setting that becomes enforced without an earlier release that only warned about it, an optional feature that gains a required setting with no `default` and no `deprecated.replacedBy` window, a `tier: 'core'` feature added with a required setting that has no `enforceFrom` later than the release, a feature that was ready under the last release's settings and isn't now, a historical configuration that no longer works, or a `since` later than the release. A core setting that only warns until a later `enforceFrom` is never counted as breaking a site. It then writes a **New configuration in X.Y.Z** CHANGELOG section and replaces `config-registry.snapshot.json`, always after reading the previous one; `--dry-run` writes nothing, a repeated or half-finished run is refused, and the stamp is written last. The first release with a registry must be run with `--baseline` (no snapshot exists, so automated comparison with earlier releases is unavailable); it checks that only the two `env.ts` values are enforced and prints the enforced and warn-only sets for review, and `--baseline` is refused once a snapshot exists. `src/app/config-compat.fixtures.ts` holds hand-written 1.8.0 configurations for critical features, so a readiness function that becomes stricter while the registry is unchanged fails `npm run check`; once a snapshot exists the same test also checks that every feature it says was ready still is. What these prove and what they can't is in the README (_Cutting a release_). `check:version` fails when the snapshot is for a different release. Existing projects: nothing to do; run `config:check --since` when you update.
 - **Registry for every feature, and generated `.env.example` and README settings table (task 233):** the remaining features are registered, so `config:check` and Studio's _Features & setup_ report all of them: site address and language, Studio name, webhook mode, Edge Config redirects, contact forms, stored enquiries, newsletter signup, pricing (checkout and webhook), the publish gate, IndexNow, the style guide (its token targets Preview only), pre-launch preview access, A/B tests, analytics and consent, members-only content, error tracking, Ops notices, daily health monitoring, backups, enquiry retention, schema deploy and migration checks, and the launch check's local values (`PSI_API_KEY`, `VERCEL_AUTOMATION_BYPASS_SECRET`). Readiness comes from each feature's existing function; where none existed there is a small pure one (`readRevalidateSecret`, `edgeConfigIdFrom` and `canSyncRedirectsFrom`, `previewSecret` moved to `src/lib/preview-secret.ts` without `server-only`, and a `FLAGS_SECRET` check for A/B tests). Two new states: **Not in use** (nothing is set for an optional feature, and the profile doesn't write it as on: not a gap) and **Dormant** (Ops notices: no Ops endpoint exists, so nothing reads the settings); Studio shows both in one quiet _Not in use_ group. `config:check --strict` fails only for **Not set up** (README, _Configuration_). The template's own `site.profile.ts` no longer writes `true` for forms, newsletter, pricing, members and experiments (they are still on by default), so a fresh starter shows them as _Not in use_. The setup wizard stops writing `NEXT_PUBLIC_STUDIO_TITLE` (the name goes into `studio-brand.json`) and writes `NEXT_PUBLIC_SANITY_API_VERSION` only for a non-default date. An `EDGE_CONFIG_ID` that names a different store than `EDGE_CONFIG` stops the redirect sync instead of writing to it. Readiness code moved to `src/app/readiness-functions.ts`, out of the registry Studio imports. Features show no "since" label where their history isn't known. `npm run config:docs` writes `.env.example` and the README's _Every setting_ table from the registries; `npm run check` (a unit test) and CI fail when either is stale. The hand-written variable table in _Deploying (Vercel)_ step 2 is replaced by a link to the generated one. The `pending` list is empty, and the canary test now covers every registered secret. The `enquiries` workflow entry in `config:check --github` is renamed `enquiry-retention`. Nothing public changes: `/api/site-info` still carries only `schema` and `launch`. Existing projects: nothing to do; run `npm run config:docs` after adding your own registry entries.
 - **Vercel token guidance (task 235 findings applied):** the README now says `VERCEL_API_TOKEN` is only for Edge Config redirects, that a project-scoped token cannot do it (a team token can), that a write-capable token in a public runtime is a standing risk to rotate, and that page-route redirects need no token. `VERCEL_TEAM_ID` is documented as needed only for a full-account token. `EDGE_CONFIG_ID` is now derived from `EDGE_CONFIG` (its connection string carries the store's `ecfg_` id); a set `EDGE_CONFIG_ID` is still read and wins. The id's format comes from Vercel's documentation, not a measured real value: check one real `EDGE_CONFIG` host and path (never the token) before dropping `EDGE_CONFIG_ID` from a site.
@@ -79,6 +89,23 @@ you start a release.
 - The "No apiVersion specified for document type list with custom filter" Studio warning for the Upcoming and Past events lists.
 - `studio-brand-preview.spec.ts` no longer times out in `beforeEach` under a full run: it has its own 60 s timeout and does not wait for every image to load.
 - **Hero background pictures sat over the hero's text and buttons.** A class-name join ran `-z-10` and the picture's own classes together as `-z-10object-cover`, which matches nothing, so the picture was not placed behind the content and took clicks meant for the buttons (since the element-level animation work on 2026-10-16). They are now separate classes. Heroes with a background picture that is not floating look different only where the picture was covering text: the picture now sits behind it. No schema or content change.
+
+### New configuration in 1.9.0
+
+**Required from a later version: set them now, the build only warns**
+
+- `SANITY_API_READ_TOKEN` (Sanity content): set it in Vercel → Settings → Environment Variables; required from 1.10.0; in production; find it: sanity.io/manage → your project → API → Tokens (Viewer role)
+
+**New features**
+
+- **Daily health monitoring**: Checks the live site and its dataset every day and opens an issue when something is wrong. (available, not set up). Needs `PRODUCTION_URL`, `NEXT_PUBLIC_SANITY_PROJECT_ID`, `SANITY_AUTH_TOKEN`.
+- **Configuration controls**: Emergency switches for the build-time configuration check. (available, not set up).
+
+**Deprecations**
+
+- `NEXT_PUBLIC_SANITY_API_VERSION` is replaced by the API_VERSION constant in src/config/env.ts, bumped deliberately in a release (no removal date yet). Delete the variable from Vercel and .env.local. The pinned date applies.
+- `NEXT_PUBLIC_STUDIO_TITLE` is replaced by the name in studio-brand.json, which already wins over it (no removal date yet). Copy the value into "name" in studio-brand.json, deploy, then delete the variable from Vercel and .env.local.
+- `ENQUIRIES_STORE` is replaced by the anonymous enquiry-exposure probe in the health check (task 230); the run summary carries the deprecation line (no removal date yet). Nothing is needed: a public dataset whose enquiries visitors can count is now found by an anonymous request. Delete the GitHub variable.
 
 ### Breaking changes / migration steps
 
@@ -1123,7 +1150,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.6.0...v1.7.0

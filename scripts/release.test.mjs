@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process'
-import { copyFileSync, mkdtempSync, readFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, readFileSync, existsSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -216,14 +216,23 @@ describe('the real script', () => {
   const root = join(fileURLToPath(import.meta.url), '..', '..')
   const script = join(root, 'scripts', 'release.mjs')
   const dir = mkdtempSync(join(tmpdir(), 'release-'))
-  for (const file of ['CHANGELOG.md', 'template-version.json'])
-    copyFileSync(join(root, file), join(dir, file))
+  // The repo's own files change with every release, so the script runs against a fixed changelog that
+  // sits at the repo's current version, releasing the next patch with the real registry.
+  const current = JSON.parse(readFileSync(join(root, 'template-version.json'), 'utf8')).version
+  const [major, minor, patch] = current.split('.').map(Number)
+  const next = `${major}.${minor}.${patch + 1}`
+  writeFileSync(join(dir, 'CHANGELOG.md'), CHANGELOG.replaceAll('1.8.0', current))
+  writeFileSync(
+    join(dir, 'template-version.json'),
+    `{ "version": "${current}", "released": "2026-10-23" }\n`,
+  )
   const go = (...args) => spawnSync('node', [script, ...args], { cwd: dir, encoding: 'utf8' })
+  const headings = () => read('CHANGELOG.md').split(`## [${next}]`).length - 1
   const read = (file) => readFileSync(join(dir, file), 'utf8')
 
   it('refuses without a snapshot or --baseline, and writes nothing', () => {
     const before = read('CHANGELOG.md')
-    const result = go('1.9.0')
+    const result = go(next)
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('Nothing was written')
     expect(read('CHANGELOG.md')).toBe(before)
@@ -232,7 +241,7 @@ describe('the real script', () => {
 
   it('--dry-run checks everything and writes nothing', () => {
     const before = read('template-version.json')
-    const result = go('1.9.0', '--baseline', '--dry-run')
+    const result = go(next, '--baseline', '--dry-run')
     expect(result.status).toBe(0)
     expect(result.stdout).toContain('Nothing was written')
     expect(read('template-version.json')).toBe(before)
@@ -240,16 +249,16 @@ describe('the real script', () => {
   })
 
   it('writes the baseline once, then refuses to run again', () => {
-    expect(go('1.9.0', '--baseline').status).toBe(0)
+    expect(go(next, '--baseline').status).toBe(0)
     expect(JSON.parse(read('config-registry.snapshot.json'))).toMatchObject({
-      version: '1.9.0',
+      version: next,
       baseline: true,
     })
-    expect(read('CHANGELOG.md').match(/^## \[1\.9\.0\]/gm)).toHaveLength(1)
+    expect(headings()).toBe(1)
 
-    const again = go('1.9.0')
+    const again = go(next)
     expect(again.status).toBe(1)
-    expect(read('CHANGELOG.md').match(/^## \[1\.9\.0\]/gm)).toHaveLength(1)
+    expect(headings()).toBe(1)
     expect(
       execFileSync('node', [join(root, 'scripts', 'check-version.mjs')], {
         cwd: dir,
