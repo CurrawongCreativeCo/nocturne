@@ -2,6 +2,8 @@ import 'server-only'
 
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
+import { MIN_PREVIEW_SECRET_LENGTH, previewSecret } from './preview-secret'
+
 /**
  * The pre-launch preview pass (README, "Pre-launch and launch"): a signed, expiring cookie that lets
  * the gate in `proxy.ts` show the whole site to the team and the client. It is issued by draft mode
@@ -21,19 +23,8 @@ export const PREVIEW_COOKIE = 'site_preview'
 export const PREVIEW_TTL_MS = 8 * 60 * 60 * 1000
 /** A server whose clock is a little ahead still accepts a pass that has just expired. */
 export const PREVIEW_CLOCK_SKEW_MS = 60_000
-/** A shorter secret is too easy to guess, so it is treated as not set. */
-export const MIN_PREVIEW_SECRET_LENGTH = 16
-
 const VERSION = 'v1'
 const SIGNATURE = /^[0-9a-f]{64}$/
-
-type Env = Record<string, string | undefined>
-
-/** The signing secret, or undefined when missing or too short. */
-export function previewSecret(env: Env = process.env): string | undefined {
-  const secret = env.PREVIEW_ACCESS_SECRET
-  return secret && secret.length >= MIN_PREVIEW_SECRET_LENGTH ? secret : undefined
-}
 
 const sign = (payload: string, secret: string) =>
   createHmac('sha256', secret).update(payload).digest('hex')
@@ -45,7 +36,7 @@ const sign = (payload: string, secret: string) =>
 export function createPreviewPass(
   now: number,
   ttlMs = PREVIEW_TTL_MS,
-  secret = previewSecret(),
+  secret = previewSecret(process.env),
 ): string | null {
   if (!secret) return null
   const payload = `${VERSION}.${String(Math.floor(now + ttlMs))}`
@@ -56,7 +47,7 @@ export function createPreviewPass(
 export function verifyPreviewPass(
   value: string | null | undefined,
   now: number,
-  secret = previewSecret(),
+  secret = previewSecret(process.env),
 ): boolean {
   if (!secret || typeof value !== 'string') return false
   const parts = value.split('.')

@@ -90,6 +90,13 @@ export interface FeatureSetting {
    */
   planned?: string
   docs?: string
+  /**
+   * How the generated `.env.example` shows it (`npm run config:docs`). `false` leaves it out (a
+   * deprecated name, a GitHub-side setting or one that isn't an environment variable). `placeholder`
+   * is a harmless sample such as "your-project-id", never a real value and never for a secret.
+   * `commented` writes the line as a comment, for a setting most sites leave unset.
+   */
+  envExample?: false | { placeholder?: string; commented?: boolean }
 }
 
 export interface FeatureConfig {
@@ -105,8 +112,18 @@ export interface FeatureConfig {
   profileFlag: FeatureName | null
   /** `core` can be enforced by the build gate; `optional` degrades and never affects a build. */
   tier: 'core' | 'optional'
-  /** Template version that introduced the feature. */
-  since: string
+  /**
+   * One line saying why nothing reads this feature's settings yet. The feature then reports
+   * "dormant", whatever the environment holds, instead of ready or not set up.
+   */
+  dormant?: string
+  /**
+   * For an optional feature that shares settings with another feature: the settings whose presence
+   * means someone has started setting it up. Without it, any of its settings counts.
+   */
+  switchedBy?: readonly string[]
+  /** Template version that introduced the feature. Left out when the history isn't known. */
+  since?: string
   docs: string
   /** Setup steps in plain language, in order, for the guidance a Settings screen will show. */
   setup?: readonly string[]

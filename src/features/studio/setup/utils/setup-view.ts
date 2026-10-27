@@ -23,7 +23,7 @@ export interface SetupStatusResponse extends SetupReport {
   builtAt: string | null
 }
 
-export type SetupGroupId = 'attention' | 'cant-check' | 'ready' | 'off'
+export type SetupGroupId = 'attention' | 'cant-check' | 'ready' | 'not-in-use' | 'off'
 
 export interface FeatureRow {
   id: string
@@ -84,6 +84,8 @@ export function isGithubBacked(feature: FeatureConfig): boolean {
 function groupFor(feature: FeatureConfig, report: FeatureReport | undefined): SetupGroupId {
   if (!report) return 'cant-check'
   if (report.status === 'off') return 'off'
+  // Dormant is a different state underneath, but the same thing to a reader: nothing to do here.
+  if (report.status === 'dormant' || report.status === 'not-in-use') return 'not-in-use'
   if (report.status === 'not-set-up') return 'attention'
   // Never Ready while any part lives where Studio can't look.
   if (report.status === 'cant-check' || isGithubBacked(feature)) return 'cant-check'
@@ -93,6 +95,7 @@ function groupFor(feature: FeatureConfig, report: FeatureReport | undefined): Se
 function messageFor(feature: FeatureConfig, group: SetupGroupId, report?: FeatureReport) {
   if (group === 'attention') return report?.reason ?? STATUS_LABEL.attention
   if (group === 'cant-check') return isGithubBacked(feature) ? CANT_CHECK_GITHUB : CANT_CHECK_OTHER
+  if (group === 'not-in-use') return report?.reason ?? feature.summary
   if (group === 'off') return "Switched off in this site's profile, so it isn't running."
   return feature.summary
 }
@@ -144,11 +147,14 @@ export function buildSetupView({
       group,
       statusLabel: STATUS_LABEL[group],
       message: messageFor(feature, group, report),
-      isNew: currentMinor !== null && minorOf(feature.since) === currentMinor,
+      isNew:
+        currentMinor !== null &&
+        feature.since !== undefined &&
+        minorOf(feature.since) === currentMinor,
     }
   })
 
-  const order: SetupGroupId[] = ['attention', 'cant-check', 'ready', 'off']
+  const order: SetupGroupId[] = ['attention', 'cant-check', 'ready', 'not-in-use', 'off']
   const groups = order
     .map((id) => ({ id, title: GROUP_TITLE[id], rows: rows.filter((row) => row.group === id) }))
     .filter((group) => group.rows.length > 0)

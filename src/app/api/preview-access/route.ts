@@ -2,13 +2,8 @@ import { connection, NextResponse, type NextRequest } from 'next/server'
 
 import { getClientIp } from '@/features/forms/utils/client-ip'
 import { createRateLimiter } from '@/features/forms/utils/rate-limit'
-import {
-  createPreviewPass,
-  MIN_PREVIEW_SECRET_LENGTH,
-  previewCookieHeader,
-  previewSecret,
-  warnNoPreviewSecret,
-} from '@/lib/preview-pass'
+import { createPreviewPass, previewCookieHeader, warnNoPreviewSecret } from '@/lib/preview-pass'
+import { MIN_PREVIEW_SECRET_LENGTH, previewSecret } from '@/lib/preview-secret'
 import { tokenMatches } from '@/lib/styleguide-access'
 
 /** Ten tries per address per ten minutes, per server instance: guessing a long token is hopeless anyway. */
@@ -36,7 +31,7 @@ export async function GET(request: NextRequest) {
   if (!limiter.take(getClientIp(request.headers)).allowed) return notFound()
   if (!tokenMatches(expected, request.nextUrl.searchParams.get('token'))) return notFound()
 
-  const pass = previewSecret() ? createPreviewPass(Date.now()) : null
+  const pass = previewSecret(process.env) ? createPreviewPass(Date.now()) : null
   if (!pass) {
     warnNoPreviewSecret()
     return notFound()

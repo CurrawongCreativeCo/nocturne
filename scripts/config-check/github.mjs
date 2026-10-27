@@ -25,7 +25,7 @@ const RESULT_ARTIFACT = 'health-result'
 export const WORKFLOWS = {
   'health-monitoring': 'health.yml',
   backups: 'backup.yml',
-  enquiries: 'enquiry-retention.yml',
+  'enquiry-retention': 'enquiry-retention.yml',
   'sanity-workflow': 'sanity.yml',
 }
 /** Features whose workflow writes a health-result artifact. The others show their last run only. */

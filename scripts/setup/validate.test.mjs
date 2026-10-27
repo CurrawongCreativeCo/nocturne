@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { mergeEnv, normalize, parseEnv } from './validate.mjs'
+import { mergeEnv, normalize, parseEnv, setStudioName } from './validate.mjs'
 
 const existing = { tokenMode: 'paste', projectMode: 'existing' }
 const valid = { projectId: 'abc123de', token: 'skVALIDLOOKINGTOKEN1234567890' }
@@ -84,9 +84,19 @@ describe('.env helpers', () => {
     expect(text.startsWith('# Written by the setup wizard')).toBe(true)
     expect(parseEnv(text)).toMatchObject({
       NEXT_PUBLIC_SANITY_PROJECT_ID: 'abc123de',
-      NEXT_PUBLIC_STUDIO_TITLE: 'Acme CMS',
       SANITY_API_READ_TOKEN: 'skSECRET',
     })
+  })
+
+  it('writes no deprecated setting: the API date is a constant and the name is in studio-brand.json', () => {
+    const env = parseEnv(mergeEnv('', values))
+    expect(env).not.toHaveProperty('NEXT_PUBLIC_STUDIO_TITLE')
+    expect(env).not.toHaveProperty('NEXT_PUBLIC_SANITY_API_VERSION')
+  })
+
+  it('still writes an API date someone chose on purpose', () => {
+    const env = parseEnv(mergeEnv('', { ...values, apiVersion: '2026-01-01' }))
+    expect(env.NEXT_PUBLIC_SANITY_API_VERSION).toBe('2026-01-01')
   })
 
   it('updates its own keys in place and keeps everything else', () => {
@@ -96,5 +106,23 @@ describe('.env helpers', () => {
     expect(after).toContain('# note')
     expect(after.match(/NEXT_PUBLIC_SANITY_PROJECT_ID=/g)).toHaveLength(1)
     expect(parseEnv(after).NEXT_PUBLIC_SANITY_PROJECT_ID).toBe('abc123de')
+  })
+})
+
+describe('setStudioName', () => {
+  const file = '{\n  "$schema": "./studio-brand.schema.json"\n}\n'
+
+  it('adds the name and keeps the rest', () => {
+    expect(JSON.parse(setStudioName(file, 'Acme CMS') ?? '')).toEqual({
+      $schema: './studio-brand.schema.json',
+      name: 'Acme CMS',
+    })
+  })
+
+  it('keeps a name that is already there, and leaves unreadable text alone', () => {
+    const named = '{"name":"Client"}'
+    expect(setStudioName(named, 'Acme CMS')).toBe(named)
+    expect(setStudioName('not json', 'Acme CMS')).toBeNull()
+    expect(setStudioName(file, '')).toBe(file)
   })
 })

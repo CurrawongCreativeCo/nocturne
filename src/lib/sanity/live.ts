@@ -12,6 +12,7 @@ import {
 } from 'next-sanity/live'
 
 import { client } from './client'
+import { readRevalidateSecret } from './revalidate-config'
 import { token } from './token'
 
 /**
@@ -68,7 +69,7 @@ export const shortLivedSanityFetch: StrictDefinedFetchType = async (options) => 
  * entries are expired by `/api/revalidate` instead (see README, "Webhook mode").
  * <SanityLive /> still runs in draft mode so previews stay live.
  */
-export const revalidateSecret = process.env.SANITY_REVALIDATE_SECRET || undefined
+export const revalidateSecret = readRevalidateSecret(process.env)
 
 /**
  * Cache tags for webhook mode, named after the document types the webhook reports.

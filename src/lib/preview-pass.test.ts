@@ -9,9 +9,9 @@ import {
   PREVIEW_TTL_MS,
   createPreviewPass,
   previewCookieHeader,
-  previewSecret,
   verifyPreviewPass,
 } from './preview-pass'
+import { previewSecret } from './preview-secret'
 
 const SECRET = 'a-test-secret-of-sufficient-length'
 const NOW = Date.UTC(2026, 9, 18, 9, 0, 0)

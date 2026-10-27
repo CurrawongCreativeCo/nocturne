@@ -307,3 +307,42 @@ describe('helpers', () => {
     expect(text).not.toMatch(/\b(color|organize|customize|initialize)/i)
   })
 })
+
+describe('representative states in one view', () => {
+  const ops = feature({ id: 'start-here', title: 'Ops notices' })
+  const analytics = feature({ id: 'analytics', title: 'Analytics' })
+  const view = buildSetupView({
+    features: [forms, pricing, core, ops, analytics],
+    status: status([
+      report('forms', { status: 'not-set-up', reason: 'Not set up: TURNSTILE_SECRET_KEY not set' }),
+      report('pricing', { status: 'off', reason: 'Off in profile' }),
+      report('sanity-core'),
+      report('start-here', { status: 'dormant', reason: 'Dormant: No Ops endpoint exists yet.' }),
+      report('analytics', { status: 'not-in-use', reason: 'Not in use: nothing is set for it' }),
+    ]),
+  })
+  const group = (id: string) => view.groups.find((g) => g.id === id)?.rows.map((r) => r.id)
+
+  it('keeps six underlying states in five groups: dormant reads as not in use', () => {
+    expect(view.groups.map((g) => g.id)).toEqual(['attention', 'ready', 'not-in-use', 'off'])
+    expect(group('attention')).toEqual(['forms'])
+    expect(group('ready')).toEqual(['sanity-core'])
+    expect(group('not-in-use')).toEqual(['start-here', 'analytics'])
+    expect(group('off')).toEqual(['pricing'])
+  })
+
+  it('says why a dormant or unused feature is idle, and counts only what needs setting up', () => {
+    const rows = view.groups.find((g) => g.id === 'not-in-use')?.rows
+    expect(rows?.map((r) => r.message)).toEqual([
+      'Dormant: No Ops endpoint exists yet.',
+      'Not in use: nothing is set for it',
+    ])
+    expect(view.attentionCount).toBe(1)
+  })
+
+  it('never shows Ready for a feature the route did not call ready', () => {
+    const ready = view.groups.find((g) => g.id === 'ready')?.rows.map((r) => r.id)
+    expect(ready).not.toContain('forms')
+    expect(ready).not.toContain('start-here')
+  })
+})

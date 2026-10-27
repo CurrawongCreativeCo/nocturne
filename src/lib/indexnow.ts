@@ -57,3 +57,19 @@ export async function pingIndexNow(request: { url: string; body: string }): Prom
     console.error('IndexNow ping failed', error)
   }
 }
+
+/**
+ * Whether IndexNow can ping. It needs a valid key, and webhook mode: the ping happens in
+ * `/api/revalidate`, which only runs when Sanity calls it.
+ */
+export function getIndexNowReadiness(env: Record<string, string | undefined> = process.env) {
+  const missing: string[] = []
+  const key = env.INDEXNOW_KEY
+  if (!key) missing.push('INDEXNOW_KEY')
+  else if (!INDEXNOW_KEY_PATTERN.test(key)) {
+    missing.push('INDEXNOW_KEY (8 to 128 letters, digits and dashes)')
+  }
+  if (!env.SANITY_REVALIDATE_SECRET)
+    missing.push('SANITY_REVALIDATE_SECRET (IndexNow needs webhook mode)')
+  return missing.length > 0 ? { ready: false as const, missing } : { ready: true as const }
+}

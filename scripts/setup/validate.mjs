@@ -18,7 +18,6 @@ export const ENV_KEYS = {
   dataset: 'NEXT_PUBLIC_SANITY_DATASET',
   apiVersion: 'NEXT_PUBLIC_SANITY_API_VERSION',
   siteUrl: 'NEXT_PUBLIC_SITE_URL',
-  studioTitle: 'NEXT_PUBLIC_STUDIO_TITLE',
   token: 'SANITY_API_READ_TOKEN',
 }
 
@@ -81,6 +80,23 @@ export function parseEnv(text) {
   return env
 }
 
+/**
+ * `studio-brand.json` with the Studio's name set, as the CMS brand file now holds it
+ * (`NEXT_PUBLIC_STUDIO_TITLE` is deprecated). Only the name changes; a name already there is kept,
+ * and text that isn't a JSON object is left for a person to edit (returns null).
+ */
+export function setStudioName(text, name) {
+  let brand
+  try {
+    brand = JSON.parse(text)
+  } catch {
+    return null
+  }
+  if (!brand || typeof brand !== 'object' || Array.isArray(brand)) return null
+  if (!name || (typeof brand.name === 'string' && brand.name.trim())) return text
+  return `${JSON.stringify({ ...brand, name }, null, 2)}\n`
+}
+
 /** Updates the wizard's keys in an .env file's text, keeping every other line as it was. */
 export function mergeEnv(text, values) {
   const lines = text
@@ -91,6 +107,8 @@ export function mergeEnv(text, values) {
     lines.push('# Written by the setup wizard. See .env.example for what each value does.')
   }
   for (const [field, key] of Object.entries(ENV_KEYS)) {
+    // The API date is a constant in src/config/env.ts; only a deliberate override is written (deprecated).
+    if (field === 'apiVersion' && values.apiVersion === DEFAULTS.apiVersion) continue
     const line = `${key}="${values[field]}"`
     const index = lines.findIndex((l) => new RegExp(`^\\s*${key}\\s*=`).test(l))
     if (index === -1) lines.push(line)
