@@ -340,6 +340,9 @@ export function resolveSiteProfile(
 
 export const siteProfile: SiteProfile = resolveSiteProfile(siteProfileInput)
 
+/** The feature flags `site.profile.ts` writes, before defaults fill the rest (`config:check` tells the two apart). */
+export const writtenFeatures: Partial<Features> = siteProfileInput.features ?? {}
+
 /** Whether a feature is switched on for this site. The one check routes, queries and Studio use. */
 export function isFeatureEnabled(name: FeatureName, profile: SiteProfile = siteProfile): boolean {
   return profile.features[name]

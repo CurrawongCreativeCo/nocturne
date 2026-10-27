@@ -10,6 +10,7 @@ const TONE: Record<SetupGroupId, 'caution' | 'default' | 'positive'> = {
   attention: 'caution',
   'cant-check': 'default',
   ready: 'positive',
+  'not-in-use': 'default',
   off: 'default',
 }
 

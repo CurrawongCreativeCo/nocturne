@@ -5,6 +5,8 @@ const ICON: Record<FeatureStatus, string> = {
   'not-set-up': '✗',
   off: '–',
   'cant-check': '?',
+  'not-in-use': '·',
+  dormant: '·',
 }
 
 /** The plain-English table `config:check` prints. Names and words only, never a value. */
@@ -27,7 +29,7 @@ export function formatTable(report: SetupReport): string {
   }
 
   if (report.pending.length > 0) {
-    lines.push('', `Not registered yet (task 233): ${report.pending.join(', ')}.`)
+    lines.push('', `Not registered yet: ${report.pending.join(', ')}.`)
   }
   return lines.join('\n')
 }

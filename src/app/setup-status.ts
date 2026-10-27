@@ -1,11 +1,12 @@
 import 'server-only'
 
-import { siteProfile } from '@/config/profile'
+import { siteProfile, writtenFeatures } from '@/config/profile'
 import { templateVersion } from '@/config/template-version'
 import { detectBuildEnvironment, type Env } from '@/lib/config/environment'
 import { buildReport, type SetupReport } from '@/lib/config/evaluate'
 
-import { featureRegistry, pending, readinessFunctions } from './feature-registry'
+import { featureRegistry, pending } from './feature-registry'
+import { readinessFunctions } from './readiness-functions'
 
 export interface SetupStatus extends SetupReport {
   templateVersion: string
@@ -30,6 +31,7 @@ export function getSetupStatus(env: Env = process.env): SetupStatus {
       env,
       environment: detectBuildEnvironment(env),
       profileFeatures: siteProfile.features,
+      explicitFeatures: writtenFeatures,
       readiness: readinessFunctions,
       pending,
     }),

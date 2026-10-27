@@ -65,22 +65,49 @@ describe('config:check --build', () => {
   })
 })
 
+/** Everything the profile switches on is set up, so `--strict` has no gap to report. */
+const EVERYTHING_ON = {
+  SANITY_API_READ_TOKEN: 't',
+  FORMS_TEST_MODE: '1',
+  STRIPE_SECRET_KEY: 'k',
+  STRIPE_WEBHOOK_SECRET: 'w',
+  SANITY_WRITE_TOKEN: 'e',
+  AUTH_SECRET: 'a',
+  AUTH_GITHUB_ID: 'i',
+  AUTH_GITHUB_SECRET: 's',
+  FLAGS_SECRET: 'f',
+}
+
 describe('config:check', () => {
   it('prints the table and exits 0 without --strict', () => {
-    const { out, status } = run([], SANITY)
+    const { out, status } = run([], { ...SANITY, TURNSTILE_SECRET_KEY: 's' })
     expect(status).toBe(0)
     expect(out).toContain('Contact forms')
     expect(out).toContain('Not set up: NEXT_PUBLIC_TURNSTILE_SITE_KEY')
     expect(out).toContain("Can't check here: run with --github (task 231)")
   })
 
-  it('exits 1 with --strict on a required gap, and 0 when there is none', () => {
-    expect(run(['--strict'], SANITY).status).toBe(1)
-    const ready = run(['--strict'], {
+  it('does not call a feature that is only on by default, with nothing set, a gap', () => {
+    const { out, status } = run(['--strict'], { ...SANITY, SANITY_API_READ_TOKEN: 't' })
+    expect(out).toMatch(/· Contact forms\s+Not in use: nothing is set for it/)
+    expect(out).toContain('Dormant:')
+    expect(status).toBe(0)
+  })
+
+  it('fails --strict for a feature that is half set up', () => {
+    // This repository's profile writes none of the service features, so half set up is the case here.
+    const started = run(['--strict'], {
       ...SANITY,
       SANITY_API_READ_TOKEN: 't',
-      FORMS_TEST_MODE: '1',
+      STRIPE_SECRET_KEY: 'k',
     })
+    expect(started.status).toBe(1)
+    expect(started.out).toContain('Not set up: STRIPE_WEBHOOK_SECRET')
+  })
+
+  it('exits 1 with --strict on a required gap, and 0 when there is none', () => {
+    expect(run(['--strict'], SANITY).status).toBe(1)
+    const ready = run(['--strict'], { ...SANITY, ...EVERYTHING_ON })
     expect(ready.status).toBe(0)
     expect(ready.out).toContain('✓ Contact forms')
   })
@@ -88,7 +115,9 @@ describe('config:check', () => {
   it('fails --strict for a malformed sender, naming the feature, the problem and a fix', () => {
     const env = {
       ...SANITY,
-      SANITY_API_READ_TOKEN: 't',
+      ...EVERYTHING_ON,
+      FORMS_TEST_MODE: '',
+      NEWSLETTER_PROVIDER: 'resend',
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: 'k',
       TURNSTILE_SECRET_KEY: 's',
       RESEND_API_KEY: 'r',
@@ -137,13 +166,14 @@ describe('config:check', () => {
   it('prints JSON with --json', () => {
     const report = JSON.parse(run(['--json'], SANITY).out)
     expect(report.schema).toBe(1)
-    expect(report.features.map((feature) => feature.id)).toEqual([
-      'sanity-core',
-      'forms',
-      'health-monitoring',
-      'config-controls',
-    ])
-    expect(report.pending).toContain('newsletter')
+    const ids = report.features.map((feature) => feature.id)
+    expect(ids).toEqual(expect.arrayContaining(['sanity-core', 'forms', 'newsletter', 'pricing']))
+    expect(ids).toEqual(expect.arrayContaining(['backups', 'launch-check', 'config-controls']))
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(report.pending).toEqual([])
+    const states = Object.fromEntries(report.features.map((f) => [f.id, f.status]))
+    expect(states['start-here']).toBe('dormant')
+    expect(states['webhook-mode']).toBe('not-in-use')
   })
 })
 

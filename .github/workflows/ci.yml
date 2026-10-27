@@ -66,6 +66,15 @@ jobs:
             exit 1
           }
 
+      # `.env.example` and the README's settings table are written from the feature registries.
+      - name: .env.example and the README settings table are committed and current
+        run: |
+          npm run config:docs
+          git diff --exit-code .env.example README.md || {
+            echo "::error::.env.example or the README settings table is stale. Run 'npm run config:docs' and commit both."
+            exit 1
+          }
+
       - name: Next.js route types
         run: npx next typegen
 

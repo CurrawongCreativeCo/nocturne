@@ -1,114 +1,75 @@
 import type { FeatureConfig } from '@/config/feature-config'
+import { siteConfig } from '@/config/site.registry'
+import { studioBrandConfig } from '@/config/studio-brand/config.registry'
+import { membersConfig } from '@/features/auth/config.registry'
+import { analyticsConfig } from '@/features/consent/config.registry'
+import { experimentsConfig } from '@/features/experiments/config.registry'
 import { formsConfig } from '@/features/forms/config.registry'
-import { getFormsConfig } from '@/features/forms/utils/config'
+import { enquiriesConfig } from '@/features/forms/enquiries.registry'
+import { newsletterConfig } from '@/features/forms/newsletter.registry'
+import { pricingConfig } from '@/features/pricing/config.registry'
+import { publishGateConfig } from '@/features/publish-gate/config.registry'
 import { configControlsConfig } from '@/lib/config/controls.registry'
-import type { Env } from '@/lib/config/environment'
-import type { Readiness } from '@/lib/config/evaluate'
+import { indexNowConfig } from '@/lib/indexnow.registry'
+import { backupsConfig } from '@/lib/ops/backup.registry'
 import { healthMonitoringConfig } from '@/lib/ops/health-config.registry'
+import { launchCheckConfig } from '@/lib/ops/launch-check.registry'
+import { opsNoticesConfig } from '@/lib/ops/notices.registry'
+import { enquiryRetentionConfig } from '@/lib/ops/retention.registry'
+import { sanityWorkflowConfig } from '@/lib/ops/sanity-workflow.registry'
+import { prelaunchConfig } from '@/lib/prelaunch.registry'
+import { redirectsConfig } from '@/lib/redirects.registry'
 import { sanityCoreConfig } from '@/lib/sanity/config.registry'
+import { webhookModeConfig } from '@/lib/sanity/revalidate.registry'
+import { errorTrackingConfig } from '@/lib/sentry/config.registry'
+import { styleGuideConfig } from '@/lib/styleguide.registry'
 
 /**
  * The feature configuration registry, composed once (docs/nocturne/NOCTURNE_SETTINGS_CONFIGURATION.md,
- * §B.3). Read by `config:check` (scripts/config-check.mjs, loaded with jiti) and by `getSetupStatus()`
- * (src/app/setup-status.ts). No `server-only` here, so the script can load it; nothing public may
- * import `setup-status.ts`. Registry files hold names and words, never values.
- *
- * Shared code can't import features, so this is where the entries meet the readiness functions.
+ * §B.3). Read by `config:check` (scripts/config-check.mjs, loaded with jiti), by `getSetupStatus()`
+ * (src/app/setup-status.ts) and by `npm run config:docs`, which writes `.env.example` and the README's
+ * settings table from it. No `server-only` here, so the scripts can load it; nothing public may
+ * import `setup-status.ts`. Registry files hold names and words, never values, and Studio imports this
+ * file, so it imports no readiness code: that is `readiness-functions.ts`.
  */
 
-/** The existing functions a registry entry's `readiness` names. Each one reads the env it is given. */
-export const readinessFunctions: Record<string, (env: Env) => Readiness> = {
-  getFormsConfig: (env) => getFormsConfig(env),
-}
-
+/**
+ * In the order `.env.example` and the README table list them. A setting several features use
+ * (`SANITY_WRITE_TOKEN`, the Turnstile keys) is described where it first appears.
+ */
 export const featureRegistry: readonly FeatureConfig[] = [
   sanityCoreConfig,
+  siteConfig,
+  studioBrandConfig,
+  webhookModeConfig,
+  redirectsConfig,
   formsConfig,
+  enquiriesConfig,
+  newsletterConfig,
+  pricingConfig,
+  publishGateConfig,
+  indexNowConfig,
+  styleGuideConfig,
+  prelaunchConfig,
+  experimentsConfig,
+  analyticsConfig,
+  membersConfig,
+  errorTrackingConfig,
+  opsNoticesConfig,
   healthMonitoringConfig,
+  backupsConfig,
+  enquiryRetentionConfig,
+  sanityWorkflowConfig,
+  launchCheckConfig,
   configControlsConfig,
 ]
 
 /**
- * Features whose settings aren't registered yet (task 233 registers them and deletes this list).
- * The completeness test counts these names as known, so it passes from day one.
+ * Features whose settings aren't registered. Empty since task 233 registered the rest; a feature
+ * added later registers in the same change, so the completeness test never needs this list. It stays
+ * so the report's `pending` field keeps its shape.
  */
-export const pending: readonly { feature: string; settings: readonly string[] }[] = [
-  {
-    feature: 'site',
-    settings: ['NEXT_PUBLIC_SITE_URL', 'NEXT_PUBLIC_SITE_LANGUAGE', 'SITE_LAUNCH_OVERRIDE'],
-  },
-  { feature: 'studio-brand', settings: ['NEXT_PUBLIC_STUDIO_TITLE'] },
-  { feature: 'webhook-mode', settings: ['SANITY_REVALIDATE_SECRET'] },
-  { feature: 'indexnow', settings: ['INDEXNOW_KEY'] },
-  {
-    feature: 'redirects',
-    settings: ['EDGE_CONFIG', 'EDGE_CONFIG_ID', 'VERCEL_API_TOKEN', 'VERCEL_TEAM_ID'],
-  },
-  {
-    feature: 'enquiries',
-    settings: ['ENQUIRIES_STORE', 'SANITY_WRITE_TOKEN', 'ENQUIRY_RETENTION_DAYS'],
-  },
-  {
-    feature: 'newsletter',
-    settings: [
-      'NEWSLETTER_PROVIDER',
-      'NEWSLETTER_RESEND_SEGMENT_ID',
-      'LOOPS_API_KEY',
-      'LOOPS_MAILING_LIST_ID',
-      'MAILCHIMP_API_KEY',
-      'MAILCHIMP_LIST_ID',
-    ],
-  },
-  { feature: 'pricing', settings: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'] },
-  { feature: 'prelaunch', settings: ['PREVIEW_ACCESS_SECRET', 'PRELAUNCH_PREVIEW_TOKEN'] },
-  { feature: 'style-guide', settings: ['STYLEGUIDE_PREVIEW_TOKEN'] },
-  { feature: 'experiments', settings: ['FLAGS_SECRET', 'EXPERIMENT_CACHE_SECONDS'] },
-  {
-    feature: 'analytics',
-    settings: [
-      'NEXT_PUBLIC_PLAUSIBLE_DOMAIN',
-      'NEXT_PUBLIC_POSTHOG_KEY',
-      'NEXT_PUBLIC_POSTHOG_HOST',
-      'NEXT_PUBLIC_GA_ID',
-    ],
-  },
-  {
-    feature: 'members',
-    settings: [
-      'AUTH_SECRET',
-      'AUTH_GITHUB_ID',
-      'AUTH_GITHUB_SECRET',
-      'AUTH_GOOGLE_ID',
-      'AUTH_GOOGLE_SECRET',
-      'AUTH_ALLOWED_EMAILS',
-      'AUTH_TRUST_HOST',
-    ],
-  },
-  {
-    feature: 'error-tracking',
-    settings: [
-      'SENTRY_DSN',
-      'SENTRY_TRACES_SAMPLE_RATE',
-      'SENTRY_AUTH_TOKEN',
-      'SENTRY_ORG',
-      'SENTRY_PROJECT',
-    ],
-  },
-  { feature: 'start-here', settings: ['OPS_NOTICES_URL', 'OPS_NOTICES_KEY'] },
-  { feature: 'launch-check', settings: ['PSI_API_KEY', 'VERCEL_AUTOMATION_BYPASS_SECRET'] },
-  {
-    feature: 'backups',
-    settings: [
-      'BACKUP_S3_ACCESS_KEY_ID',
-      'BACKUP_S3_BUCKET',
-      'BACKUP_S3_ENDPOINT',
-      'BACKUP_S3_PREFIX',
-      'BACKUP_S3_REGION',
-      'BACKUP_S3_SECRET_ACCESS_KEY',
-    ],
-  },
-  { feature: 'sanity-workflow', settings: ['SANITY_DEPLOY_TOKEN', 'SANITY_MIGRATION_READ_TOKEN'] },
-]
+export const pending: readonly { feature: string; settings: readonly string[] }[] = []
 
 /**
  * Names the completeness test lets through without a registry entry: tests and tooling, platform

@@ -1,0 +1,76 @@
+import { defineFeatureConfig } from '@/config/feature-config'
+
+export const pricingConfig = defineFeatureConfig({
+  id: 'pricing',
+  title: 'Pricing table and checkout',
+  summary: 'Shows prices from Stripe and sends buyers to Stripe to pay, then records the payment.',
+  why: 'The business can sell from the site without building a shop.',
+  withoutIt: 'Pricing sections cannot start a checkout, and payments are not recorded.',
+  profileFlag: 'pricing',
+  switchedBy: [
+    'STRIPE_SECRET_KEY',
+    'STRIPE_WEBHOOK_SECRET',
+    'STRIPE_SUCCESS_URL',
+    'STRIPE_CANCEL_URL',
+  ],
+  tier: 'optional',
+  docs: 'README.md#pricing-table',
+  setup: [
+    'Create a Stripe secret or restricted key and add it to Vercel as STRIPE_SECRET_KEY.',
+    'In Stripe → Developers → Webhooks, add the endpoint <site>/api/stripe/webhook and copy its signing secret.',
+    'Add that as STRIPE_WEBHOOK_SECRET, add an Editor-role SANITY_WRITE_TOKEN, then redeploy.',
+  ],
+  settings: [
+    {
+      name: 'STRIPE_SECRET_KEY',
+      kind: 'secret',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: true,
+      purpose: 'Lets the server read prices and start a checkout.',
+      source: 'Stripe → Developers → API keys (a restricted key is better than the secret key)',
+    },
+    {
+      name: 'STRIPE_WEBHOOK_SECRET',
+      kind: 'secret',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: true,
+      purpose:
+        "Proves a payment notice came from Stripe. It is the endpoint's signing secret, beginning whsec_.",
+      source: 'Stripe → Developers → Webhooks → your endpoint → Signing secret',
+    },
+    {
+      name: 'SANITY_WRITE_TOKEN',
+      kind: 'secret',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: true,
+      purpose: 'Lets the webhook record a paid order. Never give it a higher role than Editor.',
+      source: 'sanity.io/manage → your project → API → Tokens (Editor role)',
+    },
+    {
+      name: 'STRIPE_SUCCESS_URL',
+      kind: 'server-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: false,
+      purpose: 'Where buyers land after paying: a path or a full https:// URL.',
+      default: '/?checkout=success',
+      envExample: { placeholder: '/thanks', commented: true },
+    },
+    {
+      name: 'STRIPE_CANCEL_URL',
+      kind: 'server-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      required: false,
+      purpose:
+        'Where buyers go when they come back from Stripe without paying: a path or a full https:// URL.',
+      default: 'The pricing page they came from',
+      envExample: { placeholder: '/pricing', commented: true },
+    },
+  ],
+  readiness: 'getPricingConfig',
+  verify: [],
+})

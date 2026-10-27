@@ -3,7 +3,8 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { featureRegistry, ignored, pending, readinessFunctions } from './feature-registry'
+import { featureRegistry, ignored, pending } from './feature-registry'
+import { readinessFunctions } from './readiness-functions'
 
 const root = process.cwd()
 const SEMVER = /^\d+\.\d+\.\d+$/
@@ -27,7 +28,7 @@ describe('the registry', () => {
 
   it('writes versions as x.y.z and deprecations with a replacement', () => {
     for (const feature of featureRegistry) {
-      expect(feature.since, feature.id).toMatch(SEMVER)
+      if (feature.since) expect(feature.since, feature.id).toMatch(SEMVER)
       for (const setting of feature.settings) {
         for (const version of [setting.since, setting.enforceFrom, setting.deprecated?.removeIn]) {
           if (version) expect(version, setting.name).toMatch(SEMVER)
@@ -96,12 +97,95 @@ describe('the registry', () => {
       'managedBy',
       'planned',
       'docs',
+      'envExample',
     ])
     for (const { settings } of featureRegistry) {
       for (const setting of settings) {
         for (const key of Object.keys(setting))
           expect(allowed, `${setting.name}.${key}`).toContain(key)
       }
+    }
+  })
+})
+
+describe('the registered features', () => {
+  const byId = (id: string) => featureRegistry.find((feature) => feature.id === id)
+
+  it('registers every feature and workflow task 233 names', () => {
+    for (const id of [
+      'newsletter',
+      'enquiries',
+      'pricing',
+      'members',
+      'analytics',
+      'error-tracking',
+      'webhook-mode',
+      'indexnow',
+      'redirects',
+      'prelaunch',
+      'style-guide',
+      'experiments',
+      'start-here',
+      'backups',
+      'enquiry-retention',
+      'sanity-workflow',
+      'launch-check',
+    ]) {
+      expect(byId(id), id).toBeDefined()
+    }
+  })
+
+  it('targets the style guide token at Preview only', () => {
+    const token = byId('style-guide')?.settings.find((s) => s.name === 'STYLEGUIDE_PREVIEW_TOKEN')
+    expect(token?.targets).toEqual(['preview'])
+  })
+
+  it('marks Ops notices dormant, with a reason, and nothing else', () => {
+    expect(byId('start-here')?.dormant).toMatch(/\S/)
+    expect(featureRegistry.filter((feature) => feature.dormant).map((f) => f.id)).toEqual([
+      'start-here',
+    ])
+  })
+
+  it('gives every Vercel setting its environments, and no GitHub or local one', () => {
+    for (const { settings } of featureRegistry) {
+      for (const setting of settings) {
+        if (setting.where === 'vercel')
+          expect(setting.targets?.length, setting.name).toBeGreaterThan(0)
+        else expect(setting.targets, setting.name).toBeUndefined()
+      }
+    }
+  })
+
+  it('shows no placeholder for a secret in .env.example', () => {
+    for (const { settings } of featureRegistry) {
+      for (const setting of settings) {
+        if (!setting.envExample || !setting.envExample.placeholder) continue
+        expect(['secret', 'github-secret'], setting.name).not.toContain(setting.kind)
+      }
+    }
+  })
+
+  it('keeps the deprecated names out of .env.example', () => {
+    const deprecated = featureRegistry
+      .flatMap((feature) => feature.settings)
+      .filter((setting) => setting.deprecated && setting.where !== 'github')
+    expect(deprecated.map((s) => s.name).sort()).toEqual([
+      'NEXT_PUBLIC_SANITY_API_VERSION',
+      'NEXT_PUBLIC_STUDIO_TITLE',
+    ])
+    for (const setting of deprecated) expect(setting.envExample, setting.name).toBe(false)
+  })
+
+  it('gives every workflow-backed feature a workflow file for config:check --github', () => {
+    const source = readFileSync(join(root, 'scripts/config-check/github.mjs'), 'utf8')
+    const block = /export const WORKFLOWS = \{([^}]*)\}/.exec(source)?.[1] ?? ''
+    const ids = [...block.matchAll(/^\s*'?([a-z-]+)'?:/gm)].map((match) => match[1])
+    for (const feature of featureRegistry) {
+      const github = feature.settings.some(
+        (s) => s.kind === 'github-var' || s.kind === 'github-secret',
+      )
+      if (github) expect(ids, feature.id).toContain(feature.id)
     }
   })
 })
@@ -162,10 +246,9 @@ function workflowNames(): string[] {
     )
 }
 
-const known = new Set([
-  ...featureRegistry.flatMap((feature) => feature.settings.map((setting) => setting.name)),
-  ...pending.flatMap((entry) => entry.settings),
-])
+const known = new Set(
+  featureRegistry.flatMap((feature) => feature.settings.map((setting) => setting.name)),
+)
 
 function isIgnored(name: string) {
   return ignored.some((entry) =>
@@ -191,9 +274,9 @@ describe('completeness', () => {
     }
   })
 
-  it('registers every env name read under src/ and scripts/, or lists it as pending or ignored', () => {
+  it('registers every env name read under src/ and scripts/, or lists it as ignored', () => {
     const unknown = [...fromCode].filter((name) => !known.has(name) && !isIgnored(name)).sort()
-    expect(unknown, 'Add these to a config.registry.ts, to `pending` or to `ignored`').toEqual([])
+    expect(unknown, 'Add these to a config.registry.ts or to `ignored`').toEqual([])
   })
 
   it('does the same for every vars.X and secrets.X in the workflows', () => {
@@ -207,9 +290,13 @@ describe('completeness', () => {
     for (const name of registered) expect(isIgnored(name), name).toBe(false)
   })
 
-  it('keeps a secret out of NEXT_PUBLIC_, also among the pending names', () => {
-    for (const entry of pending) {
-      for (const name of entry.settings) {
+  it('has nothing left on the pending list: every feature is registered', () => {
+    expect(pending).toEqual([])
+  })
+
+  it('keeps a secret out of NEXT_PUBLIC_', () => {
+    for (const feature of featureRegistry) {
+      for (const { name } of feature.settings) {
         if (/(SECRET|TOKEN|PRIVATE)/.test(name)) expect(name, name).not.toMatch(/^NEXT_PUBLIC_/)
       }
     }

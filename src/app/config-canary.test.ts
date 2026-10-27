@@ -5,22 +5,21 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { GET } from './api/site-info/route'
-import { featureRegistry, pending } from './feature-registry'
+import { featureRegistry } from './feature-registry'
 
 vi.mock('server-only', () => ({}))
 
 const CANARY = 'CANARY_9f3a7c1e5b2d4a60'
 const root = process.cwd()
 
-/** Every registered secret holds the canary, as does each pending name that looks like one. */
+/** Every registered secret holds the canary. */
 const secretNames = [
-  ...featureRegistry
-    .flatMap((feature) => feature.settings)
-    .filter((setting) => setting.kind === 'secret' || setting.kind === 'github-secret')
-    .map((setting) => setting.name),
-  ...pending
-    .flatMap((entry) => entry.settings)
-    .filter((name) => /(SECRET|TOKEN|API_KEY)/.test(name)),
+  ...new Set(
+    featureRegistry
+      .flatMap((feature) => feature.settings)
+      .filter((setting) => setting.kind === 'secret' || setting.kind === 'github-secret')
+      .map((setting) => setting.name),
+  ),
 ]
 const canaryEnv = Object.fromEntries(secretNames.map((name) => [name, CANARY]))
 
@@ -41,8 +40,24 @@ afterEach(() => {
 describe('the canary', () => {
   it('is set on the secrets it should be', () => {
     expect(secretNames).toEqual(
-      expect.arrayContaining(['TURNSTILE_SECRET_KEY', 'SANITY_API_READ_TOKEN']),
+      expect.arrayContaining([
+        'TURNSTILE_SECRET_KEY',
+        'SANITY_API_READ_TOKEN',
+        'EDGE_CONFIG',
+        'STRIPE_WEBHOOK_SECRET',
+        'PREVIEW_ACCESS_SECRET',
+        'SENTRY_AUTH_TOKEN',
+        'PSI_API_KEY',
+        'BACKUP_S3_SECRET_ACCESS_KEY',
+      ]),
     )
+  })
+
+  it('covers every secret in the registry, so a new one cannot be forgotten', () => {
+    const secrets = featureRegistry
+      .flatMap((feature) => feature.settings)
+      .filter((setting) => setting.kind === 'secret' || setting.kind === 'github-secret')
+    for (const { name } of secrets) expect(canaryEnv, name).toHaveProperty(name, CANARY)
   })
 
   it("never appears in site-info's response", async () => {
@@ -60,12 +75,9 @@ describe('the canary', () => {
     })
     const text = JSON.stringify(status)
     expect(text).not.toContain(CANARY)
-    expect(status.features.map((f) => f.id)).toEqual([
-      'sanity-core',
-      'forms',
-      'health-monitoring',
-      'config-controls',
-    ])
+    // Every registered feature reports, in registry order.
+    expect(status.features.map((f) => f.id)).toEqual(featureRegistry.map((f) => f.id))
+    expect(status.pending).toEqual([])
   })
 
   it('never appears in config:check, as a table, as JSON or as the build gate message', () => {

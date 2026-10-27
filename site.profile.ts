@@ -24,11 +24,10 @@ export const siteProfileInput = defineSiteProfile({
   tier: 'custom',
   features: {
     blog: true,
-    forms: true,
-    newsletter: true,
-    pricing: true,
-    members: true,
-    experiments: true,
+    // forms, newsletter, pricing, members and experiments need a service behind them. Left out they
+    // are on, as before, but `config:check` treats them as "not in use" until something is set for
+    // them. Write `forms: true` (and so on) to declare that this site uses one: then a missing
+    // setting is a gap `config:check --strict` fails on. Write `false` to switch it off.
     search: true,
     businessInfo: true,
     team: true,

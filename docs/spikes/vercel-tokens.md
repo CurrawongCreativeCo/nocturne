@@ -75,6 +75,14 @@ Measured results: HTTP status and Vercel's error `code`. Tokens and values are n
 
 **Milestone MS (Foundation).** Foundation can save env vars (as `sensitive`), list deployments and trigger redeploys with a **project-scoped** token. It must not assume that token also covers Edge Config; that needs a team token, which Foundation (on the owner's machine) may hold but a site runtime may not.
 
+## Evidence check for task 233 (27 October 2026)
+
+What the cleanups rest on, kept apart:
+
+- **Measured against Vercel's API:** a project-scoped token is refused for the Edge Config write (404) and a team token is accepted; `teamId` is not needed by either token type and sending it does no harm; env var creation works for `plain`, `encrypted` and `sensitive` and `secret` is rejected. These are matrix rows a, a2, a3, b2, b4 and d4.
+- **From Vercel's documentation, not measured:** that the `EDGE_CONFIG` connection string is `https://edge-config.vercel.com/ecfg_…?token=…` (older) or `https://global-config.vercel.com/<id>?token=…` (newer); that a full-account token still needs `teamId`; that `sensitive` env vars cannot target `development`. The spike never read a real `EDGE_CONFIG` value.
+- **What the code therefore does:** `src/lib/edge-config-settings.ts` derives an id only from those two hosts over https, and only when the first path segment looks like `ecfg_…`; anything else yields no derived id, so a site with an unrecognised string keeps working as before (and sets `EDGE_CONFIG_ID`). An explicit `EDGE_CONFIG_ID` must itself be an `ecfg_` id, and if it differs from the derived one nothing is written. Messages name settings and never include the string or its token. Whether newer Global Config ids still start `ecfg_` is **unconfirmed**: check one real value (host and path only) before relying on derivation for a site.
+
 ## How it was run
 
 ```sh

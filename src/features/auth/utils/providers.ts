@@ -20,3 +20,16 @@ export const PROVIDER_NAMES: Record<ProviderId, string> = {
   google: 'Google',
   test: 'test account',
 }
+
+/**
+ * Whether members-only content can work: `AUTH_SECRET` signs the session cookie, and at least one
+ * sign-in method is switched on. Names only.
+ */
+export function getMembersReadiness(env: Record<string, string | undefined>) {
+  const missing: string[] = []
+  if (!env.AUTH_SECRET) missing.push('AUTH_SECRET')
+  if (enabledProviders(env).length === 0) {
+    missing.push('AUTH_GITHUB_ID and AUTH_GITHUB_SECRET, or AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET')
+  }
+  return missing.length > 0 ? { ready: false as const, missing } : { ready: true as const }
+}

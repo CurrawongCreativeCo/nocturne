@@ -9,7 +9,11 @@ export interface Readiness {
   missing?: readonly string[]
 }
 
-export type FeatureStatus = 'ready' | 'not-set-up' | 'off' | 'cant-check'
+/**
+ * `not-in-use`: an opt-in feature with no switch in the profile that nothing has been set for (not
+ * a gap: most sites never need it). `dormant`: nothing reads its settings yet, so no state applies.
+ */
+export type FeatureStatus = 'ready' | 'not-set-up' | 'off' | 'cant-check' | 'not-in-use' | 'dormant'
 
 export interface LiveResult {
   status: 'ok' | 'failed' | 'not-implemented'
@@ -40,7 +44,7 @@ export interface SetupReport {
   schema: 1
   environment: BuildEnvironment
   features: FeatureReport[]
-  /** Features not registered yet (task 233). */
+  /** Features not registered yet. Empty since task 233; kept so readers of the report don't change. */
   pending: string[]
 }
 
@@ -50,6 +54,12 @@ export interface EvaluateInput {
   environment: BuildEnvironment
   /** `siteProfile.features`: a flag set to false switches the feature off. */
   profileFeatures: Partial<Record<string, boolean>>
+  /**
+   * The flags `site.profile.ts` actually writes (before defaults). A feature that is only on by
+   * default and has nothing set is "not in use", not a gap; one written `true` is a declaration that
+   * the site uses it. Leave out to treat every flag as written.
+   */
+  explicitFeatures?: Partial<Record<string, boolean>>
   readiness: Record<string, (env: Env) => Readiness>
   pending?: readonly { feature: string }[]
 }
@@ -81,6 +91,8 @@ export function evaluateFeature(feature: FeatureConfig, input: EvaluateInput): F
   if (feature.profileFlag && profileFeatures[feature.profileFlag] === false) {
     return { ...base, status: 'off', reason: 'Off in profile' }
   }
+
+  if (feature.dormant) return { ...base, status: 'dormant', reason: `Dormant: ${feature.dormant}` }
 
   const live = feature.settings.filter((setting) => !setting.planned)
   const required = live.filter((setting) => isRequired(setting, env))
@@ -126,6 +138,29 @@ export function evaluateFeature(feature: FeatureConfig, input: EvaluateInput): F
     })
 
   const details = { ...base, missing, invalid, unchecked: unchecked.map((s) => s.name), warnings }
+  // Nothing set for an optional feature is not a gap unless the profile declares it: opt-in
+  // infrastructure and features that are merely on by default. Half set up still is a gap.
+  const switches = feature.switchedBy ?? live.map((setting) => setting.name)
+  const started = switches.some((name) => isSet(env, name))
+  const declared = feature.profileFlag
+    ? input.explicitFeatures
+      ? input.explicitFeatures[feature.profileFlag] === true
+      : true
+    : false
+  if (
+    (missing.length > 0 || invalid.length > 0) &&
+    feature.tier === 'optional' &&
+    !started &&
+    !declared
+  ) {
+    return {
+      ...details,
+      status: 'not-in-use',
+      reason: feature.profileFlag
+        ? `Not in use: nothing is set for it, and features.${feature.profileFlag} isn't written in site.profile.ts`
+        : 'Not in use: nothing is set for it',
+    }
+  }
   if (missing.length > 0) {
     return { ...details, status: 'not-set-up', reason: `Not set up: ${missing.join(', ')} not set` }
   }

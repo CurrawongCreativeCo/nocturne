@@ -30,6 +30,7 @@ export const configControlsConfig = defineFeatureConfig({
         "Turns the build check's failures into warnings. It cannot skip a value the build itself needs, and it never affects dataset privacy or any other check.",
       default: 'Unset: the build check enforces',
       docs: 'README.md#configuration',
+      envExample: false,
     },
   ],
   verify: [],

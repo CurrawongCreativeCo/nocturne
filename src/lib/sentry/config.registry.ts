@@ -1,0 +1,80 @@
+import { defineFeatureConfig } from '@/config/feature-config'
+
+export const errorTrackingConfig = defineFeatureConfig({
+  id: 'error-tracking',
+  title: 'Error tracking (Sentry)',
+  summary:
+    'Sends server and browser errors to Sentry, tagged with the reference shown on the error page.',
+  why: 'Problems visitors hit reach the agency with the detail needed to fix them.',
+  withoutIt:
+    'Errors are logged as one JSON line each in Vercel. Nothing is sent anywhere and no Sentry code loads.',
+  profileFlag: null,
+  tier: 'optional',
+  docs: 'README.md#error-tracking',
+  setup: [
+    'Create a project in Sentry and copy its DSN into Vercel as SENTRY_DSN.',
+    'For readable stack traces, add SENTRY_AUTH_TOKEN, SENTRY_ORG and SENTRY_PROJECT to the Vercel build environment.',
+    'Redeploy: the DSN is built into the pages.',
+  ],
+  settings: [
+    {
+      name: 'SENTRY_DSN',
+      kind: 'server-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      buildTime: true,
+      required: true,
+      format: 'https-url',
+      purpose:
+        'Turns Sentry on. A DSN only lets events be sent, so it is public by design; the build copies it into the browser.',
+      source: 'Sentry → Project settings → Client Keys (DSN)',
+    },
+    {
+      name: 'SENTRY_TRACES_SAMPLE_RATE',
+      kind: 'server-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      buildTime: true,
+      required: false,
+      purpose: 'The share of requests traced, from 0 to 1.',
+      default: '0.1',
+      envExample: { placeholder: '0.1', commented: true },
+    },
+    {
+      name: 'SENTRY_AUTH_TOKEN',
+      kind: 'secret',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      buildTime: true,
+      required: false,
+      purpose:
+        'Uploads source maps during the build only. Add it to the Vercel build environment, not .env.local.',
+      default: 'Unset: no source maps are uploaded',
+      source: 'Sentry → Settings → Auth Tokens',
+      envExample: { commented: true },
+    },
+    {
+      name: 'SENTRY_ORG',
+      kind: 'server-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      buildTime: true,
+      required: false,
+      purpose: 'The Sentry organisation the source maps belong to.',
+      source: 'Sentry → Settings → Organization slug',
+      envExample: { commented: true },
+    },
+    {
+      name: 'SENTRY_PROJECT',
+      kind: 'server-env',
+      where: 'vercel',
+      targets: ['production', 'preview'],
+      buildTime: true,
+      required: false,
+      purpose: 'The Sentry project the source maps belong to.',
+      source: 'Sentry → Project settings → Project slug',
+      envExample: { commented: true },
+    },
+  ],
+  verify: [],
+})

@@ -19,7 +19,15 @@ import { fileURLToPath } from 'node:url'
 
 import { PRELAUNCH_LAUNCH, launchLine, setLaunchInProfile } from './profile-edit.mjs'
 import { seedDocuments } from './seed.mjs'
-import { DEFAULTS, DEV_PORT, ENV_KEYS, mergeEnv, normalize, parseEnv } from './validate.mjs'
+import {
+  DEFAULTS,
+  DEV_PORT,
+  ENV_KEYS,
+  mergeEnv,
+  normalize,
+  parseEnv,
+  setStudioName,
+} from './validate.mjs'
 
 const wizardDir = dirname(fileURLToPath(import.meta.url))
 const root = join(wizardDir, '..', '..')
@@ -360,6 +368,12 @@ function readEnvFile() {
 
 function writeEnvFile(values) {
   writeFileSync(envPath, mergeEnv(existsSync(envPath) ? readFileSync(envPath, 'utf8') : '', values))
+  // The Studio's name lives in studio-brand.json now, not in NEXT_PUBLIC_STUDIO_TITLE.
+  const brandPath = join(root, 'studio-brand.json')
+  if (existsSync(brandPath)) {
+    const next = setStudioName(readFileSync(brandPath, 'utf8'), values.studioTitle)
+    if (next !== null) writeFileSync(brandPath, next)
+  }
 }
 
 function removeWizard() {

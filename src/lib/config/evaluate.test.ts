@@ -56,6 +56,75 @@ function input(env: Record<string, string>, extra: Partial<EvaluateInput> = {}):
   }
 }
 
+describe('dormant and not-in-use features', () => {
+  const optIn = defineFeatureConfig({ ...feature, id: 'opt-in', profileFlag: null })
+
+  it('reports a dormant feature as dormant, whatever the environment holds', () => {
+    const dormant = defineFeatureConfig({ ...optIn, dormant: 'No endpoint exists yet.' })
+    const environments: Record<string, string>[] = [
+      {},
+      { DEMO_KEY: 'k', DEMO_URL: 'https://a.test' },
+    ]
+    for (const env of environments) {
+      expect(evaluateFeature(dormant, input(env))).toMatchObject({
+        status: 'dormant',
+        reason: 'Dormant: No endpoint exists yet.',
+      })
+    }
+  })
+
+  it('does not count an opt-in feature nobody has started as a gap', () => {
+    const report = evaluateFeature(optIn, input({}))
+    expect(report).toMatchObject({
+      status: 'not-in-use',
+      reason: 'Not in use: nothing is set for it',
+    })
+    expect(hasRequiredGap(buildReport(input({}, { registry: [optIn] })))).toBe(false)
+  })
+
+  it("uses switchedBy, so another feature's setting doesn't make it look started", () => {
+    const shared = defineFeatureConfig({ ...optIn, switchedBy: ['DEMO_URL'] })
+    expect(evaluateFeature(shared, input({ DEMO_KEY: 'k' })).status).toBe('not-in-use')
+    expect(evaluateFeature(shared, input({ DEMO_URL: 'https://a.test' })).status).toBe('not-set-up')
+  })
+
+  it('still flags an opt-in feature that is half set up', () => {
+    const report = evaluateFeature(optIn, input({ DEMO_KEY: 'k' }))
+    expect(report.status).toBe('not-set-up')
+    expect(report.missing).toEqual(['DEMO_URL'])
+  })
+
+  it('treats a feature that is only on by default, with nothing set, as not in use', () => {
+    const report = evaluateFeature(feature, input({}, { explicitFeatures: {} }))
+    expect(report.status).toBe('not-in-use')
+    expect(report.reason).toContain('features.forms')
+    expect(hasRequiredGap(buildReport(input({}, { explicitFeatures: {} })))).toBe(false)
+  })
+
+  it('still flags a feature the profile declares, or one that is half set up', () => {
+    expect(evaluateFeature(feature, input({})).status).toBe('not-set-up')
+    expect(evaluateFeature(feature, input({}, { explicitFeatures: { forms: true } })).status).toBe(
+      'not-set-up',
+    )
+    expect(
+      evaluateFeature(feature, input({ DEMO_KEY: 'k' }, { explicitFeatures: {} })).status,
+    ).toBe('not-set-up')
+  })
+
+  it('is never ready just because one variable exists: a readiness function can refuse', () => {
+    const withReadiness = defineFeatureConfig({ ...feature, readiness: 'demo' })
+    const report = evaluateFeature(
+      withReadiness,
+      input(
+        { DEMO_KEY: 'k', DEMO_URL: 'https://a.test' },
+        { readiness: { demo: () => ({ ready: false, missing: ['DEMO_OTHER'] }) } },
+      ),
+    )
+    expect(report.status).toBe('not-set-up')
+    expect(report.missing).toEqual(['DEMO_OTHER'])
+  })
+})
+
 describe('evaluateFeature', () => {
   it('is ready when every required setting is set', () => {
     const report = evaluateFeature(feature, input({ DEMO_KEY: 'k', DEMO_URL: 'https://a.test' }))
@@ -171,7 +240,7 @@ describe('the report', () => {
     const table = formatTable(report)
     expect(table).toContain('Not set up: DEMO_KEY, DEMO_URL not set')
     expect(table).toContain('Without it: Nothing happens.')
-    expect(table).toContain('Not registered yet (task 233): later.')
+    expect(table).toContain('Not registered yet: later.')
   })
 })
 

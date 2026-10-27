@@ -27,6 +27,7 @@ export const sanityCoreConfig = defineFeatureConfig({
       format: 'sanity-project-id',
       purpose: 'Says which Sanity project holds the content.',
       source: 'sanity.io/manage → your project → Project ID',
+      envExample: { placeholder: 'your-project-id' },
     },
     {
       name: 'NEXT_PUBLIC_SANITY_DATASET',
@@ -39,6 +40,7 @@ export const sanityCoreConfig = defineFeatureConfig({
       purpose: 'Says which dataset in that project is this site.',
       default: 'None in the app. The GitHub workflows assume "production".',
       source: 'sanity.io/manage → your project → API → Datasets',
+      envExample: { placeholder: 'production' },
     },
     {
       name: 'SANITY_API_READ_TOKEN',
@@ -60,8 +62,16 @@ export const sanityCoreConfig = defineFeatureConfig({
       targets: ['production', 'preview', 'development'],
       buildTime: true,
       required: false,
-      purpose: 'Pins the Sanity API date. A code constant in disguise.',
+      purpose: 'Pins the Sanity API date. It is now a constant in src/config/env.ts.',
       default: 'The date pinned in src/config/env.ts.',
+      deprecated: {
+        replacedBy:
+          'the API_VERSION constant in src/config/env.ts, bumped deliberately in a release',
+        migration: 'Delete the variable from Vercel and .env.local. The pinned date applies.',
+        removeWhen:
+          'One minor release after this deprecation has shipped, the setup wizard no longer writes it, and the removal is approved as its own versioned decision.',
+      },
+      envExample: false,
     },
   ],
   verify: ['check-dataset'],

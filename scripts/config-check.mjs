@@ -119,10 +119,9 @@ async function main() {
   const args = new Set(argv)
   const env = loadEnv(root, { envFile: !args.has('--no-env-file') })
 
-  const { featureRegistry, pending, readinessFunctions } = await jiti.import(
-    join(root, 'src/app/feature-registry.ts'),
-  )
-  const { siteProfile } = await jiti.import(join(root, 'src/config/profile.ts'))
+  const { featureRegistry, pending } = await jiti.import(join(root, 'src/app/feature-registry.ts'))
+  const { readinessFunctions } = await jiti.import(join(root, 'src/app/readiness-functions.ts'))
+  const { siteProfile, writtenFeatures } = await jiti.import(join(root, 'src/config/profile.ts'))
   const { detectBuildEnvironment } = await jiti.import(join(root, 'src/lib/config/environment.ts'))
   const environment = detectBuildEnvironment(env)
 
@@ -150,6 +149,7 @@ async function main() {
     env,
     environment,
     profileFeatures: siteProfile.features,
+    explicitFeatures: writtenFeatures,
     readiness: readinessFunctions,
     pending,
   })

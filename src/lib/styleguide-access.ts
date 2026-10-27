@@ -54,3 +54,16 @@ export function tokenMatches(expected: string | undefined, given: string | null 
 export function isStyleguidePath(pathname: string, base: string) {
   return pathname === base || pathname.startsWith(`${base}/`)
 }
+
+/** Whether a Vercel preview can open the style guide: the token must be long enough to count as set. */
+export function getStyleguideReadiness(env: Record<string, string | undefined> = process.env) {
+  const token = env.STYLEGUIDE_PREVIEW_TOKEN ?? ''
+  return token.length >= MIN_PREVIEW_TOKEN_LENGTH
+    ? { ready: true as const }
+    : {
+        ready: false as const,
+        missing: [
+          `STYLEGUIDE_PREVIEW_TOKEN (${String(MIN_PREVIEW_TOKEN_LENGTH)} or more characters)`,
+        ],
+      }
+}

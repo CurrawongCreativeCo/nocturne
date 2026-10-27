@@ -48,6 +48,7 @@ export const STATUS_LABEL = {
   attention: 'Not set up',
   ready: 'Ready',
   'cant-check': "Can't be checked from here",
+  'not-in-use': 'Not in use',
   off: "Off in this site's profile",
 } as const
 
@@ -55,6 +56,7 @@ export const GROUP_TITLE = {
   attention: 'Needs attention',
   'cant-check': "Can't be checked from here",
   ready: 'Ready',
+  'not-in-use': 'Not in use',
   off: "Off in this site's profile",
 } as const
 
