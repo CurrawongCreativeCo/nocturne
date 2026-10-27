@@ -29,8 +29,6 @@ you start a release.
 
 - **End-to-end tests:** the build now clears cached Sanity responses first, so a local run no longer reuses days-old event dates; the screenshot specs stop waiting after 10 s for a picture that never loads and name it.
 
-
-
 ### Breaking changes / migration steps
 
 ## [1.9.0] - 2026-10-27

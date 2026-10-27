@@ -1,13 +1,12 @@
 # End-to-end speed: approved follow-ups, results
 
-27 October 2026, branch `spike/e2e-speed`. Follows [e2e-speed.md](e2e-speed.md). Four change commits after the spike commit, one per
-change, so any can be dropped on its own (the experiment is a measurement, not a commit). Nothing is merged, pushed or deployed.
+27 October 2026. Follows [e2e-speed.md](e2e-speed.md). The local results below were written on the spike branch; the
+CI results at the end are from GitHub Actions. Merged: timing instrumentation, the stale data-cache fix and the bounded
+image decode (pull requests #123 and #124). Not merged: the `.next/cache` copy exclusion (dropped, see the end).
 
 ## Read this first
 
-- **There is no CI before/after yet.** No CI run has used the new instrumentation, so no CI wall-clock figure exists to
-  compare. Every "before and after" below is a local Windows run. The first step is to push `daa7cfc` (the timing
-  commit) alone, take the baseline from its run summary, then push the rest.
+- **Local numbers are Windows runs; the CI section at the end is the evidence that counts.**
 - **One claim in the spike was wrong.** It said excluding `.next/cache` saves 9 s per copy. It does not (see change 4).
 
 ## Unit-test count: 2,996 versus "more than 4,000"
@@ -152,16 +151,44 @@ skipped by dependency failures before), so the test phase is the fair figure (-2
 are the `settle` spec (3) and the isolated projects. Visual specs skip on Windows in both. **Linux visual baselines have
 not been refreshed or run here**; the "Update visual baselines" workflow or CI is where they run.
 
-## Deferred, as instructed
+## CI results (27 October 2026)
 
-Project-scope changes, shard restructuring, more workers or runners, conditional server startup and shared CI builds
-are untouched. After the CI baseline, the first thing worth knowing is each shard's build-and-server time and the slowest
-shard; those decide whether the deferred items are worth their risk.
+Two comparable runs of the same code (the fixes added a no-op cache clear in CI and a decode cap), on GitHub's
+`ubuntu-latest`, from the `e2e timings` summary of each run:
 
-## By hand
+| Shard (wall / build + servers / tests)          | Run A (fixes PR)     | Run B (timings PR, re-run) |
+| ----------------------------------------------- | -------------------- | -------------------------- |
+| 1                                               | 352 / 51 / 301 s     | 519 / 77 / 442 s           |
+| 2                                               | **992** / 74 / 919 s | **760** / 59 / 701 s       |
+| 3                                               | 468 / 75 / 393 s     | 395 / 62 / 333 s           |
+| 4                                               | 511 / 55 / 456 s     | 598 / 60 / 537 s           |
+| isolated (design-visual / design / experiments) | 155 / 101 / 84 s     | 138 / 88 / 63 s            |
 
-1. Push `daa7cfc` (and its parent doc commit) alone and let one CI run finish; keep that run's summary and the
-   `e2e-timings-summary` artifact as the baseline.
-2. Then push the remaining commits and compare with `scripts/e2e-timings.mjs`.
-3. Tell me where the "more than 4,000" came from if it was not unit plus end-to-end.
-4. Decide whether to keep change 4 once CI numbers exist.
+- **Slowest shard:** shard 2 in both runs, which also holds the biggest share of the work (1,807 s of 4,046 s of worker
+  time in run A, 1,377 s of 3,934 s in run B).
+- **Failures and retries:** none in either run. No flaky tests, nothing unmeasured.
+- **Visual tests:** passed against the existing baselines in both runs. No baseline was regenerated.
+- **Variation:** the same shard moved by up to 50% between runs (shard 1: 352 s to 519 s), in both directions. One
+  attempt also lost 335 s to a slow Chromium install and hit the 20-minute job limit (a re-run passed). Build and
+  server startup was 51 to 77 s per shard. Two runs cannot show an effect of a few seconds.
+- **Critical path:** `e2e (2/4)` took 1,056 s of the 1,200 s job limit in run A.
+- **Missing versus zero:** the summary printed "n/a" for a measurement it did not have, and a report that arrives with
+  no tests no longer appears as a job (fixed in `cfa256f`: a re-run had left the previous attempt's summary artifact
+  to be read as a job).
+- **Uploaded data:** reports are slimmed to durations and statuses (about 16 to 19 KB per job, no config, errors or output).
+- **Formatting:** the Linux `check` job passed `format:check`; the Windows warnings were line endings only.
+
+### Decisions
+
+- **Change 4 (`.next/cache` exclusion): dropped, not merged.** Startup varies by about 25 s across shards in one run,
+  against roughly 1 s saved locally. CI cannot show a benefit that small, and no operational reason justified it.
+- **The pending `e2e` check** that never reported came from a ruleset still requiring a job named `e2e`, which was
+  split into `e2e (n/4)` on 16 October. It was updated in the repository's ruleset; no code was involved.
+- **Brand-preview shared page:** rejected. No further brand-preview work is planned.
+
+### Observations (no work started)
+
+- Shard 2 carries 45% of the worker time because the heaviest files (`studio-brand-preview`, `visual`,
+  `studio-brand-visual`) fall in the same contiguous slice.
+- Its job can approach the 20-minute limit on a slow day.
+- Project scope, shards, workers, conditional servers and shared builds remain deferred until there is a demonstrated need.
