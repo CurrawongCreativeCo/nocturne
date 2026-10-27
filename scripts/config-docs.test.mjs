@@ -152,7 +152,9 @@ describe('the committed files', () => {
     })
     expect(`${result.stdout}${result.stderr}`).toContain('current')
     expect(result.status).toBe(0)
-  })
+    // It starts a second Node process and compiles the whole registry, which takes seconds on a busy
+    // machine (it timed out at the 5 s default in CI-like runs).
+  }, 30_000)
 })
 
 describe('.env.example holds placeholders, never live values', () => {
