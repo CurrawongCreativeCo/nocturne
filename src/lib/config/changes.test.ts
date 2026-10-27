@@ -219,6 +219,47 @@ describe('formatChanges', () => {
   })
 })
 
+describe('a setting the site already needs at run time', () => {
+  const registry = [
+    core([
+      setting({
+        name: 'TOKEN',
+        required: true,
+        requiredAtRuntime: true,
+        requiredIn: ['production'],
+        enforceFrom: '1.11.0',
+      }),
+    ]),
+  ]
+
+  it('is described as needed now, never as optional until the build enforces it', () => {
+    const text = formatChanges(changesSince(registry, '1.9.0', '1.10.0'), { markdown: true }).join(
+      '\n',
+    )
+    expect(text).toContain('Needed for the site to run')
+    expect(text).toContain('the site already fails without it, in every environment')
+    expect(text).toContain('the build refuses a missing one from 1.11.0')
+    expect(text).not.toContain('set them now, the build only warns')
+    expect(text).not.toContain('in production')
+  })
+
+  it('keeps ordinary later requirements under the old heading', () => {
+    const ordinary = [
+      core([
+        setting({
+          name: 'LATER',
+          required: true,
+          requiredIn: ['production'],
+          enforceFrom: '1.11.0',
+        }),
+      ]),
+    ]
+    const text = formatChanges(changesSince(ordinary, '1.9.0', '1.10.0')).join('\n')
+    expect(text).toContain('Required from a later version')
+    expect(text).not.toContain('Needed for the site to run')
+  })
+})
+
 describe('checkBaseline and checkVersions', () => {
   const allowed = ['NEXT_PUBLIC_SANITY_PROJECT_ID']
 

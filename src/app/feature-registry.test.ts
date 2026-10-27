@@ -86,6 +86,7 @@ describe('the registry', () => {
       'buildTime',
       'required',
       'requiredIn',
+      'requiredAtRuntime',
       'enforceFrom',
       'default',
       'format',
