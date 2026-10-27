@@ -30,6 +30,23 @@ describe('checkDatasetPrivate', () => {
     expect(publicResult[0].status).toBe('fail')
     expect(publicResult[0].detail).toContain('PUBLIC')
   })
+  it('turns an accepted public dataset into a warning, and fails it once something is readable', async () => {
+    const answer = (counts) => {
+      let call = 0
+      return vi
+        .fn()
+        .mockImplementation(async (url) =>
+          String(url).endsWith('/datasets')
+            ? { status: 200, json: async () => [{ name: 'production', aclMode: 'public' }] }
+            : { status: 200, json: async () => ({ result: counts[call++] }) },
+        )
+    }
+    const accepting = { ...env, ACCEPT_PUBLIC_DATASET: 'Free plan' }
+    const [accepted] = await checkDatasetPrivate({ env: accepting, fetchImpl: answer([0, 0, 0]) })
+    expect(accepted.status).toBe('warn')
+    const [exposed] = await checkDatasetPrivate({ env: accepting, fetchImpl: answer([0, 1, 0]) })
+    expect(exposed.status).toBe('fail')
+  })
   it('reminds instead of failing when the values are not available', async () => {
     const fetchImpl = vi.fn()
     const [result] = await checkDatasetPrivate({ env: {}, fetchImpl })

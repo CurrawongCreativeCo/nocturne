@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url'
 import {
   constantCase,
   createContext,
+  classifyNewDocument,
   findTypeNameUsage,
   planSchemaRegistration,
   toFeatureName,
@@ -45,6 +46,7 @@ const paths = {
   live: join(root, 'src/lib/sanity/live.ts'),
   structure: join(root, 'src/features/studio/structure.ts'),
   clientEditable: join(root, 'src/lib/sanity/client-editable.ts'),
+  exposure: join(root, 'scripts/dataset-exposure.json'),
   gitkeeps: ['schemas', 'api'].map((dir) => join(root, 'src/features', feature, dir, '.gitkeep')),
 }
 
@@ -59,7 +61,13 @@ const registration = planSchemaRegistration({ root, feature, typeName, kebab })
 if (registration.error) exit(registration.error)
 
 const touched = write({
-  create: { ...registration.create, [paths.schema]: schema(), [paths.api]: api() },
+  create: {
+    ...registration.create,
+    [paths.schema]: schema(),
+    [paths.api]: api(),
+    // A public dataset exposes this type too: record the decision (see src/app/dataset-exposure.test.ts).
+    [paths.exposure]: classifyNewDocument(readFileSync(paths.exposure, 'utf8'), typeName),
+  },
   edits: [
     ...registration.edits,
     { file: paths.live, marker: '// new-document:tag', text: `${typeName}: '${typeName}',\n` },
@@ -86,8 +94,10 @@ console.log(`
 Next:
   1. Add fields in ${rel(paths.schema)}
   2. Shape ${constantCase(typeName)}_QUERY and get${Component}() in ${rel(paths.api)}, then run \`npm run typegen\`
-  3. Webhook mode only: add "${typeName}" to the webhook filter (README, "Live mode vs. webhook mode")
-  4. Routes in src/app compose the feature: call get${Component}() from a page. If you add a route,
+  3. Check scripts/dataset-exposure.json: "${typeName}" is recorded as published. If it can hold
+     personal or secret data, add a probe there and mark it probed (README, "Dataset privacy")
+  4. Webhook mode only: add "${typeName}" to the webhook filter (README, "Live mode vs. webhook mode")
+  5. Routes in src/app compose the feature: call get${Component}() from a page. If you add a route,
      add a fixture document in tests/e2e/fixtures/dataset.mjs so the axe scan covers it.
 `)
 

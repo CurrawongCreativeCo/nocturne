@@ -117,6 +117,8 @@ jobs:
         if: steps.gate.outputs.state == 'ready'
         env:
           CHECK_MODE: ${{ steps.mode.outputs.mode }}
+          # A written reason accepts a public dataset on purpose (README, "Dataset privacy").
+          ACCEPT_PUBLIC_DATASET: ${{ vars.ACCEPT_PUBLIC_DATASET }}
         run: |
           args=(--json)
           [ "$CHECK_MODE" = "prelaunch" ] && args+=(--prelaunch)

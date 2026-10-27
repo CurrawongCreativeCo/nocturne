@@ -127,7 +127,9 @@ describe.skipIf(!existsSync(SNAPSHOT_FILE))('against the last released registry'
   it('has no change since that would be refused if it were released today', () => {
     // An early warning in `npm run check`, so a pull request doesn't wait for the release to be refused.
     const snapshot = load()
-    expect(checkRelease(snapshot, featureRegistry, snapshot.version)).toEqual([])
+    expect(checkRelease(snapshot, featureRegistry, snapshot.version, { versions: false })).toEqual(
+      [],
+    )
   })
 
   it('is a snapshot this version of the tooling can read', () => {

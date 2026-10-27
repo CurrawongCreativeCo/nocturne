@@ -20,10 +20,13 @@ you start a release.
 
 ### Added
 
+- **Acknowledge a public dataset on purpose (`ACCEPT_PUBLIC_DATASET`):** a site on a plan without private datasets no longer has a health check that fails every day. Set the GitHub variable (and `.env.local` for local runs) to a written reason. That records a decision that the dataset is public and everything in it is readable; it does not make the content safe. `check:dataset`, `launch:check` and the Health workflow then ask Sanity, with no token, how many published enquiries, forms with a recipient address and members-only pages or sections an anonymous visitor can find. If all are zero the dataset is reported as accepted, the Health run ends as a warning (no issue is opened) and `launch:check` warns. If any is above zero, a count can't be read, or there is no reason, it fails as before and says which. The counts cover only the sensitive things the template knows about. `scripts/dataset-exposure.json` classifies every document type, and `src/app/dataset-exposure.test.ts` fails when a new type is added unclassified or a field that looks personal or secret appears on an unprobed type, so a new feature can't silently skip the check. Registered under Daily health monitoring (since 1.10.0). Existing projects: nothing to do (README, _Dataset privacy_).
 - **End-to-end speed spike:** `docs/spikes/e2e-speed.md` measures which Playwright specs need only one of the desktop and mobile projects, models the CI shard balance, and proposes follow-up tasks. No test behaviour changed.
 - **CI end-to-end timings:** every Playwright job writes a JSON report and a new `e2e timings` job summarises wall time, build and server startup, the slowest job, retries, failures and the slowest specs in the run summary (`scripts/e2e-timings.mjs`). Results of the first follow-ups are in `docs/spikes/e2e-speed-follow-ups.md`.
 
 ### Changed
+
+- **Release keeps `package.json` in step:** `npm run release` now sets the version in `package.json` and `package-lock.json` (they had stayed at 1.7.1) and refuses to start if they disagree with `template-version.json`; `npm run check:version` fails on the same disagreement. It applies only to the template's own package (named `nocturne`): a client site keeps its own name and version. Existing projects: nothing to do.
 
 ### Fixed
 
