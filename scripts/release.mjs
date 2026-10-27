@@ -9,7 +9,8 @@
  * refuses, before writing anything and listing every reason, a release that could switch off a
  * working feature or make a site undeployable; writes a "New configuration in X.Y.Z" CHANGELOG
  * section; and replaces config-registry.snapshot.json (the previous release's registry, which it
- * validated against first) with this release's. `--dry-run` does all the checking and writes
+ * validated against first) with this release's. On the template itself it also sets the version in
+ * package.json and package-lock.json. `--dry-run` does all the checking and writes
  * nothing. `--baseline` is only for the first release, when no snapshot exists yet.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -22,6 +23,8 @@ import { prepareRelease, SNAPSHOT_FILE } from './release-utils.mjs'
 
 const STAMP_FILE = 'template-version.json'
 const CHANGELOG_FILE = 'CHANGELOG.md'
+const PACKAGE_FILE = 'package.json'
+const LOCK_FILE = 'package-lock.json'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const jiti = createJiti(import.meta.url, {
@@ -86,6 +89,8 @@ export function runRelease({ cwd, argv, registry, rules, now = today }) {
     version,
     date,
     baseline: argv.includes('--baseline'),
+    packageText: existsSync(at(PACKAGE_FILE)) ? readFileSync(at(PACKAGE_FILE), 'utf8') : null,
+    lockText: existsSync(at(LOCK_FILE)) ? readFileSync(at(LOCK_FILE), 'utf8') : null,
     registry,
     rules,
   })
@@ -108,14 +113,16 @@ export function runRelease({ cwd, argv, registry, rules, now = today }) {
   // The stamp goes last: until it moves, a rerun is refused as inconsistent rather than repeated.
   writeFileSync(at(CHANGELOG_FILE), result.files.changelog)
   writeFileSync(at(SNAPSHOT_FILE), result.files.snapshot)
+  if (result.files.package) writeFileSync(at(PACKAGE_FILE), result.files.package)
+  if (result.files.lock) writeFileSync(at(LOCK_FILE), result.files.lock)
   writeFileSync(at(STAMP_FILE), result.files.stamp)
 
-  out.push(`Released ${stamp.version} -> ${version} (${date}) in ${CHANGELOG_FILE}, ${STAMP_FILE} and ${SNAPSHOT_FILE}.
+  out.push(`Released ${stamp.version} -> ${version} (${date}) in ${CHANGELOG_FILE}, ${STAMP_FILE}, ${SNAPSHOT_FILE}${result.files.package ? ` and ${PACKAGE_FILE}/${LOCK_FILE}` : ''}.
 
 Next, by hand (this script never runs git):
 
   1. Review the diff, then npm run format && npm run check && npm run test:e2e
-  2. git add ${CHANGELOG_FILE} ${STAMP_FILE} ${SNAPSHOT_FILE}
+  2. git add ${CHANGELOG_FILE} ${STAMP_FILE} ${SNAPSHOT_FILE}${result.files.package ? ` ${PACKAGE_FILE} ${LOCK_FILE}` : ''}
      git commit -m "Release v${version}"
   3. Get that commit onto main (pull request, or push main directly if you are an admin), then:
      git switch main && git pull --ff-only

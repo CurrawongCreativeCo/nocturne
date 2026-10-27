@@ -206,6 +206,44 @@ describe('prepareRelease: the seven cases', () => {
     expect(run(base, base, { baseline: true }).problems.join('\n')).toContain('only for the first')
   })
 
+  it('moves package.json and the lockfile with the release, and refuses when they have drifted', () => {
+    const pkg = (version) => `${JSON.stringify({ name: 'nocturne', version }, null, 2)}\n`
+    const lock = (version) =>
+      `${JSON.stringify({ name: 'nocturne', version, packages: { '': { version } } }, null, 2)}\n`
+    const inputs = { stamp: STAMP, changelog: CHANGELOG, version: '1.9.0', date: '2026-10-27' }
+    const ok = prepareRelease({
+      ...inputs,
+      snapshotText: released(base),
+      registry: base,
+      rules: rules(),
+      packageText: pkg('1.8.0'),
+      lockText: lock('1.8.0'),
+    })
+    expect(ok.files.package).toBe(pkg('1.9.0'))
+    expect(ok.files.lock).toBe(lock('1.9.0'))
+
+    const drifted = prepareRelease({
+      ...inputs,
+      snapshotText: released(base),
+      registry: base,
+      rules: rules(),
+      packageText: pkg('1.7.1'),
+      lockText: lock('1.8.0'),
+    })
+    expect(drifted.files).toBeNull()
+    expect(drifted.problems[0]).toContain('package.json says 1.7.1')
+
+    const client = prepareRelease({
+      ...inputs,
+      snapshotText: released(base),
+      registry: base,
+      rules: rules(),
+      packageText: `${JSON.stringify({ name: 'acme', version: '0.1.0' })}\n`,
+    })
+    expect(client.problems).toEqual([])
+    expect(client.files.package).toBeNull()
+  })
+
   it('does not accept an entry claiming a later version than the release', () => {
     const future = [base[0], feature('forms', [base[1].settings[0]], { since: '1.10.0' })]
     expect(run(future, base).problems.join('\n')).toContain('later than this release')
@@ -224,6 +262,9 @@ describe('runRelease: the whole release against real files', () => {
     })
   const previous = [core([PROJECT, token()])]
   const stampText = (version) => `{ "version": "${version}", "released": "2026-10-23" }\n`
+  const pkgText = (version) => `${JSON.stringify({ name: 'nocturne', version }, null, 2)}\n`
+  const lockText = (version) =>
+    `${JSON.stringify({ name: 'nocturne', version, packages: { '': { version } } }, null, 2)}\n`
   const changelogFor = (version) => CHANGELOG.replaceAll('1.8.0', version)
   /** A configuration that worked in 1.9.0 and has no token. */
   const tokenless = {
@@ -237,12 +278,20 @@ describe('runRelease: the whole release against real files', () => {
     const dir = mkdtempSync(join(tmpdir(), 'run-release-'))
     writeFileSync(join(dir, 'CHANGELOG.md'), changelogFor(version))
     writeFileSync(join(dir, 'template-version.json'), stampText(version))
+    writeFileSync(join(dir, 'package.json'), pkgText(version))
+    writeFileSync(join(dir, 'package-lock.json'), lockText(version))
     if (snapshot)
       writeFileSync(
         join(dir, 'config-registry.snapshot.json'),
         serialiseSnapshot(version, snapshot),
       )
-    const files = ['CHANGELOG.md', 'template-version.json', 'config-registry.snapshot.json']
+    const files = [
+      'CHANGELOG.md',
+      'template-version.json',
+      'config-registry.snapshot.json',
+      'package.json',
+      'package-lock.json',
+    ]
     const read = () =>
       Object.fromEntries(
         files.map((f) => [f, existsSync(join(dir, f)) ? readFileSync(join(dir, f), 'utf8') : null]),
@@ -262,6 +311,8 @@ describe('runRelease: the whole release against real files', () => {
       stampText('1.10.0').replace('2026-10-23', '2026-11-10'),
     )
     expect(JSON.parse(after['config-registry.snapshot.json'])).toMatchObject({ version: '1.10.0' })
+    expect(after['package.json']).toBe(pkgText('1.10.0'))
+    expect(after['package-lock.json']).toBe(lockText('1.10.0'))
 
     const again = release(dir, previous, {}, '1.10.0')
     expect(again.status).toBe(1)
@@ -314,12 +365,22 @@ describe('runRelease: the whole release against real files', () => {
   it('refuses with no snapshot unless --baseline, and --baseline once one exists', () => {
     const none = project({ snapshot: null })
     expect(release(none.dir, previous, {}, '1.10.0').stderr).toContain('--baseline')
-    expect(Object.values(none.read()).filter(Boolean)).toHaveLength(2)
+    expect(none.read()['config-registry.snapshot.json']).toBeNull()
 
     const have = project()
     const result = release(have.dir, previous, {}, '1.10.0', '--baseline')
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('only for the first release')
+  })
+
+  it('refuses to start when package.json has drifted from the stamp, and changes nothing', () => {
+    const { dir, read } = project()
+    writeFileSync(join(dir, 'package.json'), pkgText('1.7.1'))
+    const before = read()
+    const result = release(dir, previous, {}, '1.10.0')
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('package.json says 1.7.1')
+    expect(read()).toEqual(before)
   })
 
   it('a half-finished earlier run is refused as inconsistent rather than repeated', () => {
