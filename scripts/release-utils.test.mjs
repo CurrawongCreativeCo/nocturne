@@ -5,8 +5,10 @@ import {
   compareVersions,
   isValidDate,
   latestChangelogRelease,
+  parseSnapshot,
   parseVersion,
   releaseChangelog,
+  serialiseSnapshot,
 } from './release-utils.mjs'
 
 const BASE = 'https://github.com/example/site'
@@ -215,5 +217,76 @@ describe('checkVersionStamp', () => {
     const out = release(changelog())
     expect(checkVersionStamp({ version: '1.2.0', released: '2026-11-02' }, out)).toBeNull()
     expect(checkVersionStamp(stamp, out)).not.toBeNull()
+  })
+})
+
+describe('releaseChangelog configuration section', () => {
+  const base = `# Changelog
+
+## [Unreleased]
+
+### Added
+
+- A new thing.
+
+### Breaking changes / migration steps
+
+## [1.0.0] - 2026-01-01
+
+### Added
+
+- First.
+
+### Breaking changes / migration steps
+
+None.
+
+[Unreleased]: https://github.com/example/site/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/example/site/releases/tag/v1.0.0
+`
+
+  it('writes "New configuration in X.Y.Z" before the breaking-changes section', () => {
+    const out = releaseChangelog(base, {
+      version: '1.1.0',
+      date: '2026-02-01',
+      configuration: ['**New features**', '', '- Forms: sends mail.'],
+    })
+    const released = out.slice(out.indexOf('## [1.1.0]'), out.indexOf('## [1.0.0]'))
+    expect(released).toContain(
+      '### New configuration in 1.1.0\n\n**New features**\n\n- Forms: sends mail.',
+    )
+    expect(released.indexOf('### New configuration in 1.1.0')).toBeLessThan(
+      released.indexOf('### Breaking changes'),
+    )
+    expect(released.indexOf('### Added')).toBeLessThan(released.indexOf('### New configuration'))
+  })
+
+  it('leaves the section out when nothing changed', () => {
+    expect(releaseChangelog(base, { version: '1.1.0', date: '2026-02-01' })).not.toContain(
+      'New configuration in',
+    )
+  })
+})
+
+describe('the registry snapshot', () => {
+  const text = serialiseSnapshot('1.8.0', [{ id: 'forms', settings: [] }])
+
+  it('round-trips and ends with a newline', () => {
+    expect(text.endsWith('\n')).toBe(true)
+    expect(parseSnapshot(text, '1.8.0')).toEqual({
+      schema: 1,
+      version: '1.8.0',
+      features: [{ id: 'forms', settings: [] }],
+    })
+  })
+
+  it('is the baseline when there is no file', () => {
+    expect(parseSnapshot(null, '1.8.0')).toBeNull()
+  })
+
+  it('refuses a snapshot from a different release, or one it cannot read', () => {
+    expect(() => parseSnapshot(text, '1.9.0')).toThrow(/released in 1\.8\.0/)
+    expect(() => parseSnapshot('{', '1.8.0')).toThrow(/not valid JSON/)
+    expect(() => parseSnapshot('{"schema":2}', '1.8.0')).toThrow(/needs/)
   })
 })

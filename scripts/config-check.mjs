@@ -10,6 +10,9 @@
  *   --live       also asks Sanity about the dataset (the other features: "not implemented yet")
  *   --github     read-only report of each workflow-backed feature's GitHub setup and latest real result
  *                (needs GITHUB_TOKEN in the environment; --repo owner/name, default: the origin remote)
+ *   --since <version>  what changed since that template version: newly required or enforced settings
+ *                first, optional features "available, not set up", deprecations with their replacement
+ *   --markdown   with --since, a "Configuration changes" block for the client update PR
  *   --json       the same report as JSON, for tools
  *   --no-env-file  ignore .env.local (the tests use it)
  */
@@ -114,6 +117,13 @@ async function runGithub(argv, args, env, registry) {
   }
 }
 
+/** `--since 1.7.0` or `--since=1.7.0`; null when absent, '' when it has no value. */
+function sinceFromArgs(argv) {
+  const index = argv.findIndex((arg) => arg === '--since' || arg.startsWith('--since='))
+  if (index < 0) return null
+  return argv[index].includes('=') ? argv[index].split('=')[1] : (argv[index + 1] ?? '')
+}
+
 async function main() {
   const argv = process.argv.slice(2)
   const args = new Set(argv)
@@ -154,6 +164,35 @@ async function main() {
     pending,
   })
   if (args.has('--live')) await addLiveChecks(report, env)
+
+  const since = sinceFromArgs(argv)
+  if (since !== null) {
+    const { changesSince, formatChanges, parseVersion, compareVersions } = await jiti.import(
+      join(root, 'src/lib/config/changes.ts'),
+    )
+    const current = JSON.parse(readFileSync(join(root, 'template-version.json'), 'utf8')).version
+    if (!parseVersion(since)) {
+      console.error(`--since needs a version like 1.7.0 (no "v"); got "${since}".`)
+      process.exit(1)
+    }
+    if (compareVersions(since, current) > 0) {
+      console.error(`--since ${since} is later than this site's template version ${current}.`)
+      process.exit(1)
+    }
+    const ready = new Set(
+      report.features.filter((feature) => feature.status === 'ready').map((f) => f.id),
+    )
+    const changes = changesSince(featureRegistry, since, current, ready)
+    const lines = formatChanges(changes, { markdown: args.has('--markdown') })
+    console.log(
+      args.has('--json')
+        ? JSON.stringify(changes, null, 2)
+        : lines.length > 0
+          ? lines.join('\n')
+          : `No configuration changes between ${since} and ${current}.`,
+    )
+    return
+  }
 
   console.log(args.has('--json') ? JSON.stringify(report, null, 2) : formatTable(report))
 

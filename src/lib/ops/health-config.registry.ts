@@ -88,6 +88,7 @@ export const healthMonitoringConfig = defineFeatureConfig({
       purpose: 'Tells the workflow that stored enquiries make a public dataset more serious.',
       default: 'Off. A copy of the Vercel setting, kept only so the health workflow knows',
       deprecated: {
+        since: '1.9.0',
         replacedBy:
           'the anonymous enquiry-exposure probe in the health check (task 230); the run summary carries the deprecation line',
         migration:
