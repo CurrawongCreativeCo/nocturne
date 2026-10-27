@@ -24,6 +24,7 @@ export const studioBrandConfig = defineFeatureConfig({
       purpose: "The Studio's name, used only while studio-brand.json has no name.",
       default: 'Nocturne',
       deprecated: {
+        since: '1.9.0',
         replacedBy: 'the name in studio-brand.json, which already wins over it',
         migration:
           'Copy the value into "name" in studio-brand.json, deploy, then delete the variable from Vercel and .env.local.',

@@ -493,7 +493,9 @@ Configuration (a local build)
 Each line is **Ready**, **Not set up: <why>**, **Off in profile** (the feature's switch in `site.profile.ts` is false) or
 **Can't check here** (GitHub-side settings, which need `--github`, task 231). Options: `--strict` exits 1 when a feature
 that is on is missing something it needs; `--json` prints the same report as JSON; `--live` also asks Sanity about the
-dataset's privacy (the other features say "not implemented yet"); `--build` runs only the build gate below.
+dataset's privacy (the other features say "not implemented yet"); `--build` runs only the build gate below;
+`--since <version> [--markdown]` prints what changed in configuration since that template version (see
+[Updating from the template](#updating-from-the-template)).
 
 **The build gate.** `npm run build` runs `config:check --build` first. It enforces exactly two settings,
 `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATASET`, which `src/config/env.ts` already throws on, so no site
@@ -5308,9 +5310,19 @@ git merge v1.2.0                              # first time only, see below: add 
 npm install                                   # dependencies usually change
 npm run typegen                               # regenerates src/types/sanity.types.ts (needs .env.local and Node from .nvmrc)
 npx next typegen                              # route types (PageProps); `npm run dev` or `build` also make them
+npm run config:check -- --since 1.1.0 --markdown   # configuration changes since the version you came from
 npm run check
 npm run test:e2e
 ```
+
+**Put the `config:check --since` output in the PR description.** Use the version in your old `template-version.json`
+(`--since` is the version you are updating _from_; run it after the merge, so it knows the new registry). It lists
+what the update changes in configuration, most urgent first: settings the build now refuses to run without (set
+them in Vercel before merging, because the preview build fails until they are), new required settings, settings that
+will be required from a later version (the build only warns for now), new optional features as "available, not set
+up", and deprecations with their replacement and removal version. Drop `--markdown` for plain text. An update never
+switches a working feature off: the template's release script refuses a release that would (see _Cutting a
+release_), so anything listed under _Set these before merging_ was announced as a warning in an earlier release.
 
 Commit the merge, open a PR (or push, if you may) and let CI confirm. If it goes badly,
 `git merge --abort` before committing, or delete the branch after.
@@ -5388,16 +5400,64 @@ take the template's copy.
    subsections are dropped; _Breaking changes / migration steps_ is kept and says "None." when empty), refreshes the
    compare links and `template-version.json`, and leaves a fresh _Unreleased_ block. Write the migration steps in
    _Unreleased_ **before** running it.
-3. Review the diff, then `npm run format`, `npm run check` and `npm run test:e2e`. **Review configuration enforcement:** run
+3. Review the diff, then `npm run format`, `npm run check` and `npm run test:e2e`. **What the release script does with
+   configuration** (settings spec §R.3). Before writing anything it checks, and lists every reason at once if it refuses:
+   a core setting that becomes enforced without an earlier release in which it was only a warning (give it an
+   `enforceFrom` later than the release first); an optional feature that gains a required setting with no `default`
+   and no deprecation window (give it a default, or mark the setting it replaces `deprecated.replacedBy`); a
+   `tier: 'core'` feature added with a required setting whose `enforceFrom` is not later than the release; a feature
+   that was ready under the last release's settings and isn't under this one; a hand-written historical
+   configuration (below) that no longer works; or a `since` later than the release carrying it. A core setting that
+   only warns until a later `enforceFrom` never counts as breaking a site. Only then does it write the **New
+   configuration in X.Y.Z** CHANGELOG section (from each registry entry's `since`, `enforceFrom` and
+   `deprecated.since`, so set `since` to the version the feature ships in, and leave `deprecated.since` out unless you
+   know it: a deprecation without one, or announced earlier, is not described again as news) and replace
+   `config-registry.snapshot.json`. The snapshot is read and validated **before** it is replaced, so a release is
+   always checked against the previous published one, never against itself. Commit it with the release.
+   `npm run release -- 1.2.0 --dry-run` does all the checking and prints the update-PR text without writing a file.
+   Running it twice is safe: the second run is refused because the version is no longer greater, and a run that
+   stopped halfway is refused as inconsistent (the stamp is written last), so no CHANGELOG section is duplicated.
+
+   **The first release with a registry (`--baseline`).** No snapshot exists, and none can be rebuilt for 1.8.0 (the
+   registry didn't exist then), so automated comparison with earlier releases is unavailable. Without a snapshot the
+   script refuses unless you pass `--baseline`, so a deleted file can't switch every check off; with a snapshot,
+   `--baseline` is refused. A baseline run checks that the only settings the build enforces are the two `env.ts`
+   already needs, that nothing is dated later than the release, and that the historical configurations are ready,
+   then prints the enforced set and everything that only warns. **Read that output before committing:** it is the
+   evidence that existing sites gain no requirement. The snapshot is taken from the registry in the release commit,
+   so tag that commit and publish it; if the tag moves, regenerate nothing: fix forward in the next release.
+   **Review configuration enforcement:** run
    `npm run config:check` and look at `enforceFrom` in the `config.registry.ts` files. If this release reaches one (the
    `config-gate.test.ts` test will fail), decide deliberately whether to enforce it now, move `enforceFrom` later, or
    promote it (change the gate, add the release note, tell owners to set it first). Never let it pass by editing the version.
+
 4. The script prints the git commands to commit, then tag and push (`git tag -a vx.y.z -m "vx.y.z"`,
    `git push origin main vx.y.z`). It never runs git or pushes. Never force-push a tag or `main`.
 
 CI runs `npm run check:version` and fails when `template-version.json` doesn't match the latest `CHANGELOG.md` version
-heading (or its date), so a release can't be tagged with one of them forgotten. `scripts/release-utils.test.mjs` tests
-the changelog transformation.
+heading (or its date), or when `config-registry.snapshot.json` is for a different release, so a release can't be
+tagged with one of them forgotten.
+
+**What the configuration tests prove, and what they can't.**
+
+- `src/lib/config/changes.test.ts` and `scripts/release.test.mjs` prove the diff, each refusal, the Markdown and the
+  release script's behaviour (a safe release, a new optional setting, a warned requirement, an unwarned one, a broken
+  historical configuration, a repeated run and the baseline) on synthetic registries, and the real script in a
+  scratch directory.
+- `src/app/config-compat.fixtures.ts` holds a few configurations written **by hand** when 1.8.0 shipped (Sanity core,
+  forms, newsletter, redirects, webhook mode, members), not generated from the registry. `config-compat.test.ts` asserts
+  each is still ready. Because they don't come from either registry, they fail when a readiness function becomes
+  stricter while the registry is unchanged. Add one when a release changes how a critical feature reads its settings;
+  never edit one to make a test pass.
+- Once a snapshot exists, the same test builds an environment from every feature the snapshot says was ready and
+  asserts it is still ready. This catches a feature **gaining a requirement**. It judges both registries with the
+  current readiness functions (code can't be snapshotted), so on its own it can't catch a function that gets stricter;
+  the historical fixtures are what cover that, for the features they represent.
+- None of this proves that every real site still works. It doesn't cover features without a fixture, settings in
+  GitHub, or values that are valid in shape but wrong with the provider. It stops the changes we know how to make
+  by mistake. The first real update PR is the check on the rest.
+- A setting can be missing from a working site without breaking the check only through a declared window: a rename
+  (`deprecated.replacedBy`) or a core setting whose `enforceFrom` is later than the release.
 
 ## Notes
 

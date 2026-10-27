@@ -70,6 +70,8 @@ export interface FeatureSetting {
    * and say under `removeWhen` what has to be true first. Removal is its own versioned decision.
    */
   deprecated?: {
+    /** Template version that announced the deprecation. Leave out unless it is known: it is never guessed. */
+    since?: string
     replacedBy: string
     /** What an owner does to move off it. */
     migration: string

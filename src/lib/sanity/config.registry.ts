@@ -65,6 +65,7 @@ export const sanityCoreConfig = defineFeatureConfig({
       purpose: 'Pins the Sanity API date. It is now a constant in src/config/env.ts.',
       default: 'The date pinned in src/config/env.ts.',
       deprecated: {
+        since: '1.9.0',
         replacedBy:
           'the API_VERSION constant in src/config/env.ts, bumped deliberately in a release',
         migration: 'Delete the variable from Vercel and .env.local. The pinned date applies.',
