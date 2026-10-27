@@ -388,16 +388,24 @@ export async function runSteps(run, ctx) {
       await run.call('blast', 'read a different scratch project', {
         path: `/v9/projects/${ctx.otherProject}`,
       })
-    await run.call('blast', 'write project setting (same value)', {
-      method: 'PATCH',
-      path: p(''),
-      body: { autoExposeSystemEnvs: current.autoExposeSystemEnvs ?? true },
-    })
-    await run.call('blast', 'write protection settings (same value)', {
-      method: 'PATCH',
-      path: p(''),
-      body: { ssoProtection: current.ssoProtection ?? null },
-    })
+    // Only written back when the project returned a value, so nothing is ever set from a default.
+    for (const field of ['autoExposeSystemEnvs', 'ssoProtection']) {
+      if (info.dryRun || current[field] !== undefined) {
+        await run.call('blast', `write ${field} (same value)`, {
+          method: 'PATCH',
+          path: p(''),
+          body: { [field]: current[field] ?? '[current value]' },
+        })
+      } else {
+        run.results.push({
+          step: 'blast',
+          label: `write ${field} (same value)`,
+          method: 'PATCH',
+          path: p(''),
+          skipped: 'project did not return the field',
+        })
+      }
+    }
     await run.call('blast', 'read protection bypass / firewall config', {
       path: '/v1/security/firewall/config/active',
       query: { projectId: project },
@@ -406,11 +414,18 @@ export async function runSteps(run, ctx) {
       path: ctx.teamId ? `/v3/teams/${ctx.teamId}/members` : '/v3/teams/unknown/members',
     })
     await run.call('blast', 'list account tokens (user-level)', { path: '/v6/user/tokens' })
-    await run.call('blast', 'mint a token (should need a full-account token)', {
+    const mint = await run.call('blast', 'mint a token (should need a full-account token)', {
       method: 'POST',
       path: '/v3/user/tokens',
       body: { name: `${SPIKE_PREFIX}mint-test` },
     })
+    // If minting worked, revoke the stray token at once.
+    const minted = mint.raw?.token?.id ?? mint.raw?.tokenId
+    if (mint.ok && minted)
+      await run.call('blast', 'revoke the token that was just minted', {
+        method: 'DELETE',
+        path: `/v3/user/tokens/${minted}`,
+      })
     await run.call('blast', 'read deployment logs/events', {
       path: '/v6/deployments',
       query: { projectId: project, limit: '1' },
