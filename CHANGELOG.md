@@ -20,10 +20,13 @@ you start a release.
 
 ### Added
 
+- **Contrast fixes in Studio (UX-004):** a Link list contrast warning names the property, what it was measured against, the ratio and the target (4.5:1 text, 3:1 large text and icons), and offers undoable fixes: **Use suggested colour**, **Reset to Link list design**, and for a gradient over a photo **Use a stronger overlay** (the failing stops' opacity, never a new colour). Nothing changes without a click, and each fix is measured again straight afterwards (a partial improvement says _improved, not fixed_ and what would finish the job). A suggested colour says it overrides the Link list design. Separators, the glow and decorative dividers are decoration and have no contrast target. Wording never claims conformance; the badges now read _Meets target_ and _Below target_ instead of _AA pass_ and _AA fail_. The suggestion logic and wording are in `src/lib/color/contrast-remedy.ts`.
 - **End-to-end speed spike:** `docs/spikes/e2e-speed.md` measures which Playwright specs need only one of the desktop and mobile projects, models the CI shard balance, and proposes follow-up tasks. No test behaviour changed.
 - **CI end-to-end timings:** every Playwright job writes a JSON report and a new `e2e timings` job summarises wall time, build and server startup, the slowest job, retries, failures and the slowest specs in the run summary (`scripts/e2e-timings.mjs`). Results of the first follow-ups are in `docs/spikes/e2e-speed-follow-ups.md`.
 
 ### Changed
+
+- **A Custom element colour is measured on the right surface:** the hex field no longer shows its own check (it measured against the section's background even on a card). The colour choice above it measures a Custom colour the same way as the other choices.
 
 ### Fixed
 

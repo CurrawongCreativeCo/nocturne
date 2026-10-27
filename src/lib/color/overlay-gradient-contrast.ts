@@ -1,7 +1,10 @@
 import { colorHex } from '@/config/tokens.generated'
 import {
+  GRADIENT_OPACITY_RANGE,
   GRADIENT_STOPS,
+  resolveOverlayGradient,
   type GradientStop,
+  type OverlayGradientInput,
   type ResolvedOverlayGradient,
   type StopColourOf,
 } from '@/lib/sanity/overlay-gradient'
@@ -54,6 +57,11 @@ const FOCUS_PLACE: Record<GradientStop, string> = {
   bottom: 'at the edges',
 }
 
+/** Where on the section a stop's gradient is, as the warning says it. */
+export function gradientPlace(shape: ResolvedOverlayGradient['shape'], stop: GradientStop): string {
+  return (shape === 'focus' ? FOCUS_PLACE : STOP_PLACE)[stop]
+}
+
 /**
  * Whether text stays readable over the picture with the gradient on it. A picture is unknown, so as
  * for the other overlays each stop is measured over pure black and pure white (after the picture's
@@ -95,4 +103,68 @@ export function overlayGradientContrastProblem({
     ratio: worst.ratio,
     message: `${worst.kind === 'body' ? 'Text' : 'Secondary text'} may be hard to read ${place} of this gradient: over the lightest or darkest part of a photo it could drop to ${worst.ratio.toFixed(1)}:1 (text needs ${BODY_TEXT_RATIO}:1). The gradient is lightest where it lets the photo show, so check the page: keep text off busy areas there, choose a stronger overlay, or raise that stop's opacity under Advanced.`,
   }
+}
+
+export interface StopRaise {
+  stop: GradientStop
+  /** Where the stop's opacity is now, in percent. */
+  from: number
+  /** The lowest opacity, in percent, at which the stop clears the check. */
+  to: number
+}
+
+/**
+ * The fix for a gradient that fails over a photo: each failing stop's opacity raised to the lowest
+ * whole percent that clears the check at that stop, measured the same way (over black and white,
+ * body and secondary text). A gradient is fixed by a stronger overlay and not by a new colour,
+ * because what fails is the photo showing through. A `stuck` stop cannot get there at the highest
+ * opacity an editor may set: its colour sits between the text colour and the photo's extremes, so a
+ * very light photo or a very dark one is always against it. That needs a calmer picture, so it is
+ * named and left alone.
+ */
+export function strongerGradientStops({
+  tone,
+  input,
+  level,
+  strength = 1,
+  site = colorHex,
+}: {
+  tone: string | null | undefined
+  input: OverlayGradientInput | null | undefined
+  level: 'light' | 'medium' | 'strong'
+  strength?: number
+  site?: ColourSet
+}): { raises: StopRaise[]; stuck: GradientStop[] } {
+  const gradient = resolveOverlayGradient(input, level)
+  const text = textColours(tone, site)
+  const { background } = tonePalette(tone, site)
+  const colourOf = stopColourHex(tone, site)
+  const shown = Math.min(1, Math.max(0, strength))
+  const worstAt = (stop: GradientStop, alpha: number) => {
+    const resolved = gradient.stops[stop]
+    const areas = ['#000000', '#ffffff'].map((area) =>
+      composite(colourOf(resolved), composite(area, background, shown), alpha),
+    )
+    return Math.min(
+      ...(['body', 'secondary'] as const).flatMap((kind) =>
+        areas.map((area) => contrastRatio(text[kind], area)),
+      ),
+    )
+  }
+  const raises: StopRaise[] = []
+  const stuck: GradientStop[] = []
+  for (const stop of GRADIENT_STOPS) {
+    const from = Math.round(gradient.stops[stop].alpha * 100)
+    if (worstAt(stop, gradient.stops[stop].alpha) >= BODY_TEXT_RATIO) continue
+    let to: number | null = null
+    for (let percent = from + 1; percent <= GRADIENT_OPACITY_RANGE.max; percent++) {
+      if (worstAt(stop, percent / 100) >= BODY_TEXT_RATIO) {
+        to = percent
+        break
+      }
+    }
+    if (to === null) stuck.push(stop)
+    else raises.push({ stop, from, to })
+  }
+  return { raises, stuck }
 }
