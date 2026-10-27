@@ -6,7 +6,12 @@
  *   node scripts/e2e-timings.mjs --out timings.json --jobs jobs.json reports/*.json >> "$GITHUB_STEP_SUMMARY"
  *
  * `--jobs` is the GitHub API's list of jobs for the run (optional): it adds each job's total duration.
+ * `--expect shard-1,shard-2` names the reports that should exist; any missing are listed as missing.
  * The summary is Markdown on stdout; `--out` also writes the numbers as JSON to compare two runs.
+ *
+ * A number that was not measured is null and prints as "n/a"; it is never turned into 0, so a missing
+ * measurement cannot pass for a genuinely instant result. `--slim in.json out.json` copies a report with
+ * only its timings (no config, errors, output or attachments): that is what CI uploads.
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { basename } from 'node:path'
@@ -25,7 +30,11 @@ export function readReport(report) {
           title: spec.title,
           project: test.projectName,
           status: test.status,
-          ms: results.reduce((total, result) => total + result.duration, 0),
+          // Null when a duration is missing, so it is never mistaken for a test that took 0 ms.
+          ms:
+            results.length > 0 && results.every((result) => Number.isFinite(result.duration))
+              ? results.reduce((total, result) => total + result.duration, 0)
+              : null,
           attempts: results.length,
           start: results.length ? Date.parse(results[0].startTime) : null,
           end: results.length
@@ -47,6 +56,7 @@ export function readReport(report) {
 export function summariseReport(label, report) {
   const tests = readReport(report)
   const ran = tests.filter((test) => test.status !== 'skipped')
+  const measured = ran.filter((test) => test.ms !== null)
   const starts = ran.map((test) => test.start).filter(Number.isFinite)
   const ends = ran.map((test) => test.end).filter(Number.isFinite)
   const begin = Date.parse(report.stats?.startTime)
@@ -54,11 +64,12 @@ export function summariseReport(label, report) {
   const lastEnd = ends.length ? Math.max(...ends) : null
   return {
     label,
-    wallMs: report.stats?.duration ?? 0,
+    wallMs: Number.isFinite(report.stats?.duration) ? report.stats.duration : null,
     startupMs:
       firstStart !== null && Number.isFinite(begin) ? Math.max(0, firstStart - begin) : null,
-    testPhaseMs: firstStart !== null ? lastEnd - firstStart : 0,
-    workerMs: ran.reduce((total, test) => total + test.ms, 0),
+    testPhaseMs: firstStart !== null ? lastEnd - firstStart : null,
+    workerMs: measured.length > 0 ? measured.reduce((total, test) => total + test.ms, 0) : null,
+    unmeasured: ran.length - measured.length,
     tests: tests.length,
     ran: ran.length,
     skipped: tests.length - ran.length,
@@ -66,10 +77,41 @@ export function summariseReport(label, report) {
     flaky: tests.filter((test) => test.status === 'flaky').map(brief),
     retried: tests.filter((test) => test.attempts > 1).length,
     specs: byKey(ran, (test) => `${test.file} (${test.project})`),
-    slowest: [...ran]
+    slowest: [...measured]
       .sort((a, b) => b.ms - a.ms)
       .slice(0, 10)
       .map(brief),
+  }
+}
+
+/**
+ * A report reduced to what the summary reads: timings and statuses, nothing a test printed or failed
+ * with, and no config. This is what CI uploads.
+ */
+export function slimReport(report) {
+  const slimSuite = (suite) => ({
+    file: suite.file,
+    specs: (suite.specs ?? []).map((spec) => ({
+      title: spec.title,
+      file: spec.file,
+      tests: (spec.tests ?? []).map((test) => ({
+        projectName: test.projectName,
+        status: test.status,
+        results: (test.results ?? []).map((result) => ({
+          status: result.status,
+          duration: result.duration,
+          startTime: result.startTime,
+          retry: result.retry,
+        })),
+      })),
+    })),
+    suites: (suite.suites ?? []).map(slimSuite),
+  })
+  return {
+    stats: report.stats,
+    suites: (report.suites ?? []).map(slimSuite),
+    workers: report.config?.workers,
+    shard: report.config?.shard,
   }
 }
 
@@ -83,7 +125,7 @@ const brief = (test) => ({
 
 function byKey(tests, key) {
   const totals = new Map()
-  for (const test of tests) {
+  for (const test of tests.filter((candidate) => candidate.ms !== null)) {
     const row = totals.get(key(test)) ?? { key: key(test), tests: 0, ms: 0 }
     row.tests += 1
     row.ms += test.ms
@@ -106,14 +148,22 @@ export function summariseJobs(jobsResponse) {
   }))
 }
 
-const mins = (ms) => `${round(ms)} s`
+const mins = (ms) => (Number.isFinite(ms) ? `${round(ms)} s` : 'n/a')
 const row = (cells) => `| ${cells.join(' | ')} |`
 
 /** The Markdown step summary. The slowest end-to-end job is whichever took the longest wall time. */
-export function renderSummary(jobs, githubJobs = []) {
+export function renderSummary(jobs, githubJobs = [], expected = []) {
   const lines = ['## End-to-end timings', '']
+  const missing = expected.filter((label) => !jobs.some((job) => job.label === label))
+  if (missing.length > 0) {
+    lines.push(
+      `**Missing reports (no timings, not zero):** ${missing.join(', ')}. The job may have failed before Playwright wrote its report.`,
+      '',
+    )
+  }
   if (!jobs.length) return [...lines, 'No Playwright reports were uploaded.', ''].join('\n')
-  const slowest = jobs.reduce((a, b) => (b.wallMs > a.wallMs ? b : a))
+  const timed = jobs.filter((job) => job.wallMs !== null)
+  const slowest = timed.length > 0 ? timed.reduce((a, b) => (b.wallMs > a.wallMs ? b : a)) : null
   lines.push(
     row([
       'Job',
@@ -126,8 +176,9 @@ export function renderSummary(jobs, githubJobs = []) {
       'Failed',
       'Flaky',
       'Retried',
+      'Unmeasured',
     ]),
-    row(['---', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:']),
+    row(['---', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:']),
   )
   for (const job of jobs) {
     lines.push(
@@ -142,6 +193,7 @@ export function renderSummary(jobs, githubJobs = []) {
         job.failed.length,
         job.flaky.length,
         job.retried,
+        job.unmeasured,
       ]),
     )
   }
@@ -219,8 +271,15 @@ if (process.argv[1]?.endsWith('e2e-timings.mjs')) {
     const at = args.indexOf(name)
     return at === -1 ? undefined : args.splice(at, 2)[1]
   }
+  const slim = args.indexOf('--slim')
+  if (slim !== -1) {
+    const [input, output] = args.slice(slim + 1)
+    writeFileSync(output, JSON.stringify(slimReport(JSON.parse(readFileSync(input, 'utf8')))))
+    process.exit(0)
+  }
   const out = option('--out')
   const jobsFile = option('--jobs')
+  const expected = (option('--expect') ?? '').split(',').filter(Boolean)
   const jobs = args.map((file) =>
     summariseReport(basename(file, '.json'), JSON.parse(readFileSync(file, 'utf8'))),
   )
@@ -231,5 +290,5 @@ if (process.argv[1]?.endsWith('e2e-timings.mjs')) {
     // The job list is a bonus; the Playwright numbers stand without it.
   }
   if (out) writeFileSync(out, JSON.stringify({ jobs, githubJobs }, null, 2))
-  process.stdout.write(renderSummary(jobs, githubJobs))
+  process.stdout.write(renderSummary(jobs, githubJobs, expected))
 }

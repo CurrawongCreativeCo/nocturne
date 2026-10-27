@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { readReport, renderSummary, summariseJobs, summariseReport } from './e2e-timings.mjs'
+import {
+  readReport,
+  renderSummary,
+  slimReport,
+  summariseJobs,
+  summariseReport,
+} from './e2e-timings.mjs'
 
 const result = (startTime, duration) => ({ startTime, duration })
 const report = (stats, specs) => ({
@@ -116,5 +122,96 @@ describe('summariseJobs', () => {
     })
     expect(job.seconds).toBe(630)
     expect(job.steps[0].seconds).toBe(360)
+  })
+})
+
+describe('missing measurements are not zero', () => {
+  it('reports n/a for a run with no duration, no tests, or no startTime', () => {
+    const summary = summariseReport('x', { suites: [] })
+    expect(summary).toMatchObject({
+      wallMs: null,
+      startupMs: null,
+      testPhaseMs: null,
+      workerMs: null,
+    })
+    const text = renderSummary([summary])
+    expect(text).toContain('n/a')
+    expect(text).not.toContain('(slowest)')
+  })
+
+  it('keeps a genuinely instant test as 0 and an unmeasured one as null', () => {
+    const report = {
+      stats: { startTime: '2026-01-01T00:00:00.000Z', duration: 10 },
+      suites: [
+        {
+          specs: [
+            {
+              title: 'instant',
+              file: 'a.spec.ts',
+              tests: [
+                {
+                  projectName: 'desktop',
+                  status: 'expected',
+                  results: [{ startTime: '2026-01-01T00:00:01.000Z', duration: 0 }],
+                },
+                {
+                  projectName: 'desktop',
+                  status: 'expected',
+                  results: [{ startTime: '2026-01-01T00:00:01.000Z' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }
+    const tests = readReport(report)
+    expect(tests.map((test) => test.ms)).toEqual([0, null])
+    const summary = summariseReport('x', report)
+    expect(summary).toMatchObject({ ran: 2, unmeasured: 1, workerMs: 0 })
+  })
+
+  it('names the reports that never arrived', () => {
+    const text = renderSummary([summariseReport('shard-1', SAMPLE)], [], ['shard-1', 'shard-2'])
+    expect(text).toContain('Missing reports (no timings, not zero):** shard-2')
+  })
+})
+
+describe('slimReport', () => {
+  it('keeps the timings and drops config, errors, output and attachments', () => {
+    const full = {
+      ...SAMPLE,
+      config: {
+        workers: 2,
+        shard: { current: 1, total: 4 },
+        webServer: { env: { TOKEN: 'secret' } },
+      },
+      errors: [{ message: 'secret in an error' }],
+      suites: [
+        {
+          file: 'a.spec.ts',
+          specs: [
+            spec('t', [
+              {
+                projectName: 'desktop',
+                status: 'unexpected',
+                results: [
+                  {
+                    ...result('2026-01-01T00:01:00.000Z', 5),
+                    error: { message: 'Bearer abc' },
+                    stdout: [{ text: 'password=hunter2' }],
+                    attachments: [{ path: 'C:/Users/x/trace.zip' }],
+                  },
+                ],
+              },
+            ]),
+          ],
+        },
+      ],
+    }
+    const slim = slimReport(full)
+    expect(JSON.stringify(slim)).not.toMatch(/secret|Bearer|hunter2|trace\.zip|webServer/)
+    expect(summariseReport('a', slim)).toMatchObject({ wallMs: 100_000, ran: 1, workerMs: 5 })
+    expect(slim.workers).toBe(2)
   })
 })

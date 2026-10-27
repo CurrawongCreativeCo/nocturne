@@ -164,13 +164,20 @@ jobs:
         env:
           E2E_TIMINGS_FILE: e2e-timings/shard-${{ matrix.shard }}.json
 
-      # Timings for every run, pass or fail: the e2e-timings job below summarises them.
+      # Timings for every run, pass or fail: the e2e-timings job below summarises them. Only the slim
+      # copy is uploaded (durations and statuses; no config, error text, output or attachments).
+      - name: Slim timings
+        if: always()
+        run: |
+          mkdir -p e2e-timings/slim
+          node scripts/e2e-timings.mjs --slim e2e-timings/shard-${{ matrix.shard }}.json e2e-timings/slim/shard-${{ matrix.shard }}.json || true
+
       - name: Upload timings
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-timings-shard-${{ matrix.shard }}
-          path: e2e-timings
+          path: e2e-timings/slim
           if-no-files-found: ignore
           retention-days: 30
 
@@ -233,12 +240,20 @@ jobs:
         env:
           E2E_TIMINGS_FILE: e2e-timings/isolated-design-visual.json
 
+      - name: Slim timings
+        if: always()
+        run: |
+          mkdir -p e2e-timings/slim
+          for name in experiments design design-visual; do
+            node scripts/e2e-timings.mjs --slim "e2e-timings/isolated-$name.json" "e2e-timings/slim/isolated-$name.json" || true
+          done
+
       - name: Upload timings
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-timings-isolated
-          path: e2e-timings
+          path: e2e-timings/slim
           if-no-files-found: ignore
           retention-days: 30
 
@@ -279,7 +294,7 @@ jobs:
         run: |
           gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --pattern 'e2e-timings-*' --dir reports || true
           gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --paginate > jobs.json || echo '{}' > jobs.json
-          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
+          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,isolated-experiments,isolated-design,isolated-design-visual $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
