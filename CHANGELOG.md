@@ -20,11 +20,16 @@ you start a release.
 
 ### Added
 
+- **End-to-end speed spike:** `docs/spikes/e2e-speed.md` measures which Playwright specs need only one of the desktop and mobile projects, models the CI shard balance, and proposes follow-up tasks. No test behaviour changed.
+- **CI end-to-end timings:** every Playwright job writes a JSON report and a new `e2e timings` job summarises wall time, build and server startup, the slowest job, retries, failures and the slowest specs in the run summary (`scripts/e2e-timings.mjs`). Results of the first follow-ups are in `docs/spikes/e2e-speed-follow-ups.md`.
+
 ### Changed
 
 - **`SANITY_API_READ_TOKEN`: build enforcement moves to 1.11.0, and the wording stops implying it is optional:** the site has always failed without the token in every environment (`src/lib/sanity/token.ts` throws, and every content read goes through it), whether the dataset is private or public. Registry entries can now say so with `requiredAtRuntime`; `config:check`, `config:check --since` and the build gate's warning say "the site already fails without it" and that only the _build's_ refusal is scheduled, instead of "required from a later version, set it now". `enforceFrom` moves from 1.10.0 to 1.11.0 because the gate does not read `enforceFrom` yet. **Prerequisite for 1.11.0:** the build gate must refuse a missing token in every environment, with regression tests (listed as `todo` in `src/app/config-gate.test.ts`); the test that fails when the template reaches an `enforceFrom` stays as the safeguard. The 1.8.0 historical fixture now includes the token: a tokenless site was never a working configuration. Existing projects: nothing to do; a site without the token already fails.
 
 ### Fixed
+
+- **End-to-end tests:** the build now clears cached Sanity responses first, so a local run no longer reuses days-old event dates; the screenshot specs stop waiting after 10 s for a picture that never loads and name it.
 
 ### Breaking changes / migration steps
 
