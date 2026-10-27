@@ -97,7 +97,7 @@ export default defineConfig({
       reuseExistingServer: !CI,
     },
     {
-      command: `npx next build && npx next start -p ${APP_PORT}`,
+      command: `node scripts/e2e-clear-data-cache.mjs && npx next build && npx next start -p ${APP_PORT}`,
       port: APP_PORT,
       timeout: 300_000,
       reuseExistingServer: !CI,

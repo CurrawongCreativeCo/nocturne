@@ -1,9 +1,10 @@
 import { readFileSync, readdirSync } from 'node:fs'
 
-import { expect, type Page } from '@playwright/test'
+import { expect } from '@playwright/test'
 
 import { galleryIds } from './fixtures/dataset.mjs'
 import { test } from './fixtures/test'
+import { settleImagesAndFonts } from './settle'
 
 /**
  * Visual regression: one screenshot per section (and per variant) from the section gallery, on
@@ -53,19 +54,8 @@ test.beforeEach(async ({ page }) => {
       }),
   )
   await page.goto(GALLERY)
-  await settle(page)
+  await settleImagesAndFonts(page)
 })
-
-/** Waits until web fonts are in use and every image, lazy ones included, has loaded. */
-async function settle(page: Page) {
-  await page.evaluate(async () => {
-    for (const img of document.querySelectorAll('img')) img.loading = 'eager'
-    await Promise.all(
-      [...document.querySelectorAll('img')].map((img) => img.decode().catch(() => undefined)),
-    )
-    await document.fonts.ready
-  })
-}
 
 test.describe('section gallery', () => {
   test('shows every section type and variant', async ({ page }) => {

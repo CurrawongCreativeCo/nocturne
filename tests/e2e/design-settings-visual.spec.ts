@@ -1,8 +1,9 @@
-import { expect, type APIRequestContext, type Page } from '@playwright/test'
+import { expect, type APIRequestContext } from '@playwright/test'
 import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { FAKE_SANITY_PORT, REVALIDATE_SECRET } from './constants'
 import { test } from './fixtures/test'
+import { settleImagesAndFonts } from './settle'
 
 /**
  * Visual regression with the Studio's brand colours: the same gallery sections as visual.spec.ts,
@@ -53,16 +54,6 @@ async function usePalette(request: APIRequestContext, palette: 'off' | 'light' |
   expect(webhook.status()).toBe(200)
 }
 
-async function settle(page: Page) {
-  await page.evaluate(async () => {
-    for (const img of document.querySelectorAll('img')) img.loading = 'eager'
-    await Promise.all(
-      [...document.querySelectorAll('img')].map((img) => img.decode().catch(() => undefined)),
-    )
-    await document.fonts.ready
-  })
-}
-
 test.afterAll(async ({ request }) => {
   test.setTimeout(30_000)
   await usePalette(request, 'off')
@@ -82,7 +73,7 @@ for (const palette of ['light', 'dark'] as const) {
           return page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)
         })
         .toBe(palette === 'dark' ? 'dark' : 'normal')
-      await settle(page)
+      await settleImagesAndFonts(page)
     })
 
     for (const id of SECTIONS) {
@@ -98,7 +89,7 @@ for (const palette of ['light', 'dark'] as const) {
       test(`looks the same: Glass rows page at ${String(width)} px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 })
         await page.goto('/link-glass')
-        await settle(page)
+        await settleImagesAndFonts(page)
         await expect(page).toHaveScreenshot(`${palette}-link-glass-${String(width)}.png`, {
           fullPage: true,
           maxDiffPixelRatio: 0.01,
@@ -108,7 +99,7 @@ for (const palette of ['light', 'dark'] as const) {
 
     test('looks the same: the home page header and first screen', async ({ page }) => {
       await page.goto('/')
-      await settle(page)
+      await settleImagesAndFonts(page)
       // A whole screen with the hero image and gradients: a few shades of dithering between runs
       // can differ without anything having moved, so allow 2% of pixels (the sections stay exact).
       await expect(page).toHaveScreenshot(`${palette}-home.png`, { maxDiffPixelRatio: 0.02 })
