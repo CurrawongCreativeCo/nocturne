@@ -28,6 +28,7 @@ import {
   PANEL_STRENGTH_TITLES,
   SECTION_PANEL_TITLES,
   panelProblem,
+  pictureOverlay,
 } from '../section-panel'
 import {
   ANCHOR_PATTERN,
@@ -709,6 +710,10 @@ export const sectionStyle = defineType({
                   motion?: string
                   panelStrength?: string
                   image?: { asset?: unknown }
+                  overlay?: string
+                  overlayColor?: string
+                  imageStrength?: string
+                  imageStrengthPercent?: number
                 }
               | undefined
             if (value !== 'glass' && value !== 'solid') return true
@@ -725,6 +730,7 @@ export const sectionStyle = defineType({
                 strength: style?.panelStrength,
                 tone: style?.tone,
                 hasPicture: Boolean(style?.image?.asset),
+                overlay: pictureOverlay(style, style?.tone),
                 gradient: style?.gradient,
                 gradients,
                 site: colours,

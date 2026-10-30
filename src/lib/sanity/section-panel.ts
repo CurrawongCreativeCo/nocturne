@@ -12,6 +12,14 @@ import {
 } from '@/lib/color/glass-contrast'
 import { mixOklab, type ColourSet } from '@/lib/color/heading-contrast'
 
+import {
+  SECTION_OVERLAYS,
+  SECTION_OVERLAY_OPACITY,
+  SECTION_WASH_COLOURS,
+  defaultOverlayFor,
+  imageStrengthOpacity,
+} from './section-style-options'
+
 /**
  * A panel behind a section's content (README, "Section panels"; Design Engine decision DE-6). Kept
  * free of Studio code so the site and the Studio share it, and so a later caller can reuse it.
@@ -54,8 +62,49 @@ export type PanelBackdrop =
   | { kind: 'solid' }
   /** A gradient whose stops are known (Studio); render, which only has its name, uses `varied`. */
   | { kind: 'gradient'; stops: readonly string[] }
-  /** A picture, a video, a pattern or overlapping content: anything not known colour by colour. */
-  | { kind: 'varied' }
+  /**
+   * A picture, a video, a pattern or overlapping content: anything not known colour by colour. With
+   * `overlay` (only a picture the section's own overlay covers) the bound is narrower than black to
+   * white, because the overlay brings every pixel towards its colour.
+   */
+  | { kind: 'varied'; overlay?: PictureOverlay }
+
+/** The overlay the section lays over its picture, as the background check reads it. */
+export interface PictureOverlay {
+  /** How strongly the overlay covers the picture, 0 to 1. */
+  opacity: number
+  /** The overlay's colour: the tone's background, or a light or dark wash. */
+  wash: 'background' | 'light' | 'dark'
+  /** How much of the picture shows through before the overlay, 0 to 1. */
+  strength: number
+}
+
+/**
+ * The overlay over a section's picture, from its stored style; undefined when it can't be bounded
+ * more tightly than black to white (a gradient overlay, whose strength varies across the section).
+ */
+export function pictureOverlay(
+  style:
+    | {
+        overlay?: string | null
+        overlayColor?: string | null
+        imageStrength?: string | null
+        imageStrengthPercent?: number | null
+      }
+    | null
+    | undefined,
+  tone: string | null | undefined,
+): PictureOverlay | undefined {
+  const wash = stegaClean(style?.overlayColor)
+  if (wash === 'gradient') return undefined
+  const overlay = stegaClean(style?.overlay)
+  const level = SECTION_OVERLAYS.find((option) => option === overlay) ?? defaultOverlayFor(tone)
+  return {
+    opacity: SECTION_OVERLAY_OPACITY[level],
+    wash: wash === 'light' || wash === 'dark' ? wash : 'background',
+    strength: imageStrengthOpacity(stegaClean(style?.imageStrength), style?.imageStrengthPercent),
+  }
+}
 
 /** Which backdrop a section has, from what it draws behind its content. */
 export function panelBackdrop(section: {
@@ -67,7 +116,12 @@ export function panelBackdrop(section: {
   hasOwnBackground?: boolean
   /** A bottom edge, a parallax or a float layer: content that can overlap what is behind. */
   overlaps?: boolean
+  /** The overlay over the section's picture, when that is all that is behind the panel. */
+  overlay?: PictureOverlay
 }): PanelBackdrop {
+  if (section.hasPicture && section.overlay && !section.hasOwnBackground && !section.overlaps) {
+    return { kind: 'varied', overlay: section.overlay }
+  }
   if (
     section.hasPicture ||
     section.hasOwnBackground ||
@@ -198,8 +252,21 @@ export function backdropAreas(
       return { areas: [toneBackground(tone, site)], exact: true }
     case 'gradient':
       return { areas: gradientSamples(backdrop.stops), exact: true }
-    default:
-      return { areas: ['#000000', '#ffffff'], exact: false }
+    default: {
+      const { overlay } = backdrop
+      if (!overlay) return { areas: ['#000000', '#ffffff'], exact: false }
+      // Every pixel of the picture lies between black and white; the overlay then covers it, so the
+      // panel sees what the overlay leaves of those two extremes (the same bound the section's own
+      // background check uses). Still a bound on the picture, never a measurement of it.
+      const background = toneBackground(tone, site)
+      const wash = overlay.wash === 'background' ? background : SECTION_WASH_COLOURS[overlay.wash]
+      return {
+        areas: ['#000000', '#ffffff'].map((area) =>
+          composite(wash, composite(area, background, overlay.strength), overlay.opacity),
+        ),
+        exact: false,
+      }
+    }
   }
 }
 
@@ -392,6 +459,8 @@ export interface SectionPanelContext {
   gradients?: readonly { slug: string; stops: readonly string[] }[]
   hasOwnBackground?: boolean
   overlaps?: boolean
+  /** The overlay over the picture, from `pictureOverlay`. */
+  overlay?: PictureOverlay
   /** The site's colours after its Brand colours; tokens.json's when they couldn't be read. */
   site?: ColourSet
 }
@@ -416,6 +485,7 @@ export function resolveSectionPanel(context: SectionPanelContext): ResolvedPanel
       hasUnknownGradient: Boolean(context.gradient) && context.gradients === undefined,
       hasOwnBackground: context.hasOwnBackground,
       overlaps: context.overlaps,
+      overlay: context.overlay,
     }),
   })
 }

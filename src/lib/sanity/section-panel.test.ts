@@ -11,6 +11,7 @@ import {
   panelChoice,
   panelConfidence,
   panelDomProps,
+  pictureOverlay,
   panelFill,
   panelProblem,
   resolvePanel,
@@ -263,5 +264,47 @@ describe('resolveSectionPanel: one decision for the site and the Studio', () => 
     expect(template?.problem).toBeNull()
     expect(own?.render).toBe('solid')
     expect(own?.problem).not.toBeNull()
+  })
+})
+
+describe('the picture’s own overlay narrows the bound', () => {
+  const overlay = { opacity: 0.6, wash: 'background', strength: 1 } as const
+  const picture = { panel: 'glass', tone: 'surface', hasPicture: true } as const
+
+  it('lets a lighter strength pass that black-to-white alone would raise', () => {
+    const bare = resolveSectionPanel({ ...picture, strength: 'light' })
+    const covered = resolveSectionPanel({ ...picture, strength: 'light', overlay })
+    expect(bare?.raised).toBe(true)
+    expect(covered?.raised).toBe(false)
+    expect(covered?.opacity).toBe(glass.light)
+    expect(covered?.confidence).toBe('guaranteed')
+  })
+
+  it('is still a bound, never exact', () => {
+    expect(resolveSectionPanel({ ...picture, overlay })?.confidence).not.toBe('exact')
+  })
+
+  it('makes the three strengths differ over a covered picture', () => {
+    const opacities = (['light', 'medium', 'strong'] as const).map(
+      (strength) => resolveSectionPanel({ ...picture, strength, overlay })?.opacity,
+    )
+    expect(new Set(opacities).size).toBe(3)
+  })
+
+  it('is ignored when something else can be behind the panel', () => {
+    const withEdge = resolveSectionPanel({ ...picture, strength: 'light', overlay, overlaps: true })
+    expect(withEdge?.raised).toBe(true)
+  })
+
+  it('reads the stored overlay the way the section does, and gives up on a gradient overlay', () => {
+    expect(pictureOverlay({ overlay: 'strong', imageStrength: 'soft' }, 'surface')).toEqual({
+      opacity: 0.88,
+      wash: 'background',
+      strength: 0.6,
+    })
+    // Unset follows the tone: Inverse starts at Medium.
+    expect(pictureOverlay({}, 'inverse')?.opacity).toBe(0.7)
+    expect(pictureOverlay({ overlayColor: 'dark', overlay: 'light' }, 'surface')?.wash).toBe('dark')
+    expect(pictureOverlay({ overlayColor: 'gradient' }, 'surface')).toBeUndefined()
   })
 })

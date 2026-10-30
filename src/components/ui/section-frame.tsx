@@ -4,7 +4,12 @@ import { LazyFloat } from '@/components/motion/float-lazy'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
 import { enterProps, revealChild, type ParallaxPlan } from '@/components/motion/presets'
-import { panelChoice, panelDomProps, resolveSectionPanel } from '@/lib/sanity/section-panel'
+import {
+  panelChoice,
+  panelDomProps,
+  pictureOverlay,
+  resolveSectionPanel,
+} from '@/lib/sanity/section-panel'
 import type { SiteDesign } from '@/lib/sanity/site-design'
 
 import { SectionBackground } from './section-background'
@@ -140,6 +145,7 @@ function SectionFrameView({
         strength: style?.panelStrength,
         tone: resolved.tone,
         hasPicture: Boolean(resolved.image),
+        overlay: pictureOverlay(style, resolved.tone),
         gradient: resolved.gradient,
         gradients: design?.gradients,
         site: design?.colours,
