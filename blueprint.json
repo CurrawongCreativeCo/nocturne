@@ -1,0 +1,1643 @@
+{
+  "schema": 1,
+  "id": "web-next-sanity",
+  "version": "1.10.0",
+  "released": "2026-10-31",
+  "source": {
+    "repo": "https://github.com/CurrawongCreativeCo/nocturne",
+    "tag": "v1.10.0",
+    "preparedFrom": "5288174a0964ff5aef4e98b587aac9efabfe9177"
+  },
+  "projectTypes": [
+    "website"
+  ],
+  "environment": [
+    {
+      "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview",
+        "development"
+      ],
+      "buildTime": true,
+      "need": "launch",
+      "uses": [
+        {
+          "feature": "sanity-core",
+          "when": {
+            "always": true
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SANITY_DATASET",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview",
+        "development"
+      ],
+      "buildTime": true,
+      "need": "launch",
+      "uses": [
+        {
+          "feature": "sanity-core",
+          "when": {
+            "always": true
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "SANITY_API_READ_TOKEN",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "launch",
+      "uses": [
+        {
+          "feature": "sanity-core",
+          "when": {
+            "always": true
+          },
+          "required": true,
+          "requiredIn": [
+            "production"
+          ],
+          "requiredAtRuntime": true
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SITE_URL",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "site",
+          "when": {
+            "setBy": [
+              "NEXT_PUBLIC_SITE_URL",
+              "NEXT_PUBLIC_SITE_LANGUAGE",
+              "SITE_LAUNCH_OVERRIDE"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SITE_LANGUAGE",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "site",
+          "when": {
+            "setBy": [
+              "NEXT_PUBLIC_SITE_URL",
+              "NEXT_PUBLIC_SITE_LANGUAGE",
+              "SITE_LAUNCH_OVERRIDE"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SITE_LAUNCH_OVERRIDE",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "site",
+          "when": {
+            "setBy": [
+              "NEXT_PUBLIC_SITE_URL",
+              "NEXT_PUBLIC_SITE_LANGUAGE",
+              "SITE_LAUNCH_OVERRIDE"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SANITY_REVALIDATE_SECRET",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "generate": "hex-32",
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "webhook-mode",
+          "when": {
+            "setBy": [
+              "SANITY_REVALIDATE_SECRET"
+            ]
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "EDGE_CONFIG",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "redirects",
+          "when": {
+            "setBy": [
+              "EDGE_CONFIG",
+              "EDGE_CONFIG_ID",
+              "VERCEL_API_TOKEN",
+              "VERCEL_TEAM_ID"
+            ]
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "EDGE_CONFIG_ID",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "redirects",
+          "when": {
+            "setBy": [
+              "EDGE_CONFIG",
+              "EDGE_CONFIG_ID",
+              "VERCEL_API_TOKEN",
+              "VERCEL_TEAM_ID"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "VERCEL_API_TOKEN",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "redirects",
+          "when": {
+            "setBy": [
+              "EDGE_CONFIG",
+              "EDGE_CONFIG_ID",
+              "VERCEL_API_TOKEN",
+              "VERCEL_TEAM_ID"
+            ]
+          },
+          "required": {
+            "when": "EDGE_CONFIG"
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERCEL_TEAM_ID",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "redirects",
+          "when": {
+            "setBy": [
+              "EDGE_CONFIG",
+              "EDGE_CONFIG_ID",
+              "VERCEL_API_TOKEN",
+              "VERCEL_TEAM_ID"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "forms",
+          "when": {
+            "profile": "forms"
+          },
+          "required": true
+        },
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "TURNSTILE_SECRET_KEY",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "forms",
+          "when": {
+            "profile": "forms"
+          },
+          "required": true
+        },
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "RESEND_API_KEY",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "forms",
+          "when": {
+            "profile": "forms"
+          },
+          "required": true
+        },
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "FORMS_FROM_EMAIL",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "forms",
+          "when": {
+            "profile": "forms"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ENQUIRIES_STORE",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "enquiries",
+          "when": {
+            "setBy": [
+              "ENQUIRIES_STORE"
+            ]
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "SANITY_WRITE_TOKEN",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "enquiries",
+          "when": {
+            "setBy": [
+              "ENQUIRIES_STORE"
+            ]
+          },
+          "required": true
+        },
+        {
+          "feature": "pricing",
+          "when": {
+            "profile": "pricing"
+          },
+          "required": true
+        },
+        {
+          "feature": "publish-gate",
+          "when": {
+            "profile": "publishGate"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "NEWSLETTER_PROVIDER",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "NEWSLETTER_RESEND_SEGMENT_ID",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "LOOPS_API_KEY",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "LOOPS_MAILING_LIST_ID",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "MAILCHIMP_API_KEY",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "MAILCHIMP_LIST_ID",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "newsletter",
+          "when": {
+            "profile": "newsletter"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "pricing",
+          "when": {
+            "profile": "pricing"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "STRIPE_WEBHOOK_SECRET",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "pricing",
+          "when": {
+            "profile": "pricing"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "STRIPE_SUCCESS_URL",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "pricing",
+          "when": {
+            "profile": "pricing"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "STRIPE_CANCEL_URL",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "pricing",
+          "when": {
+            "profile": "pricing"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "INDEXNOW_KEY",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "generate": "hex-32",
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "indexnow",
+          "when": {
+            "setBy": [
+              "INDEXNOW_KEY"
+            ]
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "STYLEGUIDE_PREVIEW_TOKEN",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "preview"
+      ],
+      "buildTime": false,
+      "generate": "hex-32",
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "style-guide",
+          "when": {
+            "setBy": [
+              "STYLEGUIDE_PREVIEW_TOKEN"
+            ]
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "PREVIEW_ACCESS_SECRET",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "generate": "hex-32",
+      "need": "launch",
+      "uses": [
+        {
+          "feature": "prelaunch",
+          "when": {
+            "launchStatus": "prelaunch"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "PRELAUNCH_PREVIEW_TOKEN",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "generate": "hex-32",
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "prelaunch",
+          "when": {
+            "launchStatus": "prelaunch"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "FLAGS_SECRET",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "generate": "base64url-32",
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "experiments",
+          "when": {
+            "profile": "experiments"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "EXPERIMENT_CACHE_SECONDS",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "experiments",
+          "when": {
+            "profile": "experiments"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_PLAUSIBLE_DOMAIN",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "analytics",
+          "when": {
+            "setBy": [
+              "NEXT_PUBLIC_PLAUSIBLE_DOMAIN",
+              "NEXT_PUBLIC_POSTHOG_KEY",
+              "NEXT_PUBLIC_POSTHOG_HOST",
+              "NEXT_PUBLIC_GA_ID"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_POSTHOG_KEY",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "analytics",
+          "when": {
+            "setBy": [
+              "NEXT_PUBLIC_PLAUSIBLE_DOMAIN",
+              "NEXT_PUBLIC_POSTHOG_KEY",
+              "NEXT_PUBLIC_POSTHOG_HOST",
+              "NEXT_PUBLIC_GA_ID"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_POSTHOG_HOST",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "analytics",
+          "when": {
+            "setBy": [
+              "NEXT_PUBLIC_PLAUSIBLE_DOMAIN",
+              "NEXT_PUBLIC_POSTHOG_KEY",
+              "NEXT_PUBLIC_POSTHOG_HOST",
+              "NEXT_PUBLIC_GA_ID"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_GA_ID",
+      "where": "vercel",
+      "kind": "public-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "analytics",
+          "when": {
+            "setBy": [
+              "NEXT_PUBLIC_PLAUSIBLE_DOMAIN",
+              "NEXT_PUBLIC_POSTHOG_KEY",
+              "NEXT_PUBLIC_POSTHOG_HOST",
+              "NEXT_PUBLIC_GA_ID"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "AUTH_SECRET",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "generate": "base64url-32",
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "members",
+          "when": {
+            "profile": "members"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "AUTH_GITHUB_ID",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "members",
+          "when": {
+            "profile": "members"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "AUTH_GITHUB_SECRET",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "members",
+          "when": {
+            "profile": "members"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "AUTH_GOOGLE_ID",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "members",
+          "when": {
+            "profile": "members"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "AUTH_GOOGLE_SECRET",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "members",
+          "when": {
+            "profile": "members"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "AUTH_ALLOWED_EMAILS",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "members",
+          "when": {
+            "profile": "members"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "AUTH_TRUST_HOST",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "members",
+          "when": {
+            "profile": "members"
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_DSN",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "when-enabled",
+      "uses": [
+        {
+          "feature": "error-tracking",
+          "when": {
+            "setBy": [
+              "SENTRY_DSN",
+              "SENTRY_TRACES_SAMPLE_RATE",
+              "SENTRY_AUTH_TOKEN",
+              "SENTRY_ORG",
+              "SENTRY_PROJECT"
+            ]
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_TRACES_SAMPLE_RATE",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "error-tracking",
+          "when": {
+            "setBy": [
+              "SENTRY_DSN",
+              "SENTRY_TRACES_SAMPLE_RATE",
+              "SENTRY_AUTH_TOKEN",
+              "SENTRY_ORG",
+              "SENTRY_PROJECT"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_AUTH_TOKEN",
+      "where": "vercel",
+      "kind": "secret",
+      "secret": true,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "error-tracking",
+          "when": {
+            "setBy": [
+              "SENTRY_DSN",
+              "SENTRY_TRACES_SAMPLE_RATE",
+              "SENTRY_AUTH_TOKEN",
+              "SENTRY_ORG",
+              "SENTRY_PROJECT"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_ORG",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "error-tracking",
+          "when": {
+            "setBy": [
+              "SENTRY_DSN",
+              "SENTRY_TRACES_SAMPLE_RATE",
+              "SENTRY_AUTH_TOKEN",
+              "SENTRY_ORG",
+              "SENTRY_PROJECT"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_PROJECT",
+      "where": "vercel",
+      "kind": "server-env",
+      "secret": false,
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "buildTime": true,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "error-tracking",
+          "when": {
+            "setBy": [
+              "SENTRY_DSN",
+              "SENTRY_TRACES_SAMPLE_RATE",
+              "SENTRY_AUTH_TOKEN",
+              "SENTRY_ORG",
+              "SENTRY_PROJECT"
+            ]
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "PRODUCTION_URL",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "after-launch",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SANITY_PROJECT_ID",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "after-launch",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        },
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        },
+        {
+          "feature": "enquiry-retention",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        },
+        {
+          "feature": "sanity-workflow",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SANITY_DATASET",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        },
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        },
+        {
+          "feature": "enquiry-retention",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        },
+        {
+          "feature": "sanity-workflow",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SANITY_AUTH_TOKEN",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "after-launch",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        },
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "HEALTH_CHECKS",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ACCEPT_PUBLIC_DATASET",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "HEALTH_CHECKS_REASON",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "HEALTH_EXPECT_MARKER",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "health-monitoring",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BACKUP_S3_BUCKET",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BACKUP_S3_ENDPOINT",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BACKUP_S3_ACCESS_KEY_ID",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BACKUP_S3_SECRET_ACCESS_KEY",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BACKUP_S3_REGION",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BACKUP_S3_PREFIX",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "backups",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SANITY_WRITE_TOKEN",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "after-launch",
+      "uses": [
+        {
+          "feature": "enquiry-retention",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ENQUIRY_RETENTION_DAYS",
+      "where": "github",
+      "kind": "github-var",
+      "secret": false,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "enquiry-retention",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SANITY_DEPLOY_TOKEN",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "sanity-workflow",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "SANITY_MIGRATION_READ_TOKEN",
+      "where": "github",
+      "kind": "github-secret",
+      "secret": true,
+      "buildTime": false,
+      "need": "optional",
+      "uses": [
+        {
+          "feature": "sanity-workflow",
+          "when": {
+            "afterLaunch": true
+          },
+          "required": false
+        }
+      ]
+    }
+  ],
+  "seed": {
+    "module": "scripts/setup/seed.mjs",
+    "export": "seedDocuments",
+    "import": "missing",
+    "defaultProfile": "prelaunch-links",
+    "marker": {
+      "document": "siteIdentity",
+      "field": "verificationMarker",
+      "rule": "\"nocturne-\" plus the site name as a lowercase slug"
+    },
+    "profiles": [
+      {
+        "id": "prelaunch-links",
+        "summary": "A published Link page, with Home and About as drafts, until launch.",
+        "prelaunch": true,
+        "published": [
+          "siteIdentity",
+          "siteNavigation",
+          "designSettings",
+          "announcement",
+          "cookieBanner",
+          "businessInfo",
+          "page-links"
+        ],
+        "drafts": [
+          "page-home",
+          "page-about"
+        ]
+      },
+      {
+        "id": "full-site",
+        "summary": "Home and About published, with menus, for a site that is live from the start.",
+        "prelaunch": false,
+        "published": [
+          "siteIdentity",
+          "siteNavigation",
+          "designSettings",
+          "announcement",
+          "cookieBanner",
+          "businessInfo",
+          "page-home",
+          "page-about"
+        ],
+        "drafts": []
+      }
+    ]
+  },
+  "verification": {
+    "marker": {
+      "meta": "nocturne:marker",
+      "document": "siteIdentity",
+      "field": "verificationMarker"
+    },
+    "siteInfo": {
+      "path": "/api/site-info",
+      "schema": 2,
+      "statuses": [
+        "prelaunch",
+        "live"
+      ]
+    },
+    "launchCheck": {
+      "script": "scripts/launch-check.mjs",
+      "args": [
+        "--json"
+      ],
+      "prelaunchArg": "--prelaunch",
+      "markerArg": "--expect-marker=",
+      "env": [
+        "NEXT_PUBLIC_SANITY_PROJECT_ID",
+        "NEXT_PUBLIC_SANITY_DATASET"
+      ],
+      "passWhen": "summary.fail is 0"
+    },
+    "features": [
+      {
+        "id": "sanity-core",
+        "checks": [
+          "check-dataset"
+        ]
+      },
+      {
+        "id": "studio-brand",
+        "checks": [
+          "check-studio-brand"
+        ]
+      },
+      {
+        "id": "prelaunch",
+        "checks": [
+          "launch-check"
+        ]
+      },
+      {
+        "id": "health-monitoring",
+        "checks": [
+          "launch-check",
+          "check-dataset"
+        ]
+      }
+    ]
+  }
+}
