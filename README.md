@@ -5433,15 +5433,15 @@ or `git log template/main --before=<date>`), and merge forward from there. Expec
 The split predicts where merges conflict. Customize files are yours; core files should be identical to
 the template, so they merge cleanly unless you changed them.
 
-| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Expect                              |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Customize | `site.profile.ts` (what the site uses: client, tier, features, approved sections, help links), `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`, `studio-brand.json` (with `studio-brand.schema.json` kept as shipped), `src/assets/brand/client/`                                                                                                                                                                                                                                                            | Conflicts if the theme changed      |
-| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                                                                                                                                             | Conflicts at each section you added |
-| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Conflicts where you added content   |
-| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                                                                                                                                         | Small conflicts                     |
-| Core      | `src/lib/**`, `src/config/{env,paths,site-url,profile,define-site-profile}.ts`, `src/config/studio-brand/**`, `src/assets/brand/currawong/**`, `src/features/studio/theme.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,check-version}.mjs`, `template-version.json`, `eslint.config.mjs` | Clean                               |
-| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                                                                                                                 | Clean                               |
-| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                                                                                                                    | Take either side, regenerate        |
+| Kind      | Paths                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Expect                              |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Customize | `site.profile.ts` (what the site uses: client, tier, features, approved sections, help links), `src/styles/tokens.json` (design tokens: colours, type, spacing), `src/styles/globals.css`, `studio-brand.json` (with `studio-brand.schema.json` kept as shipped), `src/assets/brand/client/`                                                                                                                                                                                                                                                                                              | Conflicts if the theme changed      |
+| Customize | `src/features/pages/schemas/sections/*`, `src/features/pages/components/sections/*`, `src/features/pages/api/sections.ts`, `section-renderer.tsx`, `schemas/sections/index.ts`, `public/section-previews/*`                                                                                                                                                                                                                                                                                                                                                                               | Conflicts at each section you added |
+| Customize | `tests/e2e/fixtures/dataset.mjs`, page templates (`schemas/templates.ts`), `public/`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Conflicts where you added content   |
+| Customize | `package.json` (name, scripts, your dependencies), `.env.example`, `sanity.config.ts` (project-specific plugins), `next.config.ts`, `README.md`                                                                                                                                                                                                                                                                                                                                                                                                                                           | Small conflicts                     |
+| Core      | `src/lib/**`, `src/config/{env,paths,site-url,profile,define-site-profile}.ts`, `src/config/studio-brand/**`, `src/assets/brand/currawong/**`, `src/features/studio/theme.ts`, `scripts/build-tokens.mjs`, `src/components/ui/**`, `src/features/{studio,draft-mode,personalization,experiments,auth,pricing}/**`, forms and blog logic (`api`, `utils`), `scripts/{new-section,new-feature,new-document,new-singleton,generator-utils,section-names,e2e-server,release,release-utils,blueprint-utils,check-version}.mjs`, `template-version.json`, `blueprint.json`, `eslint.config.mjs` | Clean                               |
+| Core      | `.github/**` (CI, Dependabot), `tests/e2e/*.spec.ts` and `tests/e2e/{fake-sanity.mjs,constants.ts}`, `playwright.config.ts`, `vitest.config.mts`, `tsconfig.json`, `prettier.config.mjs`, `lighthouserc.json`, `.nvmrc`                                                                                                                                                                                                                                                                                                                                                                   | Clean                               |
+| Generated | `src/types/sanity.types.ts`, `schema.json`, `src/styles/tokens.generated.css`, `src/config/tokens.generated.ts`, `package-lock.json`                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Take either side, regenerate        |
 
 Keep customisations out of core files where you can: add a section, a page template or a fixture
 document in a new file or at the marker comments rather than editing shared code. Layout and design
@@ -5515,12 +5515,59 @@ take the template's copy.
    promote it (change the gate, add the release note, tell owners to set it first). Never let it pass by editing the version.
 
 4. The script prints the git commands to commit, then tag and push (`git tag -a vx.y.z -m "vx.y.z"`,
-   `git push origin main vx.y.z`). It never runs git or pushes. Never force-push a tag or `main`.
+   `git push origin main vx.y.z`). The only git it runs is `git rev-parse HEAD` (for `blueprint.json`, below); it never
+   commits, tags or pushes. Never force-push a tag or `main`.
+
+**`blueprint.json`, what Foundation provisions from** (task 200; settings spec §D.3). In the template, every release
+from 1.10.0 writes it next to the registry snapshot; commit it with the release. It is generated, never edited by hand,
+and holds names and fixed words, never a value:
+
+- `schema`: the format version (`1`). A reader accepts only the versions it knows and refuses any other before
+  reading anything else. Raise it for any change an existing reader could misread.
+- `source`: the repository (from the CHANGELOG compare links), the tag `vX.Y.Z`, and `preparedFrom`, the commit the
+  release was prepared from. A commit can't contain its own hash, so this is an ancestor of the tagged commit, not the
+  tagged commit itself. Foundation resolves the tag to its commit, checks that `preparedFrom` is an ancestor of it,
+  pins and records that commit, and refuses rather than substitutes when the tag is missing, has moved, or fails the
+  check. The release refuses a working tree with uncommitted changes and a commit that isn't on `origin/main`, so
+  `preparedFrom` stays an ancestor however the release PR is merged.
+- `projectTypes`: `["website"]`. The format allows `mobile` and `website+mobile`, for a later mobile starter.
+- `environment`: from the feature registry, one entry per variable and place (Vercel or GitHub) with its `kind`,
+  `secret`, Vercel `targets` and `buildTime` (together, the scope: which environments, and whether changing it needs a
+  rebuild), any `generate` rule, and its `need`:
+  - `launch`: every new site sets it before its first deployment (core features, and the pre-launch pass while the
+    site is in pre-launch). Today that is four variables: the Sanity project ID, dataset and Viewer token, and
+    `PREVIEW_ACCESS_SECRET`;
+  - `when-enabled`: only once the site turns on a feature that requires it, by its `site.profile.ts` switch or by
+    setting it up;
+  - `after-launch`: the scheduled GitHub workflows (health checks, backups, enquiry retention, Sanity workflow), set up
+    once the site is live, one feature at a time;
+  - `optional`: no feature requires it.
+
+  `uses` lists every feature that reads it, with `when` that feature applies (`always`, `launchStatus`, `profile`,
+  `setBy` or `afterLaunch`), whether it is `required` (`true`, `false` or `{ "when": "NAME" }`), `requiredIn` and
+  `requiredAtRuntime`. `requiredEnvironment(environment, { launchStatus, profile, optIn, afterLaunch })` in
+  `scripts/blueprint-utils.mjs` turns that into the variables one site must set; Foundation imports it from the pinned
+  checkout, as it does the seed, so the rules aren't written twice. A `requiredAtRuntime` setting is required in every
+  target whatever `requiredIn` says, because the code fails without it. Deprecated, planned and `system` settings,
+  dormant features, and settings that live in Sanity, `site.profile.ts` or on a laptop, are left out. A registry
+  feature's `stage` (`prelaunch` or `after-launch`) is the only field that exists for this; everything else comes from
+  `tier`, `profileFlag`, `switchedBy` and `required`.
+
+- `seed`: how to import `scripts/setup/seed.mjs` (`--missing`), the marker it writes, and its profiles
+  (`SEED_PROFILES`: `prelaunch-links`, the default, and `full-site`), each with the document IDs it creates.
+- `verification`: the `<meta name="nocturne:marker">` tag, `/api/site-info` (schema 2, `prelaunch` or `live`), the
+  `launch:check --json` call, and each feature's own `verify` checks from the registry.
+  `scripts/blueprint-utils.test.mjs` fails when the template code these name changes without the blueprint.
+
+The release validates the file exactly as `check:version` does before writing anything, and refuses outside a git
+checkout. A client site gets no new blueprint: its copy, merged with a template tag, describes the template.
 
 CI runs `npm run check:version` and fails when `template-version.json` doesn't match the latest `CHANGELOG.md` version
 heading (or its date), when `config-registry.snapshot.json` is for a different release, or, in the template itself (a
 package named `nocturne`; a client site keeps its own name and version), when `package.json` or `package-lock.json` says
-another version, so a release can't be tagged with one of them forgotten. `npm run release` sets the version in
+another version, or when `blueprint.json` is missing (from 1.10.0), is for another release, has a field it doesn't
+know, or has an environment list or verification spec that isn't what the snapshot's registry gives, so a release
+can't be tagged with one of them forgotten or hand-edited. `npm run release` sets the version in
 `package.json` and `package-lock.json` along with the others (add them to the commit it prints), and refuses to start if
 they have already drifted.
 

@@ -9,6 +9,7 @@ export const prelaunchConfig = defineFeatureConfig({
   withoutIt: 'No preview pass can be issued: pre-launch pages stay private, even in Presentation.',
   profileFlag: null,
   tier: 'optional',
+  stage: 'prelaunch',
   docs: 'README.md#pre-launch-and-launch',
   setup: [
     'Generate PREVIEW_ACCESS_SECRET (16 or more characters, for example openssl rand -hex 32) and add it to Vercel.',

@@ -2,6 +2,12 @@
  * Pure helpers for scripts/release.mjs and scripts/check-version.mjs: version maths and the
  * CHANGELOG.md transformation. No file or git access here, so it is unit-tested directly.
  */
+import {
+  buildBlueprint,
+  checkBlueprint,
+  repoFromChangelog,
+  serialiseBlueprint,
+} from './blueprint-utils.mjs'
 
 const SEMVER = /^(\d+)\.(\d+)\.(\d+)$/
 const DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -210,6 +216,10 @@ export function parseSnapshot(text, expectedVersion) {
  * release is refused unless `baseline` is true, so a deleted snapshot can't quietly switch every
  * comparison off; with one, `baseline` is refused, so a baseline can't replace a real comparison.
  * The returned `files` carry the new snapshot only when nothing was refused.
+ *
+ * `blueprint` is `{ commit, seedProfiles }` in the template itself (the release script passes it
+ * only there), and `files.blueprint` is then the new blueprint.json, already validated the way
+ * `check:version` will validate it. A client site gets null.
  */
 export function prepareRelease({
   stamp,
@@ -222,6 +232,7 @@ export function prepareRelease({
   rules,
   packageText = null,
   lockText = null,
+  blueprint = null,
 }) {
   const refused = (...problems) => ({ problems, files: null, notes: [], markdown: [] })
 
@@ -304,6 +315,31 @@ export function prepareRelease({
   } catch (error) {
     return refused(error.message)
   }
+  const snapshot = serialiseSnapshot(version, registry, { baseline: !previous })
+  let blueprintText = null
+  if (blueprint) {
+    const repo = repoFromChangelog(changelog)
+    if (!repo) {
+      return refused(
+        'blueprint.json needs the GitHub repository, read from the CHANGELOG.md "[Unreleased]: https://github.com/owner/repo/compare/…" link, and that link points elsewhere.',
+      )
+    }
+    blueprintText = serialiseBlueprint(
+      buildBlueprint({
+        version,
+        released: date,
+        repo,
+        commit: blueprint.commit,
+        features: registry,
+        seedProfiles: blueprint.seedProfiles,
+      }),
+    )
+    const invalid = checkBlueprint(blueprintText, {
+      stamp: { version, released: date },
+      snapshot: JSON.parse(snapshot),
+    })
+    if (invalid.length > 0) return refused(...invalid)
+  }
   return {
     problems: [],
     notes,
@@ -312,7 +348,8 @@ export function prepareRelease({
     files: {
       changelog: released,
       stamp: `{ "version": "${version}", "released": "${date}" }\n`,
-      snapshot: serialiseSnapshot(version, registry, { baseline: !previous }),
+      snapshot,
+      blueprint: blueprintText,
       // Only the template's own package moves; a client's keeps its version.
       package:
         packageText && JSON.parse(packageText).name === TEMPLATE_PACKAGE

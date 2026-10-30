@@ -11,6 +11,7 @@ export const backupsConfig = defineFeatureConfig({
     'Nothing exports the dataset. Sanity keeps its own history, but there is no copy the business holds.',
   profileFlag: null,
   tier: 'optional',
+  stage: 'after-launch',
   docs: 'README.md#backups',
   setup: [
     'Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.',

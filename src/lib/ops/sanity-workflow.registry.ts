@@ -10,6 +10,7 @@ export const sanityWorkflowConfig = defineFeatureConfig({
     'The schema is deployed by hand with the Sanity CLI, and migrations are not tried before merging.',
   profileFlag: null,
   tier: 'optional',
+  stage: 'after-launch',
   docs: 'README.md#sanity-workflow-migrations-and-schema-deploy',
   setup: [
     'Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.',

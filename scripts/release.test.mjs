@@ -4,8 +4,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
+import { checkBlueprint } from './blueprint-utils.mjs'
 import { parseSnapshot, prepareRelease, serialiseSnapshot } from './release-utils.mjs'
 import { loadRules, runRelease } from './release.mjs'
 
@@ -291,6 +292,7 @@ describe('runRelease: the whole release against real files', () => {
       'config-registry.snapshot.json',
       'package.json',
       'package-lock.json',
+      'blueprint.json',
     ]
     const read = () =>
       Object.fromEntries(
@@ -298,8 +300,16 @@ describe('runRelease: the whole release against real files', () => {
       )
     return { dir, read }
   }
+  const SHA = 'f39d2a4c2d7cf1748a914d2b20bd7e2256f70492'
   const release = (dir, registry, ruleOverrides, ...argv) =>
-    runRelease({ cwd: dir, argv, registry, rules: rules(ruleOverrides), now: () => '2026-11-10' })
+    runRelease({
+      cwd: dir,
+      argv,
+      registry,
+      rules: rules(ruleOverrides),
+      now: () => '2026-11-10',
+      head: () => SHA,
+    })
 
   it('a valid release writes the changelog, the stamp and the new snapshot, and a repeat changes nothing', () => {
     const { dir, read } = project()
@@ -313,6 +323,21 @@ describe('runRelease: the whole release against real files', () => {
     expect(JSON.parse(after['config-registry.snapshot.json'])).toMatchObject({ version: '1.10.0' })
     expect(after['package.json']).toBe(pkgText('1.10.0'))
     expect(after['package-lock.json']).toBe(lockText('1.10.0'))
+    expect(result.stdout).toContain('blueprint.json')
+    const blueprint = JSON.parse(after['blueprint.json'])
+    expect(blueprint).toMatchObject({
+      version: '1.10.0',
+      released: '2026-11-10',
+      source: { repo: 'https://github.com/example/site', tag: 'v1.10.0', preparedFrom: SHA },
+      projectTypes: ['website'],
+    })
+    expect(blueprint.environment.map((entry) => entry.name)).toEqual(['PROJECT_ID', 'READ_TOKEN'])
+    expect(
+      checkBlueprint(after['blueprint.json'], {
+        stamp: { version: '1.10.0', released: '2026-11-10' },
+        snapshot: parseSnapshot(after['config-registry.snapshot.json'], '1.10.0'),
+      }),
+    ).toEqual([])
 
     const again = release(dir, previous, {}, '1.10.0')
     expect(again.status).toBe(1)
@@ -380,6 +405,62 @@ describe('runRelease: the whole release against real files', () => {
     const result = release(dir, previous, {}, '1.10.0')
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('package.json says 1.7.1')
+    expect(read()).toEqual(before)
+  })
+
+  it('prints no setting value, and writes none, even with every setting set in the environment', () => {
+    const { dir, read } = project()
+    for (const [index, name] of [
+      'PROJECT_ID',
+      'READ_TOKEN',
+      ...realRegistry.flatMap((f) => f.settings.map((x) => x.name)),
+    ].entries())
+      vi.stubEnv(name, `leak-check-${index}`)
+    try {
+      const result = release(dir, previous, {}, '1.10.0')
+      expect(result.status).toBe(0)
+      expect(`${result.stdout}${result.stderr}`).not.toContain('leak-check-')
+      expect(Object.values(read()).join('')).not.toContain('leak-check-')
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
+  it('a client site gets no blueprint and runs no git', () => {
+    const { dir, read } = project()
+    writeFileSync(
+      join(dir, 'package.json'),
+      `${JSON.stringify({ name: 'acme', version: '0.1.0' })}\n`,
+    )
+    const result = runRelease({
+      cwd: dir,
+      argv: ['1.10.0'],
+      registry: previous,
+      rules: rules(),
+      now: () => '2026-11-10',
+      head: () => {
+        throw new Error('git must not run')
+      },
+    })
+    expect(result.status).toBe(0)
+    expect(read()['blueprint.json']).toBeNull()
+  })
+
+  it('refuses, writing nothing, when the commit for the blueprint cannot be read', () => {
+    const { dir, read } = project()
+    const before = read()
+    const result = runRelease({
+      cwd: dir,
+      argv: ['1.10.0'],
+      registry: previous,
+      rules: rules(),
+      head: () => {
+        throw new Error('The working tree has uncommitted changes')
+      },
+    })
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('records the commit the release is prepared from')
+    expect(result.stderr).toContain('uncommitted changes')
     expect(read()).toEqual(before)
   })
 

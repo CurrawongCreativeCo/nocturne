@@ -1,4 +1,21 @@
 /**
+ * The seed's named starting points, for blueprint.json (Foundation picks one per site). The setup
+ * wizard uses the same switch: pre-launch by default, `--live` for the full site.
+ */
+export const SEED_PROFILES = [
+  {
+    id: 'prelaunch-links',
+    summary: 'A published Link page, with Home and About as drafts, until launch.',
+    prelaunch: true,
+  },
+  {
+    id: 'full-site',
+    summary: 'Home and About published, with menus, for a site that is live from the start.',
+    prelaunch: false,
+  },
+]
+
+/**
  * Starter content imported by the setup wizard (with fixed IDs, imported with `--missing` so
  * existing documents are never overwritten: the import's createIfNotExists).
  * The copy doubles as a short guide for whoever edits the site first.
