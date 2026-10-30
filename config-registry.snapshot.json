@@ -1,7 +1,6 @@
 {
   "schema": 1,
-  "version": "1.9.0",
-  "baseline": true,
+  "version": "1.10.0",
   "features": [
     {
       "id": "sanity-core",
@@ -16,7 +15,7 @@
       "setup": [
         "Create the project at sanity.io/manage and copy its Project ID.",
         "Add NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET to Vercel and .env.local.",
-        "Create a Viewer token and add it as SANITY_API_READ_TOKEN: datasets are private, so the site reads content with it."
+        "Create a Viewer token and add it as SANITY_API_READ_TOKEN: the site needs it to read content, whether the dataset is private or public."
       ],
       "settings": [
         {
@@ -65,11 +64,12 @@
             "preview"
           ],
           "required": true,
+          "requiredAtRuntime": true,
           "requiredIn": [
             "production"
           ],
-          "enforceFrom": "1.10.0",
-          "purpose": "Lets the server read content from a private dataset. Without it a production site has nothing to show.",
+          "enforceFrom": "1.11.0",
+          "purpose": "Lets the server read content. The site fails without it in every environment, whether the dataset is private or public; the build only starts to refuse a missing one from 1.11.0.",
           "source": "sanity.io/manage → your project → API → Tokens (Viewer role)",
           "docs": "README.md#dataset-privacy"
         },
@@ -767,6 +767,7 @@
       "withoutIt": "No preview pass can be issued: pre-launch pages stay private, even in Presentation.",
       "profileFlag": null,
       "tier": "optional",
+      "stage": "prelaunch",
       "docs": "README.md#pre-launch-and-launch",
       "setup": [
         "Generate PREVIEW_ACCESS_SECRET (16 or more characters, for example openssl rand -hex 32) and add it to Vercel.",
@@ -1185,6 +1186,7 @@
       "withoutIt": "Nothing checks the live site. Problems are found by visitors.",
       "profileFlag": null,
       "tier": "optional",
+      "stage": "after-launch",
       "since": "1.9.0",
       "docs": "README.md#health-checks",
       "setup": [
@@ -1238,6 +1240,16 @@
           "default": "On. Set it to \"off\" to switch monitoring off deliberately"
         },
         {
+          "name": "ACCEPT_PUBLIC_DATASET",
+          "kind": "github-var",
+          "where": "github",
+          "required": false,
+          "since": "1.10.0",
+          "purpose": "Records that a public dataset is on purpose (a plan without private datasets). The value is the reason. It does not make the content safe: it only applies while an anonymous request finds none of the known sensitive things (enquiries, form recipients, members-only content), and then the run is a warning, not a failure.",
+          "default": "A public dataset fails the health check",
+          "docs": "README.md#dataset-privacy"
+        },
+        {
           "name": "HEALTH_CHECKS_REASON",
           "kind": "github-var",
           "where": "github",
@@ -1281,6 +1293,7 @@
       "withoutIt": "Nothing exports the dataset. Sanity keeps its own history, but there is no copy the business holds.",
       "profileFlag": null,
       "tier": "optional",
+      "stage": "after-launch",
       "docs": "README.md#backups",
       "setup": [
         "Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.",
@@ -1371,6 +1384,7 @@
       "withoutIt": "Stored enquiries are kept until someone deletes them.",
       "profileFlag": null,
       "tier": "optional",
+      "stage": "after-launch",
       "docs": "README.md#enquiries",
       "setup": [
         "Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.",
@@ -1423,6 +1437,7 @@
       "withoutIt": "The schema is deployed by hand with the Sanity CLI, and migrations are not tried before merging.",
       "profileFlag": null,
       "tier": "optional",
+      "stage": "after-launch",
       "docs": "README.md#sanity-workflow-migrations-and-schema-deploy",
       "setup": [
         "Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.",

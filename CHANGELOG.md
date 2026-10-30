@@ -20,6 +20,16 @@ you start a release.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Breaking changes / migration steps
+
+## [1.10.0] - 2026-10-31
+
+### Added
+
 - **`blueprint.json` for Foundation (task 200):** `npm run release` now writes a machine-readable description of each template release (format `schema` 1): the repository, tag and the commit it was prepared from; `projectTypes` (`website`, with room for mobile later); the environment a site can need, generated from the feature registry (name, place, kind, whether it is secret, targets and build-time, never a value), each variable marked `launch`, `when-enabled`, `after-launch` or `optional`, with every feature that uses it, when that feature applies, and its `required`, `requiredIn` and `requiredAtRuntime`; the seed profiles from `scripts/setup/seed.mjs` (`SEED_PROFILES`) with the documents each creates; and the verification spec (marker, `/api/site-info`, `launch:check`, and each feature's checks). A basic pre-launch site needs four variables. `requiredEnvironment()` in `scripts/blueprint-utils.mjs` gives the variables for a chosen configuration. Registry features can say `stage: 'prelaunch'` or `'after-launch'` (set on the pre-launch pass and the four scheduled GitHub workflows). The release refuses a dirty working tree or a commit that isn't on `origin/main`. `npm run check:version` fails when the file is missing from 1.10.0, has another schema, belongs to another release, has an unknown field, or doesn't match the registry snapshot. Existing projects: nothing to do; the file arrives with the template merge (README, _Cutting a release_).
 - **Contrast fixes in Studio (UX-004):** a Link list contrast warning names the property, what it was measured against, the ratio and the target (4.5:1 text, 3:1 large text and icons), and offers undoable fixes: **Use suggested colour**, **Reset to Link list design**, and for a gradient over a photo **Use a stronger overlay** (the failing stops' opacity, never a new colour). Nothing changes without a click, and each fix is measured again straight afterwards (a partial improvement says _improved, not fixed_ and what would finish the job). A suggested colour says it overrides the Link list design. Separators, the glow and decorative dividers are decoration and have no contrast target. Wording never claims conformance; the badges now read _Meets target_ and _Below target_ instead of _AA pass_ and _AA fail_. The suggestion logic and wording are in `src/lib/color/contrast-remedy.ts`.
 - **Acknowledge a public dataset on purpose (`ACCEPT_PUBLIC_DATASET`):** a site on a plan without private datasets no longer has a health check that fails every day. Set the GitHub variable (and `.env.local` for local runs) to a written reason. That records a decision that the dataset is public and everything in it is readable; it does not make the content safe. `check:dataset`, `launch:check` and the Health workflow then ask Sanity, with no token, how many published enquiries, forms with a recipient address and members-only pages or sections an anonymous visitor can find. If all are zero the dataset is reported as accepted, the Health run ends as a warning (no issue is opened) and `launch:check` warns. If any is above zero, a count can't be read, or there is no reason, it fails as before and says which. The counts cover only the sensitive things the template knows about. `scripts/dataset-exposure.json` classifies every document type, and `src/app/dataset-exposure.test.ts` fails when a new type is added unclassified or a field that looks personal or secret appears on an unprobed type, so a new feature can't silently skip the check. Registered under Daily health monitoring (since 1.10.0). Existing projects: nothing to do (README, _Dataset privacy_).
@@ -36,7 +46,19 @@ you start a release.
 
 - **End-to-end tests:** the build now clears cached Sanity responses first, so a local run no longer reuses days-old event dates; the screenshot specs stop waiting after 10 s for a picture that never loads and name it.
 
+### New configuration in 1.10.0
+
+**Needed for the site to run: the build only starts to enforce them later**
+
+- `SANITY_API_READ_TOKEN` (Sanity content): set it in Vercel → Settings → Environment Variables; the site already fails without it, in every environment; the build refuses a missing one from 1.11.0; find it: sanity.io/manage → your project → API → Tokens (Viewer role)
+
+**New optional settings**
+
+- `ACCEPT_PUBLIC_DATASET` (Daily health monitoring). Records that a public dataset is on purpose (a plan without private datasets). The value is the reason. It does not make the content safe: it only applies while an anonymous request finds none of the known sensitive things (enquiries, form recipients, members-only content), and then the run is a warning, not a failure.
+
 ### Breaking changes / migration steps
+
+None.
 
 ## [1.9.0] - 2026-10-27
 
@@ -1162,7 +1184,8 @@ first merge (`--allow-unrelated-histories` is needed only when the project was c
 After merging, run `npm install` (dependencies changed) and `npm run typegen`, then commit the
 regenerated `src/types/sanity.types.ts`.
 
-[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/CurrawongCreativeCo/nocturne/compare/v1.7.0...v1.7.1
