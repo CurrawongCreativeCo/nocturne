@@ -10,6 +10,7 @@ export const healthMonitoringConfig = defineFeatureConfig({
   withoutIt: 'Nothing checks the live site. Problems are found by visitors.',
   profileFlag: null,
   tier: 'optional',
+  stage: 'after-launch',
   since: '1.9.0',
   docs: 'README.md#health-checks',
   setup: [

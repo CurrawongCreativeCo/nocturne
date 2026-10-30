@@ -9,6 +9,7 @@ export const enquiryRetentionConfig = defineFeatureConfig({
   withoutIt: 'Stored enquiries are kept until someone deletes them.',
   profileFlag: null,
   tier: 'optional',
+  stage: 'after-launch',
   docs: 'README.md#enquiries',
   setup: [
     'Add the NEXT_PUBLIC_SANITY_PROJECT_ID repository variable on GitHub.',

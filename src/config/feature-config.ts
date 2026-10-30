@@ -133,6 +133,13 @@ export interface FeatureConfig {
   switchedBy?: readonly string[]
   /** Template version that introduced the feature. Left out when the history isn't known. */
   since?: string
+  /**
+   * When a new site needs it set up, for Foundation (blueprint.json). `prelaunch`: while the site is
+   * in pre-launch, from its first deployment. `after-launch`: once it has a production address (the
+   * scheduled GitHub workflows). Leave out otherwise: a core feature is needed from the first
+   * deployment, and an optional one once the site turns it on (`profileFlag`, or its settings).
+   */
+  stage?: 'prelaunch' | 'after-launch'
   docs: string
   /** Setup steps in plain language, in order, for the guidance a Settings screen will show. */
   setup?: readonly string[]

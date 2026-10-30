@@ -5,6 +5,7 @@ src/config/tokens.generated.ts
 src/config/studio-brand/assets.generated.ts
 schema.json
 config-registry.snapshot.json
+blueprint.json
 src/features/studio/start-here/editor-guide.generated.json
 next-env.d.ts
 AGENTS.md
