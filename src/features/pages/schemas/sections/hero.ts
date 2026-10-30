@@ -373,6 +373,8 @@ export const hero = defineType({
         fixesAlignment: (section) => ['split', 'editorial'].includes(layoutOf(section)),
         // The hero has its own Image, so the shared Background image is not offered.
         hasOwnBackgroundImage: () => true,
+        // Only these two draw the picture behind the text; a panel sits over it.
+        drawsBackground: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
       },
     },
   ),

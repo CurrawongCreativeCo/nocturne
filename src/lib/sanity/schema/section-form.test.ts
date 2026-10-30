@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   allowsAlignment,
+  allowsPanel,
   allowsParallax,
   alignmentHidden,
   imageOptionHidden,
@@ -183,5 +184,15 @@ describe('background image options', () => {
       true,
     )
     expect(staleImageOptionMessage('repeat', undefined, { parent })).toBe(true)
+  })
+})
+
+describe('panel', () => {
+  it('is offered everywhere except sections that draw their own surfaces', () => {
+    registerSectionRules('panelOwner', { ownsSurfaces: () => true })
+    expect(allowsPanel({ _type: 'panelOwner' })).toBe(false)
+    expect(allowsPanel({ _type: 'richText' })).toBe(true)
+    // A path we can't resolve offers it: hiding an option wrongly is worse than showing one.
+    expect(allowsPanel(undefined)).toBe(true)
   })
 })

@@ -1018,6 +1018,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
   unauthenticated query to check the dataset is private (see [Enquiries](#enquiries)); neither is read through the cache,
   and a page view still causes none.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
+- **Section panels** add one small query, `DESIGN_COLOURS_QUERY` (Brand colours and gradients, tagged `designSettings`), and only while rendering a section that has a panel: a site with no panels never makes it, and a visitor never causes it. It exists so the panel's contrast uses the colours the page really draws; sharing the settings entry would mean importing the site feature from shared code.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
 Keep it that way: fetch through `cachedSanityFetch`, call each query with the same argument shape so
@@ -3644,6 +3645,34 @@ foreground independently of section schemas, and checks solid or glass surfaces.
 `surfaceColourCheck` for a candidate text/background choice and `surfaceTextContrast` for an
 effective surface. `card-contrast.ts` maps the Link list’s label fields onto that contract; other
 sections should provide their own typed adapter, keeping schema paths out of the shared calculation.
+
+### Section panels
+
+A section's content can sit on a panel over its background. In the section's **Design** tab, **Panel** offers **None** (the default: nothing changes), **Glass** and **Solid card**. The panel is tinted from the section's background colour: Inverse gives dark glass, Accent an accent tint, and the text on it follows automatically. You never choose the text colour.
+
+| Panel          | What it draws                                                             |
+| -------------- | ------------------------------------------------------------------------- |
+| **None**       | The content straight on the background.                                   |
+| **Glass**      | A see-through panel. How it renders depends on what is behind it (below). |
+| **Solid card** | An opaque card in the tone's raised surface colour.                       |
+
+**Glass over any background.** The site decides how to draw it, so there is nothing to configure:
+
+- Over a **solid colour**, the glass is _tinted_: a translucent fill flattened against the colour, with a highlight border and **no blur**, because there is nothing varied behind it to blur.
+- Over a **picture, gradient, video, pattern or overlapping content** (a section edge, a Parallax or Float layer, a hero's own background), it is _frosted_: the same tint with a backdrop blur.
+
+**Keeping text readable.** Text on a panel must reach 4.5:1 (body and secondary text).
+
+- Over a solid colour the contrast is **exact**, measured against the flattened colour. Over a gradient the Studio measures at its stops and at points between them.
+- Over a **picture or video** nothing is measured: the photo is unknown. The site checks the panel colour over pure black and over pure white. If text passes both, it is _guaranteed_ whatever the picture; if it fails both, it fails; otherwise it is _not guaranteed: check visually_.
+- When text isn't guaranteed, the panel gets more opaque (in 5% steps) up to the strongest glass strength. If that still isn't enough, it renders **solid**, and the Studio shows a **warning** under Panel naming the fix: a stronger overlay on the picture, a higher glass strength or **Solid card**. It is only ever a warning: the section lives inside a page, and an error would block the whole page from publishing.
+- Visitors who ask for less transparency (`prefers-reduced-transparency`) or more contrast (`prefers-contrast: more`), and browsers that can't blur, always get a solid panel.
+
+**Advanced: panel** holds **Glass strength** (Light, Medium or Strong), shown only for Glass. Unset follows the site's glass (Medium, from `tokens.json`). The Link list draws its own surfaces (glass rows and cards), so it doesn't offer Panel; its stored value, if any, is ignored.
+
+**Limits.** The checks use the colours in `tokens.json`, as the other section checks do. The page knows a brand gradient only by name, not by its stops, so on the site a gradient is checked with the black-and-white bound; the Studio, which can read the stops, measures it exactly.
+
+**For developers.** `src/lib/sanity/section-panel.ts` is the resolver and is importable by the site and the Studio: `resolvePanel` returns the render (`tinted`, `frosted` or `solid`), the opacity and any warning, and `panelDomProps` turns that into the `data-panel` attributes `SectionFrame` puts on the content container (the look is in `globals.css`, `[data-panel]`). `SectionFrame` renders the panel for every section, so a new section needs no code of its own. A section that draws its own surfaces registers `ownsSurfaces` in its `sectionFields` rules and passes `ownsSurfaces` to `SectionFrame` (see the Link list). Gallery entries `panel-*` and `tests/e2e/section-panel.spec.ts` cover each case; the visual baselines are Linux-only (run the "Update visual baselines" workflow after a change to the panel's look).
 
 ### Section dividers
 

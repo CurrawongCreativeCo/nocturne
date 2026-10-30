@@ -913,7 +913,9 @@ export const linkList = defineType({
     ],
     // How this section starts when added. Keep it equal to DEFAULTS in the components.
     { align: 'center' },
-    // No design option depends on the layout: no picture, and each layout accepts any alignment.
+    // No design option depends on the layout: no picture, and each layout accepts any alignment. Its
+    // cards are its own surfaces (glass rows, tinted cards), so the shared Panel isn't offered.
+    { rules: { type: 'linkList', ownsSurfaces: () => true } },
   ),
   preview: {
     select: {

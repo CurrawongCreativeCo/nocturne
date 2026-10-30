@@ -45,6 +45,16 @@ export interface SectionFormRules {
    * shared Background image does not apply. Gradients still do.
    */
   hasOwnBackgroundImage?: (section: SectionValue) => boolean
+  /**
+   * Whether this layout draws a picture or video behind its text (a hero's Full background, the
+   * ambient video), which a panel then sits over. SectionFrame sees the same thing as its `background`.
+   */
+  drawsBackground?: (section: SectionValue) => boolean
+  /**
+   * Whether this layout draws its own surfaces (the Link list's cards), so the shared Panel doesn't
+   * apply and isn't offered. SectionFrame's `ownsSurfaces` is the same rule on the page.
+   */
+  ownsSurfaces?: (section: SectionValue) => boolean
 }
 
 const RULES = new Map<string, SectionFormRules>()
@@ -101,6 +111,17 @@ export function allowsBackgroundImage(section: SectionValue | undefined): boolea
   return !sectionRulesFor(section._type).hasOwnBackgroundImage?.(section)
 }
 
+/** Whether the shared Panel makes sense: not where the section draws its own surfaces. */
+export function allowsPanel(section: SectionValue | undefined): boolean {
+  if (!section) return true
+  return !sectionRulesFor(section._type).ownsSurfaces?.(section)
+}
+
+/** Whether the layout draws a picture or video of its own behind its content (a hero's background). */
+export function sectionHasOwnBackground(section: SectionValue | undefined): boolean {
+  return section ? (sectionRulesFor(section._type).drawsBackground?.(section) ?? false) : false
+}
+
 /** The animations to offer: every one, minus Float and Parallax where there is no picture to move. */
 export function visibleMotions(section: SectionValue | undefined): readonly string[] {
   return allowsParallax(section)
@@ -127,6 +148,15 @@ export const alignmentHidden: ConditionalPropertyCallback = ({ document, path, v
 export const backgroundImageHidden: ConditionalPropertyCallback = ({ document, path, parent }) =>
   !(parent as { image?: { asset?: unknown } } | undefined)?.image?.asset &&
   !allowsBackgroundImage(sectionAtStylePath(document, path))
+
+/** Panel and its options are hidden where the section draws its own surfaces. */
+export const panelHidden: ConditionalPropertyCallback = ({ document, path }) =>
+  !allowsPanel(sectionAtStylePath(document, path))
+
+/** Panel strength is for Glass: Solid card and None have nothing to strengthen. */
+export const panelStrengthHidden: ConditionalPropertyCallback = ({ document, path, parent }) =>
+  (parent as { panel?: string } | undefined)?.panel !== 'glass' ||
+  !allowsPanel(sectionAtStylePath(document, path))
 
 /** The overlay only means something once there is a picture to cover. */
 export const overlayHidden: ConditionalPropertyCallback = ({ document, path, parent }) =>
