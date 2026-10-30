@@ -20,7 +20,7 @@ interface Props {
 
 /**
  * Up to six logos in a quiet row with no section around it, made to sit inside another section (the
- * hero's supporting slot, README "Adding a hero slot"). Each logo is a fixed height so a mixed set
+ * hero's supporting slot, README "Adding a slot block"). Each logo is a fixed height so a mixed set
  * lines up, and the row wraps on a narrow screen. Greyscale logos are also dimmed so they sit behind
  * the heading, not beside it. The company's name is the alt text.
  */

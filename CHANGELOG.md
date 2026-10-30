@@ -20,11 +20,25 @@ you start a release.
 
 ### Added
 
+- A shared slot registry (`src/features/pages/slots/`): any section family can offer a named slot that takes approved
+  blocks, generalised from the hero's supporting slot. `slotField({ name, slot })` builds the field, insert menu and
+  thumbnails; `renderSlot` draws the block. README, "Adding a slot block".
+- A **Video** block (`slotVideo`) for the hero's extra-content slot: the Video section's click-to-load YouTube and Vimeo
+  player, or an uploaded MP4 with captions. Nothing is requested from the video service until Play.
+
 ### Changed
+
+- The hero's extra-content slot now uses the shared registry. Stored content is unchanged and the hero renders
+  identically. The insert-menu pictures moved from `public/hero-slot-previews/` to `public/slot-previews/`, and
+  `heroSupportingFields` gained the video block.
+- The Video section draws its player with a shared `VideoFrame`, with no change to the page.
 
 ### Fixed
 
 ### Breaking changes / migration steps
+
+None. A project that added its own hero slot type moves it to a `SLOT_BLOCKS` line and a `COMPONENTS` line (README,
+"Adding a slot block"); its stored content needs no migration.
 
 ## [1.10.0] - 2026-10-31
 

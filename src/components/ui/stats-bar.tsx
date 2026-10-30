@@ -23,7 +23,7 @@ const COLUMNS: Record<number, string> = {
 
 /**
  * A compact row of figures with no section around it, made to sit inside another section (the hero's
- * supporting slot, see the README's "Statistics" and "Adding a hero slot"). It brings no colour of its
+ * supporting slot, see the README's "Statistics" and "Adding a slot block"). It brings no colour of its
  * own: text, muted text and dividers all come from the tone it sits in, so it reads on a dark hero or a
  * light one.
  *

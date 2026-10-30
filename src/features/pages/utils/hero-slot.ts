@@ -1,5 +1,5 @@
 /**
- * Where a hero layout puts its supporting slot (README, "Adding a hero slot"):
+ * Where a hero layout puts its supporting slot (README, "Adding a slot block"):
  *
  * - `below-buttons`: under the buttons, inside the text block (Full background, Split).
  * - `beside-text`: in a column beside the text from `lg` up, below it on a phone (Editorial).

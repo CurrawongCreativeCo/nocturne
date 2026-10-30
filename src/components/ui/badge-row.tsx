@@ -16,7 +16,7 @@ interface Props {
 
 /**
  * One to three short labels with an optional icon, made to sit inside another section (the hero's
- * supporting slot, README "Adding a hero slot"). The pills wrap rather than shrink, so a long label
+ * supporting slot, README "Adding a slot block"). The pills wrap rather than shrink, so a long label
  * on a phone drops to its own line. Colour comes from the tone it sits in, never its own.
  */
 export function BadgeRow({ badges, centred = false, className = '' }: Props) {

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { VIDEO_VARIANTS } from '@/features/pages/schemas/sections/video'
 
 /** Files in the folder that are not layouts: the dispatcher, the two client components and the Ambient lazy wrapper (the facade's is shared with Embed, in ../lazy-facade). */
-const SHARED = ['index', 'video-facade', 'ambient-player', 'ambient-player-lazy']
+const SHARED = ['index', 'video-facade', 'video-frame', 'ambient-player', 'ambient-player-lazy']
 
 describe('video variants', () => {
   it('has one component file per variant in the schema, and no others', () => {
