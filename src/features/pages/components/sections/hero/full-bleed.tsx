@@ -31,6 +31,7 @@ export function HeroFullBleed({ data, isFirst = false, greeting }: SectionProps<
       style={data.style}
       defaults={DEFAULTS}
       isFirst={isFirst}
+      ownsSurfaces
       className={`flex items-end overflow-hidden ${hasImage ? 'min-h-[28rem] lg:min-h-[40rem]' : ''}`}
       background={
         <HeroBackground

@@ -25,6 +25,7 @@ you start a release.
   thumbnails; `renderSlot` draws the block. README, "Adding a slot block".
 - A **Video** block (`slotVideo`) for the hero's extra-content slot: the Video section's click-to-load YouTube and Vimeo
   player, or an uploaded MP4 with captions. Nothing is requested from the video service until Play.
+- **Section panels.** Every section's Design tab has a **Panel** option: None (the default), Glass or Solid card, with an Advanced glass strength. Glass is tinted with no blur over a solid colour and frosted over pictures, gradients and overlapping content. Text contrast is exact over solids and a guaranteed bound over pictures; the panel gets more opaque, then solid, when text can't be guaranteed, with a Studio warning (never an error). Reduced transparency and more contrast always render solid. See README, "Section panels".
 
 ### Changed
 
@@ -37,7 +38,9 @@ you start a release.
 
 ### Breaking changes / migration steps
 
-None. A project that added its own hero slot type moves it to a `SLOT_BLOCKS` line and a `COMPONENTS` line (README,
+None. The new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
+
+Slot blocks: A project that added its own hero slot type moves it to a `SLOT_BLOCKS` line and a `COMPONENTS` line (README,
 "Adding a slot block"); its stored content needs no migration.
 
 ## [1.10.0] - 2026-10-31

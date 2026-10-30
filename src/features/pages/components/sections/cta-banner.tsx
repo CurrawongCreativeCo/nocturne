@@ -33,7 +33,7 @@ export function CtaBanner({ data, isFirst }: SectionProps<'ctaBanner'>) {
   const { block, text: textAlign, justify } = sectionTraits(data.style, DEFAULTS)
 
   return (
-    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
+    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst} ownsSurfaces>
       <div
         data-tone={card.tone}
         className={`rounded-panel px-8 py-section-compact text-ink sm:px-16 ${textAlign}`}

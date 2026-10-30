@@ -224,7 +224,9 @@ export const sectionStyleFields = /* groq */ `
   edgeInvert,
   edgeHeightMobile,
   edgeHeightTablet,
-  edgeHeightDesktop
+  edgeHeightDesktop,
+  panel,
+  panelStrength
 `
 
 export const seoFields = /* groq */ `
