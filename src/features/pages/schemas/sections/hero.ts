@@ -374,6 +374,8 @@ export const hero = defineType({
         // The hero has its own Image, so the shared Background image is not offered.
         hasOwnBackgroundImage: () => true,
         // Only these two draw the picture behind the text; a panel sits over it.
+        // Full background draws its own text panel, so a section Panel would double it.
+        ownsSurfaces: (section) => layoutOf(section) === 'full-bleed',
         drawsBackground: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
       },
     },

@@ -62,18 +62,57 @@ test('a section with no panel chosen has none', async ({ page }) => {
   await expect(page.locator('[data-gallery-section="hero"] [data-panel]')).toHaveCount(0)
 })
 
-test.describe('visitors who ask for less transparency or more contrast', () => {
-  for (const media of [
-    { reducedTransparency: 'reduce' },
-    { forcedColors: 'none', contrast: 'more' },
-  ] as const) {
-    test(`get an opaque panel (${JSON.stringify(media)})`, async ({ page }) => {
-      await page.emulateMedia(media)
-      await page.goto(GALLERY)
-      const panel = panelOf(page.locator('[data-gallery-section="panel-image"]'))
-      expect(await backdropFilter(panel)).toBe('none')
-      const colour = await panel.evaluate((el) => getComputedStyle(el).backgroundColor)
-      expect(colour).not.toMatch(/rgba\(.*, 0\.\d+\)/)
-    })
+test('visitors who ask for more contrast get an opaque panel', async ({ page }) => {
+  await page.emulateMedia({ contrast: 'more' })
+  await page.goto(GALLERY)
+  for (const id of ['panel-image', 'panel-solid-tone']) {
+    const panel = panelOf(page.locator(`[data-gallery-section="${id}"]`))
+    expect(await backdropFilter(panel)).toBe('none')
+    const colour = await panel.evaluate((el) => getComputedStyle(el).backgroundColor)
+    expect(colour).not.toMatch(/\/ 0\.\d+\)|rgba\(.*, 0\.\d+\)/)
   }
+})
+
+/**
+ * Playwright cannot emulate `prefers-reduced-transparency`, and a browser that cannot blur cannot be
+ * launched on purpose, so these two fallbacks are checked in the stylesheet that ships: each is a rule
+ * under its condition that turns the blur off and fills the panel with the solid colour.
+ */
+test('the stylesheet makes panels solid for reduced transparency and without backdrop-filter', async ({
+  page,
+}) => {
+  await page.goto(GALLERY)
+  const found = await page.evaluate(() => {
+    const out = { reducedTransparency: false, noBackdropFilter: false }
+    const solid = (rules: CSSRuleList) =>
+      [...rules].some(
+        (rule) =>
+          rule instanceof CSSStyleRule &&
+          rule.selectorText.includes('data-panel') &&
+          rule.style.getPropertyValue('background-color').includes('--panel-solid'),
+      )
+    const walk = (rules: CSSRuleList) => {
+      for (const rule of rules) {
+        if (
+          rule instanceof CSSMediaRule &&
+          rule.conditionText.includes('prefers-reduced-transparency')
+        ) {
+          out.reducedTransparency ||= solid(rule.cssRules)
+        }
+        if (rule instanceof CSSSupportsRule && /not \(.*backdrop-filter/.test(rule.conditionText)) {
+          out.noBackdropFilter ||= solid(rule.cssRules)
+        }
+        if ('cssRules' in rule) walk((rule as CSSGroupingRule).cssRules)
+      }
+    }
+    for (const sheet of document.styleSheets) {
+      try {
+        walk(sheet.cssRules)
+      } catch {
+        // A cross-origin sheet; the site's own are same-origin.
+      }
+    }
+    return out
+  })
+  expect(found).toEqual({ reducedTransparency: true, noBackdropFilter: true })
 })
