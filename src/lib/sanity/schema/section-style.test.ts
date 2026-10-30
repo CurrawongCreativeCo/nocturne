@@ -82,6 +82,8 @@ describe('sectionStyle', () => {
       'imageRepeat',
       'imageStrengthPercent',
       'imageFixed',
+      'panel',
+      'panelStrength',
       'motion',
       'motionIntensity',
       'motionDuration',
@@ -117,6 +119,8 @@ describe('sectionStyle', () => {
     >
     expect(byName.tone?.fieldset).toBeUndefined()
     expect(byName.motion?.fieldset).toBeUndefined()
+    expect(byName.panel?.fieldset).toBeUndefined()
+    expect(byName.panelStrength?.fieldset).toBe('panelAdvanced')
     for (const name of ['spacing', 'width', 'align', 'fillScreen', 'anchorId']) {
       expect(byName[name]?.fieldset).toBe('layoutOptions')
     }
@@ -134,6 +138,11 @@ describe('sectionStyle', () => {
       expect.objectContaining({
         name: 'gradientAdvanced',
         title: 'Advanced: gradient',
+        options: { collapsible: true, collapsed: true },
+      }),
+      expect.objectContaining({
+        name: 'panelAdvanced',
+        title: 'Advanced: panel',
         options: { collapsible: true, collapsed: true },
       }),
       expect.objectContaining({

@@ -24,6 +24,13 @@ import {
 } from '../overlay-gradient'
 import { hiddenFromClients } from '../roles'
 import {
+  PANEL_STRENGTHS,
+  PANEL_STRENGTH_TITLES,
+  SECTION_PANEL_TITLES,
+  panelProblem,
+  pictureOverlay,
+} from '../section-panel'
+import {
   ANCHOR_PATTERN,
   EDGE_CUSTOM_MAX,
   EDGE_CUSTOM_MIN,
@@ -84,8 +91,11 @@ import {
   motionCustomHidden,
   motionOptionHidden,
   overlayHidden,
+  panelHidden,
+  panelStrengthHidden,
   registerSectionRules,
   sectionAtStylePath,
+  sectionHasOwnBackground,
   staleAlignmentMessage,
   staleMotionMessage,
   visibleMotions,
@@ -120,6 +130,11 @@ import {
   OverlayStrongThumbnail,
 } from './thumbnails/overlay-thumbnails'
 import { animationThumbnails } from './thumbnails/registry'
+import {
+  PanelGlassThumbnail,
+  PanelNoneThumbnail,
+  PanelSolidThumbnail,
+} from './thumbnails/section-panel-thumbnails'
 import {
   ToneAccentThumbnail,
   ToneAltThumbnail,
@@ -303,6 +318,13 @@ export const sectionStyle = defineType({
       title: 'Advanced: gradient',
       description:
         'The colour and opacity of the top, middle and bottom of the gradient. Anything left empty follows the gradient chosen above.',
+      options: { collapsible: true, collapsed: true },
+    },
+    {
+      name: 'panelAdvanced',
+      title: 'Advanced: panel',
+      description:
+        'How see-through the glass starts. It is made more solid where the text needs it.',
       options: { collapsible: true, collapsed: true },
     },
     {
@@ -646,6 +668,94 @@ export const sectionStyle = defineType({
       initialValue: false,
       // Cover the screen already holds the picture still.
       hidden: imageOptionHidden('fixed'),
+    }),
+    presetField({
+      name: 'panel',
+      title: 'Panel',
+      description:
+        'Puts the content on a panel over the background, tinted from the background colour. Glass blurs only where a picture or gradient is behind it. Text colours follow automatically; where they could not be read, the panel is drawn solid.',
+      required: false,
+      options: [
+        {
+          value: 'none',
+          title: SECTION_PANEL_TITLES.none,
+          description: 'The content sits straight on the background.',
+          thumbnail: PanelNoneThumbnail,
+        },
+        {
+          value: 'glass',
+          title: SECTION_PANEL_TITLES.glass,
+          description: 'A see-through panel, frosted over pictures.',
+          thumbnail: PanelGlassThumbnail,
+        },
+        {
+          value: 'solid',
+          title: SECTION_PANEL_TITLES.solid,
+          description: 'An opaque card.',
+          thumbnail: PanelSolidThumbnail,
+        },
+      ],
+      // Unset is None: a section with no choice looks as it always has.
+      initialValue: null,
+      defaultValue: () => 'none',
+      hidden: panelHidden,
+      validation: (rule) =>
+        rule
+          .custom(async (value, { getClient, parent, document, path }) => {
+            const style = parent as
+              | {
+                  tone?: string
+                  gradient?: string
+                  edge?: string
+                  motion?: string
+                  panelStrength?: string
+                  image?: { asset?: unknown }
+                  overlay?: string
+                  overlayColor?: string
+                  imageStrength?: string
+                  imageStrengthPercent?: number
+                }
+              | undefined
+            if (value !== 'glass' && value !== 'solid') return true
+            const section = sectionAtStylePath(document, path)
+            const client = getClient({ apiVersion: '2025-01-01' })
+            // The site's colours and gradients, as the page draws them: the same inputs as the site.
+            const [{ colours }, gradients] = await Promise.all([
+              fetchBrandColours(client),
+              fetchBrandGradients(client),
+            ])
+            return (
+              panelProblem({
+                panel: value,
+                strength: style?.panelStrength,
+                tone: style?.tone,
+                hasPicture: Boolean(style?.image?.asset),
+                overlay: pictureOverlay(style, style?.tone),
+                gradient: style?.gradient,
+                gradients,
+                site: colours,
+                hasOwnBackground: sectionHasOwnBackground(section),
+                overlaps:
+                  Boolean(style?.edge && style.edge !== 'none') ||
+                  style?.motion === 'parallax' ||
+                  style?.motion === 'float',
+              }) ?? true
+            )
+          })
+          .warning(),
+    }),
+    defineField({
+      name: 'panelStrength',
+      title: 'Glass strength',
+      description:
+        'How much of the panel colour shows. Unset follows the site’s glass (Medium). The panel still gets more solid where the text needs it.',
+      type: 'string',
+      fieldset: 'panelAdvanced',
+      options: {
+        list: PANEL_STRENGTHS.map((value) => ({ value, title: PANEL_STRENGTH_TITLES[value] })),
+        layout: 'radio',
+      },
+      hidden: panelStrengthHidden,
     }),
     presetField({
       name: 'motion',

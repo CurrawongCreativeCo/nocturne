@@ -1888,6 +1888,29 @@ documents.push({
   pageBuilder: linkSpacingExamples,
 })
 
+/** Rich text with a panel: the section's `style` decides tone, backdrop and panel. */
+const panelExample = (id, style) => ({
+  _key: id,
+  _type: 'richText',
+  style: { _type: 'sectionStyle', anchorId: id, ...style },
+  body: [
+    block(['Content on a panel'], { style: 'h2' }),
+    block(['Body text on the panel, long enough to wrap onto a second line or two.']),
+  ],
+})
+const sectionPanelExamples = [
+  panelExample('panel-solid-tone', { tone: 'alt', panel: 'glass' }),
+  panelExample('panel-image', {
+    tone: 'inverse',
+    image: image(''),
+    overlay: 'medium',
+    panel: 'glass',
+  }),
+  panelExample('panel-gradient', { tone: 'inverse', gradient: 'forest-dusk', panel: 'glass' }),
+  panelExample('panel-inverse', { tone: 'inverse', panel: 'glass' }),
+  panelExample('panel-solid-card', { tone: 'surface', panel: 'solid' }),
+]
+
 const gallerySections = [
   ...heroLabelExamples.slice(0, 2),
   {
@@ -2567,6 +2590,9 @@ const gallerySections = [
   }),
   linkHeadingExamples[0],
   ...linkSpacingExamples,
+  // Section panels (README, "Section panels"; tests/e2e/section-panel.spec.ts): glass over a solid tone
+  // is tinted with no blur, over a picture or a gradient it is frosted, and Solid card is opaque.
+  ...sectionPanelExamples,
   // new-section:gallery
 ]
 

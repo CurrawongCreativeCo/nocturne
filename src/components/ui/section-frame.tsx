@@ -4,6 +4,13 @@ import { LazyFloat } from '@/components/motion/float-lazy'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
 import { enterProps, revealChild, type ParallaxPlan } from '@/components/motion/presets'
+import {
+  panelChoice,
+  panelDomProps,
+  pictureOverlay,
+  resolveSectionPanel,
+} from '@/lib/sanity/section-panel'
+import type { SiteDesign } from '@/lib/sanity/site-design'
 
 import { SectionBackground } from './section-background'
 import {
@@ -45,6 +52,11 @@ interface Props {
    * itself never drifts.
    */
   media?: ReactNode | ((parallax: ParallaxPlan | undefined) => ReactNode)
+  /**
+   * The section draws its own surfaces (the Link list's cards), so the shared Panel doesn't apply
+   * and a stored choice is ignored. Mirrors the `ownsSurfaces` rule its schema registers.
+   */
+  ownsSurfaces?: boolean
   'aria-labelledby'?: string
   children: ReactNode
 }
@@ -91,7 +103,21 @@ function EdgeSvg({ children, ...rest }: { children: ReactNode; 'data-edge-layer'
  * pictures that can't be inside the mask: a layered wave's back wave (under the section, showing
  * through the cut) and the accent line (over it).
  */
-export function SectionFrame({
+export function SectionFrame(props: Props) {
+  // Only a section with a panel needs the site's colours and gradients, so only it waits for them.
+  if (!props.ownsSurfaces && panelChoice(props.style?.panel))
+    return <PanelSectionFrame {...props} />
+  return <SectionFrameView {...props} />
+}
+
+async function PanelSectionFrame(props: Props) {
+  // Loaded here, not at the top, so a page without a panel never loads the Sanity client for this.
+  const { getSiteDesign } = await import('@/lib/sanity/site-design')
+  return <SectionFrameView {...props} design={await getSiteDesign()} />
+}
+
+function SectionFrameView({
+  design,
   style,
   defaults,
   isFirst = false,
@@ -99,16 +125,44 @@ export function SectionFrame({
   className = '',
   background,
   media,
+  ownsSurfaces = false,
   'aria-labelledby': labelledBy,
   children,
-}: Props) {
+}: Props & { design?: SiteDesign }) {
   const resolved = resolveSectionStyle(style, defaults)
   const plan = sectionMotion(style, defaults, {
     isFirst,
     hasMedia: Boolean(media),
     placement: 'beside',
   })
-  const containerClass = `${resolved.containerClass} ${containerClassName}`.trim()
+  // A panel is on the content container, so every section gets it with no code of its own. The same
+  // decision the Studio's warning makes (resolveSectionPanel), from the colours and gradients the page
+  // really draws; with none (they couldn't be read) a gradient is checked with the conservative bound.
+  const panel = ownsSurfaces
+    ? null
+    : resolveSectionPanel({
+        panel: style?.panel,
+        strength: style?.panelStrength,
+        tone: resolved.tone,
+        hasPicture: Boolean(resolved.image),
+        overlay: pictureOverlay(style, resolved.tone),
+        gradient: resolved.gradient,
+        gradients: design?.gradients,
+        site: design?.colours,
+        hasOwnBackground: Boolean(background),
+        overlaps:
+          Boolean(resolved.edge) || resolved.motion === 'parallax' || resolved.motion === 'float',
+      })
+  const panelProps = panel ? panelDomProps(panel) : undefined
+  const containerClass =
+    `${resolved.containerClass} ${containerClassName} ${panelProps?.className ?? ''}`.trim()
+  const panelAttributes = panelProps
+    ? {
+        'data-panel': panelProps.render,
+        'data-panel-base': panelProps.base,
+        'data-panel-tint': panelProps.tint,
+      }
+    : undefined
   const mediaNode =
     typeof media === 'function' ? (
       plan.kind === 'float' ? (
@@ -154,11 +208,21 @@ export function SectionFrame({
       />
       {background}
       {plan.kind === 'enter' && plan.target === 'container' ? (
-        <MotionDiv {...enterProps(plan)} className={containerClass}>
+        <MotionDiv
+          {...enterProps(plan)}
+          {...panelAttributes}
+          className={containerClass}
+          style={panelProps?.style}
+        >
           {content}
         </MotionDiv>
       ) : plan.kind === 'enter' ? (
-        <MotionDiv {...enterProps(plan)} className={containerClass}>
+        <MotionDiv
+          {...enterProps(plan)}
+          {...panelAttributes}
+          className={containerClass}
+          style={panelProps?.style}
+        >
           {Children.map(
             [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
             (child) =>
@@ -166,7 +230,9 @@ export function SectionFrame({
           )}
         </MotionDiv>
       ) : (
-        <div className={containerClass}>{content}</div>
+        <div className={containerClass} style={panelProps?.style} {...panelAttributes}>
+          {content}
+        </div>
       )}
     </section>
   )

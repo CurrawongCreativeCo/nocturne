@@ -183,7 +183,8 @@ export const video = defineType({
     ],
     // How this section starts when added. Keep it equal to DEFAULTS in the components.
     { align: 'start' },
-    // No design option depends on the layout: the poster sits inside the frame or behind the words, and each layout accepts any alignment.
+    // No other design option depends on the layout: the poster sits inside the frame or behind the words, and each layout accepts any alignment. Ambient plays a video behind the words, which a panel sits over.
+    { rules: { type: 'video', drawsBackground: (section) => section.variant === 'ambient' } },
   ),
   preview: {
     select: {

@@ -20,11 +20,15 @@ you start a release.
 
 ### Added
 
+- **Section panels.** Every section's Design tab has a **Panel** option: None (the default), Glass or Solid card, with an Advanced glass strength. Glass is tinted with no blur over a solid colour and frosted over pictures, gradients and overlapping content. Text contrast is exact over solids and a guaranteed bound over pictures; the panel gets more opaque, then solid, when text can't be guaranteed, with a Studio warning (never an error). Reduced transparency and more contrast always render solid. See README, "Section panels".
+
 ### Changed
 
 ### Fixed
 
 ### Breaking changes / migration steps
+
+None. The new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
 
 ## [1.10.0] - 2026-10-31
 

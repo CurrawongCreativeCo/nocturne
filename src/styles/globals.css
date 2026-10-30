@@ -507,6 +507,92 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
 }
 
 /*
+ * A section's panel (README, "Section panels"; lib/sanity/section-panel.ts decides which look and how
+ * strong). It sits on the content container, filled from the tone: the panel colour is the tone's
+ * raised surface, and `--panel-opacity` is its share, raised by the resolver until text is readable.
+ * - tinted (glass over a solid tone): the fill is flattened against the tone's own background, with
+ *   no backdrop-filter, because nothing varied is behind it to blur;
+ * - frosted (over a picture, gradient, video, pattern or overlapping content): see-through and blurred;
+ * - solid: the panel colour. `data-panel-base='tone'` is the last resort, the tone's own background.
+ * Visitors who ask for less transparency or more contrast, and browsers that can't blur, get solid.
+ */
+@layer components {
+  [data-panel] {
+    --panel-solid: var(--panel-base);
+    border: 1px solid var(--color-line);
+  }
+
+  [data-tone] [data-panel] {
+    --panel-base: var(--color-surface-alt);
+    --panel-behind: var(--color-surface);
+  }
+
+  [data-tone='alt'] [data-panel] {
+    --panel-base: var(--color-surface);
+    --panel-behind: var(--color-surface-alt);
+  }
+
+  /* The accent's own raised surface lightens towards its text; a panel tints it the other way (accentTint). */
+  [data-tone='accent'] [data-panel] {
+    --panel-base: color-mix(in oklab, black 25%, var(--tone-accent));
+  }
+
+  [data-tone='accent'] [data-panel][data-panel-tint='light'] {
+    --panel-base: color-mix(in oklab, white 25%, var(--tone-accent));
+  }
+
+  [data-panel][data-panel-base='tone'] {
+    --panel-solid: var(--panel-behind);
+  }
+
+  [data-panel='solid'] {
+    background-color: var(--panel-solid);
+  }
+
+  [data-panel='tinted'] {
+    background-color: color-mix(
+      in srgb,
+      var(--panel-base) var(--panel-opacity),
+      var(--panel-behind)
+    );
+    box-shadow: var(--glass-shadow);
+  }
+
+  [data-panel='frosted'] {
+    background-color: color-mix(in srgb, var(--panel-base) var(--panel-opacity), transparent);
+    box-shadow:
+      var(--glass-shadow),
+      inset 0 1px 0 color-mix(in oklch, var(--color-ink-inverse) 35%, transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    [data-panel='frosted'] {
+      background-color: var(--panel-solid);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    [data-panel='tinted'],
+    [data-panel='frosted'] {
+      background-color: var(--panel-solid);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    [data-panel='tinted'],
+    [data-panel='frosted'] {
+      background-color: var(--panel-solid);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+
+/*
  * The ring around a profile picture (components/ui/profile-image.tsx): one layer filled with a colour
  * or a gradient (`--ring-fill`) and masked to a band `--ring-width` wide, so the gap between it and
  * the picture is see-through over a photo or glass. It follows the wrapper's corners.

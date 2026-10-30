@@ -64,6 +64,8 @@ export const ctaBanner = defineType({
       accessField,
     ],
     { spacing: 'compact', align: 'center' },
+    // The banner is its own coloured card, so the shared Panel isn't offered.
+    { rules: { type: 'ctaBanner', ownsSurfaces: () => true } },
   ),
   preview: {
     select: { heading: 'heading', title: 'title', tone: 'style.tone' },
