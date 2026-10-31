@@ -137,15 +137,15 @@ jobs:
           npm run check
 
   e2e:
-    name: e2e (${{ matrix.shard }}/4)
+    name: e2e (${{ matrix.shard }}/10)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
-      # Four shards, each with its own build and fake Content Lake, so the suite runs in parallel
+      # Ten shards, each with its own build and fake Content Lake, so the suite runs in parallel
       # instead of as one 20+ minute job. A failure in one shard doesn't hide the others.
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -168,7 +168,10 @@ jobs:
       # them, and Playwright keeps a project with its dependencies in one shard, which put every test
       # in shard 1 and none in the others.
       - name: End-to-end tests
-        run: npx playwright test --project=desktop --project=mobile --shard=${{ matrix.shard }}/4
+        # Two workers, set here instead of left to Playwright's default (half the CPUs). A public repository's
+        # runners have four CPUs (two workers) and a private one's have two (one worker), which made the same
+        # suite about twice as slow in a client's private repository and put the heaviest shards past 20 minutes.
+        run: npx playwright test --project=desktop --project=mobile --shard=${{ matrix.shard }}/10 --workers=2
         env:
           E2E_TIMINGS_FILE: e2e-timings/shard-${{ matrix.shard }}.json
 
@@ -307,7 +310,7 @@ jobs:
         run: |
           gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --pattern 'e2e-timings-shard-*' --pattern 'e2e-timings-isolated' --dir reports || true
           gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --paginate > jobs.json || echo '{}' > jobs.json
-          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,isolated-experiments,isolated-design,isolated-design-visual,isolated-panel-palettes $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
+          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,shard-5,shard-6,shard-7,shard-8,shard-9,shard-10,isolated-experiments,isolated-design,isolated-design-visual,isolated-panel-palettes $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

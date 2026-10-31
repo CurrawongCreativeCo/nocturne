@@ -186,7 +186,11 @@ test.describe('the Events section', () => {
   test('says so when nothing is coming up', async ({ page }) => {
     await page.goto('/quiet-events')
     await expect(page.locator('#main-content h1')).toHaveText('Quiet events')
-    await expect(page.getByText('No upcoming events right now. Check back soon.')).toBeVisible()
+    // Scoped to the page being shown: after a navigation Next keeps the previous page, hidden, and an
+    // unscoped getByText matches its copy of the text too.
+    await expect(
+      page.locator('#main-content').getByText('No upcoming events right now. Check back soon.'),
+    ).toBeVisible()
   })
 
   test('the section gallery has the three layouts, and they pass axe', async ({ page }) => {

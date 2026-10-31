@@ -54,6 +54,18 @@ you start a release.
 
 ### Fixed
 
+- The template's tests no longer fail on a client site. Checks of what the template ships (a bare `studio-brand.json`, the
+  commented-out launch example, a profile with no service features) run only in the template (`scripts/is-template.mjs`:
+  the package is named `nocturne`) and are skipped on a client, which customises those files on purpose. The proxy tests
+  now state a live launch status instead of inheriting the profile's, and the A/B experiments end-to-end spec skips itself
+  on a pre-launch site, where its fixture page is private.
+
+- The end-to-end suite no longer depends on a client's `site.profile.ts`. Playwright and Lighthouse CI build the site under test
+  with the template's default profile (`E2E_FIXED_PROFILE=1`, `tests/e2e/fixtures/site.profile.ts`), so a pre-launch site or one with
+  features switched off runs the same suite as the template. Ordinary builds still use the site's own profile, and the flag is
+  refused in every Vercel build. A unit test checks the fixture matches the template's profile, and another proves this site's own
+  pre-launch restrictions.
+
 ### Breaking changes / migration steps
 
 None. The new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.

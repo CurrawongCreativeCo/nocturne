@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 
 import { describe, expect, it } from 'vitest'
 
+import { isTemplateRepo } from '../is-template.mjs'
 import { PRELAUNCH_LAUNCH, launchLine, setLaunchInProfile } from './profile-edit.mjs'
 
 const shipped = readFileSync(new URL('../../site.profile.ts', import.meta.url), 'utf8')
@@ -22,15 +23,19 @@ describe('setLaunchInProfile', () => {
     })
   })
 
-  it('round-trips the real site.profile.ts: only the launch line differs', () => {
-    const result = setLaunchInProfile(shipped)
-    if (!result.ok) throw new Error(result.reason)
-    const before = shipped.split('\n')
-    const after = result.text.split('\n')
-    expect(after).toHaveLength(before.length)
-    const changed = after.filter((line, i) => line !== before[i])
-    expect(changed).toEqual([`  ${LINE}`])
-  })
+  // A client has already turned the launch line on, so there is nothing left to change.
+  it.skipIf(!isTemplateRepo())(
+    'round-trips the real site.profile.ts: only the launch line differs',
+    () => {
+      const result = setLaunchInProfile(shipped)
+      if (!result.ok) throw new Error(result.reason)
+      const before = shipped.split('\n')
+      const after = result.text.split('\n')
+      expect(after).toHaveLength(before.length)
+      const changed = after.filter((line, i) => line !== before[i])
+      expect(changed).toEqual([`  ${LINE}`])
+    },
+  )
 
   it('is idempotent', () => {
     const once = setLaunchInProfile(shipped)
