@@ -24,6 +24,7 @@ import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
 import { hideEnquiriesFromNewMenu, withoutEnquiryDuplicate } from './src/features/forms/studio'
 import { framesSchemaTypes } from './src/features/frames/schemas'
+import { locationsSchemaTypes } from './src/features/locations/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { sectionTypes } from './src/features/pages/schemas/sections'
 import { AGENCY_ONLY_TEMPLATE_IDS, pageTemplates } from './src/features/pages/schemas/templates'
@@ -151,6 +152,7 @@ export default defineConfig({
         ...framesSchemaTypes,
         ...panelsSchemaTypes,
         ...servicesSchemaTypes,
+        ...locationsSchemaTypes,
         // new-registry:register
         ...sharedSchemaTypes,
       ]),

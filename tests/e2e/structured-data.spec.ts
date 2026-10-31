@@ -143,6 +143,7 @@ test.describe('structured data describes visible content', () => {
       'Person',
       'Event',
       'Service',
+      'Place',
     ]) {
       expect(types, `${type} JSON-LD somewhere in the sitemap`).toContain(type)
     }

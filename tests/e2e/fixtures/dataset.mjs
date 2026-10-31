@@ -3033,6 +3033,7 @@ documents.push(
     publicEmail: 'ann@example.com',
     phone: '02 9876 5432',
     services: [{ _key: 'ann-emergency', ...ref('service-emergency-plumbing') }],
+    locations: [{ _key: 'ann-parramatta', ...ref('place-parramatta') }],
     socialLinks: [
       {
         _key: 'ann-linkedin',
@@ -3111,6 +3112,11 @@ documents.push(
       { _key: 'ev-page', ...ref('page-about') },
       { _key: 'ev-members', ...ref('page-members') },
     ],
+    // Offered at the Parramatta branch and in the Western Sydney area; Blocked drains lists none (everywhere).
+    locations: [
+      { _key: 'loc-parramatta', ...ref('place-parramatta') },
+      { _key: 'loc-western-sydney', ...ref('place-western-sydney') },
+    ],
     enquiry: cta('Get a quote', external('https://quotes.example.com/plumbing')),
     sections: [
       {
@@ -3130,6 +3136,65 @@ documents.push(
     slug: { _type: 'slug', current: 'blocked-drains' },
     summary: 'We clear blocked drains and tell you what caused them.',
     image: image('A drain being cleared'),
+  },
+)
+
+/**
+ * Locations (tests/e2e/locations.spec.ts). Parramatta is a branch with every field; Western Sydney is
+ * a service area that still holds a phone number and hours it must not show or mark up (it was a
+ * branch once); Newtown is a branch with only the required fields, so its phone, email, hours and
+ * people are absent, heading and markup included. Emergency plumbing lists the first two; Blocked
+ * drains lists none, so it is offered at all three.
+ */
+documents.push(
+  {
+    _id: 'place-parramatta',
+    _type: 'place',
+    name: 'Parramatta',
+    kind: 'branch',
+    slug: { _type: 'slug', current: 'parramatta' },
+    summary: 'Our Parramatta branch, two minutes from the station.',
+    image: image('The Parramatta branch front door'),
+    body: [
+      block(['Park behind the building and use the side entrance.']),
+      block(['The branch is on the first floor.']),
+    ],
+    phone: '(02) 9000 0000',
+    publicEmail: 'parramatta@example.com',
+    address: { street: '1 Church St', suburb: 'Parramatta', state: 'NSW', postcode: '2150' },
+    timeZone: 'Australia/Sydney',
+    geo: { lat: -33.8151, lng: 151.0011 },
+    openingHours: [
+      {
+        _key: 'weekdays',
+        _type: 'hoursRow',
+        days: ['mon', 'tue', 'wed', 'thu', 'fri'],
+        opens: '07:00',
+        closes: '17:00',
+      },
+      { _key: 'saturday', _type: 'hoursRow', days: ['sat'], opens: '08:00', closes: '12:00' },
+    ],
+  },
+  {
+    _id: 'place-western-sydney',
+    _type: 'place',
+    name: 'Western Sydney',
+    kind: 'serviceArea',
+    slug: { _type: 'slug', current: 'western-sydney' },
+    summary: 'We travel across Western Sydney, from Parramatta to the Blue Mountains.',
+    phone: '(02) 9111 1111',
+    address: { suburb: 'Penrith', state: 'NSW', postcode: '2750' },
+    openingHours: [
+      { _key: 'always', _type: 'hoursRow', days: ['mon'], opens: '09:00', closes: '10:00' },
+    ],
+  },
+  {
+    _id: 'place-newtown',
+    _type: 'place',
+    name: 'Newtown',
+    kind: 'branch',
+    slug: { _type: 'slug', current: 'newtown' },
+    address: { suburb: 'Newtown', state: 'NSW', postcode: '2042' },
   },
 )
 

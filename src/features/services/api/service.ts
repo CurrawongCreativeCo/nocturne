@@ -2,7 +2,7 @@ import type { Metadata, MetadataRoute, ResolvedMetadata } from 'next'
 import { defineQuery } from 'next-sanity'
 
 import { servicePath } from '@/config/paths'
-import { hasServices } from '@/config/profile'
+import { hasLocations, hasServices } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
 import { imageFields, linkFields, portableTextFields } from '@/lib/sanity/fragments'
 import { urlFor } from '@/lib/sanity/image'
@@ -11,7 +11,8 @@ import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity
 /**
  * A service with everything its page and metadata need, in one request: the fields, the proof of
  * work it links to, the team members who list it (the reverse of `teamMember.services`) and the
- * newest posts that list it (the reverse of `post.services`), so each relationship has one owning side. Only published services have a page; the slug is the way in.
+ * newest posts that list it (the reverse of `post.services`), so each relationship has one owning side. The locations
+ * are the service's own `locations` (empty means offered everywhere). Only published services have a page; the slug is the way in.
  * Members-only pages are left out of the proof of work, as they are from the sitemap and search.
  */
 export const SERVICE_QUERY = defineQuery(/* groq */ `
@@ -31,6 +32,7 @@ export const SERVICE_QUERY = defineQuery(/* groq */ `
     "hasSections": count(sections[access != "members"]) > 0,
     "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,
     enquiry { label, variant, link { ${linkFields} } },
+    locations[]->[defined(slug.current)] { _id, name, kind, "slug": slug.current },
     evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },
     "people": *[_type == "teamMember" && references(^._id)]
       | order(coalesce(order, 999999) asc, name asc) {
@@ -60,7 +62,7 @@ export const SERVICE_INDEX_QUERY = defineQuery(/* groq */ `
 `)
 
 /** The page links to posts and pages (proof of work) and lists team members, so those expire it too. */
-const SERVICE_TAGS = [TAGS.service, TAGS.teamMember, TAGS.post, TAGS.page]
+const SERVICE_TAGS = [TAGS.service, TAGS.teamMember, TAGS.post, TAGS.page, TAGS.place]
 
 /** `generateStaticParams` can't be empty under Cache Components; this slug is never a service (404). */
 const PLACEHOLDER_SLUG = '_'
@@ -92,7 +94,10 @@ export async function getService({ slug, ...mode }: { slug: string } & FetchMode
     tags: SERVICE_TAGS,
   })
   // The query matches on the slug, so it is set; this tells the types so.
-  return data?.slug ? { ...data, slug: data.slug } : null
+  // Locations are listed (and named in the structured data) only while the site has them.
+  return data?.slug
+    ? { ...data, slug: data.slug, locations: hasLocations() ? (data.locations ?? []) : [] }
+    : null
 }
 
 /**

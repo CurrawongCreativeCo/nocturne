@@ -41,6 +41,10 @@
     "event": { "class": "published", "why": "Shown on the website." },
     "eventCategory": { "class": "published", "why": "Shown on the website." },
     "service": { "class": "published", "why": "Shown on the website." },
+    "place": {
+      "class": "published",
+      "why": "Shown on the website, including a branch's address, phone and opening hours."
+    },
     "teamMember": {
       "class": "published",
       "why": "Shown on the website, including the public email and phone."
@@ -84,6 +88,9 @@
     "fields": {
       "teamMember.publicEmail": "A public contact address, shown on the website.",
       "teamMember.phone": "A public contact number, shown on the website.",
+      "place.publicEmail": "A branch's public contact address, shown on its page.",
+      "place.phone": "A branch's public contact number, shown on its page.",
+      "place.address": "A branch's address, shown on its page.",
       "businessInfo.publicEmail": "A public contact address, shown on the website.",
       "businessInfo.phone": "A public contact number, shown on the website.",
       "businessInfo.address": "The business address, shown on the website."
