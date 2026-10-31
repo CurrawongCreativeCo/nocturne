@@ -71,6 +71,12 @@ export const SLOT_BLOCKS = {
     allowedIn: ['hero.supporting'],
     clientEditable: true,
   },
+  slotImage: {
+    schemaType: 'slotImage',
+    noun: 'a picture',
+    allowedIn: ['split.media'],
+    clientEditable: true,
+  },
   slotVideo: {
     schemaType: 'slotVideo',
     noun: 'a video',

@@ -126,6 +126,13 @@ export const HERO_PRESETS = [
   },
 ] as const
 
+/** The field names the preset summary uses ("1 change (tone)"). */
+export const HERO_PRESET_LABELS = {
+  variant: 'layout',
+  imagePosition: 'image side',
+  'style.tone': 'tone',
+}
+
 /** What an unset field means, so a hero that was never touched still matches its preset (Full background image). */
 export const HERO_DEFAULTS = { variant: 'overlay', imagePosition: 'right', 'style.tone': 'inverse' }
 
@@ -210,7 +217,7 @@ export const hero = defineType({
   icon: BlockContentIcon,
   // The preset bar above the form: the one place to choose a hero's design (README, "Hero presets").
   options: {
-    ...presetsOption(HERO_PRESETS),
+    ...presetsOption(HERO_PRESETS, HERO_PRESET_LABELS),
     manifest: {
       purpose:
         'The opening section of a page: a heading, a short introduction and up to two buttons, with an optional picture in one of four layouts.',

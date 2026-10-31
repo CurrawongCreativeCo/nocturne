@@ -1,4 +1,4 @@
-import { Stack } from '@sanity/ui'
+import { Button, Flex, Stack, Text } from '@sanity/ui'
 import {
   setIfMissing,
   set,
@@ -9,7 +9,13 @@ import {
 } from 'sanity'
 
 import { isClientView } from '@/lib/sanity/roles'
-import { getAtPath, matchPreset, splitPath } from '@/lib/sanity/schema/preset-match'
+import {
+  describePresetState,
+  getAtPath,
+  matchPreset,
+  presetStateText,
+  splitPath,
+} from '@/lib/sanity/schema/preset-match'
 
 import { normalisePresets } from './options'
 import { PickerView } from './picker-view'
@@ -75,6 +81,10 @@ export function PresetBarInput(props: ObjectInputProps) {
     ),
   )
   const current = matchPreset(presets, value, defaults)
+  // A section on Custom says what it started from and what moved, and can go back (Reset).
+  const labels = (schemaType.options as { presetLabels?: Record<string, string> } | undefined)
+    ?.presetLabels
+  const state = labels && !current ? describePresetState(presets, value, defaults) : null
 
   function apply(presetValue: string) {
     const preset = presets.find((candidate) => candidate.value === presetValue)
@@ -103,6 +113,23 @@ export function PresetBarInput(props: ObjectInputProps) {
         onSelect={apply}
         unmatched={{ title: 'Custom', description: 'The fields below no longer match a preset.' }}
       />
+      {state?.nearest && (
+        <Flex align="center" gap={3} wrap="wrap" data-preset-summary="">
+          <Text size={1} muted>
+            {presetStateText(state, labels)}
+          </Text>
+          <Button
+            mode="ghost"
+            fontSize={1}
+            padding={2}
+            text={`Reset to ${state.nearest.title}`}
+            disabled={readOnly}
+            onClick={() => {
+              if (state.nearest) apply(state.nearest.value)
+            }}
+          />
+        </Flex>
+      )}
       {props.renderDefault(props)}
     </Stack>
   )

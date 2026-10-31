@@ -20,6 +20,13 @@ you start a release.
 
 ### Added
 
+- **Image + text, section contract v2.** Four looks through the preset bar (Media right, Media left, Stacked, Text over
+  media; stored as the hidden `variant` plus the existing `imagePosition`), a `media` slot that takes a picture
+  (`slotImage`) or a video (`slotVideo`), and an agency-only `supporting` slot for a video under the media. Panels (Glass and
+  Solid card) apply to Text over media with no rules of their own. A Custom section now shows which preset it started from
+  and what moved, with a **Reset** button (`presetLabels`; the hero has it too). New fields are classified in the client
+  registry (`variant`, `supporting` agency only). Migration `image-to-media` (dry run first) moves `image` into `media`;
+  until it runs the section reads `image`, so existing pages render the same. README, "Image + text".
 - `design-manifest.generated.json`: a generated, read-only description of the sections, fields, option lists, presets, layout rules,
   client-editable flags and token names, built by `npm run typegen` (`npm run design-manifest`) and checked in CI. Sections can
   add `options.manifest = { purpose, example }`; Hero and Image + text have one. See the README's "Design manifest".
