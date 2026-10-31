@@ -45,6 +45,12 @@ you start a release.
   now state a live launch status instead of inheriting the profile's, and the A/B experiments end-to-end spec skips itself
   on a pre-launch site, where its fixture page is private.
 
+- The end-to-end suite no longer depends on a client's `site.profile.ts`. Playwright and Lighthouse CI build the site under test
+  with the template's default profile (`E2E_FIXED_PROFILE=1`, `tests/e2e/fixtures/site.profile.ts`), so a pre-launch site or one with
+  features switched off runs the same suite as the template. Ordinary builds still use the site's own profile, and the flag is
+  refused in every Vercel build. A unit test checks the fixture matches the template's profile, and another proves this site's own
+  pre-launch restrictions.
+
 ### Breaking changes / migration steps
 
 None. The new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
