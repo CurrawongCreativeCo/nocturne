@@ -1,10 +1,25 @@
 import { NextRequest } from 'next/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import type * as Profile from '@/config/profile'
+
 import { config, proxy } from './proxy'
 
 // proxy.ts reaches a server-only module (the preview pass), which throws outside a server bundle.
 vi.mock('server-only', () => ({}))
+
+// These tests are about a live site, so they say so instead of inheriting the real profile's launch
+// status (a client site is pre-launch until it launches).
+vi.mock('@/config/profile', async (importOriginal) => {
+  const original = await importOriginal<typeof Profile>()
+  return {
+    ...original,
+    siteProfile: {
+      ...original.siteProfile,
+      launch: { status: 'live', homepage: 'links', publicPages: [], unknownPaths: 'not-found' },
+    },
+  }
+})
 
 const TOKEN = 'a-long-enough-token-1234'
 

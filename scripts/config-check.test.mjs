@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import { addLiveChecks, loadEnv } from './config-check.mjs'
+import { isTemplateRepo } from './is-template.mjs'
 
 const root = join(fileURLToPath(import.meta.url), '..', '..')
 
@@ -87,14 +88,18 @@ describe('config:check', () => {
     expect(out).toContain("Can't check here: run with --github (task 231)")
   })
 
-  it('does not call a feature that is only on by default, with nothing set, a gap', () => {
-    const { out, status } = run(['--strict'], { ...SANITY, SANITY_API_READ_TOKEN: 't' })
-    expect(out).toMatch(/· Contact forms\s+Not in use: nothing is set for it/)
-    expect(out).toContain('Dormant:')
-    expect(status).toBe(0)
-  })
+  // These two read this repository's own profile, which writes none of the service features. A client's profile switches features on and off.
+  it.skipIf(!isTemplateRepo())(
+    'does not call a feature that is only on by default, with nothing set, a gap',
+    () => {
+      const { out, status } = run(['--strict'], { ...SANITY, SANITY_API_READ_TOKEN: 't' })
+      expect(out).toMatch(/· Contact forms\s+Not in use: nothing is set for it/)
+      expect(out).toContain('Dormant:')
+      expect(status).toBe(0)
+    },
+  )
 
-  it('fails --strict for a feature that is half set up', () => {
+  it.skipIf(!isTemplateRepo())('fails --strict for a feature that is half set up', () => {
     // This repository's profile writes none of the service features, so half set up is the case here.
     const started = run(['--strict'], {
       ...SANITY,

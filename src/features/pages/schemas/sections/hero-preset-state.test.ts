@@ -23,11 +23,11 @@ describe('hero preset state', () => {
     )
   })
 
-  it('cannot tell two presets apart when each differs by one field', () => {
+  it('breaks a one-field tie towards the preset whose layout still matches', () => {
     // Editorial with a dark tone is one field from Editorial (tone) and one from Full background
-    // image (layout). The earlier preset wins the tie, which reads as the wrong starting point.
+    // image (layout). The layout is the defining field, so Editorial is the starting point.
     expect(text({ variant: 'editorial', style: { tone: 'inverse' } })).toBe(
-      'Custom · based on Full background image · 1 change (layout)',
+      'Custom · based on Editorial · 1 change (tone)',
     )
   })
 })

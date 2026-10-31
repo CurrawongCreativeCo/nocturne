@@ -18,8 +18,22 @@ const section = (page: Page, name: string) =>
   page.locator('#main-content section').filter({ has: page.getByRole('heading', { name }) })
 const link = (page: Page, name: string | RegExp, list = 'Tinted glass') =>
   section(page, list).getByRole('link', { name })
-const css = (locator: Locator, property: string) =>
-  locator.evaluate((el, prop) => getComputedStyle(el).getPropertyValue(prop), property)
+/**
+ * A computed style, read again until it has a value. A standard property never computes to '', so an
+ * empty read means the element was detached (React replaced it while hydrating, which a slow runner
+ * makes likely) and the next attempt finds the live one. Every assertion below is unchanged.
+ */
+const css = async (locator: Locator, property: string) => {
+  let value = ''
+  await expect(async () => {
+    value = await locator.evaluate(
+      (el, prop) => getComputedStyle(el).getPropertyValue(prop),
+      property,
+    )
+    expect(value, `${property} was not computed yet`).not.toBe('')
+  }).toPass()
+  return value
+}
 
 /** The alpha of a computed colour (1 for rgb()). */
 const alphaOf = (colour: string) => {

@@ -7,33 +7,39 @@ import { RichText } from '@/components/ui/rich-text'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { graph } from '@/lib/structured-data/graph'
+import { buildFaqPage } from '@/lib/structured-data/nodes/faq-page'
 
 import type { SectionProps } from '../../types'
 
 const DEFAULTS: SectionDefaults = { container: 'max-w-measure', align: 'center' }
 
 /** Native <details> accordion: accessible and works without JavaScript. */
-export function Faq({ data, isFirst }: SectionProps<'faq'>) {
+export function Faq({ data, isFirst, page }: SectionProps<'faq'>) {
   const { heading, intro, items } = data
   const title = sectionTitle(data)
   const { text } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
-      <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          mainEntity: items.map((item) => ({
-            '@type': 'Question',
-            name: stegaClean(item.question),
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: stegaClean(toPlainText(item.answer)),
-            },
-          })),
-        }}
-      />
+      {/* One FAQPage per page, keyed by its URL: the first FAQ section carries every visible question. */}
+      {page && page.faqSections[0]?._key === data._key && (
+        <JsonLd
+          data={graph(
+            buildFaqPage({
+              url: page.url,
+              doc: page.documentId,
+              questions: page.faqSections.flatMap((section) =>
+                section.items.map((item) => ({
+                  question: stegaClean(item.question),
+                  answer: stegaClean(toPlainText(item.answer)),
+                  field: `pageBuilder[_key=="${section._key}"].items[_key=="${item._key}"]`,
+                })),
+              ),
+            }),
+          )}
+        />
+      )}
       {(title || intro) && (
         <header className={`mb-12 ${text}`}>
           {title && (
