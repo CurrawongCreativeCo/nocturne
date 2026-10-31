@@ -6,7 +6,9 @@ import { BODY_TEXT_RATIO } from '@/lib/color/background-contrast'
 import {
   PANEL_MAX_OPACITY,
   accentTint,
+  UNKNOWN_GRADIENT_NOTICE,
   gradientSamples,
+  gradientState,
   panelBackdrop,
   panelChoice,
   panelConfidence,
@@ -14,6 +16,7 @@ import {
   pictureOverlay,
   panelFill,
   panelProblem,
+  panelWarning,
   resolvePanel,
   resolveSectionPanel,
 } from './section-panel'
@@ -306,5 +309,73 @@ describe('the picture’s own overlay narrows the bound', () => {
     expect(pictureOverlay({}, 'inverse')?.opacity).toBe(0.7)
     expect(pictureOverlay({ overlayColor: 'dark', overlay: 'light' }, 'surface')?.wash).toBe('dark')
     expect(pictureOverlay({ overlayColor: 'gradient' }, 'surface')).toBeUndefined()
+  })
+})
+
+describe('a gradient that is none, present, missing or unknown', () => {
+  const dusk = [{ slug: 'dusk', stops: ['#0b3d2e', '#1b2a3b'] }]
+  const base = { panel: 'glass', tone: 'inverse', hasPicture: false } as const
+
+  it('tells the four states apart', () => {
+    expect(gradientState(undefined, dusk)).toBe('none')
+    expect(gradientState('dusk', dusk)).toBe('present')
+    expect(gradientState('gone', dusk)).toBe('missing')
+    expect(gradientState('dusk', [])).toBe('missing')
+    expect(gradientState('dusk', undefined)).toBe('unknown')
+    // A picture covers the gradient, so what is known of it does not matter.
+    expect(gradientState('dusk', undefined, true)).toBe('none')
+  })
+
+  it('records the state on the panel', () => {
+    expect(resolveSectionPanel({ ...base, gradient: 'dusk', gradients: dusk })?.gradient).toBe(
+      'present',
+    )
+    expect(resolveSectionPanel({ ...base, gradient: 'gone', gradients: dusk })?.gradient).toBe(
+      'missing',
+    )
+    expect(resolveSectionPanel({ ...base, gradient: 'dusk' })?.gradient).toBe('unknown')
+  })
+
+  it('keeps conservative rendering when the gradient is unknown, and does not call it exact', () => {
+    const panel = resolveSectionPanel({ ...base, gradient: 'dusk' })
+    expect(panel?.render).toBe('frosted')
+    expect(panel?.confidence).not.toBe('exact')
+  })
+
+  it('does not treat an unknown gradient as removed: it is not drawn as the plain tone', () => {
+    const unknown = resolveSectionPanel({ ...base, gradient: 'dusk' })
+    const missing = resolveSectionPanel({ ...base, gradient: 'dusk', gradients: [] })
+    expect(unknown?.render).toBe('frosted')
+    expect(missing?.render).toBe('tinted')
+  })
+
+  it('warns, without blocking or claiming contrast, when the gradient is unknown', () => {
+    const message = panelWarning({ ...base, gradient: 'dusk' })
+    expect(message).toBe(UNKNOWN_GRADIENT_NOTICE)
+    expect(message).toMatch(/isn’t confirmed/)
+    expect(message).toMatch(/chose is kept/)
+    expect(message).not.toMatch(/guarantee|no longer/i)
+  })
+
+  it('recalculates exactly once the gradients are available', () => {
+    const later = resolveSectionPanel({ ...base, gradient: 'dusk', gradients: dusk })
+    expect(later?.confidence).toBe('exact')
+    expect(panelWarning({ ...base, gradient: 'dusk', gradients: dusk })).toBeNull()
+  })
+
+  it('says nothing about gradients when none is chosen or a picture covers it', () => {
+    expect(panelWarning(base)).toBeNull()
+    expect(panelWarning({ ...base, hasPicture: true, gradient: 'dusk' })).toBeNull()
+  })
+
+  it('a solid-fallback warning still wins over the notice', () => {
+    const message = panelWarning({
+      panel: 'glass',
+      tone: 'accent',
+      hasPicture: false,
+      gradient: 'dusk',
+      site: { ...colorHex, accentInk: '#9ca3af' },
+    })
+    expect(message).toMatch(/drawn solid/)
   })
 })
