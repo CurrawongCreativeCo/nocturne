@@ -335,6 +335,26 @@
       "max": 1,
       "blocks": [
         {
+          "type": "slotImage",
+          "noun": "a picture",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "image",
+              "kind": "image",
+              "required": true,
+              "clientEditable": true
+            },
+            {
+              "path": "image.alt",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            }
+          ]
+        },
+        {
           "type": "slotVideo",
           "noun": "a video",
           "clientEditable": true,
@@ -1916,16 +1936,38 @@
     {
       "type": "mediaText",
       "title": "Image + text",
-      "purpose": "A picture beside a block of text, with an optional title and up to two buttons. Use it to explain one idea with an image.",
+      "purpose": "Media beside, above or behind a block of text, with an optional title, up to two buttons and one extra block such as a video. Use it to explain one idea with a picture or a video.",
       "example": {
         "eyebrow": "Our story",
         "title": "Built on local knowledge",
+        "variant": "side",
         "imagePosition": "left",
         "style": {
           "tone": "alt"
         }
       },
       "fields": [
+        {
+          "path": "variant",
+          "kind": "string",
+          "required": true,
+          "max": null,
+          "list": [
+            {
+              "value": "side",
+              "title": "Side by side"
+            },
+            {
+              "value": "stacked",
+              "title": "Stacked"
+            },
+            {
+              "value": "overlay",
+              "title": "Text over media"
+            }
+          ],
+          "clientEditable": false
+        },
         {
           "path": "eyebrow",
           "kind": "string",
@@ -2065,6 +2107,201 @@
             }
           ],
           "clientEditable": true
+        },
+        {
+          "path": "media",
+          "kind": "array",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotImage].image",
+          "kind": "image",
+          "required": true,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotImage].image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].title",
+          "kind": "string",
+          "required": true,
+          "max": null,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].source",
+          "kind": "string",
+          "required": true,
+          "max": null,
+          "list": [
+            {
+              "value": "youtube",
+              "title": "YouTube"
+            },
+            {
+              "value": "vimeo",
+              "title": "Vimeo"
+            },
+            {
+              "value": "upload",
+              "title": "Uploaded video (MP4)"
+            }
+          ],
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].url",
+          "kind": "url",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].file",
+          "kind": "file",
+          "required": null,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].poster",
+          "kind": "image",
+          "required": true,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].poster.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].captions",
+          "kind": "file",
+          "required": false,
+          "clientEditable": true
+        },
+        {
+          "path": "media[slotVideo].aspectRatio",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "16:9",
+              "title": "Widescreen (16:9)"
+            },
+            {
+              "value": "4:3",
+              "title": "Standard (4:3)"
+            },
+            {
+              "value": "1:1",
+              "title": "Square (1:1)"
+            },
+            {
+              "value": "21:9",
+              "title": "Cinema (21:9)"
+            }
+          ],
+          "clientEditable": true
+        },
+        {
+          "path": "supporting",
+          "kind": "array",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].title",
+          "kind": "string",
+          "required": true,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].source",
+          "kind": "string",
+          "required": true,
+          "max": null,
+          "list": [
+            {
+              "value": "youtube",
+              "title": "YouTube"
+            },
+            {
+              "value": "vimeo",
+              "title": "Vimeo"
+            },
+            {
+              "value": "upload",
+              "title": "Uploaded video (MP4)"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].url",
+          "kind": "url",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].file",
+          "kind": "file",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].poster",
+          "kind": "image",
+          "required": true,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].poster.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].captions",
+          "kind": "file",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[].aspectRatio",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "16:9",
+              "title": "Widescreen (16:9)"
+            },
+            {
+              "value": "4:3",
+              "title": "Standard (4:3)"
+            },
+            {
+              "value": "1:1",
+              "title": "Square (1:1)"
+            },
+            {
+              "value": "21:9",
+              "title": "Cinema (21:9)"
+            }
+          ],
+          "clientEditable": false
         },
         {
           "path": "image",
@@ -2291,13 +2528,77 @@
           "clientEditable": false
         }
       ],
-      "presets": [],
+      "variants": [
+        {
+          "value": "side",
+          "title": "Side by side"
+        },
+        {
+          "value": "stacked",
+          "title": "Stacked"
+        },
+        {
+          "value": "overlay",
+          "title": "Text over media"
+        }
+      ],
+      "presets": [
+        {
+          "value": "media-right",
+          "title": "Media right",
+          "set": {
+            "variant": "side",
+            "imagePosition": "right"
+          }
+        },
+        {
+          "value": "media-left",
+          "title": "Media left",
+          "set": {
+            "variant": "side",
+            "imagePosition": "left"
+          }
+        },
+        {
+          "value": "stacked",
+          "title": "Stacked",
+          "set": {
+            "variant": "stacked"
+          }
+        },
+        {
+          "value": "text-over-media",
+          "title": "Text over media",
+          "set": {
+            "variant": "overlay",
+            "style.tone": "inverse"
+          }
+        }
+      ],
       "rules": [
         {
           "variant": null,
           "hasPicture": true,
           "fixesAlignment": false,
           "hasOwnBackgroundImage": false
+        },
+        {
+          "variant": "side",
+          "hasPicture": true,
+          "fixesAlignment": false,
+          "hasOwnBackgroundImage": false
+        },
+        {
+          "variant": "stacked",
+          "hasPicture": true,
+          "fixesAlignment": false,
+          "hasOwnBackgroundImage": false
+        },
+        {
+          "variant": "overlay",
+          "hasPicture": true,
+          "fixesAlignment": false,
+          "hasOwnBackgroundImage": true
         }
       ]
     },

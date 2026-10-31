@@ -63,6 +63,7 @@ const { designSettings } = await jiti.import(
   join(root, 'src/features/site/schemas/design-settings.ts'),
 )
 const slots = await jiti.import(join(root, 'src/features/pages/slots/registry.ts'))
+const { slotImage } = await jiti.import(join(root, 'src/features/pages/schemas/slot-image.ts'))
 const { slotVideo } = await jiti.import(join(root, 'src/features/pages/schemas/slot-video.ts'))
 const { isClientEditable } = await jiti.import(join(root, 'src/lib/sanity/client-editable.ts'))
 
@@ -87,7 +88,7 @@ try {
   manifest = buildDesignManifest({
     version: JSON.parse(readFileSync(join(root, 'template-version.json'), 'utf8')).version,
     sectionTypes,
-    sharedTypes: [...sharedTypes, slotVideo],
+    sharedTypes: [...sharedTypes, slotImage, slotVideo],
     slots,
     sectionStyle,
     designSettings,

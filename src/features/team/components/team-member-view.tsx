@@ -5,7 +5,11 @@ import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SocialLinks } from '@/components/ui/social-links'
+import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
+import { teamPath } from '@/config/paths'
+import { siteUrl } from '@/config/site-url'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
+import { personId } from '@/lib/structured-data/ids'
 
 import { PersonJsonLd } from './person-json-ld'
 import { getTeamMember } from '../api/team-member'
@@ -21,6 +25,12 @@ export async function TeamMemberView({ slug, ...mode }: { slug: string } & Fetch
 
   return (
     <>
+      <WebPageJsonLd
+        path={teamPath(stegaClean(member.slug))}
+        name={member.name}
+        nameSource={{ doc: member._id, field: 'name' }}
+        about={personId(siteUrl, stegaClean(member._id))}
+      />
       <PersonJsonLd member={member} />
       <article className="mx-auto max-w-content px-gutter py-section-compact">
         <div className="grid items-start gap-10 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:gap-14">

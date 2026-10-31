@@ -48,9 +48,32 @@ function variantOf(section: PageSection): string | undefined {
     case 'hero':
     case 'stats':
       return 'variant' in section ? stegaClean(section.variant) : undefined
-    case 'mediaText':
+    case 'mediaText': {
       if (!('imagePosition' in section)) return undefined
-      return section.image?.asset ? `image ${section.imagePosition}` : 'no image'
+      const layout = stegaClean(section.variant)
+      const media = section.media?.[0]
+      const mediaType = media ? stegaClean(media._type) : undefined
+      // A picture block saved without its picture (a draft) has none, whatever the types say.
+      const slotPicture = media && 'image' in media ? (media.image as typeof section.image) : null
+      const hasPicture =
+        (mediaType === 'slotImage' && Boolean(slotPicture?.asset)) ||
+        (mediaType !== 'slotVideo' && Boolean(section.image?.asset))
+      // Sections saved before the media slot say "image left"; the slot's say "media left".
+      const where = mediaType === 'slotImage' ? 'media' : 'image'
+      const first =
+        layout === 'stacked' || layout === 'overlay'
+          ? layout
+          : hasPicture || mediaType === 'slotVideo'
+            ? `${where} ${section.imagePosition}`
+            : 'no image'
+      return [
+        first,
+        mediaType === 'slotVideo' && 'video media',
+        section.supporting?.length && 'supporting video',
+      ]
+        .filter(Boolean)
+        .join(', ')
+    }
     default:
       return undefined
   }

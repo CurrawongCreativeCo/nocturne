@@ -73,6 +73,11 @@ declare module 'sanity' {
     /** Presets shown in a bar above the object's fields (features/studio/components/preset-picker). */
     presets?: PresetDefinition[]
     /**
+     * Names a preset field path for people ('style.tone' -> 'tone'). With it, a section on Custom shows
+     * which preset it started from and what moved, with a button that resets to that preset.
+     */
+    presetLabels?: Record<string, string>
+    /**
      * What the section is for, and optionally an example of valid content. Read only by
      * scripts/build-design-manifest.mjs for design-manifest.generated.json; section families must
      * have a purpose (README, "Design manifest").
@@ -143,6 +148,9 @@ export function presetField({
  * The `options` for an object type (a section, say) that offers presets above its form:
  * `defineType({ type: 'object', options: presetsOption([...]), ... })`.
  */
-export function presetsOption(presets: readonly PresetDefinition[]) {
-  return { presets: [...presets] }
+export function presetsOption(
+  presets: readonly PresetDefinition[],
+  labels?: Record<string, string>,
+) {
+  return { presets: [...presets], ...(labels ? { presetLabels: labels } : {}) }
 }

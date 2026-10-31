@@ -7,6 +7,7 @@ import {
   type CustomValidator,
 } from 'sanity'
 
+import { parseAuPhone } from '@/lib/au-phone'
 import { DAYS, DEFAULT_TIME_ZONE, formatTime, isTime } from '@/lib/opening-hours'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
@@ -14,7 +15,6 @@ import { TIME_ZONES } from '@/lib/time-zones'
 
 import { AbnInput } from '../components/abn-input'
 import { formatAbn, isValidAbn } from '../utils/abn'
-import { parseAuPhone } from '../utils/phone'
 
 /** schema.org types a business can pick without knowing schema.org. "Other" lets the agency name any other. */
 export const BUSINESS_TYPES = [

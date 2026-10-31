@@ -4,6 +4,7 @@ import type { ComponentType } from 'react'
 import { BadgeRow } from '@/components/ui/badge-row'
 import { LaunchDateLine } from '@/components/ui/launch-date-line'
 import { LogoRow } from '@/components/ui/logo-row'
+import { SanityImage } from '@/components/ui/sanity-image'
 import { StatsBar } from '@/components/ui/stats-bar'
 
 import type { SlotBlockType } from './registry'
@@ -14,7 +15,9 @@ import type { SectionProps } from '../types'
  * One slot item as the page query projects it. Every family's slot uses the same block fragments, so
  * the hero's union describes them all; a family whose slot takes fewer blocks simply never sees some.
  */
-export type SlotItem = NonNullable<SectionProps<'hero'>['data']['supporting']>[number]
+export type SlotItem =
+  | NonNullable<SectionProps<'hero'>['data']['supporting']>[number]
+  | NonNullable<SectionProps<'mediaText'>['data']['media']>[number]
 
 interface SlotProps<T extends SlotBlockType> {
   /** The block, projected by `heroSupportingFields` (fragments.ts). */
@@ -41,6 +44,16 @@ const COMPONENTS: { [T in SlotBlockType]: ComponentType<SlotProps<T>> } = {
   ),
   launchDate: ({ item, centred }) => <LaunchDateLine item={item} centred={centred} />,
   slotVideo: ({ item, centred }) => <SlotVideo item={item} centred={centred} />,
+  // Image + text draws its picture itself, inside the section's Image design (a frame, a shape,
+  // movement); this is the plain picture for a slot that has no such design.
+  slotImage: ({ item }) => (
+    <SanityImage
+      image={item.image}
+      width={1200}
+      sizes="(min-width: 1024px) 576px, 100vw"
+      className="w-full rounded-card"
+    />
+  ),
 }
 
 /** The components, for the registry test: every block type has one. */

@@ -59,7 +59,18 @@ export const POST_QUERY = defineQuery(/* groq */ `
     excerpt,
     publishedAt,
     mainImage { ${imageFields} },
-    author->{ name, bio, image { ${imageFields} } },
+    // An author is an author document or a team member (whose JSON-LD Person the byline links to).
+    author->{
+      _id,
+      _type,
+      name,
+      "slug": slug.current,
+      "bio": select(_type == "teamMember" => shortBio, bio),
+      "image": select(
+        _type == "teamMember" => portrait { ${imageFields} },
+        image { ${imageFields} }
+      )
+    },
     categories[]->{ title, "slug": slug.current },
     body[] { ${portableTextFields} },
     seo { ${seoFields} },

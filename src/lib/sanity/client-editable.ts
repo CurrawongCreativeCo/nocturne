@@ -177,8 +177,10 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     agencyOnly: ['access', 'style'],
   },
   mediaText: {
-    editable: ['eyebrow', 'heading', 'title', 'body', 'ctas', 'image', 'imagePosition'],
-    agencyOnly: ['imageDesign', 'access', 'style'],
+    // The layout (`variant`, set by the presets) and the extra block are the agency's; clients change
+    // the words, the buttons and the picture or video in the media slot.
+    editable: ['eyebrow', 'heading', 'title', 'body', 'ctas', 'media', 'image', 'imagePosition'],
+    agencyOnly: ['variant', 'supporting', 'imageDesign', 'access', 'style'],
   },
   featuresGrid: {
     editable: ['heading', 'title', 'intro', 'columns', 'items'],
@@ -343,6 +345,11 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   launchDate: {
     editable: ['label', 'date', 'time', 'countdown'],
+    agencyOnly: [],
+  },
+  // The picture is the client's; its frame and movement are the section's Image design.
+  slotImage: {
+    editable: ['image'],
     agencyOnly: [],
   },
   // Content is the client's; the Shape (layout) is the agency's.
