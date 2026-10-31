@@ -41,7 +41,12 @@ describe('planProposal', () => {
     expect(plan.mutations[0]).not.toHaveProperty('create._rev')
     expect(patches(plan).every((p) => p.ifRevisionID === undefined)).toBe(true)
     expect(plan.writes).toEqual([
-      { documentId: 'page-home', targetId: 'drafts.page-home', created: true },
+      {
+        documentId: 'page-home',
+        documentType: 'page',
+        targetId: 'drafts.page-home',
+        created: true,
+      },
     ])
   })
 
@@ -92,13 +97,20 @@ describe('planProposal', () => {
     expect(patches(plan).every((p) => p.id === 'versions.rTest.page-home')).toBe(true)
   })
 
-  it('undoes by deleting created drafts and restoring existing ones', () => {
-    expect(undoMutations([{ documentId: 'a', targetId: 'drafts.a', created: true }])).toEqual([
-      { delete: { id: 'drafts.a' } },
-    ])
+  it('undoes with a revision guard: delete what it created, restore what existed, skip what it cannot guard', () => {
     const original = { _id: 'drafts.b', _type: 'page', _rev: 'r' }
-    expect(
-      undoMutations([{ documentId: 'b', targetId: 'drafts.b', created: false, original }]),
-    ).toEqual([{ createOrReplace: { _id: 'drafts.b', _type: 'page' } }])
+    const writes = [
+      { documentId: 'a', documentType: 'page', targetId: 'drafts.a', created: true },
+      { documentId: 'b', documentType: 'page', targetId: 'drafts.b', created: false, original },
+      { documentId: 'c', documentType: 'page', targetId: 'drafts.c', created: true },
+    ]
+    const undo = undoMutations(writes, { 'drafts.a': 'ra', 'drafts.b': 'rb' })
+    expect(undo.unguarded).toEqual(['drafts.c'])
+    expect(undo.mutations).toEqual([
+      { patch: { id: 'drafts.a', ifRevisionID: 'ra', setIfMissing: { _type: 'page' } } },
+      { delete: { id: 'drafts.a' } },
+      { patch: { id: 'drafts.b', ifRevisionID: 'rb', setIfMissing: { _type: 'page' } } },
+      { createOrReplace: { _id: 'drafts.b', _type: 'page' } },
+    ])
   })
 })

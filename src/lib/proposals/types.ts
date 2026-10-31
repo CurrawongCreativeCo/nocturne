@@ -55,6 +55,7 @@ export type RejectionCode =
   | 'limit-exceeded'
   | 'slot-block-not-allowed'
   | 'contrast-fails'
+  | 'agency-approval-required'
 
 export interface Rejection {
   code: RejectionCode

@@ -13,8 +13,8 @@ export const changeProposalsConfig = defineFeatureConfig({
   docs: 'README.md#change-proposals',
   since: '1.11.0',
   setup: [
-    'Use a scratch dataset only: its name must start with "scratch". The applier refuses every other name.',
-    'Create a token with the Editor role for that project and put it in .env.local as SANITY_PROPOSAL_TOKEN.',
+    'Use a scratch dataset only: named "scratch", or starting "scratch-" or "scratch_". The applier refuses every other name.',
+    'Create a token for that project and put it in .env.local as SANITY_PROPOSAL_TOKEN. Agency-only changes apply only with an Administrator or Developer token. Sign the Sanity CLI in too (npx sanity login): the Studio validation step uses it.',
   ],
   settings: [
     {
@@ -25,7 +25,8 @@ export const changeProposalsConfig = defineFeatureConfig({
       purpose:
         'Lets `npm run proposal -- apply` read documents and write drafts in a scratch dataset.',
       default: 'Unset: validate works from a documents file, and apply stops with a message',
-      source: 'sanity.io/manage → your project → API → Tokens (Editor role)',
+      source:
+        'sanity.io/manage → your project → API → Tokens (Administrator or Developer role for agency-only changes)',
       envExample: false,
     },
   ],

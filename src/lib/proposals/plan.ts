@@ -31,6 +31,8 @@ export type ProposalMutation = PatchMutation | CreateMutation
 /** One document the plan writes, with what is needed to undo it. */
 export interface PlannedWrite {
   documentId: string
+  /** The document's `_type`, for the undo guard. */
+  documentType: string
   /** The id written to: `drafts.<id>` or `versions.<release>.<id>`. */
   targetId: string
   /** The draft did not exist, so undoing is deleting it. */
@@ -135,6 +137,7 @@ export function planProposal(
 
     plan.writes.push({
       documentId,
+      documentType: snapshot._type,
       targetId,
       created: release ? true : !hasDraft,
       ...(hasDraft && !release ? { original: snapshot } : {}),
@@ -143,13 +146,40 @@ export function planProposal(
   return plan
 }
 
-/** The mutations that undo a plan's writes in a draft dataset: delete what was created, restore the rest. */
-export function undoMutations(writes: readonly PlannedWrite[]): Record<string, unknown>[] {
-  return writes.flatMap<Record<string, unknown>>((write) =>
-    write.original
-      ? [{ createOrReplace: bare(write.original, write.targetId) }]
-      : [{ delete: { id: write.targetId } }],
-  )
+/**
+ * The transaction that undoes a plan's writes in a scratch dataset, guarded so it can only undo what
+ * the proposal itself wrote. Each document gets a no-op patch carrying `ifRevisionID` set to the
+ * revision the write left it at, then the delete (a draft the proposal created) or the restore (a
+ * draft that existed before). If anyone has edited the draft since, the guard fails the whole
+ * transaction and nothing is touched. `unguarded` lists targets whose post-write revision is unknown:
+ * they are left alone, because discarding them could destroy someone else's work.
+ */
+export function undoMutations(
+  writes: readonly PlannedWrite[],
+  revisions: Readonly<Record<string, string>>,
+): { mutations: Record<string, unknown>[]; unguarded: string[] } {
+  const mutations: Record<string, unknown>[] = []
+  const unguarded: string[] = []
+  for (const write of writes) {
+    const revision = revisions[write.targetId]
+    if (!revision) {
+      unguarded.push(write.targetId)
+      continue
+    }
+    mutations.push({
+      patch: {
+        id: write.targetId,
+        ifRevisionID: revision,
+        setIfMissing: { _type: write.documentType },
+      },
+    })
+    mutations.push(
+      write.original
+        ? { createOrReplace: bare(write.original, write.targetId) }
+        : { delete: { id: write.targetId } },
+    )
+  }
+  return { mutations, unguarded }
 }
 
 /** The Actions API requests that undo a release plan: discard each version, then archive and delete the release. */

@@ -50,6 +50,12 @@ export interface ValidateDeps {
   manifest: DesignManifest
   /** The documents the changes apply to: the draft where there is one, else the published document. */
   documents: Readonly<Record<string, DocumentSnapshot>>
+  /**
+   * Whether the person applying holds an agency role. Left out, a patch that needs agency review is
+   * only flagged (the read-only `validate` command). Set, the flag is enforced: `false` rejects every
+   * such patch with `agency-approval-required`, so a client-level run can never apply agency-only changes.
+   */
+  agencyApproved?: boolean
   /** Defaults to the CLIENT_EDITABLE registry. */
   isClientEditable?: (type: string, field: string) => boolean
 }
@@ -704,6 +710,18 @@ export function validateProposal(proposal: unknown, deps: ValidateDeps): Proposa
       const rejected: RejectedPatch = { ...base, reasons: inspection.reasons }
       part.rejected.push(rejected)
     } else {
+      if (inspection.review && deps.agencyApproved === false) {
+        part.rejected.push({
+          ...base,
+          reasons: [
+            reject(
+              'agency-approval-required',
+              `${unit.path} changes something clients may not edit. It needs a token held by an Administrator or Developer.`,
+            ),
+          ],
+        })
+        continue
+      }
       const accepted: AcceptedPatch = {
         ...base,
         needsAgencyReview: inspection.review,

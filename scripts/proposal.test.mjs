@@ -4,9 +4,9 @@ import manifest from '../design-manifest.generated.json'
 import {
   assertScratchDataset,
   createHttpClient,
-  errorsFromCliOutput,
   parseArgs,
-  releaseIdFor,
+  parseValidationOutput,
+  RELEASE_MODE_VERIFIED,
   runProposal,
   sanityValidator,
 } from './proposal-utils.mjs'
@@ -14,49 +14,32 @@ import densityAiry from '../src/lib/proposals/fixtures/density-airy.proposal.jso
 import documentsFile from '../src/lib/proposals/fixtures/documents.json'
 import glassImageLeft from '../src/lib/proposals/fixtures/glass-image-left.proposal.json'
 import supportingVideo from '../src/lib/proposals/fixtures/supporting-video.proposal.json'
+import { insertAt, parsePath, setAt, unsetAt } from '../src/lib/proposals/paths'
 import * as plan from '../src/lib/proposals/plan'
 import { validateProposal } from '../src/lib/proposals/validate'
-
-const HERO = 'pageBuilder[_key=="hero1"]'
-const TOKEN_CANARY = 'sk-canary-token-value'
-
-/** A mock client holding the fixture documents (as published, or with a draft when given). */
-function mockClient({ draft, mutate, action } = {}) {
-  const documents = [documentsFile['page-home'], documentsFile.designSettings]
-  if (draft) documents.push(draft)
-  return {
-    getDocuments: vi.fn(async (ids) => documents.filter((doc) => ids.includes(doc._id))),
-    mutate: vi.fn(mutate ?? (async () => ({}))),
-    action: vi.fn(action ?? (async () => ({}))),
-  }
-}
-
-const run = (overrides = {}) =>
-  runProposal({
-    proposal: glassImageLeft,
-    client: mockClient(),
-    dataset: 'scratch-test',
-    validate: validateProposal,
-    plan,
-    manifest,
-    yes: true,
-    release: false,
-    releasesEnabled: false,
-    sanityValidate: async () => [],
-    ...overrides,
-  })
 
 describe('assertScratchDataset', () => {
   it.each(['scratch', 'scratch-abc', 'scratch_2026'])('allows %s', (name) => {
     expect(() => assertScratchDataset(name)).not.toThrow()
   })
 
-  it.each(['production', 'staging', 'my-scratch', 'Scratch', ' scratch', '', undefined, null])(
-    'refuses %j',
-    (name) => {
-      expect(() => assertScratchDataset(name)).toThrow(/scratch/)
-    },
-  )
+  it.each([
+    'production',
+    'staging',
+    'my-scratch',
+    'Scratch',
+    ' scratch',
+    'scratchpad',
+    'scratchy-not',
+    'scratch-',
+    'scratch/x',
+    'scratch-A',
+    '',
+    undefined,
+    null,
+  ])('refuses %j', (name) => {
+    expect(() => assertScratchDataset(name)).toThrow(/scratch/)
+  })
 })
 
 describe('parseArgs', () => {
@@ -91,216 +74,615 @@ describe('parseArgs', () => {
   })
 })
 
-describe('runProposal', () => {
+const HERO = 'pageBuilder[_key=="hero1"]'
+const TOKEN_CANARY = 'sk-canary-token-value'
+
+const clone = (value) => structuredClone(value)
+
+/**
+ * A stateful stand-in for a Sanity dataset that follows the documented rules this code relies on:
+ * a mutate request is one transaction (all or nothing); `create` fails when the id exists;
+ * `ifRevisionID` fails when the revision differs; a `set` under a missing parent fails; every
+ * successful write gets a new revision; results carry the written documents. These tests show the
+ * applier behaves correctly against those rules. They do NOT show Sanity follows them: the real
+ * dataset run (README, "Change proposals") is what verifies that.
+ */
+function fakeLake({ documents = [], roles = ['administrator'], beforeMutate } = {}) {
+  let counter = 0
+  let store = new Map(documents.map((doc) => [doc._id, clone(doc)]))
+  const lake = {
+    mutations: [],
+    get store() {
+      return store
+    },
+    roles,
+    stripResults: false,
+    getDocuments: vi.fn(async (ids) =>
+      ids.filter((id) => store.has(id)).map((id) => clone(store.get(id))),
+    ),
+    getRoles: vi.fn(async () => {
+      if (lake.roles instanceof Error) throw lake.roles
+      return lake.roles
+    }),
+    mutate: vi.fn(async (mutations) => {
+      lake.mutations.push(mutations)
+      beforeMutate?.(lake, mutations)
+      const next = new Map([...store].map(([id, doc]) => [id, clone(doc)]))
+      const results = []
+      const conflict = (message) => Object.assign(new Error(message), { status: 409 })
+      for (const mutation of mutations) {
+        if (mutation.create) {
+          const id = mutation.create._id
+          if (next.has(id)) throw conflict('document already exists')
+          next.set(id, { ...clone(mutation.create), _rev: `r${++counter}` })
+          results.push({ id, operation: 'create', document: clone(next.get(id)) })
+        } else if (mutation.createOrReplace) {
+          const id = mutation.createOrReplace._id
+          next.set(id, { ...clone(mutation.createOrReplace), _rev: `r${++counter}` })
+          results.push({ id, operation: 'update', document: clone(next.get(id)) })
+        } else if (mutation.delete) {
+          next.delete(mutation.delete.id)
+          results.push({ id: mutation.delete.id, operation: 'delete' })
+        } else if (mutation.patch) {
+          const { id, ifRevisionID, setIfMissing, set, unset, insert } = mutation.patch
+          let doc = next.get(id)
+          if (!doc) throw Object.assign(new Error('not found'), { status: 404 })
+          if (ifRevisionID && doc._rev !== ifRevisionID) throw conflict('revision mismatch')
+          const bad = (error) => Object.assign(error, { status: 400 })
+          try {
+            for (const [path, value] of Object.entries(setIfMissing ?? {})) {
+              const segments = parsePath(path)
+              if (segments && doc[segments[0].name] === undefined && segments.length === 1) {
+                doc = setAt(doc, segments, value)
+              } else if (segments) {
+                const parent = JSON.stringify(path)
+                void parent
+                const exists = (function find() {
+                  try {
+                    return segments.reduce(
+                      (current, segment) =>
+                        segment.kind === 'field'
+                          ? current?.[segment.name]
+                          : Array.isArray(current)
+                            ? segment.kind === 'key'
+                              ? current.find((item) => item._key === segment.key)
+                              : current.at(segment.index)
+                            : undefined,
+                      doc,
+                    )
+                  } catch {
+                    return undefined
+                  }
+                })()
+                if (exists === undefined) doc = setAt(doc, segments, value)
+              }
+            }
+            for (const [path, value] of Object.entries(set ?? {}))
+              doc = setAt(doc, parsePath(path), value)
+            for (const path of unset ?? []) doc = unsetAt(doc, parsePath(path))
+            if (insert) {
+              const where = ['before', 'after', 'replace'].find((key) => insert[key])
+              doc = insertAt(doc, parsePath(insert[where]), where, insert.items)
+            }
+          } catch (error) {
+            throw bad(error)
+          }
+          next.set(id, { ...doc, _rev: `r${++counter}` })
+          results.push({ id, operation: 'update', document: clone(next.get(id)) })
+        }
+      }
+      store = next
+      return lake.stripResults ? { transactionId: 't' } : { transactionId: 't', results }
+    }),
+    /** Someone else edits a document between the proposal's write and its clean-up. */
+    editBehindBack(id, set) {
+      const doc = store.get(id)
+      store.set(id, {
+        ...setAt(doc, parsePath(Object.keys(set)[0]), Object.values(set)[0]),
+        _rev: `r${++counter}`,
+      })
+    },
+  }
+  return lake
+}
+
+const published = documentsFile['page-home']
+const otherPublished = {
+  _id: 'page-about',
+  _type: 'page',
+  _rev: 'rev-about-1',
+  title: 'About',
+  pageBuilder: [],
+}
+const otherDraft = {
+  _id: 'drafts.page-contact',
+  _type: 'page',
+  _rev: 'rev-contact-9',
+  title: 'Contact (editing)',
+  pageBuilder: [],
+}
+const baseDocuments = () => [published, documentsFile.designSettings, otherPublished, otherDraft]
+
+const withTitle = (baseRev = 'rev-home-1') => ({
+  ...glassImageLeft,
+  id: 'title-and-spacing',
+  changes: [
+    {
+      documentId: 'page-home',
+      baseRev,
+      patches: [
+        { set: { [`${HERO}.title`]: 'A better heading', [`${HERO}.style.spacing`]: 'spacious' } },
+      ],
+    },
+  ],
+})
+
+const noErrors = { errors: [], warnings: [] }
+
+const run = (overrides = {}) =>
+  runProposal({
+    proposal: glassImageLeft,
+    client: fakeLake({ documents: baseDocuments() }),
+    dataset: 'scratch-test',
+    validate: validateProposal,
+    plan,
+    manifest,
+    yes: true,
+    release: false,
+    sanityValidate: async () => noErrors,
+    ...overrides,
+  })
+
+describe('runProposal: drafts and revisions', () => {
   it('refuses a dataset that is not scratch before reading anything', async () => {
-    const client = mockClient()
-    await expect(run({ client, dataset: 'production' })).rejects.toThrow(/scratch/)
+    const client = fakeLake({ documents: baseDocuments() })
+    for (const dataset of ['production', 'scratchy-not', 'my-scratch', 'Scratch']) {
+      await expect(run({ client, dataset })).rejects.toThrow(/scratch/)
+    }
     expect(client.getDocuments).not.toHaveBeenCalled()
     expect(client.mutate).not.toHaveBeenCalled()
   })
 
-  it('is a dry run without yes: reads, plans, writes nothing', async () => {
-    const client = mockClient()
+  it('is a dry run without yes: reads and plans, writes nothing', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
     const result = await run({ client, yes: false })
     expect(result.status).toBe('dry-run')
-    expect(result.plan.mutations.length).toBeGreaterThan(0)
     expect(client.mutate).not.toHaveBeenCalled()
-    expect(client.action).not.toHaveBeenCalled()
   })
 
   it.each([
     ['glass with the image on the left', glassImageLeft],
     ['density airy', densityAiry],
     ['a supporting video', supportingVideo],
-  ])('applies the fixture proposal "%s" as one draft-only transaction', async (_name, proposal) => {
-    const client = mockClient()
-    const result = await run({ client, proposal })
-    expect(result.status).toBe('applied')
-    expect(client.mutate).toHaveBeenCalledTimes(1)
-    const sent = client.mutate.mock.calls[0][0]
-    const ids = sent.map((m) => m.create?._id ?? m.patch.id)
-    expect(new Set(ids)).toEqual(new Set(['drafts.page-home']))
-    expect(JSON.stringify(sent)).not.toMatch(/publish/i)
-    expect(client.action).not.toHaveBeenCalled()
-  })
+  ])(
+    'creates a draft from the published document for "%s", leaving everything else alone',
+    async (_name, proposal) => {
+      const client = fakeLake({ documents: baseDocuments() })
+      const before = clone(Object.fromEntries(client.store))
+      const result = await run({ client, proposal })
+      expect(result.status).toBe('applied')
+      expect(result.cleanup.status).toBe('not-needed')
+      expect(client.mutate).toHaveBeenCalledTimes(1)
+      const draft = client.store.get('drafts.page-home')
+      expect(draft).toBeDefined()
+      expect(draft._rev).not.toBe('rev-home-1')
+      for (const id of ['page-home', 'designSettings', 'page-about', 'drafts.page-contact']) {
+        expect(client.store.get(id)).toEqual(before[id])
+      }
+      expect(JSON.stringify(client.mutations)).not.toMatch(/publish/i)
+    },
+  )
 
-  it('sets ifRevisionID to baseRev when the draft already exists', async () => {
-    const draft = { ...documentsFile['page-home'], _id: 'drafts.page-home', _rev: 'rev-draft-3' }
-    const proposal = {
-      ...densityAiry,
-      changes: [{ ...densityAiry.changes[0], baseRev: 'rev-draft-3' }],
+  it('updates an existing draft when baseRev is the draft’s revision', async () => {
+    const draft = {
+      ...clone(published),
+      _id: 'drafts.page-home',
+      _rev: 'rev-draft-3',
+      title: 'Editing',
     }
-    const client = mockClient({ draft })
-    const result = await run({ client, proposal })
+    const client = fakeLake({ documents: [...baseDocuments(), draft] })
+    const result = await run({ client, proposal: withTitle('rev-draft-3') })
     expect(result.status).toBe('applied')
-    const sent = client.mutate.mock.calls[0][0]
-    expect(sent[0].patch.ifRevisionID).toBe('rev-draft-3')
-    expect(sent.some((m) => m.create)).toBe(false)
+    expect(client.mutations[0][0].patch.ifRevisionID).toBe('rev-draft-3')
+    const after = client.store.get('drafts.page-home')
+    expect(after.title).toBe('Editing')
+    expect(after.pageBuilder[0].title).toBe('A better heading')
+    expect(client.store.get('page-home')).toEqual(published)
   })
 
-  it('refuses a stale proposal without writing: the draft has moved on', async () => {
-    const draft = { ...documentsFile['page-home'], _id: 'drafts.page-home', _rev: 'rev-draft-9' }
-    const client = mockClient({ draft })
-    const result = await run({ client, proposal: densityAiry })
+  it('refuses a stale revision without writing anything', async () => {
+    const draft = { ...clone(published), _id: 'drafts.page-home', _rev: 'rev-draft-9' }
+    const client = fakeLake({ documents: [...baseDocuments(), draft] })
+    const result = await run({ client, proposal: withTitle('rev-home-1') })
     expect(result.status).toBe('nothing-to-apply')
     expect(result.validation.rejected[0].reasons[0].code).toBe('stale-revision')
     expect(client.mutate).not.toHaveBeenCalled()
+    expect(client.store.get('drafts.page-home')).toEqual(draft)
   })
 
-  it('reports a revision conflict from the server and leaves nothing behind', async () => {
-    const error = Object.assign(new Error('conflict'), { status: 409 })
-    const client = mockClient({ mutate: async () => Promise.reject(error) })
+  it('refuses when a draft is created after planning, and keeps that editor’s draft', async () => {
+    const concurrent = {
+      ...clone(published),
+      _id: 'drafts.page-home',
+      _rev: 'rev-theirs-1',
+      title: 'Their work',
+    }
+    const client = fakeLake({
+      documents: baseDocuments(),
+      beforeMutate: (lake) => {
+        if (!lake.store.has('drafts.page-home')) lake.store.set('drafts.page-home', concurrent)
+      },
+    })
     const sanityValidate = vi.fn()
     const result = await run({ client, sanityValidate })
     expect(result.status).toBe('conflict')
     expect(result.notes.join(' ')).toMatch(/Propose again/)
     expect(sanityValidate).not.toHaveBeenCalled()
-    // One transaction that failed whole: no clean-up write is needed.
+    expect(client.mutate).toHaveBeenCalledTimes(1)
+    expect(client.store.get('drafts.page-home')).toEqual(concurrent)
+  })
+
+  it('refuses when an existing draft is edited after planning', async () => {
+    const draft = { ...clone(published), _id: 'drafts.page-home', _rev: 'rev-draft-3' }
+    const client = fakeLake({
+      documents: [...baseDocuments(), draft],
+      beforeMutate: (lake) =>
+        lake.editBehindBack('drafts.page-home', { title: 'Edited meanwhile' }),
+    })
+    const result = await run({ client, proposal: withTitle('rev-draft-3') })
+    expect(result.status).toBe('conflict')
+    expect(client.store.get('drafts.page-home').title).toBe('Edited meanwhile')
+  })
+
+  it('refuses to reapply the same proposal: the draft has moved on', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    expect((await run({ client })).status).toBe('applied')
+    const afterFirst = clone(client.store.get('drafts.page-home'))
+    const second = await run({ client })
+    expect(second.status).toBe('nothing-to-apply')
+    expect(second.validation.rejected[0].reasons[0].code).toBe('stale-revision')
+    expect(client.store.get('drafts.page-home')).toEqual(afterFirst)
     expect(client.mutate).toHaveBeenCalledTimes(1)
   })
+})
 
-  it('discards the drafts when Studio validation fails', async () => {
-    const client = mockClient()
-    const result = await run({
-      client,
-      sanityValidate: async () => ['drafts.page-home: Title is required'],
-    })
-    expect(result.status).toBe('invalid-in-sanity')
-    expect(result.errors).toEqual(['drafts.page-home: Title is required'])
-    expect(client.mutate).toHaveBeenCalledTimes(2)
-    expect(client.mutate.mock.calls[1][0]).toEqual([{ delete: { id: 'drafts.page-home' } }])
+describe('runProposal: agency review is enforced', () => {
+  const mixed = withTitle()
+  const heroOf = (client) => client.store.get('drafts.page-home')?.pageBuilder[0]
+
+  it('applies the client-editable part and rejects the agency-only part for an Editor token', async () => {
+    const client = fakeLake({ documents: baseDocuments(), roles: ['editor'] })
+    const result = await run({ client, proposal: mixed })
+    expect(result.status).toBe('applied')
+    expect(result.validation.rejected.map((p) => p.reasons[0].code)).toEqual([
+      'agency-approval-required',
+    ])
+    expect(result.validation.rejected[0].path).toBe(`${HERO}.style.spacing`)
+    expect(heroOf(client).title).toBe('A better heading')
+    expect(heroOf(client).style.spacing).toBeUndefined()
   })
 
-  it('discards the drafts when Studio validation cannot run', async () => {
-    const client = mockClient()
-    const result = await run({
-      client,
-      sanityValidate: async () => {
-        throw new Error('The CLI did not run.')
-      },
-    })
-    expect(result.status).toBe('invalid-in-sanity')
-    expect(client.mutate.mock.calls[1][0]).toEqual([{ delete: { id: 'drafts.page-home' } }])
-  })
-
-  it('restores a draft that existed before when the new version fails Studio validation', async () => {
-    const draft = { ...documentsFile['page-home'], _id: 'drafts.page-home', _rev: 'rev-draft-3' }
-    const proposal = {
-      ...densityAiry,
-      changes: [{ ...densityAiry.changes[0], baseRev: 'rev-draft-3' }],
+  it('applies both for an Administrator or Developer token', async () => {
+    for (const roles of [['administrator'], ['developer']]) {
+      const client = fakeLake({ documents: baseDocuments(), roles })
+      const result = await run({ client, proposal: mixed })
+      expect(result.validation.rejected).toEqual([])
+      expect(heroOf(client).style.spacing).toBe('spacious')
     }
-    const client = mockClient({ draft })
-    await run({ client, proposal, sanityValidate: async () => ['bad'] })
-    const undo = client.mutate.mock.calls[1][0]
-    expect(undo[0].createOrReplace._id).toBe('drafts.page-home')
-    expect(undo[0].createOrReplace).not.toHaveProperty('_rev')
   })
 
-  it('writes the content part when the design part is rejected', async () => {
-    const proposal = {
-      ...glassImageLeft,
+  it('fails closed when the token’s roles cannot be read', async () => {
+    const client = fakeLake({ documents: baseDocuments(), roles: new Error('boom') })
+    const result = await run({ client, proposal: densityAiry })
+    expect(result.status).toBe('nothing-to-apply')
+    expect(result.validation.rejected[0].reasons[0].code).toBe('agency-approval-required')
+    expect(client.mutate).not.toHaveBeenCalled()
+  })
+
+  it('rejects an agency-only proposal from a Contributor token entirely', async () => {
+    const client = fakeLake({ documents: baseDocuments(), roles: ['contributor'] })
+    for (const proposal of [glassImageLeft, supportingVideo]) {
+      expect((await run({ client, proposal })).status).toBe('nothing-to-apply')
+    }
+    expect(client.mutate).not.toHaveBeenCalled()
+  })
+
+  it('does not ask for roles when nothing needs review', async () => {
+    const client = fakeLake({
+      documents: baseDocuments(),
+      roles: new Error('should not be called'),
+    })
+    const titleOnly = {
+      ...mixed,
+      changes: [{ ...mixed.changes[0], patches: [{ set: { [`${HERO}.title`]: 'Only a title' } }] }],
+    }
+    expect((await run({ client, proposal: titleOnly })).status).toBe('applied')
+    expect(client.getRoles).not.toHaveBeenCalled()
+  })
+
+  it('keeps a rejected design part from altering the content part', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const bad = {
+      ...mixed,
       changes: [
         {
-          ...glassImageLeft.changes[0],
-          patches: [{ set: { [`${HERO}.title`]: 'Better', [`${HERO}.style.panel`]: 'neon' } }],
+          ...mixed.changes[0],
+          patches: [{ set: { [`${HERO}.title`]: 'Content ok', [`${HERO}.style.panel`]: 'neon' } }],
         },
       ],
     }
-    const client = mockClient()
-    const result = await run({ client, proposal })
+    const result = await run({ client, proposal: bad })
     expect(result.status).toBe('applied')
-    const sent = JSON.stringify(client.mutate.mock.calls[0][0])
-    expect(sent).toContain('Better')
-    expect(sent).not.toContain('neon')
+    expect(heroOf(client).title).toBe('Content ok')
+    expect(heroOf(client).style).toEqual({ tone: 'surface' })
     expect(result.validation.rejected).toHaveLength(1)
   })
 
   it('writes nothing for a proposal the manifest rejects as a whole', async () => {
-    const client = mockClient()
+    const client = fakeLake({ documents: baseDocuments() })
     const result = await run({ client, proposal: { ...glassImageLeft, manifestVersion: '9.0.0' } })
     expect(result.status).toBe('rejected')
     expect(client.mutate).not.toHaveBeenCalled()
   })
+})
 
-  describe('with --release', () => {
-    it('needs the releases flag in the profile', async () => {
-      await expect(run({ release: true, releasesEnabled: false })).rejects.toThrow(/releases/)
-    })
+describe('runProposal: validation failure and clean-up', () => {
+  const failing = async () => ({ errors: ['drafts.page-home: Title is required'], warnings: [] })
 
-    it('puts every change into one release, created first', async () => {
-      const client = mockClient()
-      const result = await run({ client, release: true, releasesEnabled: true })
-      expect(result.status).toBe('applied')
-      expect(client.action).toHaveBeenCalledTimes(1)
-      const actions = client.action.mock.calls[0][0].map((a) => a.actionType)
-      expect(actions[0]).toBe('sanity.action.release.create')
-      expect(actions.some((type) => /publish|schedule/.test(type))).toBe(false)
-      const releaseId = releaseIdFor(glassImageLeft.id)
-      const ids = client.mutate.mock.calls[0][0].map((m) => m.patch.id)
-      expect(new Set(ids)).toEqual(new Set([`versions.${releaseId}.page-home`]))
-    })
+  it('discards only the draft it created, leaving every other document alone', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const before = clone(Object.fromEntries(client.store))
+    const result = await run({ client, sanityValidate: failing })
+    expect(result.status).toBe('invalid-in-sanity')
+    expect(result.studio.errors).toEqual(['drafts.page-home: Title is required'])
+    expect(result.cleanup).toEqual({ status: 'done', remaining: [] })
+    expect(Object.fromEntries(client.store)).toEqual(before)
+  })
 
-    it('discards the release when Studio validation fails', async () => {
-      const client = mockClient()
-      await run({
-        client,
-        release: true,
-        releasesEnabled: true,
-        sanityValidate: async () => ['bad'],
-      })
-      const undo = client.action.mock.calls[1][0].map((a) => a.actionType)
-      expect(undo).toEqual([
-        'sanity.action.document.version.discard',
-        'sanity.action.release.archive',
-        'sanity.action.release.delete',
-      ])
+  it('restores a draft that existed before, keeping unrelated drafts', async () => {
+    const draft = {
+      ...clone(published),
+      _id: 'drafts.page-home',
+      _rev: 'rev-draft-3',
+      title: 'Editing',
+    }
+    const client = fakeLake({ documents: [...baseDocuments(), draft] })
+    const result = await run({
+      client,
+      proposal: withTitle('rev-draft-3'),
+      sanityValidate: failing,
     })
+    expect(result.cleanup.status).toBe('done')
+    const { _rev, ...restored } = client.store.get('drafts.page-home')
+    const { _rev: _original, ...original } = draft
+    expect(restored).toEqual(original)
+    expect(_rev).not.toBe('rev-draft-3')
+    expect(client.store.get('drafts.page-contact')).toEqual(otherDraft)
+  })
+
+  it('treats a validation that could not run as a failure, never a pass', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const result = await run({
+      client,
+      sanityValidate: async () => {
+        throw new Error('Studio validation did not run.')
+      },
+    })
+    expect(result.status).toBe('invalid-in-sanity')
+    expect(result.notes.join(' ')).toMatch(/could not be checked/)
+    expect(client.store.has('drafts.page-home')).toBe(false)
+  })
+
+  it('does not discard a draft that was edited after the write, and reports it', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const result = await run({
+      client,
+      sanityValidate: async () => {
+        client.editBehindBack('drafts.page-home', { title: 'Their later edit' })
+        return { errors: ['bad'], warnings: [] }
+      },
+    })
+    expect(result.status).toBe('invalid-in-sanity')
+    expect(result.cleanup).toEqual({ status: 'failed', remaining: ['drafts.page-home'] })
+    expect(result.manualActions.join(' ')).toContain('drafts.page-home')
+    expect(result.notes.join(' ')).toMatch(/NOT discarded/)
+    expect(client.store.get('drafts.page-home').title).toBe('Their later edit')
+  })
+
+  it('reports what remains when the clean-up request itself fails', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const original = client.mutate.getMockImplementation()
+    client.mutate.mockImplementation(async (mutations) => {
+      if (client.mutations.length >= 1) throw new Error('network down')
+      return original(mutations)
+    })
+    const result = await run({ client, sanityValidate: failing })
+    expect(result.cleanup).toEqual({ status: 'failed', remaining: ['drafts.page-home'] })
+    expect(result.manualActions).toHaveLength(1)
+    expect(result.notes.join(' ')).not.toMatch(/were discarded/)
+  })
+
+  it('will not discard what it cannot guard: no revision came back', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    client.stripResults = true
+    const result = await run({ client })
+    expect(result.status).toBe('invalid-in-sanity')
+    expect(result.cleanup.status).toBe('failed')
+    expect(result.cleanup.remaining).toEqual(['drafts.page-home'])
+    expect(client.store.has('drafts.page-home')).toBe(true)
+    expect(client.mutate).toHaveBeenCalledTimes(1)
+  })
+
+  it('passes the documents Sanity returned to validation, and reports warnings without failing', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const sanityValidate = vi.fn(async () => ({
+      errors: [],
+      warnings: ['drafts.page-home: Long title'],
+    }))
+    const result = await run({ client, sanityValidate })
+    expect(result.status).toBe('applied')
+    expect(result.studio.warnings).toEqual(['drafts.page-home: Long title'])
+    expect(sanityValidate.mock.calls[0][0][0]).toMatchObject({
+      _id: 'drafts.page-home',
+      _rev: expect.any(String),
+    })
+    expect(result.written).toEqual([
+      { id: 'drafts.page-home', revision: client.store.get('drafts.page-home')._rev },
+    ])
+  })
+
+  it('a failed write reports that nothing was written', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    client.mutate.mockRejectedValueOnce(new Error('HTTP 500'))
+    const result = await run({ client })
+    expect(result.status).toBe('failed')
+    expect(result.notes.join(' ')).toMatch(/Nothing was written/)
+    expect(client.store.has('drafts.page-home')).toBe(false)
   })
 })
 
-describe('errorsFromCliOutput', () => {
-  const ids = ['drafts.page-home']
+describe('release mode', () => {
+  it('is disabled until it has been verified on a scratch dataset', async () => {
+    expect(RELEASE_MODE_VERIFIED).toBe(false)
+    const client = fakeLake({ documents: baseDocuments() })
+    await expect(run({ client, release: true })).rejects.toThrow(/disabled/)
+    expect(client.getDocuments).not.toHaveBeenCalled()
+    expect(client.mutate).not.toHaveBeenCalled()
+  })
+})
 
-  it('keeps the errors for the documents written, from JSON or NDJSON', () => {
-    const entries = [
-      {
-        documentId: 'drafts.page-home',
-        validation: [
-          { level: 'error', message: 'Title is required' },
-          { level: 'warning', message: 'Long title' },
-        ],
-      },
-      { documentId: 'other', validation: [{ level: 'error', message: 'Not ours' }] },
-    ]
-    const expected = ['drafts.page-home: Title is required']
-    expect(errorsFromCliOutput(JSON.stringify(entries), ids)).toEqual(expected)
-    expect(errorsFromCliOutput(entries.map((e) => JSON.stringify(e)).join('\n'), ids)).toEqual(
-      expected,
-    )
-    expect(errorsFromCliOutput('', ids)).toEqual([])
+const marker = (level, message = 'm') => ({ level, message, path: [] })
+const entry = (documentId, ...markers) => ({
+  documentId,
+  documentType: 'page',
+  level: markers[0].level,
+  markers,
+  revision: 'r',
+})
+
+describe('parseValidationOutput (the CLI’s --format json)', () => {
+  it('reads errors and warnings per document', () => {
+    const out = JSON.stringify([
+      entry('drafts.a', marker('error', 'Required'), marker('warning', 'Long')),
+    ])
+    expect(parseValidationOutput(out)).toEqual({
+      errors: ['drafts.a: Required'],
+      warnings: ['drafts.a: Long'],
+    })
+    expect(parseValidationOutput('[]')).toEqual({ errors: [], warnings: [] })
+  })
+
+  it.each([
+    '',
+    'not json',
+    '{"documentId":"a"}',
+    '[{"documentId":"a"}]',
+    '[1]',
+    'null',
+    'Error: not signed in',
+  ])('throws on unreadable output %j', (output) => {
+    expect(() => parseValidationOutput(output)).toThrow(/Studio validation output/)
   })
 })
 
 describe('sanityValidator', () => {
-  it('reads CLI errors (exit status 1) and treats other failures as not run', async () => {
-    const out = JSON.stringify([
-      { documentId: 'drafts.a', validation: [{ level: 'error', message: 'bad' }] },
-    ])
-    const validate = (result) => sanityValidator({ dataset: 'scratch-x', run: () => result })
-    await expect(validate({ status: 1, stdout: out })(['drafts.a'])).resolves.toEqual([
-      'drafts.a: bad',
-    ])
-    await expect(validate({ status: 0, stdout: '[]' })(['drafts.a'])).resolves.toEqual([])
-    await expect(validate({ status: 127, stdout: '' })(['drafts.a'])).rejects.toThrow(/did not run/)
+  const docs = [{ _id: 'drafts.a', _type: 'page', _rev: 'r1' }]
+  const validator = (result, extra = {}) =>
+    sanityValidator({ projectId: 'p1', dataset: 'scratch-x', run: () => result, ...extra })
+
+  it('a valid document: exit 0 and an empty list', async () => {
+    await expect(validator({ status: 0, stdout: '[]' })(docs)).resolves.toEqual({
+      errors: [],
+      warnings: [],
+    })
   })
 
-  it('validates the scratch dataset it was given, and asks for errors only', async () => {
-    const calls = []
-    await sanityValidator({
-      dataset: 'scratch-x',
-      run: (args) => (calls.push(args), { status: 0, stdout: '[]' }),
-    })(['drafts.a'])
-    expect(calls[0]).toEqual(expect.arrayContaining(['--dataset', 'scratch-x', '--level', 'error']))
+  it('a validation error: exit 1 with an error marker', async () => {
+    const stdout = JSON.stringify([entry('drafts.a', marker('error', 'Required'))])
+    await expect(validator({ status: 1, stdout })(docs)).resolves.toEqual({
+      errors: ['drafts.a: Required'],
+      warnings: [],
+    })
+  })
+
+  it('warnings only: exit 0, reported, not errors', async () => {
+    const stdout = JSON.stringify([entry('drafts.a', marker('warning', 'Long'))])
+    await expect(validator({ status: 0, stdout })(docs)).resolves.toEqual({
+      errors: [],
+      warnings: ['drafts.a: Long'],
+    })
+  })
+
+  it('an error marker is an error even if the exit code says 0', async () => {
+    const stdout = JSON.stringify([entry('drafts.a', marker('error', 'Required'))])
+    const result = await validator({ status: 0, stdout })(docs)
+    expect(result.errors).toHaveLength(1)
+  })
+
+  it.each([
+    ['malformed output', { status: 0, stdout: 'garbage' }],
+    ['empty output on success', { status: 0, stdout: '' }],
+    ['not signed in (exit 1, no JSON)', { status: 1, stdout: '', stderr: 'Not logged in' }],
+    [
+      'exit 1 with warnings only',
+      { status: 1, stdout: JSON.stringify([entry('drafts.a', marker('warning'))]) },
+    ],
+    ['exit 1 with an empty list', { status: 1, stdout: '[]' }],
+    ['an unexpected exit status', { status: 127, stdout: '' }],
+    ['a signal', { status: null, signal: 'SIGKILL', stdout: '' }],
+    ['the CLI missing', { status: null, error: Object.assign(new Error('x'), { code: 'ENOENT' }) }],
+  ])('throws, never passes, for %s', async (_name, result) => {
+    await expect(validator(result)(docs)).rejects.toThrow()
+  })
+
+  it('reports a timeout as a timeout', async () => {
+    const result = { status: null, error: Object.assign(new Error('x'), { code: 'ETIMEDOUT' }) }
+    await expect(validator(result, { timeoutMs: 5000 })(docs)).rejects.toThrow(
+      /timed out after 5 seconds/,
+    )
+  })
+
+  it('validates a file of just the documents written, as explicit JSON, then removes it', async () => {
+    let call
+    let contents
+    const { readFileSync, existsSync } = await import('node:fs')
+    const run = (args, options) => {
+      call = { args, options }
+      contents = readFileSync(args[args.indexOf('--file') + 1], 'utf8')
+      return { status: 0, stdout: '[]' }
+    }
+    await sanityValidator({ projectId: 'p1', dataset: 'scratch-x', run, timeoutMs: 1234 })(docs)
+    expect(call.args).toEqual(
+      expect.arrayContaining([
+        '--format',
+        'json',
+        '--dataset',
+        'scratch-x',
+        '--project-id',
+        'p1',
+        '--yes',
+      ]),
+    )
+    expect(call.options.timeout).toBe(1234)
+    expect(call.options.env).toEqual({
+      NEXT_PUBLIC_SANITY_PROJECT_ID: 'p1',
+      NEXT_PUBLIC_SANITY_DATASET: 'scratch-x',
+    })
+    expect(JSON.parse(contents.trim())).toEqual(docs[0])
+    expect(existsSync(call.args[call.args.indexOf('--file') + 1])).toBe(false)
+  })
+
+  it('removes the file even when validation fails', async () => {
+    const { existsSync } = await import('node:fs')
+    let file
+    const run = (args) => {
+      file = args[args.indexOf('--file') + 1]
+      return { status: 127 }
+    }
+    await expect(
+      sanityValidator({ projectId: 'p1', dataset: 'scratch-x', run })(docs),
+    ).rejects.toThrow()
+    expect(existsSync(file)).toBe(false)
   })
 })
 
@@ -316,6 +698,7 @@ describe('createHttpClient', () => {
     await client.mutate([{ delete: { id: 'x' } }])
     const [url, init] = fetchImpl.mock.calls[0]
     expect(url).toContain('/mutate/scratch-x')
+    expect(url).toContain('returnDocuments=true')
     expect(init.headers.Authorization).toBe(`Bearer ${TOKEN_CANARY}`)
   })
 
@@ -330,5 +713,21 @@ describe('createHttpClient', () => {
     const error = await client.mutate([]).catch((e) => e)
     expect(error.status).toBe(409)
     expect(error.message).not.toContain(TOKEN_CANARY)
+  })
+})
+
+describe('createHttpClient.getRoles', () => {
+  it('reads the token’s role names', async () => {
+    const fetchImpl = async () => ({
+      ok: true,
+      json: async () => ({ roles: [{ name: 'editor' }, { name: 'developer' }] }),
+    })
+    const client = createHttpClient({
+      projectId: 'p1',
+      dataset: 'scratch-x',
+      token: TOKEN_CANARY,
+      fetchImpl,
+    })
+    await expect(client.getRoles()).resolves.toEqual(['editor', 'developer'])
   })
 })

@@ -117,13 +117,14 @@ async function main() {
     process.exit(bad ? 1 : 0)
   }
 
-  let releasesEnabled = false
-  if (args.release) {
-    const { siteProfile } = await jiti.import(join(root, 'src/config/profile.ts'))
-    releasesEnabled = siteProfile.features.releases === true
-  }
-
-  const run = (cliArgs) => spawnSync('npx', cliArgs, { cwd: root, encoding: 'utf8' })
+  const run = (cliArgs, { timeout, env: extra }) =>
+    spawnSync('npx', cliArgs, {
+      cwd: root,
+      encoding: 'utf8',
+      timeout,
+      maxBuffer: 20 * 1024 * 1024,
+      env: { ...process.env, ...extra },
+    })
   let result
   try {
     result = await runProposal({
@@ -135,8 +136,11 @@ async function main() {
       manifest,
       yes: args.yes,
       release: args.release,
-      releasesEnabled,
-      sanityValidate: sanityValidator({ dataset: args.dataset, run }),
+      sanityValidate: sanityValidator({
+        projectId: env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+        dataset: args.dataset,
+        run,
+      }),
     })
   } catch (error) {
     fail(error.message)
@@ -151,21 +155,26 @@ async function main() {
       break
     case 'dry-run':
       console.log(
-        `Dry run: ${result.plan.mutations.length} mutation(s) would write ${result.plan.writes.map((w) => w.targetId).join(', ')}. Add --yes to write them.`,
+        `Dry run: ${result.plan.mutations.length} mutation(s) would write ${result.plan.writes.map((w) => w.targetId).join(', ')} in one transaction. Add --yes to write them.`,
       )
       break
     case 'applied':
-      console.log(`Written as drafts: ${result.written.map((w) => w.targetId).join(', ')}.`)
+      console.log(`Written as drafts: ${result.written.map((w) => w.id).join(', ')}.`)
       console.log('Preview them in Presentation. Discard the draft to undo. Nothing is published.')
       break
     case 'invalid-in-sanity':
-      console.log('Studio validation failed, so the drafts were discarded:')
-      for (const message of result.errors ?? []) console.log(`  ✗ ${message}`)
+      console.log('The drafts did not pass Studio validation, or could not be checked.')
       break
     default:
       console.log(`Not applied (${result.status}).`)
   }
+  for (const line of result.studio.errors) console.log(`  ✗ Studio: ${line}`)
+  for (const line of result.studio.warnings) console.log(`  ! Studio: ${line}`)
+  if (result.status === 'applied' || result.status === 'invalid-in-sanity') {
+    console.log(`Cleanup: ${result.cleanup.status}`)
+  }
   for (const note of result.notes) console.log(note)
+  for (const action of result.manualActions) console.log(`MANUAL ACTION: ${action}`)
   const partial = result.validation.rejected.length > 0
   process.exit(result.status === 'applied' || result.status === 'dry-run' ? (partial ? 2 : 0) : 1)
 }
