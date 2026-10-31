@@ -872,38 +872,6 @@ export type Event = {
   }
 }
 
-export type TeamMember = {
-  _id: string
-  _type: 'teamMember'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name: string
-  role?: string
-  portrait: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  shortBio?: string
-  slug?: Slug
-  bio?: BlockContent
-  qualifications?: Array<string>
-  publicEmail?: string
-  phone?: string
-  socialLinks?: Array<{
-    platform: 'linkedin' | 'instagram' | 'facebook' | 'x' | 'youtube' | 'website'
-    url: string
-    _type: 'socialLink'
-    _key: string
-  }>
-  socialDisplay?: 'icons' | 'text'
-  order?: number
-}
-
 export type BusinessInfo = {
   _id: string
   _type: 'businessInfo'
@@ -1171,6 +1139,13 @@ export type AuthorReference = {
   [internalGroqTypeReferenceTo]?: 'author'
 }
 
+export type TeamMemberReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'teamMember'
+}
+
 export type Post = {
   _id: string
   _type: 'post'
@@ -1194,9 +1169,41 @@ export type Post = {
       _key: string
     } & CategoryReference
   >
-  author: AuthorReference
+  author: AuthorReference | TeamMemberReference
   publishedAt: string
   seo?: Seo
+}
+
+export type TeamMember = {
+  _id: string
+  _type: 'teamMember'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name: string
+  role?: string
+  portrait: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  shortBio?: string
+  slug?: Slug
+  bio?: BlockContent
+  qualifications?: Array<string>
+  publicEmail?: string
+  phone?: string
+  socialLinks?: Array<{
+    platform: 'linkedin' | 'instagram' | 'facebook' | 'x' | 'youtube' | 'website'
+    url: string
+    _type: 'socialLink'
+    _key: string
+  }>
+  socialDisplay?: 'icons' | 'text'
+  order?: number
 }
 
 export type Author = {
@@ -1430,13 +1437,6 @@ export type Video = {
   aspectRatio?: '16:9' | '4:3' | '1:1' | '21:9'
   access?: 'public' | 'members'
   style?: SectionStyle
-}
-
-export type TeamMemberReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'teamMember'
 }
 
 export type Team = {
@@ -2293,7 +2293,6 @@ export type AllSanitySchemaTypes =
   | SanityImageHotspot
   | EventCategoryReference
   | Event
-  | TeamMember
   | BusinessInfo
   | DesignSettings
   | CookieBanner
@@ -2306,7 +2305,9 @@ export type AllSanitySchemaTypes =
   | Category
   | CategoryReference
   | AuthorReference
+  | TeamMemberReference
   | Post
+  | TeamMember
   | Author
   | SanityFileAssetReference
   | SlotVideo
@@ -2317,7 +2318,6 @@ export type AllSanitySchemaTypes =
   | Embed
   | Process
   | Video
-  | TeamMemberReference
   | Team
   | Location
   | Gallery
@@ -2410,7 +2410,7 @@ export type POSTS_QUERY_RESULT = {
 
 // Source: src/features/blog/api/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    title,    "slug": slug.current,    excerpt,    publishedAt,    mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    author->{ name, bio, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    categories[]->{ title, "slug": slug.current },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    "related": *[      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)    ] | score(      boost(^.categories[0]._ref in categories[]._ref, 1),      boost(^.categories[1]._ref in categories[]._ref, 1),      boost(^.categories[2]._ref in categories[]._ref, 1),      boost(^.categories[3]._ref in categories[]._ref, 1),      boost(^.categories[4]._ref in categories[]._ref, 1)    ) | order(_score desc, publishedAt desc, _id desc) [0...3] {   _id,  title,  "slug": slug.current,  excerpt,  publishedAt,  mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  author->{ name },  categories[]->{ title, "slug": slug.current } }  }
+// Query: *[_type == "post" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    title,    "slug": slug.current,    excerpt,    publishedAt,    mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    // An author is an author document or a team member (whose JSON-LD Person the byline links to).    author->{      _id,      _type,      name,      "slug": slug.current,      "bio": select(_type == "teamMember" => shortBio, bio),      "image": select(        _type == "teamMember" => portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },        image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }      )    },    categories[]->{ title, "slug": slug.current },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    "related": *[      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)    ] | score(      boost(^.categories[0]._ref in categories[]._ref, 1),      boost(^.categories[1]._ref in categories[]._ref, 1),      boost(^.categories[2]._ref in categories[]._ref, 1),      boost(^.categories[3]._ref in categories[]._ref, 1),      boost(^.categories[4]._ref in categories[]._ref, 1)    ) | order(_score desc, publishedAt desc, _id desc) [0...3] {   _id,  title,  "slug": slug.current,  excerpt,  publishedAt,  mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  author->{ name },  categories[]->{ title, "slug": slug.current } }  }
 export type POST_QUERY_RESULT = {
   _id: string
   _type: 'post'
@@ -2435,26 +2435,53 @@ export type POST_QUERY_RESULT = {
       } | null
     } | null
   }
-  author: {
-    name: string
-    bio: string | null
-    image: {
-      alt: string | null
-      crop: SanityImageCrop | null
-      hotspot: SanityImageHotspot | null
-      asset: {
+  author:
+    | {
         _id: string
-        metadata: {
-          lqip: string | null
-          hasAlpha: boolean | null
-          dimensions: {
-            width: number
-            height: number
+        _type: 'author'
+        name: string
+        slug: null
+        bio: string | null
+        image: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
           } | null
         } | null
-      } | null
-    } | null
-  }
+      }
+    | {
+        _id: string
+        _type: 'teamMember'
+        name: string
+        slug: string | null
+        bio: string | null
+        image: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        }
+      }
   categories: Array<{
     title: string
     slug: string
@@ -12593,7 +12620,7 @@ export type DESIGN_COLOURS_QUERY_RESULT =
 declare global {
   interface SanityQueries {
     '{\n  "posts": *[\n  _type == "post" && defined(slug.current) &&\n  (!defined($category) || $category in categories[]->slug.current)\n] | order(publishedAt desc, _id desc) [$start...$end] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n },\n  "total": count(*[\n  _type == "post" && defined(slug.current) &&\n  (!defined($category) || $category in categories[]->slug.current)\n]),\n  "category": *[_type == "category" && defined(slug.current) && slug.current == $category][0] {\n    title,\n    "slug": slug.current\n  },\n  "categories": *[\n    _type == "category" && defined(slug.current) && count(*[_type == "post" && references(^._id)]) > 0\n  ] | order(title asc) { title, "slug": slug.current }\n}': POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    title,\n    "slug": slug.current,\n    excerpt,\n    publishedAt,\n    mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    author->{ name, bio, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n } },\n    categories[]->{ title, "slug": slug.current },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    "related": *[\n      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)\n    ] | score(\n      boost(^.categories[0]._ref in categories[]._ref, 1),\n      boost(^.categories[1]._ref in categories[]._ref, 1),\n      boost(^.categories[2]._ref in categories[]._ref, 1),\n      boost(^.categories[3]._ref in categories[]._ref, 1),\n      boost(^.categories[4]._ref in categories[]._ref, 1)\n    ) | order(_score desc, publishedAt desc, _id desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n }\n  }\n': POST_QUERY_RESULT
+    '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    title,\n    "slug": slug.current,\n    excerpt,\n    publishedAt,\n    mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    // An author is an author document or a team member (whose JSON-LD Person the byline links to).\n    author->{\n      _id,\n      _type,\n      name,\n      "slug": slug.current,\n      "bio": select(_type == "teamMember" => shortBio, bio),\n      "image": select(\n        _type == "teamMember" => portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n        image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n      )\n    },\n    categories[]->{ title, "slug": slug.current },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    "related": *[\n      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)\n    ] | score(\n      boost(^.categories[0]._ref in categories[]._ref, 1),\n      boost(^.categories[1]._ref in categories[]._ref, 1),\n      boost(^.categories[2]._ref in categories[]._ref, 1),\n      boost(^.categories[3]._ref in categories[]._ref, 1),\n      boost(^.categories[4]._ref in categories[]._ref, 1)\n    ) | order(_score desc, publishedAt desc, _id desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n }\n  }\n': POST_QUERY_RESULT
     '{\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc) {\n    "slug": slug.current,\n    title,\n    "description": coalesce(seo.metaDescription, excerpt),\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  },\n  "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current }\n}': BLOG_INDEX_QUERY_RESULT
     '\n  *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': POST_SITEMAP_QUERY_RESULT
     '\n  *[_type == "event" && slug.current == $slug][0] {\n    \n  _id,\n  "slug": slug.current,\n  title,\n  start,\n  end,\n  allDay,\n  timeZone,\n  summary,\n  status,\n  capacityNote,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  "category": category->title,\n  location { kind, name },\n  recurrence { repeat, until, skip }\n,\n    _type,\n    _updatedAt,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    location { kind, name, address, url },\n    registration { label, variant, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n } },\n    "businessTimeZone": *[_id == "businessInfo"][0].timeZone\n  }\n': EVENT_QUERY_RESULT

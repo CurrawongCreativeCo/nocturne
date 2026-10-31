@@ -14,11 +14,12 @@ const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const ORDER = ['Ann Lee', 'Ben Ng', 'Cara Doyle', 'Dev Patel']
 
 const jsonLd = (page: Page) =>
-  page
-    .locator('script[type="application/ld+json"]')
-    .evaluateAll((scripts) =>
-      scripts.map((script) => JSON.parse(script.textContent) as Record<string, unknown>),
-    )
+  page.locator('script[type="application/ld+json"]').evaluateAll((scripts) =>
+    scripts.flatMap((script) => {
+      const data = JSON.parse(script.textContent) as Record<string, unknown>
+      return (data['@graph'] as Record<string, unknown>[] | undefined) ?? [data]
+    }),
+  )
 
 const section = (page: Page, heading: string) =>
   page.locator('section', { has: page.getByRole('heading', { level: 2, name: heading }) })
@@ -158,8 +159,8 @@ test.describe('a profile page', () => {
     await page.goto(path)
     const person = (await jsonLd(page)).find((data) => data['@type'] === 'Person')
     expect(person).toMatchObject({
-      '@context': 'https://schema.org',
-      '@id': `${SITE_URL}${path}#person`,
+      // Keyed by the document, so a new slug changes the url and not the id.
+      '@id': `${SITE_URL}/#person-teamMember-ann`,
       url: `${SITE_URL}${path}`,
       name: 'Ann Lee',
       jobTitle: 'Principal solicitor',
@@ -177,6 +178,10 @@ test.describe('a profile page', () => {
       worksFor: { '@id': `${SITE_URL}/#organization` },
     })
     expect(person?.image as string).toContain('cdn.sanity.io/images')
+    expect((await jsonLd(page)).find((data) => data['@type'] === 'WebPage')).toMatchObject({
+      '@id': `${SITE_URL}${path}#webpage`,
+      about: { '@id': `${SITE_URL}/#person-teamMember-ann` },
+    })
   })
 
   test('has profile metadata and the portrait as the share image', async ({ page }) => {

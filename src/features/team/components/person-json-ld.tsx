@@ -4,13 +4,16 @@ import { JsonLd } from '@/components/ui/json-ld'
 import { teamPath } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
+import { graph } from '@/lib/structured-data/graph'
+import { buildPerson } from '@/lib/structured-data/nodes/person'
 
 import type { TeamMemberData } from '../types'
 import { telHref } from '../utils/phone'
 
 /**
- * schema.org Person for a member's page. `worksFor` points at the Organization that the site
- * layout already describes (site-json-ld.tsx), so it isn't repeated here.
+ * schema.org Person for a member's page, described in full here and referenced by `@id` elsewhere
+ * (a post's byline). `worksFor` points at the Organization that the site layout already describes
+ * (site-json-ld.tsx), so it isn't repeated here.
  */
 export function PersonJsonLd({ member }: { member: TeamMemberData }) {
   const { portrait } = member
@@ -25,30 +28,24 @@ export function PersonJsonLd({ member }: { member: TeamMemberData }) {
         .fit('crop')
         .url()
     : undefined
-  const phone = telHref(stegaClean(member.phone))
-  const sameAs = (member.socialLinks ?? []).map(({ url }) => stegaClean(url))
-  const credentials = (member.qualifications ?? []).map((name) => ({
-    '@type': 'EducationalOccupationalCredential',
-    name: stegaClean(name),
-  }))
 
   return (
     <JsonLd
-      data={{
-        '@context': 'https://schema.org',
-        '@type': 'Person',
-        '@id': `${new URL(teamPath(stegaClean(member.slug)), siteUrl).toString()}#person`,
-        url: new URL(teamPath(stegaClean(member.slug)), siteUrl).toString(),
-        name: stegaClean(member.name),
-        ...(member.role && { jobTitle: stegaClean(member.role) }),
-        ...(member.shortBio && { description: stegaClean(member.shortBio) }),
-        ...(image && { image }),
-        ...(member.publicEmail && { email: stegaClean(member.publicEmail) }),
-        ...(phone && { telephone: phone }),
-        ...(sameAs.length > 0 && { sameAs }),
-        ...(credentials.length > 0 && { hasCredential: credentials }),
-        worksFor: { '@id': `${new URL('/', siteUrl).toString()}#organization` },
-      }}
+      data={graph(
+        buildPerson({
+          origin: siteUrl,
+          id: stegaClean(member._id),
+          url: new URL(teamPath(stegaClean(member.slug)), siteUrl).toString(),
+          name: stegaClean(member.name),
+          jobTitle: stegaClean(member.role),
+          description: stegaClean(member.shortBio),
+          image,
+          email: stegaClean(member.publicEmail),
+          telephone: telHref(stegaClean(member.phone)),
+          sameAs: (member.socialLinks ?? []).map(({ url }) => stegaClean(url)),
+          credentials: (member.qualifications ?? []).map((name) => stegaClean(name)),
+        }),
+      )}
     />
   )
 }

@@ -1,4 +1,4 @@
-import type { BusinessInfoData } from './business-json-ld'
+import type { BusinessInfoData } from '@/lib/structured-data/nodes/organization'
 
 /**
  * Whether Business info has anything a visitor could see. The setup wizard creates the document

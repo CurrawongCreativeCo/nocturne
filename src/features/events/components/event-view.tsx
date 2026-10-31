@@ -8,6 +8,7 @@ import { PlainText } from '@/components/ui/plain-text'
 import { resolveLink } from '@/components/ui/resolve-link'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
+import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { eventIcsPath, eventPath } from '@/config/event-paths'
 import { siteUrl } from '@/config/site-url'
 import { googleCalendarUrl, outlookCalendarUrl } from '@/lib/events/calendar-links'
@@ -22,10 +23,12 @@ import {
 import { zoneAbbreviation } from '@/lib/events/time-zone'
 import { requestTime } from '@/lib/request-time'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
+import { graph } from '@/lib/structured-data/graph'
+import { eventId } from '@/lib/structured-data/ids'
+import { buildEvent } from '@/lib/structured-data/nodes/event'
 
 import { getEvent } from '../api/event'
 import type { EventData } from '../types'
-import { buildEventJsonLd } from '../utils/json-ld'
 import { directionsUrl, locationText } from '../utils/location'
 import { registrationUrl } from '../utils/registration-url'
 
@@ -51,63 +54,72 @@ export async function EventView({ slug, ...mode }: { slug: string } & FetchMode)
   const first = timing && expandOccurrences(timing, { from: -Infinity, limit: 1 })[0]
 
   return (
-    <article className="mx-auto max-w-content px-gutter py-section-compact">
-      <header className="max-w-measure">
-        <Pills event={event} timing={timing} status={status} />
-        <h1 className="mt-3 text-h1 font-semibold text-balance">{event.title}</h1>
-        <PlainText text={event.summary} className="mt-5 text-lead text-pretty text-ink-muted" />
-        {status === 'cancelled' && (
-          <p
-            role="status"
-            className="mt-6 rounded-control border border-danger bg-danger-surface p-4 text-danger-ink"
+    <>
+      {/* The Event node itself is drawn with the dates, once they are known (see Details). */}
+      <WebPageJsonLd
+        path={eventPath(event.slug)}
+        name={event.title}
+        nameSource={{ doc: event._id, field: 'title' }}
+        about={timing ? eventId(siteUrl, event._id) : undefined}
+      />
+      <article className="mx-auto max-w-content px-gutter py-section-compact">
+        <header className="max-w-measure">
+          <Pills event={event} timing={timing} status={status} />
+          <h1 className="mt-3 text-h1 font-semibold text-balance">{event.title}</h1>
+          <PlainText text={event.summary} className="mt-5 text-lead text-pretty text-ink-muted" />
+          {status === 'cancelled' && (
+            <p
+              role="status"
+              className="mt-6 rounded-control border border-danger bg-danger-surface p-4 text-danger-ink"
+            >
+              This event has been cancelled.
+            </p>
+          )}
+        </header>
+
+        <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-14">
+          <aside
+            aria-labelledby="event-details-heading"
+            className="rounded-card bg-surface p-6 shadow-card ring-1 ring-line lg:order-2"
           >
-            This event has been cancelled.
-          </p>
-        )}
-      </header>
-
-      <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-14">
-        <aside
-          aria-labelledby="event-details-heading"
-          className="rounded-card bg-surface p-6 shadow-card ring-1 ring-line lg:order-2"
-        >
-          <h2 id="event-details-heading" className="text-h4 font-semibold">
-            Event details
-          </h2>
-          {timing && first ? (
-            timing.repeat === 'none' ? (
-              <Details event={event} timing={timing} occurrences={[first]} status={status} />
+            <h2 id="event-details-heading" className="text-h4 font-semibold">
+              Event details
+            </h2>
+            {timing && first ? (
+              timing.repeat === 'none' ? (
+                <Details event={event} timing={timing} occurrences={[first]} status={status} />
+              ) : (
+                // A series shows its next dates: today's date is only known when someone asks.
+                <Suspense fallback={<DetailsFallback />}>
+                  <SeriesDetails event={event} timing={timing} status={status} />
+                </Suspense>
+              )
             ) : (
-              // A series shows its next dates: today's date is only known when someone asks.
-              <Suspense fallback={<DetailsFallback />}>
-                <SeriesDetails event={event} timing={timing} status={status} />
-              </Suspense>
-            )
-          ) : (
-            <p className="mt-4 text-ink-muted">The date for this event is still to come.</p>
-          )}
-        </aside>
+              <p className="mt-4 text-ink-muted">The date for this event is still to come.</p>
+            )}
+          </aside>
 
-        <div className="min-w-0 lg:order-1">
-          {event.image?.asset && (
-            <SanityImage
-              image={event.image}
-              width={1200}
-              height={675}
-              preload
-              sizes="(min-width: 1024px) 720px, 100vw"
-              className="aspect-video w-full rounded-card object-cover"
-            />
-          )}
-          {event.body && event.body.length > 0 && (
-            <RichText
-              value={event.body}
-              className={`max-w-measure text-lead text-ink ${event.image?.asset ? 'mt-10' : ''}`}
-            />
-          )}
+          <div className="min-w-0 lg:order-1">
+            {event.image?.asset && (
+              <SanityImage
+                image={event.image}
+                width={1200}
+                height={675}
+                preload
+                sizes="(min-width: 1024px) 720px, 100vw"
+                className="aspect-video w-full rounded-card object-cover"
+              />
+            )}
+            {event.body && event.body.length > 0 && (
+              <RichText
+                value={event.body}
+                className={`max-w-measure text-lead text-ink ${event.image?.asset ? 'mt-10' : ''}`}
+              />
+            )}
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </>
   )
 }
 
@@ -222,23 +234,26 @@ function Details({
   return (
     <>
       <JsonLd
-        data={buildEventJsonLd({
-          url: pageUrl,
-          title: stegaClean(event.title),
-          summary: stegaClean(event.summary),
-          image: new URL(`/api/og/events/${event.slug}`, siteUrl).toString(),
-          occurrence: next,
-          timing,
-          status,
-          location: event.location && {
-            kind: isOnline ? 'online' : 'venue',
-            name: stegaClean(event.location.name),
-            address: stegaClean(event.location.address),
-            url: stegaClean(event.location.url),
-          },
-          registrationUrl: registrationUrl(resolved, siteUrl),
-          organizerId: `${new URL('/', siteUrl).toString()}#organization`,
-        })}
+        data={graph(
+          buildEvent({
+            origin: siteUrl,
+            id: event._id,
+            url: pageUrl,
+            title: stegaClean(event.title),
+            summary: stegaClean(event.summary),
+            image: new URL(`/api/og/events/${event.slug}`, siteUrl).toString(),
+            occurrence: next,
+            timing,
+            status,
+            location: event.location && {
+              kind: isOnline ? 'online' : 'venue',
+              name: stegaClean(event.location.name),
+              address: stegaClean(event.location.address),
+              url: stegaClean(event.location.url),
+            },
+            registrationUrl: registrationUrl(resolved, siteUrl),
+          }),
+        )}
       />
       <dl className="mt-5 space-y-5">
         <div>
