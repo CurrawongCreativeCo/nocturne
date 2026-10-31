@@ -40,6 +40,17 @@ describe('resolveMainDocument', () => {
     })
   })
 
+  it('opens a location for /locations/<slug> only while the locations feature is on', () => {
+    expect(resolveMainDocument('/locations/parramatta', live, { locations: true })).toEqual({
+      filter: '_type == "place" && slug.current == $slug',
+      params: { slug: 'parramatta' },
+    })
+    expect(resolveMainDocument('/locations/parramatta', live, { services: true })).toEqual({
+      filter: '_type == "page" && slug.current == $slug',
+      params: { slug: 'locations/parramatta' },
+    })
+  })
+
   it.each([
     ['/blog/hello', 'post', 'hello'],
     ['/blog/category/news', 'category', 'news'],

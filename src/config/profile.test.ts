@@ -5,6 +5,7 @@ import {
   DEFAULT_VOICE,
   FEATURE_NAMES,
   hasEvents,
+  hasLocations,
   hasServices,
   hasTeamProfiles,
   isFeatureEnabled,
@@ -198,6 +199,19 @@ describe('hasServices', () => {
   it('is off by default and follows the services switch', () => {
     expect(hasServices(profile({}))).toBe(false)
     expect(hasServices(profile({ services: true }))).toBe(true)
+  })
+
+  it('locations are off by default, follow their switch and need Business info', () => {
+    expect(hasLocations(profile({}))).toBe(false)
+    expect(hasLocations(profile({ locations: true }))).toBe(true)
+    expect(() => profile({ locations: true, businessInfo: false })).toThrow(
+      /features\.businessInfo/,
+    )
+    expect(hasLocations(profile({ locations: false, businessInfo: false }))).toBe(false)
+  })
+
+  it.skipIf(!isTemplateRepo())('locations are off in the template profile', () => {
+    expect(hasLocations(siteProfile)).toBe(false)
   })
 
   // A client site decides for itself; the template ships Services off (a plan feature).

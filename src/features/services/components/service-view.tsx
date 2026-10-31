@@ -7,7 +7,7 @@ import { CtaLink } from '@/components/ui/cta-link'
 import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
-import { postPath, slugToPath, teamPath } from '@/config/paths'
+import { locationPath, postPath, slugToPath, teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
@@ -36,9 +36,15 @@ const headingClass = 'text-h3 font-semibold'
  */
 export async function ServiceView({
   slug,
+  businessType,
   renderSections,
   ...mode
-}: { slug: string; renderSections?: RenderServiceSections } & FetchMode) {
+}: {
+  slug: string
+  /** The schema.org type of the site's business (the route reads it from Business info). */
+  businessType: string
+  renderSections?: RenderServiceSections
+} & FetchMode) {
   const service = await getService({ slug, ...mode })
   if (!service) notFound()
 
@@ -46,7 +52,7 @@ export async function ServiceView({
   const priceUnit = stegaClean(service.priceUnit)
   const price =
     typeof priceFrom === 'number' && priceUnit ? formatServicePrice(priceFrom, priceUnit) : null
-  const { people } = service
+  const { people, locations } = service
   const evidence = service.evidence ?? []
   const faqs = service.faqs ?? []
   const enquiry = service.enquiry?.label ? service.enquiry : null
@@ -56,7 +62,7 @@ export async function ServiceView({
 
   return (
     <>
-      <ServiceJsonLd service={service} />
+      <ServiceJsonLd service={service} businessType={businessType} />
       <article className="mx-auto max-w-content px-gutter py-section-compact">
         <div className="grid items-center gap-10 md:grid-cols-2 md:gap-14">
           <header>
@@ -92,6 +98,23 @@ export async function ServiceView({
               Who it’s for
             </h2>
             <PlainText text={service.audience} className="mt-4 max-w-measure text-lead" />
+          </section>
+        )}
+
+        {locations.length > 0 && (
+          <section aria-labelledby="locations-heading" className="mt-12 border-t border-line pt-8">
+            <h2 id="locations-heading" className={headingClass}>
+              Where it’s offered
+            </h2>
+            <ul className="mt-4 space-y-2 text-lead">
+              {locations.map((place) => (
+                <li key={place._id}>
+                  <Link href={locationPath(stegaClean(place.slug))} className={linkClass}>
+                    {place.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
@@ -184,10 +207,19 @@ export async function ServiceView({
 /** Reads draft-mode cookies, so it must render inside <Suspense>. */
 export async function DraftServiceView({
   slug,
+  businessType,
   renderSections,
 }: {
   slug: string
+  businessType: string
   renderSections?: RenderServiceSections
 }) {
-  return <ServiceView slug={slug} renderSections={renderSections} {...await getDraftFetchMode()} />
+  return (
+    <ServiceView
+      slug={slug}
+      businessType={businessType}
+      renderSections={renderSections}
+      {...await getDraftFetchMode()}
+    />
+  )
 }

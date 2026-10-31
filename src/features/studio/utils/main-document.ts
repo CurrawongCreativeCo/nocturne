@@ -7,15 +7,14 @@ import { isHtmlPagePath } from '@/lib/prelaunch-gate'
 export function resolveMainDocument(
   path: string,
   launch: Pick<LaunchState, 'status' | 'homepage'>,
-  /** `services/<slug>` is a service only while the services feature is on; off, it is a CMS page. */
-  { services = false }: { services?: boolean } = {},
+  /** `services/<slug>` and `locations/<slug>` open those documents only while the feature is on; off, they are CMS pages. */
+  { services = false, locations = false }: { services?: boolean; locations?: boolean } = {},
 ) {
   if (!isHtmlPagePath(path)) return undefined
-  const detail = (
-    services
-      ? /^\/(blog\/category|blog|team|events|services)\/([^/]+)\/?$/
-      : /^\/(blog\/category|blog|team|events)\/([^/]+)\/?$/
-  ).exec(path)
+  const segments = ['blog/category', 'blog', 'team', 'events']
+  if (services) segments.push('services')
+  if (locations) segments.push('locations')
+  const detail = new RegExp(`^/(${segments.join('|')})/([^/]+)/?$`).exec(path)
   if (detail?.[2]) {
     const types = {
       'blog/category': 'category',
@@ -23,6 +22,7 @@ export function resolveMainDocument(
       team: 'teamMember',
       events: 'event',
       services: 'service',
+      locations: 'place',
     }
     const type = types[detail[1] as keyof typeof types]
     return { filter: `_type == "${type}" && slug.current == $slug`, params: { slug: detail[2] } }

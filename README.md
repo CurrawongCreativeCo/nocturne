@@ -838,6 +838,7 @@ src/
       utils/                       stripe-signature, map-stripe (event + price -> document), stripe-api (REST), config
     events/                        events: the event schema, event pages, calendar files
     services/                      services: the service schema, service pages and Service JSON-LD (features.services)
+    locations/                     locations: the `place` schema (titled Location), location pages and branch JSON-LD (features.locations)
       api/                         event.ts (EVENT_QUERY, EVENTS_INDEX_QUERY, EVENTS_FEED_QUERY, metadata, sitemap)
       components/                  event-view (server)
       schemas/                     event.ts, event-category.ts
@@ -1023,6 +1024,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
   `ENQUIRIES_STORE=1` a send also writes one document, and the first send per hour per server instance makes one
   unauthenticated query to check the dataset is private (see [Enquiries](#enquiries)); neither is read through the cache,
   and a page view still causes none.
+- **Locations** add none to a page view. A location page adds `LOCATION_QUERY`, one per location (the fields, the services offered there and the team members who list it, all in one request; a `place`, `service` or `teamMember` change expires it), and `LOCATION_INDEX_QUERY` (the slugs) is shared, so unknown `/locations/…` URLs cost nothing. A service page's locations are part of its own query. With `features.locations` off neither runs.
 - **Services** add none to a page view. A service page adds `SERVICE_QUERY`, one per service (the fields, the proof of work it links to and the team members who list it, all in one request; a `service`, `teamMember`, `post` or `page` change expires it), and `SERVICE_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/services/…` URLs cost nothing. With `features.services` off neither runs.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
 - **Section panels** add one small query, `DESIGN_COLOURS_QUERY` (Brand colours and gradients, tagged `designSettings`), and only while rendering a section that has a panel: a site with no panels never makes it, and a visitor never causes it. It exists so the panel's contrast uses the colours the page really draws; sharing the settings entry would mean importing the site feature from shared code.
@@ -1058,7 +1060,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "place", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1842,21 +1844,22 @@ export const siteProfileInput = defineSiteProfile({
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
 feature does:
 
-| Feature                      | When off                                                                                                                                                                                                                                                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                                                 |
-| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                                       |
-| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                                                     |
-| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                                      |
-| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                                                 |
-| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                                                  |
-| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                                         |
-| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                                           |
-| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page)                       |
-| `services`                   | `/services/<slug>` answers 404; service pages leave the sitemap; Services leaves the desk and _New document_; the _Services they provide_ field leaves the team member form. A page at `services/<slug>` is then an ordinary CMS page (while on, `services/…` is reserved like `team/…`). Off by default |
-| `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                                       |
-| `publishGate`                | `POST /api/publish` answers 404 (off by default). See _Publish gate_ under _Studio roles and permissions_                                                                                                                                                                                                |
-| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                                          |
+| Feature                      | When off                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                                                                                                                       |
+| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                                                                                                             |
+| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                                                                                                                           |
+| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                                                                                                            |
+| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                                                                                                                       |
+| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                                                                                                                        |
+| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                                                                                                               |
+| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                                                                                                                 |
+| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page)                                                                                             |
+| `services`                   | `/services/<slug>` answers 404; service pages leave the sitemap; Services leaves the desk and _New document_; the _Services they provide_ field leaves the team member form. A page at `services/<slug>` is then an ordinary CMS page (while on, `services/…` is reserved like `team/…`). Off by default                                                                       |
+| `locations`                  | `/locations/<slug>` answers 404; location pages leave the sitemap; Locations leaves the desk and _New document_; the _Where it's offered_ and _Locations they work at_ fields leave the service and team member forms. Needs `businessInfo`. A page at `locations/<slug>` is then an ordinary CMS page (while on, `locations/…` is reserved like `services/…`). Off by default |
+| `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                                                                                                             |
+| `publishGate`                | `POST /api/publish` answers 404 (off by default). See _Publish gate_ under _Studio roles and permissions_                                                                                                                                                                                                                                                                      |
+| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                                                                                                                |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
 import it). Page-builder sections that depend on a disabled feature (a form, pricing table or newsletter section)
@@ -3489,14 +3492,18 @@ above includes `service`. Switching it off again removes the routes, Studio entr
   published document's id, so it survives a change of address and a draft or release id never reaches the page), `name`,
   `url`, `description` (the summary), `image`, `audience` (only when "Who it's for" is shown), `provider` (the site's
   `#organization`), `mainEntityOfPage` (the page's `#webpage`, whose `about` is the service) and an `Offer` in AUD **only when
-  the page shows a price with its unit**. Nothing the page doesn't show: no `areaServed`, rating or review. Visible questions
+  the page shows a price with its unit**, and an `areaServed` (a list of `@id`s) **only for the locations the page lists under "Where it's offered"** (see "Locations"). Nothing the page doesn't show: no rating or review. Visible questions
   are one `FAQPage` with `@id` `<page url>#faq`. Provenance names the field behind each value, and the shared parity check
   runs over every service page in `tests/e2e/structured-data.spec.ts`.
 - **Caching and webhook mode:** `service` is in `TAGS` and in the webhook filter. A service page is tagged `service`,
   `teamMember`, `post` and `page`; its sections add the section tags. Published reads check the cached index first, so
   probing `/services/anything` costs nothing.
-- **Not built yet:** `locations[]` and `areaServed` wait for the `location` type (task 212); the visibility rules for
-  services (F-1, F-2) arrive with the rules engine (task 225).
+- **Where it's offered:** `locations[]` on the service (shown only while `features.locations` is on). Empty means offered
+  everywhere: the page names no place and the markup has no `areaServed`. The page lists each place as a link, and each is
+  defined beside the `Service` as a short node (name and page, with the full node's `@id` and type), so every `@id` the page
+  refers to is defined on it, as a byline's `Person` is. The location's own page describes it in full. The field lives on the
+  service; the location page reads the other direction.
+- **Not built yet:** the visibility rules for services (F-1, F-2) arrive with the rules engine (task 225).
 - **Tests:** unit: `src/lib/structured-data/nodes/service.test.ts` (ids, draft and release prefixes, slug changes, offer,
   empty fields), `src/features/services/api/service.test.ts` (the reverse reads), `src/app/service-sections-field.test.ts`, `src/app/service-faq.test.tsx` (one FAQPage, no repeated id),
   `src/features/services/components/service-view.test.tsx` (no sections, no second read),
@@ -3505,6 +3512,84 @@ above includes `service`. Switching it off again removes the routes, Studio entr
   `tests/e2e/services.spec.ts` (a service with everything, one with only the required fields, people, articles, enquiry
   button, extra sections, JSON-LD and graph integrity, phone width, 404s, sitemap), plus `accessibility.spec.ts`,
   `prelaunch-gate.spec.ts` and `structured-data.spec.ts`.
+
+### Locations
+
+A page for each branch or area a business serves, so a multi-location business (or one that travels) gives search engines and
+visitors accurate places. It is a document in `src/features/locations` with its own page at `/locations/<slug>`, behind
+`features.locations` in `site.profile.ts`. **It is off by default**, and a single-location business creates none: **Business
+info stays the primary place** (footer, contact details, the site's `LocalBusiness`); a location is an _additional_ place, and
+the two never copy facts from each other. `locations` needs `businessInfo` (the profile refuses the combination otherwise).
+
+**The Sanity type is `place`, titled "Location" in Studio.** The page builder's _Location_ section already owns the type name
+`location` (stored on pages), so the document can't share it. Editors only ever see "Location"; the name matters in GROQ
+(`_type == "place"`), the webhook filter and the migration below. The JSON-LD `@id` uses `#location-…` regardless.
+
+**Enabling it for a site.** Run `npm run check:location-routes` first (read-only, like `check:service-routes`: it lists published
+pages whose address is exactly `locations/<something>`, which the route would shadow). Rename each page and redirect its old
+address before you switch the flag on. Then set `features: { locations: true }`, add the documents, and if the site uses webhook
+mode make sure the filter above includes `place`. Switching it off removes the routes, Studio entries and markup; documents stay.
+
+- **What an editor enters:** _What is it?_ (a **branch**: a place people can visit, or a **service area**: a region you travel
+  to), name, page address, a summary (160 characters at most; a warning, not an error, if empty), and optionally a picture and
+  "About this place" (how to get there, parking, the suburbs covered). A **branch** also has a phone, public email, address (a
+  suburb, state and postcode are required once any part is filled), time zone, opening hours, special days and, under
+  Advanced, map coordinates: the same fields, rules and wording as Business info (they share
+  `src/lib/sanity/schema/business-fields.ts`). A **service area** hides all of those, so a nonsensical combination (an area with
+  opening hours) can't be entered. If a branch is turned into an area, its old address, phone and hours stay in the document
+  but are neither shown nor marked up.
+- **Clients edit** everything except the coordinates (agency-only, as on Business info).
+- **Relationships have one owning side.** A service lists where it is offered (`service.locations`), and a team member lists
+  where they work (`teamMember.locations`); the location page reads both in reverse, inside its one query. A service with no
+  locations is offered everywhere, so it appears on every location's "Services here".
+- **The page:** one `<h1>`, summary, picture, description; for a branch "Visit or contact us" (address, a _Get directions_
+  link built from the street or the coordinates, phone, email), "Opening hours" with the _Open now_ badge and upcoming special
+  days; then "Services here" and "Who works here". A part with nothing to show is left out, heading and markup included.
+- **Structured data**, from `src/lib/structured-data/nodes/location.ts` (`buildLocation`) beside the page's `WebPage` (whose
+  `about` is the location). `@id` is `<origin>/#location-<document id>`, so a slug change moves the `url` and not the `@id`.
+  A **branch** is the site's business type (`businessSchemaType` of Business info, so a plumber's branch is a `Plumber`) with
+  `parentOrganization` (the site's `#organization`), `name`, `url`, `description` (the summary), `image`, `telephone`, `email`,
+  `address`, `geo` and `openingHoursSpecification`, each only when the page shows it. A **service area** is a `Place` with name,
+  page, description and image, never an address, phone or hours. Never a rating, review or offer. Services refer to a
+  location by `@id` in `areaServed` (see "Services"). Provenance names the field behind each value, and the shared parity check
+  runs over every location page in `tests/e2e/structured-data.spec.ts` and `tests/e2e/locations.spec.ts`.
+- **Organization `areaServed` stays off.** Business info's `serviceAreas` strings are still not shown by any template component, so
+  the site-wide `LocalBusiness` still omits `areaServed`. Service-area locations are where an area is now stated, visibly.
+- **Migrating Business info's `serviceAreas`.** `migrations/service-areas-to-locations` turns each string into a service-area
+  location (`_id` `place-area-<page address>`, name, page address; no summary, so Studio warns until one is written). It is
+  non-destructive and **dry-run first** (the default; it writes nothing): `npx sanity migration run service-areas-to-locations`
+  (see `migrations/README.md`), then add `--no-dry-run` by hand from a logged-in machine. The dry run prints each proposed
+  **create**, **skip** and **conflict**:
+  - the same normalised name (spacing, case, accents) always gives the same id, so a repeat run creates nothing
+    (`createIfNotExists` never overwrites either);
+  - blank, non-text or unusable names, and repeats within the list, are skipped with the reason;
+  - a page address already used by a different `place` (one made by hand), or by a published page at `locations/<name>`, is
+    a **conflict**: nothing is created, and a person decides (link the existing location, or rename and redirect the page);
+  - only the published Business info is read; its strings stay as they are, and nothing is deleted;
+  - **no service or team member is linked.** Which services an area serves is the business's decision.
+
+  Run `npm run check:location-routes` first, since the new pages take `/locations/<name>`.
+
+- **Rule F-8** (`src/lib/audit/rules/location-info.ts`, finding id `content.location-info`): a branch page should have an
+  address (an error if missing), opening hours (warning), a way to get directions (a street or coordinates; warning) and local
+  proof (a description or people who work there; a suggestion); a service area should say what it covers. Deterministic
+  presence only, never usefulness. It is a pure function over a location's facts using the finding contract from the Content
+  Intelligence architecture (`src/lib/audit/finding.ts`). **It is not active:** nothing runs it, because the shared rule library
+  and its runners arrive with task 225, which will register it beside F-1 and F-2. No temporary runner exists.
+- **Caching and webhook mode:** `place` is in `TAGS` and in the webhook filter. A location page is tagged `place`, `service` and
+  `teamMember`, and a service page is also tagged `place`. Published reads check the cached index first, so probing
+  `/locations/anything` costs nothing.
+- **Not built (deferred):** `event.venue`, an optional reference from an event to a location. It is not a small change: an event's
+  address is read as text by the event page, cards, the calendar feed and its `.ics` files, search and the Event JSON-LD, so a
+  reference would have to be resolved and formatted in each (and tagged `place`) without duplicating facts. That is an Events
+  change, not Locations; the inline event location is unchanged. The `/locations` list is an ordinary page with the editors' own intro copy.
+- **Tests:** unit: `nodes/location.test.ts` (ids, draft and release prefixes, branch and service-area nodes, empty fields),
+  `parity.test.ts` (locations), `schemas/location.test.ts` (branch and service-area rules, switching kind), `api/location.test.ts` (reverse reads, off by default), `opening-hours.test.ts` (daylight saving, zones, overnight, unknown zone), `location-view.test.tsx` (the page and its markup agree), `location-info.test.ts` (F-8),
+  `migrations/service-areas-to-locations/index.test.ts`, `scripts/check-location-routes.test.mjs`, `profile.test.ts`,
+  `reserved-slug.test.ts`, `main-document.test.ts`, `feature-visibility.test.ts` and the client-editable and dataset-exposure
+  registry tests. End to end: `tests/e2e/locations.spec.ts` (a branch with everything, a service area that holds a phone and
+  hours it must not show, a branch with only the required fields, JSON-LD and graph integrity, phone width, 404s, sitemap),
+  plus `services.spec.ts` (`areaServed`), `accessibility.spec.ts`, `prelaunch-gate.spec.ts` and `structured-data.spec.ts`.
 
 ### Events
 
@@ -5305,7 +5390,7 @@ When you add a section or a content type, add an example of it to the fixture da
   client site that is pre-launch, or has a feature switched off, runs the same suite as the template. Ordinary builds
   (`npm run dev`, `npm run build`, Vercel) use `site.profile.ts` as usual, and the flag is refused in every Vercel
   build, Preview and Production (`scripts/e2e-profile.mjs`). The fixture is a copy of the template's `site.profile.ts`
-  that differs only in its import path and in `services: true` (Services are off in the template, as a plan feature, and the
+  that differs only in its import path and in `services: true` and `locations: true` (both are off in the template, as plan features, and the
   suite tests them); a template-only test fails if they drift, so change both together.
 - **Some checks run only in the template.** Tests of what the template ships skip themselves on a client site, which
   customises those files on purpose: the bare `studio-brand.json`, the commented-out `launch` example in

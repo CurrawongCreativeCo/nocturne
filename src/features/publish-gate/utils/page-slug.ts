@@ -9,6 +9,9 @@ export function pageSlugProblem(slug: string): string | null {
   if (!PAGE_SLUG.test(slug)) {
     return 'Use lowercase letters, numbers and hyphens, with "/" only between parts.'
   }
-  const reserved = reservedSegment(slug, { services: isFeatureEnabled('services') })
+  const reserved = reservedSegment(slug, {
+    services: isFeatureEnabled('services'),
+    locations: isFeatureEnabled('locations'),
+  })
   return reserved ? `"${reserved}" is used by the site itself; choose another address.` : null
 }

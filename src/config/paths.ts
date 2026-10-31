@@ -64,6 +64,18 @@ export function teamPath(slug: string): string {
 export const SERVICES_SEGMENT = 'services'
 export const SERVICES_PATH = `/${SERVICES_SEGMENT}`
 
+/**
+ * Location pages: `/locations/<slug>` (src/features/locations), behind `features.locations`. Reserved
+ * above the detail pages exactly as `services` is: a page called plain `locations` is fine.
+ */
+export const LOCATIONS_SEGMENT = 'locations'
+export const LOCATIONS_PATH = `/${LOCATIONS_SEGMENT}`
+
+/** Location slug -> "/locations/<slug>". */
+export function locationPath(slug: string): string {
+  return `${LOCATIONS_PATH}/${slug}`
+}
+
 /** Service slug -> "/services/<slug>". */
 export function servicePath(slug: string): string {
   return `${SERVICES_PATH}/${slug}`

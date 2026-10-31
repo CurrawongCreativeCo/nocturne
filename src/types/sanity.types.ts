@@ -757,6 +757,94 @@ export type Link = {
   fallbackUrl?: string
 }
 
+export type Place = {
+  _id: string
+  _type: 'place'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name: string
+  kind: 'branch' | 'serviceArea'
+  slug: Slug
+  summary?: string
+  image?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  body?: BlockContent
+  phone?: string
+  publicEmail?: string
+  address?: {
+    street?: string
+    suburb?: string
+    state?: 'NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT'
+    postcode?: string
+    country?: string
+  }
+  timeZone?:
+    | 'Australia/Sydney'
+    | 'Australia/Melbourne'
+    | 'Australia/Brisbane'
+    | 'Australia/Adelaide'
+    | 'Australia/Darwin'
+    | 'Australia/Perth'
+    | 'Australia/Hobart'
+  openingHours?: Array<{
+    days: Array<string>
+    closed?: boolean
+    opens?: string
+    closes?: string
+    _type: 'hoursRow'
+    _key: string
+  }>
+  specialHours?: Array<{
+    date: string
+    closed?: boolean
+    opens?: string
+    closes?: string
+    note?: string
+    _type: 'specialDay'
+    _key: string
+  }>
+  geo?: {
+    lat?: number
+    lng?: number
+  }
+}
+
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x: number
+  y: number
+  height: number
+  width: number
+}
+
+export type Slug = {
+  _type: 'slug'
+  current: string
+  source?: string
+}
+
+export type PlaceReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'place'
+}
+
 export type PostReference = {
   _ref: string
   _type: 'reference'
@@ -791,6 +879,11 @@ export type Service = {
     _type: 'serviceFaq'
     _key: string
   }>
+  locations?: Array<
+    {
+      _key: string
+    } & PlaceReference
+  >
   evidence?: ArrayOf<PostReference | PageReference>
   enquiry?: Cta
   sections?: Array<
@@ -840,28 +933,6 @@ export type Service = {
         _key: string
       } & Events)
   >
-}
-
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top: number
-  bottom: number
-  left: number
-  right: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x: number
-  y: number
-  height: number
-  width: number
-}
-
-export type Slug = {
-  _type: 'slug'
-  current: string
-  source?: string
 }
 
 export type FormReference = {
@@ -1310,6 +1381,11 @@ export type TeamMember = {
     {
       _key: string
     } & ServiceReference
+  >
+  locations?: Array<
+    {
+      _key: string
+    } & PlaceReference
   >
   order?: number
 }
@@ -2392,11 +2468,13 @@ export type AllSanitySchemaTypes =
   | PageReference
   | PanelReference
   | Link
-  | PostReference
-  | Service
+  | Place
   | SanityImageCrop
   | SanityImageHotspot
   | Slug
+  | PlaceReference
+  | PostReference
+  | Service
   | FormReference
   | PanelForm
   | PanelText
@@ -2932,7 +3010,6 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
           } | null
         }>
         businessTimeZone:
-          | null
           | 'Australia/Adelaide'
           | 'Australia/Brisbane'
           | 'Australia/Darwin'
@@ -2940,6 +3017,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
           | 'Australia/Melbourne'
           | 'Australia/Perth'
           | 'Australia/Sydney'
+          | null
         _type: 'events'
       }
     | {
@@ -5967,7 +6045,6 @@ export type EVENT_QUERY_RESULT = {
     }
   } | null
   businessTimeZone:
-    | null
     | 'Australia/Adelaide'
     | 'Australia/Brisbane'
     | 'Australia/Darwin'
@@ -5975,6 +6052,7 @@ export type EVENT_QUERY_RESULT = {
     | 'Australia/Melbourne'
     | 'Australia/Perth'
     | 'Australia/Sydney'
+    | null
 } | null
 
 // Source: src/features/events/api/event.ts
@@ -6022,7 +6100,6 @@ export type EVENTS_FEED_QUERY_RESULT = {
     } | null
   }>
   businessTimeZone:
-    | null
     | 'Australia/Adelaide'
     | 'Australia/Brisbane'
     | 'Australia/Darwin'
@@ -6030,6 +6107,7 @@ export type EVENTS_FEED_QUERY_RESULT = {
     | 'Australia/Melbourne'
     | 'Australia/Perth'
     | 'Australia/Sydney'
+    | null
 }
 
 // Source: src/features/experiments/api/queries.ts
@@ -6074,6 +6152,143 @@ export type FRAME_PICTURE_ASSET_QUERY_RESULT = {
   width: number | null
   height: number | null
 } | null
+
+// Source: src/features/locations/api/location.ts
+// Variable: LOCATION_QUERY
+// Query: *[_type == "place" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    name,    kind,    "slug": slug.current,    summary,    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    phone,    publicEmail,    address { street, suburb, state, postcode },    timeZone,    geo { lat, lng },    openingHours[] { _key, days, opens, closes, closed },    specialHours[] { _key, date, closed, opens, closes, note },    "services": *[_type == "service" && defined(slug.current)      && (references(^._id) || count(coalesce(locations, [])) == 0)]      | order(name asc) {      _id,      name,      "slug": slug.current,      summary    },    "people": *[_type == "teamMember" && references(^._id)]      | order(coalesce(order, 999999) asc, name asc) {      _id,      name,      role,      "slug": slug.current    }  }
+export type LOCATION_QUERY_RESULT = {
+  _id: string
+  _type: 'place'
+  _updatedAt: string
+  name: string
+  kind: 'branch' | 'serviceArea'
+  slug: string
+  summary: string | null
+  image: {
+    alt: string | null
+    crop: SanityImageCrop | null
+    hotspot: SanityImageHotspot | null
+    asset: {
+      _id: string
+      metadata: {
+        lqip: string | null
+        hasAlpha: boolean | null
+        dimensions: {
+          width: number
+          height: number
+        } | null
+      } | null
+    } | null
+  } | null
+  body: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>
+          text?: string
+          _type: 'span'
+          _key: string
+        }>
+        style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+        listItem?: 'bullet' | 'number'
+        markDefs: Array<{
+          _key: string
+          _type: 'link'
+          linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+          internal?: PageReference
+          url: string | null
+          anchor: string | null
+          panel: {
+            id: string
+            title: string
+          } | null
+          bookingUrl: string | null
+          openInNewTab: boolean | null
+          fallbackUrl: string | null
+          slug: string | null
+        }> | null
+        level?: number
+        _type: 'block'
+        _key: string
+      }
+    | {
+        asset: {
+          _id: string
+          metadata: {
+            lqip: string | null
+            hasAlpha: boolean | null
+            dimensions: {
+              width: number
+              height: number
+            } | null
+          } | null
+        } | null
+        media?: unknown
+        hotspot: SanityImageHotspot | null
+        crop: SanityImageCrop | null
+        alt: string | null
+        caption: string | null
+        _type: 'image'
+        _key: string
+        markDefs: null
+      }
+  > | null
+  phone: string | null
+  publicEmail: string | null
+  address: {
+    street: string | null
+    suburb: string | null
+    state: 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA' | null
+    postcode: string | null
+  } | null
+  timeZone:
+    | 'Australia/Adelaide'
+    | 'Australia/Brisbane'
+    | 'Australia/Darwin'
+    | 'Australia/Hobart'
+    | 'Australia/Melbourne'
+    | 'Australia/Perth'
+    | 'Australia/Sydney'
+    | null
+  geo: {
+    lat: number | null
+    lng: number | null
+  } | null
+  openingHours: Array<{
+    _key: string
+    days: Array<string>
+    opens: string | null
+    closes: string | null
+    closed: boolean | null
+  }> | null
+  specialHours: Array<{
+    _key: string
+    date: string
+    closed: boolean | null
+    opens: string | null
+    closes: string | null
+    note: string | null
+  }> | null
+  services: Array<{
+    _id: string
+    name: string
+    slug: string
+    summary: string
+  }>
+  people: Array<{
+    _id: string
+    name: string
+    role: string | null
+    slug: string | null
+  }>
+} | null
+
+// Source: src/features/locations/api/location.ts
+// Variable: LOCATION_INDEX_QUERY
+// Query: *[_type == "place" && defined(slug.current)] | order(name asc) {    "slug": slug.current,    _updatedAt  }
+export type LOCATION_INDEX_QUERY_RESULT = Array<{
+  slug: string
+  _updatedAt: string
+}>
 
 // Source: src/features/pages/api/queries.ts
 // Variable: PAGE_QUERY
@@ -6836,7 +7051,6 @@ export type PAGE_QUERY_RESULT = {
               } | null
             }>
             businessTimeZone:
-              | null
               | 'Australia/Adelaide'
               | 'Australia/Brisbane'
               | 'Australia/Darwin'
@@ -6844,6 +7058,7 @@ export type PAGE_QUERY_RESULT = {
               | 'Australia/Melbourne'
               | 'Australia/Perth'
               | 'Australia/Sydney'
+              | null
             sharedSectionId: string
           }
         | {
@@ -7027,7 +7242,6 @@ export type PAGE_QUERY_RESULT = {
               } | null
             }>
             businessTimeZone:
-              | null
               | 'Australia/Adelaide'
               | 'Australia/Brisbane'
               | 'Australia/Darwin'
@@ -7035,6 +7249,7 @@ export type PAGE_QUERY_RESULT = {
               | 'Australia/Melbourne'
               | 'Australia/Perth'
               | 'Australia/Sydney'
+              | null
             _type: 'events'
           }
         | {
@@ -8568,7 +8783,6 @@ export type PAGE_QUERY_RESULT = {
                   time: string | null
                   countdown: boolean | null
                   timeZone:
-                    | null
                     | 'Australia/Adelaide'
                     | 'Australia/Brisbane'
                     | 'Australia/Darwin'
@@ -8576,6 +8790,7 @@ export type PAGE_QUERY_RESULT = {
                     | 'Australia/Melbourne'
                     | 'Australia/Perth'
                     | 'Australia/Sydney'
+                    | null
                 }
               | {
                   _key: string
@@ -8941,7 +9156,6 @@ export type PAGE_QUERY_RESULT = {
                   time: string | null
                   countdown: boolean | null
                   timeZone:
-                    | null
                     | 'Australia/Adelaide'
                     | 'Australia/Brisbane'
                     | 'Australia/Darwin'
@@ -8949,6 +9163,7 @@ export type PAGE_QUERY_RESULT = {
                     | 'Australia/Melbourne'
                     | 'Australia/Perth'
                     | 'Australia/Sydney'
+                    | null
                 }
               | {
                   _key: string
@@ -14727,7 +14942,7 @@ export type SEARCH_QUERY_RESULT = Array<{
 
 // Source: src/features/services/api/service.ts
 // Variable: SERVICE_QUERY
-// Query: *[_type == "service" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    name,    "slug": slug.current,    summary,    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    audience,    priceFrom,    priceUnit,    faqs[] { _key, question, answer },    "hasSections": count(sections[access != "members"]) > 0,    "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,    enquiry { label, variant, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    evidence[defined(@->slug.current) && @->access != "members"]->{ _id, _type, title, "slug": slug.current },    "people": *[_type == "teamMember" && references(^._id)]      | order(coalesce(order, 999999) asc, name asc) {      _id,      name,      role,      "slug": slug.current    },    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]      | order(publishedAt desc, _id desc) [0...6] {      _id,      title,      "slug": slug.current    }  }
+// Query: *[_type == "service" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    name,    "slug": slug.current,    summary,    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    audience,    priceFrom,    priceUnit,    faqs[] { _key, question, answer },    "hasSections": count(sections[access != "members"]) > 0,    "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,    enquiry { label, variant, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    locations[defined(@->slug.current)]->{ _id, name, kind, "slug": slug.current },    evidence[defined(@->slug.current) && @->access != "members"]->{ _id, _type, title, "slug": slug.current },    "people": *[_type == "teamMember" && references(^._id)]      | order(coalesce(order, 999999) asc, name asc) {      _id,      name,      role,      "slug": slug.current    },    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]      | order(publishedAt desc, _id desc) [0...6] {      _id,      title,      "slug": slug.current    }  }
 export type SERVICE_QUERY_RESULT = {
   _id: string
   _type: 'service'
@@ -14830,6 +15045,12 @@ export type SERVICE_QUERY_RESULT = {
       bookingUrl: string | null
     }
   } | null
+  locations: Array<{
+    _id: string
+    name: string
+    kind: 'branch' | 'serviceArea'
+    slug: string
+  }> | null
   evidence: Array<
     | {
         _id: string
@@ -15139,6 +15360,52 @@ export type SETTINGS_QUERY_RESULT = {
           platform: 'facebook' | 'instagram' | 'linkedin' | 'website' | 'x' | 'youtube'
           url: string
         }> | null
+        priceRange: null
+      }
+    | {
+        tradingName: null
+        legalName: null
+        abn: null
+        phone: string | null
+        publicEmail: string | null
+        address: {
+          street: string | null
+          suburb: string | null
+          state: 'ACT' | 'NSW' | 'NT' | 'QLD' | 'SA' | 'TAS' | 'VIC' | 'WA' | null
+          postcode: string | null
+        } | null
+        timeZone:
+          | 'Australia/Adelaide'
+          | 'Australia/Brisbane'
+          | 'Australia/Darwin'
+          | 'Australia/Hobart'
+          | 'Australia/Melbourne'
+          | 'Australia/Perth'
+          | 'Australia/Sydney'
+          | null
+        businessType: null
+        businessTypeOther: null
+        geo: {
+          lat: number | null
+          lng: number | null
+        } | null
+        openingHours: Array<{
+          _key: string
+          days: Array<string>
+          opens: string | null
+          closes: string | null
+          closed: boolean | null
+        }> | null
+        specialHours: Array<{
+          _key: string
+          date: string
+          closed: boolean | null
+          opens: string | null
+          closes: string | null
+          note: string | null
+        }> | null
+        serviceAreas: null
+        socialLinks: null
         priceRange: null
       }
     | {
@@ -15480,6 +15747,12 @@ export type START_HERE_QUERY_RESULT = {
       }
     | {
         _id: string
+        _type: 'place'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
         _type: 'post'
         _updatedAt: string
         title: string
@@ -15609,6 +15882,12 @@ export type START_HERE_QUERY_RESULT = {
     | {
         _id: string
         _type: 'panel'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
+        _type: 'place'
         _updatedAt: string
         title: string
       }
@@ -16011,6 +16290,8 @@ declare global {
     '\n  *[_type == "experiment" && active == true] | order(_createdAt asc)[0] {\n    _id,\n    name,\n    "controlWeight": coalesce(controlWeight, 0),\n    "variants": coalesce(variants[defined(variantId)] { "id": variantId, "weight": coalesce(weight, 0) }, [])\n  }\n': ACTIVE_EXPERIMENT_QUERY_RESULT
     '\n  *[_type == "form" && _id == $id][0] {\n    _id,\n    \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n,\n    successMessage,\n    recipientEmail\n  }\n': FORM_QUERY_RESULT
     '\n  *[_type == "sanity.imageAsset" && _id == $id][0]{\n    mimeType,\n    size,\n    "hasAlpha": metadata.hasAlpha,\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height\n  }\n': FRAME_PICTURE_ASSET_QUERY_RESULT
+    '\n  *[_type == "place" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    name,\n    kind,\n    "slug": slug.current,\n    summary,\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    phone,\n    publicEmail,\n    address { street, suburb, state, postcode },\n    timeZone,\n    geo { lat, lng },\n    openingHours[] { _key, days, opens, closes, closed },\n    specialHours[] { _key, date, closed, opens, closes, note },\n    "services": *[_type == "service" && defined(slug.current)\n      && (references(^._id) || count(coalesce(locations, [])) == 0)]\n      | order(name asc) {\n      _id,\n      name,\n      "slug": slug.current,\n      summary\n    },\n    "people": *[_type == "teamMember" && references(^._id)]\n      | order(coalesce(order, 999999) asc, name asc) {\n      _id,\n      name,\n      role,\n      "slug": slug.current\n    }\n  }\n': LOCATION_QUERY_RESULT
+    '\n  *[_type == "place" && defined(slug.current)] | order(name asc) {\n    "slug": slug.current,\n    _updatedAt\n  }\n': LOCATION_INDEX_QUERY_RESULT
     '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    "title": select(access == "members" && !$members => "Members only", title),\n    access,\n    "minimal": minimalLayout == true,\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    "pageBuilder": select(\n      access == "members" && !$members => [],\n      pageBuilder[] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    eyebrow,\n    eyebrowLabels,\n    eyebrowDesign {\n      separator,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n } }\n },\n  _type == "launchDate" => { \n  label,\n  date,\n  time,\n  countdown,\n  "timeZone": *[_id == "businessInfo"][0].timeZone\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    showGreeting,\n    partMotion {\n      enabled,\n      eyebrowPreset, eyebrowDelay,\n      headingPreset, headingDelay,\n      descriptionPreset, descriptionDelay,\n      buttonsPreset, buttonsDelay,\n      slotPreset, slotDelay,\n      imagePreset, imageDelay,\n      backgroundPreset, backgroundDelay\n    }\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    media[] { \n  _key,\n  _type,\n  _type == "slotImage" => { \n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    imagePosition,\n    variant\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    logoColour,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    showSocial,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  \n  _type == "video" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    source,\n    url,\n    "fileUrl": file.asset->url,\n    "captionsUrl": captions.asset->url,\n    poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    aspectRatio\n  }\n,\n  \n  _type == "process" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    steps[] {\n      _key,\n      label,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "embed" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    provider,\n    url,\n    height,\n    customHeight\n  }\n,\n  \n  _type == "linkList" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    rowStyle,\n    glassStrength,\n    showArrows,\n    thumbnailSize,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    headingDisplay,\n    headingImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    profile {\n      name,\n      // Hidden categories never leave the Content Lake, like hidden links.\n      "categories": select(categoriesVisibility != "hide" => categories),\n      bio,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      nameDisplay,\n      nameImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    },\n    // The approved frame is resolved to its artwork\'s CDN URL, as for imageDesign (tagged `frame`).\n    profileDesign {\n      imageSize,\n      imageShape,\n      border,\n      borderWidth,\n      borderGap,\n      borderGradient,\n      "frameUrl": frame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,\n      borderColour { colour, hex },\n      nameColour { colour, hex },\n      bioColour { colour, hex }\n    },\n    categoryDesign {\n      separator,\n      size,\n      weight,\n      textCase,\n      letterSpacing,\n      gap,\n      phoneLayout,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    cardDesign {\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n      eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      description { size, weight, colour { colour, hex }, textCase, tracking, leading }\n    },\n    linkDesign {\n      arrowStyle,\n      arrowColour { colour, hex },\n      \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n\n    },\n    socialDesign {\n      style,\n      position,\n      iconColour { colour, hex },\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n\n    },\n    dividerDesign {\n      afterCategories { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      afterProfile { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      aboveSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      belowSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n }\n    },\n    depthDesign {\n      linkShadow,\n      socialShadow,\n      pictureShadow,\n      glow,\n      glowTargets,\n      glowColour { colour, hex }\n    },\n    socialSource,\n    "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),\n    // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due\n    // (the page is cached and can\'t know the time), see LINK_SCHEDULE_SCRIPT.\n    "links": links[visibility != "hide"] {\n      _key,\n      eyebrow,\n      label,\n      description,\n      icon,\n      featured,\n      group,\n      groupDisplay,\n      groupImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      showFrom,\n      showUntil,\n      utmSource,\n      utmMedium,\n      utmCampaign,\n      thumbnail { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      // A card\'s own Appearance, only while it is set to "Customise this card".\n      "design": select(design.appearance == "custom" => design {\n        appearance,\n        \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n        shadow,\n        eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        description { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n,\n        arrowStyle,\n        arrowColour { colour, hex }\n      })\n    }\n  }\n,\n  \n  _type == "events" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    count,\n    "hasCategoryFilter": defined(category),\n    seeAllLabel,\n    seeAllLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n    "events": *[_type == "event" && defined(start) && defined(slug.current) && (!defined(^.category) || category._ref == ^.category._ref)]\n      | order(select(\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] && !defined(recurrence.until) => "9999-12-31",\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] => recurrence.until,\n  coalesce(end, start)\n) desc) [0...200] { \n  _id,\n  "slug": slug.current,\n  title,\n  start,\n  end,\n  allDay,\n  timeZone,\n  summary,\n  status,\n  capacityNote,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  "category": category->title,\n  location { kind, name },\n  recurrence { repeat, until, skip }\n },\n    // The zone for an event saved without one (an all-day event).\n    "businessTimeZone": *[_id == "businessInfo"][0].timeZone\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    eyebrow,\n    eyebrowLabels,\n    eyebrowDesign {\n      separator,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n } }\n },\n  _type == "launchDate" => { \n  label,\n  date,\n  time,\n  countdown,\n  "timeZone": *[_id == "businessInfo"][0].timeZone\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    showGreeting,\n    partMotion {\n      enabled,\n      eyebrowPreset, eyebrowDelay,\n      headingPreset, headingDelay,\n      descriptionPreset, descriptionDelay,\n      buttonsPreset, buttonsDelay,\n      slotPreset, slotDelay,\n      imagePreset, imageDelay,\n      backgroundPreset, backgroundDelay\n    }\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    media[] { \n  _key,\n  _type,\n  _type == "slotImage" => { \n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    imagePosition,\n    variant\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    logoColour,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    showSocial,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  \n  _type == "video" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    source,\n    url,\n    "fileUrl": file.asset->url,\n    "captionsUrl": captions.asset->url,\n    poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    aspectRatio\n  }\n,\n  \n  _type == "process" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    steps[] {\n      _key,\n      label,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "embed" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    provider,\n    url,\n    height,\n    customHeight\n  }\n,\n  \n  _type == "linkList" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    rowStyle,\n    glassStrength,\n    showArrows,\n    thumbnailSize,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    headingDisplay,\n    headingImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    profile {\n      name,\n      // Hidden categories never leave the Content Lake, like hidden links.\n      "categories": select(categoriesVisibility != "hide" => categories),\n      bio,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      nameDisplay,\n      nameImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    },\n    // The approved frame is resolved to its artwork\'s CDN URL, as for imageDesign (tagged `frame`).\n    profileDesign {\n      imageSize,\n      imageShape,\n      border,\n      borderWidth,\n      borderGap,\n      borderGradient,\n      "frameUrl": frame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,\n      borderColour { colour, hex },\n      nameColour { colour, hex },\n      bioColour { colour, hex }\n    },\n    categoryDesign {\n      separator,\n      size,\n      weight,\n      textCase,\n      letterSpacing,\n      gap,\n      phoneLayout,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    cardDesign {\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n      eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      description { size, weight, colour { colour, hex }, textCase, tracking, leading }\n    },\n    linkDesign {\n      arrowStyle,\n      arrowColour { colour, hex },\n      \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n\n    },\n    socialDesign {\n      style,\n      position,\n      iconColour { colour, hex },\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n\n    },\n    dividerDesign {\n      afterCategories { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      afterProfile { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      aboveSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      belowSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n }\n    },\n    depthDesign {\n      linkShadow,\n      socialShadow,\n      pictureShadow,\n      glow,\n      glowTargets,\n      glowColour { colour, hex }\n    },\n    socialSource,\n    "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),\n    // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due\n    // (the page is cached and can\'t know the time), see LINK_SCHEDULE_SCRIPT.\n    "links": links[visibility != "hide"] {\n      _key,\n      eyebrow,\n      label,\n      description,\n      icon,\n      featured,\n      group,\n      groupDisplay,\n      groupImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      showFrom,\n      showUntil,\n      utmSource,\n      utmMedium,\n      utmCampaign,\n      thumbnail { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      // A card\'s own Appearance, only while it is set to "Customise this card".\n      "design": select(design.appearance == "custom" => design {\n        appearance,\n        \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n        shadow,\n        eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        description { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n,\n        arrowStyle,\n        arrowColour { colour, hex }\n      })\n    }\n  }\n,\n  \n  _type == "events" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    count,\n    "hasCategoryFilter": defined(category),\n    seeAllLabel,\n    seeAllLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n    "events": *[_type == "event" && defined(start) && defined(slug.current) && (!defined(^.category) || category._ref == ^.category._ref)]\n      | order(select(\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] && !defined(recurrence.until) => "9999-12-31",\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] => recurrence.until,\n  coalesce(end, start)\n) desc) [0...200] { \n  _id,\n  "slug": slug.current,\n  title,\n  start,\n  end,\n  allDay,\n  timeZone,\n  summary,\n  status,\n  capacityNote,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  "category": category->title,\n  location { kind, name },\n  recurrence { repeat, until, skip }\n },\n    // The zone for an event saved without one (an all-day event).\n    "businessTimeZone": *[_id == "businessInfo"][0].timeZone\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n    ),\n    "panels": select(\n      access == "members" && !$members => [],\n      *[_type == "panel" && _id in (\n  coalesce(^.pageBuilder[access != "members" || $members].ctas[].link.panel._ref, [])\n  + coalesce(^.pageBuilder[access != "members" || $members].body[].markDefs[].panel._ref, [])\n  + coalesce(^.pageBuilder[access != "members" || $members].items[].answer[].markDefs[].panel._ref, [])\n  + coalesce(^.pageBuilder[_type == "reference"]->section[access != "members" || $members].ctas[].link.panel._ref, [])\n  + coalesce(^.pageBuilder[_type == "reference"]->section[access != "members" || $members].body[].markDefs[].panel._ref, [])\n  + coalesce(^.pageBuilder[_type == "reference"]->section[access != "members" || $members].items[].answer[].markDefs[].panel._ref, [])\n)] { \n  _id,\n  title,\n  "slug": slug.current,\n  presentation,\n  width,\n  swipeToClose,\n  content[] {\n    _key,\n    _type,\n    _type == "panelText" => {\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    },\n    _type == "panelForm" => {\n      form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n    }\n  }\n }\n    )\n  }\n': PAGE_QUERY_RESULT
     '\n  *[_type == "page" && defined(slug.current)] {\n    "slug": slug.current,\n    "title": select(access == "members" => "Members only", title),\n    "description": seo.metaDescription,\n    _updatedAt,\n    "noIndex": seo.noIndex == true || access == "members"\n  }\n': PAGE_INDEX_QUERY_RESULT
     '\n  count(*[_type == "page" && defined(slug.current) && slug.current != "section-gallery"])\n': PAGE_COUNT_QUERY_RESULT
@@ -16018,7 +16299,7 @@ declare global {
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_type == "stripePrice" && priceId == $priceId && active == true][0] {\n    priceId,\n    interval\n  }\n': CHECKOUT_PRICE_QUERY_RESULT
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
-    '\n  *[_type == "service" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    name,\n    "slug": slug.current,\n    summary,\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    audience,\n    priceFrom,\n    priceUnit,\n    faqs[] { _key, question, answer },\n    "hasSections": count(sections[access != "members"]) > 0,\n    "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,\n    enquiry { label, variant, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n } },\n    evidence[defined(@->slug.current) && @->access != "members"]->{ _id, _type, title, "slug": slug.current },\n    "people": *[_type == "teamMember" && references(^._id)]\n      | order(coalesce(order, 999999) asc, name asc) {\n      _id,\n      name,\n      role,\n      "slug": slug.current\n    },\n    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]\n      | order(publishedAt desc, _id desc) [0...6] {\n      _id,\n      title,\n      "slug": slug.current\n    }\n  }\n': SERVICE_QUERY_RESULT
+    '\n  *[_type == "service" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    name,\n    "slug": slug.current,\n    summary,\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    audience,\n    priceFrom,\n    priceUnit,\n    faqs[] { _key, question, answer },\n    "hasSections": count(sections[access != "members"]) > 0,\n    "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,\n    enquiry { label, variant, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n } },\n    locations[defined(@->slug.current)]->{ _id, name, kind, "slug": slug.current },\n    evidence[defined(@->slug.current) && @->access != "members"]->{ _id, _type, title, "slug": slug.current },\n    "people": *[_type == "teamMember" && references(^._id)]\n      | order(coalesce(order, 999999) asc, name asc) {\n      _id,\n      name,\n      role,\n      "slug": slug.current\n    },\n    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]\n      | order(publishedAt desc, _id desc) [0...6] {\n      _id,\n      title,\n      "slug": slug.current\n    }\n  }\n': SERVICE_QUERY_RESULT
     '\n  *[_type == "service" && defined(slug.current)] | order(name asc) {\n    "slug": slug.current,\n    _updatedAt\n  }\n': SERVICE_INDEX_QUERY_RESULT
     '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers,\n      verificationMarker\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerText,\n      footerShowSocial,\n      footerSocialStyle\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    },\n    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).\n    "business": *[_id == "businessInfo"][0] {\n      tradingName,\n      legalName,\n      abn,\n      phone,\n      publicEmail,\n      address { street, suburb, state, postcode },\n      timeZone,\n      businessType,\n      businessTypeOther,\n      geo { lat, lng },\n      openingHours[] { _key, days, opens, closes, closed },\n      specialHours[] { _key, date, closed, opens, closes, note },\n      serviceAreas,\n      socialLinks[] { _key, platform, url },\n      priceRange\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "footerShowSocial": navigation.footerShowSocial == true,\n    "footerSocialStyle": navigation.footerSocialStyle,\n    "consent": consent,\n    "design": design,\n    "business": business,\n    "allowAiCrawlers": identity.allowAiCrawlers != false,\n    "verificationMarker": identity.verificationMarker\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "panels": *[_type == "panel"] {\n    _id,\n    title\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
