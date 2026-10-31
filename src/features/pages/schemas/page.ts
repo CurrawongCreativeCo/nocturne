@@ -3,6 +3,7 @@ import { HomeIcon } from '@sanity/icons/Home'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { HOME_SLUG, slugToPath } from '@/config/paths'
+import { hasServices } from '@/config/profile'
 import { reservedSegment } from '@/config/reserved-slug'
 import { ACCESS_MEMBERS } from '@/lib/sanity/access'
 import { hiddenFromClients, lockedForClientsOnceSet } from '@/lib/sanity/roles'
@@ -52,7 +53,7 @@ export const page = defineType({
           if (!SLUG_PATTERN.test(slug.current)) {
             return 'Lowercase letters, numbers, hyphens; "/" separates path segments'
           }
-          const taken = reservedSegment(slug.current)
+          const taken = reservedSegment(slug.current, { services: hasServices() })
           return taken ? `"${taken}" is used by the site itself; choose another path` : true
         }),
     }),

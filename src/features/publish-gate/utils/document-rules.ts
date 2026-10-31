@@ -17,6 +17,7 @@ export const REQUIRED_FIELDS: Readonly<Record<string, readonly string[]>> = {
   businessInfo: ['tradingName', 'timeZone'],
   teamMember: ['name', 'portrait'],
   event: ['title', 'slug', 'start', 'status'],
+  service: ['name', 'slug', 'summary', 'image'],
   eventCategory: ['title'],
   panel: ['title', 'content', 'presentation'],
 }
@@ -28,6 +29,7 @@ export const UNIQUE_SLUG_TYPES: ReadonlySet<string> = new Set([
   'category',
   'event',
   'teamMember',
+  'service',
 ])
 
 /** The `INITIAL_VALUES` key whose values apply to every type (the section fields all sections share). */

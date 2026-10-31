@@ -200,6 +200,8 @@ const blogPosts = [
     ...blogPost('welcome-to-the-blog', 'Welcome to the blog', '2026-10-10T09:00:00Z', {
       categories: ['category-news', 'category-guides'],
     }),
+    // Also proof of work on that service, so it is listed once, under "See it in action".
+    services: [{ _key: 'svc-plumbing', ...ref('service-emergency-plumbing') }],
     body: [
       block(['A first heading'], { style: 'h2' }),
       {
@@ -212,7 +214,13 @@ const blogPosts = [
       },
     ],
   },
-  blogPost('news-update', 'News update', '2026-10-09T09:00:00Z', { categories: ['category-news'] }),
+  {
+    ...blogPost('news-update', 'News update', '2026-10-09T09:00:00Z', {
+      categories: ['category-news'],
+    }),
+    // Listed on the Emergency plumbing page as a related article (tests/e2e/services.spec.ts).
+    services: [{ _key: 'svc-plumbing', ...ref('service-emergency-plumbing') }],
+  },
   blogPost('how-to-guide', 'How-to guide', '2026-10-08T09:00:00Z', {
     categories: ['category-guides'],
   }),
@@ -3024,6 +3032,7 @@ documents.push(
     qualifications: ['LLB (Hons)', 'GAICD'],
     publicEmail: 'ann@example.com',
     phone: '02 9876 5432',
+    services: [{ _key: 'ann-emergency', ...ref('service-emergency-plumbing') }],
     socialLinks: [
       {
         _key: 'ann-linkedin',
@@ -3044,7 +3053,11 @@ documents.push(
     order: 2,
     bio: [block(['Ben joined from a large city firm.'])],
   }),
-  teamMember('cara', 'Cara Doyle', 'Office manager', { order: 3 }),
+  // Cara has no page, so on a service she is named without a link.
+  teamMember('cara', 'Cara Doyle', 'Office manager', {
+    order: 3,
+    services: [{ _key: 'cara-emergency', ...ref('service-emergency-plumbing') }],
+  }),
   // Dev's links are text, for a client who prefers them.
   teamMember('dev', 'Dev Patel', 'Paralegal', {
     ...memberSlug('dev-patel'),
@@ -3058,6 +3071,66 @@ documents.push(
       },
     ],
   }),
+)
+
+/**
+ * Services (tests/e2e/services.spec.ts). Emergency plumbing has every field: a price, who it's for,
+ * two people (Ann has a profile page, Cara has none), proof of work (a post, a page, and a
+ * members-only page that must be left out) and questions. Blocked drains has only the required
+ * fields, so every optional part, its heading and the price and FAQ markup must be absent.
+ */
+documents.push(
+  {
+    _id: 'service-emergency-plumbing',
+    _type: 'service',
+    name: 'Emergency plumbing',
+    slug: { _type: 'slug', current: 'emergency-plumbing' },
+    summary: 'Burst pipes, blocked drains and gas leaks, fixed the same day.',
+    image: image('A plumber repairing a burst pipe'),
+    body: [
+      block(['We answer within the hour, any day of the week.']),
+      block(['Every job comes with a written quote before we start.']),
+    ],
+    audience: 'Households and small businesses with a plumbing problem that cannot wait.',
+    priceFrom: 150,
+    priceUnit: 'per hour',
+    faqs: [
+      {
+        _key: 'faq-weekends',
+        question: 'Do you work on weekends?',
+        answer: 'Yes. We work every day of the week, including public holidays.',
+      },
+      {
+        _key: 'faq-fee',
+        question: 'Is there a call-out fee?',
+        answer: 'No. You pay the hourly rate from the moment we arrive.',
+      },
+    ],
+    evidence: [
+      { _key: 'ev-post', ...ref('post-welcome-to-the-blog') },
+      { _key: 'ev-page', ...ref('page-about') },
+      { _key: 'ev-members', ...ref('page-members') },
+    ],
+    enquiry: cta('Get a quote', external('https://quotes.example.com/plumbing')),
+    sections: [
+      {
+        _key: 'after-the-job',
+        _type: 'richText',
+        body: [
+          block(['What happens after the job'], { style: 'h2' }),
+          block(['We test every repair and leave the site clean.']),
+        ],
+      },
+    ],
+  },
+  {
+    _id: 'service-blocked-drains',
+    _type: 'service',
+    name: 'Blocked drains',
+    slug: { _type: 'slug', current: 'blocked-drains' },
+    summary: 'We clear blocked drains and tell you what caused them.',
+    image: image('A drain being cleared'),
+  },
 )
 
 /** Team sections on a real page, with a MotionProvider (tests/e2e/team.spec.ts). `team` alone is a legal page slug. */
