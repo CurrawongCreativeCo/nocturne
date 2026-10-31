@@ -194,7 +194,15 @@ test.describe('the JSON-LD', () => {
   test('says nothing the page does not show, and the graph holds together', async ({ page }) => {
     await page.goto(FULL)
     const nodes = await jsonLd(page)
-    const text = await page.evaluate(() => document.body.innerText)
+    // As structured-data.spec.ts reads a page: the body, plus the <title> and meta description, which
+    // are the rendered form of the title and description fields (the WebSite node's description).
+    const text = await page.evaluate(() =>
+      [
+        document.body.innerText,
+        document.title,
+        document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '',
+      ].join('\n'),
+    )
     expect(
       checkParity(nodes, { origin: SITE_URL, text, siteText: text, siteDetails: true }),
     ).toEqual([])
