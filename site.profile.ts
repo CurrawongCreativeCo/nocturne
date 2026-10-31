@@ -33,6 +33,8 @@ export const siteProfileInput = defineSiteProfile({
     team: true,
     teamProfiles: true,
     events: true,
+    // Service pages and Service JSON-LD. Off for a site that doesn't list services (the default).
+    services: true,
     // Sanity Releases and scheduled drafts: on only where the Sanity plan includes them (default off).
     releases: true,
   },

@@ -783,6 +783,7 @@ src/
     (site)/blog/                     blog index, [slug] (post), category/[slug]
     (site)/team/[slug]/page.tsx      a team member's profile page
     (site)/events/[slug]/page.tsx    an event's page
+    (site)/services/[slug]/page.tsx  a service's page (features.services)
     api/events/[slug]/ics/route.ts   one event's calendar file (served at /events/<slug>.ics)
     api/events/feed/route.ts         every upcoming event as a calendar feed (served at /events/feed.ics)
     api/og/events/[slug]/route.tsx   an event's branded share image
@@ -835,6 +836,7 @@ src/
       components/                  checkout-button (client form)
       utils/                       stripe-signature, map-stripe (event + price -> document), stripe-api (REST), config
     events/                        events: the event schema, event pages, calendar files
+    services/                      services: the service schema, service pages and Service JSON-LD (features.services)
       api/                         event.ts (EVENT_QUERY, EVENTS_INDEX_QUERY, EVENTS_FEED_QUERY, metadata, sitemap)
       components/                  event-view (server)
       schemas/                     event.ts, event-category.ts
@@ -1020,6 +1022,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
   `ENQUIRIES_STORE=1` a send also writes one document, and the first send per hour per server instance makes one
   unauthenticated query to check the dataset is private (see [Enquiries](#enquiries)); neither is read through the cache,
   and a page view still causes none.
+- **Services** add none to a page view. A service page adds `SERVICE_QUERY`, one per service (the fields, the proof of work it links to and the team members who list it, all in one request; a `service`, `teamMember`, `post` or `page` change expires it), and `SERVICE_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/services/…` URLs cost nothing. With `features.services` off neither runs.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
 - **Section panels** add one small query, `DESIGN_COLOURS_QUERY` (Brand colours and gradients, tagged `designSettings`), and only while rendering a section that has a panel: a site with no panels never makes it, and a visitor never causes it. It exists so the panel's contrast uses the colours the page really draws; sharing the settings entry would mean importing the site feature from shared code.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
@@ -1054,7 +1057,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1813,7 +1816,7 @@ export const siteProfileInput = defineSiteProfile({
 
 - **`voice`**: the AI Assist tone summary and `do` / `dont` lists, all in Australian English (see _AI Assist_ above). Omitted in older profiles: clear, warm and practical defaults.
 - **`features`**: `blog`, `forms`, `newsletter`, `pricing`, `members`, `experiments`, `search`, `businessInfo`,
-  `team`, `teamProfiles`, `events`, `releases` and `publishGate`. A feature you leave out stays **on**, except `releases` (which depends on your Sanity plan, see _Content releases_) and `publishGate` (which needs an Editor token and Contributor clients, see _Publish gate_), which start **off**. A site that never edits the file otherwise behaves as the template always has.
+  `team`, `teamProfiles`, `events`, `services`, `releases` and `publishGate`. A feature you leave out stays **on**, except `services` (which adds routes and markup a site may not want, see _Services_), `releases` (which depends on your Sanity plan, see _Content releases_) and `publishGate` (which needs an Editor token and Contributor clients, see _Publish gate_), which start **off**. A site that never edits the file otherwise behaves as the template always has.
 - **`clientSections`**: the section types a client may add in the page builder (schema names such as `richText`;
   see `src/features/pages/schemas/sections/index.ts`). An unknown name fails `npm run check`. Empty or left out, the
   Studio's default list applies (see "Approved sections" under _Studio roles and permissions_). This replaces the
@@ -1831,20 +1834,21 @@ export const siteProfileInput = defineSiteProfile({
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
 feature does:
 
-| Feature                      | When off                                                                                                                                                                                                                                                                           |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                           |
-| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                 |
-| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                               |
-| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                |
-| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                           |
-| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                            |
-| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                   |
-| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                     |
-| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page) |
-| `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                 |
-| `publishGate`                | `POST /api/publish` answers 404 (off by default). See _Publish gate_ under _Studio roles and permissions_                                                                                                                                                                          |
-| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                    |
+| Feature                      | When off                                                                                                                                                                                                                                                                                                 |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                                                 |
+| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                                       |
+| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                                                     |
+| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                                      |
+| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                                                 |
+| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                                                  |
+| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                                         |
+| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                                           |
+| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page)                       |
+| `services`                   | `/services/<slug>` answers 404; service pages leave the sitemap; Services leaves the desk and _New document_; the _Services they provide_ field leaves the team member form. A page at `services/<slug>` is then an ordinary CMS page (while on, `services/…` is reserved like `team/…`). Off by default |
+| `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                                       |
+| `publishGate`                | `POST /api/publish` answers 404 (off by default). See _Publish gate_ under _Studio roles and permissions_                                                                                                                                                                                                |
+| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                                          |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
 import it). Page-builder sections that depend on a disabled feature (a form, pricing table or newsletter section)
@@ -3428,6 +3432,42 @@ profile pages, on their own page at `/team/<slug>`.
   slug and a member with no address; the sitemap; axe) and `accessibility.spec.ts` (`/team`, `/team/ann-lee`).
   The section gallery has `team-grid`, `team-slider` and `team-list`; their screenshot baselines need the **Update visual
   baselines** workflow (macOS skips visual tests).
+
+### Services
+
+A page for each thing a business sells. A service is a document (`service`, in `src/features/services`) with its own page at
+`/services/<slug>`, behind `features.services` in `site.profile.ts`. **It is off by default**, so a site that doesn't list
+services carries no route, Studio entry, sitemap entry or markup for them. Switch it on with `features: { services: true }`.
+Before you do, list the site's existing pages whose address starts with `services/`: each one becomes a service (or is
+renamed), because `services/<slug>` is reserved while the flag is on. A page called exactly `services` is fine: it is where
+the list of services usually lives, so editors keep control of its introduction.
+
+- **What an editor enters:** name, page address, a summary (160 characters at most: it is the heading's lead-in and the page's
+  description), a picture with alt text, and optionally a full description, "Who it's for", a _From_ price with its unit
+  ("From $150 per hour", in Australian dollars: both or neither), questions and answers, and proof of work (posts or pages;
+  members-only pages are left out). Clients may edit all of these; the template, price format and markup are fixed.
+- **People:** a team member lists the services they provide (_Services they provide_ on the member). The service page lists
+  those members, linked when they have a profile page. The field lives on the member only, so there is one place to keep in
+  step; the service page reads the other direction.
+- **A part with nothing to show is left out,** heading and markup included: no price, no "Who provides it".
+- **Structured data** (`src/features/services/utils/json-ld.ts`, unit-tested): a `Service` with `@id`
+  `<origin>/#service-<document id>` (the id of the published document, so it survives a change of address and a draft never
+  puts its own id in the page), `name`, `url`, `description` (the summary), `image`, `provider` (the site's `#organization`),
+  a nested `WebPage` for `mainEntityOfPage`, and an `Offer` **only when the page shows a price**. Nothing is added that the page
+  doesn't show: no `areaServed`, rating or review. Questions the page shows are one `FAQPage` with `@id` `<page url>#faq`; it
+  describes the visible questions and answers so machines read the page accurately, and is not a rich-result tactic. Both
+  nodes are checked against the visible text by `tests/e2e/structured-data.spec.ts`.
+- **Caching and webhook mode:** `service` is in `TAGS` and in the webhook filter above. A service page is tagged `service`,
+  `teamMember`, `post` and `page`, because it shows people and links to posts and pages. Published reads check the cached
+  index first, so probing `/services/anything` costs nothing.
+- **Not built yet:** the `locations[]` relationship (a service offered at some locations only) and `areaServed` wait for the
+  `location` type; `sections[]` below the template, `post.services[]` (related articles) and the enquiry button are not
+  included; the Service nodes move into `src/lib/structured-data/` when that module exists, and the visibility rules for
+  services (F-1, F-2) arrive with the rules engine.
+- **Tests:** `src/features/services/utils/*.test.ts` (slug, price, JSON-LD), `profile.test.ts` (the flag), `reserved-slug.test.ts`,
+  `main-document.test.ts` and `feature-visibility.test.ts`. End to end: `tests/e2e/services.spec.ts` (a service with everything,
+  one with only the required fields, people linked or not, proof of work without a members-only page, questions, metadata,
+  JSON-LD, 404s and the sitemap), plus `accessibility.spec.ts`, `prelaunch-gate.spec.ts` and `structured-data.spec.ts`.
 
 ### Events
 

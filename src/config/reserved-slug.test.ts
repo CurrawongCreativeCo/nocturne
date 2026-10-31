@@ -28,6 +28,12 @@ describe('reservedSegment', () => {
     expect(reservedSegment('events')).toBeNull()
   })
 
+  it('reserves services above the service pages only while the flag is on', () => {
+    expect(reservedSegment('services/web-design')).toBeNull()
+    expect(reservedSegment('services/web-design', { services: true })).toBe('services')
+    expect(reservedSegment('services', { services: true })).toBeNull()
+  })
+
   it('leaves other paths alone, including ones that merely contain a reserved word', () => {
     expect(reservedSegment('about')).toBeNull()
     expect(reservedSegment('about/team')).toBeNull()

@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Services (task 192).** A `service` document with its own page at `/services/<slug>`, behind the new `services` site profile flag (**off by default**). It has a name, summary, picture, optional description, audience, _From_ price (AUD, with a unit), questions and answers, and proof of work; team members list the services they provide (`teamMember.services`), and the service page lists them. `Service` JSON-LD (`@id` `<origin>/#service-<document id>`, provider `#organization`, an `Offer` only when a price is shown) and one `FAQPage` per page are built only from what the page shows. `service` is in `TAGS`, the README webhook filter, the sitemap, the route inventory, the publish gate's required fields and the client field registry (clients may edit every field). With the flag on, `services/<slug>` is a reserved page address (`reservedSegment` takes `{ services }`). New fixtures, `tests/e2e/services.spec.ts`, and unit tests. Locations, `areaServed`, `sections[]` and related articles wait for the `location` type and the structured-data module.
+
 - **Section panels: unreadable gradients, opt-outs and browser checks.** A brand gradient that Studio can't load is now "unknown", never "removed": the choice is kept, a non-blocking warning says the check didn't run, and it is rechecked next time. The three sections that draw their own surface (Link list, CTA banner, the hero's Full background) are documented in the README, with tests that a stored Panel value is ignored on them. A browser spec checks panels under the default, light and dark palettes, over black and white pictures, with reduced transparency and without `backdrop-filter`.
 
 - **Image + text, section contract v2.** Four looks through the preset bar (Media right, Media left, Stacked, Text over
@@ -72,6 +74,8 @@ None. The new fields are optional and unset means no panel, so existing sections
 
 Slot blocks: A project that added its own hero slot type moves it to a `SLOT_BLOCKS` line and a `COMPONENTS` line (README,
 "Adding a slot block"); its stored content needs no migration.
+
+Services: nothing to do unless you want them. The `services` flag is off for any profile that does not name it, so a project's own `site.profile.ts` is unaffected (the template's own profile and the e2e fixture profile switch it on). Before setting `features: { services: true }`, list your pages whose address starts with `services/`: each becomes a service or is renamed, because that prefix is reserved while the flag is on. Run `npm run typegen` after merging.
 
 ## [1.10.0] - 2026-10-31
 

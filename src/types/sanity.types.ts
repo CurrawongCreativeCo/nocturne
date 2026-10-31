@@ -14,6 +14,12 @@
 
 export declare const internalGroqTypeReferenceTo: unique symbol
 
+type ArrayOf<T> = Array<
+  T & {
+    _key: string
+  }
+>
+
 // Source: schema.json
 export type OverlayGradientTop = {
   colour?:
@@ -751,6 +757,65 @@ export type Link = {
   fallbackUrl?: string
 }
 
+export type PostReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'post'
+}
+
+export type Service = {
+  _id: string
+  _type: 'service'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name: string
+  slug: Slug
+  summary: string
+  image: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  body?: BlockContent
+  audience?: string
+  priceFrom?: number
+  priceUnit?: string
+  faqs?: Array<{
+    question: string
+    answer: string
+    _type: 'serviceFaq'
+    _key: string
+  }>
+  evidence?: ArrayOf<PostReference | PageReference>
+}
+
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x: number
+  y: number
+  height: number
+  width: number
+}
+
+export type Slug = {
+  _type: 'slug'
+  current: string
+  source?: string
+}
+
 export type FormReference = {
   _ref: string
   _type: 'reference'
@@ -795,28 +860,6 @@ export type Panel = {
   width?: 'narrow' | 'medium' | 'wide'
   swipeToClose?: boolean
   slug?: Slug
-}
-
-export type Slug = {
-  _type: 'slug'
-  current: string
-  source?: string
-}
-
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top: number
-  bottom: number
-  left: number
-  right: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x: number
-  y: number
-  height: number
-  width: number
 }
 
 export type EventCategoryReference = {
@@ -872,6 +915,13 @@ export type Event = {
   }
 }
 
+export type ServiceReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'service'
+}
+
 export type TeamMember = {
   _id: string
   _type: 'teamMember'
@@ -901,6 +951,11 @@ export type TeamMember = {
     _key: string
   }>
   socialDisplay?: 'icons' | 'text'
+  services?: Array<
+    {
+      _key: string
+    } & ServiceReference
+  >
   order?: number
 }
 
@@ -2284,15 +2339,18 @@ export type AllSanitySchemaTypes =
   | PageReference
   | PanelReference
   | Link
+  | PostReference
+  | Service
+  | SanityImageCrop
+  | SanityImageHotspot
+  | Slug
   | FormReference
   | PanelForm
   | PanelText
   | Panel
-  | Slug
-  | SanityImageCrop
-  | SanityImageHotspot
   | EventCategoryReference
   | Event
+  | ServiceReference
   | TeamMember
   | BusinessInfo
   | DesignSettings
@@ -11469,6 +11527,122 @@ export type SEARCH_QUERY_RESULT = Array<{
   text: string
 }>
 
+// Source: src/features/services/api/service.ts
+// Variable: SERVICE_QUERY
+// Query: *[_type == "service" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    name,    "slug": slug.current,    summary,    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    audience,    priceFrom,    priceUnit,    faqs[] { _key, question, answer },    evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },    "people": *[_type == "teamMember" && references(^._id)]      | order(coalesce(order, 999999) asc, name asc) {      _id,      name,      role,      "slug": slug.current    }  }
+export type SERVICE_QUERY_RESULT = {
+  _id: string
+  _type: 'service'
+  _updatedAt: string
+  name: string
+  slug: string
+  summary: string
+  image: {
+    alt: string | null
+    crop: SanityImageCrop | null
+    hotspot: SanityImageHotspot | null
+    asset: {
+      _id: string
+      metadata: {
+        lqip: string | null
+        hasAlpha: boolean | null
+        dimensions: {
+          width: number
+          height: number
+        } | null
+      } | null
+    } | null
+  }
+  body: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>
+          text?: string
+          _type: 'span'
+          _key: string
+        }>
+        style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+        listItem?: 'bullet' | 'number'
+        markDefs: Array<{
+          _key: string
+          _type: 'link'
+          linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+          internal?: PageReference
+          url: string | null
+          anchor: string | null
+          panel: {
+            id: string
+            title: string
+          } | null
+          bookingUrl: string | null
+          openInNewTab: boolean | null
+          fallbackUrl: string | null
+          slug: string | null
+        }> | null
+        level?: number
+        _type: 'block'
+        _key: string
+      }
+    | {
+        asset: {
+          _id: string
+          metadata: {
+            lqip: string | null
+            hasAlpha: boolean | null
+            dimensions: {
+              width: number
+              height: number
+            } | null
+          } | null
+        } | null
+        media?: unknown
+        hotspot: SanityImageHotspot | null
+        crop: SanityImageCrop | null
+        alt: string | null
+        caption: string | null
+        _type: 'image'
+        _key: string
+        markDefs: null
+      }
+  > | null
+  audience: string | null
+  priceFrom: number | null
+  priceUnit: string | null
+  faqs: Array<{
+    _key: string
+    question: string
+    answer: string
+  }> | null
+  evidence: Array<
+    | {
+        _id: string
+        _type: 'page'
+        title: string
+        slug: string
+      }
+    | {
+        _id: string
+        _type: 'post'
+        title: string
+        slug: string
+      }
+  > | null
+  people: Array<{
+    _id: string
+    name: string
+    role: string | null
+    slug: string | null
+  }>
+} | null
+
+// Source: src/features/services/api/service.ts
+// Variable: SERVICE_INDEX_QUERY
+// Query: *[_type == "service" && defined(slug.current)] | order(name asc) {    "slug": slug.current,    _updatedAt  }
+export type SERVICE_INDEX_QUERY_RESULT = Array<{
+  slug: string
+  _updatedAt: string
+}>
+
 // Source: src/features/site/api/queries.ts
 // Variable: SETTINGS_QUERY
 // Query: *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {      title,      description,      logo {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },      ogImage { asset->{ _id } },      // Only when the editor chose their own icon: the default icon needs no data.      "browserIcon": select(        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {          "image": browserIcon.image { asset, crop, hotspot },          "padding": coalesce(browserIcon.padding, "none"),          "background": coalesce(browserIcon.background, "transparent")        }      ),      allowAiCrawlers,      verificationMarker    },    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {      headerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },      headerCta {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },      footerNav[] {   _key,  label,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },      footerText,      footerShowSocial,      footerSocialStyle    },    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {      message,      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl },      startsAt,      endsAt,      dismissible    },    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {      title,      message,      privacyLabel,      privacyLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl },      analyticsText,      marketingText    },    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).    "design": *[_id == "designSettings"][0] {      appearance,      primary,      secondary,      highlight,      surface,      surfaceAlt,      surfaceInverse,      ink,      inkMuted,      line,      gradients[] { name, angle, stops }    },    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).    "business": *[_id == "businessInfo"][0] {      tradingName,      legalName,      abn,      phone,      publicEmail,      address { street, suburb, state, postcode },      timeZone,      businessType,      businessTypeOther,      geo { lat, lng },      openingHours[] { _key, days, opens, closes, closed },      specialHours[] { _key, date, closed, opens, closes, note },      serviceAreas,      socialLinks[] { _key, platform, url },      priceRange    }  } {    "title": identity.title,    "description": identity.description,    "logo": identity.logo,    "ogImage": identity.ogImage,    "browserIcon": identity.browserIcon,    "announcement": announcement,    "headerNav": navigation.headerNav,    "headerCta": navigation.headerCta,    "footerNav": navigation.footerNav,    "footerText": navigation.footerText,    "footerShowSocial": navigation.footerShowSocial == true,    "footerSocialStyle": navigation.footerSocialStyle,    "consent": consent,    "design": design,    "business": business,    "allowAiCrawlers": identity.allowAiCrawlers != false,    "verificationMarker": identity.verificationMarker  }
@@ -12096,6 +12270,12 @@ export type START_HERE_QUERY_RESULT = {
       }
     | {
         _id: string
+        _type: 'service'
+        _updatedAt: string
+        title: string
+      }
+    | {
+        _id: string
         _type: 'sharedSection'
         _updatedAt: string
         title: string
@@ -12221,6 +12401,12 @@ export type START_HERE_QUERY_RESULT = {
         _type: 'redirect'
         _updatedAt: string
         title: null
+      }
+    | {
+        _id: string
+        _type: 'service'
+        _updatedAt: string
+        title: string
       }
     | {
         _id: string
@@ -12609,6 +12795,8 @@ declare global {
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_type == "stripePrice" && priceId == $priceId && active == true][0] {\n    priceId,\n    interval\n  }\n': CHECKOUT_PRICE_QUERY_RESULT
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
+    '\n  *[_type == "service" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    name,\n    "slug": slug.current,\n    summary,\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    audience,\n    priceFrom,\n    priceUnit,\n    faqs[] { _key, question, answer },\n    evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },\n    "people": *[_type == "teamMember" && references(^._id)]\n      | order(coalesce(order, 999999) asc, name asc) {\n      _id,\n      name,\n      role,\n      "slug": slug.current\n    }\n  }\n': SERVICE_QUERY_RESULT
+    '\n  *[_type == "service" && defined(slug.current)] | order(name asc) {\n    "slug": slug.current,\n    _updatedAt\n  }\n': SERVICE_INDEX_QUERY_RESULT
     '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers,\n      verificationMarker\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerText,\n      footerShowSocial,\n      footerSocialStyle\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    },\n    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).\n    "business": *[_id == "businessInfo"][0] {\n      tradingName,\n      legalName,\n      abn,\n      phone,\n      publicEmail,\n      address { street, suburb, state, postcode },\n      timeZone,\n      businessType,\n      businessTypeOther,\n      geo { lat, lng },\n      openingHours[] { _key, days, opens, closes, closed },\n      specialHours[] { _key, date, closed, opens, closes, note },\n      serviceAreas,\n      socialLinks[] { _key, platform, url },\n      priceRange\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "footerShowSocial": navigation.footerShowSocial == true,\n    "footerSocialStyle": navigation.footerSocialStyle,\n    "consent": consent,\n    "design": design,\n    "business": business,\n    "allowAiCrawlers": identity.allowAiCrawlers != false,\n    "verificationMarker": identity.verificationMarker\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "panels": *[_type == "panel"] {\n    _id,\n    title\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '{\n  "recent": *[!(_type match "system.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt desc)[0...60] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "drafts": *[_id in path("drafts.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt asc)[0...200] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "enquiries": {\n    "new": count(*[_type == "enquiry" && status == "new"]),\n    "total": count(*[_type == "enquiry"])\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  }\n}': START_HERE_QUERY_RESULT

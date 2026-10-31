@@ -5,6 +5,7 @@ import {
   DEFAULT_VOICE,
   FEATURE_NAMES,
   hasEvents,
+  hasServices,
   hasTeamProfiles,
   isFeatureEnabled,
   resolveSiteProfile,
@@ -187,6 +188,16 @@ describe('hasEvents', () => {
   it('is on by default and follows the events switch', () => {
     expect(hasEvents(profile({}))).toBe(true)
     expect(hasEvents(profile({ events: false }))).toBe(false)
+  })
+})
+
+describe('hasServices', () => {
+  const profile = (features: SiteProfileInput['features']) =>
+    resolveSiteProfile({ ...valid, features })
+
+  it('is off by default and follows the services switch', () => {
+    expect(hasServices(profile({}))).toBe(false)
+    expect(hasServices(profile({ services: true }))).toBe(true)
   })
 })
 

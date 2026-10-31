@@ -29,6 +29,7 @@ import { AGENCY_ONLY_TEMPLATE_IDS, pageTemplates } from './src/features/pages/sc
 import { panelsSchemaTypes } from './src/features/panels/schemas'
 import { pricingSchemaTypes } from './src/features/pricing/schemas'
 import { hidePricesFromNewMenu } from './src/features/pricing/studio'
+import { servicesSchemaTypes } from './src/features/services/schemas'
 import { ColourInput } from './src/features/site/components/colour-input'
 import { siteSchemaTypes } from './src/features/site/schemas'
 import { confirmDeletePageActions } from './src/features/studio/actions/confirm-delete-page'
@@ -147,6 +148,7 @@ export default defineConfig({
       ...eventsSchemaTypes,
       ...framesSchemaTypes,
       ...panelsSchemaTypes,
+      ...servicesSchemaTypes,
       // new-registry:register
       ...sharedSchemaTypes,
     ]),
