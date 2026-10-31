@@ -1,0 +1,21 @@
+{
+  "id": "glass-image-left",
+  "manifestVersion": "1.10.0",
+  "intent": "Make the home page hero glass, with the image on the left.",
+  "scope": "section",
+  "changes": [
+    {
+      "documentId": "page-home",
+      "baseRev": "rev-home-1",
+      "patches": [
+        {
+          "set": {
+            "pageBuilder[_key==\"hero1\"].style.panel": "glass",
+            "pageBuilder[_key==\"hero1\"].imagePosition": "left"
+          }
+        }
+      ]
+    }
+  ],
+  "rationale": "A glass panel sits well over the picture, and the image on the left leads the eye into the heading."
+}

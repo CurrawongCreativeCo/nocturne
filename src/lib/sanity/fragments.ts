@@ -179,6 +179,29 @@ export const heroSupportingFields = /* groq */ `
   _type == "slotVideo" => { ${slotVideoFields} }
 `
 
+/** A `slotImage` (schema: features/pages/schemas/slot-image.ts): project it as `slotImage { ${slotImageFields} }`. */
+export const slotImageFields = /* groq */ `
+  image { ${imageFields} }
+`
+
+/**
+ * The Image + text section's media slot (`split.media`): the one picture or video it shows. The
+ * projections are the blocks' own, so the same video block reads the same in the hero and here.
+ */
+export const splitMediaFields = /* groq */ `
+  _key,
+  _type,
+  _type == "slotImage" => { ${slotImageFields} },
+  _type == "slotVideo" => { ${slotVideoFields} }
+`
+
+/** The Image + text section's supporting slot (`split.supporting`): a video under the media or the text. */
+export const splitSupportingFields = /* groq */ `
+  _key,
+  _type,
+  _type == "slotVideo" => { ${slotVideoFields} }
+`
+
 /**
  * A section's shared layout and style options (schema: lib/sanity/schema/section-style.ts). Every
  * section fragment projects it as `style { ${sectionStyleFields} }`; SectionFrame reads it.

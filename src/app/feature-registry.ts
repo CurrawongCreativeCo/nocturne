@@ -18,6 +18,7 @@ import { opsNoticesConfig } from '@/lib/ops/notices.registry'
 import { enquiryRetentionConfig } from '@/lib/ops/retention.registry'
 import { sanityWorkflowConfig } from '@/lib/ops/sanity-workflow.registry'
 import { prelaunchConfig } from '@/lib/prelaunch.registry'
+import { changeProposalsConfig } from '@/lib/proposals/config.registry'
 import { redirectsConfig } from '@/lib/redirects.registry'
 import { sanityCoreConfig } from '@/lib/sanity/config.registry'
 import { webhookModeConfig } from '@/lib/sanity/revalidate.registry'
@@ -62,6 +63,7 @@ export const featureRegistry: readonly FeatureConfig[] = [
   sanityWorkflowConfig,
   launchCheckConfig,
   configControlsConfig,
+  changeProposalsConfig,
 ]
 
 /**

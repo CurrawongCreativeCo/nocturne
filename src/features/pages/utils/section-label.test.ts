@@ -32,6 +32,24 @@ describe('sectionLabel', () => {
     ).toBe('mediaText (no image)')
   })
 
+  it('names the media slot, the layouts and a supporting block', () => {
+    const slotImage = { _type: 'slotImage', image: { asset: { _id: 'image-1' } } }
+    const media = (extra: object) =>
+      sectionLabel(
+        section({ _key: 'a', _type: 'mediaText', imagePosition: 'left', image: null, ...extra }),
+      )
+    expect(media({ media: [slotImage] })).toBe('mediaText (media left)')
+    expect(media({ media: [slotImage], variant: 'stacked' })).toBe('mediaText (stacked)')
+    expect(media({ media: [slotImage], variant: 'overlay' })).toBe('mediaText (overlay)')
+    expect(media({ media: [slotImage], supporting: [{ _type: 'slotVideo' }] })).toBe(
+      'mediaText (media left, supporting video)',
+    )
+    expect(media({ media: [{ _type: 'slotVideo' }], variant: 'stacked' })).toBe(
+      'mediaText (stacked, video media)',
+    )
+    expect(media({ media: [] })).toBe('mediaText (no image)')
+  })
+
   it('adds the picture design an editor chose, so the gallery tells the pictures apart', () => {
     const image = { asset: { _id: 'image-1' } }
     const media = (imageDesign: object) =>

@@ -20,6 +20,13 @@ you start a release.
 
 ### Added
 
+- **Image + text, section contract v2.** Four looks through the preset bar (Media right, Media left, Stacked, Text over
+  media; stored as the hidden `variant` plus the existing `imagePosition`), a `media` slot that takes a picture
+  (`slotImage`) or a video (`slotVideo`), and an agency-only `supporting` slot for a video under the media. Panels (Glass and
+  Solid card) apply to Text over media with no rules of their own. A Custom section now shows which preset it started from
+  and what moved, with a **Reset** button (`presetLabels`; the hero has it too). New fields are classified in the client
+  registry (`variant`, `supporting` agency only). Migration `image-to-media` (dry run first) moves `image` into `media`;
+  until it runs the section reads `image`, so existing pages render the same. README, "Image + text".
 - `design-manifest.generated.json`: a generated, read-only description of the sections, fields, option lists, presets, layout rules,
   client-editable flags and token names, built by `npm run typegen` (`npm run design-manifest`) and checked in CI. Sections can
   add `options.manifest = { purpose, example }`; Hero and Image + text have one. See the README's "Design manifest".
@@ -29,6 +36,12 @@ you start a release.
 - A **Video** block (`slotVideo`) for the hero's extra-content slot: the Video section's click-to-load YouTube and Vimeo
   player, or an uploaded MP4 with captions. Nothing is requested from the video service until Play.
 - **Section panels.** Every section's Design tab has a **Panel** option: None (the default), Glass or Solid card, with an Advanced glass strength. Glass is tinted with no blur over a solid colour and frosted over pictures, gradients and overlapping content. Text contrast is exact over solids and a guaranteed bound over pictures; the panel gets more opaque, then solid, when text can't be guaranteed, with a Studio warning (never an error). Reduced transparency and more contrast always render solid. See README, "Section panels".
+- **Change proposals** (`npm run proposal`): a JSON format for scripted or AI-made edits to pages and Brand colours, a pure
+  validator (manifest, contrast through `resolveDesignTokens`, panel warnings, `CLIENT_EDITABLE` review flags; content and
+  design checked as separate parts) and a draft-only applier for scratch datasets (dry run by default, `--yes` to write,
+  `ifRevisionID` guard, guarded clean-up, never publishes; agency-only changes need an Administrator or Developer token; `--release` puts the
+  changes into one unpublished release; both were checked against a real scratch dataset). Adds the `SANITY_PROPOSAL_TOKEN` setting (local only). README,
+  "Change proposals".
 
 ### Changed
 
