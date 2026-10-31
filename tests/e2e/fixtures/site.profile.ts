@@ -33,6 +33,8 @@ export const siteProfileInput = defineSiteProfile({
     team: true,
     teamProfiles: true,
     events: true,
+    // The one difference from site.profile.ts: Services are off by default there, and the suite tests them (task 192).
+    services: true,
     // Sanity Releases and scheduled drafts: on only where the Sanity plan includes them (default off).
     releases: true,
   },

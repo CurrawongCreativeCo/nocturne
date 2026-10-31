@@ -57,6 +57,19 @@ export function teamPath(slug: string): string {
 }
 
 /**
+ * Service pages: `/services/<slug>` (src/features/services), behind `features.services`. Like `team`,
+ * a CMS page can't have a path *under* it while the flag is on, but a page called exactly `services`
+ * is fine: that is where the list of services usually lives.
+ */
+export const SERVICES_SEGMENT = 'services'
+export const SERVICES_PATH = `/${SERVICES_SEGMENT}`
+
+/** Service slug -> "/services/<slug>". */
+export function servicePath(slug: string): string {
+  return `${SERVICES_PATH}/${slug}`
+}
+
+/**
  * First path segment of the prerendered A/B variant routes. proxy.ts rewrites a page request to
  * "/ab/<code>/<path>" for visitors in an experiment, so a CMS page can't use it either.
  */

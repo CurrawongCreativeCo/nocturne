@@ -1,3 +1,4 @@
+import { isFeatureEnabled } from '@/config/profile'
 import { reservedSegment } from '@/config/reserved-slug'
 
 /** The page schema's slug pattern (src/features/pages/schemas/page.ts): nested paths, no slashes at the ends. */
@@ -8,6 +9,6 @@ export function pageSlugProblem(slug: string): string | null {
   if (!PAGE_SLUG.test(slug)) {
     return 'Use lowercase letters, numbers and hyphens, with "/" only between parts.'
   }
-  const reserved = reservedSegment(slug)
+  const reserved = reservedSegment(slug, { services: isFeatureEnabled('services') })
   return reserved ? `"${reserved}" is used by the site itself; choose another address.` : null
 }

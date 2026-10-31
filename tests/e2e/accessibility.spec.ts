@@ -13,6 +13,8 @@ for (const path of [
   '/newsletter',
   '/pricing',
   '/services/web/design',
+  '/services/emergency-plumbing',
+  '/services/blocked-drains',
   '/does-not-exist',
   '/blog',
   '/blog?page=2',
