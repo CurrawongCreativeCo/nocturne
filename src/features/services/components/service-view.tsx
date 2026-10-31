@@ -14,12 +14,17 @@ import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { ServiceJsonLd } from './service-json-ld'
 import { getService } from '../api/service'
 import { formatServicePrice } from '../utils/price'
+import { serviceQuestions, type ServiceQuestion } from '../utils/questions'
 
 /**
  * Draws the service's optional sections below the page. They are the page builder's, which this
  * feature can't import, so the route supplies it; it is only called for a service that has sections.
  */
-export type RenderServiceSections = (slug: string, mode: FetchMode) => ReactNode
+export type RenderServiceSections = (
+  slug: string,
+  mode: FetchMode,
+  questions: ServiceQuestion[],
+) => ReactNode
 
 const linkClass = 'font-medium text-ink underline underline-offset-4 hover:text-accent'
 const headingClass = 'text-h3 font-semibold'
@@ -171,7 +176,7 @@ export async function ServiceView({
           </section>
         )}
       </article>
-      {service.hasSections && renderSections?.(slug, mode)}
+      {service.hasSections && renderSections?.(slug, mode, serviceQuestions(service.faqs))}
     </>
   )
 }

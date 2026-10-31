@@ -5,14 +5,23 @@ import { Suspense } from 'react'
 
 import { hasServices } from '@/config/profile'
 import { getServiceMetadata, getServiceStaticParams } from '@/features/services/api/service'
-import { DraftServiceView, ServiceView } from '@/features/services/components/service-view'
-import { PUBLISHED, type FetchMode } from '@/lib/sanity/live'
+import {
+  DraftServiceView,
+  ServiceView,
+  type RenderServiceSections,
+} from '@/features/services/components/service-view'
+import { PUBLISHED } from '@/lib/sanity/live'
 
 import { ServiceSections } from './service-sections'
 
 /** The page builder's sections below the service (see `service-sections.tsx`). Editable overlays only in draft mode. */
-const renderSections = (slug: string, mode: FetchMode) => (
-  <ServiceSections slug={slug} editable={mode.perspective !== 'published'} {...mode} />
+const renderSections: RenderServiceSections = (slug, mode, questions) => (
+  <ServiceSections
+    slug={slug}
+    questions={questions}
+    editable={mode.perspective !== 'published'}
+    {...mode}
+  />
 )
 
 /**

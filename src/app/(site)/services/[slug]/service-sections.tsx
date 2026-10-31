@@ -1,8 +1,11 @@
 import { defineQuery } from 'next-sanity'
 
+import { servicePath } from '@/config/paths'
 import { hasServices } from '@/config/profile'
+import { siteUrl } from '@/config/site-url'
 import { pageBuilderFragment } from '@/features/pages/api/sections'
 import { SectionRenderer } from '@/features/pages/components/section-renderer'
+import type { ServiceQuestion } from '@/features/services/utils/questions'
 import { cachedSanityFetch, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 /**
@@ -21,8 +24,14 @@ export const SERVICE_SECTIONS_QUERY = defineQuery(/* groq */ `
 export async function ServiceSections({
   slug,
   editable,
+  questions,
   ...mode
-}: { slug: string; editable: boolean } & FetchMode) {
+}: {
+  slug: string
+  editable: boolean
+  /** The service's own questions: they head the page's one FAQPage, ahead of any FAQ section's. */
+  questions: ServiceQuestion[]
+} & FetchMode) {
   if (!hasServices()) return null
   const { data } = await cachedSanityFetch({
     query: SERVICE_SECTIONS_QUERY,
@@ -48,6 +57,8 @@ export async function ServiceSections({
       path="sections"
       sections={data.sections}
       editable={editable}
+      pageUrl={new URL(servicePath(slug), siteUrl).toString()}
+      leadingQuestions={questions}
       belowHeading
     />
   )

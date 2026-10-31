@@ -3475,8 +3475,14 @@ above includes `service`. Switching it off again removes the routes, Studio entr
   testimonials, FAQ, process and others; not the hero, forms, pricing table, newsletter or location, which need the full page
   route, and no members-only or shared sections). The field is added to the service in `src/app/service-sections-field.ts`
   and drawn by `src/app/(site)/services/[slug]/service-sections.tsx`, because a feature may not import another. It is a
-  second cached read, made only for a service whose first read says it has sections. A FAQ section's questions are visible
-  but carry no markup on a service page (the service's own questions are the page's one `FAQPage`).
+  second cached read, made only for a service whose first read says it has sections (`hasSections`), so a service without
+  them costs no extra request. It can't be folded into the service query: the section GROQ lives in the pages feature, and a
+  feature may not import another (moving it to `src/lib` would change every page query for one field). It is tagged
+  `service`, `page`, `post`, `sharedSection`, `teamMember`, `frame`, `event`, `eventCategory` and `panel`: the page tags
+  that the allowed sections read, so an edit to any of them expires it. **One FAQPage:** the service's own questions and
+  every FAQ section's questions are one `FAQPage` node (`<page url>#faq`), the service's first. The first FAQ section draws
+  it (`PageContext.leadingQuestions`), and the service leaves its own node out when the query's `hasFaqSections` says a
+  section will.
 - **A part with nothing to show is left out,** heading and markup included: no price, no "Who provides it", no articles.
 - **Structured data:** built by the shared module, `src/lib/structured-data/` (`nodes/service.ts`, with `buildFaqPage` and
   the page's `WebPageJsonLd`; see "Structured data rules"). A `Service` with `@id` `<origin>/#service-<document id>` (the
@@ -3492,7 +3498,8 @@ above includes `service`. Switching it off again removes the routes, Studio entr
 - **Not built yet:** `locations[]` and `areaServed` wait for the `location` type (task 212); the visibility rules for
   services (F-1, F-2) arrive with the rules engine (task 225).
 - **Tests:** unit: `src/lib/structured-data/nodes/service.test.ts` (ids, draft and release prefixes, slug changes, offer,
-  empty fields), `src/features/services/api/service.test.ts` (the reverse reads), `src/app/service-sections-field.test.ts`,
+  empty fields), `src/features/services/api/service.test.ts` (the reverse reads), `src/app/service-sections-field.test.ts`, `src/app/service-faq.test.tsx` (one FAQPage, no repeated id),
+  `src/features/services/components/service-view.test.tsx` (no sections, no second read),
   `scripts/check-service-routes.test.mjs`, `profile.test.ts` (off by default), `reserved-slug.test.ts`,
   `main-document.test.ts`, `feature-visibility.test.ts` and the client-editable registry test. End to end:
   `tests/e2e/services.spec.ts` (a service with everything, one with only the required fields, people, articles, enquiry

@@ -11,6 +11,7 @@ import { buildFaqPage } from '@/lib/structured-data/nodes/faq-page'
 import { buildService } from '@/lib/structured-data/nodes/service'
 
 import type { ServiceData } from '../types'
+import { serviceQuestions } from '../utils/questions'
 
 /**
  * The page's WebPage (about the Service), the Service node, and the FAQPage node when the page
@@ -32,7 +33,7 @@ export function ServiceJsonLd({ service }: { service: ServiceData }) {
     : undefined
   const priceFrom = service.priceFrom
   const priceUnit = stegaClean(service.priceUnit)
-  const faqs = service.faqs ?? []
+  const questions = serviceQuestions(service.faqs)
 
   return (
     <>
@@ -57,16 +58,11 @@ export function ServiceJsonLd({ service }: { service: ServiceData }) {
                 ? { amount: priceFrom, unit: priceUnit }
                 : null,
           }),
-          faqs.length > 0 &&
-            buildFaqPage({
-              url,
-              doc: service._id,
-              questions: faqs.map(({ _key, question, answer }) => ({
-                question: stegaClean(question),
-                answer: stegaClean(answer),
-                field: `faqs[_key=="${_key}"]`,
-              })),
-            }),
+          // When a FAQ section below carries questions, the first one adds them to this same node
+          // (one FAQPage per page, one id): see `PageContext.leadingQuestions`.
+          questions.length > 0 &&
+            !service.hasFaqSections &&
+            buildFaqPage({ url, doc: service._id, questions }),
         )}
       />
     </>

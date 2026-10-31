@@ -84,6 +84,8 @@ interface Props {
   business?: SectionProps<SectionType>['business']
   /** The page's absolute URL, for structured data keyed by the page (the FAQPage node). */
   pageUrl?: string
+  /** Questions the page shows above its sections, joined into the same FAQPage (see `PageContext`). */
+  leadingQuestions?: NonNullable<SectionProps<SectionType>['page']>['leadingQuestions']
   /**
    * True when the page shows its own heading above the sections (a service page), so the first
    * section takes a lower heading level and no LCP preload.
@@ -145,6 +147,7 @@ export function SectionRenderer({
   renderNewsletter,
   business,
   pageUrl,
+  leadingQuestions,
   belowHeading = false,
   gate,
 }: Props) {
@@ -155,6 +158,8 @@ export function SectionRenderer({
     ? {
         url: pageUrl,
         documentId,
+        path,
+        leadingQuestions,
         faqSections: sections.filter(
           (section): section is SectionOf<'faq'> =>
             section._type === 'faq' &&
