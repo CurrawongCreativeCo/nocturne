@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,7 +13,9 @@ const TIMEOUT = 30_000
 const run = (...args) =>
   spawnSync('node', [script, ...args], { cwd: root, encoding: 'utf8', timeout: TIMEOUT })
 
-describe('build-design-manifest.mjs', () => {
+// schema.json is generated (and git-ignored), so a job that has not run `npm run typegen` has none.
+// The CI typegen job still checks the committed manifest is current.
+describe.skipIf(!existsSync(join(root, 'schema.json')))('build-design-manifest.mjs', () => {
   const dir = mkdtempSync(join(tmpdir(), 'design-manifest-'))
   const first = join(dir, 'first.json')
   const second = join(dir, 'second.json')
