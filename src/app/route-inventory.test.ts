@@ -45,6 +45,7 @@ export const ROUTES: Record<string, [Classification, string]> = {
   '(site)/blog/[slug]/page.tsx': ['gated-by-proxy', 'A blog post: unfinished content.'],
   '(site)/blog/category/[slug]/page.tsx': ['gated-by-proxy', 'A blog category.'],
   '(site)/events/[slug]/page.tsx': ['gated-by-proxy', 'An event page.'],
+  '(site)/services/[slug]/page.tsx': ['gated-by-proxy', 'A service page.'],
   '(site)/team/[slug]/page.tsx': ['gated-by-proxy', 'A team profile.'],
   '(site)/search/page.tsx': [
     'gated-by-proxy',

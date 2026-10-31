@@ -31,6 +31,7 @@ export const FEATURE_NAMES = [
   'team',
   'teamProfiles',
   'events',
+  'services',
   'releases',
   'publishGate',
 ] as const
@@ -112,10 +113,11 @@ export interface SiteProfile {
 /**
  * Features that start off: ones that depend on the Sanity plan rather than on what the site offers
  * (a site on a plan without them never meets an upgrade screen), and ones that need set-up before
- * they are safe (`publishGate` needs an Editor token and Contributor clients). Switch one on in
+ * they are safe (`publishGate` needs an Editor token and Contributor clients), and ones a site opts
+ * into because they add routes and structured data it may not want (`services`). Switch one on in
  * `site.profile.ts`.
  */
-export const PLAN_FEATURES: readonly FeatureName[] = ['releases', 'publishGate']
+export const PLAN_FEATURES: readonly FeatureName[] = ['releases', 'publishGate', 'services']
 
 /** Everything on except the plan-dependent features: a site with no profile edits behaves as the template always has. */
 export const DEFAULT_FEATURES: Readonly<Features> = Object.fromEntries(
@@ -354,6 +356,11 @@ export function isFeatureEnabled(name: FeatureName, profile: SiteProfile = siteP
  */
 export function hasTeamProfiles(profile: SiteProfile = siteProfile): boolean {
   return profile.features.team && profile.features.teamProfiles
+}
+
+/** Whether the site has services: `/services/<slug>` pages, their sitemap entries and Service JSON-LD. Off by default. */
+export function hasServices(profile: SiteProfile = siteProfile): boolean {
+  return profile.features.services
 }
 
 /** Whether the site has events: event pages, the calendar files and the Events section's links. */

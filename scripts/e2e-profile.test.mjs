@@ -56,14 +56,20 @@ describe('e2eProfileAlias', () => {
 
   // The fixture is the template's own profile; a client's differs on purpose, so only the template checks.
   it.skipIf(!isTemplateRepo())(
-    'matches the template site.profile.ts apart from its import path',
+    'matches the template site.profile.ts apart from its import path and the services flag',
     () => {
       const real = readFileSync(new URL('../site.profile.ts', import.meta.url), 'utf8')
       const fixture = readFileSync(
         new URL('../tests/e2e/fixtures/site.profile.ts', import.meta.url),
         'utf8',
       )
-      const body = (text) => text.split('\n').slice(1).join('\n')
+      // `services` is off in the template (a plan feature) and on in the fixture so the suite covers it.
+      const body = (text) =>
+        text
+          .split('\n')
+          .slice(1)
+          .filter((line) => !/^\s*(\/\/ The one difference.*|services: true,)$/.test(line))
+          .join('\n')
       expect(body(fixture)).toBe(body(real))
     },
   )

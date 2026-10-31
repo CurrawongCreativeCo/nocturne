@@ -7,10 +7,11 @@ import { releasesSettings } from './releases-config'
 const client = { name: 'Acme Plumbing', slug: 'acme-plumbing' }
 
 describe('releases flag', () => {
-  it('starts off for a new site, and every other feature stays on (bar the publish gate)', () => {
+  it('starts off for a new site, and every other feature stays on (bar the publish gate and services)', () => {
     const { features } = resolveSiteProfile({ client })
     expect(features.releases).toBe(false)
     expect(Object.entries(features).filter(([, on]) => !on)).toEqual([
+      ['services', false],
       ['releases', false],
       ['publishGate', false],
     ])
