@@ -12,10 +12,10 @@ import type { FeedItem } from '../utils/feed'
 import { pagePath, pageRange } from '../utils/pagination'
 
 /**
- * Every blog result shows author names and category titles, so all three types invalidate it.
- * Post bodies can also link to pages, which resolve to slugs.
+ * Every blog result shows author names and category titles, so all three types invalidate it (an
+ * author may be a team member, whose edits do too). Post bodies can also link to pages, which resolve to slugs.
  */
-const BLOG_TAGS = [TAGS.post, TAGS.author, TAGS.category]
+const BLOG_TAGS = [TAGS.post, TAGS.author, TAGS.teamMember, TAGS.category]
 const POST_TAGS = [...BLOG_TAGS, TAGS.page]
 
 /** `generateStaticParams` can't be empty under Cache Components; this slug is never a post (404). */

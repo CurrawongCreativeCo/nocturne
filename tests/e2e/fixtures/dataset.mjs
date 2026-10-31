@@ -224,8 +224,9 @@ const blogPosts = [
       `archive-post-${i + 1}`,
       `Archive post ${i + 1}`,
       `2026-10-0${6 - Math.min(i, 5)}T${String(12 - i).padStart(2, '0')}:00:00Z`,
-      // The last one points at an author that no longer exists: it must render without a byline.
-      i === 8 ? { author: 'author-deleted' } : {},
+      // The first is by a team member (its byline links to their Person node); the last points at
+      // an author that no longer exists: it must render without a byline.
+      i === 0 ? { author: 'teamMember-ann' } : i === 8 ? { author: 'author-deleted' } : {},
     ),
   ),
   blogPost('hidden-post', 'Hidden post', '2026-09-01T09:00:00Z', { seo: { noIndex: true } }),

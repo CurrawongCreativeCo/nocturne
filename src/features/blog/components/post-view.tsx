@@ -5,9 +5,12 @@ import { stegaClean } from 'next-sanity'
 import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
+import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { siteLanguage } from '@/config/env'
-import { BLOG_PATH, categoryPath } from '@/config/paths'
+import { BLOG_PATH, categoryPath, postPath } from '@/config/paths'
+import { siteUrl } from '@/config/site-url'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
+import { articleId } from '@/lib/structured-data/ids'
 
 import { ArticleJsonLd } from './article-json-ld'
 import { PostCard } from './post-card'
@@ -25,6 +28,13 @@ export async function PostView({ slug, ...mode }: { slug: string } & FetchMode) 
 
   return (
     <>
+      <WebPageJsonLd
+        path={postPath(stegaClean(post.slug))}
+        name={post.title}
+        nameSource={{ doc: post._id, field: 'title' }}
+        about={articleId(siteUrl, stegaClean(post._id))}
+        noIndex={Boolean(post.seo?.noIndex)}
+      />
       <ArticleJsonLd post={post} />
       <article className="mx-auto max-w-measure px-gutter py-section-compact">
         <header>

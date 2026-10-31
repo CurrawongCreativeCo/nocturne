@@ -19,11 +19,12 @@ const section = (page: Page, heading: string) =>
   page.locator('section', { has: page.getByRole('heading', { level: 2, name: heading }) })
 
 const jsonLd = (page: Page) =>
-  page
-    .locator('script[type="application/ld+json"]')
-    .evaluateAll((scripts) =>
-      scripts.map((script) => JSON.parse(script.textContent) as Record<string, unknown>),
-    )
+  page.locator('script[type="application/ld+json"]').evaluateAll((scripts) =>
+    scripts.flatMap((script) => {
+      const data = JSON.parse(script.textContent) as Record<string, unknown>
+      return (data['@graph'] as Record<string, unknown>[] | undefined) ?? [data]
+    }),
+  )
 
 /** The parts of the Event structured data the tests read. */
 interface EventLd {
@@ -234,7 +235,6 @@ test.describe('an event page', () => {
     await page.goto('/events/pottery-workshop')
     const event = await eventJsonLd(page)
     expect(event).toMatchObject({
-      '@context': 'https://schema.org',
       name: 'Pottery workshop',
       url: `${SITE_URL}/events/pottery-workshop`,
       eventStatus: 'https://schema.org/EventScheduled',
