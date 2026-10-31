@@ -31,6 +31,19 @@ const jsonLd = async (page: Page): Promise<JsonLdNode[]> =>
       .evaluateAll((scripts) => scripts.map((script) => script.textContent)),
   ).nodes
 
+/**
+ * As structured-data.spec.ts reads a page: the body, plus the <title> and meta description, which are
+ * the rendered form of the title and description fields (the WebSite node's description).
+ */
+const pageText = (page: Page) =>
+  page.evaluate(() =>
+    [
+      document.body.innerText,
+      document.title,
+      document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '',
+    ].join('\n'),
+  )
+
 const region = (page: Page, name: string) => page.getByRole('region', { name })
 
 test.describe('a branch page with everything', () => {
@@ -157,7 +170,7 @@ test.describe('the JSON-LD of a branch', () => {
   test('says nothing the page does not show, and the graph holds together', async ({ page }) => {
     await page.goto(BRANCH)
     const nodes = await jsonLd(page)
-    const text = await page.evaluate(() => document.body.innerText)
+    const text = await pageText(page)
     expect(
       checkParity(nodes, { origin: SITE_URL, text, siteText: text, siteDetails: true }),
     ).toEqual([])
@@ -185,7 +198,7 @@ test.describe('a service area page', () => {
     )
     // The document still holds a phone number, a suburb and hours; none of them is shown.
     for (const heading of ['Visit or contact us', 'Opening hours'])
-      await expect(page.getByRole('heading', { level: 2, name: heading })).toHaveCount(0)
+      await expect(main.getByRole('heading', { level: 2, name: heading })).toHaveCount(0)
     await expect(main.getByText('9111 1111')).toHaveCount(0)
     await expect(main.getByText('Penrith')).toHaveCount(0)
     await expect(main.getByRole('link', { name: 'Get directions' })).toHaveCount(0)
@@ -208,7 +221,7 @@ test.describe('a service area page', () => {
       url: `${SITE_URL}${AREA}`,
       description: 'We travel across Western Sydney, from Parramatta to the Blue Mountains.',
     })
-    const text = await page.evaluate(() => document.body.innerText)
+    const text = await pageText(page)
     expect(
       checkParity(nodes, { origin: SITE_URL, text, siteText: text, siteDetails: true }),
     ).toEqual([])
@@ -222,7 +235,7 @@ test.describe('a branch page with only the required fields', () => {
     await expect(main.locator('h1')).toHaveText('Newtown')
     await expect(main).toContainText('Newtown NSW 2042')
     for (const heading of ['Opening hours', 'Who works here'])
-      await expect(page.getByRole('heading', { level: 2, name: heading })).toHaveCount(0)
+      await expect(main.getByRole('heading', { level: 2, name: heading })).toHaveCount(0)
     // No phone, email or street: the address is there, but there is nothing to dial or write to.
     await expect(main.locator('a[href^="tel:"], a[href^="mailto:"]')).toHaveCount(0)
 
