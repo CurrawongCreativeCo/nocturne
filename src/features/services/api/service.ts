@@ -4,14 +4,14 @@ import { defineQuery } from 'next-sanity'
 import { servicePath } from '@/config/paths'
 import { hasServices } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
-import { imageFields, portableTextFields } from '@/lib/sanity/fragments'
+import { imageFields, linkFields, portableTextFields } from '@/lib/sanity/fragments'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
 /**
  * A service with everything its page and metadata need, in one request: the fields, the proof of
- * work it links to, and the team members who list it (the reverse of `teamMember.services`, so the
- * relationship has one owning side). Only published services have a page; the slug is the way in.
+ * work it links to, the team members who list it (the reverse of `teamMember.services`) and the
+ * newest posts that list it (the reverse of `post.services`), so each relationship has one owning side. Only published services have a page; the slug is the way in.
  * Members-only pages are left out of the proof of work, as they are from the sitemap and search.
  */
 export const SERVICE_QUERY = defineQuery(/* groq */ `
@@ -28,12 +28,20 @@ export const SERVICE_QUERY = defineQuery(/* groq */ `
     priceFrom,
     priceUnit,
     faqs[] { _key, question, answer },
+    "hasSections": count(sections[access != "members"]) > 0,
+    enquiry { label, variant, link { ${linkFields} } },
     evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },
     "people": *[_type == "teamMember" && references(^._id)]
       | order(coalesce(order, 999999) asc, name asc) {
       _id,
       name,
       role,
+      "slug": slug.current
+    },
+    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]
+      | order(publishedAt desc, _id desc) [0...6] {
+      _id,
+      title,
       "slug": slug.current
     }
   }

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 
+import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { BLOG_PATH, categoryPath } from '@/config/paths'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
@@ -7,7 +8,7 @@ import { CategoryNav } from './category-nav'
 import { Pagination } from './pagination'
 import { PostCard } from './post-card'
 import { getPostList } from '../api/get-posts'
-import { pageCount } from '../utils/pagination'
+import { pageCount, pagePath } from '../utils/pagination'
 
 interface ViewProps {
   /** Category slug, or null for the whole blog. */
@@ -26,9 +27,16 @@ export async function PostListView({ category, page, ...mode }: ViewProps & Fetc
 
   const basePath = category === null ? BLOG_PATH : categoryPath(category)
 
+  const title = list.category?.title ?? 'Blog'
+
   return (
     <div className="mx-auto max-w-6xl px-gutter py-section-compact">
-      <h1 className="text-h1 font-semibold text-balance">{list.category?.title ?? 'Blog'}</h1>
+      <WebPageJsonLd
+        path={pagePath(basePath, page)}
+        name={title}
+        nameSource={list.category ? { doc: `category-${category}`, field: 'title' } : undefined}
+      />
+      <h1 className="text-h1 font-semibold text-balance">{title}</h1>
       <CategoryNav categories={list.categories} current={category} />
       {list.posts.length === 0 ? (
         <p className="mt-12 text-lead text-ink-muted">

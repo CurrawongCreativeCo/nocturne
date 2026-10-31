@@ -1,26 +1,26 @@
 import { stegaClean } from 'next-sanity'
 
 import { JsonLd } from '@/components/ui/json-ld'
+import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { servicePath } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
+import { graph } from '@/lib/structured-data/graph'
+import { serviceId } from '@/lib/structured-data/ids'
+import { buildFaqPage } from '@/lib/structured-data/nodes/faq-page'
+import { buildService } from '@/lib/structured-data/nodes/service'
 
 import type { ServiceData } from '../types'
-import { buildServiceFaqJsonLd, buildServiceJsonLd } from '../utils/json-ld'
 
 /**
- * The Service node, and the FAQPage node when the page shows questions. Both are built from the
- * fields the page renders (`../utils/json-ld.ts` has the rules); this only cleans them of stega
- * and resolves the picture.
+ * The page's WebPage (about the Service), the Service node, and the FAQPage node when the page
+ * shows questions. The nodes come from `src/lib/structured-data/`; this cleans the page's values of
+ * stega, resolves the picture and passes only what `ServiceView` renders.
  */
 export function ServiceJsonLd({ service }: { service: ServiceData }) {
   const { image } = service
-  const origin = new URL('/', siteUrl).toString().replace(/\/$/, '')
-  const url = new URL(servicePath(stegaClean(service.slug)), siteUrl).toString()
-  const faqs = (service.faqs ?? []).map(({ question, answer }) => ({
-    question: stegaClean(question),
-    answer: stegaClean(answer),
-  }))
+  const path = servicePath(stegaClean(service.slug))
+  const url = new URL(path, siteUrl).toString()
   const shareImage = image.asset
     ? urlFor({
         asset: { _ref: image.asset._id },
@@ -32,26 +32,43 @@ export function ServiceJsonLd({ service }: { service: ServiceData }) {
     : undefined
   const priceFrom = service.priceFrom
   const priceUnit = stegaClean(service.priceUnit)
+  const faqs = service.faqs ?? []
 
-  const faqNode = buildServiceFaqJsonLd({ url, faqs })
   return (
     <>
-      <JsonLd
-        data={buildServiceJsonLd({
-          documentId: stegaClean(service._id),
-          origin,
-          url,
-          name: stegaClean(service.name),
-          summary: stegaClean(service.summary),
-          image: shareImage,
-          price:
-            typeof priceFrom === 'number' && priceUnit
-              ? { amount: priceFrom, unit: priceUnit }
-              : null,
-          faqs,
-        })}
+      <WebPageJsonLd
+        path={path}
+        name={service.name}
+        nameSource={{ doc: service._id, field: 'name' }}
+        about={serviceId(siteUrl, service._id)}
       />
-      {faqNode && <JsonLd data={faqNode} />}
+      <JsonLd
+        data={graph(
+          buildService({
+            origin: siteUrl,
+            id: service._id,
+            url,
+            name: stegaClean(service.name),
+            summary: stegaClean(service.summary),
+            image: shareImage,
+            audience: stegaClean(service.audience),
+            price:
+              typeof priceFrom === 'number' && priceUnit
+                ? { amount: priceFrom, unit: priceUnit }
+                : null,
+          }),
+          faqs.length > 0 &&
+            buildFaqPage({
+              url,
+              doc: service._id,
+              questions: faqs.map(({ _key, question, answer }) => ({
+                question: stegaClean(question),
+                answer: stegaClean(answer),
+                field: `faqs[_key=="${_key}"]`,
+              })),
+            }),
+        )}
+      />
     </>
   )
 }

@@ -200,6 +200,8 @@ const blogPosts = [
     ...blogPost('welcome-to-the-blog', 'Welcome to the blog', '2026-10-10T09:00:00Z', {
       categories: ['category-news', 'category-guides'],
     }),
+    // Also proof of work on that service, so it is listed once, under "See it in action".
+    services: [{ _key: 'svc-plumbing', ...ref('service-emergency-plumbing') }],
     body: [
       block(['A first heading'], { style: 'h2' }),
       {
@@ -212,7 +214,13 @@ const blogPosts = [
       },
     ],
   },
-  blogPost('news-update', 'News update', '2026-10-09T09:00:00Z', { categories: ['category-news'] }),
+  {
+    ...blogPost('news-update', 'News update', '2026-10-09T09:00:00Z', {
+      categories: ['category-news'],
+    }),
+    // Listed on the Emergency plumbing page as a related article (tests/e2e/services.spec.ts).
+    services: [{ _key: 'svc-plumbing', ...ref('service-emergency-plumbing') }],
+  },
   blogPost('how-to-guide', 'How-to guide', '2026-10-08T09:00:00Z', {
     categories: ['category-guides'],
   }),
@@ -224,8 +232,9 @@ const blogPosts = [
       `archive-post-${i + 1}`,
       `Archive post ${i + 1}`,
       `2026-10-0${6 - Math.min(i, 5)}T${String(12 - i).padStart(2, '0')}:00:00Z`,
-      // The last one points at an author that no longer exists: it must render without a byline.
-      i === 8 ? { author: 'author-deleted' } : {},
+      // The first is by a team member (its byline links to their Person node); the last points at
+      // an author that no longer exists: it must render without a byline.
+      i === 0 ? { author: 'teamMember-ann' } : i === 8 ? { author: 'author-deleted' } : {},
     ),
   ),
   blogPost('hidden-post', 'Hidden post', '2026-09-01T09:00:00Z', { seo: { noIndex: true } }),
@@ -3101,6 +3110,17 @@ documents.push(
       { _key: 'ev-post', ...ref('post-welcome-to-the-blog') },
       { _key: 'ev-page', ...ref('page-about') },
       { _key: 'ev-members', ...ref('page-members') },
+    ],
+    enquiry: cta('Get a quote', external('https://quotes.example.com/plumbing')),
+    sections: [
+      {
+        _key: 'after-the-job',
+        _type: 'richText',
+        body: [
+          block(['What happens after the job'], { style: 'h2' }),
+          block(['We test every repair and leave the site clean.']),
+        ],
+      },
     ],
   },
   {

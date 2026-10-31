@@ -46,5 +46,6 @@ export function reservedSegment(
   if (RESERVED_SEGMENTS.has(first)) return first
   if (rest.length === 0) return null
   if (first === TEAM_SEGMENT || first === EVENTS_SEGMENT) return first
-  return first === SERVICES_SEGMENT && services ? first : null
+  // `/services/[slug]` answers exactly two segments; `services/web/design` still reaches the page route.
+  return first === SERVICES_SEGMENT && services && rest.length === 1 ? first : null
 }

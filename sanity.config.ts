@@ -15,6 +15,7 @@ import { presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
 import { featureRegistry } from './src/app/feature-registry'
+import { withServiceSections } from './src/app/service-sections-field'
 import { apiVersion, dataset, projectId, studioUrl } from './src/config/env'
 import { studioBrand } from './src/config/studio-brand/client'
 import { blogSchemaTypes } from './src/features/blog/schemas'
@@ -137,21 +138,23 @@ export default defineConfig({
   // Content variants: lets editors create variants of a document, which A/B experiments serve.
   beta: { variants: { enabled: true } },
   schema: {
-    types: withClientEditableHiding([
-      ...pageSchemaTypes,
-      ...blogSchemaTypes,
-      ...formSchemaTypes,
-      ...pricingSchemaTypes,
-      ...experimentSchemaTypes,
-      ...siteSchemaTypes,
-      ...teamSchemaTypes,
-      ...eventsSchemaTypes,
-      ...framesSchemaTypes,
-      ...panelsSchemaTypes,
-      ...servicesSchemaTypes,
-      // new-registry:register
-      ...sharedSchemaTypes,
-    ]),
+    types: withClientEditableHiding(
+      withServiceSections([
+        ...pageSchemaTypes,
+        ...blogSchemaTypes,
+        ...formSchemaTypes,
+        ...pricingSchemaTypes,
+        ...experimentSchemaTypes,
+        ...siteSchemaTypes,
+        ...teamSchemaTypes,
+        ...eventsSchemaTypes,
+        ...framesSchemaTypes,
+        ...panelsSchemaTypes,
+        ...servicesSchemaTypes,
+        // new-registry:register
+        ...sharedSchemaTypes,
+      ]),
+    ),
     templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],
   },
   document: {

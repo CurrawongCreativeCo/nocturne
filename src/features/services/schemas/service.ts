@@ -134,6 +134,13 @@ export const service = defineType({
       of: [defineArrayMember({ type: 'reference', to: [{ type: 'post' }, { type: 'page' }] })],
       validation: (rule) => rule.unique(),
     }),
+    defineField({
+      name: 'enquiry',
+      title: 'Enquiry button',
+      type: 'cta',
+      description:
+        'Optional. “Book a call”, “Get a quote”: a link to your contact page, a form or a booking. Left empty, the page shows no button.',
+    }),
   ],
   preview: {
     select: { title: 'name', subtitle: 'summary', media: 'image' },

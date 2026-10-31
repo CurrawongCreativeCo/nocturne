@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseAuPhone } from './phone'
+import { parseAuPhone } from './au-phone'
 
 describe('parseAuPhone', () => {
   it('turns local formats into an international number', () => {

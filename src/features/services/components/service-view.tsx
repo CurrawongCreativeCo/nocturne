@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { stegaClean } from 'next-sanity'
+import type { ReactNode } from 'react'
 
+import { CtaLink } from '@/components/ui/cta-link'
 import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
@@ -13,15 +15,25 @@ import { ServiceJsonLd } from './service-json-ld'
 import { getService } from '../api/service'
 import { formatServicePrice } from '../utils/price'
 
+/**
+ * Draws the service's optional sections below the page. They are the page builder's, which this
+ * feature can't import, so the route supplies it; it is only called for a service that has sections.
+ */
+export type RenderServiceSections = (slug: string, mode: FetchMode) => ReactNode
+
 const linkClass = 'font-medium text-ink underline underline-offset-4 hover:text-accent'
 const headingClass = 'text-h3 font-semibold'
 
 /**
  * A service's page: name, summary, price, picture and full description, then who it's for, who provides
- * it, proof of work and questions. A part with nothing to show is left out, heading and all. Every
+ * it, proof of work, related articles and questions, with an enquiry button under the price when one is set. A part with nothing to show is left out, heading and all. Every
  * string in the JSON-LD (`ServiceJsonLd`) is one of these, shown here.
  */
-export async function ServiceView({ slug, ...mode }: { slug: string } & FetchMode) {
+export async function ServiceView({
+  slug,
+  renderSections,
+  ...mode
+}: { slug: string; renderSections?: RenderServiceSections } & FetchMode) {
   const service = await getService({ slug, ...mode })
   if (!service) notFound()
 
@@ -32,6 +44,10 @@ export async function ServiceView({ slug, ...mode }: { slug: string } & FetchMod
   const { people } = service
   const evidence = service.evidence ?? []
   const faqs = service.faqs ?? []
+  const enquiry = service.enquiry?.label ? service.enquiry : null
+  // Posts already linked as proof of work are not listed twice.
+  const linked = new Set(evidence.map(({ _id }) => _id))
+  const articles = service.articles.filter(({ _id }) => !linked.has(_id))
 
   return (
     <>
@@ -45,6 +61,11 @@ export async function ServiceView({ slug, ...mode }: { slug: string } & FetchMod
               className="mt-6 text-lead text-pretty text-ink-muted"
             />
             {price && <p className="mt-6 text-h4 font-semibold">{price}</p>}
+            {enquiry && (
+              <div className="mt-6">
+                <CtaLink cta={enquiry} surface="light" />
+              </div>
+            )}
           </header>
           <SanityImage
             image={service.image}
@@ -115,6 +136,23 @@ export async function ServiceView({ slug, ...mode }: { slug: string } & FetchMod
           </section>
         )}
 
+        {articles.length > 0 && (
+          <section aria-labelledby="articles-heading" className="mt-12 border-t border-line pt-8">
+            <h2 id="articles-heading" className={headingClass}>
+              Related articles
+            </h2>
+            <ul className="mt-4 space-y-2 text-lead">
+              {articles.map((article) => (
+                <li key={article._id}>
+                  <Link href={postPath(stegaClean(article.slug))} className={linkClass}>
+                    {article.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {faqs.length > 0 && (
           <section aria-labelledby="faq-heading" className="mt-12 border-t border-line pt-8">
             <h2 id="faq-heading" className={headingClass}>
@@ -133,11 +171,18 @@ export async function ServiceView({ slug, ...mode }: { slug: string } & FetchMod
           </section>
         )}
       </article>
+      {service.hasSections && renderSections?.(slug, mode)}
     </>
   )
 }
 
 /** Reads draft-mode cookies, so it must render inside <Suspense>. */
-export async function DraftServiceView({ slug }: { slug: string }) {
-  return <ServiceView slug={slug} {...await getDraftFetchMode()} />
+export async function DraftServiceView({
+  slug,
+  renderSections,
+}: {
+  slug: string
+  renderSections?: RenderServiceSections
+}) {
+  return <ServiceView slug={slug} renderSections={renderSections} {...await getDraftFetchMode()} />
 }

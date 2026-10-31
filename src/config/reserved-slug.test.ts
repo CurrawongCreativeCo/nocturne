@@ -32,6 +32,8 @@ describe('reservedSegment', () => {
     expect(reservedSegment('services/web-design')).toBeNull()
     expect(reservedSegment('services/web-design', { services: true })).toBe('services')
     expect(reservedSegment('services', { services: true })).toBeNull()
+    // Only exactly two segments reach the service route; deeper addresses are still pages.
+    expect(reservedSegment('services/web/design', { services: true })).toBeNull()
   })
 
   it('leaves other paths alone, including ones that merely contain a reserved word', () => {

@@ -2,6 +2,7 @@ import { ComposeIcon } from '@sanity/icons/Compose'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
 import { siteLanguage } from '@/config/env'
+import { hasServices } from '@/config/profile'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 import { formatDate } from '../utils/format-date'
@@ -76,10 +77,21 @@ export const post = defineType({
       validation: (rule) => rule.unique(),
     }),
     defineField({
+      name: 'services',
+      title: 'Related services',
+      type: 'array',
+      group: 'content',
+      of: [defineArrayMember({ type: 'reference', to: [{ type: 'service' }] })],
+      hidden: () => !hasServices(),
+      description: 'This post is listed as a related article on each of these services’ pages.',
+      validation: (rule) => rule.unique(),
+    }),
+    defineField({
       name: 'author',
       type: 'reference',
       group: 'content',
-      to: [{ type: 'author' }],
+      // A team member can be the author, so a person is entered once and the byline links to their profile.
+      to: [{ type: 'author' }, { type: 'teamMember' }],
       validation: (rule) => rule.required(),
     }),
     defineField({

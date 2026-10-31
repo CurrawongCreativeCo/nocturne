@@ -6,7 +6,14 @@ import { Suspense } from 'react'
 import { hasServices } from '@/config/profile'
 import { getServiceMetadata, getServiceStaticParams } from '@/features/services/api/service'
 import { DraftServiceView, ServiceView } from '@/features/services/components/service-view'
-import { PUBLISHED } from '@/lib/sanity/live'
+import { PUBLISHED, type FetchMode } from '@/lib/sanity/live'
+
+import { ServiceSections } from './service-sections'
+
+/** The page builder's sections below the service (see `service-sections.tsx`). Editable overlays only in draft mode. */
+const renderSections = (slug: string, mode: FetchMode) => (
+  <ServiceSections slug={slug} editable={mode.perspective !== 'published'} {...mode} />
+)
 
 /**
  * A service's own page. Rendered like team profiles (see app/(site)/team/[slug]/page.tsx):
@@ -37,9 +44,9 @@ export default async function ServicePage({ params }: Props) {
     )
   }
 
-  return <ServiceView slug={(await params).slug} {...PUBLISHED} />
+  return <ServiceView slug={(await params).slug} renderSections={renderSections} {...PUBLISHED} />
 }
 
 async function DraftService({ params }: Pick<Props, 'params'>) {
-  return <DraftServiceView slug={(await params).slug} />
+  return <DraftServiceView slug={(await params).slug} renderSections={renderSections} />
 }

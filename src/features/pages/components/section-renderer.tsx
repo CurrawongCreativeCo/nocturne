@@ -9,7 +9,7 @@ import { resolveEdge } from '@/components/ui/section-style'
 import { isMembersOnly } from '@/lib/sanity/access'
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
-import type { PageSection, SectionGate, SectionProps, SectionType } from '../types'
+import type { PageSection, SectionGate, SectionOf, SectionProps, SectionType } from '../types'
 import { CtaBanner } from './sections/cta-banner'
 import { Embed } from './sections/embed'
 import { Events } from './sections/events'
@@ -82,6 +82,13 @@ interface Props {
   renderNewsletter?: SectionProps<SectionType>['renderNewsletter']
   /** Passed to every section; see `SectionProps.business`. */
   business?: SectionProps<SectionType>['business']
+  /** The page's absolute URL, for structured data keyed by the page (the FAQPage node). */
+  pageUrl?: string
+  /**
+   * True when the page shows its own heading above the sections (a service page), so the first
+   * section takes a lower heading level and no LCP preload.
+   */
+  belowHeading?: boolean
   /**
    * Set on public views: members-only sections arrive as stubs and are rendered here behind the
    * gate. Leave it out where every section holds its content (draft mode, or inside a page that
@@ -137,9 +144,25 @@ export function SectionRenderer({
   renderCheckout,
   renderNewsletter,
   business,
+  pageUrl,
+  belowHeading = false,
   gate,
 }: Props) {
   if (!sections?.length) return null
+
+  // A locked members-only section is a stub with no questions; the rest feed the page's one FAQPage.
+  const page: SectionProps<SectionType>['page'] = pageUrl
+    ? {
+        url: pageUrl,
+        documentId,
+        faqSections: sections.filter(
+          (section): section is SectionOf<'faq'> =>
+            section._type === 'faq' &&
+            'items' in section &&
+            !(gate && isMembersOnly(section.access)),
+        ),
+      }
+    : undefined
 
   // The footer follows the last section, so it takes the edge like a section would (a band of its colour).
   const lastEdge = edgeOf(sections[sections.length - 1], gate)
@@ -159,6 +182,7 @@ export function SectionRenderer({
               renderCheckout?: Props['renderCheckout']
               renderNewsletter?: Props['renderNewsletter']
               business?: Props['business']
+              page?: SectionProps<SectionType>['page']
             }>
           | undefined
 
@@ -189,6 +213,7 @@ export function SectionRenderer({
                       renderCheckout={renderCheckout}
                       renderNewsletter={renderNewsletter}
                       business={business}
+                      page={page}
                     />
                   ) : null
                 },
@@ -197,12 +222,13 @@ export function SectionRenderer({
           ) : (
             <Section
               data={section}
-              isFirst={index === 0}
+              isFirst={index === 0 && !belowHeading}
               greeting={greeting}
               renderForm={renderForm}
               renderCheckout={renderCheckout}
               renderNewsletter={renderNewsletter}
               business={business}
+              page={page}
             />
           )
 

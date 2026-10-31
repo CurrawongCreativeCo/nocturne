@@ -792,6 +792,54 @@ export type Service = {
     _key: string
   }>
   evidence?: ArrayOf<PostReference | PageReference>
+  enquiry?: Cta
+  sections?: Array<
+    | ({
+        _key: string
+      } & RichText)
+    | ({
+        _key: string
+      } & MediaText)
+    | ({
+        _key: string
+      } & FeaturesGrid)
+    | ({
+        _key: string
+      } & LogoCloud)
+    | ({
+        _key: string
+      } & Testimonials)
+    | ({
+        _key: string
+      } & Faq)
+    | ({
+        _key: string
+      } & CtaBanner)
+    | ({
+        _key: string
+      } & Stats)
+    | ({
+        _key: string
+      } & Gallery)
+    | ({
+        _key: string
+      } & Team)
+    | ({
+        _key: string
+      } & Video)
+    | ({
+        _key: string
+      } & Process)
+    | ({
+        _key: string
+      } & Embed)
+    | ({
+        _key: string
+      } & LinkList)
+    | ({
+        _key: string
+      } & Events)
+  >
 }
 
 export type SanityImageCrop = {
@@ -913,50 +961,6 @@ export type Event = {
     until?: string
     skip?: Array<string>
   }
-}
-
-export type ServiceReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'service'
-}
-
-export type TeamMember = {
-  _id: string
-  _type: 'teamMember'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name: string
-  role?: string
-  portrait: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  shortBio?: string
-  slug?: Slug
-  bio?: BlockContent
-  qualifications?: Array<string>
-  publicEmail?: string
-  phone?: string
-  socialLinks?: Array<{
-    platform: 'linkedin' | 'instagram' | 'facebook' | 'x' | 'youtube' | 'website'
-    url: string
-    _type: 'socialLink'
-    _key: string
-  }>
-  socialDisplay?: 'icons' | 'text'
-  services?: Array<
-    {
-      _key: string
-    } & ServiceReference
-  >
-  order?: number
 }
 
 export type BusinessInfo = {
@@ -1219,11 +1223,25 @@ export type CategoryReference = {
   [internalGroqTypeReferenceTo]?: 'category'
 }
 
+export type ServiceReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'service'
+}
+
 export type AuthorReference = {
   _ref: string
   _type: 'reference'
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: 'author'
+}
+
+export type TeamMemberReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'teamMember'
 }
 
 export type Post = {
@@ -1249,9 +1267,51 @@ export type Post = {
       _key: string
     } & CategoryReference
   >
-  author: AuthorReference
+  services?: Array<
+    {
+      _key: string
+    } & ServiceReference
+  >
+  author: AuthorReference | TeamMemberReference
   publishedAt: string
   seo?: Seo
+}
+
+export type TeamMember = {
+  _id: string
+  _type: 'teamMember'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name: string
+  role?: string
+  portrait: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  shortBio?: string
+  slug?: Slug
+  bio?: BlockContent
+  qualifications?: Array<string>
+  publicEmail?: string
+  phone?: string
+  socialLinks?: Array<{
+    platform: 'linkedin' | 'instagram' | 'facebook' | 'x' | 'youtube' | 'website'
+    url: string
+    _type: 'socialLink'
+    _key: string
+  }>
+  socialDisplay?: 'icons' | 'text'
+  services?: Array<
+    {
+      _key: string
+    } & ServiceReference
+  >
+  order?: number
 }
 
 export type Author = {
@@ -1485,13 +1545,6 @@ export type Video = {
   aspectRatio?: '16:9' | '4:3' | '1:1' | '21:9'
   access?: 'public' | 'members'
   style?: SectionStyle
-}
-
-export type TeamMemberReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'teamMember'
 }
 
 export type Team = {
@@ -2350,8 +2403,6 @@ export type AllSanitySchemaTypes =
   | Panel
   | EventCategoryReference
   | Event
-  | ServiceReference
-  | TeamMember
   | BusinessInfo
   | DesignSettings
   | CookieBanner
@@ -2363,8 +2414,11 @@ export type AllSanitySchemaTypes =
   | Enquiry
   | Category
   | CategoryReference
+  | ServiceReference
   | AuthorReference
+  | TeamMemberReference
   | Post
+  | TeamMember
   | Author
   | SanityFileAssetReference
   | SlotVideo
@@ -2375,7 +2429,6 @@ export type AllSanitySchemaTypes =
   | Embed
   | Process
   | Video
-  | TeamMemberReference
   | Team
   | Location
   | Gallery
@@ -2420,6 +2473,3124 @@ export type AllSanitySchemaTypes =
   | SanityAssetSourceData
   | SanityImageAsset
   | Geopoint
+
+// Source: src/app/(site)/services/[slug]/service-sections.tsx
+// Variable: SERVICE_SECTIONS_QUERY
+// Query: *[_type == "service" && slug.current == $slug][0] {    _id,    "sections": sections[access != "members"] {   _key,    access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    eyebrow,    eyebrowLabels,    eyebrowDesign {      separator,      textColour { colour, hex },      separatorColour { colour, hex }    },    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } } },  _type == "launchDate" => {   label,  date,  time,  countdown,  "timeZone": *[_id == "businessInfo"][0].timeZone },  _type == "slotVideo" => {   title,  source,  url,  "fileUrl": file.asset->url,  "captionsUrl": captions.asset->url,  poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  aspectRatio } },    showGreeting,    partMotion {      enabled,      eyebrowPreset, eyebrowDelay,      headingPreset, headingDelay,      descriptionPreset, descriptionDelay,      buttonsPreset, buttonsDelay,      slotPreset, slotDelay,      imagePreset, imageDelay,      backgroundPreset, backgroundDelay    }  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    media[] {   _key,  _type,  _type == "slotImage" => {   image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },  _type == "slotVideo" => {   title,  source,  url,  "fileUrl": file.asset->url,  "captionsUrl": captions.asset->url,  poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  aspectRatio } },    supporting[] {   _key,  _type,  _type == "slotVideo" => {   title,  source,  url,  "fileUrl": file.asset->url,  "captionsUrl": captions.asset->url,  poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  aspectRatio } },    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    imagePosition,    variant  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    logoColour,    title,    heading,    "headingPlain": pt::text(heading),    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },    _type == "gallery" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    intro,    columns,    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    images[] { _key, caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }  },    _type == "location" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    mapImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    showHours,    showOpenNow,    showContact,    showSocial,    directionsLabel,    interactiveMap  },    _type == "team" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    text,    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    "members": select(      selection == "picked" => members[defined(@->_id)]->{   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] {   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } }    )  },    _type == "video" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    text,    source,    url,    "fileUrl": file.asset->url,    "captionsUrl": captions.asset->url,    poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    aspectRatio  },    _type == "process" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    intro,    steps[] {      _key,      label,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "embed" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    provider,    url,    height,    customHeight  },    _type == "linkList" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    rowStyle,    glassStrength,    showArrows,    thumbnailSize,    title,    heading,    "headingPlain": pt::text(heading),    headingDisplay,    headingImage { size,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    profile {      name,      // Hidden categories never leave the Content Lake, like hidden links.      "categories": select(categoriesVisibility != "hide" => categories),      bio,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },      nameDisplay,      nameImage { size,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    },    // The approved frame is resolved to its artwork's CDN URL, as for imageDesign (tagged `frame`).    profileDesign {      imageSize,      imageShape,      border,      borderWidth,      borderGap,      borderGradient,      "frameUrl": frame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,      borderColour { colour, hex },      nameColour { colour, hex },      bioColour { colour, hex }    },    categoryDesign {      separator,      size,      weight,      textCase,      letterSpacing,      gap,      phoneLayout,      textColour { colour, hex },      separatorColour { colour, hex }    },    cardDesign {        background { colour, hex },  backgroundStrength,  border,  borderColour { colour, hex },      eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },      label { size, weight, colour { colour, hex }, textCase, tracking, leading },      description { size, weight, colour { colour, hex }, textCase, tracking, leading }    },    linkDesign {      arrowStyle,      arrowColour { colour, hex },        iconShape,  iconColour { colour, hex },  iconBackground { colour, hex },  iconBackgroundStrength,  iconBorder,  iconBorderColour { colour, hex }    },    socialDesign {      style,      position,      iconColour { colour, hex },        background { colour, hex },  backgroundStrength,  border,  borderColour { colour, hex }    },    dividerDesign {      afterCategories {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } },      afterProfile {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } },      aboveSocial {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } },      belowSocial {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } }    },    depthDesign {      linkShadow,      socialShadow,      pictureShadow,      glow,      glowTargets,      glowColour { colour, hex }    },    socialSource,    "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),    // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due    // (the page is cached and can't know the time), see LINK_SCHEDULE_SCRIPT.    "links": links[visibility != "hide"] {      _key,      eyebrow,      label,      description,      icon,      featured,      group,      groupDisplay,      groupImage { size,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },      showFrom,      showUntil,      utmSource,      utmMedium,      utmCampaign,      thumbnail {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl },      // A card's own Appearance, only while it is set to "Customise this card".      "design": select(design.appearance == "custom" => design {        appearance,          background { colour, hex },  backgroundStrength,  border,  borderColour { colour, hex },        shadow,        eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },        label { size, weight, colour { colour, hex }, textCase, tracking, leading },        description { size, weight, colour { colour, hex }, textCase, tracking, leading },          iconShape,  iconColour { colour, hex },  iconBackground { colour, hex },  iconBackgroundStrength,  iconBorder,  iconBorderColour { colour, hex },        arrowStyle,        arrowColour { colour, hex }      })    }  },    _type == "events" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    text,    count,    "hasCategoryFilter": defined(category),    seeAllLabel,    seeAllLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl },    "events": *[_type == "event" && defined(start) && defined(slug.current) && (!defined(^.category) || category._ref == ^.category._ref)]      | order(select(  recurrence.repeat in ["weekly", "fortnightly", "monthly"] && !defined(recurrence.until) => "9999-12-31",  recurrence.repeat in ["weekly", "fortnightly", "monthly"] => recurrence.until,  coalesce(end, start)) desc) [0...200] {   _id,  "slug": slug.current,  title,  start,  end,  allDay,  timeZone,  summary,  status,  capacityNote,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  "category": category->title,  location { kind, name },  recurrence { repeat, until, skip } },    // The zone for an event saved without one (an all-day event).    "businessTimeZone": *[_id == "businessInfo"][0].timeZone  },  _type,  _type == "reference" => @->section[0] {      access,    _type == "hero" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    eyebrow,    eyebrowLabels,    eyebrowDesign {      separator,      textColour { colour, hex },      separatorColour { colour, hex }    },    title,    heading,    "headingPlain": pt::text(heading),    description,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    backgroundImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    imagePosition,    proportion,    imageShape,    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    secondaryImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    supporting[] {   _key,  _type,  _type == "statsBar" => {   items[] {   _key,  value,  decimals,  prefix,  suffix,  label },  caption },  _type == "badgeRow" => {   badges[] { _key, label, icon } },  _type == "logoRow" => {   greyscale,  logos[] { _key, name, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } } },  _type == "launchDate" => {   label,  date,  time,  countdown,  "timeZone": *[_id == "businessInfo"][0].timeZone },  _type == "slotVideo" => {   title,  source,  url,  "fileUrl": file.asset->url,  "captionsUrl": captions.asset->url,  poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  aspectRatio } },    showGreeting,    partMotion {      enabled,      eyebrowPreset, eyebrowDelay,      headingPreset, headingDelay,      descriptionPreset, descriptionDelay,      buttonsPreset, buttonsDelay,      slotPreset, slotDelay,      imagePreset, imageDelay,      backgroundPreset, backgroundDelay    }  },    _type == "richText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } }  },    _type == "mediaText" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    eyebrow,    title,    heading,    "headingPlain": pt::text(heading),    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    media[] {   _key,  _type,  _type == "slotImage" => {   image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },  _type == "slotVideo" => {   title,  source,  url,  "fileUrl": file.asset->url,  "captionsUrl": captions.asset->url,  poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  aspectRatio } },    supporting[] {   _key,  _type,  _type == "slotVideo" => {   title,  source,  url,  "fileUrl": file.asset->url,  "captionsUrl": captions.asset->url,  poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  aspectRatio } },    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    imagePosition,    variant  },    _type == "featuresGrid" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    columns,    items[] {      _key,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "logoCloud" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    logoColour,    title,    heading,    "headingPlain": pt::text(heading),    logos[] {      _key,      name,      url,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "testimonials" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    items[] {      _key,      quote,      name,      role,      avatar {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "faq" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    items[] {      _key,      question,      answer[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } }    }  },    _type == "ctaBanner" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    ctas[] {   _key,  label,  variant,  link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    tone  },    _type == "formSection" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    form-> { _id,   title,  submitLabel,  fields[] {    _key,    label,    name,    type,    required,    options  } }  },    _type == "pricingTable" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.    plans[defined(price->priceId) && price->active == true] {      _key,      name,      features,      highlighted,      ctaLabel,      price-> {   priceId,  productName,  amount,  currency,  interval,  intervalCount }    }  },    _type == "newsletterSignup" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    submitLabel,    successMessage  },    _type == "stats" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    intro,    items[] {   _key,  value,  decimals,  prefix,  suffix,  label }  },    _type == "gallery" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    intro,    columns,    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    images[] { _key, caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }  },    _type == "location" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    intro,    mapImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    showHours,    showOpenNow,    showContact,    showSocial,    directionsLabel,    interactiveMap  },    _type == "team" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    text,    imageDesign {   appearance,  motion,  custom,  travel,  direction,  scale,  frame,  frameColour,  frameInset,  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url },    "members": select(      selection == "picked" => members[defined(@->_id)]->{   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] {   _id,  name,  role,  "slug": slug.current,  shortBio,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } }    )  },    _type == "video" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    text,    source,    url,    "fileUrl": file.asset->url,    "captionsUrl": captions.asset->url,    poster {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    aspectRatio  },    _type == "process" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    intro,    steps[] {      _key,      label,      title,      text,      icon {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    }  },    _type == "embed" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    title,    heading,    "headingPlain": pt::text(heading),    text,    provider,    url,    height,    customHeight  },    _type == "linkList" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    rowStyle,    glassStrength,    showArrows,    thumbnailSize,    title,    heading,    "headingPlain": pt::text(heading),    headingDisplay,    headingImage { size,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    profile {      name,      // Hidden categories never leave the Content Lake, like hidden links.      "categories": select(categoriesVisibility != "hide" => categories),      bio,      image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },      nameDisplay,      nameImage { size,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }    },    // The approved frame is resolved to its artwork's CDN URL, as for imageDesign (tagged `frame`).    profileDesign {      imageSize,      imageShape,      border,      borderWidth,      borderGap,      borderGradient,      "frameUrl": frame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,      borderColour { colour, hex },      nameColour { colour, hex },      bioColour { colour, hex }    },    categoryDesign {      separator,      size,      weight,      textCase,      letterSpacing,      gap,      phoneLayout,      textColour { colour, hex },      separatorColour { colour, hex }    },    cardDesign {        background { colour, hex },  backgroundStrength,  border,  borderColour { colour, hex },      eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },      label { size, weight, colour { colour, hex }, textCase, tracking, leading },      description { size, weight, colour { colour, hex }, textCase, tracking, leading }    },    linkDesign {      arrowStyle,      arrowColour { colour, hex },        iconShape,  iconColour { colour, hex },  iconBackground { colour, hex },  iconBackgroundStrength,  iconBorder,  iconBorderColour { colour, hex }    },    socialDesign {      style,      position,      iconColour { colour, hex },        background { colour, hex },  backgroundStrength,  border,  borderColour { colour, hex }    },    dividerDesign {      afterCategories {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } },      afterProfile {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } },      aboveSocial {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } },      belowSocial {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } }    },    depthDesign {      linkShadow,      socialShadow,      pictureShadow,      glow,      glowTargets,      glowColour { colour, hex }    },    socialSource,    "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),    // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due    // (the page is cached and can't know the time), see LINK_SCHEDULE_SCRIPT.    "links": links[visibility != "hide"] {      _key,      eyebrow,      label,      description,      icon,      featured,      group,      groupDisplay,      groupImage { size,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },      showFrom,      showUntil,      utmSource,      utmMedium,      utmCampaign,      thumbnail {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },      link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl },      // A card's own Appearance, only while it is set to "Customise this card".      "design": select(design.appearance == "custom" => design {        appearance,          background { colour, hex },  backgroundStrength,  border,  borderColour { colour, hex },        shadow,        eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },        label { size, weight, colour { colour, hex }, textCase, tracking, leading },        description { size, weight, colour { colour, hex }, textCase, tracking, leading },          iconShape,  iconColour { colour, hex },  iconBackground { colour, hex },  iconBackgroundStrength,  iconBorder,  iconBorderColour { colour, hex },        arrowStyle,        arrowColour { colour, hex }      })    }  },    _type == "events" && (access != "members" || $members) => {    style {   tone,  spacing,  width,  align,  anchorId,  motion,  motionIntensity,  motionDuration,  motionDelay,  motionDirection,  motionTrigger,  motionCustom,  motionDurationMs,  motionDistancePx,  motionEasing,  motionThreshold,  gradient,  overlay,  overlayColor,  overlayGradient,  overlayGradientTop { colour, hex, opacity },  overlayGradientMiddle { colour, hex, opacity },  overlayGradientBottom { colour, hex, opacity },  imageSize,  imageVertical,  imageHorizontal,  imageRepeat,  imageStrength,  imageStrengthPercent,  imageFixed,  fillScreen,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  edge,  edgeHeight,  edgeFlip,  edgeAccent,  edgeLayer,  edgeInvert,  edgeHeightMobile,  edgeHeightTablet,  edgeHeightDesktop,  panel,  panelStrength },    variant,    title,    heading,    "headingPlain": pt::text(heading),    text,    count,    "hasCategoryFilter": defined(category),    seeAllLabel,    seeAllLink {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl },    "events": *[_type == "event" && defined(start) && defined(slug.current) && (!defined(^.category) || category._ref == ^.category._ref)]      | order(select(  recurrence.repeat in ["weekly", "fortnightly", "monthly"] && !defined(recurrence.until) => "9999-12-31",  recurrence.repeat in ["weekly", "fortnightly", "monthly"] => recurrence.until,  coalesce(end, start)) desc) [0...200] {   _id,  "slug": slug.current,  title,  start,  end,  allDay,  timeZone,  summary,  status,  capacityNote,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  "category": category->title,  location { kind, name },  recurrence { repeat, until, skip } },    // The zone for an event saved without one (an all-day event).    "businessTimeZone": *[_id == "businessInfo"][0].timeZone  },  _type,    "_key": ^._key,    "sharedSectionId": ^._ref  } }[_type != "reference"]  }
+export type SERVICE_SECTIONS_QUERY_RESULT = {
+  _id: string
+  sections: Array<
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        text: string | null
+        ctas: Array<{
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
+          link: {
+            linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+            anchor: string | null
+            panel: {
+              id: string
+              title: string
+            } | null
+            fallbackUrl: string | null
+            bookingUrl: string | null
+          }
+        }> | null
+        tone: 'brand' | 'dark' | 'light'
+        _type: 'ctaBanner'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'ctaBanner'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        text: string | null
+        provider: 'google-maps' | 'spotify' | 'typeform'
+        url: string | null
+        height: 'medium' | 'short' | 'tall' | null
+        customHeight: number | null
+        _type: 'embed'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'embed'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'agenda' | 'featured' | 'list'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        text: string | null
+        count: number | null
+        hasCategoryFilter: false | true
+        seeAllLabel: string | null
+        seeAllLink: {
+          linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+          slug: string | null
+          url: string | null
+          openInNewTab: boolean | null
+          anchor: string | null
+          panel: {
+            id: string
+            title: string
+          } | null
+          fallbackUrl: string | null
+          bookingUrl: string | null
+        } | null
+        events: Array<{
+          _id: string
+          slug: string
+          title: string
+          start: string
+          end: string | null
+          allDay: boolean | null
+          timeZone:
+            | 'Australia/Adelaide'
+            | 'Australia/Brisbane'
+            | 'Australia/Darwin'
+            | 'Australia/Hobart'
+            | 'Australia/Melbourne'
+            | 'Australia/Perth'
+            | 'Australia/Sydney'
+            | null
+          summary: string | null
+          status: 'cancelled' | 'scheduled' | 'soldOut'
+          capacityNote: string | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          category: string | null
+          location: {
+            kind: 'online' | 'venue' | null
+            name: string | null
+          } | null
+          recurrence: {
+            repeat: 'fortnightly' | 'monthly' | 'none' | 'weekly' | null
+            until: string | null
+            skip: Array<string> | null
+          } | null
+        }>
+        businessTimeZone:
+          | null
+          | 'Australia/Adelaide'
+          | 'Australia/Brisbane'
+          | 'Australia/Darwin'
+          | 'Australia/Hobart'
+          | 'Australia/Melbourne'
+          | 'Australia/Perth'
+          | 'Australia/Sydney'
+        _type: 'events'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'events'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        intro: string | null
+        items: Array<{
+          _key: string
+          question: string
+          answer: Array<
+            | {
+                children?: Array<{
+                  marks?: Array<string>
+                  text?: string
+                  _type: 'span'
+                  _key: string
+                }>
+                style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+                listItem?: 'bullet' | 'number'
+                markDefs: Array<{
+                  _key: string
+                  _type: 'link'
+                  linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+                  internal?: PageReference
+                  url: string | null
+                  anchor: string | null
+                  panel: {
+                    id: string
+                    title: string
+                  } | null
+                  bookingUrl: string | null
+                  openInNewTab: boolean | null
+                  fallbackUrl: string | null
+                  slug: string | null
+                }> | null
+                level?: number
+                _type: 'block'
+                _key: string
+              }
+            | {
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    hasAlpha: boolean | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+                media?: unknown
+                hotspot: SanityImageHotspot | null
+                crop: SanityImageCrop | null
+                alt: string | null
+                caption: string | null
+                _type: 'image'
+                _key: string
+                markDefs: null
+              }
+          >
+        }>
+        _type: 'faq'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'faq'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        intro: string | null
+        columns: 2 | 3 | 4
+        items: Array<{
+          _key: string
+          title: string
+          text: string | null
+          icon: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+        }>
+        _type: 'featuresGrid'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'featuresGrid'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'grid' | 'masonry' | 'slider'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        intro: string | null
+        columns: 2 | 3 | 4
+        imageDesign: {
+          appearance: 'arch' | 'circle' | 'framed' | 'rounded' | 'square' | 'standard' | null
+          motion: 'medium' | 'none' | 'subtle' | null
+          custom: boolean | null
+          travel: number | null
+          direction: 'down' | 'up' | null
+          scale: number | null
+          frame:
+            | 'corner-brackets'
+            | 'custom'
+            | 'double-line'
+            | 'none'
+            | 'offset-border'
+            | 'organic-brush'
+            | 'thin-line'
+            | null
+          frameColour: 'accent-2' | 'accent' | 'highlight' | 'ink' | null
+          frameInset: number | null
+          customFrameUrl: string | null
+        } | null
+        images: Array<{
+          _key: string
+          caption: string | null
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        }>
+        _type: 'gallery'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'gallery'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'cards' | 'compact' | 'editorial' | 'stacked'
+        rowStyle: 'glass' | 'solid' | null
+        glassStrength: 'light' | 'medium' | 'strong'
+        showArrows: boolean | null
+        thumbnailSize: 'large' | 'standard'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        headingDisplay: 'image' | 'text' | null
+        headingImage: {
+          size: 'large' | 'medium' | 'small' | null
+          alt: null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        } | null
+        profile: {
+          name: string | null
+          categories: Array<string> | null
+          bio: string | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          nameDisplay: 'image' | 'text' | null
+          nameImage: {
+            size: 'large' | 'medium' | 'small' | null
+            alt: null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+        } | null
+        profileDesign: {
+          imageSize: 'large' | 'medium' | 'small' | null
+          imageShape: 'circle' | 'natural' | 'rounded' | null
+          border: 'frame' | 'gradient' | 'line' | 'none' | null
+          borderWidth: 'medium' | 'thick' | 'thin' | null
+          borderGap: 'large' | 'none' | 'small' | null
+          borderGradient: string | null
+          frameUrl: string | null
+          borderColour: {
+            colour: 'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | null
+            hex: string | null
+          } | null
+          nameColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+          bioColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+        } | null
+        categoryDesign: {
+          separator: 'bullet' | 'diamond' | 'dot' | 'line' | 'none' | null
+          size: 'large' | 'medium' | 'small' | null
+          weight: 'medium' | 'regular' | 'semibold' | null
+          textCase: 'normal' | 'uppercase' | null
+          letterSpacing: 'extra-wide' | 'normal' | 'wide' | null
+          gap: 'comfortable' | 'compact' | 'wide' | null
+          phoneLayout: 'stack' | 'wrap' | null
+          textColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+          separatorColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+        } | null
+        cardDesign: {
+          background: {
+            colour:
+              | 'accent-2'
+              | 'accent'
+              | 'custom'
+              | 'highlight'
+              | 'inherit'
+              | 'ink'
+              | 'transparent'
+              | null
+            hex: string | null
+          } | null
+          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+          border: 'medium' | 'none' | 'thick' | 'thin' | null
+          borderColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+          eyebrow: {
+            size: 'large' | 'medium' | 'small' | null
+            weight: 'medium' | 'regular' | 'semibold' | null
+            colour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            textCase: 'normal' | 'uppercase' | null
+            tracking: 'normal' | 'wide' | 'wider' | null
+            leading: null
+          } | null
+          label: {
+            size: 'large' | 'medium' | 'small' | null
+            weight: 'medium' | 'regular' | 'semibold' | null
+            colour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            textCase: null
+            tracking: null
+            leading: null
+          } | null
+          description: {
+            size: 'large' | 'medium' | 'small' | null
+            weight: 'medium' | 'regular' | 'semibold' | null
+            colour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            textCase: null
+            tracking: null
+            leading: 'normal' | 'relaxed' | 'tight' | null
+          } | null
+        } | null
+        linkDesign: {
+          arrowStyle: 'arrow' | 'chevron' | 'external' | 'none' | null
+          arrowColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+          iconShape: 'circle' | 'plain' | 'rounded' | 'square' | null
+          iconColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+          iconBackground: {
+            colour:
+              | 'accent-2'
+              | 'accent'
+              | 'custom'
+              | 'highlight'
+              | 'inherit'
+              | 'ink'
+              | 'transparent'
+              | null
+            hex: string | null
+          } | null
+          iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+          iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
+          iconBorderColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+        } | null
+        socialDesign: {
+          style: 'circle' | 'plain' | 'rounded' | 'square' | null
+          position: 'above' | 'below' | null
+          iconColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+          background: {
+            colour:
+              | 'accent-2'
+              | 'accent'
+              | 'custom'
+              | 'highlight'
+              | 'inherit'
+              | 'ink'
+              | 'transparent'
+              | null
+            hex: string | null
+          } | null
+          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+          border: 'medium' | 'none' | 'thick' | 'thin' | null
+          borderColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+        } | null
+        dividerDesign: {
+          afterCategories: {
+            style: 'dots' | 'fade' | 'line' | 'none' | null
+            width: 'full' | 'long' | 'medium' | 'short' | null
+            thickness: 'bold' | 'thin' | null
+            centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
+            text: string | null
+            textCase: 'normal' | 'uppercase' | null
+            letterSpacing: 'extra-wide' | 'normal' | 'wide' | null
+            icon:
+              | 'award'
+              | 'bolt'
+              | 'calendar'
+              | 'care'
+              | 'check'
+              | 'clock'
+              | 'community'
+              | 'email'
+              | 'gift'
+              | 'heart'
+              | 'leaf'
+              | 'location'
+              | 'lotus'
+              | 'person'
+              | 'phone'
+              | 'shield'
+              | 'star'
+              | 'sun'
+              | null
+            centreSize: 'large' | 'medium' | 'small' | null
+            image: {
+              alt: string | null
+              crop: SanityImageCrop | null
+              hotspot: SanityImageHotspot | null
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  hasAlpha: boolean | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+            } | null
+            lineColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            centreColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+          } | null
+          afterProfile: {
+            style: 'dots' | 'fade' | 'line' | 'none' | null
+            width: 'full' | 'long' | 'medium' | 'short' | null
+            thickness: 'bold' | 'thin' | null
+            centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
+            text: string | null
+            textCase: 'normal' | 'uppercase' | null
+            letterSpacing: 'extra-wide' | 'normal' | 'wide' | null
+            icon:
+              | 'award'
+              | 'bolt'
+              | 'calendar'
+              | 'care'
+              | 'check'
+              | 'clock'
+              | 'community'
+              | 'email'
+              | 'gift'
+              | 'heart'
+              | 'leaf'
+              | 'location'
+              | 'lotus'
+              | 'person'
+              | 'phone'
+              | 'shield'
+              | 'star'
+              | 'sun'
+              | null
+            centreSize: 'large' | 'medium' | 'small' | null
+            image: {
+              alt: string | null
+              crop: SanityImageCrop | null
+              hotspot: SanityImageHotspot | null
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  hasAlpha: boolean | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+            } | null
+            lineColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            centreColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+          } | null
+          aboveSocial: {
+            style: 'dots' | 'fade' | 'line' | 'none' | null
+            width: 'full' | 'long' | 'medium' | 'short' | null
+            thickness: 'bold' | 'thin' | null
+            centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
+            text: string | null
+            textCase: 'normal' | 'uppercase' | null
+            letterSpacing: 'extra-wide' | 'normal' | 'wide' | null
+            icon:
+              | 'award'
+              | 'bolt'
+              | 'calendar'
+              | 'care'
+              | 'check'
+              | 'clock'
+              | 'community'
+              | 'email'
+              | 'gift'
+              | 'heart'
+              | 'leaf'
+              | 'location'
+              | 'lotus'
+              | 'person'
+              | 'phone'
+              | 'shield'
+              | 'star'
+              | 'sun'
+              | null
+            centreSize: 'large' | 'medium' | 'small' | null
+            image: {
+              alt: string | null
+              crop: SanityImageCrop | null
+              hotspot: SanityImageHotspot | null
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  hasAlpha: boolean | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+            } | null
+            lineColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            centreColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+          } | null
+          belowSocial: {
+            style: 'dots' | 'fade' | 'line' | 'none' | null
+            width: 'full' | 'long' | 'medium' | 'short' | null
+            thickness: 'bold' | 'thin' | null
+            centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
+            text: string | null
+            textCase: 'normal' | 'uppercase' | null
+            letterSpacing: 'extra-wide' | 'normal' | 'wide' | null
+            icon:
+              | 'award'
+              | 'bolt'
+              | 'calendar'
+              | 'care'
+              | 'check'
+              | 'clock'
+              | 'community'
+              | 'email'
+              | 'gift'
+              | 'heart'
+              | 'leaf'
+              | 'location'
+              | 'lotus'
+              | 'person'
+              | 'phone'
+              | 'shield'
+              | 'star'
+              | 'sun'
+              | null
+            centreSize: 'large' | 'medium' | 'small' | null
+            image: {
+              alt: string | null
+              crop: SanityImageCrop | null
+              hotspot: SanityImageHotspot | null
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  hasAlpha: boolean | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+            } | null
+            lineColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            centreColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+          } | null
+        } | null
+        depthDesign: {
+          linkShadow: 'flat' | 'floating' | 'raised' | 'soft' | null
+          socialShadow: 'flat' | 'floating' | 'raised' | 'soft' | null
+          pictureShadow: 'flat' | 'floating' | 'raised' | 'soft' | null
+          glow: 'off' | 'soft' | 'strong' | null
+          glowTargets: Array<string> | null
+          glowColour: {
+            colour: 'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | null
+            hex: string | null
+          } | null
+        } | null
+        socialSource: 'business' | 'custom' | 'none'
+        socialLinks: Array<{
+          _key: string
+          platform:
+            | 'facebook'
+            | 'google'
+            | 'instagram'
+            | 'linkedin'
+            | 'other'
+            | 'pinterest'
+            | 'tiktok'
+            | 'x'
+            | 'youtube'
+          url: string
+        }> | null
+        links: Array<{
+          _key: string
+          eyebrow: string | null
+          label: string
+          description: string | null
+          icon:
+            | 'award'
+            | 'bolt'
+            | 'calendar'
+            | 'care'
+            | 'check'
+            | 'clock'
+            | 'community'
+            | 'email'
+            | 'gift'
+            | 'heart'
+            | 'leaf'
+            | 'location'
+            | 'lotus'
+            | 'person'
+            | 'phone'
+            | 'shield'
+            | 'star'
+            | 'sun'
+            | null
+          featured: boolean | null
+          group: string | null
+          groupDisplay: 'image' | 'text' | null
+          groupImage: {
+            size: 'large' | 'medium' | 'small' | null
+            alt: null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          showFrom: string | null
+          showUntil: string | null
+          utmSource: string | null
+          utmMedium: string | null
+          utmCampaign: string | null
+          thumbnail: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          link: {
+            linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+            anchor: string | null
+            panel: {
+              id: string
+              title: string
+            } | null
+            fallbackUrl: string | null
+            bookingUrl: string | null
+          }
+          design: {
+            appearance: 'custom' | null
+            background: {
+              colour:
+                | 'accent-2'
+                | 'accent'
+                | 'custom'
+                | 'highlight'
+                | 'inherit'
+                | 'ink'
+                | 'transparent'
+                | null
+              hex: string | null
+            } | null
+            backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+            border: 'medium' | 'none' | 'thick' | 'thin' | null
+            borderColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            shadow: 'flat' | 'floating' | 'raised' | 'soft' | null
+            eyebrow: {
+              size: 'large' | 'medium' | 'small' | null
+              weight: 'medium' | 'regular' | 'semibold' | null
+              colour: {
+                colour:
+                  | 'accent-2'
+                  | 'accent'
+                  | 'custom'
+                  | 'highlight'
+                  | 'inherit'
+                  | 'ink'
+                  | 'muted'
+                  | null
+                hex: string | null
+              } | null
+              textCase: 'normal' | 'uppercase' | null
+              tracking: 'normal' | 'wide' | 'wider' | null
+              leading: null
+            } | null
+            label: {
+              size: 'large' | 'medium' | 'small' | null
+              weight: 'medium' | 'regular' | 'semibold' | null
+              colour: {
+                colour:
+                  | 'accent-2'
+                  | 'accent'
+                  | 'custom'
+                  | 'highlight'
+                  | 'inherit'
+                  | 'ink'
+                  | 'muted'
+                  | null
+                hex: string | null
+              } | null
+              textCase: null
+              tracking: null
+              leading: null
+            } | null
+            description: {
+              size: 'large' | 'medium' | 'small' | null
+              weight: 'medium' | 'regular' | 'semibold' | null
+              colour: {
+                colour:
+                  | 'accent-2'
+                  | 'accent'
+                  | 'custom'
+                  | 'highlight'
+                  | 'inherit'
+                  | 'ink'
+                  | 'muted'
+                  | null
+                hex: string | null
+              } | null
+              textCase: null
+              tracking: null
+              leading: 'normal' | 'relaxed' | 'tight' | null
+            } | null
+            iconShape: 'circle' | 'plain' | 'rounded' | 'square' | null
+            iconColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            iconBackground: {
+              colour:
+                | 'accent-2'
+                | 'accent'
+                | 'custom'
+                | 'highlight'
+                | 'inherit'
+                | 'ink'
+                | 'transparent'
+                | null
+              hex: string | null
+            } | null
+            iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+            iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
+            iconBorderColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+            arrowStyle: 'arrow' | 'chevron' | 'external' | 'none' | null
+            arrowColour: {
+              colour:
+                'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+              hex: string | null
+            } | null
+          } | null
+        }> | null
+        _type: 'linkList'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'linkList'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'grid' | 'marquee'
+        logoColour: 'colour' | 'grey' | null
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        logos: Array<{
+          _key: string
+          name: string
+          url: string | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          }
+        }>
+        _type: 'logoCloud'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'logoCloud'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        eyebrow: string | null
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        body: Array<
+          | {
+              children?: Array<{
+                marks?: Array<string>
+                text?: string
+                _type: 'span'
+                _key: string
+              }>
+              style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+              listItem?: 'bullet' | 'number'
+              markDefs: Array<{
+                _key: string
+                _type: 'link'
+                linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+                internal?: PageReference
+                url: string | null
+                anchor: string | null
+                panel: {
+                  id: string
+                  title: string
+                } | null
+                bookingUrl: string | null
+                openInNewTab: boolean | null
+                fallbackUrl: string | null
+                slug: string | null
+              }> | null
+              level?: number
+              _type: 'block'
+              _key: string
+            }
+          | {
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  hasAlpha: boolean | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+              media?: unknown
+              hotspot: SanityImageHotspot | null
+              crop: SanityImageCrop | null
+              alt: string | null
+              caption: string | null
+              _type: 'image'
+              _key: string
+              markDefs: null
+            }
+        > | null
+        ctas: Array<{
+          _key: string
+          label: string
+          variant: 'primary' | 'secondary'
+          link: {
+            linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+            slug: string | null
+            url: string | null
+            openInNewTab: boolean | null
+            anchor: string | null
+            panel: {
+              id: string
+              title: string
+            } | null
+            fallbackUrl: string | null
+            bookingUrl: string | null
+          }
+        }> | null
+        image: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        } | null
+        media: Array<
+          | {
+              _key: string
+              _type: 'slotImage'
+              image: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    hasAlpha: boolean | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              }
+            }
+          | {
+              _key: string
+              _type: 'slotVideo'
+              title: string
+              source: 'upload' | 'vimeo' | 'youtube'
+              url: string | null
+              fileUrl: string | null
+              captionsUrl: string | null
+              poster: {
+                alt: string | null
+                crop: SanityImageCrop | null
+                hotspot: SanityImageHotspot | null
+                asset: {
+                  _id: string
+                  metadata: {
+                    lqip: string | null
+                    hasAlpha: boolean | null
+                    dimensions: {
+                      width: number
+                      height: number
+                    } | null
+                  } | null
+                } | null
+              }
+              aspectRatio: '1:1' | '16:9' | '21:9' | '4:3' | null
+            }
+        > | null
+        supporting: Array<{
+          _key: string
+          _type: 'slotVideo'
+          title: string
+          source: 'upload' | 'vimeo' | 'youtube'
+          url: string | null
+          fileUrl: string | null
+          captionsUrl: string | null
+          poster: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          }
+          aspectRatio: '1:1' | '16:9' | '21:9' | '4:3' | null
+        }> | null
+        imageDesign: {
+          appearance: 'arch' | 'circle' | 'framed' | 'rounded' | 'square' | 'standard' | null
+          motion: 'medium' | 'none' | 'subtle' | null
+          custom: boolean | null
+          travel: number | null
+          direction: 'down' | 'up' | null
+          scale: number | null
+          frame:
+            | 'corner-brackets'
+            | 'custom'
+            | 'double-line'
+            | 'none'
+            | 'offset-border'
+            | 'organic-brush'
+            | 'thin-line'
+            | null
+          frameColour: 'accent-2' | 'accent' | 'highlight' | 'ink' | null
+          frameInset: number | null
+          customFrameUrl: string | null
+        } | null
+        imagePosition: 'left' | 'right'
+        variant: 'overlay' | 'side' | 'stacked'
+        _type: 'mediaText'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'mediaText'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'alternating' | 'vertical'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        intro: string | null
+        steps: Array<{
+          _key: string
+          label: string | null
+          title: string
+          text: string | null
+          icon: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+        }>
+        _type: 'process'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'process'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        body: Array<
+          | {
+              children?: Array<{
+                marks?: Array<string>
+                text?: string
+                _type: 'span'
+                _key: string
+              }>
+              style?: 'blockquote' | 'h2' | 'h3' | 'h4' | 'normal'
+              listItem?: 'bullet' | 'number'
+              markDefs: Array<{
+                _key: string
+                _type: 'link'
+                linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+                internal?: PageReference
+                url: string | null
+                anchor: string | null
+                panel: {
+                  id: string
+                  title: string
+                } | null
+                bookingUrl: string | null
+                openInNewTab: boolean | null
+                fallbackUrl: string | null
+                slug: string | null
+              }> | null
+              level?: number
+              _type: 'block'
+              _key: string
+            }
+          | {
+              asset: {
+                _id: string
+                metadata: {
+                  lqip: string | null
+                  hasAlpha: boolean | null
+                  dimensions: {
+                    width: number
+                    height: number
+                  } | null
+                } | null
+              } | null
+              media?: unknown
+              hotspot: SanityImageHotspot | null
+              crop: SanityImageCrop | null
+              alt: string | null
+              caption: string | null
+              _type: 'image'
+              _key: string
+              markDefs: null
+            }
+        >
+        _type: 'richText'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'richText'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'cards' | 'inline'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        intro: string | null
+        items: Array<{
+          _key: string
+          value: number
+          decimals: number | null
+          prefix: string | null
+          suffix: string | null
+          label: string
+        }>
+        _type: 'stats'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'stats'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'grid' | 'list' | 'slider'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        text: string | null
+        imageDesign: {
+          appearance: 'arch' | 'circle' | 'framed' | 'rounded' | 'square' | 'standard' | null
+          motion: 'medium' | 'none' | 'subtle' | null
+          custom: boolean | null
+          travel: number | null
+          direction: 'down' | 'up' | null
+          scale: number | null
+          frame:
+            | 'corner-brackets'
+            | 'custom'
+            | 'double-line'
+            | 'none'
+            | 'offset-border'
+            | 'organic-brush'
+            | 'thin-line'
+            | null
+          frameColour: 'accent-2' | 'accent' | 'highlight' | 'ink' | null
+          frameInset: number | null
+          customFrameUrl: string | null
+        } | null
+        members: Array<{
+          _id: string
+          name: string
+          role: string | null
+          slug: string | null
+          shortBio: string | null
+          portrait: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          }
+        }> | null
+        _type: 'team'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'team'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'grid' | 'slider'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        items: Array<{
+          _key: string
+          quote: string
+          name: string
+          role: string | null
+          avatar: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+        }>
+        _type: 'testimonials'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'testimonials'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        style: {
+          tone: 'accent' | 'alt' | 'inverse' | 'surface' | null
+          spacing: 'compact' | 'default' | 'spacious' | null
+          width: 'default' | 'full' | 'narrow' | 'wide' | null
+          align: 'center' | 'start' | null
+          anchorId: string | null
+          motion:
+            | 'fade'
+            | 'float'
+            | 'none'
+            | 'parallax'
+            | 'parallaxMedium'
+            | 'parallaxStrong'
+            | 'reveal'
+            | 'slide'
+            | 'stagger'
+            | 'subtle'
+            | null
+          motionIntensity: 'bold' | 'normal' | 'subtle' | null
+          motionDuration: 'fast' | 'normal' | 'slow' | null
+          motionDelay: 'long' | 'none' | 'short' | null
+          motionDirection: 'down' | 'end' | 'start' | 'up' | null
+          motionTrigger: 'load' | 'view' | null
+          motionCustom: boolean | null
+          motionDurationMs: number | null
+          motionDistancePx: number | null
+          motionEasing: 'easeIn' | 'easeInOut' | 'easeOut' | 'linear' | null
+          motionThreshold: number | null
+          gradient: string | null
+          overlay: 'light' | 'medium' | 'none' | 'strong' | null
+          overlayColor: 'background' | 'dark' | 'gradient' | 'light' | null
+          overlayGradient: 'deepen' | 'even' | 'focus' | null
+          overlayGradientTop: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientMiddle: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          overlayGradientBottom: {
+            colour:
+              | 'accent-2'
+              | 'accent-deep'
+              | 'accent'
+              | 'background'
+              | 'custom'
+              | 'dark'
+              | 'highlight'
+              | 'light'
+              | null
+            hex: string | null
+            opacity: number | null
+          } | null
+          imageSize: 'actual' | 'contain' | 'cover' | 'screen' | null
+          imageVertical: 'bottom' | 'middle' | 'top' | null
+          imageHorizontal: 'center' | 'left' | 'right' | null
+          imageRepeat: 'both' | 'none' | 'x' | 'y' | null
+          imageStrength: 'faint' | 'full' | 'soft' | null
+          imageStrengthPercent: number | null
+          imageFixed: boolean | null
+          fillScreen: boolean | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          edge: 'arch' | 'curve' | 'diagonal' | 'layered' | 'none' | 'wave' | null
+          edgeHeight: 'large' | 'medium' | 'small' | null
+          edgeFlip: boolean | null
+          edgeAccent: 'accent-2' | 'accent' | 'highlight' | 'none' | null
+          edgeLayer: 'accent-2' | 'highlight' | null
+          edgeInvert: boolean | null
+          edgeHeightMobile: number | null
+          edgeHeightTablet: number | null
+          edgeHeightDesktop: number | null
+          panel: 'glass' | 'none' | 'solid' | null
+          panelStrength: 'light' | 'medium' | 'strong' | null
+        } | null
+        variant: 'ambient' | 'embed'
+        title: string | null
+        heading: HeadingText | null
+        headingPlain: string
+        text: string | null
+        source: 'upload' | 'vimeo' | 'youtube' | null
+        url: string | null
+        fileUrl: string | null
+        captionsUrl: string | null
+        poster: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        }
+        aspectRatio: '1:1' | '16:9' | '21:9' | '4:3' | null
+        _type: 'video'
+      }
+    | {
+        _key: string
+        access: 'members' | 'public' | null
+        _type: 'video'
+      }
+  > | null
+} | null
 
 // Source: src/features/blog/api/queries.ts
 // Variable: POSTS_QUERY
@@ -2468,7 +5639,7 @@ export type POSTS_QUERY_RESULT = {
 
 // Source: src/features/blog/api/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    title,    "slug": slug.current,    excerpt,    publishedAt,    mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    author->{ name, bio, image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    categories[]->{ title, "slug": slug.current },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    "related": *[      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)    ] | score(      boost(^.categories[0]._ref in categories[]._ref, 1),      boost(^.categories[1]._ref in categories[]._ref, 1),      boost(^.categories[2]._ref in categories[]._ref, 1),      boost(^.categories[3]._ref in categories[]._ref, 1),      boost(^.categories[4]._ref in categories[]._ref, 1)    ) | order(_score desc, publishedAt desc, _id desc) [0...3] {   _id,  title,  "slug": slug.current,  excerpt,  publishedAt,  mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  author->{ name },  categories[]->{ title, "slug": slug.current } }  }
+// Query: *[_type == "post" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    title,    "slug": slug.current,    excerpt,    publishedAt,    mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    // An author is an author document or a team member (whose JSON-LD Person the byline links to).    author->{      _id,      _type,      name,      "slug": slug.current,      "bio": select(_type == "teamMember" => shortBio, bio),      "image": select(        _type == "teamMember" => portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },        image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } }      )    },    categories[]->{ title, "slug": slug.current },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    seo {   metaTitle,  metaDescription,  noIndex,  ogImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    "related": *[      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)    ] | score(      boost(^.categories[0]._ref in categories[]._ref, 1),      boost(^.categories[1]._ref in categories[]._ref, 1),      boost(^.categories[2]._ref in categories[]._ref, 1),      boost(^.categories[3]._ref in categories[]._ref, 1),      boost(^.categories[4]._ref in categories[]._ref, 1)    ) | order(_score desc, publishedAt desc, _id desc) [0...3] {   _id,  title,  "slug": slug.current,  excerpt,  publishedAt,  mainImage {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  author->{ name },  categories[]->{ title, "slug": slug.current } }  }
 export type POST_QUERY_RESULT = {
   _id: string
   _type: 'post'
@@ -2493,26 +5664,53 @@ export type POST_QUERY_RESULT = {
       } | null
     } | null
   }
-  author: {
-    name: string
-    bio: string | null
-    image: {
-      alt: string | null
-      crop: SanityImageCrop | null
-      hotspot: SanityImageHotspot | null
-      asset: {
+  author:
+    | {
         _id: string
-        metadata: {
-          lqip: string | null
-          hasAlpha: boolean | null
-          dimensions: {
-            width: number
-            height: number
+        _type: 'author'
+        name: string
+        slug: null
+        bio: string | null
+        image: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
           } | null
         } | null
-      } | null
-    } | null
-  }
+      }
+    | {
+        _id: string
+        _type: 'teamMember'
+        name: string
+        slug: string | null
+        bio: string | null
+        image: {
+          alt: string | null
+          crop: SanityImageCrop | null
+          hotspot: SanityImageHotspot | null
+          asset: {
+            _id: string
+            metadata: {
+              lqip: string | null
+              hasAlpha: boolean | null
+              dimensions: {
+                width: number
+                height: number
+              } | null
+            } | null
+          } | null
+        }
+      }
   categories: Array<{
     title: string
     slug: string
@@ -11529,7 +14727,7 @@ export type SEARCH_QUERY_RESULT = Array<{
 
 // Source: src/features/services/api/service.ts
 // Variable: SERVICE_QUERY
-// Query: *[_type == "service" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    name,    "slug": slug.current,    summary,    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    audience,    priceFrom,    priceUnit,    faqs[] { _key, question, answer },    evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },    "people": *[_type == "teamMember" && references(^._id)]      | order(coalesce(order, 999999) asc, name asc) {      _id,      name,      role,      "slug": slug.current    }  }
+// Query: *[_type == "service" && slug.current == $slug][0] {    _id,    _type,    _updatedAt,    name,    "slug": slug.current,    summary,    image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },    body[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },    audience,    priceFrom,    priceUnit,    faqs[] { _key, question, answer },    "hasSections": count(sections[access != "members"]) > 0,    enquiry { label, variant, link {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl } },    evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },    "people": *[_type == "teamMember" && references(^._id)]      | order(coalesce(order, 999999) asc, name asc) {      _id,      name,      role,      "slug": slug.current    },    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]      | order(publishedAt desc, _id desc) [0...6] {      _id,      title,      "slug": slug.current    }  }
 export type SERVICE_QUERY_RESULT = {
   _id: string
   _type: 'service'
@@ -11613,6 +14811,24 @@ export type SERVICE_QUERY_RESULT = {
     question: string
     answer: string
   }> | null
+  hasSections: boolean | null
+  enquiry: {
+    label: string
+    variant: 'primary' | 'secondary'
+    link: {
+      linkType: 'anchor' | 'booking' | 'external' | 'internal' | 'panel'
+      slug: string | null
+      url: string | null
+      openInNewTab: boolean | null
+      anchor: string | null
+      panel: {
+        id: string
+        title: string
+      } | null
+      fallbackUrl: string | null
+      bookingUrl: string | null
+    }
+  } | null
   evidence: Array<
     | {
         _id: string
@@ -11632,6 +14848,11 @@ export type SERVICE_QUERY_RESULT = {
     name: string
     role: string | null
     slug: string | null
+  }>
+  articles: Array<{
+    _id: string
+    title: string
+    slug: string
   }>
 } | null
 
@@ -12778,8 +15999,9 @@ export type DESIGN_COLOURS_QUERY_RESULT =
 // Query TypeMap
 declare global {
   interface SanityQueries {
+    '\n  *[_type == "service" && slug.current == $slug][0] {\n    _id,\n    "sections": sections[access != "members"] { \n  _key,\n  \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    eyebrow,\n    eyebrowLabels,\n    eyebrowDesign {\n      separator,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n } }\n },\n  _type == "launchDate" => { \n  label,\n  date,\n  time,\n  countdown,\n  "timeZone": *[_id == "businessInfo"][0].timeZone\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    showGreeting,\n    partMotion {\n      enabled,\n      eyebrowPreset, eyebrowDelay,\n      headingPreset, headingDelay,\n      descriptionPreset, descriptionDelay,\n      buttonsPreset, buttonsDelay,\n      slotPreset, slotDelay,\n      imagePreset, imageDelay,\n      backgroundPreset, backgroundDelay\n    }\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    media[] { \n  _key,\n  _type,\n  _type == "slotImage" => { \n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    imagePosition,\n    variant\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    logoColour,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    showSocial,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  \n  _type == "video" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    source,\n    url,\n    "fileUrl": file.asset->url,\n    "captionsUrl": captions.asset->url,\n    poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    aspectRatio\n  }\n,\n  \n  _type == "process" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    steps[] {\n      _key,\n      label,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "embed" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    provider,\n    url,\n    height,\n    customHeight\n  }\n,\n  \n  _type == "linkList" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    rowStyle,\n    glassStrength,\n    showArrows,\n    thumbnailSize,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    headingDisplay,\n    headingImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    profile {\n      name,\n      // Hidden categories never leave the Content Lake, like hidden links.\n      "categories": select(categoriesVisibility != "hide" => categories),\n      bio,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      nameDisplay,\n      nameImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    },\n    // The approved frame is resolved to its artwork\'s CDN URL, as for imageDesign (tagged `frame`).\n    profileDesign {\n      imageSize,\n      imageShape,\n      border,\n      borderWidth,\n      borderGap,\n      borderGradient,\n      "frameUrl": frame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,\n      borderColour { colour, hex },\n      nameColour { colour, hex },\n      bioColour { colour, hex }\n    },\n    categoryDesign {\n      separator,\n      size,\n      weight,\n      textCase,\n      letterSpacing,\n      gap,\n      phoneLayout,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    cardDesign {\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n      eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      description { size, weight, colour { colour, hex }, textCase, tracking, leading }\n    },\n    linkDesign {\n      arrowStyle,\n      arrowColour { colour, hex },\n      \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n\n    },\n    socialDesign {\n      style,\n      position,\n      iconColour { colour, hex },\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n\n    },\n    dividerDesign {\n      afterCategories { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      afterProfile { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      aboveSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      belowSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n }\n    },\n    depthDesign {\n      linkShadow,\n      socialShadow,\n      pictureShadow,\n      glow,\n      glowTargets,\n      glowColour { colour, hex }\n    },\n    socialSource,\n    "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),\n    // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due\n    // (the page is cached and can\'t know the time), see LINK_SCHEDULE_SCRIPT.\n    "links": links[visibility != "hide"] {\n      _key,\n      eyebrow,\n      label,\n      description,\n      icon,\n      featured,\n      group,\n      groupDisplay,\n      groupImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      showFrom,\n      showUntil,\n      utmSource,\n      utmMedium,\n      utmCampaign,\n      thumbnail { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      // A card\'s own Appearance, only while it is set to "Customise this card".\n      "design": select(design.appearance == "custom" => design {\n        appearance,\n        \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n        shadow,\n        eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        description { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n,\n        arrowStyle,\n        arrowColour { colour, hex }\n      })\n    }\n  }\n,\n  \n  _type == "events" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    count,\n    "hasCategoryFilter": defined(category),\n    seeAllLabel,\n    seeAllLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n    "events": *[_type == "event" && defined(start) && defined(slug.current) && (!defined(^.category) || category._ref == ^.category._ref)]\n      | order(select(\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] && !defined(recurrence.until) => "9999-12-31",\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] => recurrence.until,\n  coalesce(end, start)\n) desc) [0...200] { \n  _id,\n  "slug": slug.current,\n  title,\n  start,\n  end,\n  allDay,\n  timeZone,\n  summary,\n  status,\n  capacityNote,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  "category": category->title,\n  location { kind, name },\n  recurrence { repeat, until, skip }\n },\n    // The zone for an event saved without one (an all-day event).\n    "businessTimeZone": *[_id == "businessInfo"][0].timeZone\n  }\n,\n  _type\n,\n  _type == "reference" => @->section[0] {\n    \n  access,\n  \n  _type == "hero" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    eyebrow,\n    eyebrowLabels,\n    eyebrowDesign {\n      separator,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    description,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    backgroundImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    imagePosition,\n    proportion,\n    imageShape,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    secondaryImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "statsBar" => { \n  items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n },\n  caption\n },\n  _type == "badgeRow" => { \n  badges[] { _key, label, icon }\n },\n  _type == "logoRow" => { \n  greyscale,\n  logos[] { _key, name, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n } }\n },\n  _type == "launchDate" => { \n  label,\n  date,\n  time,\n  countdown,\n  "timeZone": *[_id == "businessInfo"][0].timeZone\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    showGreeting,\n    partMotion {\n      enabled,\n      eyebrowPreset, eyebrowDelay,\n      headingPreset, headingDelay,\n      descriptionPreset, descriptionDelay,\n      buttonsPreset, buttonsDelay,\n      slotPreset, slotDelay,\n      imagePreset, imageDelay,\n      backgroundPreset, backgroundDelay\n    }\n  }\n,\n  \n  _type == "richText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n  }\n,\n  \n  _type == "mediaText" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    eyebrow,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    media[] { \n  _key,\n  _type,\n  _type == "slotImage" => { \n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    supporting[] { \n  _key,\n  _type,\n  _type == "slotVideo" => { \n  title,\n  source,\n  url,\n  "fileUrl": file.asset->url,\n  "captionsUrl": captions.asset->url,\n  poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  aspectRatio\n }\n },\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    imagePosition,\n    variant\n  }\n,\n  \n  _type == "featuresGrid" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    items[] {\n      _key,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "logoCloud" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    logoColour,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    logos[] {\n      _key,\n      name,\n      url,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "testimonials" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    items[] {\n      _key,\n      quote,\n      name,\n      role,\n      avatar { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "faq" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] {\n      _key,\n      question,\n      answer[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    }\n  }\n,\n  \n  _type == "ctaBanner" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    ctas[] { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n    tone\n  }\n,\n  \n  _type == "formSection" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    form-> { _id, \n  title,\n  submitLabel,\n  fields[] {\n    _key,\n    label,\n    name,\n    type,\n    required,\n    options\n  }\n }\n  }\n,\n  \n  _type == "pricingTable" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.\n    plans[defined(price->priceId) && price->active == true] {\n      _key,\n      name,\n      features,\n      highlighted,\n      ctaLabel,\n      price-> { \n  priceId,\n  productName,\n  amount,\n  currency,\n  interval,\n  intervalCount\n }\n    }\n  }\n,\n  \n  _type == "newsletterSignup" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    submitLabel,\n    successMessage\n  }\n,\n  \n  _type == "stats" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    items[] { \n  _key,\n  value,\n  decimals,\n  prefix,\n  suffix,\n  label\n }\n  }\n,\n  \n  _type == "gallery" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    columns,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    images[] { _key, caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n  }\n,\n  \n  _type == "location" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    mapImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    showHours,\n    showOpenNow,\n    showContact,\n    showSocial,\n    directionsLabel,\n    interactiveMap\n  }\n,\n  \n  _type == "team" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    imageDesign { \n  appearance,\n  motion,\n  custom,\n  travel,\n  direction,\n  scale,\n  frame,\n  frameColour,\n  frameInset,\n  "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url\n },\n    "members": select(\n      selection == "picked" => members[defined(@->_id)]->{ \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n      *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { \n  _id,\n  name,\n  role,\n  "slug": slug.current,\n  shortBio,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n }\n    )\n  }\n,\n  \n  _type == "video" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    source,\n    url,\n    "fileUrl": file.asset->url,\n    "captionsUrl": captions.asset->url,\n    poster { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    aspectRatio\n  }\n,\n  \n  _type == "process" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    intro,\n    steps[] {\n      _key,\n      label,\n      title,\n      text,\n      icon { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    }\n  }\n,\n  \n  _type == "embed" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    provider,\n    url,\n    height,\n    customHeight\n  }\n,\n  \n  _type == "linkList" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    rowStyle,\n    glassStrength,\n    showArrows,\n    thumbnailSize,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    headingDisplay,\n    headingImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    profile {\n      name,\n      // Hidden categories never leave the Content Lake, like hidden links.\n      "categories": select(categoriesVisibility != "hide" => categories),\n      bio,\n      image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      nameDisplay,\n      nameImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n    },\n    // The approved frame is resolved to its artwork\'s CDN URL, as for imageDesign (tagged `frame`).\n    profileDesign {\n      imageSize,\n      imageShape,\n      border,\n      borderWidth,\n      borderGap,\n      borderGradient,\n      "frameUrl": frame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,\n      borderColour { colour, hex },\n      nameColour { colour, hex },\n      bioColour { colour, hex }\n    },\n    categoryDesign {\n      separator,\n      size,\n      weight,\n      textCase,\n      letterSpacing,\n      gap,\n      phoneLayout,\n      textColour { colour, hex },\n      separatorColour { colour, hex }\n    },\n    cardDesign {\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n      eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n      description { size, weight, colour { colour, hex }, textCase, tracking, leading }\n    },\n    linkDesign {\n      arrowStyle,\n      arrowColour { colour, hex },\n      \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n\n    },\n    socialDesign {\n      style,\n      position,\n      iconColour { colour, hex },\n      \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n\n    },\n    dividerDesign {\n      afterCategories { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      afterProfile { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      aboveSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n },\n      belowSocial { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n }\n    },\n    depthDesign {\n      linkShadow,\n      socialShadow,\n      pictureShadow,\n      glow,\n      glowTargets,\n      glowColour { colour, hex }\n    },\n    socialSource,\n    "socialLinks": select(socialSource == "custom" => socialLinks[] { _key, platform, url }),\n    // Hidden links never leave the Content Lake. Scheduled ones do: the browser decides when they are due\n    // (the page is cached and can\'t know the time), see LINK_SCHEDULE_SCRIPT.\n    "links": links[visibility != "hide"] {\n      _key,\n      eyebrow,\n      label,\n      description,\n      icon,\n      featured,\n      group,\n      groupDisplay,\n      groupImage { size, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      showFrom,\n      showUntil,\n      utmSource,\n      utmMedium,\n      utmCampaign,\n      thumbnail { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      // A card\'s own Appearance, only while it is set to "Customise this card".\n      "design": select(design.appearance == "custom" => design {\n        appearance,\n        \n  background { colour, hex },\n  backgroundStrength,\n  border,\n  borderColour { colour, hex }\n,\n        shadow,\n        eyebrow { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        label { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        description { size, weight, colour { colour, hex }, textCase, tracking, leading },\n        \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n,\n        arrowStyle,\n        arrowColour { colour, hex }\n      })\n    }\n  }\n,\n  \n  _type == "events" && (access != "members" || $members) => {\n    style { \n  tone,\n  spacing,\n  width,\n  align,\n  anchorId,\n  motion,\n  motionIntensity,\n  motionDuration,\n  motionDelay,\n  motionDirection,\n  motionTrigger,\n  motionCustom,\n  motionDurationMs,\n  motionDistancePx,\n  motionEasing,\n  motionThreshold,\n  gradient,\n  overlay,\n  overlayColor,\n  overlayGradient,\n  overlayGradientTop { colour, hex, opacity },\n  overlayGradientMiddle { colour, hex, opacity },\n  overlayGradientBottom { colour, hex, opacity },\n  imageSize,\n  imageVertical,\n  imageHorizontal,\n  imageRepeat,\n  imageStrength,\n  imageStrengthPercent,\n  imageFixed,\n  fillScreen,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  edge,\n  edgeHeight,\n  edgeFlip,\n  edgeAccent,\n  edgeLayer,\n  edgeInvert,\n  edgeHeightMobile,\n  edgeHeightTablet,\n  edgeHeightDesktop,\n  panel,\n  panelStrength\n },\n    variant,\n    title,\n    heading,\n    "headingPlain": pt::text(heading),\n    text,\n    count,\n    "hasCategoryFilter": defined(category),\n    seeAllLabel,\n    seeAllLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n    "events": *[_type == "event" && defined(start) && defined(slug.current) && (!defined(^.category) || category._ref == ^.category._ref)]\n      | order(select(\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] && !defined(recurrence.until) => "9999-12-31",\n  recurrence.repeat in ["weekly", "fortnightly", "monthly"] => recurrence.until,\n  coalesce(end, start)\n) desc) [0...200] { \n  _id,\n  "slug": slug.current,\n  title,\n  start,\n  end,\n  allDay,\n  timeZone,\n  summary,\n  status,\n  capacityNote,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  "category": category->title,\n  location { kind, name },\n  recurrence { repeat, until, skip }\n },\n    // The zone for an event saved without one (an all-day event).\n    "businessTimeZone": *[_id == "businessInfo"][0].timeZone\n  }\n,\n  _type\n,\n    "_key": ^._key,\n    "sharedSectionId": ^._ref\n  }\n }[_type != "reference"]\n  }\n': SERVICE_SECTIONS_QUERY_RESULT
     '{\n  "posts": *[\n  _type == "post" && defined(slug.current) &&\n  (!defined($category) || $category in categories[]->slug.current)\n] | order(publishedAt desc, _id desc) [$start...$end] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n },\n  "total": count(*[\n  _type == "post" && defined(slug.current) &&\n  (!defined($category) || $category in categories[]->slug.current)\n]),\n  "category": *[_type == "category" && defined(slug.current) && slug.current == $category][0] {\n    title,\n    "slug": slug.current\n  },\n  "categories": *[\n    _type == "category" && defined(slug.current) && count(*[_type == "post" && references(^._id)]) > 0\n  ] | order(title asc) { title, "slug": slug.current }\n}': POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    title,\n    "slug": slug.current,\n    excerpt,\n    publishedAt,\n    mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    author->{ name, bio, image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n } },\n    categories[]->{ title, "slug": slug.current },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    "related": *[\n      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)\n    ] | score(\n      boost(^.categories[0]._ref in categories[]._ref, 1),\n      boost(^.categories[1]._ref in categories[]._ref, 1),\n      boost(^.categories[2]._ref in categories[]._ref, 1),\n      boost(^.categories[3]._ref in categories[]._ref, 1),\n      boost(^.categories[4]._ref in categories[]._ref, 1)\n    ) | order(_score desc, publishedAt desc, _id desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n }\n  }\n': POST_QUERY_RESULT
+    '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    title,\n    "slug": slug.current,\n    excerpt,\n    publishedAt,\n    mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    // An author is an author document or a team member (whose JSON-LD Person the byline links to).\n    author->{\n      _id,\n      _type,\n      name,\n      "slug": slug.current,\n      "bio": select(_type == "teamMember" => shortBio, bio),\n      "image": select(\n        _type == "teamMember" => portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n        image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n      )\n    },\n    categories[]->{ title, "slug": slug.current },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    seo { \n  metaTitle,\n  metaDescription,\n  noIndex,\n  ogImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    "related": *[\n      _type == "post" && defined(slug.current) && _id != ^._id && references(^.categories[]._ref)\n    ] | score(\n      boost(^.categories[0]._ref in categories[]._ref, 1),\n      boost(^.categories[1]._ref in categories[]._ref, 1),\n      boost(^.categories[2]._ref in categories[]._ref, 1),\n      boost(^.categories[3]._ref in categories[]._ref, 1),\n      boost(^.categories[4]._ref in categories[]._ref, 1)\n    ) | order(_score desc, publishedAt desc, _id desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  publishedAt,\n  mainImage { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  author->{ name },\n  categories[]->{ title, "slug": slug.current }\n }\n  }\n': POST_QUERY_RESULT
     '{\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc) {\n    "slug": slug.current,\n    title,\n    "description": coalesce(seo.metaDescription, excerpt),\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  },\n  "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current }\n}': BLOG_INDEX_QUERY_RESULT
     '\n  *[_type == "post" && defined(slug.current)] | order(_id) [$start...$end] {\n    "slug": slug.current,\n    _updatedAt,\n    "noIndex": seo.noIndex == true\n  }\n': POST_SITEMAP_QUERY_RESULT
     '\n  *[_type == "event" && slug.current == $slug][0] {\n    \n  _id,\n  "slug": slug.current,\n  title,\n  start,\n  end,\n  allDay,\n  timeZone,\n  summary,\n  status,\n  capacityNote,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  "category": category->title,\n  location { kind, name },\n  recurrence { repeat, until, skip }\n,\n    _type,\n    _updatedAt,\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    location { kind, name, address, url },\n    registration { label, variant, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n } },\n    "businessTimeZone": *[_id == "businessInfo"][0].timeZone\n  }\n': EVENT_QUERY_RESULT
@@ -12795,7 +16017,7 @@ declare global {
     '\n  *[_type == "redirect" && defined(source) && defined(destination)] {\n    source,\n    destination,\n    "permanent": permanent != false\n  }\n': REDIRECTS_QUERY_RESULT
     '\n  *[_type == "stripePrice" && priceId == $priceId && active == true][0] {\n    priceId,\n    interval\n  }\n': CHECKOUT_PRICE_QUERY_RESULT
     '\n  *[\n    _type == "page" && defined(slug.current) && seo.noIndex != true &&\n    access != "members" &&\n    (\n      title match $q || seo.metaDescription match $q ||\n      pt::text(pageBuilder[access != "members"].body) match $q\n    )\n  ] | score(title match $q) | order(_score desc, title asc) [0...20] {\n    title,\n    "slug": slug.current,\n    "description": seo.metaDescription,\n    "text": coalesce(pt::text(pageBuilder[access != "members"].body), "")\n  }\n': SEARCH_QUERY_RESULT
-    '\n  *[_type == "service" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    name,\n    "slug": slug.current,\n    summary,\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    audience,\n    priceFrom,\n    priceUnit,\n    faqs[] { _key, question, answer },\n    evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },\n    "people": *[_type == "teamMember" && references(^._id)]\n      | order(coalesce(order, 999999) asc, name asc) {\n      _id,\n      name,\n      role,\n      "slug": slug.current\n    }\n  }\n': SERVICE_QUERY_RESULT
+    '\n  *[_type == "service" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    name,\n    "slug": slug.current,\n    summary,\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    audience,\n    priceFrom,\n    priceUnit,\n    faqs[] { _key, question, answer },\n    "hasSections": count(sections[access != "members"]) > 0,\n    enquiry { label, variant, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n } },\n    evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },\n    "people": *[_type == "teamMember" && references(^._id)]\n      | order(coalesce(order, 999999) asc, name asc) {\n      _id,\n      name,\n      role,\n      "slug": slug.current\n    },\n    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]\n      | order(publishedAt desc, _id desc) [0...6] {\n      _id,\n      title,\n      "slug": slug.current\n    }\n  }\n': SERVICE_QUERY_RESULT
     '\n  *[_type == "service" && defined(slug.current)] | order(name asc) {\n    "slug": slug.current,\n    _updatedAt\n  }\n': SERVICE_INDEX_QUERY_RESULT
     '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers,\n      verificationMarker\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerText,\n      footerShowSocial,\n      footerSocialStyle\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      gradients[] { name, angle, stops }\n    },\n    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).\n    "business": *[_id == "businessInfo"][0] {\n      tradingName,\n      legalName,\n      abn,\n      phone,\n      publicEmail,\n      address { street, suburb, state, postcode },\n      timeZone,\n      businessType,\n      businessTypeOther,\n      geo { lat, lng },\n      openingHours[] { _key, days, opens, closes, closed },\n      specialHours[] { _key, date, closed, opens, closes, note },\n      serviceAreas,\n      socialLinks[] { _key, platform, url },\n      priceRange\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "footerShowSocial": navigation.footerShowSocial == true,\n    "footerSocialStyle": navigation.footerSocialStyle,\n    "consent": consent,\n    "design": design,\n    "business": business,\n    "allowAiCrawlers": identity.allowAiCrawlers != false,\n    "verificationMarker": identity.verificationMarker\n  }\n': SETTINGS_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "panels": *[_type == "panel"] {\n    _id,\n    title\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT

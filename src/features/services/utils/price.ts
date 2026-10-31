@@ -1,5 +1,4 @@
-/** The currency a service's "from" price is in. Every price on the site is AUD. */
-export const SERVICE_CURRENCY = 'AUD'
+import { SERVICE_CURRENCY } from '@/lib/structured-data/nodes/service'
 
 /** "From $150 per hour". `amount` is in dollars; whole dollars drop the cents. */
 export function formatServicePrice(amount: number, unit: string): string {

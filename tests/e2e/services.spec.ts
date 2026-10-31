@@ -3,11 +3,14 @@ import { expect, type Page } from '@playwright/test'
 import { SITE_URL } from './constants'
 import { test } from './fixtures/test'
 import {
-  collectCheckableStrings,
-  findHiddenStrings,
+  findDraftIds,
+  findMissingWebPage,
+  findUnresolvedReferences,
   findWebPageProblems,
+  parseJsonLd,
   type JsonLdNode,
 } from '../../src/lib/json-ld-visibility'
+import { checkParity } from '../../src/lib/structured-data/parity'
 
 /**
  * Service pages and their structured data (README, "Services"). Emergency plumbing has every optional
@@ -18,12 +21,13 @@ import {
 const FULL = '/services/emergency-plumbing'
 const BARE = '/services/blocked-drains'
 
-const jsonLd = (page: Page) =>
-  page
-    .locator('script[type="application/ld+json"]')
-    .evaluateAll((scripts) =>
-      scripts.map((script) => JSON.parse(script.textContent) as Record<string, unknown>),
-    ) as Promise<JsonLdNode[]>
+/** Every node on the page, with `@graph` flattened. */
+const jsonLd = async (page: Page): Promise<JsonLdNode[]> =>
+  parseJsonLd(
+    await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((scripts) => scripts.map((script) => script.textContent)),
+  ).nodes
 
 const region = (page: Page, name: string) => page.getByRole('region', { name })
 
@@ -72,6 +76,35 @@ test.describe('a service page with everything', () => {
     await expect(evidence).not.toContainText('Members area')
   })
 
+  test('lists related articles once, leaving out posts already shown as proof of work', async ({
+    page,
+  }) => {
+    await page.goto(FULL)
+    const articles = region(page, 'Related articles')
+    await expect(articles.getByRole('link')).toHaveText(['News update'])
+    await expect(articles.getByRole('link', { name: 'News update' })).toHaveAttribute(
+      'href',
+      '/blog/news-update',
+    )
+  })
+
+  test('offers the enquiry button the editor set, and the extra sections below the page', async ({
+    page,
+  }) => {
+    await page.goto(FULL)
+    const main = page.locator('#main-content')
+    await expect(main.getByRole('link', { name: 'Get a quote' })).toHaveAttribute(
+      'href',
+      'https://quotes.example.com/plumbing',
+    )
+    await expect(
+      main.getByRole('heading', { level: 2, name: 'What happens after the job' }),
+    ).toBeVisible()
+    await expect(main.getByText('We test every repair and leave the site clean.')).toBeVisible()
+    // The page keeps its one <h1>.
+    await expect(main.locator('h1')).toHaveCount(1)
+  })
+
   test('shows every question and answer without opening anything', async ({ page }) => {
     await page.goto(FULL)
     const faqs = region(page, 'Questions and answers')
@@ -104,7 +137,6 @@ test.describe('the JSON-LD', () => {
     await page.goto(FULL)
     const service = (await jsonLd(page)).find((node) => node['@type'] === 'Service')
     expect(service).toMatchObject({
-      '@context': 'https://schema.org',
       '@id': `${SITE_URL}/#service-service-emergency-plumbing`,
       name: 'Emergency plumbing',
       url: `${SITE_URL}${FULL}`,
@@ -112,6 +144,8 @@ test.describe('the JSON-LD', () => {
       provider: { '@id': `${SITE_URL}/#organization` },
       offers: {
         '@type': 'Offer',
+        price: 150,
+        priceCurrency: 'AUD',
         priceSpecification: {
           '@type': 'PriceSpecification',
           minPrice: 150,
@@ -119,7 +153,16 @@ test.describe('the JSON-LD', () => {
           unitText: 'per hour',
         },
       },
-      mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}${FULL}#webpage` },
+      audience: {
+        '@type': 'Audience',
+        audienceType: 'Households and small businesses with a plumbing problem that cannot wait.',
+      },
+      mainEntityOfPage: { '@id': `${SITE_URL}${FULL}#webpage` },
+    })
+    // The page's WebPage is about the service, by the same @id.
+    expect((await jsonLd(page)).find((node) => node['@type'] === 'WebPage')).toMatchObject({
+      '@id': `${SITE_URL}${FULL}#webpage`,
+      about: { '@id': `${SITE_URL}/#service-service-emergency-plumbing` },
     })
     expect(service?.image as string).toContain('cdn.sanity.io/images')
     for (const key of ['areaServed', 'aggregateRating', 'review']) {
@@ -148,14 +191,23 @@ test.describe('the JSON-LD', () => {
     })
   })
 
-  test('says nothing the page does not show, and points its WebPage at the site', async ({
-    page,
-  }) => {
+  test('says nothing the page does not show, and the graph holds together', async ({ page }) => {
     await page.goto(FULL)
     const nodes = await jsonLd(page)
     const text = await page.evaluate(() => document.body.innerText)
-    expect(findHiddenStrings(collectCheckableStrings(nodes), text)).toEqual([])
+    expect(
+      checkParity(nodes, { origin: SITE_URL, text, siteText: text, siteDetails: true }),
+    ).toEqual([])
     expect(findWebPageProblems(nodes, SITE_URL)).toEqual([])
+    expect(findMissingWebPage(nodes, `${SITE_URL}${FULL}`)).toEqual([])
+    expect(findDraftIds(nodes)).toEqual([])
+    // The organisation and website are defined by the site-wide nodes, which this page also carries.
+    expect(
+      findUnresolvedReferences(
+        nodes,
+        new Set([`${SITE_URL}/#organization`, `${SITE_URL}/#website`]),
+      ),
+    ).toEqual([])
   })
 })
 
@@ -170,16 +222,34 @@ test.describe('a service page with only the required fields', () => {
       'Who provides it',
       'See it in action',
       'Questions and answers',
+      'Related articles',
+      'What happens after the job',
     ]) {
       await expect(page.getByRole('heading', { level: 2, name: heading })).toHaveCount(0)
     }
     await expect(main.getByText('From $')).toHaveCount(0)
+    // No enquiry button is set, so there is none and no invented contact link.
+    await expect(main.getByRole('link', { name: 'Get a quote' })).toHaveCount(0)
 
     const nodes = await jsonLd(page)
     expect(nodes.map((node) => node['@type'])).toContain('Service')
     expect(nodes.map((node) => node['@type'])).not.toContain('FAQPage')
     expect(nodes.find((node) => node['@type'] === 'Service')).not.toHaveProperty('offers')
   })
+})
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 375, height: 800 } })
+
+  for (const path of [FULL, BARE]) {
+    test(`${path} has no horizontal scroll`, async ({ page }) => {
+      await page.goto(path)
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      )
+      expect(overflow).toBeLessThanOrEqual(0)
+    })
+  }
 })
 
 test.describe('unknown services', () => {

@@ -199,6 +199,11 @@ describe('hasServices', () => {
     expect(hasServices(profile({}))).toBe(false)
     expect(hasServices(profile({ services: true }))).toBe(true)
   })
+
+  // A client site decides for itself; the template ships Services off (a plan feature).
+  it.skipIf(!isTemplateRepo())('is off in the template profile', () => {
+    expect(hasServices(siteProfile)).toBe(false)
+  })
 })
 
 describe('launch', () => {
