@@ -76,7 +76,8 @@ export async function PageView({
       name={page.seo?.metaTitle || page.title}
       nameSource={{ doc: page._id, field: page.seo?.metaTitle ? 'seo.metaTitle' : 'title' }}
       breadcrumb={trail.length > 0}
-      noIndex={Boolean(page.seo?.noIndex) || isMembersOnly(page.access)}
+      // The pre-launch view (breadcrumbs off) carries the site-level graph only: no page is named.
+      noIndex={Boolean(page.seo?.noIndex) || isMembersOnly(page.access) || !showBreadcrumbs}
     />
   )
   // A "Minimal page" marks itself, and globals.css hides the site's header, announcement and footer

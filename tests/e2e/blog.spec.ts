@@ -196,8 +196,9 @@ test.describe('blog post', () => {
       url: `${SITE_URL}${path}`,
       isPartOf: { '@id': `${SITE_URL}/#website` },
       about: { '@id': `${SITE_URL}/#article-post-welcome-to-the-blog` },
-      inLanguage: 'en-AU',
     })
+    // The site language (NEXT_PUBLIC_SITE_LANGUAGE; "en" under the fixtures).
+    expect(webPage?.inLanguage).toEqual(expect.stringMatching(/^en/))
   })
 
   test('an author who is a team member is the Person node, linked by @id', async ({ page }) => {

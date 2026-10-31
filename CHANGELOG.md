@@ -74,7 +74,7 @@ you start a release.
 
 None for panels: the new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
 
-Structured data: `post.author` now also accepts a team member (no data migration; existing posts keep their author); run `npm run typegen` after merging. The Person `@id` changes once, from `<team url>#person` to `<origin>/#person-<id>`; search engines re-read it. The Organization no longer emits `areaServed` (no component shows service areas, and markup must match what visitors see); it returns once a site displays them. Pages hidden from search engines, members-only pages, search and sign-in carry no `WebPage` node. Sites that imported the moved files update their imports.
+Structured data: `post.author` now also accepts a team member (no data migration; existing posts keep their author); run `npm run typegen` after merging. The Person `@id` changes once, from `<team url>#person` to `<origin>/#person-<id>`; search engines re-read it. The Organization no longer emits `areaServed` (no component shows service areas, and markup must match what visitors see); it returns once a site displays them. Pages hidden from search engines, members-only pages, the pre-launch view, search and sign-in carry no `WebPage` node. Sites that imported the moved files update their imports.
 
 Slot blocks: A project that added its own hero slot type moves it to a `SLOT_BLOCKS` line and a `COMPONENTS` line (README,
 "Adding a slot block"); its stored content needs no migration.
