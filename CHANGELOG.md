@@ -29,6 +29,11 @@ you start a release.
 - A **Video** block (`slotVideo`) for the hero's extra-content slot: the Video section's click-to-load YouTube and Vimeo
   player, or an uploaded MP4 with captions. Nothing is requested from the video service until Play.
 - **Section panels.** Every section's Design tab has a **Panel** option: None (the default), Glass or Solid card, with an Advanced glass strength. Glass is tinted with no blur over a solid colour and frosted over pictures, gradients and overlapping content. Text contrast is exact over solids and a guaranteed bound over pictures; the panel gets more opaque, then solid, when text can't be guaranteed, with a Studio warning (never an error). Reduced transparency and more contrast always render solid. See README, "Section panels".
+- **Change proposals** (`npm run proposal`): a JSON format for scripted or AI-made edits to pages and Brand colours, a pure
+  validator (manifest, contrast through `resolveDesignTokens`, panel warnings, `CLIENT_EDITABLE` review flags; content and
+  design checked as separate parts) and a draft-only applier for scratch datasets (dry run by default, `--yes` to write,
+  `ifRevisionID` guard, optional `--release`, never publishes). Adds the `SANITY_PROPOSAL_TOKEN` setting (local only). README,
+  "Change proposals".
 
 ### Changed
 

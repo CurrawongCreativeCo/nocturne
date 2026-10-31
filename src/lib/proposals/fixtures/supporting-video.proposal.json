@@ -1,0 +1,28 @@
+{
+  "id": "supporting-video",
+  "manifestVersion": "1.10.0",
+  "intent": "Add a supporting video to the hero.",
+  "scope": "section",
+  "changes": [
+    {
+      "documentId": "page-home",
+      "baseRev": "rev-home-1",
+      "patches": [
+        {
+          "set": {
+            "pageBuilder[_key==\"hero1\"].supporting": [
+              {
+                "_key": "video1",
+                "_type": "slotVideo",
+                "title": "Meet the studio",
+                "source": "youtube",
+                "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "rationale": "The hero's supporting slot holds one block, and a video is an approved block there."
+}
