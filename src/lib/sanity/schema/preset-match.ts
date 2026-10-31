@@ -61,8 +61,10 @@ export interface PresetState<T> {
 
 /**
  * Which preset a value is on, and when it is Custom, which one it is closest to and which fields
- * moved. `defaults` stands in for unset fields as in `matchPreset`. Fewest moved fields wins, then the
- * most fields still matching (so a preset that sets more of what the value holds), then the earlier preset.
+ * moved. `defaults` stands in for unset fields as in `matchPreset`. Fewest moved fields wins. A tie
+ * (two presets each one field away) goes to the preset whose earlier `set` keys still match, because
+ * a preset lists its defining field first (the layout), then its refinements (tone). Last, the
+ * earlier preset.
  */
 export function describePresetState<T extends Pick<PresetDefinition, 'set'>>(
   presets: readonly T[],
@@ -71,26 +73,33 @@ export function describePresetState<T extends Pick<PresetDefinition, 'set'>>(
 ): PresetState<T> {
   let nearest: T | null = null
   let differences: string[] = []
-  let matching = 0
+  let leading: boolean[] = []
   for (const preset of presets) {
-    const moved = Object.entries(preset.set)
-      .filter(([key, expected]) => {
-        const current = getAtPath(value, splitPath(key))
-        return !isEqual(current === undefined ? defaults[key] : current, expected)
-      })
-      .map(([key]) => key)
-    const same = Object.keys(preset.set).length - moved.length
-    if (
-      nearest === null ||
-      moved.length < differences.length ||
-      (moved.length === differences.length && same > matching)
-    ) {
+    const entries = Object.entries(preset.set)
+    const matches = entries.map(([key, expected]) => {
+      const current = getAtPath(value, splitPath(key))
+      return isEqual(current === undefined ? defaults[key] : current, expected)
+    })
+    const moved = entries.filter((_, index) => !matches[index]).map(([key]) => key)
+    if (nearest === null || moved.length < differences.length) {
       nearest = preset
       differences = moved
-      matching = same
+      leading = matches
+    } else if (moved.length === differences.length && leadsOver(matches, leading)) {
+      nearest = preset
+      differences = moved
+      leading = matches
     }
   }
   return { preset: differences.length === 0 ? nearest : null, nearest, differences }
+}
+
+/** Whether `a` matches an earlier key than `b` does, at the first key where they differ. */
+function leadsOver(a: readonly boolean[], b: readonly boolean[]): boolean {
+  for (let index = 0; index < Math.max(a.length, b.length); index++) {
+    if ((a[index] ?? false) !== (b[index] ?? false)) return a[index] ?? false
+  }
+  return false
 }
 
 /**

@@ -6,11 +6,12 @@ import { test } from './fixtures/test'
 // Headings and text are looked up inside #main-content: under load React can leave its hidden streaming
 // segment (<div hidden id="S:n">) in the DOM beside the revealed copy, and strict locators match both.
 const jsonLd = (page: Page) =>
-  page
-    .locator('script[type="application/ld+json"]')
-    .evaluateAll((scripts) =>
-      scripts.map((script) => JSON.parse(script.textContent) as Record<string, unknown>),
-    )
+  page.locator('script[type="application/ld+json"]').evaluateAll((scripts) =>
+    scripts.flatMap((script) => {
+      const data = JSON.parse(script.textContent) as Record<string, unknown>
+      return (data['@graph'] as Record<string, unknown>[] | undefined) ?? [data]
+    }),
+  )
 
 const cards = (page: Page) => page.locator('main article')
 
@@ -173,17 +174,49 @@ test.describe('blog post', () => {
     await page.goto(path)
     const article = (await jsonLd(page)).find((data) => data['@type'] === 'Article')
     expect(article).toMatchObject({
-      '@context': 'https://schema.org',
+      '@id': `${SITE_URL}/#article-post-welcome-to-the-blog`,
+      url: `${SITE_URL}${path}`,
       headline: 'Welcome to the blog',
       description: 'Summary of Welcome to the blog.',
       datePublished: '2026-10-10T09:00:00Z',
       dateModified: '2026-10-12T00:00:00Z',
       author: { '@type': 'Person', name: 'Ann Author' },
       publisher: { '@id': `${SITE_URL}/#organization` },
-      mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}${path}` },
+      mainEntityOfPage: { '@id': `${SITE_URL}${path}#webpage` },
       articleSection: ['News', 'Guides'],
     })
     expect((article?.image as string[])[0]).toContain('cdn.sanity.io/images')
+  })
+
+  test('has a WebPage node about the article', async ({ page }) => {
+    await page.goto(path)
+    const webPage = (await jsonLd(page)).find((data) => data['@type'] === 'WebPage')
+    expect(webPage).toMatchObject({
+      '@id': `${SITE_URL}${path}#webpage`,
+      url: `${SITE_URL}${path}`,
+      isPartOf: { '@id': `${SITE_URL}/#website` },
+      about: { '@id': `${SITE_URL}/#article-post-welcome-to-the-blog` },
+    })
+    // The site language (NEXT_PUBLIC_SITE_LANGUAGE; "en" under the fixtures).
+    expect(webPage?.inLanguage).toEqual(expect.stringMatching(/^en/))
+  })
+
+  test('an author who is a team member is the Person node, linked by @id', async ({ page }) => {
+    await page.goto('/blog/archive-post-1')
+    const nodes = await jsonLd(page)
+    const personId = `${SITE_URL}/#person-teamMember-ann`
+    expect(nodes.find((data) => data['@type'] === 'Article')).toMatchObject({
+      author: { '@id': personId },
+    })
+    // The member is described in full on their own page; here only the byline's name and address.
+    expect(nodes.find((data) => data['@id'] === personId)).toEqual({
+      '@type': 'Person',
+      '@id': personId,
+      url: `${SITE_URL}/team/ann-lee`,
+      name: 'Ann Lee',
+      worksFor: { '@id': `${SITE_URL}/#organization` },
+    })
+    await expect(page.locator('article > header')).toContainText('By Ann Lee')
   })
 
   test('has article metadata and its main image as the share image', async ({ page }) => {

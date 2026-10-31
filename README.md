@@ -124,7 +124,7 @@ Open http://localhost:3000/studio:
   - **Advanced:** _Redirects_ send old addresses to new ones, _A/B tests_ run headline experiments, _Stripe prices_ are the synced pricing plans, and anything the site adds later lands here too.
 - **Announcement bar:** in Website settings → _Announcement bar_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
 - **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Website settings → _Name, logo & icon_), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
-- **Structured data:** every FAQ section also emits schema.org `FAQPage` JSON-LD (questions, and answers as plain text), so keep answers self-contained. Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Name, logo & icon_; once [Business info](#business-info) exists, the Organization becomes the matching LocalBusiness type with the address, phone and hours. All of it goes through `src/components/ui/json-ld.tsx`.
+- **Structured data:** a page's FAQ sections emit one schema.org `FAQPage` node between them (the questions on the page, answers as plain text, keyed by the page's URL), so keep answers self-contained. Every page also carries a `WebPage` node (see [Structured data rules](#structured-data-rules)). Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Name, logo & icon_; once [Business info](#business-info) exists, the Organization becomes the matching LocalBusiness type with the address, phone and hours. All of it is built in `src/lib/structured-data/` and drawn through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
 - **AI crawlers and `/llms.txt`:** in Website settings → _Name, logo & icon_ → _Advanced_ (agency only), _Allow AI crawlers_ (on by default) decides how the site treats AI tools.
   - _On:_ `/llms.txt` lists the site name, its default description and every page that isn't hidden from search engines, as Markdown links followed by each page's meta description (a page without one is listed by title only), so AI tools can find your content. Posts follow under a _Blog_ heading, newest first, with the post's meta description or else its summary; posts hidden from search engines are left out.
@@ -188,6 +188,7 @@ Open http://localhost:3000/studio:
   - _Related posts:_ up to three other posts that share a category, the most shared categories first (counting the post's first five), then newest. A post whose categories nobody else uses shows none.
   - _Going live:_ a post is public once published; _Published at_ only sets the order and the date shown, so a future date doesn't hide it. To schedule one, use a content release (needs `features.releases`, see _Content releases_). Studio only warns before deleting an author that posts still use; those posts keep working and just lose the byline.
   - _RSS:_ `/feed.xml` is an RSS 2.0 feed of the newest 12 posts, with absolute URLs, and blog pages advertise it in their `<head>`. It takes the title and description from _Name, logo & icon_.
+  - _Author:_ pick an author document, or a **team member** (a person is entered once, and the byline then links to their profile's `Person` in the structured data). Existing posts keep their author.
   - _Search engines:_ posts get `Article` JSON-LD (author, dates, image, categories; the publisher is the site's Organization). Posts and `/blog` are in the sitemap unless the post's _Hide from search engines_ is ticked; category pages are not.
   - _Bad URLs:_ an unknown post or category gets a real 404. A `?page` past the last page (or not a number) shows the 404 page with `noindex` but answers 200, because the page number can only be read after the response has started streaming.
 - **Team:** _Team_ in the sidebar lists your people in the order the website shows them. **Drag a row** to move someone (or use the up and down arrows on each row, which also work from the keyboard); the new order saves straight away. _New team member_ adds one. A member needs a name and a square portrait with alt text; their role and a short bio (300 characters at most) appear on the cards. Show the team on any page with _Add item → Team_: choose **Everyone** (in team order) or **Choose members** and pick them in the order you want. Agencies choose the layout (grid, slider or list). If the site has profile pages, each member also has a collapsed **Profile page** group (page address, full bio, qualifications) and **Contact details** group (public email, phone, social links); a member with an address gets a page at `/team/<address>` and their card links to it, and a member without one just has a card. Details in [Team](#team).
@@ -414,7 +415,7 @@ Presentation the document's locations are _Home_ and the footer.
   (`src/features/site/api/get-today.ts`) is a small `'use cache'` function with `cacheLife('hours')`, like the footer's
   year. A passed day can therefore linger for up to about an hour.
 - **Structured data.** `SiteJsonLd` swaps the plain Organization for `buildLocalBusinessJsonLd`
-  (`utils/business-json-ld.ts`, unit tested), keeping the same `@id` (`<site>/#organization`) so the WebSite's
+  (`src/lib/structured-data/nodes/organization.ts`, unit tested), keeping the same `@id` (`<site>/#organization`) so the WebSite's
   `publisher` still points at it. It emits the chosen type, `name`, `legalName`, `telephone` (`+61…`), `email`,
   `PostalAddress` (`addressCountry: "AU"`), `GeoCoordinates`, `openingHoursSpecification` (regular days, then dated
   entries for upcoming special days, closed days as `00:00`–`00:00`), `areaServed`, `sameAs` and `priceRange`. Empty
@@ -423,7 +424,7 @@ Presentation the document's locations are _Home_ and the footer.
 - **Draft mode.** The footer cleans the data with `stegaClean` before reading times, days and phone numbers, because the
   invisible click-to-edit characters would break them; the footer's business text is therefore not click-to-edit in
   Presentation. Edit it from the _Business info_ document.
-- **Tests.** Unit: `abn`, `phone`, `business-json-ld`, `opening-hours` and the `SETTINGS_QUERY` projection. End to end
+- **Tests.** Unit: `abn`, `phone` (`src/lib/au-phone.ts`), the organisation node, `opening-hours` and the `SETTINGS_QUERY` projection. End to end
   (`tests/e2e/business-info.spec.ts`): the footer's address, tel and mailto links and grouped hours, upcoming and passed
   special days, the badge in two time zones' worth of clock settings, the JSON-LD shape and axe. The fixture
   (`businessInfo` in `tests/e2e/fixtures/dataset.mjs`) puts a band in every page's footer, so the visual baselines need
@@ -838,12 +839,12 @@ src/
       api/                         event.ts (EVENT_QUERY, EVENTS_INDEX_QUERY, EVENTS_FEED_QUERY, metadata, sitemap)
       components/                  event-view (server)
       schemas/                     event.ts, event-category.ts
-      utils/                       json-ld, to-ics, location, registration-url, slug
+      utils/                       to-ics, location, registration-url, slug
     draft-mode/components/         draft-mode-tools (lazy Visual Editing + exit button)
     personalization/               request-time (cookie) greeting, rendered in <Suspense> inside cached pages
     studio/                        desk structure, singletons, Presentation resolvers, content-health tool,
                                    AI settings tool, Start here tool, AI Assist presets
-  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, slider (+ slider-lazy, slider-snap)
+  components/ui/                   shared UI: sanity-image, sanity-link, cta-link, rich-text, json-ld, web-page-json-ld, slider (+ slider-lazy, slider-snap)
   components/ui/overlay/           the shared overlay: useModalDialog, Overlay (modal, drawers, sheet, full screen)
   components/motion/               Motion: provider (LazyMotion), MotionDiv and friends, presets
   config/                          env.ts (validated), paths.ts (slug <-> URL), event-paths.ts (/events URLs),
@@ -1347,14 +1348,21 @@ After each valid `page` or `post` webhook the route POSTs the document's URL to 
 
 ### Structured data rules
 
-Google requires structured data (JSON-LD) to describe content visitors can see. `tests/e2e/structured-data.spec.ts` crawls every page in the fixture sitemap and fails, naming the page and property, when it doesn't hold. The rules are pure functions in `src/lib/json-ld-visibility.ts`, unit-tested with a deliberately broken fixture.
+All JSON-LD is built in `src/lib/structured-data/`: `ids.ts` (every `@id`), `nodes/` (one pure builder per node: organisation or local business, website, web page, breadcrumb, article, person, event, FAQ page), `graph.ts` and `parity.ts`. Components keep rendering where they did (`SiteJsonLd`, `Breadcrumbs`, the FAQ section, `ArticleJsonLd`, `PersonJsonLd`, the event view) and call the builders with `stegaClean`ed values. Nothing here ships client JavaScript.
 
-- **Visible text:** each `name` and `headline` (organisation, person, event, place, breadcrumb, FAQ question), each part of an address, the weekly opening and closing times (compared as the page shows them, "5:30 pm") and each line of an FAQ answer must appear in the page's `document.body.innerText`. Comparison ignores case, whitespace, HTML entities and curly versus straight quotes and dashes. Answers inside a closed `<details>` count: the test opens them first, as a visitor can.
-- **Minimal pages:** a Link page's "Minimal page" hides the footer with CSS, so the site-wide business address and hours aren't visible there. The spec skips those two (the Organization's top-level `address` and `openingHoursSpecification`) when the site chrome is hidden, and still checks names. An event's or place's own address is always checked.
-- **Not checked:** `legalName`, `description`, `areaServed`, links, dates and dated special days. Don't add structured data for something the page doesn't show; if a field is only for search engines, keep it out of the checked list on purpose.
-- **`@id`s:** unique within a page. Across pages the same `@id` may repeat only with an identical definition (the Organization and WebSite are on every page); two different things sharing one would merge into a single entity.
-- **WebPage:** every `WebPage` node (an Article's `mainEntityOfPage`) is `isPartOf` the site's `<origin>/#website` and names `<origin>/#organization` as its `publisher`.
-- **Adding structured data:** build it from the same fields the page renders, put it in the fixtures so the spec covers it, and if it adds a new kind of visible string, teach `collectCheckableStrings` about it.
+- **`@id`s** (`ids.ts`; the origin is `siteUrl`). The organisation and website are `<origin>/#organization` and `<origin>/#website`. A persistent entity is keyed by its published document `_id` with `drafts.` and `versions.` prefixes removed: `<origin>/#person-<id>`, `#article-<id>`, `#event-<id>`, and `#service-<id>` and `#location-<id>` once those types exist. They survive a slug change (the node's `url` changes, the `@id` doesn't), and a draft or release-version id is never emitted. Nodes that describe a URL are keyed by it: `<page url>#webpage`, `#breadcrumb`, `#faq`. A unit test fails if `#organization`, `#website` or `#webpage` ids are built anywhere else in `src/`.
+- **Describe once, reference elsewhere.** An entity is described in full on its own page (the organisation in the site shell) and referenced by `@id` elsewhere. Every indexable page has a `WebPage` node (pages hidden from search engines, members-only pages, the pre-launch view, search, sign-in and sign-out have none: they make no claim to be public pages; the URL is always the production address of the page itself, never a draft, preview or `?callbackUrl` address) (`isPartOf` the website, `about` its main entity when it has one, `breadcrumb` by `@id`, `inLanguage`). A post whose author is a team member points `author` at that Person's `@id`, with a short Person node (name and profile address) beside it so the reference resolves; a plain author stays a named `Person` with no `@id`.
+- **Provenance.** Each builder also returns a map of JSON-LD property path to the document and field it came from. It is used by tests and checks and is never rendered.
+- **Parity** (`parity.ts`, unit tested; `tests/e2e/structured-data.spec.ts` crawls every page in the fixture sitemap and names the page and property that fails). Values are compared by what they mean, by property class:
+  - _Visible facts_ (names, headlines, phone, email, address, weekly opening hours, event dates and times, prices, FAQ questions and answers): compared as typed values. Phones as E.164 (`+61 2 9000 0000` equals `(02) 9000 0000`), addresses by component (`St` equals `Street`, `New South Wales` equals `NSW`), hours as days and times (`5:30 pm` equals `17:30`, `Mon–Fri` covers five days), dates as dates, a price as amount plus currency, names after case, punctuation, diacritic and "&"/"and" folding.
+  - _Descriptive text_ (`description`, a WebPage's name): must come from a field the page renders (its title and meta description count); it may be cut short. The site's own description only has to be shown somewhere on the site.
+  - _Reach_ (`areaServed`): must be stated somewhere on the site, not necessarily on that page. No template component shows Business info's service areas, so the Organization **omits `areaServed`** until a site displays them (`showServiceAreas` in `buildOrganization`, which no caller sets yet); the checker still enforces the rule if it is emitted.
+  - _Identity and technical_ (`@id`, `url`, `logo`, `image`, `sameAs`, `geo`...): exempt from visibility, but must be valid (absolute URLs, `geo` inside Australia).
+- **"Visible"** means in the rendered page and reachable by a visitor: the spec opens every closed `<details>` first, as a visitor can, so a collapsed FAQ answer passes; text hidden from everyone doesn't count. It keeps task 188's normaliser (`normaliseText`: case, whitespace, entities, curly quotes and dashes).
+- **Contradictions and the deny list.** One `@id` with different property values on different pages fails (a shorter definition of an entity may omit properties). A JSON-LD value that differs from its owning field fails (`checkAgainstOwners`, over provenance). Never emitted, and failed if found: ratings and reviews, a `Product`, an `Offer` with a price the page doesn't show (an event's registration offer carries no price, so it is allowed), FAQs that aren't on the page, credentials the page doesn't show, and an organisation type that isn't the business type.
+- **Graph integrity.** No `@id` contains a draft or release-version id. Every `@id` a page refers to must be defined by a node on that page or in the site graph (the nodes on every page), and each page has its own `WebPage`.
+- **Minimal pages:** a Link page's "Minimal page" hides the footer with CSS, so the site-wide business address, hours, phone and email aren't visible there. The spec skips those four (the Organization's top-level properties) when the site chrome is hidden, and still checks names.
+- **Adding structured data:** write a builder in `src/lib/structured-data/nodes/` that returns its provenance, with a unit test; get its `@id` from `ids.ts`; render it from the component that shows the content; add it to the fixtures so the spec covers it. If it adds a new kind of visible fact, teach `parity.ts` about it.
 
 ### Edge Config redirects
 
@@ -3042,6 +3050,82 @@ the parts ending whole, reduced motion, no JavaScript, axe, `/hero-parts-later` 
 parts at rest and prove the wrappers change nothing about the layout. `/hero-parts` is also in `lighthouserc.json`
 (LCP at most 2.5 s, like the home page).
 
+### Image + text
+
+_Image + text_ puts media beside, above or behind a block of words: an eyebrow, a title, text, up to two buttons, and
+optionally one extra block under the media. It uses the same conventions as the hero (beautiful default, presets,
+advanced options only where they apply). A new section is **Media right** on the page's background, so there is nothing
+to configure.
+
+**Looks (presets).** The bar at the top of the section offers four pictures (`SPLIT_PRESETS`,
+`src/features/pages/schemas/sections/media-text.ts`). Each sets the layout and the options that go with it in one click;
+every field stays editable afterwards, and the bar shows _Custom_ once they no longer match one. There is no separate
+"look" field: the looks are the presets, matched against the stored fields by `src/lib/sanity/schema/preset-match.ts`.
+
+| Preset          | Layout (`variant`) | Also sets                    |
+| --------------- | ------------------ | ---------------------------- |
+| Media right     | `side`             | _Media side_ right           |
+| Media left      | `side`             | _Media side_ left            |
+| Stacked         | `stacked`          | Nothing; the text is centred |
+| Text over media | `overlay`          | Background _Contrast_ (dark) |
+
+A section saved before layouts existed has no `variant`, which is `side`, and keeps its _Image side_ (stored as
+`imagePosition`), so it still shows the preset it matches (_Media left_ or _Media right_) and renders exactly as before.
+Presets other than _Text over media_ never touch the tone, so choosing one does not repaint a page. A layout this
+deployment does not know (from a later release) renders as `side`.
+
+**Customised looks.** When the fields no longer match a preset, the bar says so in one line under the picker, for
+example "Custom · based on Stacked · 1 change (tone)", and a **Reset to Stacked** button sets the preset's fields again.
+It names the preset with the fewest differences; if two are equally close, the one whose layout still matches wins
+(`describePresetState`). Reset changes only the fields the preset sets: the words, the media and the Design tab's other
+options are kept. Add `presetLabels` (`presetsOption(presets, labels)`) to another section to give it the same summary.
+The bar is above every tab, so it is also in view while you work in _Design_.
+
+**Media (`media`).** One slot (`split.media`, see _Adding a slot block_) that holds a **picture** (`slotImage`) or a
+**video** (`slotVideo`: a click-to-load YouTube or Vimeo player, or an uploaded MP4 with captions). The agency adds or
+removes it; clients change what is in it. The section's _Image design_ (shape, frame, movement) applies to a picture.
+_Text over media_ needs a picture: with a video, the section draws the video beside the text and the field shows a
+yellow warning. With no media, the text takes the full width.
+
+**Extra content (`supporting`).** One optional slot (`split.supporting`) for a video under the media (side by side and
+stacked) or under the buttons (text over media). Agency only; it is the way to add a video without a new layout.
+
+**Buttons.** Up to two (`ctas`), in every layout, in the same group as the hero's.
+
+**Text over media and panels.** This layout draws the picture as the section's background, dimmed under the section's
+tone, and the shared **Panel** (_Glass_ or _Solid card_, see _Section panels_) sits over it. Image + text has no
+glass rules of its own: a glass panel over a picture needs a wash or falls back to a solid card, so the text keeps at
+least 4.5:1 contrast, exactly as everywhere else. Contrast problems in the Design tab are yellow warnings with
+render-time fallbacks, never errors. Contrast over a picture is a guaranteed bound or "check visually", never a
+measurement.
+
+**Who changes what.** Classified in `CLIENT_EDITABLE_FIELDS`: clients change the words, buttons and the media's picture
+or video (and, on older sections, the `image`); the layout (`variant`), `supporting`, _Image design_ and _Design_ are
+agency only.
+
+**Moving older pictures into `media` (migration).** Pictures saved before the slot are in `image`. The section reads
+`media` first and falls back to `image`, so nothing needs to happen for a page to keep rendering, and the Studio shows
+the old field only while `media` is empty. To move them, run the migration `image-to-media` (see
+`migrations/README.md`): a dry run lists every patch and writes nothing.
+
+```bash
+npx sanity migration run image-to-media                 # dry run: prints the patches, writes nothing
+npx sanity dataset export production backup.tar.gz      # then, before running it for real
+npx sanity migration run image-to-media --no-dry-run
+```
+
+It adds one `slotImage` block per section that has a picture and no media, copying the picture whole (asset, alt text,
+crop and hotspot). It never removes or changes `image`, the layout or the _Image design_, so existing pages render the
+same afterwards, and it is safe to run twice. Delete the old `image` field in a later release, once it has run on every
+dataset.
+
+**Tests.** Unit: the layouts (`utils/split-layout.test.ts`), the presets and their tie-breaking
+(`preset-match.test.ts`), the gallery labels and the migration. End to end (`tests/e2e/split-contract.spec.ts`): every
+look passes axe and fits at 375, 768 and 1280 px; the media sits where the layout says; the supporting video is a Play
+button until clicked. The gallery has an entry for each look (`media-text-media-left`, `-stacked`, `-overlay`,
+`-supporting-video`, `-media-video`); the older entries use `image`, so their unchanged baselines show saved pages render
+as before. The new baselines are Linux-only: create them with the **Update visual baselines** workflow.
+
 ### Image design
 
 One treatment for a section's main picture: a **still frame with the picture moving gently inside it**, a handful of
@@ -3325,7 +3409,7 @@ profile pages, on their own page at `/team/<slug>`.
   published members are cached and prerendered (`generateStaticParams` from `TEAM_INDEX_QUERY`), draft mode reads its
   options inside `<Suspense>`. The page has one `<h1>` (the name), the portrait, role, qualifications, short and full bio
   and a "Get in touch" list (email as `mailto:`, phone as `tel:`, social links); anything the member lacks is left out,
-  and with no contact details there is no "Get in touch". `Person` JSON-LD carries the name, job title, description,
+  and with no contact details there is no "Get in touch". `Person` JSON-LD (`@id` `<site>/#person-<document id>`, so a new slug keeps it) carries the name, job title, description,
   image, email, telephone, `sameAs` (social links), `hasCredential` (qualifications) and `worksFor` pointing at the
   site's Organization. Metadata is the name and role, the short bio and the portrait as the share image.
 - **404s.** An unknown slug, a member with no page address, one who is only a draft (the published perspective hides drafts), and every `/team/…` URL when
@@ -3900,7 +3984,30 @@ A section's content can sit on a panel over its background. In the section's **D
 
 **Advanced: panel** holds **Glass strength** (Light, Medium or Strong), shown only for Glass. Unset follows the site's glass (Medium, from `tokens.json`). The Link list draws its own surfaces (glass rows and cards), so it doesn't offer Panel; its stored value, if any, is ignored.
 
-**Limits.** The checks use the colours in `tokens.json`, as the other section checks do. The page knows a brand gradient only by name, not by its stops, so on the site a gradient is checked with the black-and-white bound; the Studio, which can read the stops, measures it exactly.
+**What the checks use, and when they can't.** The site and the Studio read the same thing, the published Brand colours and brand gradients in Design settings, and call the same `resolveSectionPanel`, so one configuration gives one answer in both. The site reads them through one small cached query, made only for a section that has a panel (see _Request budget_); a change to Design settings reaches the page on the next refresh, like any other content change.
+
+A section's gradient is always in one of four states, and the checks never confuse them:
+
+| State       | Meaning                                               | What happens                                                                                  |
+| ----------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **None**    | No gradient is chosen, or a picture covers it.        | Nothing to check.                                                                             |
+| **Present** | It is in Design settings, so its colours are known.   | Contrast is exact, at the stops and between them.                                             |
+| **Missing** | Design settings was read and it is no longer there.   | The page draws no gradient, so the panel is the plain tint; Studio says the gradient is gone. |
+| **Unknown** | Design settings could not be read (a failed request). | See below.                                                                                    |
+
+When the gradients can't be read, the gradient you chose is **kept**, never cleared or reported as removed. The panel is drawn for the worst case (as over a picture), the Studio shows a non-blocking warning that contrast over that gradient isn't confirmed, and nothing is claimed as exact. A failed request is not remembered, so the next time the form is looked at, or the next time the site renders the page, it is checked properly.
+
+**Checked in a browser.** `tests/e2e/section-panel-rendering.spec.ts` renders panels under the default, a light and a dark palette; over a black and a white picture; with reduced transparency (the browser's own media feature, emulated); and with `backdrop-filter` unknown to the browser. It measures readability from the pixels the browser paints, and it falls back to a solid panel where the dark palette needs it. Nothing can run a browser without `backdrop-filter`, so that case serves the real stylesheet with the property renamed: to the engine it is an unknown property, in the `@supports` test and in every declaration.
+
+**Sections that draw their own surface.** Three opt out of Panel with `ownsSurfaces`, because a second panel would sit on top of the one they already draw. The opt-out removes only the shared Panel option: Studio hides it, and a value stored earlier (a layout changed after Panel was set, say) is ignored on the page and not applied.
+
+| Section                          | Why it opts out                                                                                     | What stops contrast being bypassed                                                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Link list**                    | Its links are cards, glass rows or buttons, each with its own Card design.                          | The glass-row and Card contrast checks in Card design; the section background's own picture and gradient checks still apply. |
+| **CTA banner**                   | The banner is itself a coloured card in the tone you choose.                                        | Its text colours are the tone's, derived from the card's colour; the section background checks still apply.                  |
+| **Hero, Full background layout** | The text already sits on a solid panel in the tone over the picture. Other hero layouts keep Panel. | The panel is opaque (the tone's surface), so its text keeps the tone's contrast over any picture.                            |
+
+None of them draws a see-through surface of its own that the panel checks would have measured (the Link list's glass rows are checked by their own rule), so opting out never skips a contrast safeguard that was there. A section's picture and gradient still get their Background warnings, and its text colours are still the tone's. A section that needs to opt out registers `ownsSurfaces` in its `sectionFields` rules (hiding the Studio field) and passes `ownsSurfaces` to `SectionFrame` (ignoring a stored value on the page); both are needed, and `section-frame.test.tsx` and `section-form.test.ts` cover each.
 
 **For developers.** `src/lib/sanity/section-panel.ts` is the resolver and is importable by the site and the Studio: `resolvePanel` returns the render (`tinted`, `frosted` or `solid`), the opacity and any warning, and `panelDomProps` turns that into the `data-panel` attributes `SectionFrame` puts on the content container (the look is in `globals.css`, `[data-panel]`). `SectionFrame` renders the panel for every section, so a new section needs no code of its own. A section that draws its own surfaces registers `ownsSurfaces` in its `sectionFields` rules and passes `ownsSurfaces` to `SectionFrame` (see the Link list). Gallery entries `panel-*` and `tests/e2e/section-panel.spec.ts` cover each case; the visual baselines are Linux-only (run the "Update visual baselines" workflow after a change to the panel's look).
 
@@ -5121,6 +5228,32 @@ CI installs the browser itself.
 
 When you add a section or a content type, add an example of it to the fixture dataset so the axe scan covers it.
 
+#### The test profile, the template-only checks and how CI runs the suite
+
+- **The end-to-end build uses a fixed test profile, not the site's own.** `E2E_FIXED_PROFILE=1` (set for Playwright
+  and Lighthouse CI through `APP_ENV` in `tests/e2e/constants.ts`) makes `next.config.ts` alias the profile import to
+  `tests/e2e/fixtures/site.profile.ts`: the template's default profile (live, the template's features). So a
+  client site that is pre-launch, or has a feature switched off, runs the same suite as the template. Ordinary builds
+  (`npm run dev`, `npm run build`, Vercel) use `site.profile.ts` as usual, and the flag is refused in every Vercel
+  build, Preview and Production (`scripts/e2e-profile.mjs`). The fixture is a copy of the template's `site.profile.ts`
+  that differs only in its import path; a template-only test fails if they drift, so change both together.
+- **Some checks run only in the template.** Tests of what the template ships skip themselves on a client site, which
+  customises those files on purpose: the bare `studio-brand.json`, the commented-out `launch` example in
+  `site.profile.ts` (and `ships live`), a profile with no service features (two `config:check` cases), the
+  profile-edit round trip and the fixture-matches-profile check. `isTemplateRepo()` in `scripts/is-template.mjs`
+  decides: the template's package is named `nocturne`, and a client renames it. The proxy tests state a live launch
+  status, the A/B experiments spec skips itself when `/api/site-info` says pre-launch, and a client's own pre-launch
+  rules are covered by `src/lib/prelaunch-real-profile.test.ts`, which runs against the site's real profile.
+- **CI runs the desktop and mobile projects in 10 shards** (`--shard=n/10`, each with its own build and fake Content
+  Lake) and the isolated projects in their own job, with `--workers=2` pinned. Playwright's default is half the CPUs:
+  a public repository's runners have four, a private one's have two, so the same suite ran about twice as slowly in a
+  client's private repository and its heaviest shards passed the 20-minute job limit. Every test runs exactly once.
+  The repository ruleset requires the job names `e2e (1/10)` to `e2e (10/10)`, `e2e (isolated)` and `check`; if you
+  change the shard count, update the ruleset and the timings job's `--expect` list in `.github/workflows/ci.yml`.
+- **In a spec, read a style with `toHaveCSS` (or retry the read), not one `getComputedStyle` straight after load.**
+  React can replace an element while hydrating, and on a slow runner the read then hits a detached node and returns
+  `''`.
+
 #### Section gallery and visual regression
 
 `/section-gallery` renders every section type on one page, each under a label (`ctaBanner (dark tone)`,
@@ -5568,9 +5701,9 @@ they are about the form, not permissions: for a hard guarantee use a document-le
 
 Slots are shared across section families (architecture: `docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md`, §4).
 A **slot** is a named place a family offers for one approved block; a **block** is a small piece of supporting
-content that fits any slot it is allowed in. Today `hero.supporting` is the only slot in use. `split.media` and
-`split.supporting` are reserved for the Split family, so a block can already say it will fit there. Nothing is stored
-differently: the hero's `supporting` array holds the same items as before, so no migration is needed.
+content that fits any slot it is allowed in. `hero.supporting` is the hero's, and `split.media` and `split.supporting`
+are Image + text's (see _Image + text_). Nothing is stored differently: the hero's `supporting` array holds the same
+items as before, so no migration is needed.
 
 | Block        | Where it is allowed                                  | Clients change                                   |
 | ------------ | ---------------------------------------------------- | ------------------------------------------------ |
@@ -5579,6 +5712,7 @@ differently: the hero's `supporting` array holds the same items as before, so no
 | `logoRow`    | `hero.supporting`                                    | Logos and Greyscale                              |
 | `launchDate` | `hero.supporting`                                    | Label, date, time and countdown                  |
 | `slotVideo`  | `hero.supporting`, `split.media`, `split.supporting` | Title, source, address or file, poster, captions |
+| `slotImage`  | `split.media`                                        | The picture and its alt text                     |
 
 **The video block.** `slotVideo` is the Video section's player without the section: a YouTube or Vimeo address behind
 the click-to-load Play button (nothing is requested from either service until the visitor presses it, so it needs no
@@ -5598,7 +5732,8 @@ A new block is one schema object, one component, one query fragment and one regi
    (`slotField({ name, slot })`, `slots/slot-field.ts`) lists the blocks that name it, builds the insert menu and
    thumbnails, hides the field from clients while it is empty and limits it to the slot's `max`.
 3. **GROQ.** Add a fields fragment to `src/lib/sanity/fragments.ts` and a `_type == "<name>" => { ... }` line to
-   `heroSupportingFields` (one fragment per block, folded into the page query: no extra request). Run `npm run typegen`
+   `heroSupportingFields`, `splitMediaFields` or `splitSupportingFields`, whichever slots allow it (one fragment per
+   block, folded into the page query: no extra request). Run `npm run typegen`
    (with the fake project from `tests/e2e/constants.ts`, never your `.env`).
 4. **Component.** Make a compact component with no section frame and no colours of its own (use `text-ink`,
    `text-ink-muted`, `border-line`, `text-accent-text`), sized to the room it is given because any slot can host it

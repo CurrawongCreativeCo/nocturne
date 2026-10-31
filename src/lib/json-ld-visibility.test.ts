@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  collectCheckableStrings,
-  findHiddenStrings,
+  findDraftIds,
   findIdProblems,
+  findMissingWebPage,
+  findUnresolvedReferences,
   findWebPageProblems,
+  siteGraphIds,
   normaliseText,
   parseJsonLd,
   type JsonLdNode,
@@ -60,19 +62,6 @@ const faq: JsonLdNode = {
   ],
 }
 
-const pageText = `
-  Test Co
-  1 King Street
-  Newtown NSW 2042
-  Mon–Fri  8:00 am – 5:30 pm
-  What do you do?
-  We build websites.
-
-  And we host them.
-`
-
-const values = (nodes: JsonLdNode[]) => collectCheckableStrings(nodes).map((s) => s.value)
-
 describe('normaliseText', () => {
   it('collapses whitespace and folds case', () => {
     expect(normaliseText('  Hello \n\t  World  ')).toBe('hello world')
@@ -112,109 +101,6 @@ describe('parseJsonLd', () => {
   })
 })
 
-describe('collectCheckableStrings', () => {
-  it('picks out names, address parts, weekly times and FAQ lines', () => {
-    expect(collectCheckableStrings([organization, website, faq])).toEqual([
-      { property: 'ProfessionalService.name', value: 'Test Co' },
-      { property: 'ProfessionalService.address.streetAddress', value: '1 King Street' },
-      { property: 'ProfessionalService.address.addressLocality', value: 'Newtown' },
-      { property: 'ProfessionalService.address.addressRegion', value: 'NSW' },
-      { property: 'ProfessionalService.address.postalCode', value: '2042' },
-      { property: 'ProfessionalService.openingHoursSpecification[0].opens', value: '8:00 am' },
-      { property: 'ProfessionalService.openingHoursSpecification[0].closes', value: '5:30 pm' },
-      { property: 'WebSite.name', value: 'Test Co' },
-      { property: 'FAQPage.mainEntity[0].name', value: 'What do you do?' },
-      { property: 'FAQPage.mainEntity[0].acceptedAnswer.text', value: 'We build websites.' },
-      { property: 'FAQPage.mainEntity[0].acceptedAnswer.text', value: 'And we host them.' },
-    ])
-  })
-
-  it('skips legal names, service areas and dated special days', () => {
-    const all = values([organization])
-    expect(all).not.toContain('Test Co Pty Ltd')
-    expect(all).not.toContain('Inner West')
-    expect(all).not.toContain('12:00 am')
-  })
-
-  it('can leave out the site-wide address and hours but keeps nested addresses', () => {
-    const event: JsonLdNode = {
-      '@type': 'Event',
-      name: 'Pottery workshop',
-      location: { '@type': 'Place', address: '12 Rose St' },
-    }
-    expect(
-      collectCheckableStrings([organization, event], { siteDetails: false }).map((s) => s.value),
-    ).toEqual(['Test Co', 'Pottery workshop', '12 Rose St'])
-  })
-
-  it('splits a plain-text address at commas and line breaks', () => {
-    const event: JsonLdNode = {
-      '@type': 'Event',
-      name: 'Pottery workshop',
-      location: { '@type': 'Place', name: 'The Studio', address: '12 Rose St, Newtown NSW 2042' },
-    }
-    expect(values([event])).toEqual([
-      'Pottery workshop',
-      'The Studio',
-      '12 Rose St',
-      'Newtown NSW 2042',
-    ])
-  })
-
-  it('reaches names nested in breadcrumbs and authors', () => {
-    const article: JsonLdNode = {
-      '@type': 'Article',
-      headline: 'Welcome',
-      author: { '@type': 'Person', name: 'Ann Author' },
-      mainEntityOfPage: { '@type': 'WebPage', '@id': `${ORIGIN}/blog/welcome` },
-    }
-    const crumbs: JsonLdNode = {
-      '@type': 'BreadcrumbList',
-      itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: `${ORIGIN}/` }],
-    }
-    expect(values([article, crumbs])).toEqual(['Welcome', 'Ann Author', 'Home'])
-  })
-})
-
-describe('findHiddenStrings', () => {
-  const strings = () => collectCheckableStrings([organization, website, faq])
-
-  it('passes when everything is on the page', () => {
-    expect(findHiddenStrings(strings(), pageText)).toEqual([])
-  })
-
-  it('matches across whitespace, entities and case', () => {
-    expect(
-      findHiddenStrings(
-        [{ property: 'Org.address', value: 'Newtown   NSW' }],
-        'NEWTOWN&nbsp;nsw 2042',
-      ),
-    ).toEqual([])
-  })
-
-  // The deliberately broken fixture: structured data that claims things the page never shows.
-  it('fails, naming the property, when the JSON-LD describes content that is not on the page', () => {
-    const broken: JsonLdNode = {
-      ...organization,
-      name: 'Phantom Plumbing',
-      address: { '@type': 'PostalAddress', streetAddress: '99 Nowhere Road' },
-      openingHoursSpecification: [{ opens: '06:00', closes: '23:00' }],
-    }
-    const hidden = findHiddenStrings(collectCheckableStrings([broken, faq]), pageText)
-    expect(hidden).toEqual([
-      { property: 'ProfessionalService.name', value: 'Phantom Plumbing' },
-      { property: 'ProfessionalService.address.streetAddress', value: '99 Nowhere Road' },
-      { property: 'ProfessionalService.openingHoursSpecification[0].opens', value: '6:00 am' },
-      { property: 'ProfessionalService.openingHoursSpecification[0].closes', value: '11:00 pm' },
-    ])
-  })
-
-  it('fails for an FAQ answer the page does not show', () => {
-    const hidden = findHiddenStrings(collectCheckableStrings([faq]), 'What do you do?')
-    expect(hidden.map((s) => s.value)).toEqual(['We build websites.', 'And we host them.'])
-  })
-})
-
 describe('findIdProblems', () => {
   it('accepts the same site nodes repeated on every page', () => {
     expect(
@@ -239,7 +125,65 @@ describe('findIdProblems', () => {
   it('reports one @id used for different things on different pages', () => {
     const other = { ...organization, name: 'Other Co' }
     expect(findIdProblems({ '/': [organization], '/about': [other] })).toEqual([
-      `/about: "${ORIGIN}/#organization" is defined differently from /`,
+      `/about: "${ORIGIN}/#organization" has a different name from /`,
+    ])
+  })
+
+  it('accepts a shorter definition of an entity that agrees with the full one', () => {
+    const full = {
+      '@type': 'Person',
+      '@id': `${ORIGIN}/#person-a`,
+      name: 'Sam',
+      jobTitle: 'Director',
+    }
+    const byline = { '@type': 'Person', '@id': `${ORIGIN}/#person-a`, name: 'Sam' }
+    expect(findIdProblems({ '/team/sam': [full], '/blog/hello': [byline] })).toEqual([])
+  })
+})
+
+describe('findMissingWebPage', () => {
+  it('wants a WebPage keyed by the page URL', () => {
+    const page = { '@type': 'WebPage', '@id': `${ORIGIN}/about#webpage` }
+    expect(findMissingWebPage([organization, page], `${ORIGIN}/about`)).toEqual([])
+    expect(findMissingWebPage([organization], `${ORIGIN}/about`)).toEqual([
+      `no WebPage node with the @id ${ORIGIN}/about#webpage`,
+    ])
+  })
+})
+
+describe('graph integrity', () => {
+  const siteGraph = siteGraphIds([
+    [organization, website],
+    [organization, website, faq],
+  ])
+
+  it('takes the site graph from the nodes every page carries', () => {
+    expect(siteGraph).toEqual(new Set([`${ORIGIN}/#organization`, `${ORIGIN}/#website`]))
+  })
+
+  it('resolves references to nodes on the page and in the site graph', () => {
+    const page = {
+      '@type': 'WebPage',
+      '@id': `${ORIGIN}/a#webpage`,
+      isPartOf: { '@id': `${ORIGIN}/#website` },
+      about: { '@id': `${ORIGIN}/#article-1` },
+    }
+    const article = {
+      '@type': 'Article',
+      '@id': `${ORIGIN}/#article-1`,
+      publisher: { '@id': `${ORIGIN}/#organization` },
+    }
+    expect(findUnresolvedReferences([page, article], siteGraph)).toEqual([])
+  })
+
+  it('reports a reference nothing defines', () => {
+    const article = {
+      '@type': 'Article',
+      '@id': `${ORIGIN}/#article-1`,
+      author: { '@id': `${ORIGIN}/#person-x` },
+    }
+    expect(findUnresolvedReferences([article], siteGraph)).toEqual([
+      `"${ORIGIN}/#person-x" is referenced but no node on the page or in the site graph defines it`,
     ])
   })
 })
@@ -282,5 +226,54 @@ describe('findWebPageProblems', () => {
       publisher: { '@id': `${ORIGIN}/#organization` },
     }
     expect(findWebPageProblems([wrong], ORIGIN)).toHaveLength(1)
+  })
+})
+
+describe('graph integrity: negative cases', () => {
+  const siteGraph = new Set([`${ORIGIN}/#organization`, `${ORIGIN}/#website`])
+  const article = (extra: JsonLdNode): JsonLdNode => ({
+    '@type': 'Article',
+    '@id': `${ORIGIN}/#article-1`,
+    ...extra,
+  })
+
+  it('fails an intentionally broken internal reference', () => {
+    const broken = article({ author: { '@id': `${ORIGIN}/#person-missing` } })
+    expect(findUnresolvedReferences([broken], siteGraph)).toHaveLength(1)
+  })
+
+  it('fails a broken Person reference from an Article, and passes it once the Person is defined', () => {
+    const byline = article({ author: { '@id': `${ORIGIN}/#person-a` } })
+    expect(findUnresolvedReferences([byline], siteGraph)).toHaveLength(1)
+    const person = { '@type': 'Person', '@id': `${ORIGIN}/#person-a`, name: 'Sam' }
+    expect(findUnresolvedReferences([byline, person], siteGraph)).toEqual([])
+  })
+
+  it('fails organisation and website references to another origin', () => {
+    const wrong = article({
+      publisher: { '@id': 'https://elsewhere.test/#organization' },
+      isPartOf: { '@id': `${ORIGIN}/#websit` },
+    })
+    expect(findUnresolvedReferences([wrong], siteGraph)).toHaveLength(2)
+  })
+
+  it('fails a WebPage reference to a page node that is not there', () => {
+    const lonely = article({ mainEntityOfPage: { '@id': `${ORIGIN}/blog/a#webpage` } })
+    expect(findUnresolvedReferences([lonely], siteGraph)).toHaveLength(1)
+  })
+
+  it('fails an id built from a draft or release-version document id', () => {
+    const drafts = article({
+      '@id': `${ORIGIN}/#article-drafts.1`,
+      author: { '@id': `${ORIGIN}/#person-versions.rSummer.a` },
+    })
+    expect(findDraftIds([drafts])).toHaveLength(2)
+    expect(findDraftIds([article({ author: { '@id': `${ORIGIN}/#person-a` } })])).toEqual([])
+  })
+
+  it('fails one @id carrying contradictory facts on two pages', () => {
+    const one = { '@type': 'Person', '@id': `${ORIGIN}/#person-a`, name: 'Sam' }
+    const two = { ...one, name: 'Samuel' }
+    expect(findIdProblems({ '/a': [one], '/b': [two] })).toHaveLength(1)
   })
 })

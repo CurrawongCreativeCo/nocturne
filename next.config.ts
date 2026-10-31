@@ -2,6 +2,8 @@ import { withSentryConfig } from '@sentry/nextjs/config'
 import type { NextConfig } from 'next'
 import { sanity } from 'next-sanity/live/cache-life'
 
+import { e2eProfileAlias } from './scripts/e2e-profile.mjs'
+
 /**
  * Security headers for every response. No full Content-Security-Policy: the embedded Studio
  * needs inline styles and scripts that a strict CSP would block, and a loose one adds little.
@@ -30,6 +32,9 @@ const nextConfig: NextConfig = {
   // Test-only: lets a second server run from a copy of the build (playwright.config.ts).
   ...(process.env.NEXT_DIST_DIR && { distDir: process.env.NEXT_DIST_DIR }),
   poweredByHeader: false,
+
+  // Test-only: end-to-end builds use the template's default profile (scripts/e2e-profile.mjs). Empty otherwise.
+  turbopack: { resolveAlias: e2eProfileAlias() },
 
   // One SENTRY_DSN configures the server and the browser (see src/lib/sentry/config.ts).
   env: {

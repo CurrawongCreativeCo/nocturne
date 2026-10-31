@@ -1,12 +1,12 @@
 import { stegaClean } from 'next-sanity'
 
+import { parseAuPhone } from '@/lib/au-phone'
 import { DEFAULT_TIME_ZONE, upcomingSpecialHours } from '@/lib/opening-hours'
 import type { FetchMode } from '@/lib/sanity/live'
 import type { LocationBusiness } from '@/types/business'
 
 import { getSettings } from './get-settings'
 import { getToday } from './get-today'
-import { parseAuPhone } from '../utils/phone'
 
 /**
  * Business info for a page's Location and Link list sections (the social icons). It reads the settings result the footer already

@@ -1,7 +1,9 @@
 import { notFound, permanentRedirect, redirect } from 'next/navigation'
 import { Suspense, type ReactNode } from 'react'
 
+import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { slugToPath } from '@/config/paths'
+import { siteUrl } from '@/config/site-url'
 import { isMembersOnly } from '@/lib/sanity/access'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
@@ -64,7 +66,20 @@ export async function PageView({
   }
 
   const callbackUrl = slugToPath(slug)
-  const breadcrumbs = showBreadcrumbs ? <Breadcrumbs items={await getBreadcrumbs(slug)} /> : null
+  const pageUrl = new URL(callbackUrl, siteUrl).toString()
+  const trail = showBreadcrumbs ? await getBreadcrumbs(slug) : []
+  const breadcrumbs = showBreadcrumbs ? <Breadcrumbs items={trail} /> : null
+  // The name is the title the page's <title> shows (SEO title, else the page title).
+  const webPage = (
+    <WebPageJsonLd
+      path={callbackUrl}
+      name={page.seo?.metaTitle || page.title}
+      nameSource={{ doc: page._id, field: page.seo?.metaTitle ? 'seo.metaTitle' : 'title' }}
+      breadcrumb={trail.length > 0}
+      // The pre-launch view (breadcrumbs off) carries the site-level graph only: no page is named.
+      noIndex={Boolean(page.seo?.noIndex) || isMembersOnly(page.access) || !showBreadcrumbs}
+    />
+  )
   // A "Minimal page" marks itself, and globals.css hides the site's header, announcement and footer
   // while the marker is on screen. It must be a top-level element: Next keeps the page you left in
   // the DOM, hidden, by styling its top-level elements `display: none`.
@@ -75,6 +90,7 @@ export async function PageView({
     return (
       <>
         {minimal}
+        {webPage}
         {breadcrumbs}
         <Suspense fallback={null}>
           {renderMembersGate({
@@ -97,6 +113,7 @@ export async function PageView({
                   renderNewsletter={renderNewsletter}
                   renderPanels={renderPanels}
                   business={business}
+                  pageUrl={pageUrl}
                 />
               )
             },
@@ -109,6 +126,7 @@ export async function PageView({
   return (
     <>
       {minimal}
+      {webPage}
       {breadcrumbs}
       <PageContent
         title={page.title}
@@ -123,6 +141,7 @@ export async function PageView({
         renderNewsletter={renderNewsletter}
         renderPanels={renderPanels}
         business={business}
+        pageUrl={pageUrl}
         // Members-only sections stay stubs here and are filled in behind the gate, one by one.
         gate={
           preview
@@ -155,6 +174,7 @@ interface ContentProps {
   renderNewsletter?: ViewProps['renderNewsletter']
   renderPanels?: ViewProps['renderPanels']
   business?: ViewProps['business']
+  pageUrl: string
   gate?: SectionGate
 }
 

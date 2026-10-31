@@ -20,6 +20,17 @@ you start a release.
 
 ### Added
 
+- **Structured data graph (task 222).** Every JSON-LD builder now lives in `src/lib/structured-data/` with stable `@id`s from one module (`ids.ts`): persistent entities are keyed by the published document id (`<origin>/#person-<id>`, `#article-<id>`, `#event-<id>`), so a slug change changes the node's `url` and not its `@id`, and a draft or release-version id is never emitted. Every page now carries a `WebPage` node (part of the website, about its main entity, with its breadcrumb and language). A post's `author` can now be a **team member**: the Article's `author` is that person's `@id`. Validation moved from literal string matching to typed, provenance-based parity (`parity.ts`): phones as E.164, addresses by component, hours as days and times, dates, prices, folded names; descriptive text from rendered fields; `areaServed` shown somewhere on the site; plus the deny list, contradiction checks and a graph-integrity check. README, "Structured data rules".
+
+- **Section panels: unreadable gradients, opt-outs and browser checks.** A brand gradient that Studio can't load is now "unknown", never "removed": the choice is kept, a non-blocking warning says the check didn't run, and it is rechecked next time. The three sections that draw their own surface (Link list, CTA banner, the hero's Full background) are documented in the README, with tests that a stored Panel value is ignored on them. A browser spec checks panels under the default, light and dark palettes, over black and white pictures, with reduced transparency and without `backdrop-filter`.
+
+- **Image + text, section contract v2.** Four looks through the preset bar (Media right, Media left, Stacked, Text over
+  media; stored as the hidden `variant` plus the existing `imagePosition`), a `media` slot that takes a picture
+  (`slotImage`) or a video (`slotVideo`), and an agency-only `supporting` slot for a video under the media. Panels (Glass and
+  Solid card) apply to Text over media with no rules of their own. A Custom section now shows which preset it started from
+  and what moved, with a **Reset** button (`presetLabels`; the hero has it too). New fields are classified in the client
+  registry (`variant`, `supporting` agency only). Migration `image-to-media` (dry run first) moves `image` into `media`;
+  until it runs the section reads `image`, so existing pages render the same. README, "Image + text".
 - `design-manifest.generated.json`: a generated, read-only description of the sections, fields, option lists, presets, layout rules,
   client-editable flags and token names, built by `npm run typegen` (`npm run design-manifest`) and checked in CI. Sections can
   add `options.manifest = { purpose, example }`; Hero and Image + text have one. See the README's "Design manifest".
@@ -38,6 +49,8 @@ you start a release.
 
 ### Changed
 
+- JSON-LD scripts now wrap their nodes in an `@graph` and carry no per-node `@context`. The FAQ section emits one `FAQPage` per page (all the page's FAQ sections merged), keyed `<page url>#faq`, and no longer emits anything in the section gallery, which has no page. The breadcrumb list gains `@id` `<page url>#breadcrumb`. An Article's `mainEntityOfPage` is now a reference to the page's `WebPage` node, and the event's `@id` is `<origin>/#event-<id>`.
+- `parseAuPhone` moved from `src/features/site/utils/phone.ts` to `src/lib/au-phone.ts`, and `buildLocalBusinessJsonLd` from `src/features/site/utils/business-json-ld.ts` to `src/lib/structured-data/nodes/organization.ts` (behaviour unchanged). A client site that imports either updates the path.
 - The hero's extra-content slot now uses the shared registry. Stored content is unchanged and the hero renders
   identically. The insert-menu pictures moved from `public/hero-slot-previews/` to `public/slot-previews/`, and
   `heroSupportingFields` gained the video block.
@@ -45,9 +58,23 @@ you start a release.
 
 ### Fixed
 
+- The template's tests no longer fail on a client site. Checks of what the template ships (a bare `studio-brand.json`, the
+  commented-out launch example, a profile with no service features) run only in the template (`scripts/is-template.mjs`:
+  the package is named `nocturne`) and are skipped on a client, which customises those files on purpose. The proxy tests
+  now state a live launch status instead of inheriting the profile's, and the A/B experiments end-to-end spec skips itself
+  on a pre-launch site, where its fixture page is private.
+
+- The end-to-end suite no longer depends on a client's `site.profile.ts`. Playwright and Lighthouse CI build the site under test
+  with the template's default profile (`E2E_FIXED_PROFILE=1`, `tests/e2e/fixtures/site.profile.ts`), so a pre-launch site or one with
+  features switched off runs the same suite as the template. Ordinary builds still use the site's own profile, and the flag is
+  refused in every Vercel build. A unit test checks the fixture matches the template's profile, and another proves this site's own
+  pre-launch restrictions.
+
 ### Breaking changes / migration steps
 
-None. The new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
+None for panels: the new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
+
+Structured data: `post.author` now also accepts a team member (no data migration; existing posts keep their author); run `npm run typegen` after merging. The Person `@id` changes once, from `<team url>#person` to `<origin>/#person-<id>`; search engines re-read it. The Organization no longer emits `areaServed` (no component shows service areas, and markup must match what visitors see); it returns once a site displays them. Pages hidden from search engines, members-only pages, the pre-launch view, search and sign-in carry no `WebPage` node. Sites that imported the moved files update their imports.
 
 Slot blocks: A project that added its own hero slot type moves it to a `SLOT_BLOCKS` line and a `COMPONENTS` line (README,
 "Adding a slot block"); its stored content needs no migration.
