@@ -20,6 +20,8 @@ you start a release.
 
 ### Added
 
+- **Section panels: unreadable gradients, opt-outs and browser checks.** A brand gradient that Studio can't load is now "unknown", never "removed": the choice is kept, a non-blocking warning says the check didn't run, and it is rechecked next time. The three sections that draw their own surface (Link list, CTA banner, the hero's Full background) are documented in the README, with tests that a stored Panel value is ignored on them. A browser spec checks panels under the default, light and dark palettes, over black and white pictures, with reduced transparency and without `backdrop-filter`.
+
 - **Image + text, section contract v2.** Four looks through the preset bar (Media right, Media left, Stacked, Text over
   media; stored as the hidden `variant` plus the existing `imagePosition`), a `media` slot that takes a picture
   (`slotImage`) or a video (`slotVideo`), and an agency-only `supporting` slot for a video under the media. Panels (Glass and

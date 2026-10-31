@@ -248,11 +248,16 @@ jobs:
         env:
           E2E_TIMINGS_FILE: e2e-timings/isolated-design-visual.json
 
+      - name: Section panels under each palette
+        run: npx playwright test --project=panel-palettes --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-panel-palettes.json
+
       - name: Slim timings
         if: always()
         run: |
           mkdir -p e2e-timings/slim
-          for name in experiments design design-visual; do
+          for name in experiments design design-visual panel-palettes; do
             node scripts/e2e-timings.mjs --slim "e2e-timings/isolated-$name.json" "e2e-timings/slim/isolated-$name.json" || true
           done
 
@@ -302,7 +307,7 @@ jobs:
         run: |
           gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --pattern 'e2e-timings-shard-*' --pattern 'e2e-timings-isolated' --dir reports || true
           gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --paginate > jobs.json || echo '{}' > jobs.json
-          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,isolated-experiments,isolated-design,isolated-design-visual $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
+          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,isolated-experiments,isolated-design,isolated-design-visual,isolated-panel-palettes $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

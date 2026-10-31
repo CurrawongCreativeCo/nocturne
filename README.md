@@ -3976,7 +3976,20 @@ A section's content can sit on a panel over its background. In the section's **D
 
 **Advanced: panel** holds **Glass strength** (Light, Medium or Strong), shown only for Glass. Unset follows the site's glass (Medium, from `tokens.json`). The Link list draws its own surfaces (glass rows and cards), so it doesn't offer Panel; its stored value, if any, is ignored.
 
-**Limits.** The checks use the colours in `tokens.json`, as the other section checks do. The page knows a brand gradient only by name, not by its stops, so on the site a gradient is checked with the black-and-white bound; the Studio, which can read the stops, measures it exactly.
+**What the checks use, and when they can't.** The site and the Studio read the same thing, the published Brand colours and brand gradients in Design settings, and call the same `resolveSectionPanel`, so one configuration gives one answer in both. The site reads them through one small cached query, made only for a section that has a panel (see _Request budget_); a change to Design settings reaches the page on the next refresh, like any other content change.
+
+A section's gradient is always in one of four states, and the checks never confuse them:
+
+| State       | Meaning                                               | What happens                                                                                  |
+| ----------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **None**    | No gradient is chosen, or a picture covers it.        | Nothing to check.                                                                             |
+| **Present** | It is in Design settings, so its colours are known.   | Contrast is exact, at the stops and between them.                                             |
+| **Missing** | Design settings was read and it is no longer there.   | The page draws no gradient, so the panel is the plain tint; Studio says the gradient is gone. |
+| **Unknown** | Design settings could not be read (a failed request). | See below.                                                                                    |
+
+When the gradients can't be read, the gradient you chose is **kept**, never cleared or reported as removed. The panel is drawn for the worst case (as over a picture), the Studio shows a non-blocking warning that contrast over that gradient isn't confirmed, and nothing is claimed as exact. A failed request is not remembered, so the next time the form is looked at, or the next time the site renders the page, it is checked properly.
+
+**Checked in a browser.** `tests/e2e/section-panel-rendering.spec.ts` renders panels under the default, a light and a dark palette; over a black and a white picture; with reduced transparency (the browser's own media feature, emulated); and with `backdrop-filter` unknown to the browser. It measures readability from the pixels the browser paints, and it falls back to a solid panel where the dark palette needs it. Nothing can run a browser without `backdrop-filter`, so that case serves the real stylesheet with the property renamed: to the engine it is an unknown property, in the `@supports` test and in every declaration.
 
 **Sections that draw their own surface.** Three opt out of Panel with `ownsSurfaces`, because a second panel would sit on top of the one they already draw. The opt-out removes only the shared Panel option: Studio hides it, and a value stored earlier (a layout changed after Panel was set, say) is ignored on the page and not applied.
 
