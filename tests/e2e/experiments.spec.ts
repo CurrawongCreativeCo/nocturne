@@ -4,10 +4,15 @@ import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { FAKE_SANITY_PORT, REVALIDATE_SECRET } from './constants'
 import { test } from './fixtures/test'
+import { siteProfile } from '../../src/config/profile'
 
 // The tests start and stop the fixture experiment, so they run in order, once.
 test.describe.configure({ mode: 'serial' })
 test.skip(({ isMobile }) => isMobile, 'Desktop only')
+test.skip(
+  siteProfile.launch.status !== 'live',
+  'The fixture page is private before launch, so a pre-launch site cannot run this',
+)
 const isMobile = (testInfo: TestInfo) => Boolean(testInfo.project.use.isMobile)
 
 const PAGE = '/ab-test'

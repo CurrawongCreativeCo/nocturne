@@ -39,6 +39,12 @@ you start a release.
 
 ### Fixed
 
+- The template's tests no longer fail on a client site. Checks of what the template ships (a bare `studio-brand.json`, the
+  commented-out launch example, a profile with no service features) run only in the template (`scripts/is-template.mjs`:
+  the package is named `nocturne`) and are skipped on a client, which customises those files on purpose. The proxy tests
+  now state a live launch status instead of inheriting the profile's, and the A/B experiments end-to-end spec skips itself
+  on a pre-launch site, where its fixture page is private.
+
 ### Breaking changes / migration steps
 
 None. The new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
