@@ -6,8 +6,15 @@ import {
 
 import { eventPath, EVENTS_PATH } from '@/config/event-paths'
 import { getLaunchState } from '@/config/launch'
-import { BLOG_PATH, categoryPath, postPath, slugToPath, teamPath } from '@/config/paths'
-import { hasEvents, hasTeamProfiles } from '@/config/profile'
+import {
+  BLOG_PATH,
+  categoryPath,
+  postPath,
+  servicePath,
+  slugToPath,
+  teamPath,
+} from '@/config/paths'
+import { hasEvents, hasServices, hasTeamProfiles } from '@/config/profile'
 
 import { resolveMainDocument } from './utils/main-document'
 
@@ -22,7 +29,7 @@ export const resolve: PresentationPluginOptions['resolve'] = {
   mainDocuments: defineDocuments([
     {
       route: '{/*path}',
-      resolve: ({ path }) => resolveMainDocument(path, launchState),
+      resolve: ({ path }) => resolveMainDocument(path, launchState, { services: hasServices() }),
     },
   ]),
   locations: {
@@ -94,6 +101,18 @@ export const resolve: PresentationPluginOptions['resolve'] = {
           hasTeamProfiles() && doc?.slug
             ? undefined
             : 'Shown in Team sections. Give them a page address for their own page.',
+        tone: 'positive',
+      }),
+    }),
+    service: defineLocations({
+      select: { name: 'name', slug: 'slug.current' },
+      resolve: (doc: { name?: string; slug?: string } | null) => ({
+        // The service's own page, when the site has services; none until it has an address.
+        locations:
+          hasServices() && doc?.slug
+            ? [{ title: doc.name || 'Untitled', href: servicePath(doc.slug) }]
+            : [],
+        message: hasServices() ? undefined : 'The services feature is off for this site',
         tone: 'positive',
       }),
     }),

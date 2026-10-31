@@ -66,6 +66,7 @@ test.describe('before launch', () => {
     '/blog/hello-world',
     '/search',
     '/team/ann-lee',
+    '/services/emergency-plumbing',
     '/links/more',
     '/Links',
     '/home',
