@@ -23,12 +23,28 @@ you start a release.
 - `design-manifest.generated.json`: a generated, read-only description of the sections, fields, option lists, presets, layout rules,
   client-editable flags and token names, built by `npm run typegen` (`npm run design-manifest`) and checked in CI. Sections can
   add `options.manifest = { purpose, example }`; Hero and Image + text have one. See the README's "Design manifest".
+- A shared slot registry (`src/features/pages/slots/`): any section family can offer a named slot that takes approved
+  blocks, generalised from the hero's supporting slot. `slotField({ name, slot })` builds the field, insert menu and
+  thumbnails; `renderSlot` draws the block. README, "Adding a slot block".
+- A **Video** block (`slotVideo`) for the hero's extra-content slot: the Video section's click-to-load YouTube and Vimeo
+  player, or an uploaded MP4 with captions. Nothing is requested from the video service until Play.
+- **Section panels.** Every section's Design tab has a **Panel** option: None (the default), Glass or Solid card, with an Advanced glass strength. Glass is tinted with no blur over a solid colour and frosted over pictures, gradients and overlapping content. Text contrast is exact over solids and a guaranteed bound over pictures; the panel gets more opaque, then solid, when text can't be guaranteed, with a Studio warning (never an error). Reduced transparency and more contrast always render solid. See README, "Section panels".
 
 ### Changed
+
+- The hero's extra-content slot now uses the shared registry. Stored content is unchanged and the hero renders
+  identically. The insert-menu pictures moved from `public/hero-slot-previews/` to `public/slot-previews/`, and
+  `heroSupportingFields` gained the video block.
+- The Video section draws its player with a shared `VideoFrame`, with no change to the page.
 
 ### Fixed
 
 ### Breaking changes / migration steps
+
+None. The new fields are optional and unset means no panel, so existing sections render as before. Run `npm run typegen` after merging.
+
+Slot blocks: A project that added its own hero slot type moves it to a `SLOT_BLOCKS` line and a `COMPONENTS` line (README,
+"Adding a slot block"); its stored content needs no migration.
 
 ## [1.10.0] - 2026-10-31
 

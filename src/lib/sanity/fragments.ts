@@ -151,8 +151,23 @@ export const launchDateFields = /* groq */ `
 `
 
 /**
- * The hero's supporting slot: the one item of `supporting[]`, whichever approved type it is. A new
- * slot type adds its conditional projection here (README, "Adding a hero slot").
+ * A `slotVideo` (schema: features/pages/schemas/slot-video.ts): project it as `slotVideo { ${slotVideoFields} }`.
+ * The file addresses are read here, as the Video section's are, so the page needs no second request.
+ */
+export const slotVideoFields = /* groq */ `
+  title,
+  source,
+  url,
+  "fileUrl": file.asset->url,
+  "captionsUrl": captions.asset->url,
+  poster { ${imageFields} },
+  aspectRatio
+`
+
+/**
+ * The hero's supporting slot (`hero.supporting` in features/pages/slots/registry.ts): the one item of
+ * `supporting[]`, whichever approved block it is. A new slot block adds its conditional projection here
+ * (README, "Adding a slot block"); slots.test.ts fails until every block allowed in the slot has one.
  */
 export const heroSupportingFields = /* groq */ `
   _key,
@@ -160,7 +175,8 @@ export const heroSupportingFields = /* groq */ `
   _type == "statsBar" => { ${statsBarFields} },
   _type == "badgeRow" => { ${badgeRowFields} },
   _type == "logoRow" => { ${logoRowFields} },
-  _type == "launchDate" => { ${launchDateFields} }
+  _type == "launchDate" => { ${launchDateFields} },
+  _type == "slotVideo" => { ${slotVideoFields} }
 `
 
 /**
@@ -208,7 +224,9 @@ export const sectionStyleFields = /* groq */ `
   edgeInvert,
   edgeHeightMobile,
   edgeHeightTablet,
-  edgeHeightDesktop
+  edgeHeightDesktop,
+  panel,
+  panelStrength
 `
 
 export const seoFields = /* groq */ `

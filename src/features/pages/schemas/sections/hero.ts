@@ -1,9 +1,9 @@
 import { BlockContentIcon } from '@sanity/icons/BlockContent'
 import { defineArrayMember, defineField, defineType, type PreviewValue } from 'sanity'
 
+import { slotField } from '@/features/pages/slots/slot-field'
 import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
 import { DEFAULT_HEADING_TONES, headingPlainText } from '@/lib/sanity/heading-text'
-import { isClientView } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
@@ -311,36 +311,9 @@ export const hero = defineType({
         aspect: '1:1',
         minWidth: 800,
       }),
-      // One approved slot for supporting content under the heading (README, "Adding a hero slot"). The
-      // agency adds or removes it; clients edit what is in it. A new type is one schema object, one
-      // component and one entry in components/sections/hero/slots.tsx.
-      defineField({
-        name: 'supporting',
-        title: 'Extra content under the heading',
-        description:
-          'A statistics bar, a row of badges, a row of logos or a launch date. One at most.',
-        type: 'array',
-        of: [
-          defineArrayMember({ type: 'statsBar' }),
-          defineArrayMember({ type: 'badgeRow' }),
-          defineArrayMember({ type: 'logoRow' }),
-          defineArrayMember({ type: 'launchDate' }),
-        ],
-        // A client cannot add one, so an empty slot would be a field with nothing to do.
-        hidden: ({ currentUser, value }) =>
-          isClientView(currentUser) && !(value as unknown[] | undefined)?.length,
-        validation: (rule) => rule.max(1),
-        options: {
-          slot: true,
-          insertMenu: {
-            // Thumbnails live in public/hero-slot-previews/<typeName>.svg.
-            views: [
-              { name: 'grid', previewImageUrl: (type) => `/hero-slot-previews/${type}.svg` },
-              { name: 'list' },
-            ],
-          },
-        },
-      }),
+      // One approved slot for supporting content under the heading (README, "Adding a slot block"). The
+      // agency adds or removes it; clients edit what is in it. Which blocks it takes is the registry's.
+      slotField({ name: 'supporting', slot: 'hero.supporting' }),
       defineField({
         name: 'showGreeting',
         title: 'Greet returning visitors',
@@ -387,6 +360,10 @@ export const hero = defineType({
         fixesAlignment: (section) => ['split', 'editorial'].includes(layoutOf(section)),
         // The hero has its own Image, so the shared Background image is not offered.
         hasOwnBackgroundImage: () => true,
+        // Only these two draw the picture behind the text; a panel sits over it.
+        // Full background draws its own text panel, so a section Panel would double it.
+        ownsSurfaces: (section) => layoutOf(section) === 'full-bleed',
+        drawsBackground: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
       },
     },
   ),

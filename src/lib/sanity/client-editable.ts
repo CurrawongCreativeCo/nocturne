@@ -345,6 +345,11 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     editable: ['label', 'date', 'time', 'countdown'],
     agencyOnly: [],
   },
+  // Content is the client's; the Shape (layout) is the agency's.
+  slotVideo: {
+    editable: ['title', 'source', 'url', 'file', 'poster', 'captions'],
+    agencyOnly: ['aspectRatio'],
+  },
 }
 
 /** Whether clients may change `field` on `type`. Unclassified fields, and unknown types, are not editable. */

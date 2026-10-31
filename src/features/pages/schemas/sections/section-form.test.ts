@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   allowsAlignment,
   allowsBackgroundImage,
+  allowsPanel,
   allowsParallax,
   alignmentHidden,
   staleAlignmentMessage,
@@ -111,5 +112,20 @@ describe('the real schema, as Studio asks it', () => {
     const editorial = inPage({ _type: 'hero', variant: 'editorial' }, 'align')
     expect(staleAlignmentMessage('center', editorial)).toMatch(/sets its own alignment/)
     expect(staleAlignmentMessage('center', inPage({ _type: 'hero' }, 'align'))).toBe(true)
+  })
+})
+
+describe('sections that draw their own surfaces', () => {
+  it('hide the shared Panel: the Link list, the CTA banner and the hero’s Full background', async () => {
+    await import('./link-list')
+    await import('./cta-banner')
+    const { hero } = await import('./hero')
+    expect(hero).toBeDefined()
+    expect(allowsPanel({ _type: 'linkList' })).toBe(false)
+    expect(allowsPanel({ _type: 'ctaBanner' })).toBe(false)
+    expect(allowsPanel({ _type: 'hero', variant: 'full-bleed' })).toBe(false)
+    expect(allowsPanel({ _type: 'hero', variant: 'overlay' })).toBe(true)
+    expect(allowsPanel({ _type: 'hero', variant: 'split' })).toBe(true)
+    expect(allowsPanel({ _type: 'richText' })).toBe(true)
   })
 })

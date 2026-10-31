@@ -104,6 +104,10 @@ export interface SectionStyleInput {
   edgeHeightMobile?: number | null
   edgeHeightTablet?: number | null
   edgeHeightDesktop?: number | null
+  /** A panel behind the content: 'none', 'glass' or 'solid' (README, "Section panels"); unset is none. */
+  panel?: string | null
+  /** Advanced: how see-through the glass starts; unset follows the glass tokens. */
+  panelStrength?: string | null
 }
 
 /** How one kind of section looks when its style is empty. Keep it equal to its schema's `initial`. */

@@ -1018,6 +1018,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
   unauthenticated query to check the dataset is private (see [Enquiries](#enquiries)); neither is read through the cache,
   and a page view still causes none.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
+- **Section panels** add one small query, `DESIGN_COLOURS_QUERY` (Brand colours and gradients, tagged `designSettings`), and only while rendering a section that has a panel: a site with no panels never makes it, and a visitor never causes it. It exists so the panel's contrast uses the colours the page really draws; sharing the settings entry would mean importing the site feature from shared code.
 - **Draft mode** bypasses the shared cache by design (editors need fresh drafts) and uses the token.
 
 Keep it that way: fetch through `cachedSanityFetch`, call each query with the same argument shape so
@@ -3696,6 +3697,36 @@ foreground independently of section schemas, and checks solid or glass surfaces.
 effective surface. `card-contrast.ts` maps the Link list’s label fields onto that contract; other
 sections should provide their own typed adapter, keeping schema paths out of the shared calculation.
 
+### Section panels
+
+A section's content can sit on a panel over its background. In the section's **Design** tab, **Panel** offers **None** (the default: nothing changes), **Glass** and **Solid card**. The panel is tinted from the section's background colour: Inverse gives dark glass, Accent an accent tint, and the text on it follows automatically. You never choose the text colour.
+
+| Panel          | What it draws                                                             |
+| -------------- | ------------------------------------------------------------------------- |
+| **None**       | The content straight on the background.                                   |
+| **Glass**      | A see-through panel. How it renders depends on what is behind it (below). |
+| **Solid card** | An opaque card in the tone's raised surface colour.                       |
+
+**Glass over any background.** The site decides how to draw it, so there is nothing to configure:
+
+- Over a **solid colour**, the glass is _tinted_: a translucent fill flattened against the colour, with a highlight border and **no blur**, because there is nothing varied behind it to blur.
+- Over a **picture, gradient, video, pattern or overlapping content** (a section edge, a Parallax or Float layer, a hero's own background), it is _frosted_: the same tint with a backdrop blur.
+
+**Keeping text readable.** Text on a panel must reach 4.5:1 (body and secondary text).
+
+- Over a solid colour the contrast is **exact**, measured against the flattened colour. Over a gradient the Studio measures at its stops and at points between them.
+- Over a **picture or video** nothing is measured: the photo is unknown. The site checks the panel colour over pure black and over pure white, after the picture's own overlay and strength (the same bound the Background check uses), so a stronger overlay lets a lighter glass strength stand. A gradient overlay, an edge, a Parallax or Float layer and a hero's own background are checked against plain black and white. If text passes both, it is _guaranteed_ whatever the picture; if it fails both, it fails; otherwise it is _not guaranteed: check visually_.
+- When text isn't guaranteed, the panel gets more opaque (in 5% steps) up to the strongest glass strength. If that still isn't enough, it renders **solid**, and the Studio shows a **warning** under Panel naming the fix: a stronger overlay on the picture, a higher glass strength or **Solid card**. It is only ever a warning: the section lives inside a page, and an error would block the whole page from publishing.
+- Visitors who ask for less transparency (`prefers-reduced-transparency`) or more contrast (`prefers-contrast: more`), and browsers that can't blur, always get a solid panel.
+
+**What Glass strength changes.** Over a picture, gradient or video it sets how much of the picture shows through, down to the point where text could stop being readable; below that point the panel is raised to the minimum that holds (never above Strong, 85%), so on a busy picture with no overlay Light and Medium can end up the same. Over a **solid colour** the glass is a tint of an almost identical colour, so Light, Medium and Strong differ only slightly (a few shades); use **Solid card** when you want a panel that stands out from a plain background.
+
+**Advanced: panel** holds **Glass strength** (Light, Medium or Strong), shown only for Glass. Unset follows the site's glass (Medium, from `tokens.json`). The Link list draws its own surfaces (glass rows and cards), so it doesn't offer Panel; its stored value, if any, is ignored.
+
+**Limits.** The checks use the colours in `tokens.json`, as the other section checks do. The page knows a brand gradient only by name, not by its stops, so on the site a gradient is checked with the black-and-white bound; the Studio, which can read the stops, measures it exactly.
+
+**For developers.** `src/lib/sanity/section-panel.ts` is the resolver and is importable by the site and the Studio: `resolvePanel` returns the render (`tinted`, `frosted` or `solid`), the opacity and any warning, and `panelDomProps` turns that into the `data-panel` attributes `SectionFrame` puts on the content container (the look is in `globals.css`, `[data-panel]`). `SectionFrame` renders the panel for every section, so a new section needs no code of its own. A section that draws its own surfaces registers `ownsSurfaces` in its `sectionFields` rules and passes `ownsSurfaces` to `SectionFrame` (see the Link list). Gallery entries `panel-*` and `tests/e2e/section-panel.spec.ts` cover each case; the visual baselines are Linux-only (run the "Update visual baselines" workflow after a change to the panel's look).
+
 ### Section dividers
 
 A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch or a layered wave. The
@@ -5325,7 +5356,7 @@ Lighthouse run per preset has not been done; `npm run test:lighthouse` still mea
 ### Hero supporting content
 
 The hero has one approved slot, **Extra content under the heading** (Content tab), for something that backs the
-heading up: a **Statistics bar** (two to four figures, see _Statistics_), **Badges** (one to three short labels, each with
+heading up: a **Video** (see _Adding a slot block_), a **Statistics bar** (two to four figures, see _Statistics_), **Badges** (one to three short labels, each with
 an optional icon: tick, star, shield, clock, heart, lightning bolt, leaf or award) or **Logos** (one to six, in grey by
 default; the _Greyscale_ switch keeps their colours instead). Nothing is added by default, so a hero looks the same
 until an agency adds one.
@@ -5354,36 +5385,73 @@ Animation is not _None_. Under `prefers-reduced-motion`, and without JavaScript,
 off, and for clients adding and removing are off too (the field is hidden from them while empty). The rules are
 `slotDisabledActions` in `src/lib/sanity/schema/slot-actions.ts` (unit tested). They use Sanity's `disableActions`, so
 they are about the form, not permissions: for a hard guarantee use a document-level role rule. The insert-menu pictures are
-`public/hero-slot-previews/<type>.svg`.
+`public/slot-previews/<type>.svg`.
 
-#### Adding a hero slot
+#### Adding a slot block
 
-A new slot type is one schema object, one component and one registry line:
+Slots are shared across section families (architecture: `docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md`, §4).
+A **slot** is a named place a family offers for one approved block; a **block** is a small piece of supporting
+content that fits any slot it is allowed in. Today `hero.supporting` is the only slot in use. `split.media` and
+`split.supporting` are reserved for the Split family, so a block can already say it will fit there. Nothing is stored
+differently: the hero's `supporting` array holds the same items as before, so no migration is needed.
 
-1. **Schema.** Create the type as a shared object (`src/lib/sanity/schema/<name>.ts`, registered in `index.ts`; see
-   `badge-row.ts` for a small one) and add `defineArrayMember({ type: '<name>' })` to the hero's `supporting` array
-   (`src/features/pages/schemas/sections/hero.ts`). Add `public/hero-slot-previews/<name>.svg` for the insert menu.
-2. **GROQ.** Add a fields fragment to `src/lib/sanity/fragments.ts` and a `_type == "<name>" => { ... }` line to
-   `heroSupportingFields`. Run `npm run typegen` (with the fake project from `tests/e2e/constants.ts`, never your `.env`).
-3. **Component.** Make a compact component in `src/components/ui/` with no section frame and no colours of its own (use
-   `text-ink`, `text-ink-muted`, `border-line`, `text-accent-text`), and size it to the room it is given (container
-   queries, as `StatsBar` does), because any layout can host it. Take a `centred` prop if it has an alignment.
-4. **Registry.** Add the type to `SLOTS` in `src/features/pages/components/sections/hero/slots.tsx`. TypeScript fails
-   until you do, because `SLOTS` is keyed by every `_type` the generated query can return.
+| Block        | Where it is allowed                                  | Clients change                                   |
+| ------------ | ---------------------------------------------------- | ------------------------------------------------ |
+| `statsBar`   | `hero.supporting`                                    | Figures and caption                              |
+| `badgeRow`   | `hero.supporting`                                    | Badges                                           |
+| `logoRow`    | `hero.supporting`                                    | Logos and Greyscale                              |
+| `launchDate` | `hero.supporting`                                    | Label, date, time and countdown                  |
+| `slotVideo`  | `hero.supporting`, `split.media`, `split.supporting` | Title, source, address or file, poster, captions |
 
-Nothing else changes: the layouts do not know which types exist. Where the slot sits is a separate table,
+**The video block.** `slotVideo` is the Video section's player without the section: a YouTube or Vimeo address behind
+the click-to-load Play button (nothing is requested from either service until the visitor presses it, so it needs no
+cookie-banner choice, exactly as the section), or an uploaded MP4 in a native player with an optional WebVTT captions
+file. The title names the Play button for screen readers and is required. The poster is required and stands in for
+visitors who ask for less motion. _Shape_ (16:9, 4:3, 1:1 or 21:9) is layout, so only the agency sees it. Both the
+section and the block draw the player with `VideoFrame` (`src/features/pages/components/sections/video/video-frame.tsx`).
+The block is up to 36rem wide and centres when the hero's text does.
+
+A new block is one schema object, one component, one query fragment and one registry line:
+
+1. **Schema.** Create the type as an object (a shared one in `src/lib/sanity/schema/<name>.ts`, registered in `index.ts`,
+   or `src/features/pages/schemas/<name>.ts` in `pageSchemaTypes` when it needs the pages feature, as `slot-video.ts`
+   does). Add `public/slot-previews/<name>.svg` for the insert menu.
+2. **Registry.** Add the block to `SLOT_BLOCKS` in `src/features/pages/slots/registry.ts`: its `schemaType`, a `noun`
+   for the slot's description, `allowedIn` (a list of `SlotName`s) and `clientEditable`. The slot's field
+   (`slotField({ name, slot })`, `slots/slot-field.ts`) lists the blocks that name it, builds the insert menu and
+   thumbnails, hides the field from clients while it is empty and limits it to the slot's `max`.
+3. **GROQ.** Add a fields fragment to `src/lib/sanity/fragments.ts` and a `_type == "<name>" => { ... }` line to
+   `heroSupportingFields` (one fragment per block, folded into the page query: no extra request). Run `npm run typegen`
+   (with the fake project from `tests/e2e/constants.ts`, never your `.env`).
+4. **Component.** Make a compact component with no section frame and no colours of its own (use `text-ink`,
+   `text-ink-muted`, `border-line`, `text-accent-text`), sized to the room it is given because any slot can host it
+   (container queries, as `StatsBar` does). Take a `centred` prop if it has an alignment. Add it to `COMPONENTS` in
+   `src/features/pages/slots/render-slot.tsx`; TypeScript fails until you do, because it is keyed by every block type.
+5. **Client fields.** Classify the block's fields in `CLIENT_EDITABLE_FIELDS` (`src/lib/sanity/client-editable.ts`):
+   content is `editable`, layout is `agencyOnly` (and hidden with `hiddenFromClients`). `client-editable.test.ts` fails
+   for a field in neither list.
+
+`src/features/pages/slots/registry.test.ts` checks that every block has a schema, a component, a thumbnail and at least one
+`allowedIn` slot, that every `allowedIn` value is a known slot, that `heroSupportingFields` projects exactly the blocks the
+hero slot allows, and that each block is classified for clients.
+
+Nothing else changes: the layouts do not know which blocks exist. Where the hero's slot sits is a separate table,
 `HERO_SLOT_PLACEMENT` in `src/features/pages/utils/hero-slot.ts` (unit tested against `HERO_VARIANTS`), which a new
 **layout** extends. Each layout renders `<HeroSlot placement="...">` for the spot it has, and the slot appears only if the
-map agrees. Add a fixture and a gallery entry for the new type in `tests/e2e/fixtures/dataset.mjs` (`SLOT_TYPES` and
-`slotItem`, which put every type in every hero preset) and refresh the visual baselines. Reuse this pattern in another
-section only when there is a real need: free nesting was rejected because it gives awkward layouts and complex rendering,
-and a fixed optional field per feature makes the schema grow with every release.
+map agrees. The hero draws its block with `renderSlot` (`slots/render-slot.tsx`), the function another family calls for
+its own slot. Add a fixture and a gallery entry for a new block in `tests/e2e/fixtures/dataset.mjs` (`SLOT_TYPES` and
+`slotItem` put a block in every hero preset; `slotVideoItem` shows the video block on its own page, `/hero-slot-video`, not in the gallery: every gallery entry gets a visual baseline) and refresh the
+visual baselines. Reuse this pattern in another family only when there is a real need: free nesting was rejected because
+it gives awkward layouts and complex rendering, and a fixed optional field per feature makes the schema grow with every
+release.
 
-**Tests.** Unit: the placement map, the slot actions, the badge icons. End to end (`tests/e2e/hero-slot.spec.ts`): every
-slot type in every hero preset passes axe and fits at 375, 768 and 1280 px; placement (under the buttons, inside the
-panel, beside the text, below it on a phone); the server HTML holds the figures; and the slot on a real page (`/hero-slot`)
-fades in, is there at once under reduced motion and without JavaScript. The visual baselines for `hero-slot-*` are
-Linux-only: refresh them with the **Update visual baselines** workflow.
+**Tests.** Unit: the registry, the placement map, the slot actions, the badge icons. End to end
+(`tests/e2e/hero-slot.spec.ts`): every slot type in every hero preset passes axe and fits at 375, 768 and 1280 px;
+placement (under the buttons, inside the panel, beside the text, below it on a phone); the server HTML holds the figures;
+and the slot on a real page (`/hero-slot`) fades in, is there at once under reduced motion and without JavaScript.
+`tests/e2e/hero-slot-video.spec.ts` covers the video block on `/hero-slot-video`: nothing from YouTube until Play, one
+player after it, the keyboard, an uploaded video with captions, the no-JavaScript link, and axe. The visual baselines for
+`hero-slot-*` are Linux-only: refresh them with the **Update visual baselines** workflow.
 
 ## Adding a feature, document type or singleton
 
