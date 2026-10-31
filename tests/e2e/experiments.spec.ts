@@ -4,15 +4,10 @@ import { encodeSignatureHeader, SIGNATURE_HEADER_NAME } from '@sanity/webhook'
 
 import { FAKE_SANITY_PORT, REVALIDATE_SECRET } from './constants'
 import { test } from './fixtures/test'
-import { siteProfile } from '../../src/config/profile'
 
 // The tests start and stop the fixture experiment, so they run in order, once.
 test.describe.configure({ mode: 'serial' })
 test.skip(({ isMobile }) => isMobile, 'Desktop only')
-test.skip(
-  siteProfile.launch.status !== 'live',
-  'The fixture page is private before launch, so a pre-launch site cannot run this',
-)
 const isMobile = (testInfo: TestInfo) => Boolean(testInfo.project.use.isMobile)
 
 const PAGE = '/ab-test'
@@ -44,8 +39,19 @@ const get = (request: APIRequestContext, headers: Record<string, string> = {}) =
 const hasCookie = (request: APIRequestContext) => async () =>
   Boolean((await get(request)).headers()['set-cookie']?.includes('ab='))
 
+// The fixture page is private before launch, so a pre-launch site (a client's, until it launches)
+// cannot run this. Asked of the running site, not read from the profile: the spec runs under Node's
+// own loader, which cannot import the app's JSON modules.
+let sitePreLaunch = false
+test.beforeAll(async ({ request }) => {
+  const response = await request.get('/api/site-info')
+  const info = response.ok() ? ((await response.json()) as { launch?: { status?: string } }) : null
+  sitePreLaunch = info?.launch?.status !== 'live'
+  test.skip(sitePreLaunch, 'The site is pre-launch, so the fixture page is private')
+})
+
 test.afterAll(async ({ request }, testInfo) => {
-  if (isMobile(testInfo)) return
+  if (isMobile(testInfo) || sitePreLaunch) return
   test.setTimeout(30_000)
   await setExperiment(request, 'off')
   await expect.poll(hasCookie(request)).toBe(false)
