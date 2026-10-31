@@ -11,12 +11,13 @@ import { join } from 'node:path'
 const API_VERSION = 'v2026-10-01'
 
 /**
- * Release mode is built (src/lib/proposals/plan.ts) and its action shapes match the installed
- * @sanity/client types, but it has never run against a real dataset: release states, the
- * archive-before-delete rule and asynchronous clean-up are unverified. It stays off until a scratch
- * dataset run has shown each of them, and `--release` is refused until then.
+ * Release mode, checked on a real scratch dataset (scripts/spikes/release-mode-probe.mjs and
+ * scripts/proposal.integration.test.mjs): release.create and version.create must be separate requests;
+ * a version can be patched with `ifRevisionID`; creating the same version twice gives 409; a release
+ * can only be deleted once archived (400 otherwise), archiving was immediate, and each cleanup step
+ * must be its own request. Set to false to switch `--release` off again.
  */
-export const RELEASE_MODE_VERIFIED = false
+export const RELEASE_MODE_VERIFIED = true
 
 /** Roles that count as the agency (src/lib/sanity/roles.ts). */
 const AGENCY_ROLES = ['administrator', 'developer']
@@ -119,6 +120,11 @@ export function createHttpClient({ projectId, dataset, token, fetchImpl = fetch 
         method: 'POST',
         body: JSON.stringify({ mutations }),
       }),
+    /** A GROQ query over raw documents (drafts and versions included). */
+    async query(groq) {
+      const qs = new URLSearchParams({ query: groq, perspective: 'raw' })
+      return (await request(`${base}/query/${dataset}?${qs}`)).result
+    },
     /** The role names of whoever the token belongs to. Throws when they cannot be read. */
     async getRoles() {
       const me = await request(`https://${projectId}.api.sanity.io/v2021-06-07/users/me`)
@@ -285,24 +291,69 @@ function writtenFrom(response) {
   return { revisions, documents }
 }
 
+const releaseDocId = (releaseId) => `_.releases.${releaseId}`
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 /**
- * Checks a proposal and, with `yes`, writes it as drafts.
+ * Removes a release this run created, and only what this run put in it. Each step is its own request
+ * (Sanity refuses discard and archive together). A version someone has edited since it was written is
+ * kept, and so is a release that holds anything else. Returns the ids still in the dataset.
+ */
+async function discardRelease({ client, releaseId, targets, revisions, notes }) {
+  const remaining = []
+  try {
+    const current = await client.getDocuments(targets)
+    const byId = new Map(current.map((doc) => [doc._id, doc]))
+    for (const id of targets) {
+      const doc = byId.get(id)
+      if (!doc) continue
+      if (revisions[id] && doc._rev !== revisions[id]) {
+        notes.push(`${id} was edited after the proposal wrote it, so it was NOT discarded.`)
+        remaining.push(id)
+        continue
+      }
+      await client.action([{ actionType: 'sanity.action.document.version.discard', versionId: id }])
+    }
+    const inRelease = await client.query(`*[_id match "versions.${releaseId}.*"]._id`)
+    const foreign = (inRelease ?? []).filter((id) => !targets.includes(id))
+    if (remaining.length > 0 || foreign.length > 0) {
+      if (foreign.length > 0)
+        notes.push(`The release also holds ${foreign.join(', ')}, so it was NOT deleted.`)
+      return [...remaining, ...foreign, releaseDocId(releaseId)]
+    }
+    await client.action([{ actionType: 'sanity.action.release.archive', releaseId }])
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const [release] = await client.getDocuments([releaseDocId(releaseId)])
+      if (release?.state === 'archived') break
+      await pause(1000)
+    }
+    await client.action([{ actionType: 'sanity.action.release.delete', releaseId }])
+    return []
+  } catch (error) {
+    notes.push(`Discarding the release failed (${error?.message ?? 'unknown error'}).`)
+    return [...new Set([...remaining, ...targets, releaseDocId(releaseId)])]
+  }
+}
+
+/**
+ * Checks a proposal and, with `yes`, writes it as drafts (or into one release with `release`).
  *
  * @param o.proposal        the parsed proposal
- * @param o.client          { getDocuments, mutate, getRoles }
- * @param o.dataset         must start with "scratch"
+ * @param o.client          { getDocuments, mutate, action, query, getRoles }
+ * @param o.dataset         must be a scratch dataset
  * @param o.validate        (proposal, { manifest, documents, agencyApproved }) => validation
  * @param o.plan            { planProposal, undoMutations }   (src/lib/proposals/plan.ts)
  * @param o.manifest        the design manifest
  * @param o.yes             write; otherwise a dry run
- * @param o.release         refused while RELEASE_MODE_VERIFIED is false
+ * @param o.release         write into one release (needs `releasesEnabled`, the profile's flag)
  * @param o.sanityValidate  (documents) => { errors, warnings }; throws when it could not run
  *
- * The write is ONE transaction: it all lands or none of it does. Validation and clean-up are
- * separate requests, so the whole run is NOT atomic: if validation fails, a second, guarded
- * transaction discards what this proposal wrote, and `cleanup` says whether that worked.
+ * Drafts are written in ONE transaction: it all lands or none of it does. A release takes several
+ * requests (create the release, create the versions, patch them). Validation and clean-up are further
+ * requests, so the run as a whole is NOT atomic: if anything after the first write fails, a guarded
+ * clean-up discards what this proposal wrote, and `cleanup` says whether that worked.
  *
- * Returns `{ status, validation, plan, written, studio, cleanup, manualActions, notes }`.
+ * Returns `{ status, validation, plan, written, release, studio, cleanup, manualActions, notes }`.
  * status: rejected | nothing-to-apply | dry-run | conflict | failed | invalid-in-sanity | applied.
  * cleanup.status: not-needed | done | failed; `remaining` lists ids still in the dataset.
  */
@@ -310,7 +361,12 @@ export async function runProposal(o) {
   assertScratchDataset(o.dataset)
   if (o.release && !RELEASE_MODE_VERIFIED) {
     throw new Error(
-      '--release is disabled: release mode has not been verified against a real scratch dataset. Apply as drafts instead.',
+      '--release is disabled: release mode has not been verified. Apply as drafts instead.',
+    )
+  }
+  if (o.release && !o.releasesEnabled) {
+    throw new Error(
+      '--release needs features.releases switched on in site.profile.ts (and a Sanity plan with Releases).',
     )
   }
   const notes = []
@@ -329,70 +385,132 @@ export async function runProposal(o) {
   if (validation.rejection) return { ...base, status: 'rejected', validation }
   if (validation.applicable.length === 0) return { ...base, status: 'nothing-to-apply', validation }
 
-  const plan = o.plan.planProposal(validation.applicable, documents)
-  if (!o.yes) return { ...base, status: 'dry-run', validation, plan }
+  const release = o.release
+    ? {
+        id: releaseIdFor(o.proposal.id),
+        title: `Proposal ${o.proposal.id}`,
+        description: o.proposal.intent,
+      }
+    : undefined
+  const plan = o.plan.planProposal(validation.applicable, documents, { release })
+  if (!o.yes) return { ...base, status: 'dry-run', validation, plan, release: release?.id }
 
-  let response
-  try {
-    response = await o.client.mutate(plan.mutations)
-  } catch (error) {
-    // One transaction: a refusal means nothing was written, so there is nothing to clean up.
+  const targets = plan.writes.map((write) => write.targetId)
+  let revisions = {}
+  let releaseCreated = false
+  const fail = async (error, what) => {
     if (error?.status === 409) {
       notes.push(
-        'A document changed (or a draft appeared) after the proposal was read. Nothing was written. Propose again from the new revision.',
+        'A document (or the release) changed or already existed. Propose again from the new revision.',
       )
-      return { ...base, status: 'conflict', validation, plan }
+    } else {
+      notes.push(`${what} failed (${error?.message ?? 'unknown error'}).`)
     }
-    notes.push(`The write failed (${error?.message ?? 'unknown error'}). Nothing was written.`)
-    return { ...base, status: 'failed', validation, plan }
+    if (releaseCreated) {
+      const remaining = await discardRelease({
+        client: o.client,
+        releaseId: release.id,
+        targets,
+        revisions,
+        notes,
+      })
+      if (remaining.length > 0) {
+        cleanup.status = 'failed'
+        cleanup.remaining = remaining
+        manualActions.push(`Review and remove from Studio: ${remaining.join(', ')}.`)
+      } else {
+        cleanup.status = 'done'
+        notes.push('The release this proposal created was discarded.')
+      }
+    } else {
+      notes.push('Nothing was written.')
+    }
+    return {
+      ...base,
+      status: error?.status === 409 ? 'conflict' : 'failed',
+      validation,
+      plan,
+      release: release?.id,
+    }
   }
 
-  const { revisions, documents: written } = writtenFrom(response)
-  const targets = plan.writes.map((write) => write.targetId)
+  let response
+  if (release) {
+    try {
+      await o.client.action(plan.releaseCreate)
+      releaseCreated = true
+      for (const action of plan.versionActions) await o.client.action([action])
+      response = await o.client.mutate(plan.mutations)
+    } catch (error) {
+      return fail(error, 'Writing the release')
+    }
+  } else {
+    try {
+      response = await o.client.mutate(plan.mutations)
+    } catch (error) {
+      // One transaction: a refusal means nothing was written, so there is nothing to clean up.
+      return fail(error, 'The write')
+    }
+  }
+
+  const { revisions: written, documents: writtenDocuments } = writtenFrom(response)
+  revisions = written
   const result = {
     ...base,
     validation,
     plan,
+    release: release?.id,
     written: targets.map((id) => ({ id, revision: revisions[id] })),
   }
 
   let failure
   try {
-    const missing = targets.filter((id) => !written[id])
+    const missing = targets.filter((id) => !writtenDocuments[id])
     if (missing.length > 0)
       throw new Error(
         'Sanity did not return the documents just written, so they cannot be validated.',
       )
-    const studio = await o.sanityValidate(targets.map((id) => written[id]))
+    const studio = await o.sanityValidate(targets.map((id) => writtenDocuments[id]))
     result.studio = studio
     if (studio.errors.length > 0) failure = 'Studio validation found errors.'
   } catch (error) {
-    failure = `${error.message} The drafts could not be checked.`
+    failure = `${error.message} The ${release ? 'release versions' : 'drafts'} could not be checked.`
   }
   if (!failure) return { ...result, status: 'applied' }
 
   notes.push(failure)
-  const undo = o.plan.undoMutations(plan.writes, revisions)
-  let remaining = [...undo.unguarded]
-  if (undo.mutations.length > 0) {
-    try {
-      await o.client.mutate(undo.mutations)
-    } catch (error) {
-      notes.push(
-        error?.status === 409
-          ? 'A draft was edited after the proposal wrote it, so it was NOT discarded.'
-          : `Discarding the drafts failed (${error?.message ?? 'unknown error'}).`,
-      )
-      remaining = targets
+  let remaining
+  if (release) {
+    remaining = await discardRelease({
+      client: o.client,
+      releaseId: release.id,
+      targets,
+      revisions,
+      notes,
+    })
+  } else {
+    const undo = o.plan.undoMutations(plan.writes, revisions)
+    remaining = [...undo.unguarded]
+    if (undo.mutations.length > 0) {
+      try {
+        await o.client.mutate(undo.mutations)
+      } catch (error) {
+        notes.push(
+          error?.status === 409
+            ? 'A draft was edited after the proposal wrote it, so it was NOT discarded.'
+            : `Discarding the drafts failed (${error?.message ?? 'unknown error'}).`,
+        )
+        remaining = targets
+      }
     }
   }
   if (remaining.length > 0) {
     cleanup.status = 'failed'
     cleanup.remaining = remaining
-    manualActions.push(`Review and discard these drafts in Studio: ${remaining.join(', ')}.`)
+    manualActions.push(`Review and discard these in Studio: ${remaining.join(', ')}.`)
   } else {
     cleanup.status = 'done'
-    notes.push('The drafts this proposal wrote were discarded; nothing else was touched.')
+    notes.push(`What this proposal wrote was discarded; nothing else was touched.`)
   }
   return { ...result, status: 'invalid-in-sanity' }
 }

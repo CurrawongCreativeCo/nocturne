@@ -29,6 +29,28 @@ export const changeProposalsConfig = defineFeatureConfig({
         'sanity.io/manage → your project → API → Tokens (Administrator or Developer role for agency-only changes)',
       envExample: false,
     },
+    {
+      name: 'PROPOSAL_INTEGRATION_DATASET',
+      kind: 'server-env',
+      where: 'local',
+      required: false,
+      purpose:
+        'Names the scratch dataset the integration test runs against. Left unset, that test is skipped. Only a scratch dataset is accepted.',
+      default: 'Unset: the integration test is skipped',
+      source: 'The name of a dataset you made for testing, such as scratch-proposals',
+      envExample: false,
+    },
+    {
+      name: 'SANITY_PROPOSAL_EDITOR_TOKEN',
+      kind: 'secret',
+      where: 'local',
+      required: false,
+      purpose:
+        'Only for the scratch-dataset integration test, which uses an Editor token to check that agency-only changes are refused.',
+      default: 'Unset: that part of the integration test is skipped',
+      source: 'sanity.io/manage → your project → API → Tokens (Editor role)',
+      envExample: false,
+    },
   ],
   verify: [],
 })

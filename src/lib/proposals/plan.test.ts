@@ -90,8 +90,9 @@ describe('planProposal', () => {
       published,
       { release: { id: 'rTest', title: 'Test' } },
     )
-    expect(plan.releaseActions.map((a) => a.actionType)).toEqual([
-      'sanity.action.release.create',
+    // Two requests, in this order: Sanity refuses both actions in one.
+    expect(plan.releaseCreate.map((a) => a.actionType)).toEqual(['sanity.action.release.create'])
+    expect(plan.versionActions.map((a) => a.actionType)).toEqual([
       'sanity.action.document.version.create',
     ])
     expect(patches(plan).every((p) => p.id === 'versions.rTest.page-home')).toBe(true)

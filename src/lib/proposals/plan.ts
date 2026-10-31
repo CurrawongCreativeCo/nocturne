@@ -43,8 +43,13 @@ export interface PlannedWrite {
 
 export interface ProposalPlan {
   writes: PlannedWrite[]
-  /** Actions API requests that must run first (release and version creation); empty without a release. */
-  releaseActions: Record<string, unknown>[]
+  /**
+   * The Actions API request that creates the release; empty without one. It must be sent on its own,
+   * and before `versionActions`: Sanity refuses `release.create` and `version.create` in one request.
+   */
+  releaseCreate: Record<string, unknown>[]
+  /** Creates each document's version in the release; empty without one. Sent after `releaseCreate`. */
+  versionActions: Record<string, unknown>[]
   mutations: ProposalMutation[]
 }
 
@@ -63,8 +68,9 @@ function bare(document: DocumentSnapshot, id: string): Record<string, unknown> {
 }
 
 /**
- * The object paths a `set` needs to exist first: Sanity does not create missing parents, so each
- * absent one gets a `setIfMissing` of its own (outermost first).
+ * The object paths a `set` goes through that do not exist yet, outermost first. Sanity would create
+ * them for a plain `set` (checked on a scratch dataset), but each gets an explicit `setIfMissing` so
+ * the plan says what it creates.
  */
 function missingParents(document: DocumentSnapshot, path: string): string[] {
   const segments = parsePath(path)
@@ -85,9 +91,9 @@ export function planProposal(
   documents: Readonly<Record<string, DocumentSnapshot>>,
   { release }: PlanOptions = {},
 ): ProposalPlan {
-  const plan: ProposalPlan = { writes: [], releaseActions: [], mutations: [] }
+  const plan: ProposalPlan = { writes: [], releaseCreate: [], versionActions: [], mutations: [] }
   if (release) {
-    plan.releaseActions.push({
+    plan.releaseCreate.push({
       actionType: 'sanity.action.release.create',
       releaseId: release.id,
       metadata: {
@@ -107,7 +113,7 @@ export function planProposal(
     const units = applicable.filter((patch) => patch.documentId === documentId)
 
     if (release) {
-      plan.releaseActions.push({
+      plan.versionActions.push({
         actionType: 'sanity.action.document.version.create',
         publishedId: documentId,
         document: bare(snapshot, targetId),
@@ -180,19 +186,4 @@ export function undoMutations(
     )
   }
   return { mutations, unguarded }
-}
-
-/** The Actions API requests that undo a release plan: discard each version, then archive and delete the release. */
-export function undoReleaseActions(
-  writes: readonly PlannedWrite[],
-  releaseId: string,
-): Record<string, unknown>[] {
-  return [
-    ...writes.map((write) => ({
-      actionType: 'sanity.action.document.version.discard',
-      versionId: write.targetId,
-    })),
-    { actionType: 'sanity.action.release.archive', releaseId },
-    { actionType: 'sanity.action.release.delete', releaseId },
-  ]
 }

@@ -32,8 +32,8 @@ you start a release.
 - **Change proposals** (`npm run proposal`): a JSON format for scripted or AI-made edits to pages and Brand colours, a pure
   validator (manifest, contrast through `resolveDesignTokens`, panel warnings, `CLIENT_EDITABLE` review flags; content and
   design checked as separate parts) and a draft-only applier for scratch datasets (dry run by default, `--yes` to write,
-  `ifRevisionID` guard, guarded clean-up, never publishes; agency-only changes need an Administrator or Developer token, and
-  `--release` is disabled until it is verified on a real dataset). Adds the `SANITY_PROPOSAL_TOKEN` setting (local only). README,
+  `ifRevisionID` guard, guarded clean-up, never publishes; agency-only changes need an Administrator or Developer token; `--release` puts the
+  changes into one unpublished release; both were checked against a real scratch dataset). Adds the `SANITY_PROPOSAL_TOKEN` setting (local only). README,
   "Change proposals".
 
 ### Changed

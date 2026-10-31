@@ -5,6 +5,7 @@ import {
   assertScratchDataset,
   createHttpClient,
   parseArgs,
+  releaseIdFor,
   parseValidationOutput,
   RELEASE_MODE_VERIFIED,
   runProposal,
@@ -98,8 +99,63 @@ function fakeLake({ documents = [], roles = ['administrator'], beforeMutate } = 
     roles,
     stripResults: false,
     getDocuments: vi.fn(async (ids) =>
-      ids.filter((id) => store.has(id)).map((id) => clone(store.get(id))),
+      ids.flatMap((id) => {
+        if (id.startsWith('_.releases.')) {
+          const release = lake.releases.get(id.slice('_.releases.'.length))
+          return release ? [{ _id: id, ...release }] : []
+        }
+        return store.has(id) ? [clone(store.get(id))] : []
+      }),
     ),
+    releases: new Map(),
+    actions: [],
+    query: vi.fn(async (groq) => {
+      const match = /match "(versions\.[^"]+)\.\*"/.exec(groq)
+      if (!match) throw new Error(`fake lake cannot answer ${groq}`)
+      return [...store.keys()].filter((id) => id.startsWith(`${match[1]}.`))
+    }),
+    /** Sanity's release rules as observed on a scratch dataset (README, "Change proposals"). */
+    action: vi.fn(async (actions) => {
+      lake.actions.push(actions)
+      const fail = (status, message) => Object.assign(new Error(message), { status })
+      const types = actions.map((a) => a.actionType)
+      if (types.includes('sanity.action.release.create') && types.length > 1) {
+        throw fail(400, 'release.create must be alone')
+      }
+      if (
+        types.includes('sanity.action.document.version.discard') &&
+        types.includes('sanity.action.release.archive')
+      ) {
+        throw fail(400, 'discard and archive together')
+      }
+      for (const action of actions) {
+        const { releaseId, versionId } = action
+        if (action.actionType === 'sanity.action.release.create') {
+          if (lake.releases.has(releaseId)) throw fail(409, 'release exists')
+          lake.releases.set(releaseId, { state: 'active' })
+        } else if (action.actionType === 'sanity.action.document.version.create') {
+          const id = action.document._id
+          const release = id.split('.')[1]
+          if (!lake.releases.has(release)) throw fail(400, 'no such release')
+          if (store.has(id)) throw fail(409, 'version exists')
+          if (!store.has(action.publishedId) && !store.has(`drafts.${action.publishedId}`))
+            throw fail(400, 'no base document')
+          store.set(id, { ...clone(action.document), _rev: `r${++counter}` })
+        } else if (action.actionType === 'sanity.action.document.version.discard') {
+          if (!store.has(versionId)) throw fail(400, 'no such version')
+          store.delete(versionId)
+        } else if (action.actionType === 'sanity.action.release.archive') {
+          lake.releases.get(releaseId).state = 'archived'
+        } else if (action.actionType === 'sanity.action.release.delete') {
+          if (lake.releases.get(releaseId)?.state !== 'archived')
+            throw fail(400, 'release must be archived')
+          lake.releases.delete(releaseId)
+        } else {
+          throw fail(400, `unexpected action ${action.actionType}`)
+        }
+      }
+      return {}
+    }),
     getRoles: vi.fn(async () => {
       if (lake.roles instanceof Error) throw lake.roles
       return lake.roles
@@ -172,7 +228,20 @@ function fakeLake({ documents = [], roles = ['administrator'], beforeMutate } = 
         }
       }
       store = next
-      return lake.stripResults ? { transactionId: 't' } : { transactionId: 't', results }
+      // The real API returns one result per document, holding its final state.
+      const finals = new Map()
+      for (const result of results) {
+        const id = result.document?._id ?? result.id
+        finals.set(
+          id,
+          result.operation === 'delete'
+            ? { operation: 'delete' }
+            : { operation: result.operation, document: next.get(id) && clone(next.get(id)) },
+        )
+      }
+      return lake.stripResults
+        ? { transactionId: 't' }
+        : { transactionId: 't', results: [...finals.values()] }
     }),
     /** Someone else edits a document between the proposal's write and its clean-up. */
     editBehindBack(id, set) {
@@ -229,6 +298,7 @@ const run = (overrides = {}) =>
     manifest,
     yes: true,
     release: false,
+    releasesEnabled: false,
     sanityValidate: async () => noErrors,
     ...overrides,
   })
@@ -542,12 +612,107 @@ describe('runProposal: validation failure and clean-up', () => {
 })
 
 describe('release mode', () => {
-  it('is disabled until it has been verified on a scratch dataset', async () => {
-    expect(RELEASE_MODE_VERIFIED).toBe(false)
+  const releaseRun = (client, overrides = {}) =>
+    run({ client, release: true, releasesEnabled: true, ...overrides })
+  const versionId = (proposal) => `versions.${releaseIdFor(proposal.id)}.page-home`
+
+  it('needs the releases flag in the profile, before anything is read', async () => {
+    expect(RELEASE_MODE_VERIFIED).toBe(true)
     const client = fakeLake({ documents: baseDocuments() })
-    await expect(run({ client, release: true })).rejects.toThrow(/disabled/)
+    await expect(run({ client, release: true, releasesEnabled: false })).rejects.toThrow(/releases/)
     expect(client.getDocuments).not.toHaveBeenCalled()
-    expect(client.mutate).not.toHaveBeenCalled()
+  })
+
+  it('creates the release, then the version, then patches it: separate requests, nothing published', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const before = clone(Object.fromEntries(client.store))
+    const result = await releaseRun(client)
+    expect(result.status).toBe('applied')
+    expect(client.actions.map((a) => a.map((x) => x.actionType))).toEqual([
+      ['sanity.action.release.create'],
+      ['sanity.action.document.version.create'],
+    ])
+    expect(
+      client.actions
+        .flat()
+        .map((a) => a.actionType)
+        .join(),
+    ).not.toMatch(/publish|schedule/)
+    expect(client.store.get(versionId(glassImageLeft)).pageBuilder[0].imagePosition).toBe('left')
+    expect(client.store.get('page-home')).toEqual(before['page-home'])
+    expect(client.store.has('drafts.page-home')).toBe(false)
+    expect(result.release).toBe(releaseIdFor(glassImageLeft.id))
+  })
+
+  it('removes the whole release when Studio validation fails: discard, archive, then delete, each alone', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const before = clone(Object.fromEntries(client.store))
+    const result = await releaseRun(client, {
+      sanityValidate: async () => ({ errors: ['bad'], warnings: [] }),
+    })
+    expect(result.status).toBe('invalid-in-sanity')
+    expect(result.cleanup).toEqual({ status: 'done', remaining: [] })
+    expect(client.actions.slice(2).map((a) => a.map((x) => x.actionType))).toEqual([
+      ['sanity.action.document.version.discard'],
+      ['sanity.action.release.archive'],
+      ['sanity.action.release.delete'],
+    ])
+    expect(client.releases.size).toBe(0)
+    expect(Object.fromEntries(client.store)).toEqual(before)
+  })
+
+  it('keeps a version someone edited after the write, and the release with it', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const result = await releaseRun(client, {
+      sanityValidate: async () => {
+        client.editBehindBack(versionId(glassImageLeft), { title: 'Their edit' })
+        return { errors: ['bad'], warnings: [] }
+      },
+    })
+    expect(result.cleanup.status).toBe('failed')
+    expect(result.cleanup.remaining).toContain(versionId(glassImageLeft))
+    expect(client.store.get(versionId(glassImageLeft)).title).toBe('Their edit')
+    expect(client.releases.has(releaseIdFor(glassImageLeft.id))).toBe(true)
+    expect(result.manualActions).toHaveLength(1)
+  })
+
+  it('does not delete a release that holds something it did not put there', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const result = await releaseRun(client, {
+      sanityValidate: async () => {
+        client.store.set(`versions.${releaseIdFor(glassImageLeft.id)}.page-about`, {
+          _id: 'x',
+          _type: 'page',
+          _rev: 'z',
+        })
+        return { errors: ['bad'], warnings: [] }
+      },
+    })
+    expect(result.cleanup.status).toBe('failed')
+    expect(client.releases.has(releaseIdFor(glassImageLeft.id))).toBe(true)
+  })
+
+  it('refuses to run the same proposal into a release twice', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    expect((await releaseRun(client)).status).toBe('applied')
+    const second = await releaseRun(client)
+    expect(second.status).toBe('conflict')
+    expect(client.store.get(versionId(glassImageLeft))).toBeDefined()
+    expect(second.cleanup.status).not.toBe('done')
+  })
+
+  it('cleans up a release whose version could not be created', async () => {
+    const client = fakeLake({ documents: baseDocuments() })
+    const action = client.action.getMockImplementation()
+    client.action.mockImplementation(async (actions) => {
+      if (actions[0].actionType === 'sanity.action.document.version.create')
+        throw Object.assign(new Error('boom'), { status: 500 })
+      return action(actions)
+    })
+    const result = await releaseRun(client)
+    expect(result.status).toBe('failed')
+    expect(result.cleanup.status).toBe('done')
+    expect(client.releases.size).toBe(0)
   })
 })
 

@@ -117,6 +117,12 @@ async function main() {
     process.exit(bad ? 1 : 0)
   }
 
+  let releasesEnabled = false
+  if (args.release) {
+    const { siteProfile } = await jiti.import(join(root, 'src/config/profile.ts'))
+    releasesEnabled = siteProfile.features.releases === true
+  }
+
   const run = (cliArgs, { timeout, env: extra }) =>
     spawnSync('npx', cliArgs, {
       cwd: root,
@@ -136,6 +142,7 @@ async function main() {
       manifest,
       yes: args.yes,
       release: args.release,
+      releasesEnabled,
       sanityValidate: sanityValidator({
         projectId: env.NEXT_PUBLIC_SANITY_PROJECT_ID,
         dataset: args.dataset,
@@ -159,7 +166,9 @@ async function main() {
       )
       break
     case 'applied':
-      console.log(`Written as drafts: ${result.written.map((w) => w.id).join(', ')}.`)
+      console.log(
+        `Written ${result.release ? `into release ${result.release}` : 'as drafts'}: ${result.written.map((w) => w.id).join(', ')}.`,
+      )
       console.log('Preview them in Presentation. Discard the draft to undo. Nothing is published.')
       break
     case 'invalid-in-sanity':
