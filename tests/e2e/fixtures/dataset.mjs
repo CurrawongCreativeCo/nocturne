@@ -1686,6 +1686,15 @@ heroSlotGallery.push(
   }),
 )
 
+// The shared slot registry's video block in the hero (README, "Adding a slot block"), used by the
+// /hero-slot-video page only: a section-gallery entry would add a screenshot to visual.spec.ts.
+const slotVideoItem = (id, fields) => ({
+  _key: `${id}-slot`,
+  _type: 'slotVideo',
+  poster: image(`${id} poster`),
+  ...fields,
+})
+
 /** `count` pictures with alt text and, for every other one, a caption: "<id> picture 1" and so on. */
 const galleryImages = (id, count) =>
   Array.from({ length: count }, (_, n) => ({
@@ -2629,6 +2638,51 @@ documents.push({
       description: 'Hero description.',
       ctas: [cta('About us', internal('page-about'))],
       supporting: [slotItem('stats', 'hero-slot-page')],
+    },
+  ],
+})
+
+/**
+ * A real page with a video block in each hero slot source (tests/e2e/hero-slot-video.spec.ts): a hero
+ * with a YouTube video, then one with an uploaded video and captions. Not indexed.
+ */
+documents.push({
+  _id: 'page-hero-slot-video',
+  _type: 'page',
+  title: 'Hero slot video',
+  slug: { _type: 'slug', current: 'hero-slot-video' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    {
+      _key: 'hero-slot-video-youtube',
+      _type: 'hero',
+      variant: 'split',
+      title: 'Hero with a film',
+      description: 'Hero description.',
+      ctas: [cta('About us', internal('page-about'))],
+      supporting: [
+        slotVideoItem('hero-slot-video-youtube', {
+          title: 'Meet the team',
+          source: 'youtube',
+          url: VIDEO_URL.youtube,
+        }),
+      ],
+    },
+    {
+      _key: 'hero-slot-video-upload',
+      _type: 'hero',
+      variant: 'overlay',
+      title: 'Hero with an uploaded film',
+      description: 'Hero description.',
+      supporting: [
+        slotVideoItem('hero-slot-video-upload', {
+          title: 'Behind the scenes',
+          source: 'upload',
+          file: fileRef(VIDEO_ASSET_ID),
+          captions: fileRef(CAPTIONS_ASSET_ID),
+          aspectRatio: '4:3',
+        }),
+      ],
     },
   ],
 })
