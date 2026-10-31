@@ -7,6 +7,7 @@ import { currawongBrand } from './currawong'
 import { resolveStudioBrand } from './resolve'
 import type { StudioBrandFile } from './types'
 import { validateStudioBrand } from './validate'
+import { isTemplateRepo } from '../../../scripts/is-template.mjs'
 
 interface JsonSchema {
   properties: Record<string, { properties?: Record<string, unknown> }>
@@ -17,11 +18,18 @@ const read = (file: string): unknown => JSON.parse(readFileSync(join(process.cwd
 describe('the shipped studio-brand.json', () => {
   const file = read('studio-brand.json') as StudioBrandFile
 
-  it('is valid and sets nothing but $schema, so a new project is Currawong-branded', () => {
+  it('is valid', () => {
     expect(validateStudioBrand(file).ok).toBe(true)
-    expect(Object.keys(file)).toEqual(['$schema'])
-    expect(resolveStudioBrand(file, currawongBrand, {}).source).toBe('currawong')
   })
+
+  // A client's own brand file names the client, on purpose.
+  it.skipIf(!isTemplateRepo())(
+    'sets nothing but $schema, so a new project is Currawong-branded',
+    () => {
+      expect(Object.keys(file)).toEqual(['$schema'])
+      expect(resolveStudioBrand(file, currawongBrand, {}).source).toBe('currawong')
+    },
+  )
 
   it('points at a schema that exists and lists the same fields as the validator', () => {
     const schema = read((file.$schema ?? '').replace('./', '')) as JsonSchema

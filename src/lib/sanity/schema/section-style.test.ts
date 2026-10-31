@@ -259,3 +259,27 @@ describe('the bottom edge', () => {
     }
   })
 })
+
+describe('Panel', () => {
+  const field = (name: string) =>
+    (sectionStyle.fields as unknown as { name: string; initialValue?: unknown }[]).find(
+      (candidate) => candidate.name === name,
+    )
+
+  it('writes nothing until someone chooses it, so existing and new sections are unchanged', () => {
+    expect(field('panel')?.initialValue).toBeUndefined()
+    expect(field('panelStrength')?.initialValue).toBeUndefined()
+    // The Studio shows None as chosen while nothing is stored, without writing it.
+    const options = (field('panel') as unknown as { options: { defaultValue: () => string } })
+      .options
+    expect(options.defaultValue()).toBe('none')
+  })
+
+  it('offers None, Glass and Solid card, in that order, each with a thumbnail', () => {
+    const list = (
+      field('panel') as unknown as { options: { list: { value: string; thumbnail?: unknown }[] } }
+    ).options.list
+    expect(list.map(({ value }) => value)).toEqual(['none', 'glass', 'solid'])
+    expect(list.every(({ thumbnail }) => typeof thumbnail === 'function')).toBe(true)
+  })
+})

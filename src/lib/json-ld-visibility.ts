@@ -1,19 +1,14 @@
 /**
- * Pure helpers for checking that a page's JSON-LD describes what visitors can see (Google requires
- * it). `collectCheckableStrings` lists the strings worth checking (names, addresses, opening hours,
- * FAQ questions and answers), `normaliseText` makes them comparable with the page's text, and
- * `findHiddenStrings` / `findIdProblems` / `findWebPageProblems` report what fails. No DOM and no
- * clock: the end-to-end spec (tests/e2e/structured-data.spec.ts) feeds them `document.body.innerText`.
+ * Pure helpers for checking a page's JSON-LD (task 188, extended by task 222). `normaliseText` makes
+ * text comparable; `parseJsonLd` reads a page's scripts; `findIdProblems`, `findWebPageProblems`,
+ * `findMissingWebPage` and `findUnresolvedReferences` check the graph. What the JSON-LD says is
+ * compared with what the page shows by property class in `structured-data/parity.ts`. No DOM and no
+ * clock: the end-to-end spec (tests/e2e/structured-data.spec.ts) feeds them the page's text.
  */
-import { formatTime, isTime } from '@/lib/opening-hours'
+import { organizationId, webPageId, websiteId } from '@/lib/structured-data/ids'
+import type { JsonLdNode } from '@/lib/structured-data/types'
 
-export type JsonLdNode = Record<string, unknown>
-
-/** One string from the JSON-LD and where it came from, e.g. "Organization.address.streetAddress". */
-export interface CheckableString {
-  property: string
-  value: string
-}
+export type { JsonLdNode }
 
 const NAMED_ENTITIES: Record<string, string> = {
   amp: '&',
@@ -85,116 +80,19 @@ export function parseJsonLd(scripts: readonly string[]): { nodes: JsonLdNode[]; 
   return { nodes, errors }
 }
 
-const nodeLabel = (node: JsonLdNode) => {
-  const type = node['@type']
-  return Array.isArray(type) ? type.join('/') : typeof type === 'string' ? type : 'Thing'
-}
-
-/** Not shown on the page: service areas are a description of reach, not a list visitors read. */
-const SKIPPED_KEYS = new Set(['areaServed'])
-/**
- * The business's own address and hours, on its top-level node. A "Minimal page" hides the footer that
- * shows them but the site-wide Organization still carries them, so the spec passes `siteDetails: false`
- * there; an Event's or Place's address is nested and always checked.
- */
-const SITE_DETAIL_KEYS = new Set(['address', 'openingHoursSpecification'])
-const ADDRESS_PARTS = ['streetAddress', 'addressLocality', 'addressRegion', 'postalCode'] as const
-
-/** Free text split into the lines and comma-separated parts that are shown separately ("1 Rose St, Newtown"). */
-const textParts = (text: string, splitOnCommas: boolean) =>
-  text
-    .split(splitOnCommas ? /[\n,]+/ : /\n+/)
-    .map((part) => part.trim())
-    .filter(Boolean)
-
-/**
- * The strings in the JSON-LD that a visitor should be able to find on the page:
- * - `name` and `headline` anywhere (organisation, person, event, place, breadcrumb, FAQ question),
- * - address parts (a plain-text address is split at commas and line breaks),
- * - the open and close times of the weekly opening hours, formatted as the page shows them ("5:30 pm"),
- * - each line of an FAQ answer.
- * With `siteDetails: false` the top-level nodes' address and hours are skipped (see SITE_DETAIL_KEYS).
- * Dated special days, `legalName`, `description`, links, dates and `areaServed` are not checked.
- */
-export function collectCheckableStrings(
-  nodes: readonly JsonLdNode[],
-  options: { siteDetails?: boolean } = {},
-): CheckableString[] {
-  const { siteDetails = true } = options
-  const found: CheckableString[] = []
-
-  const add = (path: string[], value: unknown, splitOnCommas = false) => {
-    if (typeof value !== 'string') return
-    for (const part of textParts(value, splitOnCommas)) {
-      found.push({ property: path.join('.'), value: part })
-    }
-  }
-
-  const walk = (value: unknown, path: string[]) => {
-    if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        walk(item, [...path.slice(0, -1), `${path.at(-1)}[${index}]`])
-      })
-      return
-    }
-    if (!isRecord(value)) return
-
-    for (const [key, child] of Object.entries(value)) {
-      if (key.startsWith('@') || SKIPPED_KEYS.has(key)) continue
-      if (!siteDetails && path.length === 1 && SITE_DETAIL_KEYS.has(key)) continue
-      const childPath = [...path, key]
-
-      if (key === 'name' || key === 'headline') add(childPath, child)
-      else if (key === 'text' && path.at(-1)?.startsWith('acceptedAnswer')) add(childPath, child)
-      else if (key === 'address' && typeof child === 'string') add(childPath, child, true)
-      else if (key === 'address' && isRecord(child)) {
-        for (const part of ADDRESS_PARTS) add([...childPath, part], child[part])
-      } else if (key === 'openingHoursSpecification') {
-        const specs = Array.isArray(child) ? child : [child]
-        specs.forEach((spec, index) => {
-          if (!isRecord(spec) || spec.validFrom || spec.validThrough) return
-          for (const field of ['opens', 'closes'] as const) {
-            const time = spec[field]
-            if (isTime(typeof time === 'string' ? time : null)) {
-              add(
-                [...childPath.slice(0, -1), `${key}[${index}]`, field],
-                formatTime(time as string),
-              )
-            }
-          }
-        })
-      } else walk(child, childPath)
-    }
-  }
-
-  for (const node of nodes) walk(node, [nodeLabel(node)])
-  return found
-}
-
-/** The strings that don't appear in the page text; `pageText` is raw (`document.body.innerText`). */
-export function findHiddenStrings(
-  strings: readonly CheckableString[],
-  pageText: string,
-): CheckableString[] {
-  const visible = normaliseText(pageText)
-  return strings.filter(({ value }) => {
-    const wanted = normaliseText(value)
-    return wanted !== '' && !visible.includes(wanted)
-  })
-}
-
 /** Every node that defines something (more than a bare `{ "@id": … }` reference) and has an `@id`. */
 const definitions = (nodes: readonly JsonLdNode[]) =>
   nodes.filter((node) => typeof node['@id'] === 'string' && Object.keys(node).length > 1)
 
 /**
  * `@id` rules over a set of pages (path -> nodes). Within one page an `@id` may be defined once.
- * Across pages the same `@id` is allowed only when the definition is identical (the Organization and
- * WebSite repeat on every page); two different things sharing an `@id` would merge into one entity.
+ * Across pages one entity may be described in full on its own page and shorter elsewhere (a byline's
+ * Person), and the site nodes repeat, so only a property the two definitions share must agree: two
+ * different things sharing an `@id` would merge into one entity.
  */
 export function findIdProblems(pages: Readonly<Record<string, readonly JsonLdNode[]>>): string[] {
   const problems: string[] = []
-  const seen = new Map<string, { path: string; json: string }>()
+  const seen = new Map<string, { path: string; node: JsonLdNode }>()
 
   for (const [path, nodes] of Object.entries(pages)) {
     const onThisPage = new Set<string>()
@@ -203,11 +101,16 @@ export function findIdProblems(pages: Readonly<Record<string, readonly JsonLdNod
       if (onThisPage.has(id)) problems.push(`${path}: "${id}" is defined twice on the page`)
       onThisPage.add(id)
 
-      const json = JSON.stringify(node)
       const earlier = seen.get(id)
-      if (!earlier) seen.set(id, { path, json })
-      else if (earlier.json !== json) {
-        problems.push(`${path}: "${id}" is defined differently from ${earlier.path}`)
+      if (!earlier) {
+        seen.set(id, { path, node })
+        continue
+      }
+      for (const [key, value] of Object.entries(node)) {
+        const other = earlier.node[key]
+        if (other !== undefined && JSON.stringify(other) !== JSON.stringify(value)) {
+          problems.push(`${path}: "${id}" has a different ${key} from ${earlier.path}`)
+        }
       }
     }
   }
@@ -239,18 +142,76 @@ function webPages(value: unknown, found: JsonLdNode[] = []): JsonLdNode[] {
  * both ids are the site's own (`<origin>/#website`, `<origin>/#organization`).
  */
 export function findWebPageProblems(nodes: readonly JsonLdNode[], origin: string): string[] {
-  const websiteId = `${origin}/#website`
-  const organizationId = `${origin}/#organization`
+  const website = websiteId(origin)
+  const organization = organizationId(origin)
   const problems: string[] = []
 
   for (const page of webPages(nodes)) {
     const label = `WebPage ${typeof page['@id'] === 'string' ? page['@id'] : '(no @id)'}`
-    if (!referencesId(page.isPartOf, websiteId)) {
-      problems.push(`${label} does not reference ${websiteId} in isPartOf`)
+    if (!referencesId(page.isPartOf, website)) {
+      problems.push(`${label} does not reference ${website} in isPartOf`)
     }
-    if (!referencesId(page.publisher, organizationId)) {
-      problems.push(`${label} does not reference ${organizationId} as publisher`)
+    if (!referencesId(page.publisher, organization)) {
+      problems.push(`${label} does not reference ${organization} as publisher`)
     }
   }
   return problems
+}
+
+/** Every page describes itself: a WebPage node keyed by its own URL (`pageUrl` is absolute). */
+export function findMissingWebPage(nodes: readonly JsonLdNode[], pageUrl: string): string[] {
+  const id = webPageId(pageUrl)
+  return nodes.some((node) => node['@id'] === id && isType(node, 'WebPage'))
+    ? []
+    : [`no WebPage node with the @id ${id}`]
+}
+
+/** A bare `{ "@id": … }` reference, wherever it nests. */
+function references(value: unknown, found: string[] = []): string[] {
+  if (Array.isArray(value)) value.forEach((item) => references(item, found))
+  else if (isRecord(value)) {
+    const keys = Object.keys(value)
+    if (keys.length === 1 && keys[0] === '@id' && typeof value['@id'] === 'string') {
+      found.push(value['@id'])
+    } else Object.values(value).forEach((child) => references(child, found))
+  }
+  return found
+}
+
+/**
+ * Graph integrity: every `@id` a page's nodes refer to must be defined by a node on the page or by
+ * the site graph (the nodes every page carries). `siteGraph` is the set of those `@id`s.
+ */
+export function findUnresolvedReferences(
+  nodes: readonly JsonLdNode[],
+  siteGraph: ReadonlySet<string>,
+): string[] {
+  const defined = new Set(definitions(nodes).map((node) => node['@id'] as string))
+  return [...new Set(references(nodes))]
+    .filter((id) => !defined.has(id) && !siteGraph.has(id))
+    .map((id) => `"${id}" is referenced but no node on the page or in the site graph defines it`)
+}
+
+/** The `@id`s of the nodes defined on every one of these pages: the site graph. */
+export function siteGraphIds(pages: readonly (readonly JsonLdNode[])[]): Set<string> {
+  const [first, ...rest] = pages.map(
+    (nodes) => new Set(definitions(nodes).map((node) => node['@id'] as string)),
+  )
+  return new Set([...(first ?? [])].filter((id) => rest.every((other) => other.has(id))))
+}
+
+/** Draft and release-version ids (`drafts.*`, `versions.*`) must never appear in an `@id`, defined or referenced. */
+export function findDraftIds(nodes: readonly JsonLdNode[]): string[] {
+  const ids = new Set<string>()
+  const walk = (value: unknown) => {
+    if (Array.isArray(value)) value.forEach(walk)
+    else if (isRecord(value)) {
+      if (typeof value['@id'] === 'string') ids.add(value['@id'])
+      Object.values(value).forEach(walk)
+    }
+  }
+  walk(nodes)
+  return [...ids]
+    .filter((id) => /(^|[#/-])(drafts|versions)\./.test(id))
+    .map((id) => `"${id}" contains a draft or release-version id`)
 }

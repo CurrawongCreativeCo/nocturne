@@ -10,6 +10,8 @@ import {
   linkFields,
   portableTextFields,
   sectionStyleFields,
+  splitMediaFields,
+  splitSupportingFields,
   statItemFields,
   stripePriceFields,
 } from '@/lib/sanity/fragments'
@@ -78,8 +80,11 @@ export const mediaTextFragment = /* groq */ `
     body[] { ${portableTextFields} },
     ctas[] { ${ctaFields} },
     image { ${imageFields} },
+    media[] { ${splitMediaFields} },
+    supporting[] { ${splitSupportingFields} },
     imageDesign { ${imageDesignFields} },
-    imagePosition
+    imagePosition,
+    variant
   }
 `
 

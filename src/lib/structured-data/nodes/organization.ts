@@ -1,3 +1,4 @@
+import { parseAuPhone } from '@/lib/au-phone'
 import {
   DAYS,
   upcomingSpecialHours,
@@ -6,7 +7,9 @@ import {
   type SpecialHoursEntry,
 } from '@/lib/opening-hours'
 
-import { parseAuPhone } from './phone'
+import { clean, trace } from '../graph'
+import { organizationId } from '../ids'
+import type { Built } from '../types'
 
 /** The business info fields structured data reads (the shape SETTINGS_QUERY returns, nulls included). */
 export interface BusinessInfoData {
@@ -39,6 +42,11 @@ interface BuildOptions {
   logo?: string
   /** Today in the business's time zone ("YYYY-MM-DD"): special days before it are left out. */
   today: string
+  /**
+   * Emit `areaServed`. Off by default: no template component shows `serviceAreas`, and structured
+   * data must describe what visitors can see (E2 §3.5). Turn it on only where the site states them.
+   */
+  areaServed?: boolean
 }
 
 const TYPE_NAME = /^[A-Z][A-Za-z]+$/
@@ -49,13 +57,6 @@ export function businessSchemaType(info: BusinessInfoData): string {
   const chosen = businessType === 'Other' ? businessTypeOther : businessType
   return chosen && TYPE_NAME.test(chosen) && chosen !== 'Other' ? chosen : 'LocalBusiness'
 }
-
-const clean = (object: Record<string, unknown>) =>
-  Object.fromEntries(
-    Object.entries(object).filter(
-      ([, value]) => value !== undefined && value !== null && value !== '',
-    ),
-  )
 
 /**
  * The LocalBusiness node for the JSON-LD graph. It replaces the plain Organization (a LocalBusiness
@@ -111,8 +112,89 @@ export function buildLocalBusinessJsonLd(info: BusinessInfoData, options: BuildO
         ? { '@type': 'GeoCoordinates', latitude: geo.lat, longitude: geo.lng }
         : undefined,
     openingHoursSpecification: specification.length > 0 ? specification : undefined,
-    areaServed: areas.length > 0 ? areas.map((name) => ({ '@type': 'Place', name })) : undefined,
+    areaServed:
+      options.areaServed && areas.length > 0
+        ? areas.map((name) => ({ '@type': 'Place', name }))
+        : undefined,
     sameAs: sameAs.length > 0 ? sameAs : undefined,
     priceRange: info.priceRange,
   })
+}
+
+/** The identity fields the Organization reads from the site identity document. */
+export interface SiteIdentityData {
+  title?: string | null
+}
+
+export interface OrganizationInput {
+  /** The production origin (`siteUrl`). */
+  origin: string
+  identity: SiteIdentityData
+  /** Business info, when the document has details. Without it the node is a plain Organization. */
+  business?: BusinessInfoData | null
+  logo?: string
+  today: string
+  /** True where the site visibly lists the service areas; see `BuildOptions.areaServed`. */
+  showServiceAreas?: boolean
+}
+
+/** Where the site-wide facts are owned (singleton document ids). */
+const IDENTITY_DOC = 'siteIdentity'
+const BUSINESS_DOC = 'businessInfo'
+
+/**
+ * The `#organization` node: the chosen LocalBusiness subtype when Business info has details, a
+ * plain Organization otherwise. The provenance records which singleton and field each property came from.
+ */
+export function buildOrganization(input: OrganizationInput): Built {
+  const { origin, identity, business } = input
+  const url = `${origin.replace(/\/+$/, '')}/`
+  const id = organizationId(origin)
+
+  if (!business) {
+    const node = clean({
+      '@type': 'Organization',
+      '@id': id,
+      name: identity.title,
+      url,
+      logo: input.logo,
+    })
+    return {
+      node,
+      provenance: trace(node, IDENTITY_DOC, { name: 'title', logo: 'logo' }),
+    }
+  }
+
+  const node = buildLocalBusinessJsonLd(business, {
+    url,
+    id,
+    name: identity.title ?? '',
+    logo: input.logo,
+    today: input.today,
+    areaServed: input.showServiceAreas,
+  })
+  return {
+    node,
+    provenance: {
+      ...trace(node, BUSINESS_DOC, {
+        legalName: 'legalName',
+        telephone: 'phone',
+        email: 'publicEmail',
+        'address.streetAddress': 'address.street',
+        'address.addressLocality': 'address.suburb',
+        'address.addressRegion': 'address.state',
+        'address.postalCode': 'address.postcode',
+        geo: 'geo',
+        openingHoursSpecification: 'openingHours',
+        areaServed: 'serviceAreas',
+        sameAs: 'socialLinks',
+        priceRange: 'priceRange',
+      }),
+      // The trading name wins; the site title is the fallback.
+      name: business.tradingName
+        ? { doc: BUSINESS_DOC, field: 'tradingName' }
+        : { doc: IDENTITY_DOC, field: 'title' },
+      ...trace(node, IDENTITY_DOC, { logo: 'logo' }),
+    },
+  }
 }

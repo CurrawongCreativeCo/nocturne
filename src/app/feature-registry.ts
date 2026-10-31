@@ -83,6 +83,10 @@ export const ignored: readonly { name: string; reason: string }[] = [
   { name: 'PORT', reason: 'Tooling: the port a script serves on' },
   { name: 'NO_COLOR', reason: 'Tooling: the standard switch for coloured output' },
   { name: 'BUILT_AT', reason: 'Stamped by next.config.ts at build time' },
+  {
+    name: 'VERCEL',
+    reason: 'Set by Vercel (scripts/e2e-profile.mjs refuses a test profile in any Vercel build)',
+  },
   { name: 'VERCEL_ENV', reason: 'Set by Vercel' },
   { name: 'VERCEL_GIT_COMMIT_SHA', reason: 'Set by Vercel' },
   { name: 'VERCEL_PROJECT_PRODUCTION_URL', reason: 'Set by Vercel' },

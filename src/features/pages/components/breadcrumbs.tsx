@@ -2,6 +2,8 @@ import Link from 'next/link'
 
 import { JsonLd } from '@/components/ui/json-ld'
 import { siteUrl } from '@/config/site-url'
+import { graph } from '@/lib/structured-data/graph'
+import { buildBreadcrumb } from '@/lib/structured-data/nodes/breadcrumb'
 
 import type { Breadcrumb } from '../utils/breadcrumbs'
 
@@ -12,16 +14,15 @@ export function Breadcrumbs({ items }: { items: Breadcrumb[] }) {
   return (
     <>
       <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          itemListElement: items.map(({ name, path }, i) => ({
-            '@type': 'ListItem',
-            position: i + 1,
-            name,
-            item: new URL(path, siteUrl).toString(),
-          })),
-        }}
+        data={graph(
+          buildBreadcrumb({
+            url: new URL(items[items.length - 1]?.path ?? '/', siteUrl).toString(),
+            items: items.map(({ name, path }) => ({
+              name,
+              url: new URL(path, siteUrl).toString(),
+            })),
+          }),
+        )}
       />
       <nav
         aria-label="Breadcrumb"

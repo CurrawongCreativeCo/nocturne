@@ -226,14 +226,15 @@ test.describe('motion on', () => {
     // The uploaded file is not in the document as markup.
     expect(await scope.locator('svg').count()).toBe(0)
     await expect(custom).toHaveAttribute('aria-hidden', 'true')
-    expect(await custom.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe('none')
+    // Auto-retrying: a style read straight after load can run before the stylesheet applies.
+    await expect(custom).toHaveCSS('pointer-events', 'none')
   })
 
   test('a frame ignores the pointer and is hidden from assistive technology', async ({ page }) => {
     await page.goto(PAGE)
     const overlay = frame(section(page, 'Built-in frame'))
     await expect(overlay).toHaveAttribute('aria-hidden', 'true')
-    expect(await overlay.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe('none')
+    await expect(overlay).toHaveCSS('pointer-events', 'none')
   })
 
   test('a transparent picture frame loads a sized WebP mask in the chosen colour', async ({

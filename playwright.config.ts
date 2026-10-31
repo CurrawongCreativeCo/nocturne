@@ -19,7 +19,9 @@ const EXPERIMENTS_SPEC = /experiments\.spec\.ts/
 // Switch the colours the whole fake site is served in, so each runs alone (see the projects below).
 const DESIGN_SPEC = /design-settings\.spec\.ts/
 const DESIGN_VISUAL_SPEC = /design-settings-visual\.spec\.ts/
-const ISOLATED_SPECS = [EXPERIMENTS_SPEC, DESIGN_SPEC, DESIGN_VISUAL_SPEC]
+// Panels under each palette, switching the colours the same way.
+const PANEL_PALETTE_SPEC = /section-panel-rendering\.spec\.ts/
+const ISOLATED_SPECS = [EXPERIMENTS_SPEC, DESIGN_SPEC, DESIGN_VISUAL_SPEC, PANEL_PALETTE_SPEC]
 
 /**
  * End-to-end tests: a production build of the site, pointed at a fake Content Lake that serves
@@ -86,6 +88,14 @@ export default defineConfig({
       name: 'design-visual',
       testMatch: DESIGN_VISUAL_SPEC,
       dependencies: ['design'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Panels as the browser draws them under each palette; after `design-visual` so two specs never
+      // switch the site's colours at once.
+      name: 'panel-palettes',
+      testMatch: PANEL_PALETTE_SPEC,
+      dependencies: ['design-visual'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

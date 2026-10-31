@@ -26,6 +26,8 @@ function PanelThumbnail({ panel }: { panel: SectionPanel }) {
         d={`M0 ${HEIGHT} L0 76 L46 38 L88 80 L122 58 L${WIDTH} 82 L${WIDTH} ${HEIGHT} Z`}
         fill="#166534"
       />
+      {/* The same calming overlay under all three, so None's text reads and the panels are compared like for like. */}
+      <rect width={WIDTH} height={HEIGHT} fill={colorHex.surfaceInverse} opacity={0.5} />
       {panel === 'none' ? null : (
         <rect
           x={22}

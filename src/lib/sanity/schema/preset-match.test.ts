@@ -94,6 +94,17 @@ describe('describePresetState', () => {
     expect(describePresetState(presets, {}).nearest?.value).toBe('centred')
   })
 
+  it('breaks a tie towards the preset whose first key still matches', () => {
+    const layouts = [
+      { value: 'a', title: 'A', set: { variant: 'one', tone: 'dark' } },
+      { value: 'b', title: 'B', set: { variant: 'two', tone: 'light' } },
+    ]
+    // Each preset is one field away: A differs in tone, B in layout. A keeps the layout.
+    const state = describePresetState(layouts, { variant: 'one', tone: 'light' })
+    expect(state.nearest?.value).toBe('a')
+    expect(state.differences).toEqual(['tone'])
+  })
+
   it('has no state without presets', () => {
     const state = describePresetState([], {})
     expect(state).toEqual({ preset: null, nearest: null, differences: [] })

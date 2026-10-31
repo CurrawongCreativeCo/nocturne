@@ -27,7 +27,7 @@ import {
   PANEL_STRENGTHS,
   PANEL_STRENGTH_TITLES,
   SECTION_PANEL_TITLES,
-  panelProblem,
+  panelWarning,
   pictureOverlay,
 } from '../section-panel'
 import {
@@ -76,7 +76,7 @@ import {
   SECTION_WIDTHS,
 } from '../section-style-options'
 import { fetchBrandColours } from './brand-colours'
-import { fetchBrandGradients } from './brand-gradients'
+import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
 import { imageField } from './image-field'
 import { presetField } from './preset-field'
 import {
@@ -388,18 +388,8 @@ export const sectionStyle = defineType({
           .custom(async (value, { getClient, parent }) => {
             const style = parent as { tone?: string; image?: { asset?: unknown } } | undefined
             if (!value || style?.image?.asset) return true
-            const gradients = await fetchBrandGradients(getClient({ apiVersion: '2025-01-01' }))
-            const chosen = gradients.find((gradient) => gradient.slug === value)
-            if (!chosen) {
-              return 'This gradient is no longer in Brand colours, so the section shows no gradient. Choose another, or clear it.'
-            }
-            return (
-              backgroundContrastProblem({
-                tone: style?.tone,
-                hasImage: false,
-                gradientStops: chosen.stops,
-              })?.message ?? true
-            )
+            const state = await fetchBrandGradientState(getClient({ apiVersion: '2025-01-01' }))
+            return gradientFieldWarning({ slug: value, tone: style?.tone, state })
           })
           .warning(),
     }),
@@ -720,19 +710,20 @@ export const sectionStyle = defineType({
             const section = sectionAtStylePath(document, path)
             const client = getClient({ apiVersion: '2025-01-01' })
             // The site's colours and gradients, as the page draws them: the same inputs as the site.
-            const [{ colours }, gradients] = await Promise.all([
+            const [{ colours }, gradientList] = await Promise.all([
               fetchBrandColours(client),
-              fetchBrandGradients(client),
+              fetchBrandGradientState(client),
             ])
             return (
-              panelProblem({
+              panelWarning({
                 panel: value,
                 strength: style?.panelStrength,
                 tone: style?.tone,
                 hasPicture: Boolean(style?.image?.asset),
                 overlay: pictureOverlay(style, style?.tone),
                 gradient: style?.gradient,
-                gradients,
+                // A list that could not be read is unknown, never "no gradients".
+                gradients: gradientList.known ? gradientList.gradients : undefined,
                 site: colours,
                 hasOwnBackground: sectionHasOwnBackground(section),
                 overlaps:
