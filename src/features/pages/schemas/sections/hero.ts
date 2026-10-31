@@ -34,7 +34,7 @@ import { heroPartMotionField } from './hero-part-motion'
 import { imageSideOptions } from './image-side'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
-const LIMITS = {
+export const LIMITS = {
   // text-display, balanced over max-w-4xl: about three lines on a phone.
   title: 80,
   // text-lead in max-w-measure-narrow: about four lines.
@@ -209,7 +209,21 @@ export const hero = defineType({
   type: 'object',
   icon: BlockContentIcon,
   // The preset bar above the form: the one place to choose a hero's design (README, "Hero presets").
-  options: presetsOption(HERO_PRESETS),
+  options: {
+    ...presetsOption(HERO_PRESETS),
+    manifest: {
+      purpose:
+        'The opening section of a page: a heading, a short introduction and up to two buttons, with an optional picture in one of four layouts.',
+      example: {
+        variant: 'split',
+        eyebrow: 'Family-run since 1998',
+        title: 'Plumbing you can rely on',
+        description: 'Fast, tidy and fairly priced across Greater Sydney.',
+        imagePosition: 'right',
+        style: { tone: 'surface' },
+      },
+    },
+  },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

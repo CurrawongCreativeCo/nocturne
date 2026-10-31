@@ -2301,6 +2301,57 @@ Tests: `scripts/editor-guide-utils.test.mjs` (frontmatter, image advice, limits,
 open **Start here → Help**, expand a guide and a section, switch `features.blog` to `false`, run `npm run typegen`, reload,
 and confirm the blog guide is gone.
 
+#### Design manifest
+
+`design-manifest.generated.json` (repo root, committed) describes what the Design Engine supports, so tools, and later AI,
+can read it without a second list that drifts. It is **read-only documentation**: nothing writes to the schemas from it, and
+nothing in `src/app` may import it (a test fails if one does), because it would land in the home page's JavaScript.
+
+- **What it holds:** `manifestVersion` (from `template-version.json`); every section type with its `purpose` and `example`
+  (where set), `fields` (`path`, `kind`, `required`, `max`, `list` of `{ value, title }`, `clientEditable`), `variants`,
+  `presets` (what each sets) and `rules`; the shared `sectionStyle` and `designSettings` fields; and `tokens` (the names in
+  `src/styles/tokens.json`, by group). Paths use `[]` for list items (`ctas[].label`) and `[type]` where a list takes
+  several types (`supporting[statsBar].items`).
+- **How it is generated:** `scripts/build-design-manifest.mjs` loads the TypeScript schemas with `jiti`, like the editor guide.
+  `npm run typegen` runs it after the editor guide, and `npm run design-manifest` runs it alone (`-- --check` reports whether
+  the file is current). CI runs typegen and fails when the committed file differs, so run `npm run typegen` and commit it
+  after changing a section's fields, options, presets or rules, `client-editable.ts` or `tokens.json`.
+- **Rules** are functions, so the script evaluates each section's `registerSectionRules` once with no layout and once per
+  layout, and records `hasPicture`, `fixesAlignment` and `hasOwnBackgroundImage`.
+- **Purpose and example:** give a section type `options.manifest = { purpose, example? }`. The build fails if `hero` or
+  `mediaText` (`FAMILY_TYPES` in `scripts/design-manifest-utils.mjs`) has no purpose. Keep an example's keys to fields the
+  section has; a test checks it.
+
+**What the metadata guarantees.** The manifest never runs a validation function, so a constraint it cannot read is reported as
+_not determined_ (`null`), never as absent:
+
+| Property   | Value    | Means                                                                                              |
+| ---------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `required` | `true`   | `schema.json` (the schema extract) marks the field required.                                       |
+|            | `false`  | The field declares no validation, so nothing can require it.                                       |
+|            | `null`   | The field has validation the manifest does not interpret: it may or may not be required.           |
+| `max`      | a number | The section's exported `LIMITS` constant, where the constant's key is the field's name.            |
+|            | absent   | The field declares no validation (or is a kind with no length, such as a switch): no maximum.      |
+|            | `null`   | The field has validation the manifest does not interpret: it may have a maximum. Look at the code. |
+
+Only `hero` and `mediaText` export `LIMITS` so far, so most `max` values are `null`. A tool must treat `null` as "ask the
+schema", not as "no limit". Minimums, array counts and warnings are not captured at all.
+
+**Deliberate omissions** (nothing is invented to fill them):
+
+- Whether a field is shown (`hidden` callbacks), conditional options (`visibleOptions`) and contrast warnings. `list` is every
+  value the field can store, not what the form offers for a given layout; use `rules` for the layout-dependent parts.
+- Lists computed at run time, such as the Section design's **Gradient** (the site's Brand colours gradients).
+- Slots and the blocks they accept: they arrive with the shared slot registry (task 219), which the manifest will read once it
+  is on `main`.
+- Document types, other than the Brand colours document. Heading text, rich text and link fields show their kind, not their limits.
+- The section's own `style` field is listed once under `sectionStyle`, not repeated in every section.
+
+Tests: `scripts/design-manifest-utils.test.mjs` (a small in-memory schema: option lists, nested objects, presets, rules per
+layout, `clientEditable`, undetermined constraints, a missing purpose, a removed family), `scripts/design-manifest-cli.test.mjs`
+(byte-identical output, `--check` passing and failing) and `src/features/pages/schemas/design-manifest.test.ts` (every section present, every preset value in its
+field's list, nothing under `src/app` imports the manifest).
+
 ### Studio roles and permissions
 
 The Studio shows a simple view to clients and the full view to Currawong staff. It reads each person's

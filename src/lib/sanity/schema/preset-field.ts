@@ -72,6 +72,12 @@ declare module 'sanity' {
   interface ObjectOptions {
     /** Presets shown in a bar above the object's fields (features/studio/components/preset-picker). */
     presets?: PresetDefinition[]
+    /**
+     * What the section is for, and optionally an example of valid content. Read only by
+     * scripts/build-design-manifest.mjs for design-manifest.generated.json; section families must
+     * have a purpose (README, "Design manifest").
+     */
+    manifest?: { purpose: string; example?: Record<string, unknown> }
   }
 }
 
