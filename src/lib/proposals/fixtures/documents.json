@@ -1,0 +1,23 @@
+{
+  "page-home": {
+    "_id": "page-home",
+    "_type": "page",
+    "_rev": "rev-home-1",
+    "title": "Home",
+    "pageBuilder": [
+      {
+        "_key": "hero1",
+        "_type": "hero",
+        "variant": "split",
+        "title": "Quiet work for loud problems",
+        "imagePosition": "right",
+        "style": { "tone": "surface" }
+      }
+    ]
+  },
+  "designSettings": {
+    "_id": "designSettings",
+    "_type": "designSettings",
+    "_rev": "rev-design-1"
+  }
+}

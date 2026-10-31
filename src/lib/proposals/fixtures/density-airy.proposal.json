@@ -1,0 +1,15 @@
+{
+  "id": "density-airy",
+  "manifestVersion": "1.10.0",
+  "intent": "Set the density to airy.",
+  "scope": "section",
+  "changes": [
+    {
+      "documentId": "page-home",
+      "baseRev": "rev-home-1",
+      "patches": [{ "set": { "pageBuilder[_key==\"hero1\"].style.spacing": "spacious" } }]
+    }
+  ],
+  "rationale": "Airy is the Spacious step of the section's spacing, the nearest named density. A site-wide density does not exist yet.",
+  "gaps": ["There is no site-wide density setting; this changes the hero's spacing only."]
+}
