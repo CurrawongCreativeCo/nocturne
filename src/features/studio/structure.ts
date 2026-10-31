@@ -185,6 +185,7 @@ const LISTED_TYPES = new Set([
   'frame',
   'enquiry',
   'panel',
+  'service',
   // new-document:listed
 ])
 
@@ -317,6 +318,9 @@ const buildStructure = (
             S.documentTypeListItem('eventCategory').title('Categories').icon(TagIcon),
           ]),
         ]
+      : []),
+    ...(hasType('service') && isTypeVisible('service')
+      ? [S.documentTypeListItem('service').title('Services').icon(CaseIcon)]
       : []),
     ...(hasType('enquiry') && isTypeVisible('enquiry') ? [enquiriesList(S, context)] : []),
     // new-document:list

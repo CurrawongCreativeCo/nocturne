@@ -120,5 +120,9 @@ export interface SectionProps<T extends SectionType> {
 export interface PageContext {
   url: string
   documentId: string
+  /** The field holding the sections on `documentId` (`pageBuilder` on a page, `sections` on a service). */
+  path: string
+  /** Questions the page shows above its sections (a service's own), as plain text, in the same FAQPage. */
+  leadingQuestions?: readonly { question: string; answer: string; field: string }[]
   faqSections: SectionOf<'faq'>[]
 }

@@ -29,6 +29,17 @@ describe('resolveMainDocument', () => {
     },
   )
 
+  it('opens a service for /services/<slug> only while the services feature is on', () => {
+    expect(resolveMainDocument('/services/plumbing', live, { services: true })).toEqual({
+      filter: '_type == "service" && slug.current == $slug',
+      params: { slug: 'plumbing' },
+    })
+    expect(resolveMainDocument('/services/plumbing', live)).toEqual({
+      filter: '_type == "page" && slug.current == $slug',
+      params: { slug: 'services/plumbing' },
+    })
+  })
+
   it.each([
     ['/blog/hello', 'post', 'hello'],
     ['/blog/category/news', 'category', 'news'],

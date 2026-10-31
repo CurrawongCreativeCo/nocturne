@@ -22,20 +22,23 @@ export function Faq({ data, isFirst, page }: SectionProps<'faq'>) {
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
-      {/* One FAQPage per page, keyed by its URL: the first FAQ section carries every visible question. */}
+      {/* One FAQPage per page, keyed by its URL: the first FAQ section carries every visible question, after any the page shows above its sections. */}
       {page && page.faqSections[0]?._key === data._key && (
         <JsonLd
           data={graph(
             buildFaqPage({
               url: page.url,
               doc: page.documentId,
-              questions: page.faqSections.flatMap((section) =>
-                section.items.map((item) => ({
-                  question: stegaClean(item.question),
-                  answer: stegaClean(toPlainText(item.answer)),
-                  field: `pageBuilder[_key=="${section._key}"].items[_key=="${item._key}"]`,
-                })),
-              ),
+              questions: [
+                ...(page.leadingQuestions ?? []),
+                ...page.faqSections.flatMap((section) =>
+                  section.items.map((item) => ({
+                    question: stegaClean(item.question),
+                    answer: stegaClean(toPlainText(item.answer)),
+                    field: `${page.path}[_key=="${section._key}"].items[_key=="${item._key}"]`,
+                  })),
+                ),
+              ],
             }),
           )}
         />
