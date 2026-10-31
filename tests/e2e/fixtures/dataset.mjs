@@ -2094,46 +2094,6 @@ const gallerySections = [
     imagePosition: 'right',
   }),
   galleryMediaText('no-image', 'Without an image', { imagePosition: 'right' }),
-  // Section contract v2 (README, "Image + text"): the media slot, the four presets and a supporting
-  // block. The entries above keep the older `image` field, so they prove saved pages render as before.
-  galleryMediaText('media-left', 'Media on the left', {
-    variant: 'side',
-    imagePosition: 'left',
-    media: [slotImageItem('media-left')],
-  }),
-  galleryMediaText('stacked', 'Media above the text', {
-    variant: 'stacked',
-    media: [slotImageItem('stacked')],
-  }),
-  {
-    ...galleryMediaText('overlay', 'Text over media', {
-      variant: 'overlay',
-      media: [slotImageItem('overlay')],
-    }),
-    style: { _type: 'sectionStyle', tone: 'inverse' },
-  },
-  galleryMediaText('supporting-video', 'A video under the picture', {
-    variant: 'side',
-    imagePosition: 'right',
-    media: [slotImageItem('supporting-video')],
-    supporting: [
-      slotVideoItem('media-text-supporting', {
-        title: 'Meet the team',
-        source: 'youtube',
-        url: VIDEO_URL.youtube,
-      }),
-    ],
-  }),
-  galleryMediaText('media-video', 'A video as the media', {
-    variant: 'stacked',
-    media: [
-      slotVideoItem('media-text-video', {
-        title: 'Our workshop',
-        source: 'youtube',
-        url: VIDEO_URL.youtube,
-      }),
-    ],
-  }),
   // Image design (README, "Image design"): a shape, a frame and parallax inside a still frame. The
   // gallery has no MotionProvider and the baselines use reduced motion, so these show the still,
   // unscaled picture with its frame.
@@ -2649,6 +2609,47 @@ const gallerySections = [
   // Section panels (README, "Section panels"; tests/e2e/section-panel.spec.ts): glass over a solid tone
   // is tinted with no blur, over a picture or a gradient it is frosted, and Solid card is opaque.
   ...sectionPanelExamples,
+  // Section contract v2 (README, "Image + text"): the media slot, the four presets and a supporting
+  // block. They sit last, so adding them moves no older entry (a shifted section re-rasterises by a
+  // sub-pixel). The older Image + text entries keep `image`, so they prove saved pages render as before.
+  galleryMediaText('media-left', 'Media on the left', {
+    variant: 'side',
+    imagePosition: 'left',
+    media: [slotImageItem('media-left')],
+  }),
+  galleryMediaText('stacked', 'Media above the text', {
+    variant: 'stacked',
+    media: [slotImageItem('stacked')],
+  }),
+  {
+    ...galleryMediaText('overlay', 'Text over media', {
+      variant: 'overlay',
+      media: [slotImageItem('overlay')],
+    }),
+    style: { _type: 'sectionStyle', tone: 'inverse' },
+  },
+  galleryMediaText('supporting-video', 'A video under the picture', {
+    variant: 'side',
+    imagePosition: 'right',
+    media: [slotImageItem('supporting-video')],
+    supporting: [
+      slotVideoItem('media-text-supporting', {
+        title: 'Meet the team',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
+    ],
+  }),
+  galleryMediaText('media-video', 'A video as the media', {
+    variant: 'stacked',
+    media: [
+      slotVideoItem('media-text-video', {
+        title: 'Our workshop',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
+    ],
+  }),
   // new-section:gallery
 ]
 
