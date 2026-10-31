@@ -96,18 +96,35 @@
           "length": "Up to 2 items"
         },
         {
+          "name": "media",
+          "title": "Media",
+          "kind": "List",
+          "required": false,
+          "description": "A picture or a video. One at most.",
+          "length": "Up to 1 item"
+        },
+        {
+          "name": "supporting",
+          "title": "Extra content",
+          "kind": "List",
+          "required": false,
+          "description": "A video. One at most.",
+          "length": "Up to 1 item"
+        },
+        {
           "name": "image",
           "title": "Image",
           "kind": "Image",
           "required": false,
+          "description": "Shown until Media above has a picture or a video.",
           "imageSize": "1600 × 1200 px, landscape."
         },
         {
           "name": "imagePosition",
-          "title": "Image side",
+          "title": "Media side",
           "kind": "Choice",
           "required": true,
-          "description": "Which side the picture sits on wide screens. On phones it sits below the text.",
+          "description": "Which side the media sits on wide screens. On phones it sits below the text.",
           "choices": [
             "Image left",
             "Image right"

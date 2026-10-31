@@ -3042,6 +3042,82 @@ the parts ending whole, reduced motion, no JavaScript, axe, `/hero-parts-later` 
 parts at rest and prove the wrappers change nothing about the layout. `/hero-parts` is also in `lighthouserc.json`
 (LCP at most 2.5 s, like the home page).
 
+### Image + text
+
+_Image + text_ puts media beside, above or behind a block of words: an eyebrow, a title, text, up to two buttons, and
+optionally one extra block under the media. It uses the same conventions as the hero (beautiful default, presets,
+advanced options only where they apply). A new section is **Media right** on the page's background, so there is nothing
+to configure.
+
+**Looks (presets).** The bar at the top of the section offers four pictures (`SPLIT_PRESETS`,
+`src/features/pages/schemas/sections/media-text.ts`). Each sets the layout and the options that go with it in one click;
+every field stays editable afterwards, and the bar shows _Custom_ once they no longer match one. There is no separate
+"look" field: the looks are the presets, matched against the stored fields by `src/lib/sanity/schema/preset-match.ts`.
+
+| Preset          | Layout (`variant`) | Also sets                    |
+| --------------- | ------------------ | ---------------------------- |
+| Media right     | `side`             | _Media side_ right           |
+| Media left      | `side`             | _Media side_ left            |
+| Stacked         | `stacked`          | Nothing; the text is centred |
+| Text over media | `overlay`          | Background _Contrast_ (dark) |
+
+A section saved before layouts existed has no `variant`, which is `side`, and keeps its _Image side_ (stored as
+`imagePosition`), so it still shows the preset it matches (_Media left_ or _Media right_) and renders exactly as before.
+Presets other than _Text over media_ never touch the tone, so choosing one does not repaint a page. A layout this
+deployment does not know (from a later release) renders as `side`.
+
+**Customised looks.** When the fields no longer match a preset, the bar says so in one line under the picker, for
+example "Custom · based on Stacked · 1 change (tone)", and a **Reset to Stacked** button sets the preset's fields again.
+It names the preset with the fewest differences; if two are equally close, the one whose layout still matches wins
+(`describePresetState`). Reset changes only the fields the preset sets: the words, the media and the Design tab's other
+options are kept. Add `presetLabels` (`presetsOption(presets, labels)`) to another section to give it the same summary.
+The bar is above every tab, so it is also in view while you work in _Design_.
+
+**Media (`media`).** One slot (`split.media`, see _Adding a slot block_) that holds a **picture** (`slotImage`) or a
+**video** (`slotVideo`: a click-to-load YouTube or Vimeo player, or an uploaded MP4 with captions). The agency adds or
+removes it; clients change what is in it. The section's _Image design_ (shape, frame, movement) applies to a picture.
+_Text over media_ needs a picture: with a video, the section draws the video beside the text and the field shows a
+yellow warning. With no media, the text takes the full width.
+
+**Extra content (`supporting`).** One optional slot (`split.supporting`) for a video under the media (side by side and
+stacked) or under the buttons (text over media). Agency only; it is the way to add a video without a new layout.
+
+**Buttons.** Up to two (`ctas`), in every layout, in the same group as the hero's.
+
+**Text over media and panels.** This layout draws the picture as the section's background, dimmed under the section's
+tone, and the shared **Panel** (_Glass_ or _Solid card_, see _Section panels_) sits over it. Image + text has no
+glass rules of its own: a glass panel over a picture needs a wash or falls back to a solid card, so the text keeps at
+least 4.5:1 contrast, exactly as everywhere else. Contrast problems in the Design tab are yellow warnings with
+render-time fallbacks, never errors. Contrast over a picture is a guaranteed bound or "check visually", never a
+measurement.
+
+**Who changes what.** Classified in `CLIENT_EDITABLE_FIELDS`: clients change the words, buttons and the media's picture
+or video (and, on older sections, the `image`); the layout (`variant`), `supporting`, _Image design_ and _Design_ are
+agency only.
+
+**Moving older pictures into `media` (migration).** Pictures saved before the slot are in `image`. The section reads
+`media` first and falls back to `image`, so nothing needs to happen for a page to keep rendering, and the Studio shows
+the old field only while `media` is empty. To move them, run the migration `image-to-media` (see
+`migrations/README.md`): a dry run lists every patch and writes nothing.
+
+```bash
+npx sanity migration run image-to-media                 # dry run: prints the patches, writes nothing
+npx sanity dataset export production backup.tar.gz      # then, before running it for real
+npx sanity migration run image-to-media --no-dry-run
+```
+
+It adds one `slotImage` block per section that has a picture and no media, copying the picture whole (asset, alt text,
+crop and hotspot). It never removes or changes `image`, the layout or the _Image design_, so existing pages render the
+same afterwards, and it is safe to run twice. Delete the old `image` field in a later release, once it has run on every
+dataset.
+
+**Tests.** Unit: the layouts (`utils/split-layout.test.ts`), the presets and their tie-breaking
+(`preset-match.test.ts`), the gallery labels and the migration. End to end (`tests/e2e/split-contract.spec.ts`): every
+look passes axe and fits at 375, 768 and 1280 px; the media sits where the layout says; the supporting video is a Play
+button until clicked. The gallery has an entry for each look (`media-text-media-left`, `-stacked`, `-overlay`,
+`-supporting-video`, `-media-video`); the older entries use `image`, so their unchanged baselines show saved pages render
+as before. The new baselines are Linux-only: create them with the **Update visual baselines** workflow.
+
 ### Image design
 
 One treatment for a section's main picture: a **still frame with the picture moving gently inside it**, a handful of
@@ -5568,9 +5644,9 @@ they are about the form, not permissions: for a hard guarantee use a document-le
 
 Slots are shared across section families (architecture: `docs/nocturne/NOCTURNE_DESIGN_ENGINE_ARCHITECTURE.md`, §4).
 A **slot** is a named place a family offers for one approved block; a **block** is a small piece of supporting
-content that fits any slot it is allowed in. Today `hero.supporting` is the only slot in use. `split.media` and
-`split.supporting` are reserved for the Split family, so a block can already say it will fit there. Nothing is stored
-differently: the hero's `supporting` array holds the same items as before, so no migration is needed.
+content that fits any slot it is allowed in. `hero.supporting` is the hero's, and `split.media` and `split.supporting`
+are Image + text's (see _Image + text_). Nothing is stored differently: the hero's `supporting` array holds the same
+items as before, so no migration is needed.
 
 | Block        | Where it is allowed                                  | Clients change                                   |
 | ------------ | ---------------------------------------------------- | ------------------------------------------------ |
@@ -5579,6 +5655,7 @@ differently: the hero's `supporting` array holds the same items as before, so no
 | `logoRow`    | `hero.supporting`                                    | Logos and Greyscale                              |
 | `launchDate` | `hero.supporting`                                    | Label, date, time and countdown                  |
 | `slotVideo`  | `hero.supporting`, `split.media`, `split.supporting` | Title, source, address or file, poster, captions |
+| `slotImage`  | `split.media`                                        | The picture and its alt text                     |
 
 **The video block.** `slotVideo` is the Video section's player without the section: a YouTube or Vimeo address behind
 the click-to-load Play button (nothing is requested from either service until the visitor presses it, so it needs no
@@ -5598,7 +5675,8 @@ A new block is one schema object, one component, one query fragment and one regi
    (`slotField({ name, slot })`, `slots/slot-field.ts`) lists the blocks that name it, builds the insert menu and
    thumbnails, hides the field from clients while it is empty and limits it to the slot's `max`.
 3. **GROQ.** Add a fields fragment to `src/lib/sanity/fragments.ts` and a `_type == "<name>" => { ... }` line to
-   `heroSupportingFields` (one fragment per block, folded into the page query: no extra request). Run `npm run typegen`
+   `heroSupportingFields`, `splitMediaFields` or `splitSupportingFields`, whichever slots allow it (one fragment per
+   block, folded into the page query: no extra request). Run `npm run typegen`
    (with the fake project from `tests/e2e/constants.ts`, never your `.env`).
 4. **Component.** Make a compact component with no section frame and no colours of its own (use `text-ink`,
    `text-ink-muted`, `border-line`, `text-accent-text`), sized to the room it is given because any slot can host it

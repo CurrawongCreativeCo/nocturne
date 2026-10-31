@@ -1695,6 +1695,13 @@ const slotVideoItem = (id, fields) => ({
   ...fields,
 })
 
+/** The Image + text media slot's picture block (README, "Image + text"). */
+const slotImageItem = (id) => ({
+  _key: `${id}-media`,
+  _type: 'slotImage',
+  image: image('Picture'),
+})
+
 /** `count` pictures with alt text and, for every other one, a caption: "<id> picture 1" and so on. */
 const galleryImages = (id, count) =>
   Array.from({ length: count }, (_, n) => ({
@@ -2087,6 +2094,46 @@ const gallerySections = [
     imagePosition: 'right',
   }),
   galleryMediaText('no-image', 'Without an image', { imagePosition: 'right' }),
+  // Section contract v2 (README, "Image + text"): the media slot, the four presets and a supporting
+  // block. The entries above keep the older `image` field, so they prove saved pages render as before.
+  galleryMediaText('media-left', 'Media on the left', {
+    variant: 'side',
+    imagePosition: 'left',
+    media: [slotImageItem('media-left')],
+  }),
+  galleryMediaText('stacked', 'Media above the text', {
+    variant: 'stacked',
+    media: [slotImageItem('stacked')],
+  }),
+  {
+    ...galleryMediaText('overlay', 'Text over media', {
+      variant: 'overlay',
+      media: [slotImageItem('overlay')],
+    }),
+    style: { _type: 'sectionStyle', tone: 'inverse' },
+  },
+  galleryMediaText('supporting-video', 'A video under the picture', {
+    variant: 'side',
+    imagePosition: 'right',
+    media: [slotImageItem('supporting-video')],
+    supporting: [
+      slotVideoItem('media-text-supporting', {
+        title: 'Meet the team',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
+    ],
+  }),
+  galleryMediaText('media-video', 'A video as the media', {
+    variant: 'stacked',
+    media: [
+      slotVideoItem('media-text-video', {
+        title: 'Our workshop',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
+    ],
+  }),
   // Image design (README, "Image design"): a shape, a frame and parallax inside a still frame. The
   // gallery has no MotionProvider and the baselines use reduced motion, so these show the still,
   // unscaled picture with its frame.
