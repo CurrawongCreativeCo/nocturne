@@ -2662,6 +2662,37 @@ export const galleryIds = gallerySections
   .filter((id) => !id.endsWith('--below'))
 
 /**
+ * Panels on a real page, for rendering them in the browser under each palette and condition
+ * (tests/e2e/section-panel-rendering.spec.ts): over a solid tone, over a picture the overlay calms, over
+ * a bare picture (the dark palette drops that one to a solid panel), over a gradient (the dark palette
+ * has no gradients, so it is a removed one there) and a Solid card. noIndex keeps it out of the sitemap.
+ */
+documents.push({
+  _id: 'page-glass-panels',
+  _type: 'page',
+  title: 'Glass panels',
+  slug: { _type: 'slug', current: 'glass-panels' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    panelExample('rp-solid-tone', { tone: 'alt', panel: 'glass' }),
+    panelExample('rp-picture', {
+      tone: 'inverse',
+      image: image(''),
+      overlay: 'medium',
+      panel: 'glass',
+    }),
+    panelExample('rp-picture-bare', {
+      tone: 'inverse',
+      image: image(''),
+      overlay: 'none',
+      panel: 'glass',
+    }),
+    panelExample('rp-gradient', { tone: 'inverse', gradient: 'forest-dusk', panel: 'glass' }),
+    panelExample('rp-solid-card', { tone: 'surface', panel: 'solid' }),
+  ],
+})
+
+/**
  * Statistics on a real page (tests/e2e/stats.spec.ts): a hero first, then a Stats section that counts
  * up (Reveal) and one with Animation None, each below the fold. Their figures are distinct and
  * formatted, so the HTML can be checked for them.
