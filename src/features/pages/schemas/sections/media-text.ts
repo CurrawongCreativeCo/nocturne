@@ -13,7 +13,7 @@ import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 import { IMAGE_SIDE_TITLES, imageSideOptions } from './image-side'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
-const LIMITS = {
+export const LIMITS = {
   // text-h2 in half the content width.
   title: 60,
   // Small label above the title.
@@ -25,6 +25,18 @@ export const mediaText = defineType({
   title: 'Image + text',
   type: 'object',
   icon: SplitHorizontalIcon,
+  options: {
+    manifest: {
+      purpose:
+        'A picture beside a block of text, with an optional title and up to two buttons. Use it to explain one idea with an image.',
+      example: {
+        eyebrow: 'Our story',
+        title: 'Built on local knowledge',
+        imagePosition: 'left',
+        style: { tone: 'alt' },
+      },
+    },
+  },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

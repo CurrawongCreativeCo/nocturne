@@ -20,6 +20,9 @@ you start a release.
 
 ### Added
 
+- `design-manifest.generated.json`: a generated, read-only description of the sections, fields, option lists, presets, layout rules,
+  client-editable flags and token names, built by `npm run typegen` (`npm run design-manifest`) and checked in CI. Sections can
+  add `options.manifest = { purpose, example }`; Hero and Image + text have one. See the README's "Design manifest".
 - A shared slot registry (`src/features/pages/slots/`): any section family can offer a named slot that takes approved
   blocks, generalised from the hero's supporting slot. `slotField({ name, slot })` builds the field, insert menu and
   thumbnails; `renderSlot` draws the block. README, "Adding a slot block".

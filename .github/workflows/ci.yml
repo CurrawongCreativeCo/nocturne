@@ -66,6 +66,14 @@ jobs:
             exit 1
           }
 
+      # `npm run typegen` also rebuilds design-manifest.generated.json from the schemas.
+      - name: Design manifest is committed and current
+        run: |
+          git diff --exit-code design-manifest.generated.json || {
+            echo "::error::The design manifest is stale. Run 'npm run typegen' and commit design-manifest.generated.json."
+            exit 1
+          }
+
       # `.env.example` and the README's settings table are written from the feature registries.
       - name: .env.example and the README settings table are committed and current
         run: |
