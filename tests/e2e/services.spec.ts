@@ -203,9 +203,15 @@ test.describe('the JSON-LD', () => {
         document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '',
       ].join('\n'),
     )
-    expect(
-      checkParity(nodes, { origin: SITE_URL, text, siteText: text, siteDetails: true }),
-    ).toEqual([])
+    // The page's own nodes. The site-wide Organization and WebSite are checked, against the pages that
+    // show their text, by structured-data.spec.ts (the WebSite description is the home page's).
+    const own = nodes.filter(
+      (node) =>
+        node['@id'] !== `${SITE_URL}/#organization` && node['@id'] !== `${SITE_URL}/#website`,
+    )
+    expect(checkParity(own, { origin: SITE_URL, text, siteText: text, siteDetails: true })).toEqual(
+      [],
+    )
     expect(findWebPageProblems(nodes, SITE_URL)).toEqual([])
     expect(findMissingWebPage(nodes, `${SITE_URL}${FULL}`)).toEqual([])
     expect(findDraftIds(nodes)).toEqual([])
