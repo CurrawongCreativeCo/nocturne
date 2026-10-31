@@ -54,7 +54,7 @@
     "@sanity/themer": "^0.10.4",
     "@sanity/ui": "^4.4.8",
     "@sanity/vision": "^6.19.0",
-    "@sentry/nextjs": "^11.7.0",
+    "@sentry/nextjs": "^11.9.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/edge-config": "^1.5.1",
     "@vercel/stega": "1.1.0",
