@@ -32,8 +32,8 @@ export const SERVICE_QUERY = defineQuery(/* groq */ `
     "hasSections": count(sections[access != "members"]) > 0,
     "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,
     enquiry { label, variant, link { ${linkFields} } },
-    locations[]->[defined(slug.current)] { _id, name, kind, "slug": slug.current },
-    evidence[]->[defined(slug.current) && access != "members"] { _id, _type, title, "slug": slug.current },
+    locations[defined(@->slug.current)]->{ _id, name, kind, "slug": slug.current },
+    evidence[defined(@->slug.current) && @->access != "members"]->{ _id, _type, title, "slug": slug.current },
     "people": *[_type == "teamMember" && references(^._id)]
       | order(coalesce(order, 999999) asc, name asc) {
       _id,

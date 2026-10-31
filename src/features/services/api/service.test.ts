@@ -31,7 +31,11 @@ describe('SERVICE_QUERY', () => {
   })
 
   it('leaves members-only pages out of the proof of work, and says whether there are sections', () => {
-    expect(SERVICE_QUERY).toContain('access != "members"')
+    // Filtered before the reference is followed: filtering after leaves a null in the array.
+    expect(SERVICE_QUERY).toContain(
+      'evidence[defined(@->slug.current) && @->access != "members"]->{',
+    )
+    expect(SERVICE_QUERY).not.toContain('evidence[]->[')
     expect(SERVICE_QUERY).toContain('"hasSections": count(sections[access != "members"]) > 0')
   })
 
