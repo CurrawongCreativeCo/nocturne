@@ -181,9 +181,25 @@ export function evaluateRules(type, variants, rulesFor) {
   return [null, ...variants.map((variant) => variant.value)].map(evaluate)
 }
 
+/**
+ * The registry slots a section offers: `<section>.<field>` where the section has that field. The
+ * registry's `max` is the slot field's known maximum.
+ */
+function sectionSlots(section, deps) {
+  const fieldNames = new Set((section.fields ?? []).map((field) => field.name))
+  return Object.keys(deps.slots?.SLOTS ?? {})
+    .map((slot) => ({ slot, family: slot.split('.')[0], path: slot.split('.')[1] }))
+    .filter(({ family, path }) => family === section.name && fieldNames.has(path))
+}
+
 function describeSection(section, deps) {
   const manifest = section.options?.manifest
-  const fields = describeFields(section, deps, { limits: deps.limitsFor(section.name) })
+  const slots = sectionSlots(section, deps)
+  const limits = {
+    ...deps.limitsFor(section.name),
+    ...Object.fromEntries(slots.map(({ slot, path }) => [path, deps.slots.SLOTS[slot].max])),
+  }
+  const fields = describeFields(section, deps, { limits })
   const variants = listOf((section.fields ?? []).find((field) => field.name === 'variant') ?? {})
   return {
     type: section.name,
@@ -192,6 +208,7 @@ function describeSection(section, deps) {
     ...(manifest?.example ? { example: manifest.example } : {}),
     fields,
     ...(variants ? { variants } : {}),
+    ...(slots.length > 0 ? { slots: slots.map(({ slot, path }) => ({ slot, path })) } : {}),
     presets: (section.options?.presets ?? []).map(({ value, title, set }) => ({
       value,
       title,
@@ -210,6 +227,32 @@ export function missingPurposes(sectionTypes, families = FAMILY_TYPES) {
     .map((type) => type.name)
 }
 
+/** Every slot in the shared registry, with the blocks it accepts and each block's fields. */
+function describeSlots(deps) {
+  const { SLOTS = {}, SLOT_BLOCKS = {} } = deps.slots ?? {}
+  return Object.entries(SLOTS).map(([slot, { title, max }]) => ({
+    slot,
+    title,
+    max,
+    blocks: Object.entries(SLOT_BLOCKS)
+      .filter(([, block]) => block.allowedIn.includes(slot))
+      .map(([type, block]) => {
+        const definition = deps.types.get(block.schemaType)
+        if (!definition) {
+          throw new Error(
+            `The slot registry lists ${type}, but no schema type ${block.schemaType} was loaded.`,
+          )
+        }
+        return {
+          type,
+          noun: block.noun,
+          clientEditable: block.clientEditable,
+          fields: describeFields(definition, deps),
+        }
+      }),
+  }))
+}
+
 /**
  * Builds the manifest.
  *
@@ -222,6 +265,7 @@ export function missingPurposes(sectionTypes, families = FAMILY_TYPES) {
  * @param deps.schemaJson       schema.json from `sanity schema extract` (which fields are required)
  * @param deps.rulesFor         (type) => registered section rules
  * @param deps.isClientEditable (type, field) => boolean
+ * @param deps.slots           { SLOTS, SLOT_BLOCKS } from the shared slot registry
  * @param deps.limitsFor        (type) => the section's exported LIMITS, if any
  */
 export function buildDesignManifest(deps) {
@@ -252,6 +296,7 @@ export function buildDesignManifest(deps) {
 
   return {
     manifestVersion: deps.version,
+    slots: describeSlots(resolved),
     sections: deps.sectionTypes.map((section) => describeSection(section, resolved)),
     sectionStyle: { fields: describeFields(deps.sectionStyle, resolved) },
     designSettings: { fields: describeFields(deps.designSettings, resolved) },

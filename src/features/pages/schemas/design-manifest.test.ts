@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { sectionTypes } from '@/features/pages/schemas/sections'
+import { blocksForSlot, SLOTS, type SlotName } from '@/features/pages/slots/registry'
 
 import { FAMILY_TYPES } from '../../../../scripts/design-manifest-utils.mjs'
 
@@ -12,12 +13,14 @@ interface Row {
   list?: { value: unknown }[]
 }
 interface Manifest {
+  slots: { slot: string; max: number; blocks: { type: string; fields: Row[] }[] }[]
   sections: {
     type: string
     purpose?: string
     fields: Row[]
     presets: { value: string; set: Record<string, unknown> }[]
     example?: Record<string, unknown>
+    slots?: { slot: string; path: string }[]
   }[]
   sectionStyle: { fields: Row[] }
 }
@@ -57,6 +60,29 @@ describe('design-manifest.generated.json', () => {
         }
       }
     }
+  })
+
+  it('lists every registered slot with exactly the blocks the registry allows', () => {
+    expect(manifest.slots.map((entry) => entry.slot)).toEqual(Object.keys(SLOTS))
+    for (const entry of manifest.slots) {
+      expect(entry.blocks.map((block) => block.type)).toEqual(blocksForSlot(entry.slot as SlotName))
+      expect(entry.max).toBe(SLOTS[entry.slot as SlotName].max)
+      for (const block of entry.blocks) expect(block.fields.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('points each section slot at a field the section has', () => {
+    for (const section of manifest.sections) {
+      for (const { slot, path } of section.slots ?? []) {
+        expect(slot.startsWith(`${section.type}.`)).toBe(true)
+        expect(
+          section.fields.map((field) => field.path),
+          slot,
+        ).toContain(path)
+      }
+    }
+    const hero = manifest.sections.find((section) => section.type === 'hero')
+    expect(hero?.slots).toEqual([{ slot: 'hero.supporting', path: 'supporting' }])
   })
 
   it('has examples that use fields the section has', () => {

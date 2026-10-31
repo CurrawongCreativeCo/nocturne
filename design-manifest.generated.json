@@ -1,5 +1,531 @@
 {
   "manifestVersion": "1.10.0",
+  "slots": [
+    {
+      "slot": "hero.supporting",
+      "title": "Extra content under the heading",
+      "max": 1,
+      "blocks": [
+        {
+          "type": "statsBar",
+          "noun": "a statistics bar",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "items",
+              "kind": "array",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "items[].value",
+              "kind": "number",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "items[].label",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "items[].prefix",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "items[].suffix",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "items[].decimals",
+              "kind": "number",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "caption",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            }
+          ]
+        },
+        {
+          "type": "badgeRow",
+          "noun": "a row of badges",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "badges",
+              "kind": "array",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "badges[].label",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "badges[].icon",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "check",
+                  "title": "Tick"
+                },
+                {
+                  "value": "star",
+                  "title": "Star"
+                },
+                {
+                  "value": "shield",
+                  "title": "Shield"
+                },
+                {
+                  "value": "clock",
+                  "title": "Clock"
+                },
+                {
+                  "value": "heart",
+                  "title": "Heart"
+                },
+                {
+                  "value": "bolt",
+                  "title": "Lightning bolt"
+                },
+                {
+                  "value": "leaf",
+                  "title": "Leaf"
+                },
+                {
+                  "value": "award",
+                  "title": "Award"
+                },
+                {
+                  "value": "care",
+                  "title": "Care"
+                },
+                {
+                  "value": "sun",
+                  "title": "Sun"
+                },
+                {
+                  "value": "community",
+                  "title": "Community"
+                },
+                {
+                  "value": "person",
+                  "title": "Person"
+                },
+                {
+                  "value": "location",
+                  "title": "Location"
+                },
+                {
+                  "value": "email",
+                  "title": "Email"
+                },
+                {
+                  "value": "calendar",
+                  "title": "Calendar"
+                },
+                {
+                  "value": "phone",
+                  "title": "Phone"
+                },
+                {
+                  "value": "lotus",
+                  "title": "Lotus"
+                },
+                {
+                  "value": "gift",
+                  "title": "Gift"
+                }
+              ],
+              "clientEditable": true
+            }
+          ]
+        },
+        {
+          "type": "logoRow",
+          "noun": "a row of logos",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "logos",
+              "kind": "array",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "logos[].name",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "logos[].image",
+              "kind": "image",
+              "required": true,
+              "clientEditable": true
+            },
+            {
+              "path": "logos[].image.alt",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "greyscale",
+              "kind": "boolean",
+              "required": false,
+              "clientEditable": true
+            }
+          ]
+        },
+        {
+          "type": "launchDate",
+          "noun": "a launch date",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "label",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "date",
+              "kind": "date",
+              "required": true,
+              "clientEditable": true
+            },
+            {
+              "path": "time",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "countdown",
+              "kind": "boolean",
+              "required": false,
+              "clientEditable": true
+            }
+          ]
+        },
+        {
+          "type": "slotVideo",
+          "noun": "a video",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "title",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "source",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "list": [
+                {
+                  "value": "youtube",
+                  "title": "YouTube"
+                },
+                {
+                  "value": "vimeo",
+                  "title": "Vimeo"
+                },
+                {
+                  "value": "upload",
+                  "title": "Uploaded video (MP4)"
+                }
+              ],
+              "clientEditable": true
+            },
+            {
+              "path": "url",
+              "kind": "url",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "file",
+              "kind": "file",
+              "required": null,
+              "clientEditable": true
+            },
+            {
+              "path": "poster",
+              "kind": "image",
+              "required": true,
+              "clientEditable": true
+            },
+            {
+              "path": "poster.alt",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "captions",
+              "kind": "file",
+              "required": false,
+              "clientEditable": true
+            },
+            {
+              "path": "aspectRatio",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "16:9",
+                  "title": "Widescreen (16:9)"
+                },
+                {
+                  "value": "4:3",
+                  "title": "Standard (4:3)"
+                },
+                {
+                  "value": "1:1",
+                  "title": "Square (1:1)"
+                },
+                {
+                  "value": "21:9",
+                  "title": "Cinema (21:9)"
+                }
+              ],
+              "clientEditable": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slot": "split.media",
+      "title": "Media",
+      "max": 1,
+      "blocks": [
+        {
+          "type": "slotVideo",
+          "noun": "a video",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "title",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "source",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "list": [
+                {
+                  "value": "youtube",
+                  "title": "YouTube"
+                },
+                {
+                  "value": "vimeo",
+                  "title": "Vimeo"
+                },
+                {
+                  "value": "upload",
+                  "title": "Uploaded video (MP4)"
+                }
+              ],
+              "clientEditable": true
+            },
+            {
+              "path": "url",
+              "kind": "url",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "file",
+              "kind": "file",
+              "required": null,
+              "clientEditable": true
+            },
+            {
+              "path": "poster",
+              "kind": "image",
+              "required": true,
+              "clientEditable": true
+            },
+            {
+              "path": "poster.alt",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "captions",
+              "kind": "file",
+              "required": false,
+              "clientEditable": true
+            },
+            {
+              "path": "aspectRatio",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "16:9",
+                  "title": "Widescreen (16:9)"
+                },
+                {
+                  "value": "4:3",
+                  "title": "Standard (4:3)"
+                },
+                {
+                  "value": "1:1",
+                  "title": "Square (1:1)"
+                },
+                {
+                  "value": "21:9",
+                  "title": "Cinema (21:9)"
+                }
+              ],
+              "clientEditable": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slot": "split.supporting",
+      "title": "Extra content",
+      "max": 1,
+      "blocks": [
+        {
+          "type": "slotVideo",
+          "noun": "a video",
+          "clientEditable": true,
+          "fields": [
+            {
+              "path": "title",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "source",
+              "kind": "string",
+              "required": true,
+              "max": null,
+              "list": [
+                {
+                  "value": "youtube",
+                  "title": "YouTube"
+                },
+                {
+                  "value": "vimeo",
+                  "title": "Vimeo"
+                },
+                {
+                  "value": "upload",
+                  "title": "Uploaded video (MP4)"
+                }
+              ],
+              "clientEditable": true
+            },
+            {
+              "path": "url",
+              "kind": "url",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "file",
+              "kind": "file",
+              "required": null,
+              "clientEditable": true
+            },
+            {
+              "path": "poster",
+              "kind": "image",
+              "required": true,
+              "clientEditable": true
+            },
+            {
+              "path": "poster.alt",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": true
+            },
+            {
+              "path": "captions",
+              "kind": "file",
+              "required": false,
+              "clientEditable": true
+            },
+            {
+              "path": "aspectRatio",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "16:9",
+                  "title": "Widescreen (16:9)"
+                },
+                {
+                  "value": "4:3",
+                  "title": "Standard (4:3)"
+                },
+                {
+                  "value": "1:1",
+                  "title": "Square (1:1)"
+                },
+                {
+                  "value": "21:9",
+                  "title": "Cinema (21:9)"
+                }
+              ],
+              "clientEditable": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "sections": [
     {
       "type": "hero",
@@ -460,7 +986,7 @@
           "path": "supporting",
           "kind": "array",
           "required": null,
-          "max": null,
+          "max": 1,
           "clientEditable": false
         },
         {
@@ -663,6 +1189,90 @@
           "path": "supporting[launchDate].countdown",
           "kind": "boolean",
           "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].title",
+          "kind": "string",
+          "required": true,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].source",
+          "kind": "string",
+          "required": true,
+          "max": null,
+          "list": [
+            {
+              "value": "youtube",
+              "title": "YouTube"
+            },
+            {
+              "value": "vimeo",
+              "title": "Vimeo"
+            },
+            {
+              "value": "upload",
+              "title": "Uploaded video (MP4)"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].url",
+          "kind": "url",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].file",
+          "kind": "file",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].poster",
+          "kind": "image",
+          "required": true,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].poster.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].captions",
+          "kind": "file",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[slotVideo].aspectRatio",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "16:9",
+              "title": "Widescreen (16:9)"
+            },
+            {
+              "value": "4:3",
+              "title": "Standard (4:3)"
+            },
+            {
+              "value": "1:1",
+              "title": "Square (1:1)"
+            },
+            {
+              "value": "21:9",
+              "title": "Cinema (21:9)"
+            }
+          ],
           "clientEditable": false
         },
         {
@@ -1166,6 +1776,12 @@
         {
           "value": "full-bleed",
           "title": "Image with panel"
+        }
+      ],
+      "slots": [
+        {
+          "slot": "hero.supporting",
+          "path": "supporting"
         }
       ],
       "presets": [
@@ -7203,6 +7819,47 @@
         "path": "imageFixed",
         "kind": "boolean",
         "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "panel",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "none",
+            "title": "None"
+          },
+          {
+            "value": "glass",
+            "title": "Glass"
+          },
+          {
+            "value": "solid",
+            "title": "Solid card"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "panelStrength",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "light",
+            "title": "Light"
+          },
+          {
+            "value": "medium",
+            "title": "Medium"
+          },
+          {
+            "value": "strong",
+            "title": "Strong"
+          }
+        ],
         "clientEditable": false
       },
       {

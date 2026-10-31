@@ -2317,6 +2317,11 @@ nothing in `src/app` may import it (a test fails if one does), because it would 
   `npm run typegen` runs it after the editor guide, and `npm run design-manifest` runs it alone (`-- --check` reports whether
   the file is current). CI runs typegen and fails when the committed file differs, so run `npm run typegen` and commit it
   after changing a section's fields, options, presets or rules, `client-editable.ts` or `tokens.json`.
+- **Slots** come from the shared slot registry (`src/features/pages/slots/registry.ts`), never from a list of their own. Top-level
+  `slots` lists every registry slot (`name`, `title`, `max`) with the blocks it accepts (`type`, `noun`, `clientEditable` and the
+  block's `fields`). A section that has the field named by a slot (`hero.supporting` is `hero`'s `supporting`) lists it under
+  `slots`, and the registry's `max` becomes that field's `max`. Slots reserved for families that do not exist yet (`split.*`)
+  appear only at the top level. A registry block with no loaded schema type fails the build.
 - **Rules** are functions, so the script evaluates each section's `registerSectionRules` once with no layout and once per
   layout, and records `hasPicture`, `fixesAlignment` and `hasOwnBackgroundImage`.
 - **Purpose and example:** give a section type `options.manifest = { purpose, example? }`. The build fails if `hero` or
@@ -2343,8 +2348,6 @@ schema", not as "no limit". Minimums, array counts and warnings are not captured
 - Whether a field is shown (`hidden` callbacks), conditional options (`visibleOptions`) and contrast warnings. `list` is every
   value the field can store, not what the form offers for a given layout; use `rules` for the layout-dependent parts.
 - Lists computed at run time, such as the Section design's **Gradient** (the site's Brand colours gradients).
-- Slots and the blocks they accept: they arrive with the shared slot registry (task 219), which the manifest will read once it
-  is on `main`.
 - Document types, other than the Brand colours document. Heading text, rich text and link fields show their kind, not their limits.
 - The section's own `style` field is listed once under `sectionStyle`, not repeated in every section.
 

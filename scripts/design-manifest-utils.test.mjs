@@ -73,6 +73,7 @@ const banner = {
     { name: 'buttons', type: 'array', of: [{ type: 'cta' }] },
     { name: 'tags', type: 'array', of: [{ type: 'string', options: { list: ['a', 'b'] } }] },
     { name: 'access', type: 'string' },
+    { name: 'extra', type: 'array', of: [{ type: 'cta' }] },
     { name: 'style', type: 'sectionStyle' },
   ],
 }
@@ -108,8 +109,16 @@ const schemaJson = [
 
 const banner0 = banner
 
+const slotDeps = {
+  SLOTS: { 'banner.extra': { title: 'Extra', max: 1 }, 'other.extra': { title: 'Other', max: 2 } },
+  SLOT_BLOCKS: {
+    cta: { schemaType: 'cta', noun: 'a button', allowedIn: ['banner.extra'], clientEditable: true },
+  },
+}
+
 const deps = (overrides = {}) => ({
   version: '9.9.9',
+  slots: slotDeps,
   sectionTypes: [banner],
   sharedTypes: [cta],
   sectionStyle,
@@ -227,6 +236,33 @@ describe('buildDesignManifest', () => {
   it('refuses a family with no purpose', () => {
     const bare = { name: 'hero', type: 'object', fields: [] }
     expect(() => buildDesignManifest(deps({ sectionTypes: [bare] }))).toThrow(/hero/)
+  })
+})
+
+describe('slots', () => {
+  const manifest = buildDesignManifest(deps())
+
+  it('lists each registry slot with its blocks and their fields', () => {
+    expect(manifest.slots.map((entry) => entry.slot)).toEqual(['banner.extra', 'other.extra'])
+    expect(manifest.slots[0].blocks[0]).toMatchObject({ type: 'cta', clientEditable: true })
+    expect(manifest.slots[0].blocks[0].fields.map((row) => row.path)).toEqual(['label', 'variant'])
+    expect(manifest.slots[1].blocks).toEqual([])
+  })
+
+  it('attaches a slot to the section that has the field, with the registry maximum', () => {
+    const section = manifest.sections[0]
+    expect(section.slots).toEqual([{ slot: 'banner.extra', path: 'extra' }])
+    expect(section.fields.find((row) => row.path === 'extra')).toMatchObject({ max: 1 })
+  })
+
+  it('refuses a registry block with no schema type', () => {
+    const missing = {
+      ...slotDeps,
+      SLOT_BLOCKS: {
+        ghost: { ...slotDeps.SLOT_BLOCKS.cta, schemaType: 'ghost', allowedIn: ['banner.extra'] },
+      },
+    }
+    expect(() => buildDesignManifest(deps({ slots: missing }))).toThrow(/ghost/)
   })
 })
 
