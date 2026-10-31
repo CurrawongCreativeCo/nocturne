@@ -425,7 +425,7 @@ describe('runProposal: agency review is enforced', () => {
     const result = await run({ client, proposal: mixed })
     expect(result.status).toBe('applied')
     expect(result.validation.rejected.map((p) => p.reasons[0].code)).toEqual([
-      'agency-approval-required',
+      'agency-permission-required',
     ])
     expect(result.validation.rejected[0].path).toBe(`${HERO}.style.spacing`)
     expect(heroOf(client).title).toBe('A better heading')
@@ -445,7 +445,7 @@ describe('runProposal: agency review is enforced', () => {
     const client = fakeLake({ documents: baseDocuments(), roles: new Error('boom') })
     const result = await run({ client, proposal: densityAiry })
     expect(result.status).toBe('nothing-to-apply')
-    expect(result.validation.rejected[0].reasons[0].code).toBe('agency-approval-required')
+    expect(result.validation.rejected[0].reasons[0].code).toBe('agency-permission-required')
     expect(client.mutate).not.toHaveBeenCalled()
   })
 

@@ -479,7 +479,7 @@ suite('change proposals against a real scratch dataset', () => {
           { client: clientWith(editor) },
         )
         expect(result.validation.rejected.map((p) => p.reasons[0].code)).toEqual([
-          'agency-approval-required',
+          'agency-permission-required',
         ])
         expect(result.status).toBe('applied')
         const hero = (await getDoc(`drafts.${id}`)).pageBuilder[0]

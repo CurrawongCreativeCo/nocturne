@@ -2389,6 +2389,11 @@ in Studio.
 **Editor** or **Contributor** token may apply only what clients may edit. The applier asks Sanity for the token's roles and, if it
 cannot read them, treats the token as non-agency.
 
+**This is permission, not approval.** The role check shows the token is allowed to make an agency-only change. It does not record
+that a person reviewed or approved this particular change. Approval happens afterwards, when someone previews the draft and
+publishes it; the applier never publishes. `needsAgencyReview` is still reported on every patch that needs it, so the person
+reviewing knows which changes to look at closely.
+
 **The format** (`ChangeProposal`, `src/lib/proposals/types.ts`):
 
 | Field             | Meaning                                                                                                            |
@@ -2427,7 +2432,7 @@ There is no site-wide density setting yet, so "density airy" sets the section's 
    the Studio, because the page falls back to a safe look. Contrast over a picture is never measured.
 4. **Permissions.** A patch to anything clients may not edit (`CLIENT_EDITABLE`, through the manifest's `clientEditable`) is
    marked `needsAgencyReview`. `validate` only reports it. **`apply` enforces it:** unless the token is an Administrator's or
-   Developer's, those patches are rejected as `agency-approval-required`, and the part they belong to is not written. A proposal
+   Developer's, those patches are rejected as `agency-permission-required`, and the part they belong to is not written. A proposal
    made of agency-only changes (all three fixtures) therefore needs an agency token to apply.
 
 The other rejection reasons are `invalid-proposal` (the file's shape) and `manifest-mismatch`. The result lists accepted and
@@ -2506,6 +2511,19 @@ on desktop and mobile. For a release, open the release in Studio and preview it 
 
 **To undo it:** discard the draft in Studio (Document actions → Discard changes), or discard the release. Nothing needs undoing on
 the live site, because nothing was published. After publishing, use the document's history and Revert.
+
+**Limitations.**
+
+- Only scratch datasets are supported. There is no production or client-dataset support, and no override.
+- Release mode needs a Sanity project and plan with Releases. Live testing used one trial-plan project, so other plans may differ;
+  on a plan without Releases `--release` fails and writes nothing.
+- A warnings-only validation result is covered by unit tests, but no live example was found to confirm it.
+- Clean-up cannot remove every concurrent-edit race: a draft or version edited between the check and the discard is reported, not
+  protected. A clean-up conflict may need someone to resolve it in Studio.
+- The live integration suite is **not** part of CI. It needs the Sanity CLI signed in as a person, a Developer token and a scratch
+  dataset, and none of those are configured for CI. Run it by hand before changing the applier. CI runs the unit tests, which use
+  the in-memory stand-in.
+- Nothing here generates proposals. A person or a script writes them.
 
 Tests: `src/lib/proposals/validate.test.ts` (every rejection reason, the content/design split, permissions, panel warnings),
 `paths.test.ts`, `plan.test.ts` (draft-only writes, the `ifRevisionID` guard, guarded undo) and `scripts/proposal.test.mjs`

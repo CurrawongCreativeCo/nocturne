@@ -341,7 +341,7 @@ async function discardRelease({ client, releaseId, targets, revisions, notes }) 
  * @param o.proposal        the parsed proposal
  * @param o.client          { getDocuments, mutate, action, query, getRoles }
  * @param o.dataset         must be a scratch dataset
- * @param o.validate        (proposal, { manifest, documents, agencyApproved }) => validation
+ * @param o.validate        (proposal, { manifest, documents, agencyPermitted }) => validation
  * @param o.plan            { planProposal, undoMutations }   (src/lib/proposals/plan.ts)
  * @param o.manifest        the design manifest
  * @param o.yes             write; otherwise a dry run
@@ -379,8 +379,8 @@ export async function runProposal(o) {
   let validation = o.validate(o.proposal, { manifest: o.manifest, documents })
   // Agency-only changes are enforced, not just flagged: they need a token held by the agency.
   if (!validation.rejection && validation.applicable.some((patch) => patch.needsAgencyReview)) {
-    const agencyApproved = await isAgencyToken(o.client)
-    validation = o.validate(o.proposal, { manifest: o.manifest, documents, agencyApproved })
+    const agencyPermitted = await isAgencyToken(o.client)
+    validation = o.validate(o.proposal, { manifest: o.manifest, documents, agencyPermitted })
   }
   if (validation.rejection) return { ...base, status: 'rejected', validation }
   if (validation.applicable.length === 0) return { ...base, status: 'nothing-to-apply', validation }
