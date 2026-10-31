@@ -40,6 +40,7 @@
     "category": { "class": "published", "why": "Shown on the website." },
     "event": { "class": "published", "why": "Shown on the website." },
     "eventCategory": { "class": "published", "why": "Shown on the website." },
+    "service": { "class": "published", "why": "Shown on the website." },
     "teamMember": {
       "class": "published",
       "why": "Shown on the website, including the public email and phone."
