@@ -5220,6 +5220,32 @@ CI installs the browser itself.
 
 When you add a section or a content type, add an example of it to the fixture dataset so the axe scan covers it.
 
+#### The test profile, the template-only checks and how CI runs the suite
+
+- **The end-to-end build uses a fixed test profile, not the site's own.** `E2E_FIXED_PROFILE=1` (set for Playwright
+  and Lighthouse CI through `APP_ENV` in `tests/e2e/constants.ts`) makes `next.config.ts` alias the profile import to
+  `tests/e2e/fixtures/site.profile.ts`: the template's default profile (live, the template's features). So a
+  client site that is pre-launch, or has a feature switched off, runs the same suite as the template. Ordinary builds
+  (`npm run dev`, `npm run build`, Vercel) use `site.profile.ts` as usual, and the flag is refused in every Vercel
+  build, Preview and Production (`scripts/e2e-profile.mjs`). The fixture is a copy of the template's `site.profile.ts`
+  that differs only in its import path; a template-only test fails if they drift, so change both together.
+- **Some checks run only in the template.** Tests of what the template ships skip themselves on a client site, which
+  customises those files on purpose: the bare `studio-brand.json`, the commented-out `launch` example in
+  `site.profile.ts` (and `ships live`), a profile with no service features (two `config:check` cases), the
+  profile-edit round trip and the fixture-matches-profile check. `isTemplateRepo()` in `scripts/is-template.mjs`
+  decides: the template's package is named `nocturne`, and a client renames it. The proxy tests state a live launch
+  status, the A/B experiments spec skips itself when `/api/site-info` says pre-launch, and a client's own pre-launch
+  rules are covered by `src/lib/prelaunch-real-profile.test.ts`, which runs against the site's real profile.
+- **CI runs the desktop and mobile projects in 10 shards** (`--shard=n/10`, each with its own build and fake Content
+  Lake) and the isolated projects in their own job, with `--workers=2` pinned. Playwright's default is half the CPUs:
+  a public repository's runners have four, a private one's have two, so the same suite ran about twice as slowly in a
+  client's private repository and its heaviest shards passed the 20-minute job limit. Every test runs exactly once.
+  The repository ruleset requires the job names `e2e (1/10)` to `e2e (10/10)`, `e2e (isolated)` and `check`; if you
+  change the shard count, update the ruleset and the timings job's `--expect` list in `.github/workflows/ci.yml`.
+- **In a spec, read a style with `toHaveCSS` (or retry the read), not one `getComputedStyle` straight after load.**
+  React can replace an element while hydrating, and on a slow runner the read then hits a detached node and returns
+  `''`.
+
 #### Section gallery and visual regression
 
 `/section-gallery` renders every section type on one page, each under a label (`ctaBanner (dark tone)`,
