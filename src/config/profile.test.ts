@@ -13,6 +13,7 @@ import {
   type SiteProfileInput,
 } from './profile'
 import { templateVersion } from './template-version'
+import { isTemplateRepo } from '../../scripts/is-template.mjs'
 
 const valid: SiteProfileInput = { client: { name: 'Acme Plumbing', slug: 'acme-plumbing' } }
 
@@ -199,6 +200,10 @@ describe('launch', () => {
       publicPages: [],
       unknownPaths: 'not-found',
     })
+  })
+
+  // The template ships live; a client site is pre-launch on purpose until it launches.
+  it.skipIf(!isTemplateRepo())('ships live', () => {
     expect(siteProfile.launch.status).toBe('live')
   })
 

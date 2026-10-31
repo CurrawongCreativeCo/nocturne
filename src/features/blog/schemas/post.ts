@@ -79,7 +79,8 @@ export const post = defineType({
       name: 'author',
       type: 'reference',
       group: 'content',
-      to: [{ type: 'author' }],
+      // A team member can be the author, so a person is entered once and the byline links to their profile.
+      to: [{ type: 'author' }, { type: 'teamMember' }],
       validation: (rule) => rule.required(),
     }),
     defineField({

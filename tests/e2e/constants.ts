@@ -48,6 +48,8 @@ export const RELEASE_ID = 'rSummer'
  * Webhook mode is on, so visitors open no live connection. NEXT_PUBLIC_* values are baked in at build.
  */
 export const APP_ENV = {
+  // Build the site under test with the template's default profile, not the real site's (scripts/e2e-profile.mjs).
+  E2E_FIXED_PROFILE: '1',
   NEXT_PUBLIC_SANITY_PROJECT_ID: 'e2etest1',
   NEXT_PUBLIC_SANITY_DATASET: 'production',
   NEXT_PUBLIC_SITE_URL: SITE_URL,

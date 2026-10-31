@@ -6,6 +6,7 @@ import { OpenNowBadge } from '@/components/ui/open-now-badge'
 import { OpeningHours } from '@/components/ui/opening-hours'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { SocialLinks } from '@/components/ui/social-links'
+import { parseAuPhone } from '@/lib/au-phone'
 import { DEFAULT_TIME_ZONE, groupOpeningHours, upcomingSpecialHours } from '@/lib/opening-hours'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { socialStyleOf } from '@/lib/sanity/social-style-options'
@@ -13,7 +14,6 @@ import { socialStyleOf } from '@/lib/sanity/social-style-options'
 import { getSettings } from '../api/get-settings'
 import { getToday } from '../api/get-today'
 import { formatAbn } from '../utils/abn'
-import { parseAuPhone } from '../utils/phone'
 
 /** `extra` is a slot after the links (the route passes the cookie settings button; features can't import each other). */
 export async function SiteFooter({ extra, ...mode }: FetchMode & { extra?: ReactNode }) {

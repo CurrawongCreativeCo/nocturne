@@ -4,6 +4,7 @@ import { page } from './page'
 import { redirect } from './redirect'
 import { sectionTypes } from './sections'
 import { sharedSection } from './shared-section'
+import { slotImage } from './slot-image'
 import { slotVideo } from './slot-video'
 // new-schema:import
 
@@ -13,6 +14,7 @@ export const pageSchemaTypes: SchemaTypeDefinition[] = [
   redirect,
   ...sectionTypes,
   // Slot blocks (slots/registry.ts): objects that sections offer in their slots.
+  slotImage,
   slotVideo,
   // new-schema:register
 ]

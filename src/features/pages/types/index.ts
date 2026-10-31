@@ -109,4 +109,16 @@ export interface SectionProps<T extends SectionType> {
    * (`getLocationBusiness`) from the settings the footer already fetched. Null until the document exists.
    */
   business?: LocationBusiness | null
+  /**
+   * The page the section is on, for structured data that belongs to the page rather than the
+   * section: its absolute URL, the document that owns the sections, and the FAQ sections visitors
+   * can read (the first one renders the page's single FAQPage node, with all their questions).
+   */
+  page?: PageContext
+}
+
+export interface PageContext {
+  url: string
+  documentId: string
+  faqSections: SectionOf<'faq'>[]
 }

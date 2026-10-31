@@ -172,6 +172,27 @@ export interface ResolvedPanel {
   ratio: number
   /** Set when the panel had to render solid: the Studio warning's text. */
   problem: PanelProblem | null
+  /** What is known of the section's gradient (`gradientState`); set by `resolveSectionPanel`. */
+  gradient?: GradientState
+}
+
+/**
+ * Where a section's chosen gradient stands:
+ * - `none`: no gradient is chosen, or a picture covers it;
+ * - `present`: it is in the list, so its stops are known;
+ * - `missing`: the list was read and it is not there, so the page draws no gradient;
+ * - `unknown`: the list could not be read, so nothing is known (never treated as `missing`).
+ */
+export type GradientState = 'none' | 'present' | 'missing' | 'unknown'
+
+export function gradientState(
+  slug: string | null | undefined,
+  gradients: readonly { slug: string }[] | undefined,
+  hasPicture = false,
+): GradientState {
+  if (!slug || hasPicture) return 'none'
+  if (gradients === undefined) return 'unknown'
+  return gradients.some((gradient) => gradient.slug === slug) ? 'present' : 'missing'
 }
 
 /** The tone's background: what a section with no picture shows behind a panel. */
@@ -470,10 +491,12 @@ export interface SectionPanelContext {
  * gives the same answer in both.
  */
 export function resolveSectionPanel(context: SectionPanelContext): ResolvedPanel | null {
-  const found = context.gradient
-    ? context.gradients?.find((gradient) => gradient.slug === context.gradient)
-    : undefined
-  return resolvePanel({
+  const state = gradientState(context.gradient, context.gradients, context.hasPicture)
+  const found =
+    state === 'present'
+      ? context.gradients?.find((gradient) => gradient.slug === context.gradient)
+      : undefined
+  const panel = resolvePanel({
     panel: context.panel,
     strength: context.strength,
     tone: context.tone,
@@ -481,13 +504,15 @@ export function resolveSectionPanel(context: SectionPanelContext): ResolvedPanel
     backdrop: panelBackdrop({
       hasPicture: context.hasPicture,
       gradientStops: found?.stops,
-      // Unknown stops are the conservative case; a removed gradient draws nothing.
-      hasUnknownGradient: Boolean(context.gradient) && context.gradients === undefined,
+      // Unknown is the conservative case: the stops are checked as if they could be anything. A
+      // missing gradient draws nothing, so it is the plain tone.
+      hasUnknownGradient: state === 'unknown',
       hasOwnBackground: context.hasOwnBackground,
       overlaps: context.overlaps,
       overlay: context.overlay,
     }),
   })
+  return panel ? { ...panel, gradient: state } : null
 }
 
 /** The attributes and variables a panel adds to the section and its content container. */
@@ -519,4 +544,19 @@ export function panelDomProps(panel: ResolvedPanel): PanelDomProps {
 /** The Design tab's warning for the section's stored choices; null when there is nothing to say. */
 export function panelProblem(context: SectionPanelContext): string | null {
   return resolveSectionPanel(context)?.problem?.message ?? null
+}
+
+/** Shown when the brand gradients could not be read: the choice is kept and the panel is drawn for the worst case. */
+export const UNKNOWN_GRADIENT_NOTICE =
+  'Studio couldn’t load the brand gradients just now, so contrast over this section’s gradient isn’t confirmed. The gradient you chose is kept, and the panel is drawn for the worst case in the meantime. It is checked again the next time this form is looked at.'
+
+/**
+ * Everything the Panel field warns about: the panel being drawn solid, or (without claiming anything)
+ * that a gradient could not be checked. Warnings only; none of it blocks publishing.
+ */
+export function panelWarning(context: SectionPanelContext): string | null {
+  const panel = resolveSectionPanel(context)
+  if (!panel) return null
+  if (panel.problem) return panel.problem.message
+  return panel.gradient === 'unknown' ? UNKNOWN_GRADIENT_NOTICE : null
 }

@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildLocalBusinessJsonLd,
+  buildOrganization,
   businessSchemaType,
   type BusinessInfoData,
-} from './business-json-ld'
+} from './organization'
 
 const options = {
+  areaServed: true,
   url: 'https://example.com.au/',
   id: 'https://example.com.au/#organization',
   name: 'Site name',
@@ -111,6 +113,15 @@ describe('buildLocalBusinessJsonLd', () => {
     expect(node).not.toHaveProperty('telephone')
   })
 
+  it('leaves out areaServed unless the site shows the service areas', () => {
+    const { areaServed: _shown, ...hidden } = options
+    expect(buildLocalBusinessJsonLd(full, hidden)).not.toHaveProperty('areaServed')
+    expect(buildLocalBusinessJsonLd(full, options)).toHaveProperty('areaServed')
+    expect(buildLocalBusinessJsonLd({ ...full, serviceAreas: [] }, options)).not.toHaveProperty(
+      'areaServed',
+    )
+  })
+
   it('includes the logo when there is one', () => {
     expect(
       buildLocalBusinessJsonLd({}, { ...options, logo: 'https://cdn/logo.png' }),
@@ -132,5 +143,66 @@ describe('businessSchemaType', () => {
       'LocalBusiness',
     )
     expect(businessSchemaType({ businessType: '<script>' })).toBe('LocalBusiness')
+  })
+})
+
+describe('buildOrganization', () => {
+  const origin = 'https://example.com.au'
+
+  it('is a plain Organization without business details', () => {
+    const { node, provenance } = buildOrganization({
+      origin,
+      identity: { title: 'Acme' },
+      logo: 'https://cdn/logo.png',
+      today: '2026-10-15',
+    })
+    expect(node).toEqual({
+      '@type': 'Organization',
+      '@id': 'https://example.com.au/#organization',
+      name: 'Acme',
+      url: 'https://example.com.au/',
+      logo: 'https://cdn/logo.png',
+    })
+    expect(provenance).toEqual({
+      name: { doc: 'siteIdentity', field: 'title' },
+      logo: { doc: 'siteIdentity', field: 'logo' },
+    })
+  })
+
+  it('has the required and recommended LocalBusiness properties, each with a source', () => {
+    const { node, provenance } = buildOrganization({
+      origin,
+      identity: { title: 'Site name' },
+      business: full,
+      logo: 'https://cdn/logo.png',
+      today: '2026-10-15',
+    })
+    expect(node).not.toHaveProperty('areaServed')
+    for (const property of ['@type', '@id', 'name', 'url', 'address', 'telephone']) {
+      expect(node).toHaveProperty([property])
+    }
+    expect(node['@id']).toBe('https://example.com.au/#organization')
+    expect(provenance.telephone).toEqual({ doc: 'businessInfo', field: 'phone' })
+    expect(provenance['address.streetAddress']).toEqual({
+      doc: 'businessInfo',
+      field: 'address.street',
+    })
+    expect(provenance.name).toEqual({ doc: 'businessInfo', field: 'tradingName' })
+    expect(provenance.openingHoursSpecification).toEqual({
+      doc: 'businessInfo',
+      field: 'openingHours',
+    })
+    expect(provenance.logo).toEqual({ doc: 'siteIdentity', field: 'logo' })
+  })
+
+  it('names the site title as the source when there is no trading name', () => {
+    const { provenance } = buildOrganization({
+      origin,
+      identity: { title: 'Site name' },
+      business: { address: { suburb: 'Fremantle' } },
+      today: '2026-10-15',
+    })
+    expect(provenance.name).toEqual({ doc: 'siteIdentity', field: 'title' })
+    expect(provenance.telephone).toBeUndefined()
   })
 })

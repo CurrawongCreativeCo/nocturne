@@ -145,16 +145,18 @@ test.describe('share images', () => {
 
 test.describe('structured data', () => {
   const jsonLd = (page: Page) =>
-    page
-      .locator('script[type="application/ld+json"]')
-      .evaluateAll((scripts) =>
-        scripts.map((script) => JSON.parse(script.textContent) as Record<string, unknown>),
-      )
+    page.locator('script[type="application/ld+json"]').evaluateAll((scripts) =>
+      scripts.flatMap((script) => {
+        const data = JSON.parse(script.textContent) as Record<string, unknown>
+        return (data['@graph'] as Record<string, unknown>[] | undefined) ?? [data]
+      }),
+    )
 
   test('the home page FAQ is valid FAQPage JSON-LD with plain-text answers', async ({ page }) => {
     await page.goto('/')
     const faq = (await jsonLd(page)).find((data) => data['@type'] === 'FAQPage')
-    expect(faq).toMatchObject({ '@context': 'https://schema.org' })
+    // One FAQPage per page, keyed by the page's URL.
+    expect(faq).toMatchObject({ '@id': `${SITE_URL}/#faq` })
     const entities = faq?.mainEntity as { name: string; acceptedAnswer: { text: string } }[]
     expect(entities.length).toBeGreaterThan(0)
     for (const { name, acceptedAnswer } of entities) {
@@ -166,7 +168,14 @@ test.describe('structured data', () => {
 
   test('a nested page has a BreadcrumbList and a visible breadcrumb nav', async ({ page }) => {
     await page.goto('/services/web/design')
-    const list = (await jsonLd(page)).find((data) => data['@type'] === 'BreadcrumbList')
+    const nodes = await jsonLd(page)
+    const list = nodes.find((data) => data['@type'] === 'BreadcrumbList')
+    expect(list?.['@id']).toBe(`${SITE_URL}/services/web/design#breadcrumb`)
+    // The page's WebPage node points at the trail by @id.
+    expect(nodes.find((data) => data['@type'] === 'WebPage')).toMatchObject({
+      '@id': `${SITE_URL}/services/web/design#webpage`,
+      breadcrumb: { '@id': `${SITE_URL}/services/web/design#breadcrumb` },
+    })
     expect(list?.itemListElement).toEqual([
       { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
       { '@type': 'ListItem', position: 2, name: 'Services', item: `${SITE_URL}/services` },

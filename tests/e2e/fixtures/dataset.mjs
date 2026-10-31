@@ -224,8 +224,9 @@ const blogPosts = [
       `archive-post-${i + 1}`,
       `Archive post ${i + 1}`,
       `2026-10-0${6 - Math.min(i, 5)}T${String(12 - i).padStart(2, '0')}:00:00Z`,
-      // The last one points at an author that no longer exists: it must render without a byline.
-      i === 8 ? { author: 'author-deleted' } : {},
+      // The first is by a team member (its byline links to their Person node); the last points at
+      // an author that no longer exists: it must render without a byline.
+      i === 0 ? { author: 'teamMember-ann' } : i === 8 ? { author: 'author-deleted' } : {},
     ),
   ),
   blogPost('hidden-post', 'Hidden post', '2026-09-01T09:00:00Z', { seo: { noIndex: true } }),
@@ -1695,6 +1696,13 @@ const slotVideoItem = (id, fields) => ({
   ...fields,
 })
 
+/** The Image + text media slot's picture block (README, "Image + text"). */
+const slotImageItem = (id) => ({
+  _key: `${id}-media`,
+  _type: 'slotImage',
+  image: image('Picture'),
+})
+
 /** `count` pictures with alt text and, for every other one, a caption: "<id> picture 1" and so on. */
 const galleryImages = (id, count) =>
   Array.from({ length: count }, (_, n) => ({
@@ -2602,6 +2610,47 @@ const gallerySections = [
   // Section panels (README, "Section panels"; tests/e2e/section-panel.spec.ts): glass over a solid tone
   // is tinted with no blur, over a picture or a gradient it is frosted, and Solid card is opaque.
   ...sectionPanelExamples,
+  // Section contract v2 (README, "Image + text"): the media slot, the four presets and a supporting
+  // block. They sit last, so adding them moves no older entry (a shifted section re-rasterises by a
+  // sub-pixel). The older Image + text entries keep `image`, so they prove saved pages render as before.
+  galleryMediaText('media-left', 'Media on the left', {
+    variant: 'side',
+    imagePosition: 'left',
+    media: [slotImageItem('media-left')],
+  }),
+  galleryMediaText('stacked', 'Media above the text', {
+    variant: 'stacked',
+    media: [slotImageItem('stacked')],
+  }),
+  {
+    ...galleryMediaText('overlay', 'Text over media', {
+      variant: 'overlay',
+      media: [slotImageItem('overlay')],
+    }),
+    style: { _type: 'sectionStyle', tone: 'inverse' },
+  },
+  galleryMediaText('supporting-video', 'A video under the picture', {
+    variant: 'side',
+    imagePosition: 'right',
+    media: [slotImageItem('supporting-video')],
+    supporting: [
+      slotVideoItem('media-text-supporting', {
+        title: 'Meet the team',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
+    ],
+  }),
+  galleryMediaText('media-video', 'A video as the media', {
+    variant: 'stacked',
+    media: [
+      slotVideoItem('media-text-video', {
+        title: 'Our workshop',
+        source: 'youtube',
+        url: VIDEO_URL.youtube,
+      }),
+    ],
+  }),
   // new-section:gallery
 ]
 
@@ -2612,6 +2661,37 @@ const gallerySections = [
 export const galleryIds = gallerySections
   .map((section) => section._key)
   .filter((id) => !id.endsWith('--below'))
+
+/**
+ * Panels on a real page, for rendering them in the browser under each palette and condition
+ * (tests/e2e/section-panel-rendering.spec.ts): over a solid tone, over a picture the overlay calms, over
+ * a bare picture (the dark palette drops that one to a solid panel), over a gradient (the dark palette
+ * has no gradients, so it is a removed one there) and a Solid card. noIndex keeps it out of the sitemap.
+ */
+documents.push({
+  _id: 'page-glass-panels',
+  _type: 'page',
+  title: 'Glass panels',
+  slug: { _type: 'slug', current: 'glass-panels' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    panelExample('rp-solid-tone', { tone: 'alt', panel: 'glass' }),
+    panelExample('rp-picture', {
+      tone: 'inverse',
+      image: image(''),
+      overlay: 'medium',
+      panel: 'glass',
+    }),
+    panelExample('rp-picture-bare', {
+      tone: 'inverse',
+      image: image(''),
+      overlay: 'none',
+      panel: 'glass',
+    }),
+    panelExample('rp-gradient', { tone: 'inverse', gradient: 'forest-dusk', panel: 'glass' }),
+    panelExample('rp-solid-card', { tone: 'surface', panel: 'solid' }),
+  ],
+})
 
 /**
  * Statistics on a real page (tests/e2e/stats.spec.ts): a hero first, then a Stats section that counts
