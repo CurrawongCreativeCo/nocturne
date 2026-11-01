@@ -1,4 +1,5 @@
 import { slugToPath } from '@/config/paths'
+import type { RuleId } from '@/lib/audit/finding'
 import type { CONTENT_HEALTH_QUERY_RESULT } from '@/types/sanity.types'
 
 import {
@@ -16,6 +17,11 @@ import {
 } from './detect'
 
 export interface HealthItem {
+  /**
+   * The audit rule this item is a finding of (src/lib/audit/finding.ts), so a Studio item and a
+   * `npm run audit:page` finding for the same problem share an id. Not shown in the tool.
+   */
+  ruleId: RuleId
   /** Published document id and type, as the "edit" intent expects them. */
   id: string
   type: 'page' | 'sharedSection' | 'siteNavigation' | 'redirect'
@@ -25,6 +31,7 @@ export interface HealthItem {
 
 export interface HealthGroup {
   id: string
+  ruleId: RuleId
   title: string
   description: string
   items: HealthItem[]
@@ -77,7 +84,13 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
 
   const noDescription: HealthItem[] = pages
     .filter(({ doc }) => !doc.metaDescription?.trim())
-    .map(({ id, doc }) => ({ id, type: 'page', title: doc.title, detail: slugToPath(doc.slug) }))
+    .map(({ id, doc }) => ({
+      ruleId: 'seo.description-missing',
+      id,
+      type: 'page',
+      title: doc.title,
+      detail: slugToPath(doc.slug),
+    }))
 
   const imageSources = [
     ...pages.map(({ id, doc }) => ({
@@ -98,6 +111,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     return labels.length
       ? [
           {
+            ruleId: 'a11y.image-alt',
             id,
             type,
             title,
@@ -112,6 +126,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     return broken.length
       ? [
           {
+            ruleId: 'links.internal-broken',
             id,
             type,
             title,
@@ -134,6 +149,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     return missing.length
       ? [
           {
+            ruleId: 'links.anchor-missing',
             id,
             type: 'page',
             title: doc.title,
@@ -153,6 +169,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     return missing.length
       ? [
           {
+            ruleId: 'links.panel-unpublished',
             id,
             type,
             title,
@@ -170,6 +187,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
         : [],
     ),
   ).map(({ id, kind, path }): HealthItem => ({
+    ruleId: 'links.redirect-chain',
     id,
     type: 'redirect',
     title: redirectTitles.get(id) ?? id,
@@ -183,6 +201,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     publishedPages.map(({ id, doc }) => ({ id, slug: doc.slug, title: doc.title })),
     links,
   ).map(({ id, slug, title }): HealthItem => ({
+    ruleId: 'links.orphan-page',
     id,
     type: 'page',
     title,
@@ -192,6 +211,7 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
   return [
     {
       id: 'meta-description',
+      ruleId: 'seo.description-missing',
       title: 'Pages without a meta description',
       description:
         'Search results show the default description instead of one written for the page.',
@@ -199,18 +219,21 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     },
     {
       id: 'alt-text',
+      ruleId: 'a11y.image-alt',
       title: 'Images without alt text',
       description: 'Screen reader users get no description of these images.',
       items: noAlt,
     },
     {
       id: 'broken-links',
+      ruleId: 'links.internal-broken',
       title: 'Links to unpublished pages',
       description: 'Visitors following these links reach a page that does not exist.',
       items: brokenLinks,
     },
     {
       id: 'broken-anchors',
+      ruleId: 'links.anchor-missing',
       title: 'Links to missing sections',
       description:
         'These links jump to an anchor that no section on the page has, so they do nothing.',
@@ -218,18 +241,21 @@ export function buildReport(data: CONTENT_HEALTH_QUERY_RESULT): HealthGroup[] {
     },
     {
       id: 'broken-panels',
+      ruleId: 'links.panel-unpublished',
       title: 'Links to unpublished panels',
       description: 'These buttons open a panel that visitors can’t see.',
       items: brokenPanels,
     },
     {
       id: 'redirects',
+      ruleId: 'links.redirect-chain',
       title: 'Redirect chains and loops',
       description: 'Point each redirect straight at its final destination; loops never resolve.',
       items: redirects,
     },
     {
       id: 'orphans',
+      ruleId: 'links.orphan-page',
       title: 'Orphan pages',
       description: 'Published pages that no menu or other page links to.',
       items: orphans,

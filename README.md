@@ -143,7 +143,7 @@ Open http://localhost:3000/studio:
   Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Contrast_, testimonials _Tinted_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Contrast". A hero that matches one of its presets shows the preset's name instead ("Hero · Split, image left"); a custom combination falls back to the layout and background.
 
 - **Start here** (toolbar, first for clients) is the first screen: a greeting, shortcut cards (_Edit your website_, _Write a blog post_, _Update the team_, _Business info and opening hours_, _Help_), your eight most recent changes with who made them and when, and up to five things to check in plain words. See [Start here](#start-here-studio-home-screen).
-- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, links to missing sections or unpublished panels, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
+- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, links to missing sections or unpublished panels, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them). Each group and item carries the id of the page-audit rule that finds the same problem ([Page audit](#page-audit)); the tool looks the same.
 - **Image and text guidance:** image fields say what suits their spot ("Recommended: 2400 × 1600 px, landscape.") and show a yellow warning, never an error, when an uploaded picture is narrower than that or a different shape by more than 15%, for example "This image is 1200 × 1800 (portrait). This spot looks best with a landscape image at least 2400 px wide." You can still publish; the warning is a nudge to swap the picture. SVGs are never checked. Section titles and intro text warn the same way when they run past what the design handles (a hero title over 80 characters, other headings over 60–70, intro text over 200). Current targets: hero background 2400 px wide, landscape; _Image + text_ 1600 px at 4:3; testimonial and author portraits 800 px square; logos 400–600 px wide if not SVG (SVG preferred).
 - **AI Assist** (`@sanity/assist`) helps with alt text, summaries, headlines, body copy and meta descriptions. It needs a Sanity **Growth** plan
   or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
@@ -3574,8 +3574,9 @@ mode make sure the filter above includes `place`. Switching it off removes the r
   address (an error if missing), opening hours (warning), a way to get directions (a street or coordinates; warning) and local
   proof (a description or people who work there; a suggestion); a service area should say what it covers. Deterministic
   presence only, never usefulness. It is a pure function over a location's facts using the finding contract from the Content
-  Intelligence architecture (`src/lib/audit/finding.ts`). **It is not active:** nothing runs it, because the shared rule library
-  and its runners arrive with task 225, which will register it beside F-1 and F-2. No temporary runner exists.
+  Intelligence architecture (`src/lib/audit/finding.ts`, where it is registered). **It is not active:** nothing runs it, not even
+  [`audit:page`](#page-audit), which reads rendered pages; the content runners arrive with task 225, which will register it beside
+  F-1 and F-2. No temporary runner exists.
 - **Caching and webhook mode:** `place` is in `TAGS` and in the webhook filter. A location page is tagged `place`, `service` and
   `teamMember`, and a service page is also tagged `place`. Published reads check the cached index first, so probing
   `/locations/anything` costs nothing.
@@ -5297,7 +5298,7 @@ for 30 days, including disabled and unconfigured runs. The run's colour is not e
 It holds `outcome`, `reason`, `skipReason`, `mode` (`live`, `prelaunch`, `unknown` or `null`), `modeSource` (`site-info`, `profile` or `null`), `synthetic`, `test` (synthetic runs only: `expectedOutcome`, `healthStatus`, `testStatus`, `problems`), `checkedAt`, `url`,
 `repoTemplateVersion` (the repository's own `template-version.json`, not necessarily what is deployed), `setup.missing`
 (names only), `summary` (`pass`, `warn`, `fail`), `failures` (`id`, `area`, `title`, `fix`), `dataset.private`, `enquiries` (`exposed`, `none-found`, `refused`, `unverified` or `not-checked`) and
-`enquiriesExposed` (true only when `enquiries` is `exposed`). It never carries a value from the environment except the site's own address.
+`enquiriesExposed` (true only when `enquiries` is `exposed`) and `audit` (`state`: `not-run`, `ok` or `unavailable`; with counts when `ok`; see [Page audit](#page-audit)). It never carries a value from the environment except the site's own address.
 
 | Outcome        | Means                                                                                           | Run              | Issue                 |
 | -------------- | ----------------------------------------------------------------------------------------------- | ---------------- | --------------------- |
@@ -5338,6 +5339,13 @@ non-synthetic `healthy` or `warning` result is ever shown as health.
   "none". The deprecated `ENQUIRIES_STORE` only adds a sentence to the
   unverified line. Because the live checks run the way a launch does, a client who has not replaced the template favicon or
   copy will see those failures daily; fix them, or set `HEALTH_CHECKS=off` until launch.
+- **The page audit.** On a live site the workflow also runs `npm run audit:page --confirm` on the home page and five
+  sitemap pages ([Page audit](#page-audit)). A **confirmed blocker** (a page search engines cannot index, seen on two
+  requests a few seconds apart) is a failure like any other: it fails the run and goes in the same issue, one line per
+  rule, and not again if `launch:check` already fails for the same cause. Errors and warnings stay advisory lines. If the
+  audit step ran and left no usable result (it crashed, timed out, or wrote something unreadable) the run is a **warning**
+  with `audit.state: "unavailable"`, never a pass, and it **leaves an open issue alone** instead of closing it, since it
+  cannot say the blocker has gone. A workflow without the step, a pre-launch site and an unknown state are `not-run`.
 - **One issue, labelled `health`.** On a real failure it opens _Production health check failing_ with the failing lines and
   how to fix each; while the problem persists later runs rewrite the same issue instead of adding more. The next
   healthy or warning run closes it with a comment. Disabled, unconfigured and skipped runs leave it alone. Turn on GitHub
@@ -5591,6 +5599,156 @@ check, write the function and its test, then call it from `runLaunchChecks`.
 tests (`npx playwright install chromium` once per machine) with reduced motion on, so scroll-in animations show their
 final state; the cookie banner appears as a first-time visitor sees it. `--max-urls=N` limits pages (default 200, so up
 to 800 images).
+
+### Page audit
+
+`npm run audit:page -- https://example.com.au/services/plumbing` audits **one page of a deployed site** and says what is
+wrong with it, with the evidence. It is the page-level view of what `launch:check` checks site-wide, plus checks that
+only make sense for one page: structured data against the page's text, the page's main entity, its internal links,
+and whether AI search can read it (Content Intelligence architecture, §4, §6, §8.2 and §11). It sends only `GET` and
+`HEAD` requests to the site, and reads Sanity with a client that cannot write (below).
+
+```bash
+npm run audit:page -- https://example.com.au/about            # one page
+npm run audit:page -- https://example.com.au --sample=10      # the home page and 10 sitemap pages
+npm run audit:page -- https://example.com.au/about --json     # also writes audit.json
+```
+
+| Option                | Does                                                                                                                                                                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<url>`               | The page. A bare domain means its home page. A redirect to another page of the same site is followed and the page it ends on is audited; one that leaves the site is refused (below).                                                                                              |
+| `--sample=N`          | Also audits the home page and the first `N` pages of the sitemap (0 to 25), and compares titles and descriptions across them. Without it only `<url>` is judged; the home page is still fetched, to compare titles and descriptions with and to find the nodes every page carries. |
+| `--confirm`           | Audits each page that has a blocker a second time, after a pause (at most five pages), and only a blocker seen twice counts for the exit code and `audit.json`'s `blocked`. The daily health run uses it, so one bad response cannot open an incident.                             |
+| `--expect-origin=URL` | The production domain the pages declare in their canonical and JSON-LD, when you audit a preview or a local server. It is only compared with: the audit never requests anything from it.                                                                                           |
+| `--json`              | Also writes the findings to `audit.json` in the current folder (git-ignored).                                                                                                                                                                                                      |
+| `--bypass`            | Sends `x-vercel-protection-bypass` (`VERCEL_AUTOMATION_BYPASS_SECRET`) to the site's own host, to audit a protected preview.                                                                                                                                                       |
+
+**What you get.** Findings, grouped by severity (blockers, errors, warnings, suggestions) and, within a severity,
+deterministic before heuristic before judgement. There is no score. Every finding says **what was seen** (`observed`),
+**where it came from** (`source`: `html`, `headers`, `json-ld` or `content`) and **when** (`at`), what was **expected**,
+**why** it matters in one sentence, **how to fix it** (with a Studio intent where the fix is a field), and **how to check**
+(`verify`: run the same command again). The shape is the shared finding contract, `Finding` in `src/lib/audit/finding.ts`.
+
+**The exit code.** `1` only when there is a **blocker**: a page search engines cannot index (it does not answer 200, it is
+`noindex`, robots.txt disallows it, or its canonical link redirects or fails). Errors, warnings and suggestions never fail
+the run. `2` means the audit could not run (a usage error, an address that redirects to another origin, a crash). A `noindex` page the editor hid on purpose (its _Hide from search engines_ switch is on) is
+a suggestion, not a blocker.
+
+**What it will and will not fetch.** The audit is not a crawler. `scripts/audit-page/guard.mjs` wraps every request it
+sends to a site, whatever the page says:
+
+- **Only `http:` and `https:`, only `GET` and `HEAD`**, with no username or password in the address (an address that has
+  them is refused), and never an `authorization` or `cookie` header.
+- **One permitted origin: the one you name** (plus the `https` version of an `http` address on the default port). A
+  redirect, link, sitemap entry, `<loc>` in a sitemap index or canonical that names any other host, including
+  `localhost`, a private address (`10.x`, `192.168.x`, `169.254.169.254`, `[::1]`) or a look-alike host, is **not requested**.
+  Internal links are the only links checked, and they are by definition on that origin. The address you type is trusted, which
+  is how you audit a local server; nothing the page says widens it, and the audit does not resolve DNS, so a name that
+  points somewhere private is not caught.
+- **Redirects are followed by hand**, up to five hops, within the origin. The hop that would leave it is returned unfollowed:
+  for a sampled page that is a `seo.status` finding, and for the page you asked for the audit stops and exits 2, naming
+  where it redirects, so you can run it on that address.
+- **`--expect-origin` only changes comparison.** It says which domain a page's canonical and JSON-LD should name. It is
+  not a permitted origin, and a redirect to it is refused like any other.
+- **Bounded.** 15 seconds per request, 180 seconds and 600 requests for the whole audit, 6 at a time, 150 internal links,
+  25 sampled pages, 5 pages re-checked by `--confirm`, and at most 2 MB of any response is read (the rest is cancelled, so
+  an endless body costs the cap, not the memory). Anything not sent because of a limit is left out of the findings, not
+  reported as broken, and is counted in the notes and in `audit.json`'s `network`.
+- **The Sanity token goes to Sanity only.** It is used by the content client alone, which cannot follow a redirect; the
+  site is never sent it. `audit.json` lists the permitted origins and how many requests were sent or refused.
+
+**The content side.** With `NEXT_PUBLIC_SANITY_PROJECT_ID` and `SANITY_API_READ_TOKEN` set (the environment, then
+`.env.local`; `NEXT_PUBLIC_SANITY_DATASET` defaults to `production`), the audit also reads the page's **published**
+document by its path and the site's _Site identity_ and _Business info_, and attaches `documentId`, the field `path` and a
+Studio intent (`edit;id=…;type=…;path=…`, the form Content health uses) to each finding whose fix is a field. A Viewer token
+is enough. Without them it says so and runs the HTML checks alone. Reading is done by `scripts/audit-page/sanity.mjs`, a
+small script client for Node only: it is never bundled into the site, it is never given to a browser, and it has **no
+method that writes**. Its one request is `GET /data/query/<dataset>?perspective=published`; no mutation, action or upload
+URL appears in the audit's code, and the tests record every request the audit makes and fail on anything but a query (or,
+for the site, a `GET` or `HEAD`). Drafts are never read.
+
+#### Rules
+
+Each rule is a pure function in `src/lib/audit/rules/`, with a unit test, and has a **ruleId that never changes
+meaning**: a rule that changes what it looks for gets a new id, and the old one is retired in `src/lib/audit/finding.ts`
+(`RULES`, which also holds each rule's title and README anchor). A test fails if a rule has no row here.
+
+| Rule                                                                     | Severity                 | What it finds, and what to do                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a id="rule-seo-status"></a>`seo.status`                                 | blocker                  | The page does not answer 200 (or the request failed). Publish the page, or find out why the server fails. Nothing else is reported for that page.                                                                                                                                           |
+| <a id="rule-seo-noindex"></a>`seo.noindex`                               | blocker (suggestion)     | `noindex` in the robots meta tag or the `X-Robots-Tag` header. A suggestion when the page's _Hide from search engines_ switch is on. Clear the switch, and check no header sets it.                                                                                                         |
+| <a id="rule-seo-robots-blocked"></a>`seo.robots-blocked`                 | blocker                  | robots.txt disallows the page for Googlebot (longest matching rule wins, as Google documents).                                                                                                                                                                                              |
+| <a id="rule-seo-canonical-missing"></a>`seo.canonical-missing`           | warning                  | No `<link rel="canonical">`. Pages declare it in `generateMetadata`.                                                                                                                                                                                                                        |
+| <a id="rule-seo-canonical-elsewhere"></a>`seo.canonical-elsewhere`       | warning                  | The canonical names a different page that answers 200 (or another domain, which is not fetched). Right for a deliberate copy; the audit cannot tell.                                                                                                                                        |
+| <a id="rule-seo-canonical-status"></a>`seo.canonical-status`             | blocker                  | The canonical is on the site and redirects, 404s or fails. Point it at the final address, or at the page. A canonical that is the page itself needs no request: the page just answered 200.                                                                                                 |
+| <a id="rule-seo-title-missing"></a>`seo.title-missing`                   | error                    | No `<title>`.                                                                                                                                                                                                                                                                               |
+| <a id="rule-seo-title-duplicate"></a>`seo.title-duplicate`               | error                    | Another page in the sample has the same title (case and spacing ignored). It says which, and how many pages were compared.                                                                                                                                                                  |
+| <a id="rule-seo-description-missing"></a>`seo.description-missing`       | warning                  | No meta description.                                                                                                                                                                                                                                                                        |
+| <a id="rule-seo-description-duplicate"></a>`seo.description-duplicate`   | warning                  | Another page in the sample has the same description.                                                                                                                                                                                                                                        |
+| <a id="rule-seo-h1-count"></a>`seo.h1-count`                             | error                    | Not exactly one visible `<h1>`.                                                                                                                                                                                                                                                             |
+| <a id="rule-seo-heading-order"></a>`seo.heading-order`                   | warning                  | A level is skipped going down (an h2 followed by an h4). Starting on a lower level, or going back up, is not reported.                                                                                                                                                                      |
+| <a id="rule-sd-json-ld-invalid"></a>`sd.json-ld-invalid`                 | error                    | A JSON-LD script that is not valid JSON.                                                                                                                                                                                                                                                    |
+| <a id="rule-sd-visible-parity"></a>`sd.visible-parity`                   | error                    | Structured data that the page does not show, by property class (E2 §3.5): phones, emails, addresses, hours, prices, dates and names as typed values; descriptions from rendered text; plus the deny list. The same helper (`checkParity`) as `tests/e2e/structured-data.spec.ts`.           |
+| <a id="rule-sd-graph-integrity"></a>`sd.graph-integrity`                 | error                    | An `@id` defined twice on the page or contradicting another page's; a reference to an `@id` no node defines; a `WebPage` that is not `isPartOf` the website or has no `publisher`; no `WebPage` for the page itself (a `noindex` page carries none); a draft or release-version id.         |
+| <a id="rule-sd-main-entity"></a>`sd.main-entity`                         | warning                  | A service, article, person, event or location page whose main entity is not the document's: no node with the `@id` its document id gives it, the wrong type, or a `WebPage` that is not `about` it. Needs the content side. An ordinary page has none, and an undated event makes no claim. |
+| <a id="rule-links-internal-broken"></a>`links.internal-broken`           | error                    | An internal link that answers 404, 410, a server error or fails. Every distinct same-site link is requested with `HEAD` (then `GET` if the server refuses `HEAD`), at most 150 per audit. 401 and 403 are gated pages, not broken ones.                                                     |
+| <a id="rule-a11y-image-alt"></a>`a11y.image-alt`                         | warning                  | An `<img>` with no `alt` attribute. `alt=""` is a deliberate "decorative" and passes, and so do images hidden from assistive technology. Whether alt text is _good_ is a judgement the audit never makes.                                                                                   |
+| <a id="rule-ai-snippet-blocked"></a>`ai.snippet-blocked`                 | warning                  | `nosnippet`, `max-snippet:N` (N above -1), or `data-nosnippet` over at least half of the main text. Google needs a page to be indexed and snippet-eligible to show it in AI Overviews. A deliberate limit is fine; it says so.                                                              |
+| <a id="rule-ai-main-text-missing"></a>`ai.main-text-missing`             | error                    | `<main>` is empty or missing in the HTML the server sends, so a crawler that does not run JavaScript sees nothing.                                                                                                                                                                          |
+| <a id="rule-ai-crawler-policy"></a>`ai.crawler-policy`                   | error (site)             | robots.txt blocks a different set of AI crawlers than the _Let AI crawlers_ switch in Site identity says (all five of `AI_CRAWLERS` when off, none when on or unset).                                                                                                                       |
+| <a id="rule-ai-search-crawler-coupling"></a>`ai.search-crawler-coupling` | suggestion (site)        | Until task 228 splits the switch in two, opting out of AI training also blocks PerplexityBot, which Perplexity uses to find pages for its search answers.                                                                                                                                   |
+| <a id="rule-ai-llms-txt-consistency"></a>`ai.llms-txt-consistency`       | suggestion (site)        | llms.txt links to a page the sitemap does not list. Checked only when the file exists and the sitemap was read whole. Google says it does not use llms.txt, so this is only consistency.                                                                                                    |
+| <a id="rule-links-anchor-missing"></a>`links.anchor-missing`             | (Content health only)    | A link jumps to a section the page does not have.                                                                                                                                                                                                                                           |
+| <a id="rule-links-panel-unpublished"></a>`links.panel-unpublished`       | (Content health only)    | A button opens a panel with no published version.                                                                                                                                                                                                                                           |
+| <a id="rule-links-redirect-chain"></a>`links.redirect-chain`             | (Content health only)    | A redirect takes extra hops, or loops.                                                                                                                                                                                                                                                      |
+| <a id="rule-links-orphan-page"></a>`links.orphan-page`                   | (Content health only)    | No menu or page links to the page.                                                                                                                                                                                                                                                          |
+| <a id="rule-content-location-info"></a>`content.location-info`           | (rule F-8, not run here) | See [Locations](#locations). A pure function over a location document; no runner calls it yet.                                                                                                                                                                                              |
+
+**AI-search readiness is not AI visibility** (E2 §8.2). The `ai.*` rules show that nothing technical stops a search or
+answer engine reading and quoting the page. They do not show that it is cited, and there is no AI visibility score:
+Google, Bing and the assistants do not report that through any API this audit can read. `noindex` is reported once, by
+`seo.noindex`. The audit cannot know whether a limit is intended, so `ai.snippet-blocked` says it may be.
+
+**Content health uses the same ids.** The Content health tool in Studio gives each group and item the `ruleId` of the
+audit rule that finds the same problem, and nothing else about the tool changes. `seo.description-missing`,
+`a11y.image-alt` and `links.internal-broken` are found by both: the tool finds them in the content (including drafts), the
+audit in the rendered page. Redirect chains, orphan pages, missing anchors and unpublished panels are content checks the
+audit cannot see in HTML, so they have an id and no audit rule.
+
+**In the daily health run.** On a live site the Health workflow runs `npm run audit:page -- "$PRODUCTION_URL" --json
+--sample=5 --confirm` after the other checks. What it does with the result is in [Health checks](#health-checks): a
+confirmed blocker fails the run, errors and warnings are up to five advisory lines in the issue and the run summary, and an
+audit that leaves no result is a warning that keeps an open issue open. The step needs only `jiti` (the audit loads the
+site's TypeScript rules through it; `scripts/audit-page/dependencies.test.mjs` fails if it ever imports another package),
+so it installs that one package, at the version `package-lock.json` pins, into a temporary folder and links it in, instead
+of running `npm ci` for the whole project. That is about a second and a few kilobytes against a minute or two and hundreds
+of megabytes, and the other checks, which use only Node's built-ins, are untouched. The audit itself is expected to add well under a minute
+(not yet measured on a live site; more if a blocker is re-checked), inside a step limited to five minutes. A pre-launch site is not audited.
+
+**Limits.** It reads the HTML the server sends, without running JavaScript, so a page that only fills in after hydration
+looks empty (which is what `ai.main-text-missing` says). Text parity is only as good as the page's text: hidden containers
+count as visible (a closed accordion is in the markup), text hidden by CSS cannot be told apart. Titles and descriptions are
+compared only with the pages in the sample. The audit does not run rule F-3 (a phone number typed into rich text that differs
+from Business info; task 225) or the thin-page and completeness rules. It cannot tell whether a `noindex`, a canonical
+elsewhere or a snippet limit is meant.
+
+**Adding a rule.** Add the id and title to `TITLES` in `src/lib/audit/finding.ts`, write a pure function
+`(page: PageSnapshot, context: AuditContext) => Finding[]` in `src/lib/audit/rules/` (build findings with `makeFinding`, so
+none can lack its evidence, `why`, `fix` or `verify`), add it to `PAGE_RULES` in `src/lib/audit/page-audit.ts`, write its
+unit test, and add a row to the table above with `<a id="rule-…"></a>`. If the rule needs something from the HTML, add a
+reader to `scripts/launch-check/html.mjs` and fill it in `scripts/audit-page/snapshot.mjs`, so `launch:check` and the
+audit read pages the same way.
+
+**Tests.** `src/lib/audit/fixtures.ts` builds a small made-up site: clean pages whose HTML and JSON-LD come from the real
+node builders, and five deliberately broken pages, each one defect away from a clean one: a repeated title
+(`seo.title-duplicate`), a branch phone number in JSON-LD that the page does not show (`sd.visible-parity`), a `WebPage`
+that is not part of the website (`sd.graph-integrity`), a canonical that redirects (`seo.canonical-status`) and an image
+with no alt text (`a11y.image-alt`). `scripts/audit-page/run.test.mjs` serves them through `launch:check`'s own request code
+and a fake Content Lake, and asserts that the broken pages produce **exactly** those five ruleIds, that the clean pages
+produce no deterministic finding at warning or above, that every finding has its evidence, and that no request is a write. `guard.test.mjs` holds the negative tests of the URL rules above (every scheme, private address
+and look-alike host refused, off-origin redirects not followed, no credentials sent, the limits), and `run.test.mjs` checks the
+same end to end against a hostile page. `tests/e2e/page-audit.spec.ts` runs the real command against the production build the
+end-to-end suite serves: `npx playwright test tests/e2e/page-audit.spec.ts --project=desktop`.
 
 ### Performance budgets
 

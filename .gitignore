@@ -27,6 +27,9 @@ blob-report/
 tests/e2e/*-snapshots/*-darwin.png
 tests/e2e/*-snapshots/*-win32.png
 
+# Findings written by `npm run audit:page -- <url> --json`
+audit.json
+
 # Screenshot sweeps from `npm run launch:screens`
 launch-screens/
 

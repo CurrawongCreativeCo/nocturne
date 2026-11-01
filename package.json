@@ -25,6 +25,7 @@
     "check:version": "node scripts/check-version.mjs",
     "check:studio-brand": "node scripts/check-studio-brand.mjs",
     "launch:check": "node scripts/launch-check.mjs",
+    "audit:page": "node scripts/audit-page.mjs",
     "launch:screens": "node scripts/launch-screens.mjs",
     "release": "node scripts/release.mjs",
     "proposal": "node scripts/proposal.mjs",
