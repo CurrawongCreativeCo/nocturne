@@ -44,6 +44,15 @@ const pageText = (page: Page) =>
     ].join('\n'),
   )
 
+/**
+ * The page's own nodes. The site-wide Organization and WebSite are checked, against the pages that
+ * show their text, by structured-data.spec.ts (the WebSite description is the home page's).
+ */
+const ownNodes = (nodes: JsonLdNode[]) =>
+  nodes.filter(
+    (node) => node['@id'] !== `${SITE_URL}/#organization` && node['@id'] !== `${SITE_URL}/#website`,
+  )
+
 const region = (page: Page, name: string) => page.getByRole('region', { name })
 
 test.describe('a branch page with everything', () => {
@@ -172,7 +181,7 @@ test.describe('the JSON-LD of a branch', () => {
     const nodes = await jsonLd(page)
     const text = await pageText(page)
     expect(
-      checkParity(nodes, { origin: SITE_URL, text, siteText: text, siteDetails: true }),
+      checkParity(ownNodes(nodes), { origin: SITE_URL, text, siteText: text, siteDetails: true }),
     ).toEqual([])
     expect(findWebPageProblems(nodes, SITE_URL)).toEqual([])
     expect(findMissingWebPage(nodes, `${SITE_URL}${BRANCH}`)).toEqual([])
@@ -223,7 +232,7 @@ test.describe('a service area page', () => {
     })
     const text = await pageText(page)
     expect(
-      checkParity(nodes, { origin: SITE_URL, text, siteText: text, siteDetails: true }),
+      checkParity(ownNodes(nodes), { origin: SITE_URL, text, siteText: text, siteDetails: true }),
     ).toEqual([])
   })
 })
