@@ -61,6 +61,18 @@ describe('sd.visible-parity', () => {
     expect(JSON.stringify(found)).not.toContain('telephone')
   })
 
+  it('does not judge a site-wide description when no other page was read', () => {
+    const odd = page({
+      visibleText:
+        'Bondi Plumbing 12 Campbell Parade, Bondi Beach NSW 2026 Phone (02) 9123 4567 hello@bondi-plumbing.example About us',
+    })
+    expect(visibleParityFindings(odd, ctx())).toEqual([])
+    const peer = { ...page({ url: `${FIXTURE_ORIGIN}/`, visibleText: 'Home' }), jsonLd: [] }
+    expect(JSON.stringify(visibleParityFindings(odd, ctx({ peers: [peer] })))).toContain(
+      'WebSite.description',
+    )
+  })
+
   it('says nothing about a page with no structured data', () => {
     expect(visibleParityFindings(page({ jsonLd: [] }), ctx())).toEqual([])
   })

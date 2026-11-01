@@ -58,18 +58,29 @@ export function visibleParityFindings(page: PageSnapshot, context: AuditContext)
     siteDetails: !page.minimal,
     ...(context.site?.businessType && { businessType: context.site.businessType }),
   })
-  if (problems.length === 0) return []
+  // A site-wide fact (the WebSite's description, an area served) only has to be shown somewhere on the
+  // site. With no other page read, "somewhere" is just this page, so claiming it is missing would be a
+  // guess: leave those out and say so. `--sample` reads more pages.
+  const siteWide = (problem: (typeof problems)[number]) =>
+    problem.property === 'WebSite.description' || problem.reason.includes('anywhere on the site')
+  const found =
+    context.peers.length === 0 ? problems.filter((problem) => !siteWide(problem)) : problems
+  const skipped = problems.length - found.length
+  if (found.length === 0) return []
   return [
     makeFinding({
       ruleId: 'sd.visible-parity',
       severity: 'error',
       scope: { kind: 'page', url: page.url },
-      observed: problems,
+      observed: found,
       expected: 'every fact in the structured data is shown on the page',
       source: 'json-ld',
       at: context.now,
       caveats: [
         'Facts that need only appear somewhere on the site were looked for on this page and the compared pages only.',
+        ...(skipped > 0
+          ? [`${skipped} site-wide fact(s) were not judged: no other page was read (use --sample).`]
+          : []),
         ...(page.minimal
           ? [
               'This is a Minimal page, so its header and footer (and the details in them) are hidden.',
