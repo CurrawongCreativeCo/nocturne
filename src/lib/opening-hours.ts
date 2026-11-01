@@ -213,6 +213,22 @@ export function upcomingSpecialHours(
   return rows.sort((a, b) => a.date.localeCompare(b.date)).slice(0, limit)
 }
 
+/**
+ * The time zone to use for a place: `timeZone` when it is a real IANA name, else the default. A
+ * stored value can be missing (a service area hides the field) or no longer valid, and
+ * `Intl.DateTimeFormat` throws on an unknown name, so every caller that can't trust the value
+ * resolves it here first. It never reads the server's own zone.
+ */
+export function resolveTimeZone(timeZone: string | null | undefined): string {
+  if (!timeZone) return DEFAULT_TIME_ZONE
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone })
+    return timeZone
+  } catch {
+    return DEFAULT_TIME_ZONE
+  }
+}
+
 export interface LocalMoment {
   day: DayValue
   /** "YYYY-MM-DD" */

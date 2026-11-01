@@ -10,13 +10,13 @@ import { SanityLink } from '@/components/ui/sanity-link'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { SocialLinks } from '@/components/ui/social-links'
+import { addressLines, directionsUrl, embedUrl } from '@/lib/location-links'
 import { groupOpeningHours } from '@/lib/opening-hours'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import type { LocationBusiness } from '@/types/business'
 
 import { MapEmbed } from './map-embed'
 import type { SectionProps } from '../../../types'
-import { addressLines, directionsUrl, embedUrl } from '../../../utils/location-links'
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }

@@ -21,6 +21,7 @@
     "config:docs": "node scripts/config-docs.mjs",
     "check:dataset": "node scripts/check-dataset.mjs",
     "check:service-routes": "node scripts/check-service-routes.mjs",
+    "check:location-routes": "node scripts/check-location-routes.mjs",
     "check:version": "node scripts/check-version.mjs",
     "check:studio-brand": "node scripts/check-studio-brand.mjs",
     "launch:check": "node scripts/launch-check.mjs",

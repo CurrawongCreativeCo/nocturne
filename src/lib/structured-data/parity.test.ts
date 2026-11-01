@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { buildFaqPage } from './nodes/faq-page'
+import { buildLocation } from './nodes/location'
 import { buildPerson } from './nodes/person'
 import {
   amountsIn,
@@ -378,5 +379,63 @@ describe('service areas', () => {
     })
     expect(found).toHaveLength(2)
     expect(found[0]).toContain('areaServed')
+  })
+})
+
+describe('locations', () => {
+  const branch = buildLocation({
+    origin,
+    id: 'place-1',
+    url: `${origin}/locations/parramatta`,
+    name: 'Parramatta',
+    kind: 'branch',
+    businessType: 'Plumber',
+    summary: 'Our Parramatta branch.',
+    phone: '(02) 9000 0000',
+    address: { street: '1 Church St', suburb: 'Parramatta', state: 'NSW', postcode: '2150' },
+    geo: { lat: -33.8151, lng: 151.0011 },
+    openingHours: [{ days: ['mon', 'tue', 'wed', 'thu', 'fri'], opens: '07:00', closes: '17:00' }],
+    today: '2026-10-31',
+  })
+  const shown =
+    'Parramatta\nOur Parramatta branch.\n1 Church St\nParramatta NSW 2150\nPhone (02) 9000 0000\nMon–Fri 7:00 am – 5:00 pm'
+
+  it('passes when a branch shows its name, summary, address, phone and hours', () => {
+    expect(problems([branch.node], shown)).toEqual([])
+    expect(checkDescriptiveProvenance(branch, [{ doc: 'place-1', field: 'summary' }])).toEqual([])
+  })
+
+  it('fails a branch fact the page does not show', () => {
+    const found = problems([branch.node], 'Parramatta\nOur Parramatta branch.').join('\n')
+    expect(found).toContain('telephone')
+    expect(found).toContain('address')
+    expect(found).toContain('openingHoursSpecification')
+  })
+
+  it('fails a summary that the page does not render', () => {
+    expect(checkDescriptiveProvenance(branch, [])).toHaveLength(1)
+  })
+
+  it('passes a service area that shows its name, and fails one that does not', () => {
+    const area = buildLocation({
+      origin,
+      id: 'place-2',
+      url: `${origin}/locations/western-sydney`,
+      name: 'Western Sydney',
+      kind: 'serviceArea',
+      businessType: 'Plumber',
+      today: '2026-10-31',
+    })
+    expect(problems([area.node], 'Western Sydney')).toEqual([])
+    expect(problems([area.node], 'Somewhere else').join('\n')).toContain('name')
+  })
+
+  it('has nothing to check on a service that names its locations by @id', () => {
+    const service = {
+      '@type': 'Service',
+      name: 'Plumbing',
+      areaServed: [{ '@id': `${origin}/#location-place-1` }],
+    }
+    expect(problems([service], 'Plumbing')).toEqual([])
   })
 })

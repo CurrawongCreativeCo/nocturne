@@ -16,6 +16,7 @@ export const FEATURE_DOCUMENT_TYPES: Partial<Record<FeatureName, readonly string
   team: ['team', 'teamMember'],
   events: ['event', 'eventCategory'],
   services: ['service'],
+  locations: ['place'],
 }
 
 /** The document types to hide for a set of feature switches. */

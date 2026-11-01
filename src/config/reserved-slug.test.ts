@@ -36,6 +36,15 @@ describe('reservedSegment', () => {
     expect(reservedSegment('services/web/design', { services: true })).toBeNull()
   })
 
+  it('reserves locations above the location pages only while the flag is on', () => {
+    expect(reservedSegment('locations/parramatta')).toBeNull()
+    expect(reservedSegment('locations/parramatta', { locations: true })).toBe('locations')
+    expect(reservedSegment('locations', { locations: true })).toBeNull()
+    expect(reservedSegment('locations/a/b', { locations: true })).toBeNull()
+    // The two flags are independent.
+    expect(reservedSegment('locations/parramatta', { services: true })).toBeNull()
+  })
+
   it('leaves other paths alone, including ones that merely contain a reserved word', () => {
     expect(reservedSegment('about')).toBeNull()
     expect(reservedSegment('about/team')).toBeNull()

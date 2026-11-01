@@ -15,6 +15,7 @@ import { FolderIcon } from '@sanity/icons/Folder'
 import { InboxIcon } from '@sanity/icons/Inbox'
 import { LockIcon } from '@sanity/icons/Lock'
 import { MenuIcon } from '@sanity/icons/Menu'
+import { PinIcon } from '@sanity/icons/Pin'
 import { RocketIcon } from '@sanity/icons/Rocket'
 import { SearchIcon } from '@sanity/icons/Search'
 import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
@@ -186,6 +187,7 @@ const LISTED_TYPES = new Set([
   'enquiry',
   'panel',
   'service',
+  'place',
   // new-document:listed
 ])
 
@@ -321,6 +323,9 @@ const buildStructure = (
       : []),
     ...(hasType('service') && isTypeVisible('service')
       ? [S.documentTypeListItem('service').title('Services').icon(CaseIcon)]
+      : []),
+    ...(hasType('place') && isTypeVisible('place')
+      ? [S.documentTypeListItem('place').title('Locations').icon(PinIcon)]
       : []),
     ...(hasType('enquiry') && isTypeVisible('enquiry') ? [enquiriesList(S, context)] : []),
     // new-document:list

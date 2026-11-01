@@ -54,6 +54,7 @@ function service(overrides: Record<string, unknown> = {}) {
     image: { asset: null },
     faqs: own,
     hasFaqSections: false,
+    locations: [],
     ...overrides,
   } as unknown as Parameters<typeof ServiceJsonLd>[0]['service']
 }
@@ -65,7 +66,9 @@ const nodesOf = (markup: string) =>
 
 function page(sections: ReturnType<typeof faqSection>[], hasFaqSections: boolean) {
   const markup =
-    renderToStaticMarkup(<ServiceJsonLd service={service({ hasFaqSections })} />) +
+    renderToStaticMarkup(
+      <ServiceJsonLd service={service({ hasFaqSections })} businessType="Plumber" />,
+    ) +
     renderToStaticMarkup(
       <SectionRenderer
         documentId="drafts.service-1"
@@ -118,7 +121,10 @@ describe('a service with no questions of its own', () => {
   it('lets the FAQ section carry the page’s FAQPage', () => {
     const markup =
       renderToStaticMarkup(
-        <ServiceJsonLd service={service({ faqs: [], hasFaqSections: true })} />,
+        <ServiceJsonLd
+          service={service({ faqs: [], hasFaqSections: true })}
+          businessType="Plumber"
+        />,
       ) +
       renderToStaticMarkup(
         <SectionRenderer

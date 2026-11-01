@@ -10,11 +10,12 @@ import {
   BLOG_PATH,
   categoryPath,
   postPath,
+  locationPath,
   servicePath,
   slugToPath,
   teamPath,
 } from '@/config/paths'
-import { hasEvents, hasServices, hasTeamProfiles } from '@/config/profile'
+import { hasEvents, hasLocations, hasServices, hasTeamProfiles } from '@/config/profile'
 
 import { resolveMainDocument } from './utils/main-document'
 
@@ -29,7 +30,11 @@ export const resolve: PresentationPluginOptions['resolve'] = {
   mainDocuments: defineDocuments([
     {
       route: '{/*path}',
-      resolve: ({ path }) => resolveMainDocument(path, launchState, { services: hasServices() }),
+      resolve: ({ path }) =>
+        resolveMainDocument(path, launchState, {
+          services: hasServices(),
+          locations: hasLocations(),
+        }),
     },
   ]),
   locations: {
@@ -113,6 +118,18 @@ export const resolve: PresentationPluginOptions['resolve'] = {
             ? [{ title: doc.name || 'Untitled', href: servicePath(doc.slug) }]
             : [],
         message: hasServices() ? undefined : 'The services feature is off for this site',
+        tone: 'positive',
+      }),
+    }),
+    place: defineLocations({
+      select: { name: 'name', slug: 'slug.current' },
+      resolve: (doc: { name?: string; slug?: string } | null) => ({
+        // The location's own page, when the site has locations; none until it has an address.
+        locations:
+          hasLocations() && doc?.slug
+            ? [{ title: doc.name || 'Untitled', href: locationPath(doc.slug) }]
+            : [],
+        message: hasLocations() ? undefined : 'The locations feature is off for this site',
         tone: 'positive',
       }),
     }),

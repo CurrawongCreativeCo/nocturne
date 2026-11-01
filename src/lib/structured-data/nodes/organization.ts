@@ -51,6 +51,33 @@ interface BuildOptions {
 
 const TYPE_NAME = /^[A-Z][A-Za-z]+$/
 
+/**
+ * The `openingHoursSpecification` entries for a place's weekly hours and its upcoming special days.
+ * Shared by the site's LocalBusiness and a branch `location`. Empty when no hours are entered.
+ */
+export function openingHoursSpecification(
+  hours: Pick<BusinessInfoData, 'openingHours' | 'specialHours'>,
+  today: string,
+) {
+  const regular = weeklyRanges(hours.openingHours).map(({ days, opens, closes }) => ({
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: days.map((day) => DAYS.find(({ value }) => value === day)?.long),
+    opens,
+    closes,
+  }))
+  // schema.org marks a closed day as a dated specification that opens and closes at midnight.
+  const special = upcomingSpecialHours(hours.specialHours, today, Infinity).map(
+    ({ date, closed, opens, closes }) => ({
+      '@type': 'OpeningHoursSpecification',
+      opens: closed ? '00:00' : opens,
+      closes: closed ? '00:00' : closes,
+      validFrom: date,
+      validThrough: date,
+    }),
+  )
+  return [...regular, ...special]
+}
+
 /** The schema.org type to emit: the chosen subtype, or the typed one for "Other". Unusable values fall back. */
 export function businessSchemaType(info: BusinessInfoData): string {
   const { businessType, businessTypeOther } = info
@@ -70,23 +97,7 @@ export function buildLocalBusinessJsonLd(info: BusinessInfoData, options: BuildO
   const sameAs = (info.socialLinks ?? []).flatMap(({ url }) => (url ? [url] : []))
   const areas = (info.serviceAreas ?? []).filter(Boolean)
 
-  const regular = weeklyRanges(info.openingHours).map(({ days, opens, closes }) => ({
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: days.map((day) => DAYS.find(({ value }) => value === day)?.long),
-    opens,
-    closes,
-  }))
-  // schema.org marks a closed day as a dated specification that opens and closes at midnight.
-  const special = upcomingSpecialHours(info.specialHours, options.today, Infinity).map(
-    ({ date, closed, opens, closes }) => ({
-      '@type': 'OpeningHoursSpecification',
-      opens: closed ? '00:00' : opens,
-      closes: closed ? '00:00' : closes,
-      validFrom: date,
-      validThrough: date,
-    }),
-  )
-  const specification = [...regular, ...special]
+  const specification = openingHoursSpecification(info, options.today)
 
   return clean({
     '@type': businessSchemaType(info),

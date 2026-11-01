@@ -98,6 +98,7 @@ export const TAGS = {
   frame: 'frame',
   panel: 'panel',
   service: 'service',
+  place: 'place',
   // new-document:tag
 } as const
 

@@ -1,7 +1,7 @@
 import { UserIcon } from '@sanity/icons/User'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
-import { hasServices, hasTeamProfiles } from '@/config/profile'
+import { hasLocations, hasServices, hasTeamProfiles } from '@/config/profile'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 import { telHref } from '../utils/phone'
@@ -174,6 +174,15 @@ export const teamMember = defineType({
       of: [defineArrayMember({ type: 'reference', to: [{ type: 'service' }] })],
       hidden: () => !hasServices(),
       description: 'Their name is listed on each of these services’ pages.',
+      validation: (rule) => rule.unique(),
+    }),
+    defineField({
+      name: 'locations',
+      title: 'Locations they work at',
+      type: 'array',
+      of: [defineArrayMember({ type: 'reference', to: [{ type: 'place' }] })],
+      hidden: () => !hasLocations(),
+      description: 'Their name is listed on each of these locations’ pages.',
       validation: (rule) => rule.unique(),
     }),
     defineField({

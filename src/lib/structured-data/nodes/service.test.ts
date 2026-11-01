@@ -70,4 +70,18 @@ describe('buildService', () => {
     for (const key of ['areaServed', 'aggregateRating', 'review'])
       expect(node).not.toHaveProperty(key)
   })
+
+  it('names the listed locations by @id as areaServed, and says nothing for "everywhere"', () => {
+    const { node, provenance } = buildService({
+      ...base,
+      locationIds: ['location-9d3f02be', 'drafts.location-a1b2c3d4'],
+    })
+    expect(node.areaServed).toEqual([
+      { '@id': `${ORIGIN}/#location-location-9d3f02be` },
+      { '@id': `${ORIGIN}/#location-location-a1b2c3d4` },
+    ])
+    expect(provenance.areaServed).toEqual({ doc: 'service-4c1e9b7a', field: 'locations' })
+    for (const locationIds of [[], null, undefined])
+      expect(buildService({ ...base, locationIds }).node).not.toHaveProperty('areaServed')
+  })
 })

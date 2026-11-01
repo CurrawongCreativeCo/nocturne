@@ -67,6 +67,7 @@ test.describe('before launch', () => {
     '/search',
     '/team/ann-lee',
     '/services/emergency-plumbing',
+    '/locations/parramatta',
     '/links/more',
     '/Links',
     '/home',

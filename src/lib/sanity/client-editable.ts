@@ -116,6 +116,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'socialLinks',
       'socialDisplay',
       'services',
+      'locations',
       'order',
     ],
     agencyOnly: [],
@@ -132,11 +133,30 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'priceFrom',
       'priceUnit',
       'faqs',
+      'locations',
       'evidence',
       'enquiry',
       'sections',
     ],
     agencyOnly: [],
+  },
+  // Clients write their own branches and service areas, like Business info; coordinates stay with the agency.
+  place: {
+    editable: [
+      'name',
+      'kind',
+      'slug',
+      'summary',
+      'image',
+      'body',
+      'phone',
+      'publicEmail',
+      'address',
+      'timeZone',
+      'openingHours',
+      'specialHours',
+    ],
+    agencyOnly: ['geo'],
   },
   event: {
     editable: [
