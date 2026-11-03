@@ -1,13 +1,29 @@
 import { PARAGRAPH_GAP, PlainLines } from '@/components/ui/plain-text'
-import { SanityImage } from '@/components/ui/sanity-image'
+import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
 import { plainTextParagraphs } from '@/lib/plain-text'
+import { resolveAvatar } from '@/lib/sanity/profile-image-options'
+import { themeColourCss } from '@/lib/sanity/theme-colour'
 
 import type { SectionProps } from '../../../types'
 
-type Item = SectionProps<'testimonials'>['data']['items'][number]
+type Data = SectionProps<'testimonials'>['data']
+type Item = Data['items'][number]
+
+/** Medium is the 48 px circle the avatar always was. */
+const AVATAR_SCALE: ProfileImageScale = {
+  box: { small: 'size-10', medium: 'size-12', large: 'size-16' },
+  height: { small: 'h-10', medium: 'h-12', large: 'h-16' },
+  px: { small: 40, medium: 48, large: 64 },
+}
 
 /** One quote with its author, shared by every layout. Fills the height it is given. */
-export function QuoteCard({ item }: { item: Item }) {
+export function QuoteCard({
+  item,
+  avatarDesign,
+}: {
+  item: Item
+  avatarDesign?: Data['avatarDesign']
+}) {
   const quote = plainTextParagraphs(item.quote)
   return (
     <figure className="flex h-full w-full flex-col rounded-card bg-surface p-8 shadow-card ring-1 ring-line">
@@ -29,11 +45,12 @@ export function QuoteCard({ item }: { item: Item }) {
         )}
       </blockquote>
       <figcaption className="mt-6 flex items-center gap-4">
-        <SanityImage
+        <ProfileImage
           image={item.avatar}
-          width={48}
-          height={48}
-          className="size-12 rounded-pill object-cover"
+          design={resolveAvatar(avatarDesign, 'circle')}
+          scale={AVATAR_SCALE}
+          colour={themeColourCss(avatarDesign?.ringColour)}
+          className="shrink-0"
         />
         <div>
           <div className="font-semibold">{item.name}</div>

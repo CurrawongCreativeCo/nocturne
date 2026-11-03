@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -95,8 +96,22 @@ export const team = defineType({
               : true,
           ),
       }),
-      // Shape, motion and frames for the portraits: agency only, in the Design tab.
-      imageDesignField(),
+      // Shape, motion and frames for the larger portraits (grid, slider): agency only, in the Design
+      // tab. The list draws small portraits, which take Portrait instead; a list that already has an
+      // Image design keeps showing it, so it can still be seen and cleared.
+      imageDesignField({
+        hidden: ({ parent }) => {
+          const section = parent as { variant?: string; imageDesign?: object } | undefined
+          return section?.variant === 'list' && !section.imageDesign
+        },
+      }),
+      avatarDesignField({
+        name: 'portraitDesign',
+        title: 'Portrait',
+        description:
+          'Size and ring for the list’s small portraits. Medium with no ring is the default.',
+        hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant !== 'list',
+      }),
       accessField,
       // Shown first in the Content tab.
       variantField(TEAM_VARIANTS),

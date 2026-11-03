@@ -122,6 +122,13 @@ export const logoCloudFragment = /* groq */ `
   }
 `
 
+/** A testimonial avatar's or team list portrait's size and ring (schema: lib/sanity/schema/avatar-design.ts). */
+const avatarDesignFields = /* groq */ `
+  size,
+  ring,
+  ringColour { colour, hex }
+`
+
 export const testimonialsFragment = /* groq */ `
   _type == "testimonials" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -129,6 +136,7 @@ export const testimonialsFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    avatarDesign { ${avatarDesignFields} },
     items[] {
       _key,
       quote,
@@ -279,6 +287,7 @@ export const teamFragment = /* groq */ `
     "headingPlain": pt::text(heading),
     text,
     imageDesign { ${imageDesignFields} },
+    portraitDesign { ${avatarDesignFields} },
     "members": select(
       selection == "picked" => members[defined(@->_id)]->{ ${teamCardFields} },
       *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { ${teamCardFields} }

@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -78,6 +79,11 @@ export const testimonials = defineType({
             preview: { select: { title: 'name', subtitle: 'quote', media: 'avatar' } },
           }),
         ],
+      }),
+      avatarDesignField({
+        name: 'avatarDesign',
+        title: 'Avatar',
+        description: 'Size and ring for the author’s picture. Medium with no ring is the default.',
       }),
       accessField,
       // Shown first in the Content tab.

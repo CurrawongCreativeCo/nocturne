@@ -3142,6 +3142,19 @@ the **Hero's Split layout**, **Gallery** (Grid and Slider) and **Team** portrait
 or the small testimonial avatars, where it would not make sense. It is one component (`FramedImage`,
 `src/components/ui/framed-image.tsx`) used by all of them, so there is one implementation.
 
+**Image design or Profile image: the rule.** A picture is drawn by exactly one of the two, and the Studio never offers both on it.
+Use **Image design** (`FramedImage`) for a larger picture that is part of the layout: Image + text, the Hero, Gallery, and the team
+grid and slider. Use **Profile image** (`ProfileImage`, `src/components/ui/profile-image.tsx`) for a small portrait or logo that sits
+beside text: the Link list's profile picture, the testimonials' author avatar and the team **list** portrait. Profile image offers a
+**size** (Small, Medium, Large; Medium is each layout's own size) and an optional **ring** (solid or gradient, with a see-through gap),
+and draws through the shared shape geometry (`src/lib/sanity/image-frame-geometry.ts`), so "Adjust picture" can follow without changes
+to the layout. Both are agency only, in the Design tab, and empty means the picture looks as it always did.
+
+- **Testimonials → Design → Avatar:** Medium circle (48 px) with no ring by default.
+- **Team (List layout only) → Design → Portrait:** replaces Image design for the list's small portraits. Until a size or ring is
+  chosen, a list keeps drawing its picture with its Image design, so existing pages are unchanged; a list that already has an Image
+  design still shows it so it can be cleared. The Portrait is a rounded square, the card's corners.
+
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and
 the picture looks exactly as it always did.
 
