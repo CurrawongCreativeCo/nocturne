@@ -235,7 +235,7 @@ Open http://localhost:3000/studio:
   Before merging changes to this flow, check a local Studio as agency and client: missing required field, a nested
   section error, warning-only document, hidden setting, keyboard navigation and focus after **Go to field**.
   Record the results in the PR; automated component tests do not replace that signed-in check.
-- **Studio keyboard and narrow-screen checks (developers):** `picker-keyboard.test.tsx` covers the preset and icon pickers by keyboard and `icon-button-names.test.ts` fails when an icon-only Studio button has no `aria-label`; give new ones a name. These do not replace a signed-in check at 390, 768, 1024 and 1440 px: record results in `docs/studio-audit/<date>/a11y-responsive.md` (the 4 November 2026 run covers Start here, Launch & visibility, Brand colours and the preset picker; Link list and Presentation are still unverified).
+- **Studio keyboard and narrow-screen checks (developers):** `picker-keyboard.test.tsx` covers the preset and icon pickers by keyboard and `icon-button-names.test.ts` fails when an icon-only Studio button has no `aria-label`; give new ones a name. These do not replace a signed-in check at 390, 768, 1024 and 1440 px: record results in `docs/studio-audit/<date>/a11y-responsive.md` (the 4 November 2026 runs cover every screen in a real browser; only Presentation's preview is still unverified).
 - **Publishing safely:** the first time a page or post is published, and whenever its address changes, Publish asks
   "Publish changes to `https://example.com/about`?" (the site's public address plus the page's path), with **Publish**
   and **Cancel**. Other edits to a live page publish straight away, with no dialog. If the page is already live and you changed its

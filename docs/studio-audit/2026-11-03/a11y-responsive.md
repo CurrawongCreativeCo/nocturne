@@ -17,81 +17,117 @@ native controls are out of scope.
 
 No failures were found in the automated checks, so no component code was changed.
 
-## Manual matrix: run on 4 November 2026
+## Manual matrix: run on 4 November 2026 (two passes)
 
 How it was run: a production build of this branch (the Studio is part of the Next app), baked for the
 scratch project `r4kwvgkz` and its `scratch-proposals` dataset only, served on localhost:3200 with the
 public pages on the fake Content Lake. A headless Chromium (Playwright script, scratch only, not
 committed) used the saved scratch sign-in at 390 x 844, 768, 1024 and 1440 x 900 px, in agency view.
-Requests to any other project or dataset, and every mutate request, were aborted. It only navigated: no
-field was edited and nothing was published. `scratch-proposals` has no `studio-perf` content: it holds
-a Home and an About page only. Production content was not used.
+Requests to any other project or dataset were aborted, as were all non-GET requests except the ones
+listed under "Writes". Production content was not used.
 
-"Tab walk" is the first 12 Tab stops. "Ring" is a heuristic (a box-shadow or outline on the focused
-element or one of its two parents), not a visual inspection of each stop.
+**Pass 1** only navigated. **Pass 2** (owner instructions of 4 November) allowed exactly two kinds of
+write, after inspecting what each sends:
 
-| Screen                                       | 390             | 768             | 1024            | 1440            |
-| -------------------------------------------- | --------------- | --------------- | --------------- | --------------- |
-| Start here                                   | Pass            | Pass            | Pass            | Pass            |
-| Launch & visibility                          | Pass            | Pass            | Pass            | Pass            |
-| Brand colours (page, preview, colour fields) | Pass, see notes | Pass, see notes | Pass, see notes | Pass, see notes |
-| Preset picker (Hero in Home)                 | Pass            | Pass            | Pass            | Pass            |
-| Page with a Link list and a nested link      | Not verified    | Not verified    | Not verified    | Not verified    |
-| Presentation                                 | Not verified    | Not verified    | Not verified    | Not verified    |
+- Presentation's preview-secret calls: `createOrReplace` of a `sanity.previewUrlSecret` draft with a
+  patch to its own `secret`, `source`, `studioUrl` and `userId` fields, and a delete whose query is
+  filtered on `_type == "sanity.previewUrlSecret"` and age alone. Anything else was aborted.
+- Edits to one synthetic draft, `drafts.a11y-task173-test` ("A11Y TEST - synthetic Task 173 page
+  (delete me)"), created in `scratch-proposals`. It is **unpublished and kept for review**: it has one
+  Link List section with two links (#1 "Untitled Link", made by a first run; #2 "Synthetic Test Link
+  (Delete Me)"). Its icon is whatever the last keyboard run chose. Home, About and every other
+  document were untouched. Nothing was published.
 
-What "Pass" means here, at every width: no horizontal page scroll; no visible interactive element
-outside the viewport on its screen; Tab starts from the top bar and moves in a sensible order; every
-one of the 12 Tab stops on Start here and Launch & visibility showed a ring and stayed on screen,
-except at 390 px where the first Start here stop scrolled the heading "What would you like to do?" into
-view (the screenshot shows the page laid out in one column with the cards full width). Screenshots were
-viewed for Start here, Brand colours and the preset picker at 390 px.
+Colour fields were exercised with writes blocked (the Brand colours document is not mine to change),
+so the Studio's attempted edits to `drafts.designSettings` and an attempted release creation were
+aborted and never saved.
 
-Preset picker (the Hero's "Change Hero presets" button, inside the section dialog):
+"Tab walk" is a run of Tab presses. "Ring" is a heuristic (box-shadow or outline on the focused element
+or two parents), checked by eye where noted.
 
-- Opening moved focus onto a card (role `radio`); there are 10 cards.
-- The grid is 1 column at 390 px and 3 at 768, 1024 and 1440 px, with no clipping.
-- ArrowRight moved focus to the next card (`split-right`) and ArrowDown to the one after (`split-left`).
-- Escape folded the grid, kept the section dialog open, and put focus back on "Change Hero presets".
-- Close ("Close Hero presets options") did the same.
+| Screen                                  | 390                               | 768                               | 1024                              | 1440                              |
+| --------------------------------------- | --------------------------------- | --------------------------------- | --------------------------------- | --------------------------------- |
+| Start here                              | Pass                              | Pass                              | Pass                              | Pass                              |
+| Launch & visibility                     | Pass                              | Pass                              | Pass                              | Pass                              |
+| Brand colours, colour fields            | Pass                              | Pass                              | Pass                              | Pass                              |
+| Preset picker (Hero; and Link list)     | Pass                              | Pass                              | Pass                              | Pass                              |
+| Page with a Link list and a nested link | Pass                              | Pass                              | Pass                              | Pass                              |
+| Icon picker (in the nested link)        | Pass                              | Pass                              | Pass                              | Pass                              |
+| Presentation                            | Chrome pass, preview not verified | Chrome pass, preview not verified | Chrome pass, preview not verified | Chrome pass, preview not verified |
 
-Brand colours: the document opened at all four widths with no overflow and no clipped control. Its 12
-Tab stops showed a ring on 10; I did not identify the other two, so this is a heuristic gap rather than
-a confirmed failure. The "Secondary: colour picker" button has its name. I did not open or operate a
-colour picker, so keyboard use of the colour inputs themselves is **Not verified** in a browser.
+"Pass" means, at that width: no horizontal page scroll, no interactive element in the section dialogs
+outside the viewport, and the behaviours below.
+
+**Start here and Launch & visibility.** Every one of the first 12 Tab stops showed a ring and stayed on
+screen, apart from the first Start here stop at 390 px, which scrolled the page. One column of full-width
+cards at 390 px.
+
+**Preset picker** (Hero in Home, and the Link list's own preset, "Change Link list presets"): opens
+with focus on a card; ArrowRight moves to the next; Escape folds the grid, keeps the dialog open and
+returns focus to "Change ... presets"; Close does the same. 1 column at 390 px, 3 above.
+
+**Link list with a nested link.** The page, the Link list dialog and the nested link dialog (breadcrumb
+Sections / Link List / Links / link) fit at every width with nothing clipped. At 390 px the nested
+content is narrow because of Sanity's nesting indent, but nothing overflows.
+
+**Icon picker** (task 155's open check), in the nested link dialog, in a real browser:
+
+- 32 cards ("No icon" and 31 icons); 2 columns at 390 px, 5 at 768, 1024 and 1440 px.
+- Opening puts focus on a card; ArrowRight moves one card each time.
+- **Enter** on a card chose it (summary changed, grid folded away) and focus returned to "Change Icon".
+- **Space** did the same on another card.
+- All four widths gave the same results.
+
+**Colour fields (Brand colours).** The colour pickers are native `<input type="color">` named
+"Primary: colour picker" and so on; each is focusable and shows a 2 px outline (focus-visible). Tabbing
+moves from the picker to the hex field to Clear. Typing "#336699" is accepted and "zzz" shows "Use a
+six-digit hex colour such as #3266e4", at all four widths. I did not open the browser's own colour
+dialog.
+
+**The two Tab stops with no detected ring** were the Sanity UI inputs: the hex text field and the
+Appearance radio. The hex field is drawn with a visible purple ring (viewed at 1440 px), so the
+heuristic missed it; neither is project code. The Appearance radio's ring was not looked at by eye.
+Other ring-less stops were Sanity's own scrolling pane, "Where did the version buttons go?" and the
+collapsed "Colours and gradients" disclosure.
+
+**Presentation.** With the secret writes allowed, the tool loads at every width: Edit toggle, address
+bar, Refresh preview, "Toggle viewport size" (the mobile toggle, UX-017, present at 390 px too), Open
+preview and Share this preview, all named, with no overflow. The tab order from the top bar into the
+toolbar is sensible. The preview itself did not load: this scratch site reads the fake lake, not
+`r4kwvgkz`, so the secret cannot validate ("Invalid secret", "Unable to connect", "Continue anyway").
+So the viewport toggle's effect, clicking in the preview and the documents panel with data are **Not
+verified**. Follow-up: run Presentation against a site build that reads `scratch-proposals` with a
+read token for it (needs the owner's token, which this session did not have), or check by hand.
 
 ### Not verified
 
-- **Page with a Link list and a nested link** (all widths). `scratch-proposals` has no Link list on
-  any page, and adding one is an edit, which this run did not make. Follow-up: seed a page with a Link
-  list and a nested link in a scratch dataset made for the purpose (the `studio-perf` seed does not
-  include one; `r4kwvgkz` holds two datasets already, so one must be freed first), then repeat the walk.
-- **Presentation** (all widths, UX-017). The tool showed "The presentation tool crashed" at every width.
-  The cause is my own run: Presentation deletes expired preview secrets with a mutate request
-  ("Failed to delete expired secrets: Failed to fetch" in the console), which the script aborts. It is
-  not evidence of a project bug, and it means the mobile toggle was not seen. Follow-up: rerun this
-  screen with that one write allowed (it writes only the plugin's own secret documents, to a scratch
-  dataset), or have someone do it by hand.
-- **Enter and Space on pickers in a real browser.** Not tried here: choosing a card changes a value.
-  The jsdom tests show the keys are not intercepted, and `tests/e2e/studio-brand-preview.spec.ts`
-  covers arrows, Enter, Space and focus return in a real browser; its result is CI's, on this PR.
-- Colour picker operation by keyboard, as above; and anything beyond the first 12 Tab stops per screen.
-- The Studio's own mutate requests: two were aborted per width, consistent with the Presentation
-  secret cleanup. Nothing was written.
+- Presentation's preview and everything inside it, as above.
+- The browser's own colour dialog (opened by the colour picker) and the Appearance radio's focus ring by eye.
+- Tab order beyond the first 10 to 40 stops per screen, and the 768 and 1024 px layouts by eye (only
+  390 and 1440 px screenshots were viewed).
+- Anything on the public site: out of scope.
 
-No project-owned failure was found, so no fix and no plan task came out of this matrix.
+No project-owned failure was found in either pass, so no fix and no plan task came out of this matrix.
 
 ## Sanity native controls
 
-Confirmed in the real Studio (for Sanity's tracker; not changed here). Icon-only buttons with no
-accessible name (no `aria-label`, text, title or label), found by listing every visible button, link
-and input without a name on Start here, Launch & visibility and Brand colours at 1440 px:
+Confirmed in the real Studio (for Sanity's tracker; not changed here).
 
-- the tool collapse menu (ellipsis icon) in the navbar and the Tasks button (`tasks-toolbar`);
-- the document pane's Copy/share menu, pane context menu (ellipsis) and Close link;
-- on narrow screens the navbar menu and search icons were present; I did not check their names.
-
-Also: at 390 px Sanity's "What's new" announcement sits over the bottom of the page and partly covers
-the Publish button, and the "Where did the version buttons go?" link is cut off in the document header.
+- **Icon-only buttons with no accessible name** (no `aria-label`, text, title or label), from listing
+  every visible button, link and input without one: the tool-collapse menu and the Tasks button in the
+  navbar; the document pane's share menu, pane menu and Close link; the field-level reset button beside
+  Sanity's radio and choice inputs ("Show as", "Social icons"); a field action menu at 390 px.
+- **Focus is not restored after closing a nested array-item dialog.** Escape closed the nested link
+  dialog but focus went to the top of the page, and the next Tab began at the document footer, not the
+  dialog that was still open. Same at all four widths.
+- The dialog that stays open does not keep Tab inside it: Tab walks out to the navbar.
+- At 390 px the "What's new" announcement sits over the bottom of the page and partly covers Publish,
+  and "Where did the version buttons go?" is cut off.
+- The scrolling pane (`pane-content`) takes a Tab stop without a visible ring.
 
 From the `@sanity/assist` plugin (third party): the bolt button in the navbar and the sparkles field
-action on each Brand colours field are unnamed too. The plugin's own tracker is the place for these.
+action on every field are unnamed. Its own tracker is the place for these.
+
+Writes observed: Presentation's secret calls (allowed, above), an attempted release creation and edits
+to `drafts.designSettings` when typing in the colour field (aborted), a descriptors call and a Sanity
+feedback call (aborted).
