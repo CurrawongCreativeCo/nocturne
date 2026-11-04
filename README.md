@@ -5222,6 +5222,10 @@ A dialog under an image field where an editor sees the picture inside the exact 
 - Tests: Vitest (maths, geometry, style helpers, and Testing Library for the dialog), Playwright + axe on the brand preview page. The Testing Library tests use `jsdom` (`// @vitest-environment jsdom` at the top of the file); everything else stays in Node.
 - **Real Studio checks** (open, drag, keyboard, touch, Apply, Undo, reopen, Reset, publish, and the draft in Presentation against the published page) need a signed-in scratch project and are done by hand once a field is opted in; record them in the PR.
 
+### Page breadcrumb (Studio)
+
+A page's place in the site shows above its fields: **Pages › services › web-design**. Each ancestor that has a page is a link to it; an ancestor with no page is plain text, and the current page is last. Editors and clients both see it, on `page` documents only. It is read from the slug, so it follows the slug as you type, and a page that has not been published yet still links (Sanity opens the draft). In a narrow pane (under 380 px) the ancestors fold behind a **…** button that lists them. The one query is a single listener per open page (`*[_type == "page"]{_id, slug}`), not one per keystroke. Developers: `PageBreadcrumbInput` is wired into `StudioInputs` in `sanity.config.ts`; the segment logic is `utils/page-breadcrumb.ts`; a preview for axe is on `/studio-brand-preview` (tests/e2e/page-breadcrumb.spec.ts).
+
 ### Sanity workflow (migrations and schema deploy)
 
 `.github/workflows/sanity.yml` keeps the dataset and its deployed schema in step with the code. Set these in the
