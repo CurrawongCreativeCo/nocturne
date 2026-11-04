@@ -3151,9 +3151,7 @@ and draws through the shared shape geometry (`src/lib/sanity/image-frame-geometr
 to the layout. Both are agency only, in the Design tab, and empty means the picture looks as it always did.
 
 - **Testimonials → Design → Avatar:** Medium circle (48 px) with no ring by default.
-- **Team (List layout only) → Design → Portrait:** replaces Image design for the list's small portraits. Until a size or ring is
-  chosen, a list keeps drawing its picture with its Image design, so existing pages are unchanged; a list that already has an Image
-  design still shows it so it can be cleared. The Portrait is a rounded square, the card's corners.
+- **Team (List layout only) → Design → Portrait:** the list's small portraits are drawn by `ProfileImage` (a rounded square, the card's corners), Medium with no ring by default, which is the same size and corners the list always had. A list that **already has an Image design saved** keeps drawing with it, and Studio then shows Image design (with a note to clear it) instead of Portrait, so one picture never has both; nothing saved is deleted or moved. Clear the Image design to choose Portrait. Grid and Slider show Image design only. The shared rule is `src/lib/sanity/team-portrait.ts`, used by both Studio and the site.
 
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and
 the picture looks exactly as it always did.

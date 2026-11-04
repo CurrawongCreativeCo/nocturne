@@ -13,6 +13,7 @@ import {
   TeamListThumbnail,
   TeamSliderThumbnail,
 } from '@/lib/sanity/schema/thumbnails/team-thumbnails'
+import { teamPortraitControls } from '@/lib/sanity/team-portrait'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -97,20 +98,24 @@ export const team = defineType({
           ),
       }),
       // Shape, motion and frames for the larger portraits (grid, slider): agency only, in the Design
-      // tab. The list draws small portraits, which take Portrait instead; a list that already has an
-      // Image design keeps showing it, so it can still be seen and cleared.
+      // tab. The list draws small portraits, which take Portrait instead (lib/sanity/team-portrait.ts):
+      // one or the other is shown, never both. A list that already has an Image design keeps it, visible
+      // so it can be cleared; Portrait is offered once it is.
       imageDesignField({
-        hidden: ({ parent }) => {
-          const section = parent as { variant?: string; imageDesign?: object } | undefined
-          return section?.variant === 'list' && !section.imageDesign
-        },
+        description:
+          'On the List layout, clear this to choose Portrait (size and ring for small portraits) instead.',
+        hidden: ({ parent }) =>
+          !teamPortraitControls((parent ?? {}) as Parameters<typeof teamPortraitControls>[0])
+            .imageDesign,
       }),
       avatarDesignField({
         name: 'portraitDesign',
         title: 'Portrait',
         description:
           'Size and ring for the list’s small portraits. Medium with no ring is the default.',
-        hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant !== 'list',
+        hidden: ({ parent }) =>
+          !teamPortraitControls((parent ?? {}) as Parameters<typeof teamPortraitControls>[0])
+            .portrait,
       }),
       accessField,
       // Shown first in the Content tab.

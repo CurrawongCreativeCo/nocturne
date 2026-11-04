@@ -241,12 +241,16 @@ export const imageDesign = defineType({
  * other design options. `hidden` adds a rule of the section's own (the gallery's Masonry layout keeps
  * every picture's own shape, so it has none).
  */
-export function imageDesignField({ hidden }: { hidden?: ConditionalPropertyCallback } = {}) {
+export function imageDesignField({
+  hidden,
+  description,
+}: { hidden?: ConditionalPropertyCallback; description?: string } = {}) {
   return defineField({
     name: 'imageDesign',
     title: 'Image design',
     type: 'imageDesign',
     group: 'design',
+    description,
     hidden: (context) => hiddenFromClients(context) || (hidden ? hidden(context) : false),
   })
 }

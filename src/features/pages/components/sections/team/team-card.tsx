@@ -9,6 +9,7 @@ import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { resolveImageDesign } from '@/lib/sanity/image-design-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
+import { hasImageDesign } from '@/lib/sanity/team-portrait'
 import { themeColourCss } from '@/lib/sanity/theme-colour'
 
 import type { SectionProps } from '../../../types'
@@ -86,8 +87,10 @@ const PORTRAIT_SCALE: ProfileImageScale = {
 }
 
 /**
- * The list layout: a small portrait beside the text. It takes a Portrait design (size, ring) through
- * ProfileImage once one is set; until then the section's Image design (FramedImage) draws it as before.
+ * The list layout: a small portrait beside the text, drawn by ProfileImage with the section's Portrait
+ * design (size, ring; Medium with no ring is the portrait it always was). A list that already has an
+ * Image design saved keeps drawing with it (FramedImage), and Studio shows that control instead of
+ * Portrait (lib/sanity/team-portrait.ts), so what is drawn matches the controls.
  */
 export function TeamRow({
   member,
@@ -96,15 +99,15 @@ export function TeamRow({
   headingLevel,
   eager,
 }: CardProps & { portrait?: Portrait }) {
-  const small = portrait && (stegaClean(portrait.size) || stegaClean(portrait.ring))
+  const legacy = hasImageDesign(stegaClean(design))
   return (
     <HoverLift className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6`}>
-      {small ? (
+      {!legacy ? (
         <ProfileImage
           image={member.portrait}
           design={resolveAvatar(portrait, 'rounded')}
           scale={PORTRAIT_SCALE}
-          colour={themeColourCss(portrait.ringColour)}
+          colour={themeColourCss(portrait?.ringColour)}
           preload={eager}
           className="shrink-0"
         />
