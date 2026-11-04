@@ -107,6 +107,22 @@ describe('TeamRow portrait', () => {
     ).toContain('data-profile-image="rounded"')
   })
 
+  it('draws with ProfileImage when the Image design is only custom: false, a cleared one', () => {
+    const html = draw(
+      { ...EMPTY, size: 'large' } as never,
+      { custom: false, appearance: null } as never,
+    )
+    expect(html).toContain('data-profile-image="rounded"')
+    expect(html).toContain('size-32 sm:size-40')
+    expect(html).not.toContain('data-framed-image')
+  })
+
+  it('keeps a genuine Image design that sits beside custom: false', () => {
+    const html = draw(undefined, { appearance: 'circle', custom: false } as never)
+    expect(html).toContain('data-framed-image')
+    expect(html).not.toContain('data-profile-image')
+  })
+
   it('draws no empty placeholder without a portrait, and keeps the name and its link', () => {
     const html = draw({ ...EMPTY, ring: 'line' } as never, undefined, {
       ...MEMBER,

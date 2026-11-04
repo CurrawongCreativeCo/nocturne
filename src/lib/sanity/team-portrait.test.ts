@@ -12,9 +12,19 @@ describe('hasImageDesign', () => {
     expect(hasImageDesign({ appearance: '' })).toBe(false)
   })
 
+  it('is false for custom: false, the initial value Studio leaves behind after a choice is cleared', () => {
+    expect(hasImageDesign({ _type: 'imageDesign', custom: false })).toBe(false)
+    expect(
+      hasImageDesign({ appearance: null, motion: null, custom: false, customFrameUrl: null }),
+    ).toBe(false)
+  })
+
   it('is true once any choice is saved', () => {
     expect(hasImageDesign({ _type: 'imageDesign', appearance: 'circle' })).toBe(true)
     expect(hasImageDesign({ motion: 'subtle' })).toBe(true)
+    expect(hasImageDesign({ motion: 'medium', custom: false })).toBe(true)
+    expect(hasImageDesign({ custom: true })).toBe(true)
+    expect(hasImageDesign({ appearance: 'standard', custom: false })).toBe(true)
   })
 })
 
@@ -42,6 +52,15 @@ describe('teamPortraitControls', () => {
     expect(
       teamPortraitControls({ variant: 'list', imageDesign: { appearance: 'circle' } }),
     ).toEqual({ imageDesign: true, portrait: false })
+  })
+
+  it('treats an Image design left as { custom: false } as cleared, so Portrait is offered', () => {
+    expect(
+      teamPortraitControls({
+        variant: 'list',
+        imageDesign: { _type: 'imageDesign', custom: false },
+      }),
+    ).toEqual({ imageDesign: false, portrait: true })
   })
 
   it('never offers both, whatever the section holds', () => {

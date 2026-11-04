@@ -47,6 +47,19 @@ describe('Team design controls in Studio', () => {
     ).toEqual({ imageDesign: true, portraitDesign: false })
   })
 
+  it('offers Portrait, not Image design, once a list’s Image design is cleared down to custom: false', () => {
+    expect(
+      shown({ variant: 'list', imageDesign: { _type: 'imageDesign', custom: false } }),
+    ).toEqual({ imageDesign: false, portraitDesign: true })
+  })
+
+  it('still offers Image design only for a genuine choice beside custom: false', () => {
+    expect(shown({ variant: 'list', imageDesign: { appearance: 'arch', custom: false } })).toEqual({
+      imageDesign: true,
+      portraitDesign: false,
+    })
+  })
+
   it('explains how to reach Portrait from the legacy control', () => {
     const field = find(teamFields, 'imageDesign') as Field & { description?: string }
     expect(field.description).toMatch(/clear this to choose Portrait/i)

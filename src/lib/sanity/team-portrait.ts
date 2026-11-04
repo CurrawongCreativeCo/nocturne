@@ -8,7 +8,12 @@
  *   Portrait is offered once it is cleared. Nothing saved is ever deleted or migrated.
  */
 
-/** Whether a stored or queried `imageDesign` holds a choice (an object of nulls, or `{}`, holds none). */
+/**
+ * Whether a stored or queried `imageDesign` holds a choice. An object of nulls or `{}` holds none, and
+ * neither does `custom: false`: "Set exact motion values" has an initial value of false, so Studio writes
+ * it as soon as the object is touched and it stays after every real choice is cleared. The site acts
+ * only on `custom: true`, so false changes nothing.
+ */
 export function hasImageDesign(design: unknown): boolean {
   if (!design || typeof design !== 'object') return false
   return Object.entries(design).some(
@@ -17,7 +22,8 @@ export function hasImageDesign(design: unknown): boolean {
       key !== 'customFrameUrl' &&
       value !== null &&
       value !== undefined &&
-      value !== '',
+      value !== '' &&
+      value !== false,
   )
 }
 
