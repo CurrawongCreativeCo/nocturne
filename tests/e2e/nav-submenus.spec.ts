@@ -40,7 +40,8 @@ async function openNested(page: Page) {
   await expect
     .poll(async () => {
       await page.goto('/')
-      return page.getByRole('button', { name: 'Services submenu' }).count()
+      // Hidden included: below 768 px the desktop menu is display: none, but it is still served.
+      return page.getByRole('button', { name: 'Services submenu', includeHidden: true }).count()
     })
     .toBe(1)
 }
