@@ -1,5 +1,8 @@
+import { Card, Stack, Text } from '@sanity/ui'
 import { useEffect, useRef } from 'react'
-import { PatchEvent, type ObjectInputProps } from 'sanity'
+import { PatchEvent, useFormValue, type ObjectInputProps } from 'sanity'
+
+import { portraitNotice } from '@/lib/sanity/team-portrait'
 
 import { hiddenFrameReferencePatches } from '../utils/hidden-frame-reference'
 
@@ -8,6 +11,10 @@ export function FrameReferenceInput(props: ObjectInputProps) {
   const { value, onChange, readOnly } = props
   const profile = props.path.at(-1) === 'profileDesign'
   const initialised = useRef(false)
+  // A Team List that still has an Image design: say why Portrait is missing and how to reach it.
+  const section = useFormValue(props.path.slice(0, -1)) as
+    { _type?: string; variant?: string; imageDesign?: unknown } | undefined
+  const notice = section?._type === 'team' ? portraitNotice(section) : null
 
   useEffect(() => {
     // Repair an already-hidden reference once on opening the object. Undo must stay undoable.
@@ -17,7 +24,7 @@ export function FrameReferenceInput(props: ObjectInputProps) {
     if (patches.length) onChange(PatchEvent.from(patches))
   }, [value, profile, onChange, readOnly])
 
-  return props.renderDefault({
+  const input = props.renderDefault({
     ...props,
     onChange: (change) => {
       const event = PatchEvent.from(change)
@@ -37,4 +44,14 @@ export function FrameReferenceInput(props: ObjectInputProps) {
       onChange(event.append(hiddenFrameReferencePatches(next, profile)))
     },
   })
+
+  if (!notice) return input
+  return (
+    <Stack gap={4}>
+      <Card tone="primary" border padding={3} radius={2} role="note" data-testid="portrait-notice">
+        <Text size={1}>{notice}</Text>
+      </Card>
+      {input}
+    </Stack>
+  )
 }

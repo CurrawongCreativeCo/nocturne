@@ -118,3 +118,35 @@ export function resolveProfileImage(
   }
   return { size, shape, border }
 }
+
+/** The ring choices of a team or testimonial avatar: no frames, and the ring is a thin accent. */
+export const AVATAR_RINGS = ['none', 'line', 'gradient'] as const
+export type AvatarRing = (typeof AVATAR_RINGS)[number]
+export const AVATAR_RING_TITLES: Record<AvatarRing, string> = {
+  none: 'None',
+  line: 'Solid ring',
+  gradient: 'Gradient ring',
+}
+
+/** A section's `avatarDesign` / `portraitDesign` as a query returns it: untrusted, so checked. */
+export interface AvatarDesignInput {
+  size?: string | null
+  ring?: string | null
+}
+
+/**
+ * An avatar's size and ring. Unset is Medium with no ring, the avatar the layout always drew, so
+ * adding the fields changes no existing page. `shape` is the layout's own (circle for a testimonial,
+ * rounded for a team list); it is not an editor's choice here.
+ */
+export function resolveAvatar(
+  input: AvatarDesignInput | null | undefined,
+  shape: Exclude<ProfileImageShape, 'natural'>,
+): ResolvedProfileImage {
+  const ring = pick(AVATAR_RINGS, input?.ring) ?? 'none'
+  return resolveProfileImage({
+    imageSize: input?.size,
+    imageShape: shape,
+    border: ring === 'none' ? null : ring,
+  })
+}

@@ -4,9 +4,13 @@ import { stegaClean } from 'next-sanity'
 import { HoverLift } from '@/components/motion/hover-lift'
 import { FramedImage } from '@/components/ui/framed-image'
 import { PlainText } from '@/components/ui/plain-text'
+import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
 import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { resolveImageDesign } from '@/lib/sanity/image-design-options'
+import { resolveAvatar } from '@/lib/sanity/profile-image-options'
+import { hasImageDesign } from '@/lib/sanity/team-portrait'
+import { themeColourCss } from '@/lib/sanity/theme-colour'
 
 import type { SectionProps } from '../../../types'
 
@@ -73,23 +77,55 @@ export function TeamCard({ member, design, headingLevel, eager }: CardProps) {
   )
 }
 
-/** The list layout: a small portrait beside the text. */
-export function TeamRow({ member, design, headingLevel, eager }: CardProps) {
+type Portrait = SectionProps<'team'>['data']['portraitDesign']
+
+/** Medium is the 96 px (128 px from sm) rounded square the list always drew. */
+const PORTRAIT_SCALE: ProfileImageScale = {
+  box: { small: 'size-16 sm:size-24', medium: 'size-24 sm:size-32', large: 'size-32 sm:size-40' },
+  height: { small: 'h-16 sm:h-24', medium: 'h-24 sm:h-32', large: 'h-32 sm:h-40' },
+  px: { small: 96, medium: 128, large: 160 },
+}
+
+/**
+ * The list layout: a small portrait beside the text, drawn by ProfileImage with the section's Portrait
+ * design (size, ring; Medium with no ring is the portrait it always was). A list that already has an
+ * Image design saved keeps drawing with it (FramedImage), and Studio shows that control instead of
+ * Portrait (lib/sanity/team-portrait.ts), so what is drawn matches the controls.
+ */
+export function TeamRow({
+  member,
+  design,
+  portrait,
+  headingLevel,
+  eager,
+}: CardProps & { portrait?: Portrait }) {
+  const legacy = hasImageDesign(stegaClean(design))
   return (
     <HoverLift className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6`}>
-      <div className="size-24 shrink-0 sm:size-32">
-        <FramedImage
+      {!legacy ? (
+        <ProfileImage
           image={member.portrait}
-          // Too small to move in; the shape and frame still apply.
-          design={{ ...design, motion: 'none' }}
-          context={{ fallbackShape: 'standard' }}
-          width={256}
-          height={256}
-          sizes="(min-width: 640px) 128px, 96px"
+          design={resolveAvatar(portrait, 'rounded')}
+          scale={PORTRAIT_SCALE}
+          colour={themeColourCss(portrait?.ringColour)}
           preload={eager}
-          aspect="1/1"
+          className="shrink-0"
         />
-      </div>
+      ) : (
+        <div className="size-24 shrink-0 sm:size-32">
+          <FramedImage
+            image={member.portrait}
+            // Too small to move in; the shape and frame still apply.
+            design={{ ...design, motion: 'none' }}
+            context={{ fallbackShape: 'standard' }}
+            width={256}
+            height={256}
+            sizes="(min-width: 640px) 128px, 96px"
+            preload={eager}
+            aspect="1/1"
+          />
+        </div>
+      )}
       <div className="min-w-0">
         <MemberName member={member} headingLevel={headingLevel} />
         {member.role && <p className="mt-1 text-small font-medium text-ink-muted">{member.role}</p>}

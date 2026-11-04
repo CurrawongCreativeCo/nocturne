@@ -13,6 +13,11 @@ export interface ProfileImageScale {
   box: Record<ProfileImageSize, string>
   /** `h-*` for a logo drawn at its own proportions. */
   height: Record<ProfileImageSize, string>
+  /**
+   * The largest drawn width in CSS pixels, per size, for a layout that draws far below the Link
+   * list's (an avatar). Without it the `sizes` hint and CDN width are the Link list's.
+   */
+  px?: Record<ProfileImageSize, number>
 }
 
 /** The `sizes` hint and the width asked of the image CDN, per size (2x the largest drawn width). */
@@ -70,7 +75,8 @@ export function ProfileImage({
   const radius = frameShape ? (CORNER_RADIUS[frameShape.corner] ?? '') : 'rounded-control'
   // A logo is shown whole: a saved adjustment stays stored for when a cropping shape is chosen again.
   const shown = natural ? { ...image, crop: null, hotspot: null } : image
-  const { sizes, request } = SIZES[size]
+  const drawn = scale.px?.[size]
+  const { sizes, request } = drawn ? { sizes: `${drawn}px`, request: drawn * 2 } : SIZES[size]
   const imageClass = natural
     ? `w-auto max-w-full object-contain ${scale.height[size]}`
     : `object-cover ${scale.box[size]}`

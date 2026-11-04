@@ -2929,6 +2929,58 @@
           "clientEditable": true
         },
         {
+          "path": "avatarDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "avatarDesign.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "avatarDesign.ring",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Solid ring"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient ring"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "avatarDesign.ringColour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -4308,6 +4360,58 @@
           "kind": "number",
           "required": null,
           "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "portraitDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "portraitDesign.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "portraitDesign.ring",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Solid ring"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient ring"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "portraitDesign.ringColour",
+          "kind": "object",
+          "required": false,
           "clientEditable": false
         },
         {

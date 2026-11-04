@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -12,6 +13,7 @@ import {
   TeamListThumbnail,
   TeamSliderThumbnail,
 } from '@/lib/sanity/schema/thumbnails/team-thumbnails'
+import { teamPortraitControls } from '@/lib/sanity/team-portrait'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -95,8 +97,26 @@ export const team = defineType({
               : true,
           ),
       }),
-      // Shape, motion and frames for the portraits: agency only, in the Design tab.
-      imageDesignField(),
+      // Shape, motion and frames for the larger portraits (grid, slider): agency only, in the Design
+      // tab. The list draws small portraits, which take Portrait instead (lib/sanity/team-portrait.ts):
+      // one or the other is shown, never both. A list whose Image design still changes its portraits
+      // keeps it, with a note above it on how to reach Portrait (drawn by the Image design input,
+      // features/studio/components/frame-reference-input.tsx); nothing saved is deleted. No options go
+      // on this field: they make Studio frame and indent the object.
+      imageDesignField({
+        hidden: ({ parent }) =>
+          !teamPortraitControls((parent ?? {}) as Parameters<typeof teamPortraitControls>[0])
+            .imageDesign,
+      }),
+      avatarDesignField({
+        name: 'portraitDesign',
+        title: 'Portrait',
+        description:
+          'Size and ring for the list’s small portraits. Medium with no ring is the default.',
+        hidden: ({ parent }) =>
+          !teamPortraitControls((parent ?? {}) as Parameters<typeof teamPortraitControls>[0])
+            .portrait,
+      }),
       accessField,
       // Shown first in the Content tab.
       variantField(TEAM_VARIANTS),

@@ -3142,6 +3142,17 @@ the **Hero's Split layout**, **Gallery** (Grid and Slider) and **Team** portrait
 or the small testimonial avatars, where it would not make sense. It is one component (`FramedImage`,
 `src/components/ui/framed-image.tsx`) used by all of them, so there is one implementation.
 
+**Image design or Profile image: the rule.** A picture is drawn by exactly one of the two, and the Studio never offers both on it.
+Use **Image design** (`FramedImage`) for a larger picture that is part of the layout: Image + text, the Hero, Gallery, and the team
+grid and slider. Use **Profile image** (`ProfileImage`, `src/components/ui/profile-image.tsx`) for a small portrait or logo that sits
+beside text: the Link list's profile picture, the testimonials' author avatar and the team **list** portrait. Profile image offers a
+**size** (Small, Medium, Large; Medium is each layout's own size) and an optional **ring** (solid or gradient, with a see-through gap),
+and draws through the shared shape geometry (`src/lib/sanity/image-frame-geometry.ts`), so "Adjust picture" can follow without changes
+to the layout. Both are agency only, in the Design tab, and empty means the picture looks as it always did.
+
+- **Testimonials → Design → Avatar:** Medium circle (48 px) with no ring by default.
+- **Team (List layout only) → Design → Portrait:** the list's small portraits are drawn by `ProfileImage` (a rounded square, the card's corners), Medium with no ring by default, which is the same size and corners the list always had. A list whose **Image design still changes how its portraits look** keeps drawing with it (`FramedImage`), and Studio shows Image design, with a note above Image shape on how to reach Portrait, instead of Portrait, so one picture never has both. Set **Image shape to Standard and Picture motion to None** and Portrait appears (and Image design goes). Nothing saved is deleted or moved: the rest of the Image design stays stored and is ignored. What counts as "changes how it looks": Rounded, Square corners, Circle or Arch; Framed with a frame; Subtle or Medium parallax. Standard, Framed with no frame, and motion None draw what the list draws anyway, and a frame, its colour or inset on anything but Framed, or Custom, travel, direction or scale on a picture that is not moving, are inactive leftovers (including `custom: false`, which Studio writes on every Image design). Grid and Slider show Image design only. The one rule is `hasImageDesign` in `src/lib/sanity/team-portrait.ts`, used by Studio's controls, its note and the site's drawing.
+
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and
 the picture looks exactly as it always did.
 
