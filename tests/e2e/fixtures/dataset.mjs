@@ -2488,54 +2488,6 @@ const gallerySections = [
     selection: 'all',
     title: 'Who we are',
   },
-  // Profile image presets (tests/e2e/profile-image-presets.spec.ts): testimonial avatars and the team list's
-  // portraits at each size and ring, a list that keeps its saved Image design, and values the site must ignore.
-  ...[
-    ['small', { size: 'small' }, undefined],
-    ['large', { size: 'large' }, undefined],
-    ['ring-line', { ring: 'line' }, undefined],
-    ['ring-gradient', { size: 'large', ring: 'gradient' }, undefined],
-    [
-      'ring-inverse',
-      { ring: 'line', ringColour: { _type: 'object', colour: 'highlight' } },
-      { _type: 'sectionStyle', tone: 'inverse' },
-    ],
-    ['malformed', { size: 'huge', ring: 'frame' }, undefined],
-  ].map(([id, avatarDesign, style]) => ({
-    _key: `testimonials-avatar-${id}`,
-    _type: 'testimonials',
-    variant: 'grid',
-    title: `Avatars: ${id}`,
-    ...(style && { style }),
-    avatarDesign: { _type: 'object', ...avatarDesign },
-    items: ['Alex', 'Sam'].map((name) => ({
-      _key: key(),
-      quote: 'Great.',
-      name,
-      role: 'CEO',
-      avatar: image(`${id}-${name}`),
-    })),
-  })),
-  ...[
-    ['portrait-small', { size: 'small' }, undefined],
-    ['portrait-large-ring', { size: 'large', ring: 'line' }, undefined],
-    ['portrait-gradient', { ring: 'gradient' }, undefined],
-    ['portrait-malformed', { size: 'huge', ring: 'frame' }, undefined],
-    // Saved Image design wins; the Portrait stored beside it is hidden in Studio and ignored here.
-    ['legacy-image-design', { size: 'large', ring: 'line' }, imageDesign({ appearance: 'circle' })],
-  ].map(([id, portraitDesign, design]) => ({
-    _key: `team-list-${id}`,
-    _type: 'team',
-    variant: 'list',
-    selection: 'picked',
-    title: `Team list: ${id}`,
-    portraitDesign: { _type: 'object', ...portraitDesign },
-    ...(design && { imageDesign: design }),
-    members: [
-      { _key: `${id}-dev`, ...ref('teamMember-dev') },
-      { _key: `${id}-ann`, ...ref('teamMember-ann') },
-    ],
-  })),
   videoSection('video-embed', {
     variant: 'embed',
     title: 'Watch our story',
@@ -2708,6 +2660,55 @@ const gallerySections = [
     ],
   }),
   // new-section:gallery
+  // Profile image presets (tests/e2e/profile-image-presets.spec.ts). They sit last, so adding them moves no
+  // older entry (a shifted section re-rasterises by a sub-pixel). Testimonial avatars and the team list's
+  // portraits at each size and ring, a list that keeps its saved Image design, and values the site must ignore.
+  ...[
+    ['small', { size: 'small' }, undefined],
+    ['large', { size: 'large' }, undefined],
+    ['ring-line', { ring: 'line' }, undefined],
+    ['ring-gradient', { size: 'large', ring: 'gradient' }, undefined],
+    [
+      'ring-inverse',
+      { ring: 'line', ringColour: { _type: 'object', colour: 'highlight' } },
+      { _type: 'sectionStyle', tone: 'inverse' },
+    ],
+    ['malformed', { size: 'huge', ring: 'frame' }, undefined],
+  ].map(([id, avatarDesign, style]) => ({
+    _key: `testimonials-avatar-${id}`,
+    _type: 'testimonials',
+    variant: 'grid',
+    title: `Avatars: ${id}`,
+    ...(style && { style }),
+    avatarDesign: { _type: 'object', ...avatarDesign },
+    items: ['Alex', 'Sam'].map((name) => ({
+      _key: key(),
+      quote: 'Great.',
+      name,
+      role: 'CEO',
+      avatar: image(`${id}-${name}`),
+    })),
+  })),
+  ...[
+    ['portrait-small', { size: 'small' }, undefined],
+    ['portrait-large-ring', { size: 'large', ring: 'line' }, undefined],
+    ['portrait-gradient', { ring: 'gradient' }, undefined],
+    ['portrait-malformed', { size: 'huge', ring: 'frame' }, undefined],
+    // Saved Image design wins; the Portrait stored beside it is hidden in Studio and ignored here.
+    ['legacy-image-design', { size: 'large', ring: 'line' }, imageDesign({ appearance: 'circle' })],
+  ].map(([id, portraitDesign, design]) => ({
+    _key: `team-list-${id}`,
+    _type: 'team',
+    variant: 'list',
+    selection: 'picked',
+    title: `Team list: ${id}`,
+    portraitDesign: { _type: 'object', ...portraitDesign },
+    ...(design && { imageDesign: design }),
+    members: [
+      { _key: `${id}-dev`, ...ref('teamMember-dev') },
+      { _key: `${id}-ann`, ...ref('teamMember-ann') },
+    ],
+  })),
 ]
 
 /**

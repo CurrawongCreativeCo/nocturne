@@ -40,6 +40,11 @@ an element screenshot rasterises them one pixel row apart. Cropping just the pic
 difference above 24), the malformed and legacy pictures match `main` exactly at the right offset (0.0 % different) at all three
 widths. The Linux visual baselines do not cover these new sections, so CI cannot catch such drift; the checks above are the evidence.
 
+**CI finding, fixed.** The first push of the corrections put the new gallery fixtures in the middle of the section gallery, which
+moved 30 or so existing sections by a sub-pixel and failed their Linux visual baselines in two e2e shards (for example
+`video-embed`, `process-vertical`, `panel-gradient`). That is the effect measured above, seen by CI. The new fixtures now sit
+last in `gallerySections`, as the fixture file already requires of new entries. No baseline was updated.
+
 ## Checks made while looking at the images
 
 - **Clipping and wrapping:** no clipped rings or pictures at any width; names and roles wrap normally. At 390 px a Large ring on a team list leaves the text a narrower column (it wraps one line more); nothing overflows.
