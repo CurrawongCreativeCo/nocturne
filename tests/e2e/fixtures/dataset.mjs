@@ -1462,6 +1462,52 @@ export const releaseVersions = [
 /** Fields the fake Content Lake applies to the experiment while it runs (tests/e2e/experiments.spec.ts). */
 export const experimentRunning = { active: true }
 
+const subItem = (label, link) => ({ _key: key(), _type: 'navSubItem', label, link })
+
+/**
+ * The header menu with dropdowns (tests/e2e/nav-submenus.spec.ts): a parent with its own page and
+ * eight sub-links (one long), a parent without a page (one unfinished sub-link, which the site
+ * leaves out), a flat link, and a last dropdown near the right edge.
+ */
+export const navigationNested = {
+  headerNav: [
+    navItem('Home', 'page-home'),
+    {
+      ...navItem('Services', 'page-about'),
+      children: [
+        subItem('Commercial fit-outs and heritage restoration consulting', internal('page-about')),
+        ...['Design', 'Build', 'Repairs', 'Landscaping', 'Painting', 'Plumbing', 'Electrical'].map(
+          (label) => subItem(label, external(`https://example.com/${label.toLowerCase()}`)),
+        ),
+      ],
+    },
+    {
+      _key: key(),
+      _type: 'navItem',
+      label: 'Resources',
+      children: [
+        subItem('Guides', external('https://example.com/guides')),
+        subItem('Unfinished', undefined),
+        subItem('Home again', internal('page-home')),
+      ],
+    },
+    navItem('About', 'page-about'),
+    {
+      _key: key(),
+      _type: 'navItem',
+      label: 'Company',
+      children: [
+        // Long enough to reach the panel's widest, so it would cross the window's edge unshifted.
+        subItem(
+          'Our story, our values and the people behind the whole business',
+          internal('page-about'),
+        ),
+        subItem('Careers', external('https://example.com/careers')),
+      ],
+    },
+  ],
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 

@@ -335,6 +335,10 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     agencyOnly: ['variant', 'access', 'style', 'category', 'count'],
   },
   navItem: {
+    editable: ['label', 'link', 'children'],
+    agencyOnly: [],
+  },
+  navSubItem: {
     editable: ['label', 'link'],
     agencyOnly: [],
   },

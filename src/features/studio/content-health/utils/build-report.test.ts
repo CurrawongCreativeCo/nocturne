@@ -162,3 +162,36 @@ describe('buildReport', () => {
     }
   })
 })
+
+describe('buildReport with header sub-links', () => {
+  const nested = {
+    ...data,
+    navigation: [
+      {
+        _id: 'siteNavigation',
+        headerNav: [
+          { label: 'Home', link: link('home') },
+          // A parent with no page of its own: its sub-links are still checked.
+          {
+            label: 'More',
+            children: [
+              { label: 'Lonely', link: link('lonely') },
+              { label: 'Contact', link: link('contact') },
+            ],
+          },
+        ],
+        headerCta: null,
+        footerNav: null,
+      },
+    ],
+  } as unknown as CONTENT_HEALTH_QUERY_RESULT
+  const groups = Object.fromEntries(buildReport(nested).map((group) => [group.id, group.items]))
+
+  it('lists a broken link in a sub-link against the navigation', () => {
+    expect(groups['broken-links']?.map(({ id }) => id)).toContain('siteNavigation')
+  })
+
+  it('counts a sub-link as a link to its page', () => {
+    expect(groups.orphans?.map(({ id }) => id)).toEqual([])
+  })
+})

@@ -62,7 +62,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
       </summary>
       <nav
         aria-label="Mobile"
-        className="absolute inset-x-0 top-16 flex flex-col gap-1 border-b border-line bg-surface px-gutter py-4 shadow-raised"
+        className="absolute inset-x-0 top-16 flex max-h-[calc(100dvh-4rem)] flex-col gap-1 overflow-y-auto border-b border-line bg-surface px-gutter py-4 shadow-raised"
       >
         {children}
       </nav>

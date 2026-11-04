@@ -6,6 +6,8 @@ import { presetField } from '@/lib/sanity/schema/preset-field'
 import { socialStyleThumbnails } from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
 import { SOCIAL_STYLES, SOCIAL_STYLE_TITLES } from '@/lib/sanity/social-style-options'
 
+import { checkFooterNav } from './nav-item'
+
 /** A singleton: the one document has `_id === 'siteNavigation'` (see SINGLETON_TYPES and the desk structure). */
 export const siteNavigation = defineType({
   name: 'siteNavigation',
@@ -21,7 +23,7 @@ export const siteNavigation = defineType({
       name: 'headerNav',
       title: 'Header menu',
       description:
-        'The links across the top of every page, in this order. Up to seven fit on a laptop; put the rest in the footer.',
+        'The links across the top of every page, in this order. Up to seven fit on a laptop; put the rest in the footer. Give a link sub-links to make it a dropdown.',
       type: 'array',
       group: 'header',
       of: [defineArrayMember({ type: 'navItem' })],
@@ -43,6 +45,7 @@ export const siteNavigation = defineType({
       type: 'array',
       group: 'footer',
       of: [defineArrayMember({ type: 'navItem' })],
+      validation: (rule) => rule.custom(checkFooterNav),
     }),
     defineField({
       name: 'footerText',
