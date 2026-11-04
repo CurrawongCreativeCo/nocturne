@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
+import { teamPortraitControls } from '@/lib/sanity/team-portrait'
 import type { SanityImageData } from '@/types/sanity'
 
 import { TeamRow, type Member } from './team-card'
@@ -117,10 +118,64 @@ describe('TeamRow portrait', () => {
     expect(html).not.toContain('data-framed-image')
   })
 
-  it('keeps a genuine Image design that sits beside custom: false', () => {
-    const html = draw(undefined, { appearance: 'circle', custom: false } as never)
-    expect(html).toContain('data-framed-image')
-    expect(html).not.toContain('data-profile-image')
+  it('draws with ProfileImage once Standard and None replace a legacy design, leftovers kept', () => {
+    for (const design of [
+      { appearance: 'standard', motion: 'none', custom: false },
+      {
+        appearance: 'standard',
+        motion: 'none',
+        custom: true,
+        travel: 5,
+        direction: 'up',
+        scale: 1.1,
+      },
+      {
+        appearance: 'standard',
+        motion: 'none',
+        frame: 'double-line',
+        frameColour: 'accent',
+        frameInset: 6,
+      },
+    ]) {
+      const html = draw(undefined, design as never)
+      expect(html).toContain('data-profile-image="rounded"')
+      expect(html).not.toContain('data-framed-image')
+    }
+  })
+
+  it('keeps a genuine Image design, whatever sits beside it', () => {
+    for (const design of [
+      { appearance: 'circle', custom: false },
+      { appearance: 'arch', motion: 'none' },
+      { appearance: 'standard', motion: 'subtle' },
+    ]) {
+      const html = draw(undefined, design as never)
+      expect(html).not.toContain('data-profile-image')
+      expect(html).toContain('data-framed-image')
+    }
+  })
+
+  it('draws what Studio offers: Portrait exactly when the controls say so, for every design', () => {
+    const designs = [
+      undefined,
+      { custom: false },
+      { appearance: 'standard', motion: 'none' },
+      { appearance: 'standard', motion: 'none', frame: 'double-line', custom: true, travel: 5 },
+      { appearance: 'circle' },
+      { appearance: 'standard', motion: 'medium' },
+      { appearance: 'framed', frame: 'none' },
+      { appearance: 'framed', frame: 'offset-border' },
+    ]
+    for (const imageDesign of designs) {
+      const { portrait, imageDesign: image } = teamPortraitControls({
+        variant: 'list',
+        imageDesign,
+      })
+      const html = draw({ ...EMPTY, ring: 'line' } as never, imageDesign as never)
+      expect(html.includes('data-profile-image')).toBe(portrait)
+      expect(html.includes('image-ring')).toBe(portrait)
+      expect(portrait && image).toBe(false)
+    }
   })
 
   it('draws no empty placeholder without a portrait, and keeps the name and its link', () => {

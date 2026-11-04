@@ -47,22 +47,59 @@ describe('Team design controls in Studio', () => {
     ).toEqual({ imageDesign: true, portraitDesign: false })
   })
 
-  it('offers Portrait, not Image design, once a list’s Image design is cleared down to custom: false', () => {
+  it('offers Portrait, not Image design, once a list’s Image design is down to custom: false', () => {
     expect(
       shown({ variant: 'list', imageDesign: { _type: 'imageDesign', custom: false } }),
     ).toEqual({ imageDesign: false, portraitDesign: true })
   })
 
-  it('still offers Image design only for a genuine choice beside custom: false', () => {
-    expect(shown({ variant: 'list', imageDesign: { appearance: 'arch', custom: false } })).toEqual({
+  it('offers Portrait once Standard and None replace Circle and Subtle, with the rest still saved', () => {
+    const saved = { appearance: 'circle', motion: 'subtle', custom: false }
+    expect(shown({ variant: 'list', imageDesign: saved })).toEqual({
       imageDesign: true,
       portraitDesign: false,
     })
+    expect(
+      shown({ variant: 'list', imageDesign: { ...saved, appearance: 'standard', motion: 'none' } }),
+    ).toEqual({ imageDesign: false, portraitDesign: true })
   })
 
-  it('explains how to reach Portrait from the legacy control', () => {
-    const field = find(teamFields, 'imageDesign') as Field & { description?: string }
-    expect(field.description).toMatch(/clear this to choose Portrait/i)
+  it('offers Portrait for Standard + None with inactive advanced settings left behind', () => {
+    for (const leftovers of [
+      { custom: false },
+      { custom: true, travel: 5, direction: 'up', scale: 1.1 },
+      { frame: 'double-line', frameColour: 'accent', frameInset: 6 },
+    ]) {
+      expect(
+        shown({
+          variant: 'list',
+          imageDesign: { appearance: 'standard', motion: 'none', ...leftovers },
+        }),
+      ).toEqual({ imageDesign: false, portraitDesign: true })
+    }
+  })
+
+  it('still offers Image design only for a genuine choice, whatever sits beside it', () => {
+    for (const imageDesign of [
+      { appearance: 'arch', custom: false },
+      { appearance: 'circle', motion: 'none' },
+      { appearance: 'standard', motion: 'subtle' },
+      { appearance: 'framed', frame: 'corner-brackets' },
+    ]) {
+      expect(shown({ variant: 'list', imageDesign })).toEqual({
+        imageDesign: true,
+        portraitDesign: false,
+      })
+    }
+  })
+
+  it('puts no options or description on the Image design field (they make Studio frame and indent it)', () => {
+    const field = find(teamFields, 'imageDesign') as Field & {
+      options?: unknown
+      description?: string
+    }
+    expect(field.options).toBeUndefined()
+    expect(field.description).toBeUndefined()
   })
 
   it('grid and slider offer Image design only, and keep a stored Portrait out of sight', () => {

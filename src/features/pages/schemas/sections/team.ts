@@ -99,11 +99,11 @@ export const team = defineType({
       }),
       // Shape, motion and frames for the larger portraits (grid, slider): agency only, in the Design
       // tab. The list draws small portraits, which take Portrait instead (lib/sanity/team-portrait.ts):
-      // one or the other is shown, never both. A list that already has an Image design keeps it, visible
-      // so it can be cleared; Portrait is offered once it is.
+      // one or the other is shown, never both. A list whose Image design still changes its portraits
+      // keeps it, with a note above it on how to reach Portrait (drawn by the Image design input,
+      // features/studio/components/frame-reference-input.tsx); nothing saved is deleted. No options go
+      // on this field: they make Studio frame and indent the object.
       imageDesignField({
-        description:
-          'On the List layout, clear this to choose Portrait (size and ring for small portraits) instead.',
         hidden: ({ parent }) =>
           !teamPortraitControls((parent ?? {}) as Parameters<typeof teamPortraitControls>[0])
             .imageDesign,
