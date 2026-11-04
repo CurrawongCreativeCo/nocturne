@@ -21,7 +21,15 @@ const DESIGN_SPEC = /design-settings\.spec\.ts/
 const DESIGN_VISUAL_SPEC = /design-settings-visual\.spec\.ts/
 // Panels under each palette, switching the colours the same way.
 const PANEL_PALETTE_SPEC = /section-panel-rendering\.spec\.ts/
-const ISOLATED_SPECS = [EXPERIMENTS_SPEC, DESIGN_SPEC, DESIGN_VISUAL_SPEC, PANEL_PALETTE_SPEC]
+// Serves a header menu with dropdowns, which every page's header would show.
+const NAV_SUBMENUS_SPEC = /nav-submenus\.spec\.ts/
+const ISOLATED_SPECS = [
+  EXPERIMENTS_SPEC,
+  DESIGN_SPEC,
+  DESIGN_VISUAL_SPEC,
+  PANEL_PALETTE_SPEC,
+  NAV_SUBMENUS_SPEC,
+]
 
 /**
  * End-to-end tests: a production build of the site, pointed at a fake Content Lake that serves
@@ -96,6 +104,14 @@ export default defineConfig({
       name: 'panel-palettes',
       testMatch: PANEL_PALETTE_SPEC,
       dependencies: ['design-visual'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Header dropdowns on desktop and in the phone menu; after `panel-palettes` so no other test
+      // sees the nested menu. The phone tests set their own viewport.
+      name: 'nav-submenus',
+      testMatch: NAV_SUBMENUS_SPEC,
+      dependencies: ['panel-palettes'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

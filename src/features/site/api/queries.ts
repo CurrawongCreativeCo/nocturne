@@ -8,6 +8,12 @@ const navItemFields = /* groq */ `
   link { ${linkFields} }
 `
 
+// One level only: sub-links have no children of their own (schemas/nav-item.ts).
+const headerNavItemFields = /* groq */ `
+  ${navItemFields},
+  children[] { ${navItemFields} }
+`
+
 /**
  * One query for the announcement bar, header, footer and site metadata: one cache entry, one request per change.
  *
@@ -36,7 +42,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       verificationMarker
     },
     "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {
-      headerNav[] { ${navItemFields} },
+      headerNav[] { ${headerNavItemFields} },
       headerCta { ${ctaFields} },
       footerNav[] { ${navItemFields} },
       footerText,

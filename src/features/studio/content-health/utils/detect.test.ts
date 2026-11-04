@@ -137,6 +137,20 @@ describe('collectLinkTargets', () => {
     expect(collectLinkTargets(doc)).toEqual(['a', 'b', 'c'])
   })
 
+  it('finds internal links in header sub-links, with or without a parent link', () => {
+    const headerNav = [
+      {
+        _type: 'navItem',
+        label: 'A',
+        link: internal('a'),
+        children: [{ label: 'B', link: internal('b') }],
+      },
+      { _type: 'navItem', label: 'C', children: [{ label: 'D', link: internal('d') }] },
+    ]
+    expect(collectLinkTargets(headerNav)).toEqual(['a', 'b', 'd'])
+    expect(findBrokenLinkTargets(headerNav, new Set(['a', 'b']))).toEqual(['d'])
+  })
+
   it('ignores external links, including a stale reference left behind by switching type', () => {
     expect(
       collectLinkTargets([internal('a', 'external'), { _type: 'link', linkType: 'external' }]),
