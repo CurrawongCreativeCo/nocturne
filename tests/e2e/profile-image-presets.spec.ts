@@ -69,6 +69,7 @@ for (const viewport of SIZES) {
     })
 
     test('values the site does not know fall back to Medium with no ring', async ({ page }) => {
+      await page.goto(PAGE)
       const circles = avatars(page, 'malformed').locator('[data-profile-image="circle"]')
       expect(await width(circles.first())).toBe(AVATAR.medium)
       await expect(avatars(page, 'malformed').locator('.image-ring')).toHaveCount(0)
