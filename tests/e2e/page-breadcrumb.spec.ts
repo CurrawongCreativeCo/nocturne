@@ -24,6 +24,9 @@ for (const scheme of SCHEMES) {
     const nested = example(page, scheme, 'nested')
     await nested.scrollIntoViewIfNeeded()
     const nav = nested.getByRole('navigation', { name: 'Page location' })
+    // On a phone the pane is narrow, so the ancestors sit behind the disclosure button.
+    const fold = nav.getByRole('button', { name: 'Show the pages above this one' })
+    if (await fold.isVisible()) await fold.click()
     await expect(nav.getByRole('link', { name: 'services' })).toBeVisible()
     await expect(nav.locator('[aria-current="page"]')).toHaveText('web-design')
 
