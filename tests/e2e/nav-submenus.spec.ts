@@ -178,7 +178,8 @@ test.describe('desktop dropdowns', () => {
     const duration = await services(page)
       .locator('svg')
       .evaluate((el) => getComputedStyle(el).transitionDuration)
-    expect(duration).toBe('0s')
+    // The site's reduced-motion rule leaves 0.01 ms (globals.css), against 150 ms otherwise.
+    expect(parseFloat(duration)).toBeLessThanOrEqual(0.00001)
   })
 
   test('removes its document listeners and timers when it closes', async ({ page }) => {

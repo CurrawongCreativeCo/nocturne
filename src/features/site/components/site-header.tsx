@@ -7,7 +7,7 @@ import { SanityLink } from '@/components/ui/sanity-link'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { MobileMenu } from './mobile-menu'
-import { NavDropdown } from './nav-dropdown'
+import { NavDropdown } from './nav-dropdown-lazy'
 import { getSettings } from '../api/get-settings'
 import { toHeaderNav } from '../utils/header-nav'
 
