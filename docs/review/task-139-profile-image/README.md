@@ -40,10 +40,13 @@ an element screenshot rasterises them one pixel row apart. Cropping just the pic
 difference above 24), the malformed and legacy pictures match `main` exactly at the right offset (0.0 % different) at all three
 widths. The Linux visual baselines do not cover these new sections, so CI cannot catch such drift; the checks above are the evidence.
 
-**CI finding, fixed.** The first push of the corrections put the new gallery fixtures in the middle of the section gallery, which
-moved 30 or so existing sections by a sub-pixel and failed their Linux visual baselines in two e2e shards (for example
-`video-embed`, `process-vertical`, `panel-gradient`). That is the effect measured above, seen by CI. The new fixtures now sit
-last in `gallerySections`, as the fixture file already requires of new entries. No baseline was updated.
+**CI findings, fixed.** (1) Putting the new fixtures in the middle of the section gallery moved about 30 existing sections by a
+sub-pixel and failed their Linux visual baselines (for example `video-embed`, `process-vertical`, `panel-gradient`): the effect
+measured above, seen by CI. (2) Moving them to the end of the gallery fixed that, but `visual.spec.ts` screenshots every
+gallery section, so each of the 11 new ones needed a new Linux baseline. They now live on a page of their own, `/profile-images`
+(like `/slider` and `/logos`), so the gallery and its baselines are untouched and no baseline was added or updated. The
+screenshots above were taken when the fixtures were in the gallery; the markup is the same on the page. The unchanged default
+states (`testimonials`, `team-list`, `team-grid`, `team-slider`) stay in the gallery.
 
 ## Checks made while looking at the images
 
