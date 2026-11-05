@@ -10,7 +10,7 @@
 import { assist } from '@sanity/assist'
 import { visionTool } from '@sanity/vision'
 import { createElement } from 'react'
-import { defineConfig, isStringInputProps, type InputProps } from 'sanity'
+import { defineConfig, isObjectInputProps, isStringInputProps, type InputProps } from 'sanity'
 import { presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
@@ -42,6 +42,7 @@ import { publishValidationActions } from './src/features/studio/actions/publish-
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
 import { FramelessAwareField } from './src/features/studio/components/frameless-field'
+import { PageBreadcrumbInput } from './src/features/studio/components/page-breadcrumb-input'
 import { withPresetPicker } from './src/features/studio/components/preset-picker/with-preset-picker'
 import { RoleNavbar } from './src/features/studio/components/role-navbar'
 import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
@@ -92,14 +93,17 @@ const PresetAwareInput = withPresetPicker(
 // An element's Custom colour (themeColourField) uses the same input; its colour choice gets swatches.
 // A plain colour (`options.colourPicker`, a gradient overlay's stop) uses it with no contrast check.
 const StudioInputs = (props: InputProps) =>
-  isStringInputProps(props) &&
-  (props.schemaType.options?.headingStop === true ||
-    props.schemaType.options?.themeColourHex ||
-    props.schemaType.options?.colourPicker === true)
-    ? createElement(ColourInput, props)
-    : isStringInputProps(props) && props.schemaType.options?.themeColourPicker
-      ? createElement(ThemeColourPickerInput, props)
-      : createElement(PresetAwareInput, props)
+  // A page's place in the site above its fields: the page document's root input only.
+  isObjectInputProps(props) && props.path.length === 0 && props.schemaType.name === 'page'
+    ? createElement(PageBreadcrumbInput, props)
+    : isStringInputProps(props) &&
+        (props.schemaType.options?.headingStop === true ||
+          props.schemaType.options?.themeColourHex ||
+          props.schemaType.options?.colourPicker === true)
+      ? createElement(ColourInput, props)
+      : isStringInputProps(props) && props.schemaType.options?.themeColourPicker
+        ? createElement(ThemeColourPickerInput, props)
+        : createElement(PresetAwareInput, props)
 // A throwing input shows a client a safe message with Try again, never a raw React error.
 const StudioInput = (props: InputProps) =>
   createElement(StudioInputBoundary, null, createElement(StudioInputs, props))

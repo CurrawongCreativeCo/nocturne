@@ -24,6 +24,7 @@ import { studioFontFamilies } from '@/config/studio-fonts'
 import { brandPreviewCases, sampleAssets, type BrandPreviewCase } from './cases'
 import { DesignInputExamples } from './design-input-examples'
 import { LaunchExample } from './launch-example'
+import { PageBreadcrumbExamples } from './page-breadcrumb-examples'
 import { PickerExamples } from './picker-examples'
 import { PictureFramingExamples } from './picture-framing-examples'
 import { SetupExample } from './setup-example'
@@ -277,6 +278,18 @@ function InputExamples({
             <ThemeProvider scheme={scheme} theme={theme}>
               <Card padding={4} radius={3} border>
                 <PictureFramingExamples />
+              </Card>
+            </ThemeProvider>
+          </div>
+        ))}
+      </div>
+      <h3 className="mt-10 text-base font-semibold">Page breadcrumb</h3>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {SCHEMES.map((scheme) => (
+          <div key={scheme} data-breadcrumb-scheme={scheme}>
+            <ThemeProvider scheme={scheme} theme={theme}>
+              <Card padding={4} radius={3} border>
+                <PageBreadcrumbExamples />
               </Card>
             </ThemeProvider>
           </div>
