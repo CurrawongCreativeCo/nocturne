@@ -838,3 +838,139 @@ describe('supported icon changes are accepted, and unsupported ones are not (AT7
     expect(found[0]?.[1]).toContain('which the manifest has no design contract for')
   })
 })
+
+describe('the layout that survives (AT4)', () => {
+  type Patches = ChangeProposal['changes'][number]['patches']
+  const thumb = { _type: 'image', asset: { _type: 'reference', _ref: 'image-abc-100x100-png' } }
+  const validate = (patches: Patches, given: ValidateDeps = deps()) =>
+    validateProposal(proposal(patches), given)
+  const reasonsAt = (result: ReturnType<typeof validate>, path: string) =>
+    result.rejected.find((patch) => patch.path === path)?.reasons.map((reason) => reason.code)
+
+  const compact = at('listCompact', 'links[_key=="a"].thumbnail')
+  const variant = at('listCompact', 'variant')
+  const badTone = at('listCompact', 'style.tone')
+
+  it('judges content in the layout that will be written when a design part is rejected', () => {
+    // Stored Compact; the proposal moves to Cards (where a thumbnail is drawn), adds one, and sets a bad
+    // tone. The design part has a rejection, so it writes nothing, and the thumbnail would land on Compact.
+    const result = validate([
+      { set: { [variant]: 'cards', [compact]: thumb, [badTone]: 'enormous' } },
+    ])
+    expect(reasonsAt(result, badTone)).toEqual(['value-not-allowed'])
+    expect(reasonsAt(result, compact)).toEqual(['capability-not-verified'])
+    expect(result.design.applies).toBe(false)
+    expect(result.content.applies).toBe(false)
+    expect(result.applicable).toEqual([])
+    const found = result.rejected.find((patch) => patch.path === compact)?.reasons[0]?.message
+    expect(found).toContain('Draws no thumbnails')
+  })
+
+  it('does the same when part of the design is rejected for want of an agency token', () => {
+    // A client may move a Link list to Cards, but the section style is the agency's. The style change is
+    // rejected, so the design part writes nothing and the layout stays Compact.
+    const result = validate(
+      [{ set: { [variant]: 'cards', [compact]: thumb, [at('listCompact', 'style.tone')]: 'alt' } }],
+      deps({ agencyPermitted: false }),
+    )
+    expect(reasonsAt(result, at('listCompact', 'style.tone'))).toEqual([
+      'agency-permission-required',
+    ])
+    expect(reasonsAt(result, compact)).toEqual(['capability-not-verified'])
+    expect(result.applicable).toEqual([])
+    // With the token, nothing is rejected and both parts are written.
+    const permitted = validate(
+      [{ set: { [variant]: 'cards', [compact]: thumb, [at('listCompact', 'style.tone')]: 'alt' } }],
+      deps({ agencyPermitted: true }),
+    )
+    expect(permitted.rejected).toEqual([])
+  })
+
+  it('does not accept the layout change itself when it is the agency-only one (mediaText)', () => {
+    const result = validate(
+      [{ set: { [at('sideMedia', 'variant')]: 'stacked' } }],
+      deps({ agencyPermitted: false }),
+    )
+    expect(reasonsAt(result, at('sideMedia', 'variant'))).toEqual(['agency-permission-required'])
+    expect(result.applicable).toEqual([])
+  })
+
+  it('applies both when the layout and what depends on it are fine', () => {
+    const result = validate([{ set: { [variant]: 'cards', [compact]: thumb } }])
+    expect(result.rejected).toEqual([])
+    expect(result.design.applies).toBe(true)
+    expect(result.content.applies).toBe(true)
+    expect(result.applicable).toHaveLength(2)
+  })
+
+  it('judges design in the document that will be written when a content part is rejected', () => {
+    // The other direction. The proposal removes a section (content) and styles it (design), and a content
+    // value elsewhere is invalid, so the content part writes nothing: the section stays, and its panel
+    // is judged on the section that will be there, not on one that is gone.
+    const style = at('heroSplit', 'style.panel')
+    const result = validate([
+      { unset: ['pageBuilder[_key=="heroSplit"]'] },
+      { set: { [at('plain', 'bogus')]: 'x', [style]: 'glass' } },
+    ])
+    expect(reasonsAt(result, at('plain', 'bogus'))).toEqual(['unknown-path'])
+    expect(reasonsAt(result, style)).toBeUndefined()
+    expect(result.content.applies).toBe(false)
+    expect(result.design.applies).toBe(true)
+    expect(result.applicable.map((patch) => patch.path)).toEqual([style])
+  })
+
+  it('still rejects design on a section the same proposal removes, when the removal will be written', () => {
+    const style = at('heroSplit', 'style.panel')
+    const result = validate([
+      { unset: ['pageBuilder[_key=="heroSplit"]'] },
+      { set: { [style]: 'glass' } },
+    ])
+    expect(reasonsAt(result, style)).toEqual(['invalid-path'])
+    expect(result.content.applies).toBe(true)
+    expect(result.design.applies).toBe(false)
+  })
+
+  it('rejects a design change to a section the same proposal inserts, whether or not the insert lands', () => {
+    const inserted = { _key: 'fresh', _type: 'richText' }
+    const path = at('fresh', 'style.tone')
+    for (const bad of [false, true]) {
+      const result = validate([
+        {
+          insert: { after: 'pageBuilder[-1]', items: [bad ? { ...inserted, bogus: 1 } : inserted] },
+        },
+        { set: { [path]: 'alt' } },
+      ])
+      expect(reasonsAt(result, path), String(bad)).toEqual(['unknown-path'])
+      expect(result.design.applies).toBe(false)
+    }
+  })
+
+  it('does not let a rejection in one part block a valid, layout-independent unit in the other', () => {
+    const label = at('listCompact', 'links[_key=="a"].label')
+    const result = validate([{ set: { [badTone]: 'enormous', [label]: 'Renamed' } }])
+    expect(reasonsAt(result, badTone)).toEqual(['value-not-allowed'])
+    expect(reasonsAt(result, label)).toBeUndefined()
+    expect(result.content.applies).toBe(true)
+    expect(result.design.applies).toBe(false)
+    expect(result.applicable.map((patch) => patch.path)).toEqual([label])
+  })
+
+  it('settles in a few rounds, and fails closed when it is not allowed enough', () => {
+    const patches: Patches = [
+      { set: { [variant]: 'cards', [compact]: thumb, [badTone]: 'enormous' } },
+    ]
+    // Allowed to settle, it does, and says why each unit was rejected.
+    expect(
+      validate(patches)
+        .rejected.map((patch) => patch.path)
+        .sort(),
+    ).toEqual([compact, badTone].sort())
+    // One round is not enough to see the thumbnail's problem settle: nothing that is left is accepted.
+    const capped = validate(patches, deps({ maxRounds: 1 }))
+    expect(capped.applicable).toEqual([])
+    expect(reasonsAt(capped, variant)).toEqual(['proposal-unstable'])
+    expect(
+      capped.rejected.flatMap((patch) => patch.reasons.map((reason) => reason.code)),
+    ).toContain('proposal-unstable')
+  })
+})

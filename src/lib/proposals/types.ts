@@ -58,6 +58,7 @@ export type RejectionCode =
   | 'capability-not-verified'
   | 'content-source-not-verified'
   | 'agency-permission-required'
+  | 'proposal-unstable'
 
 export interface Rejection {
   code: RejectionCode
