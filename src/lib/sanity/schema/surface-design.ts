@@ -1,5 +1,6 @@
 import { defineField, type ConditionalProperty, type ConditionalPropertyCallback } from 'sanity'
 
+import type { DesignSummaryConfig } from '../design-summary'
 import {
   INLINE_CASE_TITLES,
   INLINE_SIZE_TITLES,
@@ -40,10 +41,11 @@ declare module 'sanity' {
   }
   interface ObjectOptions {
     /**
-     * A link's Appearance: the Studio shows what the link changes and the resets above its fields
-     * (features/studio/components/link-design-summary-input).
+     * A section, card or item design object: the Studio shows what it changes, at which level, and
+     * the resets above its fields (features/studio/components/design-summary-input). A Link list
+     * link's Appearance sets LINK_DESIGN_SUMMARY (lib/sanity/link-design-summary.ts).
      */
-    linkDesignSummary?: boolean
+    designSummary?: DesignSummaryConfig
   }
 }
 

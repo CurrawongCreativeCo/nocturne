@@ -18,6 +18,7 @@ import { headingPlainText } from '@/lib/sanity/heading-text'
 import { LINK_ARROWS, LINK_ARROW_TITLES } from '@/lib/sanity/link-arrow-options'
 import {
   LINK_DESIGN_GROUP_TITLES,
+  LINK_DESIGN_SUMMARY,
   countCustomisedLinks,
   customisedLinksText,
   scopedTitle,
@@ -356,7 +357,7 @@ const linkAppearanceField = defineField({
     'This link follows the Link list’s design (Design tab). Customise it to change only what you pick here.',
   hidden: hiddenFromClients,
   // The summary and the resets above the fields (features/studio/components/link-design-summary-input).
-  options: { collapsible: true, collapsed: true, linkDesignSummary: true },
+  options: { collapsible: true, collapsed: true, designSummary: LINK_DESIGN_SUMMARY },
   fieldsets: [
     {
       name: 'card',
