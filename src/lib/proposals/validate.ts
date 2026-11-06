@@ -2,6 +2,7 @@ import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-d
 import { isClientEditable as registryIsClientEditable } from '@/lib/sanity/client-editable'
 import { panelProblem } from '@/lib/sanity/section-panel'
 
+import { capabilityVerdicts, layoutOfSection, type MarkedField } from './capabilities'
 import {
   getAt,
   insertAt,
@@ -39,7 +40,10 @@ import type {
  *    the value is in its list, a slot block is allowed there and an array's limit holds.
  * 3. Design: a Brand colours change that makes a text pair fail (through `resolveDesignTokens`) is
  *    rejected; a section's panel that cannot be made readable is only a warning, as it is in Studio.
- * 4. Permissions: a change to anything clients may not edit (CLIENT_EDITABLE, through the manifest)
+ * 4. Capabilities: a value in a field that is a shared design capability, or feeds a content source,
+ *    must be verified for the section's layout in the manifest (capabilities.ts); anything else is
+ *    rejected with the reason. Fields that carry no capability keep the ordinary checks.
+ * 5. Permissions: a change to anything clients may not edit (CLIENT_EDITABLE, through the manifest)
  *    is marked `needsAgencyReview`.
  *
  * The Sanity schema's own validation rules cannot run here; scripts/proposal.mjs runs them on the
@@ -105,8 +109,10 @@ interface Inspection {
   reasons: Rejection[]
   warnings: string[]
   review: boolean
-  /** The section the unit changes (its `_key`), for the panel check. */
+  /** The section the unit changes (its `_key`), for the panel and capability checks. */
   sectionKey?: string
+  /** Capability and content-source fields the value sets, judged once the layout is known. */
+  marked: MarkedField[]
   /** The name of the top-level field it changes, for attributing a contrast failure. */
   field?: string
 }
@@ -246,6 +252,8 @@ interface ValueCheck {
   problems: Rejection[]
   /** The rows the value touches, for the permission check. */
   touched: ManifestField[]
+  /** The touched rows that are a shared design capability or feed a content source, with their paths. */
+  marked: MarkedField[]
 }
 
 /** The block types the slot at `arrayPath` accepts, or undefined when the array isn't a slot. */
@@ -296,6 +304,7 @@ function checkValue(check: ValueCheck, path: string, value: unknown) {
     problems.push(reject('value-not-allowed', `${path} cannot be null: unset it to inherit.`))
     return
   }
+  if (row && (row.capability || row.contentSource)) check.marked.push({ path, row })
 
   if (Array.isArray(value)) {
     if (row && row.kind !== 'array' && !OPAQUE_KINDS.has(row.kind)) {
@@ -376,7 +385,13 @@ function partOf(scope: Scope | undefined, topField: string | undefined, designDo
 function inspect(unit: Unit, deps: ValidateDeps): Inspection {
   const { manifest, documents } = deps
   const editable = deps.isClientEditable ?? registryIsClientEditable
-  const result: Inspection = { part: 'content', reasons: [], warnings: [], review: false }
+  const result: Inspection = {
+    part: 'content',
+    reasons: [],
+    warnings: [],
+    review: false,
+    marked: [],
+  }
   const fail = (code: RejectionCode, message: string) => {
     result.reasons.push(reject(code, message))
     return result
@@ -485,7 +500,7 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
     )
   }
 
-  const check: ValueCheck = { scope, problems: result.reasons, touched: [] }
+  const check: ValueCheck = { scope, problems: result.reasons, touched: [], marked: [] }
   const top = result.field ? scope.rows.get(result.field) : undefined
   if (top) check.touched.push(top)
 
@@ -520,6 +535,7 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
     }
   }
   result.review = result.review || check.touched.some((row) => !row.clientEditable)
+  result.marked = check.marked
   return result
 }
 
@@ -542,6 +558,7 @@ function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspec
       scope: sectionScope(manifest, section, item),
       problems: result.reasons,
       touched: [],
+      marked: [],
     }
     for (const [key, value] of Object.entries(item)) {
       if (key === '_type' || key === '_key') continue
@@ -552,6 +569,14 @@ function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspec
         continue
       }
       checkValue(check, key, value)
+    }
+    // A section inserted whole is judged in the layout it brings, else its default.
+    for (const verdict of capabilityVerdicts(
+      section,
+      layoutOfSection(section, item.variant),
+      check.marked,
+    )) {
+      result.reasons.push(reject(verdict.code, verdict.message))
     }
     result.review = result.review || check.touched.some((row) => !row.clientEditable)
   }
@@ -568,6 +593,45 @@ function applyUnit(document: DocumentSnapshot, unit: Unit): DocumentSnapshot {
     return insertAt(document, segments, unit.position.where, unit.value)
   }
   return document
+}
+
+/**
+ * Capability and content-source fields: each value must be verified for the layout its section is drawn
+ * in once the whole proposal is applied (a change of layout in the same proposal counts). A value that
+ * isn't is rejected, whichever part it is in, with the reason.
+ */
+function checkCapabilities(
+  document: DocumentSnapshot,
+  units: { unit: Unit; inspection: Inspection }[],
+  deps: ValidateDeps,
+) {
+  // Best effort: a unit that can't be applied here (a value set on a section with no `style` object yet)
+  // is skipped, so the layout is still read from every change that can be, and never from nothing.
+  let patched = document
+  for (const { unit } of units) {
+    try {
+      patched = applyUnit(patched, unit)
+    } catch {
+      continue
+    }
+  }
+  const sections = Array.isArray(patched.pageBuilder) ? (patched.pageBuilder as unknown[]) : []
+  for (const { inspection } of units) {
+    if (inspection.marked.length === 0 || !inspection.sectionKey) continue
+    const section = sections.find(
+      (item): item is Record<string, unknown> =>
+        isRecord(item) && item._key === inspection.sectionKey,
+    )
+    const entry = deps.manifest.sections.find((candidate) => candidate.type === section?._type)
+    if (!section || !entry) continue
+    for (const verdict of capabilityVerdicts(
+      entry,
+      layoutOfSection(entry, section.variant),
+      inspection.marked,
+    )) {
+      inspection.reasons.push(reject(verdict.code, verdict.message))
+    }
+  }
 }
 
 /** Brand colours: a change that makes a text pair newly fail is rejected, on the units that touch it. */
@@ -680,6 +744,27 @@ export function validateProposal(proposal: unknown, deps: ValidateDeps): Proposa
   }
 
   const inspected = explode(typed).map((unit) => ({ unit, inspection: inspect(unit, deps) }))
+
+  // Capability and content-source values are judged against the manifest, whichever part they are in.
+  const withMarked = new Set(
+    inspected
+      .filter(
+        (entry) => entry.inspection.reasons.length === 0 && entry.inspection.marked.length > 0,
+      )
+      .map((entry) => entry.unit.documentId),
+  )
+  for (const documentId of withMarked) {
+    const document = deps.documents[documentId]
+    if (document?._type !== 'page') continue
+    // The document's accepted units together, so a layout change in the same proposal counts.
+    checkCapabilities(
+      document,
+      inspected.filter(
+        (entry) => entry.unit.documentId === documentId && entry.inspection.reasons.length === 0,
+      ),
+      deps,
+    )
+  }
 
   // Design checks run on what is still acceptable, per document, once the parts are separate.
   const byDocument = new Map<string, typeof inspected>()

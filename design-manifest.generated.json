@@ -1917,6 +1917,7 @@
                 "intro"
               ],
               "closingTask": 213,
+              "fields": [],
               "availability": {
                 "overlay": "pending",
                 "split": "pending",
@@ -1938,6 +1939,7 @@
                 "intro"
               ],
               "closingTask": 213,
+              "fields": [],
               "availability": {
                 "overlay": "pending",
                 "split": "pending",
@@ -1954,6 +1956,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "overlay": "pending",
                 "split": "pending",
@@ -1982,6 +1985,7 @@
                 "reachable": true
               },
               "closingTask": 137,
+              "fields": [],
               "availability": {
                 "overlay": "pending",
                 "split": "pending",
@@ -1999,6 +2003,7 @@
               "scope": "section",
               "part": "picture",
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "overlay": {
                   "notApplicable": "Its picture is the background: see the background part"
@@ -2023,6 +2028,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "overlay": "pending",
                 "split": {
@@ -2043,6 +2049,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 147,
+              "fields": [],
               "availability": {
                 "overlay": {
                   "notApplicable": "Its picture is the background: backgrounds are excluded (147)"
@@ -2065,6 +2072,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [],
               "availability": {
                 "overlay": "pending",
                 "split": {
@@ -2085,6 +2093,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "overlay": "verified",
                 "split": "verified",
@@ -2118,6 +2129,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "overlay": "pending",
                 "split": "pending",
@@ -2134,6 +2146,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "overlay": "verified",
                 "split": "verified",
@@ -2167,6 +2182,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "overlay": "verified",
                 "split": "verified",
@@ -2199,6 +2217,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 219,
+              "fields": [
+                "supporting"
+              ],
               "availability": {
                 "overlay": "verified",
                 "split": "verified",
@@ -2301,6 +2322,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -2328,6 +2350,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -2342,6 +2365,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -2366,6 +2392,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             }
           ],
@@ -2390,6 +2419,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -2401,6 +2431,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -2426,6 +2459,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -3156,6 +3192,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "side": "pending",
                 "stacked": "pending",
@@ -3171,6 +3208,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "side": "pending",
                 "stacked": "pending",
@@ -3198,6 +3236,7 @@
                 "reachable": true
               },
               "closingTask": 137,
+              "fields": [],
               "availability": {
                 "side": "pending",
                 "stacked": "pending",
@@ -3220,6 +3259,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "side": "pending",
                 "stacked": "pending",
@@ -3237,6 +3277,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 147,
+              "fields": [],
               "availability": {
                 "side": "pending",
                 "stacked": "pending",
@@ -3254,6 +3295,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "side": "verified",
                 "stacked": "verified",
@@ -3285,6 +3329,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "side": "verified",
                 "stacked": "verified",
@@ -3315,6 +3362,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "side": "pending",
                 "stacked": "pending",
@@ -3330,6 +3378,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "side": "verified",
                 "stacked": "verified",
@@ -3361,6 +3412,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "side": "verified",
                 "stacked": "verified",
@@ -3391,6 +3445,10 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 219,
+              "fields": [
+                "media",
+                "supporting"
+              ],
               "availability": {
                 "side": "verified",
                 "stacked": "verified",
@@ -3556,6 +3614,7 @@
                 "when": "A layout or look draws its items on a card (the grid has no such option today)"
               },
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3571,6 +3630,7 @@
                 "body"
               ],
               "closingTask": 276,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3587,6 +3647,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3598,6 +3659,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3613,6 +3675,7 @@
                 "when": "A layout or look draws its items on a card (the grid has no such option today)"
               },
               "closingTask": 146,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3624,6 +3687,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 158,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3639,6 +3703,7 @@
                 "when": "An item has a link (the field doesn’t exist today)"
               },
               "closingTask": 137,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3657,6 +3722,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3671,6 +3737,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -3695,6 +3764,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             },
             {
@@ -3705,6 +3777,7 @@
                 "when": "Items are drawn on a card whose surface kind is Glass"
               },
               "closingTask": 159,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3729,6 +3802,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -3740,6 +3814,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -3765,6 +3842,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -3951,6 +4031,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "marquee": "pending"
@@ -3965,6 +4046,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "marquee": "pending"
@@ -3995,6 +4077,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "marquee": "pending"
@@ -4012,6 +4095,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "grid": "verified",
                 "marquee": "verified"
@@ -4040,6 +4126,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "grid": "verified",
                 "marquee": "verified"
@@ -4068,6 +4157,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "marquee": "pending"
@@ -4082,6 +4172,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "grid": "verified",
                 "marquee": "verified"
@@ -4111,6 +4204,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "grid": "verified",
                 "marquee": "verified"
@@ -4179,7 +4275,8 @@
           "kind": "array",
           "required": true,
           "max": null,
-          "clientEditable": true
+          "clientEditable": true,
+          "contentSource": "testimonials.manual"
         },
         {
           "path": "items[].quote",
@@ -4333,6 +4430,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4352,6 +4450,7 @@
                 "label"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4371,6 +4470,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4385,6 +4485,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4394,6 +4495,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4408,6 +4510,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4429,6 +4532,7 @@
               "scope": "card",
               "part": "avatar",
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4445,6 +4549,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4459,6 +4564,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 147,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4473,6 +4579,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified"
@@ -4501,6 +4610,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified"
@@ -4514,6 +4626,7 @@
                 "when": "The card’s surface kind is Glass"
               },
               "closingTask": 159,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4542,6 +4655,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
@@ -4556,6 +4670,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified"
@@ -4585,6 +4702,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified"
@@ -4614,6 +4734,9 @@
       "contentSources": {
         "testimonials.manual": {
           "owner": 156,
+          "fields": [
+            "items"
+          ],
           "availability": {
             "grid": "verified",
             "slider": "verified"
@@ -4622,6 +4745,7 @@
         "testimonials.google": {
           "owner": 277,
           "gate": "Task 277 Phase 1 decision record and the owner’s approval. No Google Cloud setup is approved",
+          "fields": [],
           "availability": {
             "grid": "pending",
             "slider": "pending"
@@ -4716,6 +4840,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -4731,6 +4856,7 @@
                 "body"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -4747,6 +4873,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -4758,12 +4885,14 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             },
             {
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -4779,6 +4908,7 @@
                 "when": "The FAQ item style is Cards (the setting arrives with 156)"
               },
               "closingTask": 146,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -4803,6 +4933,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -4817,6 +4948,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -4841,6 +4975,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             }
           ],
@@ -4865,6 +5002,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -4876,6 +5014,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -4901,6 +5042,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -5125,6 +5269,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 159,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5144,6 +5289,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5155,6 +5301,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5166,6 +5313,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5186,6 +5334,7 @@
                 "reachable": true
               },
               "closingTask": 137,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5204,6 +5353,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5218,6 +5368,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -5242,6 +5395,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5253,6 +5407,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5264,6 +5419,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -5289,6 +5447,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -5385,6 +5546,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 148,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5404,6 +5566,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5415,6 +5578,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5426,6 +5590,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 148,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5450,6 +5615,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5464,6 +5630,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -5488,6 +5657,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             }
           ],
@@ -5512,6 +5684,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5523,6 +5696,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -5548,6 +5724,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -5681,12 +5860,14 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             },
             {
               "policy": "required",
               "scope": "item",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5705,6 +5886,7 @@
                 "description"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             },
             {
@@ -5718,6 +5900,7 @@
                 "description"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5734,6 +5917,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5745,18 +5929,21 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             },
             {
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             },
             {
               "policy": "required",
               "scope": "item",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5768,12 +5955,14 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
+              "fields": [],
               "availability": "pending"
             },
             {
               "policy": "required",
               "scope": "item",
               "closingTask": 146,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5791,6 +5980,7 @@
                 "reachable": true
               },
               "closingTask": 158,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5812,6 +6002,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5826,6 +6017,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -5850,6 +6044,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             },
             {
@@ -5860,6 +6057,7 @@
                 "when": "The card’s surface kind is Glass"
               },
               "closingTask": 159,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5884,6 +6082,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -5895,6 +6094,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -5920,6 +6122,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -6024,6 +6229,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 148,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -6043,6 +6249,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -6054,6 +6261,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -6065,6 +6273,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 148,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -6089,6 +6298,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -6103,6 +6313,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -6127,6 +6340,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             }
           ],
@@ -6151,6 +6367,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -6162,6 +6379,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -6187,6 +6407,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -6362,6 +6585,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "inline": {
                   "notApplicable": "Draws no card"
@@ -6382,6 +6606,7 @@
                 "label"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "inline": {
                   "notApplicable": "156 item 6 names the cards layout only"
@@ -6403,6 +6628,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "inline": "pending",
                 "cards": "pending"
@@ -6417,6 +6643,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "inline": "pending",
                 "cards": "pending"
@@ -6426,6 +6653,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "inline": {
                   "notApplicable": "Draws no card"
@@ -6446,6 +6674,7 @@
                 "when": "The layout is Cards"
               },
               "closingTask": 146,
+              "fields": [],
               "availability": {
                 "inline": {
                   "notApplicable": "Draws no card"
@@ -6475,6 +6704,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "inline": "pending",
                 "cards": "pending"
@@ -6492,6 +6722,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "inline": "verified",
                 "cards": "verified"
@@ -6520,6 +6753,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "inline": "verified",
                 "cards": "verified"
@@ -6533,6 +6769,7 @@
                 "when": "The card’s surface kind is Glass"
               },
               "closingTask": 159,
+              "fields": [],
               "availability": {
                 "inline": {
                   "notApplicable": "Draws no card"
@@ -6563,6 +6800,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "inline": "pending",
                 "cards": "pending"
@@ -6577,6 +6815,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "inline": "verified",
                 "cards": "verified"
@@ -6606,6 +6847,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "inline": "verified",
                 "cards": "verified"
@@ -6984,6 +7228,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "masonry": "pending",
@@ -6999,6 +7244,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "masonry": "pending",
@@ -7024,6 +7270,7 @@
               "scope": "card",
               "part": "tile",
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "masonry": "pending",
@@ -7041,6 +7288,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "masonry": "pending",
@@ -7056,6 +7304,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 147,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "masonry": "pending",
@@ -7071,6 +7320,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "grid": "verified",
                 "masonry": "verified",
@@ -7101,6 +7353,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "grid": "verified",
                 "masonry": "verified",
@@ -7131,6 +7386,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "masonry": "pending",
@@ -7146,6 +7402,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "grid": "verified",
                 "masonry": "verified",
@@ -7177,6 +7436,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "grid": "verified",
                 "masonry": "verified",
@@ -7249,7 +7511,8 @@
           "path": "showHours",
           "kind": "boolean",
           "required": false,
-          "clientEditable": true
+          "clientEditable": true,
+          "contentSource": "location.addressCard"
         },
         {
           "path": "showOpenNow",
@@ -7274,7 +7537,8 @@
           "kind": "string",
           "required": true,
           "max": null,
-          "clientEditable": true
+          "clientEditable": true,
+          "contentSource": "location.directionsLink"
         },
         {
           "path": "access",
@@ -7302,7 +7566,8 @@
           "path": "interactiveMap",
           "kind": "boolean",
           "required": false,
-          "clientEditable": false
+          "clientEditable": false,
+          "contentSource": "location.clickToLoadEmbed"
         }
       ],
       "presets": [],
@@ -7323,6 +7588,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7339,6 +7605,7 @@
                 "meta"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7355,6 +7622,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7366,12 +7634,14 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             },
             {
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7383,6 +7653,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7394,6 +7665,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 158,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7415,6 +7687,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7432,6 +7705,7 @@
                 "reachable": true
               },
               "closingTask": 147,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7443,6 +7717,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -7467,6 +7744,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             },
             {
@@ -7477,6 +7757,7 @@
                 "when": "The card’s surface kind is Glass"
               },
               "closingTask": 159,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7501,6 +7782,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -7512,6 +7794,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -7537,6 +7822,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -7562,19 +7850,29 @@
       "contentSources": {
         "location.addressCard": {
           "owner": 278,
+          "fields": [
+            "showHours"
+          ],
           "availability": "verified"
         },
         "location.directionsLink": {
           "owner": 278,
+          "fields": [
+            "directionsLabel"
+          ],
           "availability": "verified"
         },
         "location.clickToLoadEmbed": {
           "owner": 278,
+          "fields": [
+            "interactiveMap"
+          ],
           "availability": "verified"
         },
         "location.placeIdEmbed": {
           "owner": 278,
           "gate": "A configured Maps Embed API key in a client-owned Google Cloud project. No project, key or billing is approved",
+          "fields": [],
           "availability": "pending"
         }
       }
@@ -7957,6 +8255,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -7977,6 +8276,7 @@
                 "body"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -7997,6 +8297,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8012,6 +8313,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8022,6 +8324,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8037,6 +8340,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8055,6 +8359,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 137,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8071,6 +8376,7 @@
               "scope": "card",
               "part": "portrait",
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8088,6 +8394,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8103,6 +8410,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 147,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8118,6 +8426,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified",
@@ -8148,6 +8459,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified",
@@ -8162,6 +8476,7 @@
                 "when": "The card’s surface kind is Glass"
               },
               "closingTask": 159,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8192,6 +8507,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "grid": "pending",
                 "slider": "pending",
@@ -8207,6 +8523,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified",
@@ -8238,6 +8557,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "grid": "verified",
                 "slider": "verified",
@@ -8465,6 +8787,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "embed": "pending",
                 "ambient": "pending"
@@ -8498,6 +8821,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "embed": "pending",
                 "ambient": "pending"
@@ -8515,6 +8839,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "embed": "verified",
                 "ambient": "verified"
@@ -8543,6 +8870,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "embed": "verified",
                 "ambient": "verified"
@@ -8571,6 +8901,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "embed": "pending",
                 "ambient": "pending"
@@ -8585,6 +8916,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "embed": "verified",
                 "ambient": "verified"
@@ -8614,6 +8948,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "embed": "verified",
                 "ambient": "verified"
@@ -8800,6 +9137,7 @@
                 "body"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
@@ -8819,6 +9157,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
@@ -8833,6 +9172,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
@@ -8850,6 +9190,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 158,
+              "fields": [],
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
@@ -8874,6 +9215,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
@@ -8891,6 +9233,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "vertical": "verified",
                 "alternating": "verified"
@@ -8919,6 +9264,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "vertical": "verified",
                 "alternating": "verified"
@@ -8947,6 +9295,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
@@ -8961,6 +9310,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "vertical": "verified",
                 "alternating": "verified"
@@ -8990,6 +9342,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "vertical": "verified",
                 "alternating": "verified"
@@ -9139,6 +9494,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 148,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -9158,6 +9514,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -9172,6 +9529,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 148,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -9196,6 +9554,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -9210,6 +9569,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": "verified"
             }
           ],
@@ -9234,6 +9596,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": "verified"
             }
           ],
@@ -9258,6 +9623,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": "pending"
             }
           ],
@@ -9269,6 +9635,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": "verified"
             }
           ],
@@ -9294,6 +9663,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": "verified"
             }
           ],
@@ -12058,6 +12430,9 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [
+                "cardDesign.border"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12071,6 +12446,9 @@
               "policy": "required",
               "scope": "item",
               "closingTask": 156,
+              "fields": [
+                "links[].design.border"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12123,6 +12501,9 @@
                 "description"
               ],
               "closingTask": 156,
+              "fields": [
+                "cardDesign.label"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12139,6 +12520,9 @@
                 "description"
               ],
               "closingTask": 156,
+              "fields": [
+                "links[].design.label"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12191,6 +12575,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "stacked": "pending",
                 "cards": "pending",
@@ -12207,6 +12592,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "stacked": "pending",
                 "cards": "pending",
@@ -12218,6 +12604,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "stacked": "pending",
                 "cards": "pending",
@@ -12229,6 +12616,7 @@
               "policy": "required",
               "scope": "item",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "stacked": "pending",
                 "cards": "pending",
@@ -12245,6 +12633,9 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
+              "fields": [
+                "depthDesign.linkShadow"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12258,6 +12649,9 @@
               "policy": "required",
               "scope": "item",
               "closingTask": 146,
+              "fields": [
+                "links[].design.shadow"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12305,6 +12699,9 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 158,
+              "fields": [
+                "linkDesign.iconShape"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12318,6 +12715,9 @@
               "policy": "required",
               "scope": "item",
               "closingTask": 158,
+              "fields": [
+                "links[].design.iconShape"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12365,6 +12765,9 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 137,
+              "fields": [
+                "linkDesign.arrowStyle"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12378,6 +12781,9 @@
               "policy": "required",
               "scope": "item",
               "closingTask": 137,
+              "fields": [
+                "links[].design.arrowStyle"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12428,6 +12834,9 @@
               "scope": "section",
               "part": "profile",
               "closingTask": 177,
+              "fields": [
+                "profile.image"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12440,6 +12849,9 @@
               "scope": "item",
               "part": "thumbnail",
               "closingTask": 177,
+              "fields": [
+                "links[].thumbnail"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12462,6 +12874,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "stacked": "pending",
                 "cards": "pending",
@@ -12507,6 +12920,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 147,
+              "fields": [
+                "depthDesign.pictureShadow"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12539,6 +12955,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12571,6 +12990,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 159,
+              "fields": [],
               "availability": {
                 "stacked": "pending",
                 "cards": {
@@ -12593,6 +13013,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "dividerDesign.afterProfile"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12625,6 +13048,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12658,6 +13084,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
@@ -12915,6 +13344,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "list": {
                   "notApplicable": "Rows get Text only (156 item 6)"
@@ -12939,6 +13369,7 @@
                 "body"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "list": "pending",
                 "agenda": "pending",
@@ -12959,6 +13390,7 @@
                 "intro"
               ],
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "list": "pending",
                 "agenda": "pending",
@@ -12974,6 +13406,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "list": "pending",
                 "agenda": "pending",
@@ -12984,6 +13417,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
+              "fields": [],
               "availability": {
                 "list": {
                   "notApplicable": "Rows have no card"
@@ -13003,6 +13437,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
+              "fields": [],
               "availability": {
                 "list": {
                   "notApplicable": "Rows have no card"
@@ -13025,6 +13460,7 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 137,
+              "fields": [],
               "availability": {
                 "list": "pending",
                 "agenda": {
@@ -13043,6 +13479,7 @@
               "scope": "card",
               "part": "picture",
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "list": {
                   "notApplicable": "Draws no event picture"
@@ -13064,6 +13501,7 @@
                 "reachable": true
               },
               "closingTask": 177,
+              "fields": [],
               "availability": {
                 "list": "pending",
                 "agenda": "pending",
@@ -13083,6 +13521,7 @@
                 "when": "The featured event has a picture"
               },
               "closingTask": 147,
+              "fields": [],
               "availability": {
                 "list": {
                   "notApplicable": "Draws no event picture"
@@ -13102,6 +13541,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 157,
+              "fields": [
+                "style.overlay"
+              ],
               "availability": {
                 "list": "verified",
                 "agenda": "verified",
@@ -13132,6 +13574,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 159,
+              "fields": [
+                "style.panel"
+              ],
               "availability": {
                 "list": "verified",
                 "agenda": "verified",
@@ -13146,6 +13591,7 @@
                 "when": "The card’s surface kind is Glass"
               },
               "closingTask": 159,
+              "fields": [],
               "availability": {
                 "list": {
                   "notApplicable": "Rows have no card"
@@ -13180,6 +13626,7 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [],
               "availability": {
                 "list": "pending",
                 "agenda": "pending",
@@ -13195,6 +13642,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
+              "fields": [
+                "style.edge"
+              ],
               "availability": {
                 "list": "verified",
                 "agenda": "verified",
@@ -13226,6 +13676,9 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 217,
+              "fields": [
+                "style.motion"
+              ],
               "availability": {
                 "list": "verified",
                 "agenda": "verified",
@@ -14700,6 +15153,7 @@
                 "policy": "required",
                 "scope": "item",
                 "closingTask": 158,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -14870,6 +15324,7 @@
                 "policy": "required",
                 "scope": "item",
                 "closingTask": 177,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -14963,6 +15418,7 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 156,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -14979,6 +15435,7 @@
                   "body"
                 ],
                 "closingTask": 156,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -14993,6 +15450,7 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 156,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -15004,6 +15462,7 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 146,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -15018,6 +15477,7 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 137,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -15029,6 +15489,7 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 177,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -15045,6 +15506,7 @@
                   "path": "mainImage"
                 },
                 "closingTask": 147,
+                "fields": [],
                 "availability": "pending"
               }
             ],
@@ -15063,6 +15525,7 @@
                   "when": "The card’s surface kind is Glass"
                 },
                 "closingTask": 159,
+                "fields": [],
                 "availability": "pending"
               }
             ],

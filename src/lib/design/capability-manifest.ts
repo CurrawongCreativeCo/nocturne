@@ -35,6 +35,11 @@ export interface ManifestPolicy {
   trigger?: Trigger & { reachable?: boolean }
   /** The task that closes what is still pending. */
   closingTask: number
+  /**
+   * The schema fields its evidence probes (manifest paths), so a change proposal can tell which policy a
+   * marked field belongs to. A field no evidence names is judged by the capability's policies together.
+   */
+  fields: readonly string[]
   /** One status, or one per layout for a component with layouts. */
   availability: LayoutStatus | Readonly<Record<string, LayoutStatus>>
 }
@@ -59,6 +64,8 @@ export type ManifestCapability =
 export interface ManifestSource {
   owner: number
   gate?: string
+  /** The schema fields its evidence probes: change proposals treat them as this source's. */
+  fields: readonly string[]
   availability: 'verified' | 'pending' | Readonly<Record<string, 'verified' | 'pending'>>
 }
 
@@ -122,6 +129,20 @@ export function componentContract(
             }
           : {}),
         closingTask: applicable.closingTask ?? 0,
+        fields: [
+          ...new Set(
+            evidence
+              .filter(
+                (entry) =>
+                  isCapabilityEvidence(entry) &&
+                  entry.component === component.id &&
+                  entry.capability === capability &&
+                  entry.scope === applicable.scope &&
+                  (entry.part ?? '') === (applicable.part ?? ''),
+              )
+              .map((entry) => entry.field),
+          ),
+        ],
         availability:
           component.layouts.length === 0
             ? statusOf(applicable)
@@ -151,6 +172,16 @@ export function componentContract(
     contentSources[source] = {
       owner: first.owner,
       ...(first.gate ? { gate: first.gate } : {}),
+      fields: [
+        ...new Set(
+          evidence
+            .filter(
+              (entry) =>
+                'source' in entry && entry.source === source && entry.component === component.id,
+            )
+            .map((entry) => entry.field),
+        ),
+      ],
       availability:
         component.layouts.length === 0
           ? first.status

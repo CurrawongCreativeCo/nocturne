@@ -212,6 +212,13 @@ function describeSection(section, deps) {
   const fields = describeFields(section, deps, { limits })
   const variants = listOf((section.fields ?? []).find((field) => field.name === 'variant') ?? {})
   const contract = deps.capabilitiesFor?.(section.name)
+  // A field a content source's evidence probes belongs to that source (change proposals judge it so).
+  for (const [source, entry] of Object.entries(contract?.contentSources ?? {})) {
+    for (const path of entry.fields ?? []) {
+      const row = fields.find((candidate) => candidate.path === path)
+      if (row) row.contentSource = source
+    }
+  }
   return {
     type: section.name,
     title: section.title ?? section.name,

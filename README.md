@@ -2669,7 +2669,16 @@ There is no site-wide density setting yet, so "density airy" sets the section's 
 3. **Design.** A Brand colours change that makes a text pair newly fail goes through `resolveDesignTokens` and is rejected
    (`contrast-fails`), naming the pair and its ratio. A section's panel that cannot be made readable is only a **warning**, as in
    the Studio, because the page falls back to a safe look. Contrast over a picture is never measured.
-4. **Permissions.** A patch to anything clients may not edit (`CLIENT_EDITABLE`, through the manifest's `clientEditable`) is
+4. **Capabilities** (task 275, [Design capability contract](#design-capability-contract)). A value in a field that is a shared
+   design capability (the manifest row's `capability`), or that feeds a content source (`contentSource`), must be **verified**
+   for the section's layout, in the manifest's `capabilities` and `contentSources`. A value that isn't is rejected with the
+   reason: `capability-not-verified` (the layout doesn't offer it, with its declared reason, or it is still pending, with the
+   task that closes it; the shared Panel is never offered where a layout draws its own surfaces) or
+   `content-source-not-verified` (with what the source is waiting for). The layout is the one the section is left in once the
+   whole proposal is applied (a layout change in the same proposal counts), and a section inserted whole is judged in the layout
+   it brings, else its default. Unsetting is never blocked, and fields that carry no capability keep the ordinary checks above.
+   A section the manifest has no declaration for is not judged.
+5. **Permissions.** A patch to anything clients may not edit (`CLIENT_EDITABLE`, through the manifest's `clientEditable`) is
    marked `needsAgencyReview`. `validate` only reports it. **`apply` enforces it:** unless the token is an Administrator's or
    Developer's, those patches are rejected as `agency-permission-required`, and the part they belong to is not written. A proposal
    made of agency-only changes (all three fixtures) therefore needs an agency token to apply.
