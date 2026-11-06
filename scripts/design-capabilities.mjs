@@ -101,6 +101,8 @@ const problems = contractProblems({
   lookup: lookupType,
   exceptions: CAPABILITY_EXCEPTIONS,
   baseline: committed,
+  readSource: (path) =>
+    existsSync(join(root, path)) ? readFileSync(join(root, path), 'utf8') : undefined,
 })
 if (problems.length > 0) {
   for (const problem of problems) console.error(formatProblem(problem))

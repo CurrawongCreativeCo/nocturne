@@ -42,5 +42,18 @@ export const mediaTextCapabilities = declareCapabilities<SplitLayout>({
   divider: { policy: 'required', scope: 'section' },
   edge: { policy: 'required', scope: 'section' },
   motion: { policy: 'required', scope: 'section' },
-  slots: { policy: 'required', scope: 'section' },
+  slots: [
+    {
+      policy: 'required',
+      scope: 'section',
+      part: 'block',
+      note: 'The slots draw their approved blocks',
+    },
+    {
+      policy: 'required',
+      scope: 'section',
+      part: 'placement',
+      note: 'Each layout places the media and the extra block: responsive behaviour no evidence covers yet',
+    },
+  ],
 })

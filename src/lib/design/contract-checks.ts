@@ -2,6 +2,7 @@ import {
   currentBaseline,
   evidenceProblems,
   ratchetProblems,
+  sourceTestProblems,
   type CapabilityBaseline,
 } from './capability-availability'
 import type { Evidence } from './capability-evidence'
@@ -59,15 +60,18 @@ export interface ContractInputs {
   exceptions: readonly CapabilityException[]
   /** The committed capability-baseline.json. */
   baseline: CapabilityBaseline
+  /** The text of a file by its path from the repository root, for the content sources' test files. */
+  readSource: (path: string) => string | undefined
 }
 
 /** What is wrong with the contract, as `{ component, capability?, message, fix }`. */
 export function contractProblems(inputs: ContractInputs): ContractProblem[] {
-  const { components, evidence, gate, schemas, lookup, exceptions, baseline } = inputs
+  const { components, evidence, gate, schemas, lookup, exceptions, baseline, readSource } = inputs
   const problems: ContractProblem[] = []
 
   for (const component of components) problems.push(...declarationProblems(component))
   problems.push(...evidenceProblems(components, evidence, gate))
+  problems.push(...sourceTestProblems(evidence, readSource))
 
   for (const [name, type] of schemas) {
     for (const found of privateFields(type, lookup, exceptions)) {

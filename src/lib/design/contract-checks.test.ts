@@ -86,6 +86,7 @@ function inputs(overrides: Partial<ContractInputs> = {}, schema = section()): Co
     lookup,
     exceptions: [],
     baseline,
+    readSource: () => undefined,
     ...overrides,
   }
 }

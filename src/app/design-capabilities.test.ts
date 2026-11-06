@@ -41,6 +41,13 @@ describe('the design capability contract', () => {
         lookup: lookupType,
         exceptions: CAPABILITY_EXCEPTIONS,
         baseline: committed,
+        readSource: (path) => {
+          try {
+            return readFileSync(join(import.meta.dirname, '..', '..', path), 'utf8')
+          } catch {
+            return undefined
+          }
+        },
       }).map(formatProblem),
     ).toEqual([])
   })

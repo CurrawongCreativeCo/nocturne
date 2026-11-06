@@ -2416,7 +2416,13 @@ owning tasks (156, 158, 137, 146 and the rest) adopt them one at a time. Three t
   through `SectionRenderer` (the section gallery's fixtures) with the field unset and then probed, and requires the target
   to exist both times, to keep its snapshot while unset and to change with the probe. It then disconnects the claimed
   resolvers, replaying what they returned with the field unset, and requires the probe to stop changing the target, so a
-  named export that exists but isn't called fails. A target that is missing or ignored fails the check.
+  named export that exists but isn't called fails. A target that is missing or ignored fails the check. A claim covers only what
+  its target proves: the slots' evidence proves a block is drawn (`part: 'block'`), not how each layout makes room for it
+  and places it (`part: 'placement'`, pending until something tests that).
+- **Content sources** are not probed as whole components, which would prove nothing about one source of several. Each is
+  verified by tests written for it, named in its evidence by file and case: what it draws from what is stored, what it draws
+  nothing without, and that disconnecting the resolver it comes through removes it. The check requires the cases to exist and
+  not be skipped, and `npm run test` runs them.
 
 Which fields are shared design controls is judged by **how they were built**, never by their names. Each shared builder
 marks the fields it makes with a provenance stamp that can't be typed by hand (`src/lib/design/builder-provenance.ts`;
@@ -2433,9 +2439,9 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
-| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R…   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R✓    |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R…   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
 | Rich text (`richText`)                   | –       | –    | –      | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R◐    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R…     | R…   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Testimonials (`testimonials`), 2 layouts | R…      | R…   | R…     | R…   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
@@ -2463,7 +2469,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope and part) | Verified | Partly verified | Pending |
 | --------------------------------------------- | -------- | --------------- | ------- |
-| Required                                      | 93       | 0               | 125     |
+| Required                                      | 93       | 0               | 127     |
 | Conditional                                   | 0        | 0               | 40      |
 
 Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2480,10 +2486,11 @@ Every Required or Conditional pair that is not verified is in `capability-baseli
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
 | 177          | 7                | 20                  |
-| 213          | 2                | 0                   |
+| 213          | 3                | 0                   |
+| 219          | 1                | 0                   |
 | 276          | 1                | 0                   |
 
-**Evidence.** 99 entries, 206 cases (an entry's layouts are one case each). Each case renders the component through `SectionRenderer` with the field unset and then probed, and must change the registered target, also with the claimed resolvers disconnected. Partial claims: `hero.slots.supporting.editorial` (Editorial widens its grid for the slot in the component itself (hero/editorial.tsx)).
+**Evidence.** 94 capability entries, 201 cases (an entry's layouts are one case each). Each case renders the component through `SectionRenderer` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 

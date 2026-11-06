@@ -12,6 +12,7 @@ import {
   pendingBaseline,
   ratchetProblems,
   sourceAvailability,
+  sourceTestProblems,
   type CapabilityBaseline,
 } from './capability-availability'
 import type { CapabilityEvidence, Evidence } from './capability-evidence'
@@ -148,9 +149,8 @@ describe('sourceAvailability', () => {
         { module: '@/features/pages/components/sections/testimonials', export: 'Testimonials' },
       ],
       render: 'src/features/pages/components/sections/testimonials',
-      target: 'section > :last-child',
-      change: 'content',
       probe: { 'items.0.quote': 'Other words.' },
+      tests: [{ file: 'manual-source.test.tsx', cases: ['draws each stored quote'] }],
     }
     const rows = sourceAvailability(component, [manual], gate)
     expect(rows.filter((row) => row.layout === 'open')).toEqual([
@@ -280,5 +280,50 @@ describe('the baseline ratchet', () => {
 
   it('ignores entries for a component the site has removed', () => {
     expect(ratchetProblems({ required: [], conditional: [] }, current, [])).toEqual([])
+  })
+})
+
+describe('sourceTestProblems', () => {
+  const source = (tests: { file: string; cases: string[] }[]): Evidence => ({
+    id: 'fixtureCards.manual',
+    component: 'fixtureCards',
+    source: 'testimonials.manual',
+    field: 'items',
+    resolvers: [{ module: '@/x', export: 'y' }],
+    render: 'src/x.tsx',
+    probe: {},
+    tests,
+  })
+  const files: Record<string, string> = {
+    'a.test.tsx':
+      "it('draws each stored quote', () => {})\nit('draws no cards without items', () => {})",
+    'skipped.test.tsx': "it.skip('draws each stored quote', () => {})",
+  }
+  const read = (path: string) => files[path]
+  const messages = (entry: Evidence) => sourceTestProblems([entry], read).map((p) => p.message)
+
+  it('accepts a source whose named tests exist in a file that skips nothing', () => {
+    expect(messages(source([{ file: 'a.test.tsx', cases: ['draws each stored quote'] }]))).toEqual(
+      [],
+    )
+  })
+
+  it('refuses a source with no tests, a missing file, a missing case or a switched-off test', () => {
+    expect(messages(source([]))).toEqual(['Evidence fixtureCards.manual: it names no tests.'])
+    expect(messages(source([{ file: 'gone.test.tsx', cases: ['x'] }]))).toEqual([
+      "Evidence fixtureCards.manual: its test file gone.test.tsx doesn't exist.",
+    ])
+    expect(messages(source([{ file: 'a.test.tsx', cases: ['draws a rating'] }]))).toEqual([
+      'Evidence fixtureCards.manual: a.test.tsx has no test "draws a rating".',
+    ])
+    expect(
+      messages(source([{ file: 'skipped.test.tsx', cases: ['draws each stored quote'] }])),
+    ).toEqual([
+      'Evidence fixtureCards.manual: skipped.test.tsx skips, focuses or expects failure in a test.',
+    ])
+  })
+
+  it('ignores capability evidence', () => {
+    expect(sourceTestProblems([glassEvidence], read)).toEqual([])
   })
 })

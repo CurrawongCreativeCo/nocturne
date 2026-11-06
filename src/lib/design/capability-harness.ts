@@ -31,23 +31,34 @@ function describe(element: Element, change: 'attributes' | 'content'): string {
   return `<${element.tagName.toLowerCase()}${attributes ? ` ${attributes}` : ''}>`
 }
 
+/** Some server-rendered HTML as a document, for tests that read what a component drew. */
+export function parseHtml(html: string): Document {
+  return new JSDOM(`<!doctype html><html><body>${html}</body></html>`).window.document
+}
+
 function select(html: string, target: string, change: 'attributes' | 'content'): string[] {
-  const { document } = new JSDOM(`<!doctype html><html><body>${html}</body></html>`).window
-  return [...document.querySelectorAll(target)].map((element) => describe(element, change))
+  return [...parseHtml(html).querySelectorAll(target)].map((element) => describe(element, change))
 }
 
 /**
  * Whether the probe changed the target. The target must exist with the capability unset and with the
- * probe: a missing element is never "unchanged", it is a broken claim.
+ * probe: a missing element is never "unchanged", it is a broken claim. In `appears` mode the claim is
+ * that the probe draws the element at all: it must be absent unset and present with the probe, and an
+ * element that is already there unset is a broken claim.
  */
 export function compareTarget(
   unsetHtml: string,
   probeHtml: string,
   target: string,
-  change: 'attributes' | 'content',
+  change: 'attributes' | 'content' | 'appears',
 ): TargetComparison {
-  const unset = select(unsetHtml, target, change)
-  const probed = select(probeHtml, target, change)
+  const mode = change === 'appears' ? 'attributes' : change
+  const unset = select(unsetHtml, target, mode)
+  const probed = select(probeHtml, target, mode)
+  if (change === 'appears') {
+    if (unset.length > 0) return { status: 'missing', unset }
+    return { status: probed.length > 0 ? 'changed' : 'ignored', unset }
+  }
   if (unset.length === 0 || probed.length === 0) return { status: 'missing', unset }
   const same = unset.length === probed.length && unset.every((value, i) => value === probed[i])
   return { status: same ? 'ignored' : 'changed', unset }

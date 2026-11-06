@@ -186,6 +186,44 @@ export function sourceAvailability(
 }
 
 /**
+ * A content source is verified by tests written for it (SourceEvidence.tests). Each named case must
+ * exist in its file, and the file must not skip, focus or fail tests on purpose. The tests themselves
+ * run in `npm test`; this checks they can't be deleted or switched off while the source stays verified.
+ */
+export function sourceTestProblems(
+  evidence: readonly Evidence[],
+  read: (path: string) => string | undefined,
+): ContractProblem[] {
+  const problems: ContractProblem[] = []
+  for (const entry of evidence) {
+    if (!('source' in entry)) continue
+    const problem = (message: string, fix: string) =>
+      problems.push({
+        component: entry.component,
+        message: `Evidence ${entry.id}: ${message}`,
+        fix,
+      })
+    const fix =
+      'A content source is verified only by tests written for it: write the test, or take the case out of the evidence (the source is then pending).'
+    if (entry.tests.length === 0) problem('it names no tests.', fix)
+    for (const { file, cases } of entry.tests) {
+      const text = read(file)
+      if (text === undefined) {
+        problem(`its test file ${file} doesn't exist.`, fix)
+        continue
+      }
+      if (/\b(it|test|describe)\.(skip|todo|only|fails)\b|\bx(it|describe)\(/.test(text)) {
+        problem(`${file} skips, focuses or expects failure in a test.`, fix)
+      }
+      for (const name of cases) {
+        if (!text.includes(name)) problem(`${file} has no test "${name}".`, fix)
+      }
+    }
+  }
+  return problems
+}
+
+/**
  * Evidence that claims more than it shows: an unknown or undeclared component, a layout the
  * declaration excludes, a field that doesn't exist or isn't marked, or one the schema doesn't offer.
  */

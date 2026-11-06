@@ -12,7 +12,7 @@ import {
   type AvailabilityCell,
   casesOf,
 } from './capability-availability'
-import type { Evidence } from './capability-evidence'
+import { isCapabilityEvidence, type Evidence } from './capability-evidence'
 import type { CapabilityException } from './capability-exceptions'
 import type { ContractComponent } from './capability-policy'
 import type { SchemaGate } from './schema-capabilities'
@@ -179,8 +179,9 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
     ]),
   )
 
-  const cases = evidence.flatMap(casesOf).length
-  const partial = evidence.filter((entry) => entry.inline)
+  const capabilityEvidence = evidence.filter(isCapabilityEvidence)
+  const sourceEvidence = evidence.filter((entry) => !isCapabilityEvidence(entry))
+  const cases = capabilityEvidence.flatMap(casesOf).length
 
   const exceptionTable = table(
     ['Component', 'Fields', 'Class', 'Nature', 'Reviewer', 'Removal task', 'Why it stays'],
@@ -212,11 +213,7 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
     totals,
     `Every Required or Conditional pair that is not verified is in \`capability-baseline.json\`, with the task that closes it. It only shrinks.`,
     closing,
-    `**Evidence.** ${String(evidence.length)} entries, ${String(cases)} cases (an entry's layouts are one case each). Each case renders the component through \`SectionRenderer\` with the field unset and then probed, and must change the registered target, also with the claimed resolvers disconnected.${
-      partial.length > 0
-        ? ` Partial claims: ${partial.map((entry) => `\`${entry.id}\` (${entry.inline ?? ''})`).join('; ')}.`
-        : ''
-    }`,
+    `**Evidence.** ${String(capabilityEvidence.length)} capability entries, ${String(cases)} cases (an entry's layouts are one case each). Each case renders the component through \`SectionRenderer\` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The ${String(sourceEvidence.length)} content source entries are verified by tests written for each source, which the check requires to exist.`,
     '**Capabilities and their owners**',
     owners,
     '**Content sources** are recorded apart from design capabilities and never stand in for them. Generic tabs are deliberately not a capability.',

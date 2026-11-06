@@ -13,7 +13,13 @@ import {
   type RawSection,
 } from '@/features/pages/components/section-renderer.fixtures'
 import { caseId, casesOf } from '@/lib/design/capability-availability'
-import { EVIDENCE, type Evidence, type Patch } from '@/lib/design/capability-evidence'
+import {
+  EVIDENCE,
+  isCapabilityEvidence,
+  type CapabilityEvidence,
+  type Evidence,
+  type Patch,
+} from '@/lib/design/capability-evidence'
 import { compareTarget } from '@/lib/design/capability-harness'
 import { applyPatch, withPicture } from '@/lib/design/capability-patch'
 
@@ -82,9 +88,6 @@ vi.mock('@/components/ui/section-style', async (load) =>
 )
 vi.mock('@/features/pages/components/sections/testimonials', async (load) =>
   resolvers.wrap('@/features/pages/components/sections/testimonials', await load()),
-)
-vi.mock('@/features/pages/components/sections/location', async (load) =>
-  resolvers.wrap('@/features/pages/components/sections/location', await load()),
 )
 vi.mock('@/features/pages/slots/render-slot', async (load) =>
   resolvers.wrap('@/features/pages/slots/render-slot', await load()),
@@ -168,7 +171,7 @@ async function statesOf(entry: Evidence, layout: string | null) {
   return { unset, probed: withPicture(applyPatch(unset, entry.probe), picture) }
 }
 
-async function runCase(entry: Evidence, layout: string | null) {
+async function runCase(entry: CapabilityEvidence, layout: string | null) {
   const { unset, probed } = await statesOf(entry, layout)
   return compareTarget(await draw(unset), await draw(probed), entry.target, entry.change)
 }
@@ -180,7 +183,7 @@ const keyOf = ({ module, export: name }: { module: string; export: string }) => 
  * returned with the field unset. Returns that comparison, the connected probe's target, and how many
  * times the renderer reached a claimed resolver.
  */
-async function runDisconnected(entry: Evidence, layout: string | null) {
+async function runDisconnected(entry: CapabilityEvidence, layout: string | null) {
   const { unset, probed } = await statesOf(entry, layout)
   const connected = await draw(probed)
   const { control } = resolvers
@@ -196,7 +199,10 @@ async function runDisconnected(entry: Evidence, layout: string | null) {
     return {
       disconnected: compareTarget(unsetHtml, probeHtml, entry.target, entry.change),
       // The probe with and without its resolvers: they must differ if the resolvers carry it.
-      cut: compareTarget(connected, probeHtml, entry.target, entry.change),
+      cut:
+        entry.change === 'appears'
+          ? compareTarget(probeHtml, connected, entry.target, entry.change)
+          : compareTarget(connected, probeHtml, entry.target, entry.change),
       reached,
     }
   } finally {
@@ -207,7 +213,10 @@ async function runDisconnected(entry: Evidence, layout: string | null) {
   }
 }
 
-const cases = EVIDENCE.flatMap((entry) =>
+// A content source isn't probed as a whole component: it has tests of its own (see sourceTestProblems).
+const CAPABILITY_EVIDENCE = EVIDENCE.filter(isCapabilityEvidence)
+
+const cases = CAPABILITY_EVIDENCE.flatMap((entry) =>
   casesOf(entry).map((layout) => ({ id: caseId(entry, layout), entry, layout })),
 )
 
@@ -233,15 +242,14 @@ describe('design capability evidence', () => {
       }
       const { disconnected, cut, reached } = await runDisconnected(entry, layout)
       expect(reached, 'the renderer never reached a claimed resolver').toBeGreaterThan(0)
-      // What the probe draws depends on the claimed resolvers.
+      // What the probe draws depends on the claimed resolvers, and only on them.
       expect(cut.status).toBe('changed')
-      // And, unless part of the path is the component's own code, only on them.
-      if (!entry.inline) expect(disconnected.status).not.toBe('changed')
+      expect(disconnected.status).not.toBe('changed')
     },
   )
 
   it('fails a resolver claim the renderer does not depend on (S2 mutation)', async () => {
-    const surface = EVIDENCE.find((entry) => entry.id === 'linkList.surface.card')
+    const surface = CAPABILITY_EVIDENCE.find((entry) => entry.id === 'linkList.surface.card')
     expect(surface).toBeDefined()
     if (!surface) return
     // A real resolver the Link list calls, but not the one its card surface comes from.

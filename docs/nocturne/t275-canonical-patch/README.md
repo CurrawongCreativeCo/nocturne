@@ -82,7 +82,9 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
 Task 275 records the hero's text roles and section header (eyebrow, heading, intro) as Required with
 this task as the closing task, and two reviewed exceptions this task removes: `eyebrowDesign` (onto
 the text roles) and `imageShape` (hidden and superseded by Image design; removing it needs a dry-run
-migration, approved first).
+migration, approved first). It also records the hero's slot placement (each layout makes room for the
+supporting block and places it, such as Editorial widening its grid) as Required, pending, with this
+task as the closing task: task 275's evidence proves only that the block is drawn.
 ```
 
 ## Task 276
@@ -131,6 +133,12 @@ the component's anatomy, layouts or settings, never a task's progress; condition
 verified are tracked in the baseline like Required ones. Contradictory policies for the same
 component, scope, part and layout are rejected.
 ```
+
+## Slot placement in Image + text (no open owner)
+
+Task 275 records Image + text's slot placement (each layout places the media and the extra block)
+as Required and pending, with closing task 219 (done). No open task owns it: the plan needs one, or
+a decision that the responsive layout is covered by the section gallery's visual baselines instead.
 
 ## Still to decide (final acceptance of task 275, not Stage 2)
 

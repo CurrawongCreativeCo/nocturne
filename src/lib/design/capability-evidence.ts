@@ -31,18 +31,8 @@ interface EvidenceBase {
    * must then stop changing the target: the claim is the whole path, not just an export that exists.
    */
   resolvers: readonly { module: string; export: string }[]
-  /**
-   * Set when part of the path is the component's own code rather than a resolver (a layout that
-   * adapts inline). The harness then only checks that cutting the resolvers changes what the probe
-   * draws, and the resolver evidence is reported as partial.
-   */
-  inline?: string
   /** The file or folder that draws the target, checked to exist. */
   render: string
-  /** A CSS selector into the component's output: the element the capability renders on. */
-  target: string
-  /** What the probe must change on the target: its own attributes, or anything inside it too. */
-  change: 'attributes' | 'content'
   /** Stored values both renders start from. `$picture` stands for the fixtures' picture. */
   base?: Patch
   /** What the probe sets on top of `base`. */
@@ -53,10 +43,31 @@ export interface CapabilityEvidence extends EvidenceBase {
   capability: CapabilityId
   scope: Scope
   part?: string
+  /** A CSS selector into the component's output: the element the capability renders on. */
+  target: string
+  /**
+   * What the probe must do to the target: change its own attributes, change anything inside it, or draw
+   * it (`appears`: the element is absent with the field unset).
+   */
+  change: 'attributes' | 'content' | 'appears'
 }
 
+/** Test cases written for one content source, by file and by name. */
+export interface SourceTests {
+  file: string
+  /** Each is the title (or the start of the title) of a test in the file. */
+  cases: readonly string[]
+}
+
+/**
+ * A content source's evidence. The whole-component probe proves nothing about one source of several,
+ * so a source is verified by tests written for it (`tests`): what it draws from what is stored, what it
+ * draws nothing without, and that disconnecting its own resolver removes it. The harness checks the
+ * named cases exist and aren't skipped; `npm run check` runs them.
+ */
 export interface SourceEvidence extends EvidenceBase {
   source: ContentSourceId
+  tests: readonly SourceTests[]
 }
 
 export type Evidence = CapabilityEvidence | SourceEvidence
@@ -427,11 +438,12 @@ const linkListEvidence: CapabilityEvidence[] = [
 
 const LOCATION = {
   component: 'location',
-  resolvers: [{ module: '@/features/pages/components/sections/location', export: 'Location' }],
   render: 'src/features/pages/components/sections/location',
-  target: SECTION_CONTAINER,
-  change: 'content',
 } as const
+
+const LOCATION_SOURCE_TESTS = 'src/features/pages/components/sections/location/sources.test.tsx'
+const LOCATION_FACADE_TESTS =
+  'src/features/pages/components/sections/location/click-to-load.test.tsx'
 
 const locationSources: SourceEvidence[] = [
   {
@@ -439,24 +451,66 @@ const locationSources: SourceEvidence[] = [
     id: 'location.addressCard',
     source: 'location.addressCard',
     field: 'showHours',
+    resolvers: [{ module: '@/lib/location-links', export: 'addressLines' }],
     // The card is what shows without a map image.
     base: { mapImage: null },
     probe: { showHours: false },
+    tests: [
+      {
+        file: LOCATION_SOURCE_TESTS,
+        cases: [
+          'draws the address card from Business info',
+          'puts the address on a card only when there is no map image',
+          'draws no address card without an address',
+          'draws no address once the address lines are disconnected',
+        ],
+      },
+    ],
   },
   {
     ...LOCATION,
     id: 'location.directionsLink',
     source: 'location.directionsLink',
     field: 'directionsLabel',
+    resolvers: [{ module: '@/lib/location-links', export: 'directionsUrl' }],
     probe: { directionsLabel: 'Find us' },
+    tests: [
+      {
+        file: LOCATION_SOURCE_TESTS,
+        cases: [
+          'links to Google Maps directions to the address, in a new tab',
+          'points at the coordinates when Business info has them',
+          'loads nothing from Google until it is followed',
+          'draws no directions link without an address',
+          'draws no directions link once the directions address is disconnected',
+        ],
+      },
+    ],
   },
   {
     ...LOCATION,
     id: 'location.clickToLoadEmbed',
     source: 'location.clickToLoadEmbed',
     field: 'interactiveMap',
+    resolvers: [
+      { module: '@/lib/location-links', export: 'embedUrl' },
+      { module: '@/features/pages/components/sections/location/map-embed', export: 'MapEmbed' },
+    ],
     base: { mapImage: null },
     probe: { interactiveMap: true },
+    tests: [
+      {
+        file: LOCATION_FACADE_TESTS,
+        cases: [
+          'draws no map or button when the interactive map is off',
+          'draws no button, frame or Google address in the server markup',
+          'offers a Load interactive map button, with a note that the map comes from Google',
+          'loads the map only after a click, and moves focus to it',
+          'draws no facade once the embed address is disconnected',
+          'keeps the picture above the button when there is a map image',
+        ],
+      },
+    ],
   },
 ]
 
@@ -474,27 +528,16 @@ export const EVIDENCE: readonly Evidence[] = [
     component: 'hero',
     capability: 'slots',
     scope: 'section',
-    layouts: ['overlay', 'split', 'full-bleed'],
+    // What this proves is that the slot draws its block, in the wrapper the hero gives it. How each
+    // layout then makes room for it (Editorial widens its grid) is placement, a separate part that no
+    // evidence covers yet.
+    part: 'block',
+    layouts: ['overlay', 'split', 'editorial', 'full-bleed'],
     field: 'supporting',
     resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
-    render: 'src/features/pages/components/sections/hero',
-    target: SECTION_CONTAINER,
-    change: 'content',
-    base: { supporting: null },
-    probe: { supporting: STATS_BAR },
-  },
-  {
-    id: 'hero.slots.supporting.editorial',
-    component: 'hero',
-    capability: 'slots',
-    scope: 'section',
-    layouts: ['editorial'],
-    inline: 'Editorial widens its grid for the slot in the component itself (hero/editorial.tsx)',
-    field: 'supporting',
-    resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
-    render: 'src/features/pages/components/sections/hero',
-    target: SECTION_CONTAINER,
-    change: 'content',
+    render: 'src/features/pages/components/sections/hero/slots.tsx',
+    target: '[data-hero-slot]',
+    change: 'appears',
     base: { supporting: null },
     probe: { supporting: STATS_BAR },
   },
@@ -509,13 +552,15 @@ export const EVIDENCE: readonly Evidence[] = [
     component: 'mediaText',
     capability: 'slots',
     scope: 'section',
+    part: 'block',
     layouts: ['side', 'stacked', 'overlay'],
     field: 'media',
-    // The media slot's picture is chosen here and drawn as the section's framed picture.
+    // The media slot's picture is chosen here and drawn as the section's picture, or its background.
     resolvers: [{ module: '@/features/pages/utils/split-layout', export: 'chooseMedia' }],
     render: 'src/features/pages/components/sections/media-text.tsx',
-    target: SECTION_CONTAINER,
-    change: 'content',
+    // The picture has no hook of its own: with the slot empty the section draws no <img> at all.
+    target: 'section img',
+    change: 'appears',
     base: { media: null, image: null },
     probe: { media: SLOT_IMAGE },
   },
@@ -524,12 +569,13 @@ export const EVIDENCE: readonly Evidence[] = [
     component: 'mediaText',
     capability: 'slots',
     scope: 'section',
+    part: 'block',
     layouts: ['side', 'stacked', 'overlay'],
     field: 'supporting',
     resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
     render: 'src/features/pages/components/sections/media-text.tsx',
-    target: SECTION_CONTAINER,
-    change: 'content',
+    target: '[data-slot-video]',
+    change: 'appears',
     base: { media: SLOT_IMAGE, supporting: null },
     probe: { supporting: SLOT_VIDEO },
   },
@@ -546,15 +592,28 @@ export const EVIDENCE: readonly Evidence[] = [
     layouts: ['grid', 'slider'],
     field: 'items',
     resolvers: [
-      { module: '@/features/pages/components/sections/testimonials', export: 'Testimonials' },
+      {
+        module: '@/features/pages/components/sections/testimonials/quote-card',
+        export: 'QuoteCard',
+      },
     ],
-    render: 'src/features/pages/components/sections/testimonials',
-    target: SECTION_CONTAINER,
-    change: 'content',
+    render: 'src/features/pages/components/sections/testimonials/quote-card.tsx',
     base: {
       items: [{ _key: 'q1', _type: 'testimonial', quote: 'Kind words.', name: 'Fixture Person' }],
     },
     probe: { 'items.0.quote': 'Different kind words.' },
+    tests: [
+      {
+        file: 'src/features/pages/components/sections/testimonials/manual-source.test.tsx',
+        cases: [
+          'draws each stored quote, name and role in its own card',
+          'draws only what was stored',
+          'draws no source label, rating or review markup',
+          'draws no cards without items',
+          'draws nothing of its own once the quote card is disconnected',
+        ],
+      },
+    ],
   },
   ...frameEvidence('richText', { overlay: true, glass: true, edge: true, motion: true }),
   ...frameEvidence('featuresGrid', { overlay: true, glass: true, edge: true, motion: true }),

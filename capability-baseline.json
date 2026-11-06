@@ -52,6 +52,14 @@
       "closingTask": 151
     },
     {
+      "component": "hero",
+      "capability": "slots",
+      "scope": "section",
+      "part": "placement",
+      "layouts": ["overlay", "split", "editorial", "full-bleed"],
+      "closingTask": 213
+    },
+    {
       "component": "richText",
       "capability": "mark",
       "scope": "section",
@@ -92,6 +100,14 @@
       "scope": "section",
       "layouts": ["side", "stacked", "overlay"],
       "closingTask": 151
+    },
+    {
+      "component": "mediaText",
+      "capability": "slots",
+      "scope": "section",
+      "part": "placement",
+      "layouts": ["side", "stacked", "overlay"],
+      "closingTask": 219
     },
     {
       "component": "featuresGrid",

@@ -2216,6 +2216,7 @@
             {
               "policy": "required",
               "scope": "section",
+              "part": "block",
               "closingTask": 219,
               "fields": [
                 "supporting"
@@ -2226,6 +2227,19 @@
                 "editorial": "verified",
                 "full-bleed": "verified"
               }
+            },
+            {
+              "policy": "required",
+              "scope": "section",
+              "part": "placement",
+              "closingTask": 213,
+              "fields": [],
+              "availability": {
+                "overlay": "pending",
+                "split": "pending",
+                "editorial": "pending",
+                "full-bleed": "pending"
+              }
             }
           ],
           "evidence": [
@@ -2235,25 +2249,13 @@
               "resolvers": [
                 "@/features/pages/slots/render-slot#renderSlot"
               ],
-              "render": "src/features/pages/components/sections/hero",
-              "target": "section > :last-child",
+              "render": "src/features/pages/components/sections/hero/slots.tsx",
+              "target": "[data-hero-slot]",
               "cases": [
                 "hero.slots.supporting@overlay",
                 "hero.slots.supporting@split",
+                "hero.slots.supporting@editorial",
                 "hero.slots.supporting@full-bleed"
-              ]
-            },
-            {
-              "id": "hero.slots.supporting.editorial",
-              "field": "supporting",
-              "resolvers": [
-                "@/features/pages/slots/render-slot#renderSlot"
-              ],
-              "inline": "Editorial widens its grid for the slot in the component itself (hero/editorial.tsx)",
-              "render": "src/features/pages/components/sections/hero",
-              "target": "section > :last-child",
-              "cases": [
-                "hero.slots.supporting.editorial@editorial"
               ]
             }
           ]
@@ -3444,6 +3446,7 @@
             {
               "policy": "required",
               "scope": "section",
+              "part": "block",
               "closingTask": 219,
               "fields": [
                 "media",
@@ -3453,6 +3456,18 @@
                 "side": "verified",
                 "stacked": "verified",
                 "overlay": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "section",
+              "part": "placement",
+              "closingTask": 219,
+              "fields": [],
+              "availability": {
+                "side": "pending",
+                "stacked": "pending",
+                "overlay": "pending"
               }
             }
           ],
@@ -3464,7 +3479,7 @@
                 "@/features/pages/utils/split-layout#chooseMedia"
               ],
               "render": "src/features/pages/components/sections/media-text.tsx",
-              "target": "section > :last-child",
+              "target": "section img",
               "cases": [
                 "mediaText.slots.media@side",
                 "mediaText.slots.media@stacked",
@@ -3478,7 +3493,7 @@
                 "@/features/pages/slots/render-slot#renderSlot"
               ],
               "render": "src/features/pages/components/sections/media-text.tsx",
-              "target": "section > :last-child",
+              "target": "[data-slot-video]",
               "cases": [
                 "mediaText.slots.supporting@side",
                 "mediaText.slots.supporting@stacked",
@@ -4737,6 +4752,21 @@
           "fields": [
             "items"
           ],
+          "tests": [
+            {
+              "file": "src/features/pages/components/sections/testimonials/manual-source.test.tsx",
+              "cases": [
+                "draws each stored quote, name and role in its own card",
+                "draws only what was stored",
+                "draws no source label, rating or review markup",
+                "draws no cards without items",
+                "draws nothing of its own once the quote card is disconnected"
+              ]
+            }
+          ],
+          "resolvers": [
+            "@/features/pages/components/sections/testimonials/quote-card#QuoteCard"
+          ],
           "availability": {
             "grid": "verified",
             "slider": "verified"
@@ -4746,6 +4776,8 @@
           "owner": 277,
           "gate": "Task 277 Phase 1 decision record and the owner’s approval. No Google Cloud setup is approved",
           "fields": [],
+          "tests": [],
+          "resolvers": [],
           "availability": {
             "grid": "pending",
             "slider": "pending"
@@ -7853,12 +7885,41 @@
           "fields": [
             "showHours"
           ],
+          "tests": [
+            {
+              "file": "src/features/pages/components/sections/location/sources.test.tsx",
+              "cases": [
+                "draws the address card from Business info",
+                "puts the address on a card only when there is no map image",
+                "draws no address card without an address",
+                "draws no address once the address lines are disconnected"
+              ]
+            }
+          ],
+          "resolvers": [
+            "@/lib/location-links#addressLines"
+          ],
           "availability": "verified"
         },
         "location.directionsLink": {
           "owner": 278,
           "fields": [
             "directionsLabel"
+          ],
+          "tests": [
+            {
+              "file": "src/features/pages/components/sections/location/sources.test.tsx",
+              "cases": [
+                "links to Google Maps directions to the address, in a new tab",
+                "points at the coordinates when Business info has them",
+                "loads nothing from Google until it is followed",
+                "draws no directions link without an address",
+                "draws no directions link once the directions address is disconnected"
+              ]
+            }
+          ],
+          "resolvers": [
+            "@/lib/location-links#directionsUrl"
           ],
           "availability": "verified"
         },
@@ -7867,12 +7928,31 @@
           "fields": [
             "interactiveMap"
           ],
+          "tests": [
+            {
+              "file": "src/features/pages/components/sections/location/click-to-load.test.tsx",
+              "cases": [
+                "draws no map or button when the interactive map is off",
+                "draws no button, frame or Google address in the server markup",
+                "offers a Load interactive map button, with a note that the map comes from Google",
+                "loads the map only after a click, and moves focus to it",
+                "draws no facade once the embed address is disconnected",
+                "keeps the picture above the button when there is a map image"
+              ]
+            }
+          ],
+          "resolvers": [
+            "@/lib/location-links#embedUrl",
+            "@/features/pages/components/sections/location/map-embed#MapEmbed"
+          ],
           "availability": "verified"
         },
         "location.placeIdEmbed": {
           "owner": 278,
           "gate": "A configured Maps Embed API key in a client-owned Google Cloud project. No project, key or billing is approved",
           "fields": [],
+          "tests": [],
+          "resolvers": [],
           "availability": "pending"
         }
       }

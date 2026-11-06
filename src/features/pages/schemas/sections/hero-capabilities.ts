@@ -92,5 +92,19 @@ export const heroCapabilities = declareCapabilities<HeroLayout>({
   divider: { policy: 'required', scope: 'section' },
   edge: { policy: 'required', scope: 'section' },
   motion: { policy: 'required', scope: 'section' },
-  slots: { policy: 'required', scope: 'section' },
+  slots: [
+    {
+      policy: 'required',
+      scope: 'section',
+      part: 'block',
+      note: 'The slot draws its approved block',
+    },
+    {
+      policy: 'required',
+      scope: 'section',
+      part: 'placement',
+      closingTask: 213,
+      note: 'Each layout makes room for the block and places it (Editorial widens its grid): responsive behaviour no evidence covers yet',
+    },
+  ],
 })

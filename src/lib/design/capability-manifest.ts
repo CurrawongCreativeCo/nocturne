@@ -14,7 +14,13 @@ import {
   sourceAvailability,
   type AvailabilityCell,
 } from './capability-availability'
-import { EVIDENCE, isCapabilityEvidence, type Evidence } from './capability-evidence'
+import {
+  EVIDENCE,
+  isCapabilityEvidence,
+  type CapabilityEvidence,
+  type Evidence,
+  type SourceEvidence,
+} from './capability-evidence'
 import type { ContractComponent } from './capability-policy'
 import type { SchemaGate } from './schema-capabilities'
 
@@ -49,8 +55,6 @@ export interface ManifestEvidence {
   field: string
   /** Each `module#export` the renderer reaches the target through. */
   resolvers: readonly string[]
-  /** Set when part of the path is the component's own code: its resolver evidence is partial. */
-  inline?: string
   render: string
   target: string
   /** The harness cases that run it. */
@@ -66,6 +70,10 @@ export interface ManifestSource {
   gate?: string
   /** The schema fields its evidence probes: change proposals treat them as this source's. */
   fields: readonly string[]
+  /** The tests written for this source, by file and case: what verifies it. */
+  tests: readonly { file: string; cases: readonly string[] }[]
+  /** The resolvers it comes through (each checked to exist). */
+  resolvers: readonly string[]
   availability: 'verified' | 'pending' | Readonly<Record<string, 'verified' | 'pending'>>
 }
 
@@ -77,13 +85,15 @@ export interface ComponentContract {
 const statusOf = (cell: AvailabilityCell): LayoutStatus =>
   cell.status === 'notApplicable' ? { notApplicable: cell.reason ?? '' } : cell.status
 
-function evidenceFor(entries: readonly Evidence[], cases: readonly string[]): ManifestEvidence[] {
+function evidenceFor(
+  entries: readonly CapabilityEvidence[],
+  cases: readonly string[],
+): ManifestEvidence[] {
   return entries
     .map((entry) => ({
       id: entry.id,
       field: entry.field,
       resolvers: entry.resolvers.map((resolver) => `${resolver.module}#${resolver.export}`),
-      ...(entry.inline ? { inline: entry.inline } : {}),
       render: entry.render,
       target: entry.target,
       cases: cases.filter((id) => id === entry.id || id.startsWith(`${entry.id}@`)),
@@ -154,7 +164,7 @@ export function componentContract(
       policies,
       evidence: evidenceFor(
         evidence.filter(
-          (entry) =>
+          (entry): entry is CapabilityEvidence =>
             isCapabilityEvidence(entry) &&
             entry.component === component.id &&
             entry.capability === capability,
@@ -169,17 +179,20 @@ export function componentContract(
     const own = rows.filter((row) => row.source === source)
     const first = own[0]
     if (!first) continue
+    const entries = evidence.filter(
+      (entry): entry is SourceEvidence =>
+        'source' in entry && entry.source === source && entry.component === component.id,
+    )
     contentSources[source] = {
       owner: first.owner,
       ...(first.gate ? { gate: first.gate } : {}),
-      fields: [
+      fields: [...new Set(entries.map((entry) => entry.field))],
+      tests: entries.flatMap((entry) => entry.tests),
+      resolvers: [
         ...new Set(
-          evidence
-            .filter(
-              (entry) =>
-                'source' in entry && entry.source === source && entry.component === component.id,
-            )
-            .map((entry) => entry.field),
+          entries.flatMap((entry) =>
+            entry.resolvers.map((resolver) => `${resolver.module}#${resolver.export}`),
+          ),
         ),
       ],
       availability:

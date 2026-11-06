@@ -327,29 +327,13 @@ exports[`design capability evidence > hero.motion.section@split: the probe chang
 ]
 `;
 
-exports[`design capability evidence > hero.slots.supporting.editorial@editori…: the probe changes the registered target 1`] = `
-[
-  "d3c08f8a72871f3c (1670 characters)",
-]
-`;
+exports[`design capability evidence > hero.slots.supporting@editorial: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > hero.slots.supporting@full-bleed: the probe changes the registered target 1`] = `
-[
-  "74cd0311f04b965b (1775 characters)",
-]
-`;
+exports[`design capability evidence > hero.slots.supporting@full-bleed: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > hero.slots.supporting@overlay: the probe changes the registered target 1`] = `
-[
-  "eb1c0641dd178399 (1723 characters)",
-]
-`;
+exports[`design capability evidence > hero.slots.supporting@overlay: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > hero.slots.supporting@split: the probe changes the registered target 1`] = `
-[
-  "f5ea95615c76cb68 (1205 characters)",
-]
-`;
+exports[`design capability evidence > hero.slots.supporting@split: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > linkList.action.card@cards: the probe changes the registered target 1`] = `
 [
@@ -733,24 +717,6 @@ exports[`design capability evidence > linkList.text.item@stacked: the probe chan
 ]
 `;
 
-exports[`design capability evidence > location.addressCard: the probe changes the registered target 1`] = `
-[
-  "591c19c5778c869a (2889 characters)",
-]
-`;
-
-exports[`design capability evidence > location.clickToLoadEmbed: the probe changes the registered target 1`] = `
-[
-  "591c19c5778c869a (2889 characters)",
-]
-`;
-
-exports[`design capability evidence > location.directionsLink: the probe changes the registered target 1`] = `
-[
-  "c14536f4d060180c (2875 characters)",
-]
-`;
-
 exports[`design capability evidence > location.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -889,41 +855,17 @@ exports[`design capability evidence > mediaText.overlay.section@stacked: the pro
 ]
 `;
 
-exports[`design capability evidence > mediaText.slots.media@overlay: the probe changes the registered target 1`] = `
-[
-  "f32b82e1ce093905 (1098 characters)",
-]
-`;
+exports[`design capability evidence > mediaText.slots.media@overlay: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > mediaText.slots.media@side: the probe changes the registered target 1`] = `
-[
-  "f46700a157f0823f (1098 characters)",
-]
-`;
+exports[`design capability evidence > mediaText.slots.media@side: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > mediaText.slots.media@stacked: the probe changes the registered target 1`] = `
-[
-  "f1d2a8e314277be5 (1090 characters)",
-]
-`;
+exports[`design capability evidence > mediaText.slots.media@stacked: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > mediaText.slots.supporting@overlay: the probe changes the registered target 1`] = `
-[
-  "27cdbff68f33dfc4 (1063 characters)",
-]
-`;
+exports[`design capability evidence > mediaText.slots.supporting@overlay: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > mediaText.slots.supporting@side: the probe changes the registered target 1`] = `
-[
-  "c86230300c74dac8 (1333 characters)",
-]
-`;
+exports[`design capability evidence > mediaText.slots.supporting@side: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > mediaText.slots.supporting@stacked: the probe changes the registered target 1`] = `
-[
-  "86c93e7e3c0260c4 (1311 characters)",
-]
-`;
+exports[`design capability evidence > mediaText.slots.supporting@stacked: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > newsletterSignup.edge.section: the probe changes the registered target 1`] = `
 [
@@ -1191,19 +1133,6 @@ exports[`design capability evidence > testimonials.glass.section@slider: the pro
 [
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
   "<p aria-atomic="true" aria-live="polite" class="sr-only">",
-]
-`;
-
-exports[`design capability evidence > testimonials.manual@grid: the probe changes the registered target 1`] = `
-[
-  "3c319666dce112a6 (611 characters)",
-]
-`;
-
-exports[`design capability evidence > testimonials.manual@slider: the probe changes the registered target 1`] = `
-[
-  "3aad03f41d477aa2 (1496 characters)",
-  "194d073417972434 (61 characters)",
 ]
 `;
 
