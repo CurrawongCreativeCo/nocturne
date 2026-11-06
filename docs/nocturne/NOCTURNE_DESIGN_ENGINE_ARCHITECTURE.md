@@ -2,6 +2,8 @@
 
 **Status:** the direction was approved by the owner on 26 October 2026. This is **revision r2**, the same day, refining contrast and publishing (§5), glass over solid backgrounds (DE-6) and proposal splitting (§6.2). Nothing is implemented, and the canonical build plan (version 19, 214 tasks) is unchanged.
 
+**Amendment, 6 November 2026 (owner-approved):** §4's cards family is narrowed. See "The cards family" in §4, under "The model". Nothing else in this revision changes.
+
 **Companion documents:**
 
 - [E2, Content Intelligence architecture](./NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md);
@@ -190,11 +192,15 @@ See §4.
 1. **Family.** One schema and one renderer for a recurring layout idea:
    - **split** (Image + text);
    - **hero**;
-   - **cards** (features, services, testimonials, team);
+   - **cards** (feature-style cards, and document-backed listings of Services, Locations and Posts; see the principle below);
    - **call to action** (CTA banner, newsletter);
    - **editorial** (rich text).
 
    Specialised sections stay as they are: gallery, stats, logo cloud, process, video, embed, location, events, link list, FAQ and pricing. Families are for recurring layouts, not for everything.
+
+   **The cards family (amended 6 November 2026, owner-approved; build plan task 276).** The cards family provides feature-style cards and document-backed listings for Services, Locations and Posts. It shares styling, typography, actions, decoration and responsive behaviour with other card components, but does not replace their semantic structures. Testimonials, Team, Pricing and Events retain specialised renderers composed from shared design primitives. A new family declares its applicable capabilities and must not introduce private copies of shared controls.
+
+   This replaces the earlier wording, "cards (features, services, testimonials, team)", which implied one schema and one renderer for every card. The shared primitives and the capability declarations are build plan tasks 156 and 275.
 
 2. **Layout presets** (existing `PresetDefinition` macros) choose the arrangement, such as Media right, Media left, Stacked or Text over media. Each layout fixes its responsive behaviour. **Editors never set breakpoints.**
 3. **Typed slots** live in one shared slot registry, generalised from `hero/slots.tsx`:
