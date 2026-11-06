@@ -40,16 +40,29 @@ export const linkListCapabilities = declareCapabilities<LinkListLayout>({
       editorial: { notApplicable: 'Has no surface for a shadow' },
     },
   },
-  icon: {
-    policy: 'required',
-    scope: ['card', 'item'],
-    layouts: {
-      stacked: 'applies',
-      cards: 'applies',
-      compact: 'applies',
-      editorial: { notApplicable: 'Draws no icon' },
+  icon: [
+    {
+      policy: 'required',
+      scope: ['card', 'item'],
+      layouts: {
+        stacked: 'applies',
+        cards: 'applies',
+        compact: 'applies',
+        editorial: { notApplicable: 'Draws no icon' },
+      },
     },
-  },
+    // A divider's centre can be an icon from the same set (its own position in the section).
+    {
+      policy: 'conditional',
+      scope: 'section',
+      part: 'divider',
+      trigger: {
+        kind: 'setting',
+        when: 'A divider’s centre is an icon',
+        path: 'dividerDesign.afterProfile.centre',
+      },
+    },
+  ],
   action: {
     policy: 'required',
     scope: ['card', 'item'],

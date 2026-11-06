@@ -15650,7 +15650,8 @@
               "scope": "item",
               "closingTask": 158,
               "fields": [
-                "links[].design.iconShape"
+                "links[].design.iconShape",
+                "links[].icon"
               ],
               "availability": {
                 "stacked": "verified",
@@ -15658,6 +15659,30 @@
                 "editorial": {
                   "notApplicable": "Draws no icon"
                 },
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider",
+              "trigger": {
+                "kind": "setting",
+                "when": "A divider’s centre is an icon",
+                "path": "dividerDesign.afterProfile.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
+                "dividerDesign.afterCategories.icon",
+                "dividerDesign.afterProfile.icon",
+                "dividerDesign.aboveSocial.icon",
+                "dividerDesign.belowSocial.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
                 "compact": "verified"
               }
             }
@@ -15689,6 +15714,81 @@
                 "linkList.icon.item@stacked",
                 "linkList.icon.item@cards",
                 "linkList.icon.item@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.identity",
+              "field": "links[].icon",
+              "resolvers": [
+                "@/features/pages/components/sections/link-list/link-design#LinkIcon",
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.icon.identity@stacked",
+                "linkList.icon.identity@cards",
+                "linkList.icon.identity@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.afterCategories",
+              "field": "dividerDesign.afterCategories.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.afterCategories@stacked",
+                "linkList.icon.divider.afterCategories@cards",
+                "linkList.icon.divider.afterCategories@editorial",
+                "linkList.icon.divider.afterCategories@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.afterProfile",
+              "field": "dividerDesign.afterProfile.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.afterProfile@stacked",
+                "linkList.icon.divider.afterProfile@cards",
+                "linkList.icon.divider.afterProfile@editorial",
+                "linkList.icon.divider.afterProfile@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.aboveSocial",
+              "field": "dividerDesign.aboveSocial.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.aboveSocial@stacked",
+                "linkList.icon.divider.aboveSocial@cards",
+                "linkList.icon.divider.aboveSocial@editorial",
+                "linkList.icon.divider.aboveSocial@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.belowSocial",
+              "field": "dividerDesign.belowSocial.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.belowSocial@stacked",
+                "linkList.icon.divider.belowSocial@cards",
+                "linkList.icon.divider.belowSocial@editorial",
+                "linkList.icon.divider.belowSocial@compact"
               ]
             }
           ]
@@ -18125,6 +18225,13 @@
                   "badges[].icon"
                 ],
                 "availability": "verified"
+              },
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 158,
+                "fields": [],
+                "availability": "pending"
               }
             ],
             "evidence": [

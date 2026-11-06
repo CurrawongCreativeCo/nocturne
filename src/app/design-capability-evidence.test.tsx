@@ -93,6 +93,9 @@ const resolvers = vi.hoisted(() => {
 vi.mock('@/components/ui/badge-icon', async (load) =>
   resolvers.wrap('@/components/ui/badge-icon', await load()),
 )
+vi.mock('@/features/pages/components/sections/link-list/link-design', async (load) =>
+  resolvers.wrap('@/features/pages/components/sections/link-list/link-design', await load()),
+)
 vi.mock('@/components/ui/link-arrow', async (load) =>
   resolvers.wrap('@/components/ui/link-arrow', await load()),
 )

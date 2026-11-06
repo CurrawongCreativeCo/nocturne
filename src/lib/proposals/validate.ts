@@ -568,6 +568,12 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
   return result
 }
 
+/** What judges a field inside a slot block: the slots, and each block's own contract. */
+const blockContext = (manifest: DesignManifest) => ({
+  slots: manifest.slots,
+  slotBlocks: manifest.designCapabilities?.slotBlocks,
+})
+
 /** Inserting whole sections into pageBuilder: each must be a section type the manifest describes. */
 function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspection): Inspection {
   const items = Array.isArray(unit.value) ? unit.value : []
@@ -604,6 +610,7 @@ function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspec
       section,
       layoutOfSection(section, item.variant),
       check.marked,
+      blockContext(manifest),
     )) {
       result.reasons.push(reject(verdict.code, verdict.message))
     }
@@ -686,6 +693,7 @@ function checkCapabilities(
       entry,
       layoutOfSection(entry, section.variant),
       inspection.marked,
+      blockContext(deps.manifest),
     )) {
       inspection.reasons.push(reject(verdict.code, verdict.message))
     }

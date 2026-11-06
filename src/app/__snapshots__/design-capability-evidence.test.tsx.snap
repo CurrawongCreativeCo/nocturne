@@ -535,6 +535,59 @@ exports[`design capability evidence > linkList.icon.card@stacked: the probe chan
 ]
 `;
 
+exports[`design capability evidence > linkList.icon.divider.aboveSocial@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.aboveSocial@compa…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.aboveSocial@edito…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.aboveSocial@stack…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterCategories@c…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterCategories@c…: the probe changes the registered target 2`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterCategories@e…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterCategories@s…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterProfile@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterProfile@comp…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterProfile@edit…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.afterProfile@stac…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.belowSocial@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.belowSocial@compa…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.belowSocial@edito…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.divider.belowSocial@stack…: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.icon.identity@cards: the probe changes the registered target 1`] = `
+[
+  "24194d3088ac82a3 (1092 characters)",
+  "12ba86878cfc8c29 (1092 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.identity@compact: the probe changes the registered target 1`] = `
+[
+  "062be634e33b392d (593 characters)",
+  "3fc94aad942d27b9 (593 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.identity@stacked: the probe changes the registered target 1`] = `
+[
+  "4602c0976a1407e9 (1020 characters)",
+  "727ef80443d49afd (1020 characters)",
+]
+`;
+
 exports[`design capability evidence > linkList.icon.item@cards: the probe changes the registered target 1`] = `
 [
   "317a7014fcfadab7 (1575 characters)",

@@ -4,6 +4,7 @@ exports[`the design capability contract > badgeRow: reports what it offers today
 {
   "capabilities": [
     "icon required item: verified",
+    "icon required section: pending (158)",
   ],
   "sources": [],
 }
@@ -307,6 +308,10 @@ exports[`the design capability contract > linkList: reports what it offers today
     "icon required item @stacked: verified",
     "icon required item @cards: verified",
     "icon required item @compact: verified",
+    "icon conditional section/divider @stacked: verified",
+    "icon conditional section/divider @cards: verified",
+    "icon conditional section/divider @editorial: verified",
+    "icon conditional section/divider @compact: verified",
     "action required card @stacked: verified",
     "action required card @cards: verified",
     "action required card @editorial: verified",

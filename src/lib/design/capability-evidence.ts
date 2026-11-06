@@ -217,6 +217,7 @@ const slotBlockEvidence: CapabilityEvidence[] = [
 // The Link list
 
 const LINK_LIST = 'src/features/pages/components/sections/link-list'
+const LINK_DESIGN = '@/features/pages/components/sections/link-list/link-design'
 // Every link item (the list's other <ul>s hold categories and social icons).
 const LINK_ITEMS = 'li[data-track-event="link_click"]'
 
@@ -230,6 +231,8 @@ const link = (key: string, thumbnail: boolean) => ({
   link: { _type: 'link', linkType: 'external', url: `https://example.com/${key}` },
   ...(thumbnail ? { thumbnail: PICTURE } : {}),
 })
+
+const withoutIcon = ({ icon: _icon, ...rest }: ReturnType<typeof link>) => rest
 
 /** A profile, social links and two links, with thumbnails (or without, so icons show). */
 const linkListContent = (thumbnails: boolean): Patch => ({
@@ -256,6 +259,7 @@ const TEXT_ROLES_DRAWN = [
 ] as const
 const WITH_ARROWS = ['stacked', 'cards', 'editorial']
 const ALL_LINK_LIST = ['stacked', 'cards', 'editorial', 'compact']
+const DIVIDER_POSITIONS = ['afterCategories', 'afterProfile', 'aboveSocial', 'belowSocial'] as const
 
 // Glass rows draw today (glass-row.tsx), but `rowStyle` is set inline rather than by a shared glass
 // builder, so it carries no glass marker and its evidence would be refused: the pair stays pending
@@ -461,6 +465,55 @@ const linkListEvidence: CapabilityEvidence[] = [
     base: linkListContent(true),
     probe: { 'dividerDesign.afterProfile': { _type: 'decorativeDivider', style: 'line' } },
   },
+  // Which icon a link shows (its container is the entries above): the stored name decides the drawing.
+  {
+    id: 'linkList.icon.identity',
+    component: 'linkList',
+    capability: 'icon',
+    scope: 'item',
+    layouts: WITH_CARDS,
+    field: 'links[].icon',
+    // The icon's container is drawn whenever the link has an icon (Cards keeps its box), so the claim is
+    // the whole path: the link's icon part, and the icon it draws.
+    resolvers: [
+      { module: LINK_DESIGN, export: 'LinkIcon' },
+      { module: '@/components/ui/badge-icon', export: 'BadgeIcon' },
+    ],
+    render: LINK_LIST,
+    target: LINK_ITEMS,
+    change: 'content',
+    // No link has an icon with the field unset, so the probe's is the only one drawn: what each resolver
+    // returned unset can then be replayed one for one.
+    base: {
+      ...linkListContent(false),
+      links: [link('l1', false), link('l2', false)].map(withoutIcon),
+    },
+    probe: { 'links.0.icon': 'star' },
+  },
+  // A divider's centre icon, in each position the Link list draws a divider.
+  ...DIVIDER_POSITIONS.map((position): CapabilityEvidence => ({
+    id: `linkList.icon.divider.${position}`,
+    component: 'linkList',
+    capability: 'icon',
+    scope: 'section',
+    part: 'divider',
+    layouts: ALL_LINK_LIST,
+    field: `dividerDesign.${position}.icon`,
+    resolvers: [{ module: '@/components/ui/badge-icon', export: 'BadgeIcon' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    // The icon is the only drawing inside the divider (its row says it has an icon centre).
+    target: '[data-decorative-divider] svg',
+    change: 'appears',
+    base: {
+      ...linkListContent(true),
+      // No link draws an icon, so the divider's is the only one: what each resolver returned unset can
+      // then be replayed one for one (Compact shows link icons whatever else is there).
+      links: [link('l1', true), link('l2', true)].map(withoutIcon),
+      [`dividerDesign.${position}.style`]: 'line',
+      [`dividerDesign.${position}.centre`]: 'icon',
+    },
+    probe: { [`dividerDesign.${position}.icon`]: 'star' },
+  })),
 ]
 
 // ---------------------------------------------------------------------------------------------------

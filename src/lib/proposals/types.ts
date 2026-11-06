@@ -184,9 +184,17 @@ export interface ManifestSlot {
   blocks: { type: string; clientEditable: boolean }[]
 }
 
+/** A slot block's own contract: what it offers wherever a slot hosts it (the manifest's `designCapabilities`). */
+export interface ManifestSlotBlock {
+  type: string
+  capabilities?: Partial<Record<string, ManifestCapability>>
+}
+
 /** The slice of the generated manifest the validator reads. */
 export interface DesignManifest {
   manifestVersion: string
+  /** The contract beyond the sections: the slot blocks, judged apart from the section that hosts them. */
+  designCapabilities?: { slotBlocks?: ManifestSlotBlock[] }
   slots: ManifestSlot[]
   sections: ManifestSection[]
   sectionStyle: { fields: ManifestField[] }

@@ -8,7 +8,12 @@ export const badgeRowCapabilities = declareCapabilities({
   header: NOT_APPLICABLE.hosted,
   mark: NOT_APPLICABLE.hosted,
   depth: NOT_APPLICABLE.hosted,
-  icon: { policy: 'required', scope: 'item' },
+  // Choosing a badge's icon is verified (item). The container around it (shape, colour) has no controls
+  // on a block yet: it is Required at section scope and closes with task 158 (BASELINE_CHANGES records why).
+  icon: [
+    { policy: 'required', scope: 'item' },
+    { policy: 'required', scope: 'section' },
+  ],
   action: NOT_APPLICABLE.noWholeCardLink,
   framing: NOT_APPLICABLE.noCroppedPicture,
   pictureDepth: NOT_APPLICABLE.noFramedPicture,

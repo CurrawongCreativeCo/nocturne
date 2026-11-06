@@ -27,6 +27,48 @@ const sections = [
     variant: 'editorial',
     links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
   },
+  {
+    _key: 'listCards',
+    _type: 'linkList',
+    variant: 'cards',
+    links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
+  },
+  {
+    _key: 'listCompact',
+    _type: 'linkList',
+    variant: 'compact',
+    links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
+  },
+  {
+    _key: 'heroOverlay',
+    _type: 'hero',
+    variant: 'overlay',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'heroEditorial',
+    _type: 'hero',
+    variant: 'editorial',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'heroSplitS',
+    _type: 'hero',
+    variant: 'split',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'heroFullS',
+    _type: 'hero',
+    variant: 'full-bleed',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'sideMedia',
+    _type: 'mediaText',
+    variant: 'side',
+    media: [{ _key: 'm0', _type: 'slotImage' }],
+  },
   { _key: 'cta', _type: 'ctaBanner' },
   { _key: 'place', _type: 'location' },
   { _key: 'plain', _type: 'richText' },
@@ -396,10 +438,10 @@ describe('a marked field is judged by its own policy (B2)', () => {
   })
 
   it('rejects a marked field no policy of its capability names, even beside Verified ones', () => {
-    // `links[].icon` is an icon field; the icon policies probe the link design's icon fields, not it.
-    const found = rejections([{ set: { [at('listStack', 'links[_key=="a"].icon')]: 'star' } }])
+    // The hero's motion is Verified (`style.motion`), but no motion policy names its part motion.
+    const found = rejections([{ set: { [at('heroSplit', 'partMotion')]: { enabled: true } } }])
     expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
-    expect(found[0]?.[1]).toContain('no icon policy names it')
+    expect(found[0]?.[1]).toContain('no motion policy names it')
   })
 })
 
@@ -667,5 +709,132 @@ describe('a text role is judged by its own status (AT2)', () => {
       editorial: 'verified',
       compact: { notApplicable: 'Compact draws the label role only' },
     })
+  })
+})
+
+describe('supported icon changes are accepted, and unsupported ones are not (AT7)', () => {
+  const clone = () => JSON.parse(JSON.stringify(manifest)) as DesignManifest
+  const codes = (
+    patches: ChangeProposal['changes'][number]['patches'],
+    given: ValidateDeps = deps(),
+  ) => rejections(patches, given).map(([code]) => code)
+  const linkIcon = (key: string, value: unknown = 'star') => [
+    { set: { [at(key, 'links[_key=="a"].icon')]: value } },
+  ]
+
+  it('accepts a link’s icon on every layout that draws one', () => {
+    for (const key of ['listStack', 'listCards', 'listCompact']) {
+      expect(rejections(linkIcon(key)), key).toEqual([])
+    }
+  })
+
+  it('accepts a new link with an icon', () => {
+    const item = {
+      _key: 'b',
+      _type: 'linkListItem',
+      label: 'Two',
+      icon: 'phone',
+    }
+    expect(
+      rejections([{ insert: { after: at('listStack', 'links[-1]'), items: [item] } }]),
+    ).toEqual([])
+  })
+
+  it('accepts a divider’s centre icon in each position', () => {
+    for (const position of ['afterCategories', 'afterProfile', 'aboveSocial', 'belowSocial']) {
+      expect(
+        rejections([{ set: { [at('listStack', `dividerDesign.${position}.icon`)]: 'star' } }]),
+        position,
+      ).toEqual([])
+    }
+  })
+
+  it('accepts a badge row with an icon in all four hero layouts', () => {
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned', icon: 'star' }],
+    }
+    for (const key of ['heroOverlay', 'heroSplitS', 'heroEditorial', 'heroFullS']) {
+      expect(
+        rejections([{ insert: { replace: at(key, 'supporting[0]'), items: [row] } }]),
+        key,
+      ).toEqual([])
+    }
+    // And setting the icon of a badge already there is the same field.
+    expect(
+      rejections([
+        { set: { [at('heroSplitS', 'supporting[_key=="s0"].badges[0].icon')]: 'star' } },
+      ]).map(([code]) => code),
+    ).not.toContain('capability-not-verified')
+  })
+
+  it('rejects a link’s icon on the layout that draws none, saying why', () => {
+    const found = rejections(linkIcon('listEd'))
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('Draws no icon')
+    expect(
+      codes([{ set: { [at('listEd', 'links[_key=="a"].design.iconShape')]: 'circle' } }]),
+    ).toEqual(['capability-not-verified'])
+  })
+
+  it('rejects an icon that isn’t in the shared set', () => {
+    expect(codes(linkIcon('listStack', 'rocket'))).toEqual(['value-not-allowed'])
+    expect(
+      codes([{ set: { [at('listStack', 'dividerDesign.afterProfile.icon')]: 'rocket' } }]),
+    ).toEqual(['value-not-allowed'])
+  })
+
+  it('rejects a badge row in a slot that doesn’t allow it', () => {
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'x' }],
+    }
+    expect(codes([{ insert: { replace: at('sideMedia', 'media[0]'), items: [row] } }])).toEqual([
+      'slot-block-not-allowed',
+    ])
+  })
+
+  it('rejects a block’s icon when its evidence is removed, saying so', () => {
+    const changed = clone()
+    const block = changed.designCapabilities?.slotBlocks?.find((entry) => entry.type === 'badgeRow')
+    const icon = block?.capabilities?.icon
+    if (!icon || !('policies' in icon)) throw new Error('No icon policies on the badge row.')
+    for (const policy of icon.policies.filter((entry) => entry.scope === 'item')) {
+      policy.availability = 'pending'
+    }
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'x', icon: 'star' }],
+    }
+    const found = rejections(
+      [{ insert: { replace: at('heroSplitS', 'supporting[0]'), items: [row] } }],
+      deps({ manifest: changed }),
+    )
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('badges[].icon')
+    expect(found[0]?.[1]).toContain("isn't verified")
+  })
+
+  it('rejects a block field when the manifest has no contract for the block', () => {
+    const changed = clone()
+    if (changed.designCapabilities?.slotBlocks) {
+      changed.designCapabilities.slotBlocks = changed.designCapabilities.slotBlocks.filter(
+        (entry) => entry.type !== 'badgeRow',
+      )
+    }
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'x', icon: 'star' }],
+    }
+    const found = rejections(
+      [{ insert: { replace: at('heroSplitS', 'supporting[0]'), items: [row] } }],
+      deps({ manifest: changed }),
+    )
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('which the manifest has no design contract for')
   })
 })
