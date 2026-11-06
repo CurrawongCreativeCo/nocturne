@@ -13,6 +13,8 @@ import {
   ProcessVerticalThumbnail,
 } from '@/lib/sanity/schema/thumbnails/process-thumbnails'
 
+import { processCapabilities } from './process-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced.
@@ -78,6 +80,7 @@ export const process = defineType({
   title: 'Process',
   type: 'object',
   icon: ArrowRightIcon,
+  options: { designCapabilities: processCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

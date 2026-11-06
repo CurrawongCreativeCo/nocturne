@@ -1,12 +1,15 @@
 import { BulbOutlineIcon } from '@sanity/icons/BulbOutline'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+
+import { ctaBannerCapabilities } from './cta-banner-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -21,6 +24,7 @@ export const ctaBanner = defineType({
   title: 'Call to action banner',
   type: 'object',
   icon: BulbOutlineIcon,
+  options: { designCapabilities: ctaBannerCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
@@ -65,7 +69,12 @@ export const ctaBanner = defineType({
     ],
     { spacing: 'compact', align: 'center' },
     // The banner is its own coloured card, so the shared Panel isn't offered.
-    { rules: { type: 'ctaBanner', ownsSurfaces: () => true } },
+    {
+      rules: {
+        type: 'ctaBanner',
+        ownsSurfaces: (section) => ownsSurfaces('ctaBanner', section.variant),
+      },
+    },
   ),
   preview: {
     select: { heading: 'heading', title: 'title', tone: 'style.tone' },

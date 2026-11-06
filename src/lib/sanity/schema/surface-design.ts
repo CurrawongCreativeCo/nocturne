@@ -1,5 +1,6 @@
 import { defineField, type ConditionalProperty, type ConditionalPropertyCallback } from 'sanity'
 
+import type { DesignSummaryConfig } from '../design-summary'
 import {
   INLINE_CASE_TITLES,
   INLINE_SIZE_TITLES,
@@ -26,6 +27,7 @@ import {
   TEXT_TRACKING_TITLES,
   TEXT_WEIGHTS,
 } from '../text-style-options'
+import { builtBy } from './capability-marker'
 import { themeColourField } from './theme-colour'
 
 declare module 'sanity' {
@@ -39,10 +41,11 @@ declare module 'sanity' {
   }
   interface ObjectOptions {
     /**
-     * A link's Appearance: the Studio shows what the link changes and the resets above its fields
-     * (features/studio/components/link-design-summary-input).
+     * A section, card or item design object: the Studio shows what it changes, at which level, and
+     * the resets above its fields (features/studio/components/design-summary-input). A Link list
+     * link's Appearance sets LINK_DESIGN_SUMMARY (lib/sanity/link-design-summary.ts).
      */
-    linkDesignSummary?: boolean
+    designSummary?: DesignSummaryConfig
   }
 }
 
@@ -158,7 +161,7 @@ export function surfaceFields({
       fieldset,
       hidden: hiddenOr(({ parent }) => valueOf(parent, 'border') === 'none'),
     }),
-  ]
+  ].map((field) => builtBy('surfaceFields', field, 'surface'))
 }
 
 type TextElement = 'eyebrow' | 'label' | 'description'
@@ -181,7 +184,7 @@ export function textStyleField({
   hidden,
 }: Level & { element: TextElement; fieldset?: string; hidden?: ConditionalProperty }) {
   const { title, description } = TEXT_ELEMENT[element]
-  return defineField({
+  const field = defineField({
     name: element,
     title,
     type: 'object',
@@ -245,6 +248,7 @@ export function textStyleField({
         : []),
     ],
   })
+  return builtBy('textStyleField', field, 'text')
 }
 
 /**
@@ -336,5 +340,5 @@ export function iconDesignFields({
         (context) => plain(context) || valueOf(context.parent, 'iconBorder') === 'none',
       ),
     }),
-  ]
+  ].map((field) => builtBy('iconDesignFields', field, 'icon'))
 }

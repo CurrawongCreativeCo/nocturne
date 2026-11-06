@@ -13,6 +13,7 @@ import {
   VideoEmbedThumbnail,
 } from '@/lib/sanity/schema/thumbnails/video-thumbnails'
 
+import { videoCapabilities } from './video-capabilities'
 import {
   ambientSizeProblem,
   ASPECT_RATIOS,
@@ -63,6 +64,7 @@ export const video = defineType({
   title: 'Video',
   type: 'object',
   icon: PlayIcon,
+  options: { designCapabilities: videoCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,

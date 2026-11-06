@@ -9,6 +9,8 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { featuresGridCapabilities } from './features-grid-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced.
@@ -22,6 +24,7 @@ export const featuresGrid = defineType({
   title: 'Features grid',
   type: 'object',
   icon: ThLargeIcon,
+  options: { designCapabilities: featuresGridCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

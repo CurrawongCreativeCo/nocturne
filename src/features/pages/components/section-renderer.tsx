@@ -10,6 +10,7 @@ import { isMembersOnly } from '@/lib/sanity/access'
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
 import type { PageSection, SectionGate, SectionOf, SectionProps, SectionType } from '../types'
+import { withoutOwnedPanel } from '../utils/owned-surfaces'
 import { CtaBanner } from './sections/cta-banner'
 import { Embed } from './sections/embed'
 import { Events } from './sections/events'
@@ -212,7 +213,7 @@ export function SectionRenderer({
                   // Not the first section of the page, so it never claims the <h1> or the LCP preload.
                   return full ? (
                     <Section
-                      data={full}
+                      data={withoutOwnedPanel(full)}
                       greeting={greeting}
                       renderForm={renderForm}
                       renderCheckout={renderCheckout}
@@ -226,7 +227,7 @@ export function SectionRenderer({
             </Suspense>
           ) : (
             <Section
-              data={section}
+              data={withoutOwnedPanel(section)}
               isFirst={index === 0 && !belowHeading}
               greeting={greeting}
               renderForm={renderForm}

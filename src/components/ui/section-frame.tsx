@@ -52,11 +52,6 @@ interface Props {
    * itself never drifts.
    */
   media?: ReactNode | ((parallax: ParallaxPlan | undefined) => ReactNode)
-  /**
-   * The section draws its own surfaces (the Link list's cards), so the shared Panel doesn't apply
-   * and a stored choice is ignored. Mirrors the `ownsSurfaces` rule its schema registers.
-   */
-  ownsSurfaces?: boolean
   'aria-labelledby'?: string
   children: ReactNode
 }
@@ -104,9 +99,10 @@ function EdgeSvg({ children, ...rest }: { children: ReactNode; 'data-edge-layer'
  * through the cut) and the accent line (over it).
  */
 export function SectionFrame(props: Props) {
-  // Only a section with a panel needs the site's colours and gradients, so only it waits for them.
-  if (!props.ownsSurfaces && panelChoice(props.style?.panel))
-    return <PanelSectionFrame {...props} />
+  // Only a section with a panel needs the site's colours and gradients, so only it waits for them. A
+  // layout that draws its own surfaces never has one: SectionRenderer leaves its stored choice out
+  // (lib/design/section-surfaces.ts).
+  if (panelChoice(props.style?.panel)) return <PanelSectionFrame {...props} />
   return <SectionFrameView {...props} />
 }
 
@@ -125,7 +121,6 @@ function SectionFrameView({
   className = '',
   background,
   media,
-  ownsSurfaces = false,
   'aria-labelledby': labelledBy,
   children,
 }: Props & { design?: SiteDesign }) {
@@ -138,21 +133,19 @@ function SectionFrameView({
   // A panel is on the content container, so every section gets it with no code of its own. The same
   // decision the Studio's warning makes (resolveSectionPanel), from the colours and gradients the page
   // really draws; with none (they couldn't be read) a gradient is checked with the conservative bound.
-  const panel = ownsSurfaces
-    ? null
-    : resolveSectionPanel({
-        panel: style?.panel,
-        strength: style?.panelStrength,
-        tone: resolved.tone,
-        hasPicture: Boolean(resolved.image),
-        overlay: pictureOverlay(style, resolved.tone),
-        gradient: resolved.gradient,
-        gradients: design?.gradients,
-        site: design?.colours,
-        hasOwnBackground: Boolean(background),
-        overlaps:
-          Boolean(resolved.edge) || resolved.motion === 'parallax' || resolved.motion === 'float',
-      })
+  const panel = resolveSectionPanel({
+    panel: style?.panel,
+    strength: style?.panelStrength,
+    tone: resolved.tone,
+    hasPicture: Boolean(resolved.image),
+    overlay: pictureOverlay(style, resolved.tone),
+    gradient: resolved.gradient,
+    gradients: design?.gradients,
+    site: design?.colours,
+    hasOwnBackground: Boolean(background),
+    overlaps:
+      Boolean(resolved.edge) || resolved.motion === 'parallax' || resolved.motion === 'float',
+  })
   const panelProps = panel ? panelDomProps(panel) : undefined
   const containerClass =
     `${resolved.containerClass} ${containerClassName} ${panelProps?.className ?? ''}`.trim()

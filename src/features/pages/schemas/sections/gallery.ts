@@ -15,6 +15,8 @@ import {
   GallerySliderThumbnail,
 } from '@/lib/sanity/schema/thumbnails/gallery-thumbnails'
 
+import { galleryCapabilities } from './gallery-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced.
@@ -76,6 +78,7 @@ export const gallery = defineType({
   title: 'Gallery',
   type: 'object',
   icon: ImagesIcon,
+  options: { designCapabilities: galleryCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,

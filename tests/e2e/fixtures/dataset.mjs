@@ -2822,6 +2822,54 @@ documents.push({
 })
 
 /**
+ * A real page with Image + text's supporting video in each layout, with the picture, and with no
+ * picture (tests/e2e/media-text-placement.spec.ts): where each layout places the media and the extra
+ * block at phone, tablet and desktop widths. Not indexed, and not in the section gallery, so it adds
+ * no visual baseline.
+ */
+const placementVideo = (id) =>
+  slotVideoItem(`media-text-placement-${id}`, {
+    title: 'Meet the team',
+    source: 'youtube',
+    url: VIDEO_URL.youtube,
+  })
+documents.push({
+  _id: 'page-media-text-placement',
+  _type: 'page',
+  title: 'Image + text placement',
+  slug: { _type: 'slug', current: 'media-text-placement' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    galleryMediaText('placement-right', 'Media on the right', {
+      variant: 'side',
+      imagePosition: 'right',
+      media: [slotImageItem('placement-right')],
+      supporting: [placementVideo('right')],
+    }),
+    galleryMediaText('placement-left', 'Media on the left', {
+      variant: 'side',
+      imagePosition: 'left',
+      media: [slotImageItem('placement-left')],
+      supporting: [placementVideo('left')],
+    }),
+    galleryMediaText('placement-stacked', 'Media above the text', {
+      variant: 'stacked',
+      media: [slotImageItem('placement-stacked')],
+      supporting: [placementVideo('stacked')],
+    }),
+    galleryMediaText('placement-overlay', 'Text over media', {
+      variant: 'overlay',
+      media: [slotImageItem('placement-overlay')],
+      supporting: [placementVideo('overlay')],
+    }),
+    galleryMediaText('placement-no-media', 'No picture', {
+      variant: 'side',
+      supporting: [placementVideo('no-media')],
+    }),
+  ],
+})
+
+/**
  * Animated hero parts on real pages (tests/e2e/hero-parts.spec.ts), for what the gallery cannot show:
  * a MotionProvider, so the parts really play. The first page's hero is the first section (its heading
  * and picture never start hidden); the second page starts with text, so its hero is further down.

@@ -7,6 +7,8 @@
  *   - the section schemas and the shared types      fields, option lists, presets, options.manifest
  *   - the section rules registry                    evaluated once per layout (registerSectionRules)
  *   - src/lib/sanity/client-editable.ts             who can edit each field
+ *   - src/app/design-components.ts                 design capability declarations, markers and
+ *                                                  evidence (task 275), per component
  *   - schema.json                                   which fields are required
  *   - src/styles/tokens.json                        token names
  *
@@ -66,6 +68,11 @@ const slots = await jiti.import(join(root, 'src/features/pages/slots/registry.ts
 const { slotImage } = await jiti.import(join(root, 'src/features/pages/schemas/slot-image.ts'))
 const { slotVideo } = await jiti.import(join(root, 'src/features/pages/schemas/slot-video.ts'))
 const { isClientEditable } = await jiti.import(join(root, 'src/lib/sanity/client-editable.ts'))
+// The design capability contract (task 275): declarations, schema markers and evidence.
+const { DESIGN_COMPONENTS, gate } = await jiti.import(join(root, 'src/app/design-components.ts'))
+const { componentContract, contractSummary } = await jiti.import(
+  join(root, 'src/lib/design/capability-manifest.ts'),
+)
 
 if (!existsSync(join(root, 'schema.json'))) {
   console.error('schema.json is missing. Run `npm run typegen` (it extracts the schema first).')
@@ -97,6 +104,11 @@ try {
     rulesFor: sectionRulesFor,
     isClientEditable,
     limitsFor: (type) => limitsByType[type],
+    capabilitiesFor: (type) => {
+      const component = DESIGN_COMPONENTS.find((candidate) => candidate.id === type)
+      return component ? componentContract(component, gate) : undefined
+    },
+    designCapabilities: contractSummary(DESIGN_COMPONENTS, gate),
   })
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)

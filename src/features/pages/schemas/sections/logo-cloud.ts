@@ -13,6 +13,8 @@ import {
   LogoCloudMarqueeThumbnail,
 } from '@/lib/sanity/schema/thumbnails/logo-cloud-thumbnails'
 
+import { logoCloudCapabilities } from './logo-cloud-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // A single line of small text above the logos.
@@ -51,6 +53,7 @@ export const logoCloud = defineType({
   title: 'Logo strip',
   type: 'object',
   icon: ImagesIcon,
+  options: { designCapabilities: logoCloudCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

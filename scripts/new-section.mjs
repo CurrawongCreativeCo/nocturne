@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url'
 
 import { parseSectionArgs, toSectionNames } from './section-names.mjs'
 import {
+  capabilitiesTemplate,
   componentTemplate,
   dispatcherTemplate,
   fragmentTemplate,
@@ -45,6 +46,7 @@ const { kebab, typeName, Component, title } = names
 
 const paths = {
   schema: join(feature, 'schemas/sections', `${kebab}.ts`),
+  capabilities: join(feature, 'schemas/sections', `${kebab}-capabilities.ts`),
   registry: join(feature, 'schemas/sections/index.ts'),
   fragments: join(feature, 'api/sections.ts'),
   // A section with variants is a folder; the renderer's './sections/<kebab>' import finds its index.tsx.
@@ -58,6 +60,7 @@ const paths = {
 
 if (
   existsSync(paths.schema) ||
+  existsSync(paths.capabilities) ||
   existsSync(paths.component) ||
   existsSync(`${paths.component}.tsx`) ||
   existsSync(join(feature, 'components/sections', kebab, 'index.tsx'))
@@ -99,6 +102,7 @@ const componentFiles = variants.length
   : [[paths.component, componentTemplate(names)]]
 
 writeFileSync(paths.schema, schemaTemplate(names, variants))
+writeFileSync(paths.capabilities, capabilitiesTemplate(names))
 if (variants.length) mkdirSync(paths.component)
 for (const [file, content] of componentFiles) writeFileSync(file, content)
 for (const [file, marker, text] of edits) {
@@ -113,7 +117,12 @@ if (existsSync(paths.placeholder) && !existsSync(paths.preview)) {
 }
 
 console.log(`\n✓ Created the "${title}" section (${typeName}):`)
-for (const file of [paths.schema, ...componentFiles.map(([file]) => file), paths.preview])
+for (const file of [
+  paths.schema,
+  paths.capabilities,
+  ...componentFiles.map(([file]) => file),
+  paths.preview,
+])
   console.log(`  + ${rel(file)}`)
 for (const file of [paths.registry, paths.fragments, paths.renderer, paths.fixtures])
   console.log(`  ~ ${rel(file)}`)
@@ -122,6 +131,7 @@ for (const file of [paths.registry, paths.fragments, paths.renderer, paths.fixtu
 // (e.g. imports added at the markers get sorted into place).
 const touched = [
   paths.schema,
+  paths.capabilities,
   paths.registry,
   paths.fragments,
   ...componentFiles.map(([file]) => file),
@@ -156,8 +166,11 @@ Next:
   1. Add fields in ${rel(paths.schema)}
   2. Query them in ${typeName}Fragment (${rel(paths.fragments)}), then run \`npm run typegen\`
   3. Build the UI in ${variants.length ? `${rel(paths.component)}/ (one file per variant)` : rel(paths.component)}
-  4. Optional: replace the thumbnail at ${rel(paths.preview)}
-  5. Give the "${kebab}" entry in the section gallery real content (${rel(paths.fixtures)}), then
+  4. Review each design capability in ${rel(paths.capabilities)}: it starts Not applicable with the reason
+     "Not reviewed yet", and \`npm run check\` fails until every one is Required, Conditional (with a
+     trigger) or Not applicable (with a reason). README, "Design capability contract".
+  5. Optional: replace the thumbnail at ${rel(paths.preview)}
+  6. Give the "${kebab}" entry in the section gallery real content (${rel(paths.fixtures)}), then
      add its screenshot baseline: \`npm run test:e2e:update\` on Linux or in Docker (see the
      README's "Section gallery"). Until then the visual test for "${kebab}" has no baseline and fails.
 

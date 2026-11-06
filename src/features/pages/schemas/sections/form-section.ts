@@ -8,6 +8,8 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { formSectionCapabilities } from './form-section-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2 in max-w-measure-narrow.
@@ -21,6 +23,7 @@ export const formSection = defineType({
   title: 'Form',
   type: 'object',
   icon: EnvelopeIcon,
+  options: { designCapabilities: formSectionCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

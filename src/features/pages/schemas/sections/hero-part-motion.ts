@@ -41,8 +41,9 @@ export const heroPartMotionField: FieldDefinition = defineField({
   name: 'partMotion',
   title: 'Animate individual parts',
   type: 'object',
-  // The switch and the rows sit directly in Advanced, not in a box of their own.
-  options: { frameless: true },
+  // The switch and the rows sit directly in Advanced, not in a box of their own. The motion
+  // capability, built here for the hero alone (an exception in lib/design/capability-exceptions.ts).
+  options: { frameless: true, capability: 'motion' },
   fieldsets: HERO_PARTS.map((part) => ({
     name: part,
     title: HERO_PART_TITLES[part],

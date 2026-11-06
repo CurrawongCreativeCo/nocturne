@@ -55,6 +55,8 @@ export type RejectionCode =
   | 'limit-exceeded'
   | 'slot-block-not-allowed'
   | 'contrast-fails'
+  | 'capability-not-verified'
+  | 'content-source-not-verified'
   | 'agency-permission-required'
 
 export interface Rejection {
@@ -125,7 +127,38 @@ export interface ManifestField {
   /** A number (text length or item count), absent when the field has no maximum, null when unknown. */
   max?: number | null
   list?: { value: string | number; title: string }[]
+  /** The shared design capability this field is, when a shared design builder made it. */
+  capability?: string
+  /** The content source this field feeds, when a source's evidence names it. */
+  contentSource?: string
   clientEditable: boolean
+}
+
+/** What a policy or source offers in one layout: `verified`, `pending` or `{ notApplicable: reason }`. */
+export type ManifestStatus = string | { notApplicable: string }
+
+/** One policy of a component's design capability, with its availability (design capability contract). */
+export interface ManifestCapabilityPolicy {
+  policy: string
+  scope: string
+  part?: string
+  trigger?: { kind: string; when: string; path?: string; reachable?: boolean }
+  closingTask: number
+  /** The schema fields its evidence probes. */
+  fields: string[]
+  /** One status, or one per layout. `verified` is the only one that lets a proposal set the value. */
+  availability: ManifestStatus | Record<string, ManifestStatus>
+}
+
+export type ManifestCapability =
+  | { notApplicable: string }
+  | { policies: ManifestCapabilityPolicy[]; evidence: { id: string; field: string }[] }
+
+export interface ManifestContentSource {
+  owner: number
+  gate?: string
+  fields: string[]
+  availability: ManifestStatus | Record<string, ManifestStatus>
 }
 
 export interface ManifestSection {
@@ -133,7 +166,10 @@ export interface ManifestSection {
   fields: ManifestField[]
   variants?: { value: string; title: string }[]
   slots?: { slot: string; path: string }[]
-  rules: { variant: string | null; hasPicture: boolean }[]
+  rules: { variant: string | null; hasPicture: boolean; ownsSurfaces?: boolean }[]
+  /** What the section should offer of each shared design capability, and what it verifiably offers. */
+  capabilities?: Partial<Record<string, ManifestCapability>>
+  contentSources?: Partial<Record<string, ManifestContentSource>>
 }
 
 export interface ManifestSlot {

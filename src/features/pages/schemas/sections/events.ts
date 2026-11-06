@@ -13,6 +13,7 @@ import {
   EventsListThumbnail,
 } from '@/lib/sanity/schema/thumbnails/events-thumbnails'
 
+import { eventsCapabilities } from './events-capabilities'
 import { EVENTS_MAX_COUNT } from '../../utils/events'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -52,6 +53,7 @@ export const events = defineType({
   title: 'Events',
   type: 'object',
   icon: CalendarIcon,
+  options: { designCapabilities: eventsCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,

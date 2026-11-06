@@ -209,6 +209,32 @@ describe('rejection reasons', () => {
     ).toEqual(['slot-block-not-allowed'])
   })
 
+  it('applies the split family’s slot rules to Image + text', () => {
+    const SPLIT = 'pageBuilder[_key=="split1"]'
+    const withSplit = {
+      ...deps,
+      documents: {
+        ...deps.documents,
+        'page-home': {
+          _id: 'page-home',
+          _type: 'page',
+          _rev: 'rev-home-1',
+          pageBuilder: [{ _key: 'split1', _type: 'mediaText', variant: 'side' }],
+        },
+      },
+    }
+    const image = (key: string) => ({
+      _key: key,
+      _type: 'slotImage',
+      image: { _type: 'image', asset: { _type: 'reference', _ref: 'image-a' } },
+    })
+    const media = (items: unknown[]) =>
+      codes(validateProposal(proposal([{ set: { [`${SPLIT}.media`]: items } }]), withSplit))
+    expect(media([image('a')])).toEqual([])
+    expect(media([image('a'), image('b')])).toEqual(['limit-exceeded'])
+    expect(media([{ _key: 's', _type: 'statsBar', items: [] }])).toEqual(['slot-block-not-allowed'])
+  })
+
   it('slot-block-not-allowed: an item with no type', () => {
     expect(reasonFor([{ set: { [`${HERO}.supporting`]: [{ _key: 'x' }] } }])).toEqual([
       'slot-block-not-allowed',

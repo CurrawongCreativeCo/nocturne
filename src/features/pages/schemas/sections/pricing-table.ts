@@ -9,6 +9,8 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { pricingTableCapabilities } from './pricing-table-capabilities'
+
 interface PlanValue {
   highlighted?: boolean
 }
@@ -26,6 +28,7 @@ export const pricingTable = defineType({
   title: 'Pricing table',
   type: 'object',
   icon: CreditCardIcon,
+  options: { designCapabilities: pricingTableCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

@@ -9,6 +9,8 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { locationCapabilities } from './location-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2 in half the content width.
@@ -24,6 +26,7 @@ export const location = defineType({
   title: 'Location',
   type: 'object',
   icon: PinIcon,
+  options: { designCapabilities: locationCapabilities },
   description:
     'Shows the address, opening hours, phone and email from Business info. Edit those there, once.',
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).

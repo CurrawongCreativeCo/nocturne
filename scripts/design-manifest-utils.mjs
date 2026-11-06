@@ -98,6 +98,8 @@ function walkFields(fields, context, depth = 0) {
 
 function describe(field, path, topField, schemaValue, required, context, depth) {
   const named = context.types.get(field.type)
+  // The shared design capability the field is, when a shared builder marked it (lib/design).
+  const capability = field.options?.capability ?? named?.options?.capability
   const row = {
     path,
     kind: field.type,
@@ -106,6 +108,7 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
       limit: context.prefix === '' ? context.limits?.[field.name] : undefined,
     }),
     ...(listOf(field) ? { list: listOf(field) } : {}),
+    ...(capability ? { capability } : {}),
     clientEditable: context.editable(context.rootType, topField),
   }
   const rows = [row]
@@ -176,20 +179,27 @@ export function evaluateRules(type, variants, rulesFor) {
       hasPicture: rules.hasPicture?.(section) === true,
       fixesAlignment: rules.fixesAlignment?.(section) === true,
       hasOwnBackgroundImage: rules.hasOwnBackgroundImage?.(section) === true,
+      drawsBackground: rules.drawsBackground?.(section) === true,
+      // The shared Panel doesn't apply where this is true (lib/design/section-surfaces.ts).
+      ownsSurfaces: rules.ownsSurfaces?.(section) === true,
     }
   }
   return [null, ...variants.map((variant) => variant.value)].map(evaluate)
 }
 
 /**
- * The registry slots a section offers: `<section>.<field>` where the section has that field. The
- * registry's `max` is the slot field's known maximum.
+ * The registry slots a section offers: `<family>.<field>` where the family is on this section (the
+ * registry's SLOT_FAMILIES: `split` is mediaText) and the section has that field. The registry's `max`
+ * is the slot field's known maximum.
  */
 function sectionSlots(section, deps) {
   const fieldNames = new Set((section.fields ?? []).map((field) => field.name))
+  const families = deps.slots?.SLOT_FAMILIES ?? {}
   return Object.keys(deps.slots?.SLOTS ?? {})
     .map((slot) => ({ slot, family: slot.split('.')[0], path: slot.split('.')[1] }))
-    .filter(({ family, path }) => family === section.name && fieldNames.has(path))
+    .filter(
+      ({ family, path }) => (families[family] ?? family) === section.name && fieldNames.has(path),
+    )
 }
 
 function describeSection(section, deps) {
@@ -201,6 +211,14 @@ function describeSection(section, deps) {
   }
   const fields = describeFields(section, deps, { limits })
   const variants = listOf((section.fields ?? []).find((field) => field.name === 'variant') ?? {})
+  const contract = deps.capabilitiesFor?.(section.name)
+  // A field a content source's evidence probes belongs to that source (change proposals judge it so).
+  for (const [source, entry] of Object.entries(contract?.contentSources ?? {})) {
+    for (const path of entry.fields ?? []) {
+      const row = fields.find((candidate) => candidate.path === path)
+      if (row) row.contentSource = source
+    }
+  }
   return {
     type: section.name,
     title: section.title ?? section.name,
@@ -215,6 +233,7 @@ function describeSection(section, deps) {
       set,
     })),
     rules: evaluateRules(section.name, variants ?? [], deps.rulesFor),
+    ...(contract ?? {}),
   }
 }
 
@@ -265,8 +284,10 @@ function describeSlots(deps) {
  * @param deps.schemaJson       schema.json from `sanity schema extract` (which fields are required)
  * @param deps.rulesFor         (type) => registered section rules
  * @param deps.isClientEditable (type, field) => boolean
- * @param deps.slots           { SLOTS, SLOT_BLOCKS } from the shared slot registry
+ * @param deps.slots           { SLOTS, SLOT_BLOCKS, SLOT_FAMILIES } from the shared slot registry
  * @param deps.limitsFor        (type) => the section's exported LIMITS, if any
+ * @param deps.capabilitiesFor  (type) => the section's `capabilities` and `contentSources`, if declared
+ * @param deps.designCapabilities the contract's registry, slot blocks, listings and coverage
  */
 export function buildDesignManifest(deps) {
   const types = new Map(
@@ -301,5 +322,8 @@ export function buildDesignManifest(deps) {
     sectionStyle: { fields: describeFields(deps.sectionStyle, resolved) },
     designSettings: { fields: describeFields(deps.designSettings, resolved) },
     tokens,
+    // The design capability contract beyond the sections: its registry, the slot blocks and listings
+    // it covers, and what it doesn't cover (lib/design/capability-manifest.ts).
+    ...(deps.designCapabilities ? { designCapabilities: deps.designCapabilities } : {}),
   }
 }

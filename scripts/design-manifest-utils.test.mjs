@@ -255,6 +255,20 @@ describe('slots', () => {
     expect(section.fields.find((row) => row.path === 'extra')).toMatchObject({ max: 1 })
   })
 
+  it('finds a family’s slots on the section the registry maps the family to', () => {
+    const mapped = buildDesignManifest(
+      deps({
+        slots: {
+          ...slotDeps,
+          SLOTS: { 'wide.extra': { title: 'Extra', max: 1 } },
+          SLOT_FAMILIES: { wide: 'banner' },
+        },
+      }),
+    )
+    expect(mapped.sections[0].slots).toEqual([{ slot: 'wide.extra', path: 'extra' }])
+    expect(mapped.sections[0].fields.find((row) => row.path === 'extra')).toMatchObject({ max: 1 })
+  })
+
   it('refuses a registry block with no schema type', () => {
     const missing = {
       ...slotDeps,
@@ -272,10 +286,29 @@ describe('evaluateRules', () => {
       hasPicture: (section) => section.variant === 'wide',
       fixesAlignment: (section) => section.variant === 'narrow',
     }))
+    const none = { hasOwnBackgroundImage: false, drawsBackground: false, ownsSurfaces: false }
     expect(rules).toEqual([
-      { variant: null, hasPicture: false, fixesAlignment: false, hasOwnBackgroundImage: false },
-      { variant: 'wide', hasPicture: true, fixesAlignment: false, hasOwnBackgroundImage: false },
-      { variant: 'narrow', hasPicture: false, fixesAlignment: true, hasOwnBackgroundImage: false },
+      { variant: null, hasPicture: false, fixesAlignment: false, ...none },
+      { variant: 'wide', hasPicture: true, fixesAlignment: false, ...none },
+      { variant: 'narrow', hasPicture: false, fixesAlignment: true, ...none },
+    ])
+  })
+
+  it('records which layouts draw their own surfaces or background', () => {
+    const rules = evaluateRules('banner', [{ value: 'wide' }, { value: 'boxed' }], () => ({
+      ownsSurfaces: (section) => section.variant === 'boxed',
+      drawsBackground: (section) => section.variant === 'wide',
+    }))
+    expect(
+      rules.map(({ variant, ownsSurfaces, drawsBackground }) => [
+        variant,
+        ownsSurfaces,
+        drawsBackground,
+      ]),
+    ).toEqual([
+      [null, false, false],
+      ['wide', false, true],
+      ['boxed', true, false],
     ])
   })
 

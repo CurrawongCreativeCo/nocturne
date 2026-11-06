@@ -5,6 +5,43 @@
  * SectionFrame (component).
  */
 
+/**
+ * `schemas/sections/<kebab>-capabilities.ts`: the new section's design capability declaration (task 275;
+ * README, "Design capability contract"). Every capability starts Not applicable with the reason "Not
+ * reviewed yet", which `npm run design-capabilities` (and so `npm run check`) rejects: a new section
+ * can't merge until each capability is reviewed as Required, Conditional (with a trigger) or Not
+ * applicable (with its reason).
+ */
+export function capabilitiesTemplate({ typeName, title }) {
+  return `import { declareCapabilities, notApplicable } from '@/lib/design/capabilities'
+
+// Not reviewed yet: \`npm run design-capabilities\` fails until each one below is reviewed. For each,
+// choose { policy: 'required', scope }, { policy: 'conditional', scope, trigger } (a trigger names the
+// section's anatomy, a layout or a stored setting) or notApplicable('why'). Name layouts when a
+// policy doesn't apply to all of them. README, "Design capability contract", says how.
+const NOT_REVIEWED = notApplicable('Not reviewed yet')
+
+/** The design capabilities of the ${escapeJs(title)} section (task 275). */
+export const ${typeName}Capabilities = declareCapabilities({
+  surface: NOT_REVIEWED,
+  text: NOT_REVIEWED,
+  header: NOT_REVIEWED,
+  mark: NOT_REVIEWED,
+  depth: NOT_REVIEWED,
+  icon: NOT_REVIEWED,
+  action: NOT_REVIEWED,
+  framing: NOT_REVIEWED,
+  pictureDepth: NOT_REVIEWED,
+  overlay: NOT_REVIEWED,
+  glass: NOT_REVIEWED,
+  divider: NOT_REVIEWED,
+  edge: NOT_REVIEWED,
+  motion: NOT_REVIEWED,
+  slots: NOT_REVIEWED,
+})
+`
+}
+
 export function schemaTemplate({ typeName, title }, variants = []) {
   const hasVariants = variants.length > 0
   const constName = `${typeName.replace(/[A-Z]/g, (c) => `_${c}`).toUpperCase()}_VARIANTS`
@@ -13,7 +50,9 @@ import { defineField, defineType } from 'sanity'
 
 import { accessField } from '@/lib/sanity/schema/access-field'
 ${hasVariants ? "import { PlaceholderThumbnail } from '@/lib/sanity/schema/placeholder-thumbnail'\n" : ''}import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
-import { ${hasVariants ? 'variantField, variantSubtitle' : 'joinSubtitle, toneTitle'} } from '@/lib/sanity/schema/section-variant'${
+import { ${hasVariants ? 'variantField, variantSubtitle' : 'joinSubtitle, toneTitle'} } from '@/lib/sanity/schema/section-variant'
+
+import { ${typeName}Capabilities } from './${kebabOf(typeName)}-capabilities'${
     hasVariants
       ? `
 
@@ -33,6 +72,8 @@ export const ${typeName} = defineType({
   title: '${title}',
   type: 'object',
   icon: BlockElementIcon,
+  // What it should offer of the shared design capabilities: see ${kebabOf(typeName)}-capabilities.ts.
+  options: { designCapabilities: ${typeName}Capabilities },
   // Content, plus the agency-only Design tab (the shared \`style\` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,

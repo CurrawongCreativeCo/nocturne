@@ -1,5 +1,17 @@
+import {
+  chosenDesignProperties,
+  designGroupChanges,
+  designResetKeys,
+  isChosen,
+  keysOfDesignGroup,
+  listLabels,
+  summariseDesign,
+  type DesignProperty,
+  type DesignSummaryConfig,
+} from './design-summary'
 import { joinSubtitle } from './schema/section-variant'
-import { themeColourCss } from './theme-colour'
+
+export { isChosen, listLabels }
 
 /**
  * Reading a Link list link's design at a glance (README, "Link list": Reading a link's design). A
@@ -30,18 +42,6 @@ export const LINK_DESIGN_SCOPES = {
 export const scopedTitle = (title: string, scope: keyof typeof LINK_DESIGN_SCOPES) =>
   joinSubtitle(title, LINK_DESIGN_SCOPES[scope])
 
-/**
- * A stored key of a link's Appearance, as editors name it. `key` is the field on the link's design
- * object; `part` is the property inside it for text (`label.colour`) and unset for the rest.
- */
-interface DesignProperty {
-  group: LinkDesignGroup
-  key: string
-  part?: string
-  /** Lower case, as it reads inside a sentence: "label colour". */
-  label: string
-}
-
 const TEXT_PARTS = {
   size: 'size',
   weight: 'weight',
@@ -55,15 +55,20 @@ const textProperties = (
   key: 'eyebrow' | 'label' | 'description',
   parts: (keyof typeof TEXT_PARTS)[],
 ) =>
-  parts.map((part): DesignProperty => ({
+  parts.map((part): LinkDesignProperty => ({
     group: 'text',
     key,
     part,
     label: `${key} ${TEXT_PARTS[part]}`,
   }))
 
+/** A stored key of a link's Appearance, as editors name it (`group` is one of LINK_DESIGN_GROUPS). */
+interface LinkDesignProperty extends DesignProperty {
+  group: LinkDesignGroup
+}
+
 /** Every property a link's Appearance can set, in form order. Keep equal to the fields in link-list.ts. */
-export const LINK_DESIGN_PROPERTIES: readonly DesignProperty[] = [
+export const LINK_DESIGN_PROPERTIES: readonly LinkDesignProperty[] = [
   { group: 'card', key: 'background', label: 'background colour' },
   { group: 'card', key: 'backgroundStrength', label: 'background strength' },
   { group: 'card', key: 'border', label: 'border' },
@@ -82,37 +87,33 @@ export const LINK_DESIGN_PROPERTIES: readonly DesignProperty[] = [
   { group: 'arrow', key: 'arrowColour', label: 'arrow colour' },
 ]
 
-/** The stored keys of a group, for a reset that clears only that group. */
-export const keysOfGroup = (group: LinkDesignGroup): string[] => [
-  ...new Set(LINK_DESIGN_PROPERTIES.filter((p) => p.group === group).map((p) => p.key)),
-]
-
 /**
- * Whether a stored value is a choice. Only an unset value inherits: a border of "none", a
- * transparent background, `0` and `false` are choices (design-overrides.ts). A colour is stored as
- * `{ colour, hex }` and counts only when the page draws it (`themeColourCss`): an empty or
- * "inherit" colour, or a Custom without a valid hex, inherits.
+ * The Link list link's summary, as the shared design summary (design-summary.ts) is configured for it:
+ * its own words and groups, and the Appearance switch. Set as `options.designSummary` on a link's design.
  */
-export function isChosen(value: unknown): boolean {
-  if (value === undefined || value === null || value === '') return false
-  if (typeof value === 'object') return themeColourCss(value) !== undefined
-  return true
+export const LINK_DESIGN_SUMMARY: DesignSummaryConfig = {
+  scope: 'item',
+  scopeLabel: LINK_DESIGN_SCOPES.link,
+  groups: LINK_DESIGN_GROUPS.map((id) => ({ id, title: LINK_DESIGN_GROUP_TITLES[id] })),
+  properties: LINK_DESIGN_PROPERTIES,
+  switchKey: 'appearance',
+  testId: 'link-design-summary',
+  followsText: 'Uses the Link list design',
+  customisedNote: 'Everything not listed follows the Link list design.',
+  customiseAction: 'Choose Customise this card',
+  nothingSaved: 'Choose Customise this card to change only this link.',
+  resetAllText: 'Reset this link',
 }
+
+/** The stored keys of a group, for a reset that clears only that group. */
+export const keysOfGroup = (group: LinkDesignGroup): string[] =>
+  keysOfDesignGroup(LINK_DESIGN_SUMMARY, group)
 
 type StoredDesign = Record<string, unknown> | null | undefined
 
-function valueOf(design: StoredDesign, property: DesignProperty): unknown {
-  const stored = design?.[property.key]
-  if (property.part === undefined) return stored
-  return stored && typeof stored === 'object'
-    ? (stored as Record<string, unknown>)[property.part]
-    : undefined
-}
-
 /** The properties a link's Appearance holds a choice for, whether or not it is switched on. */
-export function chosenProperties(design: StoredDesign): DesignProperty[] {
-  return LINK_DESIGN_PROPERTIES.filter((property) => isChosen(valueOf(design, property)))
-}
+export const chosenProperties = (design: StoredDesign): LinkDesignProperty[] =>
+  chosenDesignProperties(LINK_DESIGN_SUMMARY, design) as LinkDesignProperty[]
 
 export interface LinkDesignSummary {
   /** `list`: the page follows the Link list design. `custom`: the link's choices apply. */
@@ -129,45 +130,18 @@ export interface LinkDesignSummary {
   detail: string
 }
 
-const plural = (count: number, one: string, many = `${one}s`) =>
-  `${String(count)} ${count === 1 ? one : many}`
-
-/** The short names for a sentence: the first few, then "and 2 more". */
-export function listLabels(labels: readonly string[], max = 3): string {
-  if (labels.length <= max) return labels.join(', ')
-  return `${labels.slice(0, max).join(', ')} and ${String(labels.length - max)} more`
-}
-
 /** What a link's design says, for its preview and the top of its Appearance. */
 export function summariseLinkDesign(design: StoredDesign, maxLabels = 3): LinkDesignSummary {
-  const chosen = chosenProperties(design)
-  if (design?.appearance !== 'custom') {
-    return {
-      state: 'list',
-      changes: 0,
-      kept: chosen.length,
-      labels: [],
-      text: 'Uses the Link list design',
-      detail:
-        chosen.length > 0
-          ? `Uses the Link list design (${plural(chosen.length, 'saved change')} not applied)`
-          : 'Uses the Link list design',
-    }
-  }
-  const labels = chosen.map((property) => property.label)
-  const text =
-    labels.length === 0
-      ? 'Customised · no changes yet'
-      : `Customised · ${plural(labels.length, 'change')}`
-  return {
-    state: 'custom',
-    changes: labels.length,
-    kept: 0,
-    labels,
-    text,
-    detail: labels.length === 0 ? text : `${text} (${listLabels(labels, maxLabels)})`,
-  }
+  const {
+    state,
+    scopeLabel: _scope,
+    ...summary
+  } = summariseDesign(LINK_DESIGN_SUMMARY, design, maxLabels)
+  return { ...summary, state: state === 'inherited' ? 'list' : 'custom' }
 }
+
+const plural = (count: number, one: string, many = `${one}s`) =>
+  `${String(count)} ${count === 1 ? one : many}`
 
 /** How many of a list's links change the list's design. A link set to customise with no change does not. */
 export function countCustomisedLinks(
@@ -186,11 +160,9 @@ export function customisedLinksText(count: number): string | undefined {
  * group's, and never `appearance`. Hidden values count: a reset removes what is saved, not only
  * what shows.
  */
-export function resetKeys(design: StoredDesign, group: LinkDesignGroup): string[] {
-  return keysOfGroup(group).filter((key) => design?.[key] !== undefined)
-}
+export const resetKeys = (design: StoredDesign, group: LinkDesignGroup): string[] =>
+  designResetKeys(LINK_DESIGN_SUMMARY, design, group)
 
 /** How many properties a group changes now, for the group's reset button. */
-export function groupChanges(design: StoredDesign, group: LinkDesignGroup): number {
-  return chosenProperties(design).filter((property) => property.group === group).length
-}
+export const groupChanges = (design: StoredDesign, group: LinkDesignGroup): number =>
+  designGroupChanges(LINK_DESIGN_SUMMARY, design, group)

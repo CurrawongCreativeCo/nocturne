@@ -12,6 +12,12 @@
 
 They build on revision 3 (documents A–D in this folder), which you approved on 25 October. Where this document changes a revision 3 decision, it says so.
 
+**Canonical planning documents** (read these, don't copy them here):
+
+- **The build plan** is the authority for every task's scope, dependencies and status: https://claude.ai/artifact/7kWst2fHcf2eZocg9h3xwL, with progress in its database.
+- **The design capability audit and its plan revisions** (tasks 275–279) are in the private `CurrawongCreativeCo/nocturne-foundation` repository, under `docs/plan/`: `2026-11-04-design-capability-audit.md` and `2026-11-05-plan-revision.md`. Read the versions on its `main` branch.
+- **The capability rules themselves are code**, not documents: `src/lib/design/` (README, "Design capability contract"). Plan amendments that task 275 found, not yet applied, are in [t275-canonical-patch](./t275-canonical-patch/README.md).
+
 **How the evidence was gathered.** I read the source on local `main` at `2b6595c`, plus `origin/main` for task 189, and the live build plan with its progress database (111 done, 2 doing, 100 to do, 1 skipped). Labels:
 
 - `[Code]` means I read it in the source;
@@ -309,6 +315,8 @@ This extends the worst-case method that `glass-contrast.ts` uses for Link list r
 
 - the manifest can't describe a field that doesn't exist;
 - a new option can't be added without appearing in it.
+
+**Amendment (task 275, approved by the owner on 5 and 6 November 2026).** The manifest stays generated. Task 275 adds one more hand-written input beside purpose and example: each component's capability _policy_ (`declareCapabilities`), which says what it should offer and switches nothing on. What a component really offers is never written down: it is worked out from the schema's markers and passing evidence.
 
 ### 6.2 Change proposals
 

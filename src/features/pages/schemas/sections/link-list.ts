@@ -11,12 +11,14 @@ import {
   GLASS_STRENGTH_TITLES,
   glassContrastProblem,
 } from '@/lib/color/glass-contrast'
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { listsCategories, looksLikeTypedCategories, plainTextParagraphs } from '@/lib/plain-text'
 import { SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { LINK_ARROWS, LINK_ARROW_TITLES } from '@/lib/sanity/link-arrow-options'
 import {
   LINK_DESIGN_GROUP_TITLES,
+  LINK_DESIGN_SUMMARY,
   countCustomisedLinks,
   customisedLinksText,
   scopedTitle,
@@ -26,6 +28,7 @@ import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
+import { markFields } from '@/lib/sanity/schema/capability-marker'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
 import { framing } from '@/lib/sanity/schema/image-framing-option'
@@ -52,6 +55,7 @@ import {
 import { textOrImageFields } from '@/lib/sanity/schema/wordmark'
 import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
 
+import { linkListCapabilities } from './link-list-capabilities'
 import { linkListDesignFields, withCardContrast } from './link-list-design'
 import {
   LINK_LIST_RECOMMENDED_MAX,
@@ -353,7 +357,7 @@ const linkAppearanceField = defineField({
     'This link follows the Link list’s design (Design tab). Customise it to change only what you pick here.',
   hidden: hiddenFromClients,
   // The summary and the resets above the fields (features/studio/components/link-design-summary-input).
-  options: { collapsible: true, collapsed: true, linkDesignSummary: true },
+  options: { collapsible: true, collapsed: true, designSummary: LINK_DESIGN_SUMMARY },
   fieldsets: [
     {
       name: 'card',
@@ -377,7 +381,7 @@ const linkAppearanceField = defineField({
       options: { collapsible: true, collapsed: true },
     },
   ],
-  fields: [
+  fields: markFields({ shadow: 'depth', arrowStyle: 'action', arrowColour: 'action' }, [
     defineField({
       name: 'appearance',
       title: 'Design',
@@ -484,7 +488,7 @@ const linkAppearanceField = defineField({
         return arrow === 'none'
       }),
     }),
-  ],
+  ]),
 })
 
 const linkItem = defineArrayMember({
@@ -676,7 +680,7 @@ export const linkList = defineType({
   type: 'object',
   icon: BlockElementIcon,
   // The preset bar above the form: the one place to choose a layout (README, "Link list").
-  options: presetsOption(LINK_LIST_PRESETS),
+  options: { ...presetsOption(LINK_LIST_PRESETS), designCapabilities: linkListCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
@@ -915,7 +919,12 @@ export const linkList = defineType({
     { align: 'center' },
     // No design option depends on the layout: no picture, and each layout accepts any alignment. Its
     // cards are its own surfaces (glass rows, tinted cards), so the shared Panel isn't offered.
-    { rules: { type: 'linkList', ownsSurfaces: () => true } },
+    {
+      rules: {
+        type: 'linkList',
+        ownsSurfaces: (section) => ownsSurfaces('linkList', section.variant),
+      },
+    },
   ),
   preview: {
     select: {

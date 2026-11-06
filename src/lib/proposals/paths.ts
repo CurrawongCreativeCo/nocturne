@@ -91,6 +91,45 @@ export function setAt<T>(document: T, segments: readonly PathSegment[], value: u
   return copy
 }
 
+/**
+ * The object fields a `set` goes through that don't exist yet, outermost first: what Sanity creates for
+ * a plain `set`, and what the plan writes explicitly as `setIfMissing` (plan.ts). Only an object field
+ * inside an object can be created; a missing array item, or a field of something that isn't an object,
+ * is the proposal's mistake and is not listed here.
+ */
+export function missingObjectParents(
+  document: unknown,
+  segments: readonly PathSegment[],
+): PathSegment[][] {
+  const missing: PathSegment[][] = []
+  for (let end = 1; end < segments.length; end++) {
+    const here = segments.slice(0, end)
+    if (getAt(document, here) !== undefined) continue
+    // The first thing that is missing decides: it must be an object field with a field beneath it, and
+    // sit in an object (or in one this set creates). Anything else has nowhere to be created.
+    if (segments[end - 1]?.kind !== 'field' || segments[end]?.kind !== 'field') break
+    const created = missing.at(-1)?.length === end - 1
+    if (!created && !isRecord(getAt(document, segments.slice(0, end - 1)))) break
+    missing.push(here)
+  }
+  return missing
+}
+
+/**
+ * Sets the value at `segments` on a copy of `document`, creating the object fields it goes through as
+ * the plan will. Throws when it still has nowhere to land: a missing array item, or a parent that isn't
+ * an object.
+ */
+export function setCreatingParents<T>(
+  document: T,
+  segments: readonly PathSegment[],
+  value: unknown,
+): T {
+  let copy = document
+  for (const parent of missingObjectParents(document, segments)) copy = setAt(copy, parent, {})
+  return setAt(copy, segments, value)
+}
+
 /** Removes the value at `segments` from a copy of `document`; a missing value is not an error. */
 export function unsetAt<T>(document: T, segments: readonly PathSegment[]): T {
   const copy = structuredClone(document)

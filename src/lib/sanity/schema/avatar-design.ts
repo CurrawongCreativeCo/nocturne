@@ -7,6 +7,7 @@ import {
   PROFILE_IMAGE_SIZE_TITLES,
 } from '../profile-image-options'
 import { hiddenFromClients } from '../roles'
+import { builtBy } from './capability-marker'
 import { themeColourField } from './theme-colour'
 
 const radio = <T extends string>(values: readonly T[], titles: Record<T, string>) => ({
@@ -34,7 +35,7 @@ export function avatarDesignField({
 }) {
   const noRing: ConditionalPropertyCallback = ({ parent }) =>
     ((parent as { ring?: string } | undefined)?.ring ?? 'none') !== 'line'
-  return defineField({
+  const field = defineField({
     name,
     title,
     type: 'object',
@@ -67,4 +68,5 @@ export function avatarDesignField({
       }),
     ],
   })
+  return builtBy('avatarDesignField', field)
 }

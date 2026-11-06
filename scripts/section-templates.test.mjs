@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { parseSectionArgs, toSectionNames } from './section-names.mjs'
 import {
+  capabilitiesTemplate,
   componentTemplate,
   dispatcherTemplate,
   fragmentTemplate,
@@ -21,6 +22,38 @@ describe('new section templates', () => {
     expect(schema).toContain("name: 'pricingTable'")
     expect(schema).toContain("joinSubtitle('Pricing table', toneTitle(tone))")
     expect(schema).toContain("tone: 'style.tone'")
+  })
+
+  it('declare every design capability Not applicable with the reason the checks reject', () => {
+    const declaration = capabilitiesTemplate(names)
+    const capabilities = [
+      'surface',
+      'text',
+      'header',
+      'mark',
+      'depth',
+      'icon',
+      'action',
+      'framing',
+      'pictureDepth',
+      'overlay',
+      'glass',
+      'divider',
+      'edge',
+      'motion',
+      'slots',
+    ]
+    for (const capability of capabilities) {
+      expect(declaration).toContain(`  ${capability}: NOT_REVIEWED,`)
+    }
+    expect(declaration).toContain("notApplicable('Not reviewed yet')")
+    expect(declaration).toContain('export const pricingTableCapabilities = declareCapabilities({')
+    // The schema declares it, from the file next to it.
+    const schema = schemaTemplate(names)
+    expect(schema).toContain(
+      "import { pricingTableCapabilities } from './pricing-table-capabilities'",
+    )
+    expect(schema).toContain('options: { designCapabilities: pricingTableCapabilities }')
   })
 
   it('project the shared style in the GROQ fragment, keeping the members-only condition', () => {

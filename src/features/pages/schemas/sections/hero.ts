@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 
 import { slotField } from '@/features/pages/slots/slot-field'
 import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { DEFAULT_HEADING_TONES, headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
@@ -29,6 +30,7 @@ import {
   HeroSplitThumbnail,
 } from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
+import { heroCapabilities } from './hero-capabilities'
 import { heroEyebrowDesignField } from './hero-eyebrow'
 import { heroPartMotionField } from './hero-part-motion'
 import { imageSideOptions } from './image-side'
@@ -218,6 +220,7 @@ export const hero = defineType({
   // The preset bar above the form: the one place to choose a hero's design (README, "Hero presets").
   options: {
     ...presetsOption(HERO_PRESETS, HERO_PRESET_LABELS),
+    designCapabilities: heroCapabilities,
     manifest: {
       purpose:
         'The opening section of a page: a heading, a short introduction and up to two buttons, with an optional picture in one of four layouts.',
@@ -369,7 +372,7 @@ export const hero = defineType({
         hasOwnBackgroundImage: () => true,
         // Only these two draw the picture behind the text; a panel sits over it.
         // Full background draws its own text panel, so a section Panel would double it.
-        ownsSurfaces: (section) => layoutOf(section) === 'full-bleed',
+        ownsSurfaces: (section) => ownsSurfaces('hero', section.variant),
         drawsBackground: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
       },
     },

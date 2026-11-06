@@ -1,6 +1,7 @@
 import { defineField, type ConditionalProperty } from 'sanity'
 
 import { BADGE_ICONS } from '../badge-icons'
+import { builtBy } from './capability-marker'
 
 declare module 'sanity' {
   interface StringOptions {
@@ -26,7 +27,7 @@ export function badgeIconField({
   description?: string
   hidden?: ConditionalProperty
 } = {}) {
-  return defineField({
+  const field = defineField({
     name,
     title,
     type: 'string',
@@ -38,4 +39,5 @@ export function badgeIconField({
       iconPicker: true,
     },
   })
+  return builtBy('badgeIconField', field, 'icon')
 }

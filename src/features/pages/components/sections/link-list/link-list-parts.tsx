@@ -197,7 +197,6 @@ export function LinkListView({
       defaults={layout.defaults}
       isFirst={isFirst}
       containerClassName={traits.text}
-      ownsSurfaces
     >
       {parts.map((part) => {
         switch (part) {

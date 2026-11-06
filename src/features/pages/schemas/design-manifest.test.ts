@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { sectionTypes } from '@/features/pages/schemas/sections'
-import { blocksForSlot, SLOTS, type SlotName } from '@/features/pages/slots/registry'
+import { blocksForSlot, SLOT_FAMILIES, SLOTS, type SlotName } from '@/features/pages/slots/registry'
 
 import { FAMILY_TYPES } from '../../../../scripts/design-manifest-utils.mjs'
 
@@ -74,7 +74,8 @@ describe('design-manifest.generated.json', () => {
   it('points each section slot at a field the section has', () => {
     for (const section of manifest.sections) {
       for (const { slot, path } of section.slots ?? []) {
-        expect(slot.startsWith(`${section.type}.`)).toBe(true)
+        const family = slot.split('.')[0] as keyof typeof SLOT_FAMILIES
+        expect(SLOT_FAMILIES[family], slot).toBe(section.type)
         expect(
           section.fields.map((field) => field.path),
           slot,
@@ -83,6 +84,12 @@ describe('design-manifest.generated.json', () => {
     }
     const hero = manifest.sections.find((section) => section.type === 'hero')
     expect(hero?.slots).toEqual([{ slot: 'hero.supporting', path: 'supporting' }])
+    // The split family's slots are on Image + text (task 275 fixed this).
+    const mediaText = manifest.sections.find((section) => section.type === 'mediaText')
+    expect(mediaText?.slots).toEqual([
+      { slot: 'split.media', path: 'media' },
+      { slot: 'split.supporting', path: 'supporting' },
+    ])
   })
 
   it('has examples that use fields the section has', () => {

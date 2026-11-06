@@ -4,6 +4,7 @@ import { defineField, defineType } from 'sanity'
 import { DEFAULT_LAUNCH_LABEL, formatLaunchLine, isLaunchPast } from '@/lib/launch-date'
 import { DEFAULT_TIME_ZONE, isTime } from '@/lib/opening-hours'
 
+import { launchDateCapabilities } from './launch-date-capabilities'
 import { lengthWarning } from './length-guidance'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -23,6 +24,7 @@ export const launchDate = defineType({
   title: 'Launch date',
   type: 'object',
   icon: CalendarIcon,
+  options: { designCapabilities: launchDateCapabilities },
   fieldsets: [
     {
       name: 'advanced',
