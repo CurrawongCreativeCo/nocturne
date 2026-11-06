@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import { hiddenFromClients } from '@/lib/sanity/roles'
 import { builtBy, builtOptions } from '@/lib/sanity/schema/capability-marker'
 
 import type { CapabilityException } from './capability-exceptions'
 import {
+  agencyOnlyField,
   exceptionProblems,
   fieldOffered,
   privateFields,
@@ -273,5 +275,35 @@ describe('fieldOffered', () => {
       offered: false,
       reason: 'items[].design.shadow: the state has no items item to check',
     })
+  })
+})
+
+describe('agencyOnlyField', () => {
+  const field = (hidden: unknown): SchemaField => ({ name: 'f', type: 'string', hidden })
+
+  it('is true for the rule the Studio uses to keep a field to the agency', () => {
+    expect(agencyOnlyField(field(hiddenFromClients))).toBe(true)
+    expect(agencyOnlyField(field((context: never) => hiddenFromClients(context) || false))).toBe(
+      true,
+    )
+  })
+
+  it('is false for a field clients can see, a field nobody sees, and one with no rule', () => {
+    expect(agencyOnlyField({ name: 'f', type: 'string' })).toBe(false)
+    expect(agencyOnlyField(field(false))).toBe(false)
+    expect(agencyOnlyField(field(true))).toBe(false)
+  })
+
+  it('is false for a rule that hides the field from clients only in some states', () => {
+    // A slot is hidden from clients only while it is empty.
+    const whileEmpty = ({ currentUser, value }: { currentUser: never; value?: unknown[] }) =>
+      hiddenFromClients({ currentUser } as never) && !value?.length
+    expect(agencyOnlyField(field(whileEmpty))).toBe(false)
+  })
+
+  it('is false for a rule that can’t be evaluated without a document', () => {
+    const needsDocument = ({ document }: { document: { missing: { deep: boolean } } }) =>
+      document.missing.deep
+    expect(agencyOnlyField(field(needsDocument))).toBe(false)
   })
 })

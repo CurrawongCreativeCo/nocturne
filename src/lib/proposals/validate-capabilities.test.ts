@@ -402,3 +402,159 @@ describe('a marked field is judged by its own policy (B2)', () => {
     expect(found[0]?.[1]).toContain('no icon policy names it')
   })
 })
+
+describe('nested paths can’t bypass validation (AT3)', () => {
+  const clone = () => JSON.parse(JSON.stringify(manifest)) as DesignManifest
+  type Policy = NonNullable<
+    Extract<
+      NonNullable<DesignManifest['sections'][number]['capabilities']>[string],
+      { policies: unknown }
+    >['policies'][number]
+  >
+  /** A copy of the manifest with every policy of a capability that `match`es set to one status. */
+  const withStatus = (
+    type: string,
+    capability: string,
+    status: string | { notApplicable: string },
+    match: (policy: Policy) => boolean = () => true,
+  ) => {
+    const changed = clone()
+    const entry = changed.sections.find((section) => section.type === type)?.capabilities?.[
+      capability
+    ]
+    if (!entry || !('policies' in entry)) throw new Error(`No ${capability} policies on ${type}.`)
+    for (const policy of entry.policies.filter(match)) policy.availability = status
+    return deps({ manifest: changed })
+  }
+  const codes = (
+    patches: ChangeProposal['changes'][number]['patches'],
+    given: ValidateDeps = deps(),
+  ) => rejections(patches, given).map(([code]) => code)
+
+  it('has a manifest row for every field a policy names', () => {
+    const missing: string[] = []
+    for (const section of manifest.sections) {
+      const rows = new Set(section.fields.map((row) => row.path))
+      for (const row of section.fields.filter((entry) => entry.kind === 'sectionStyle')) {
+        for (const style of manifest.sectionStyle.fields) rows.add(`${row.path}.${style.path}`)
+      }
+      for (const [capability, entry] of Object.entries(section.capabilities ?? {})) {
+        if (!entry || !('policies' in entry)) continue
+        for (const policy of entry.policies) {
+          for (const field of policy.fields) {
+            if (!rows.has(field))
+              missing.push(`${section.type}: ${capability} policy names ${field}`)
+          }
+        }
+      }
+    }
+    expect(missing).toEqual([])
+  })
+
+  it('walks inline objects inside inline objects: a link’s own design has rows', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    const paths = new Set(list?.fields.map((row) => row.path))
+    for (const path of [
+      'links[].design.iconShape',
+      'links[].design.label',
+      'links[].design.border',
+    ]) {
+      expect(paths.has(path), path).toBe(true)
+    }
+  })
+
+  it('treats a link’s own design as design, and agency-only, however deep the path', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    const rows = list?.fields.filter((row) => row.path.startsWith('links[].design')) ?? []
+    expect(rows.length).toBeGreaterThan(20)
+    for (const row of rows) {
+      expect(row.clientEditable, row.path).toBe(false)
+      expect(row.design, row.path).toBe(true)
+    }
+    const change = [{ set: { [at('listStack', 'links[_key=="a"].design.iconShape')]: 'circle' } }]
+    const result = validateProposal(proposal(change), deps())
+    expect(result.rejected).toEqual([])
+    expect(result.design.accepted).toHaveLength(1)
+    expect(result.content.accepted).toHaveLength(0)
+    expect(result.needsAgencyReview).toBe(true)
+    // A client-level run can't write it.
+    expect(codes(change, deps({ agencyPermitted: false }))).toEqual(['agency-permission-required'])
+  })
+
+  it('keeps the text of a link client-editable', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    expect(list?.fields.find((row) => row.path === 'links[].label')?.clientEditable).toBe(true)
+    expect(accepted([{ set: { [at('listStack', 'links[_key=="a"].label')]: 'Two' } }])).toBe(true)
+    expect(
+      codes(
+        [{ set: { [at('listStack', 'links[_key=="a"].label')]: 'Two' } }],
+        deps({ agencyPermitted: false }),
+      ),
+    ).toEqual([])
+  })
+
+  it('rejects a child of a Pending marked object as it rejects the object', () => {
+    const pending = withStatus('linkList', 'divider', 'pending')
+    const parent = codes(
+      [{ set: { [at('listStack', 'dividerDesign.afterProfile')]: { style: 'line' } } }],
+      pending,
+    )
+    expect(parent).toEqual(['capability-not-verified'])
+    expect(
+      codes([{ set: { [at('listStack', 'dividerDesign.afterProfile.style')]: 'line' } }], pending),
+    ).toEqual(parent)
+    // Verified, the same child is accepted.
+    expect(
+      accepted([{ set: { [at('listStack', 'dividerDesign.afterProfile.style')]: 'line' } }]),
+    ).toBe(true)
+  })
+
+  it('rejects a child of a Not applicable marked object as it rejects the object', () => {
+    // Editorial draws no card: cardDesign.border is Not applicable there, and so is what is inside it.
+    const child = rejections([
+      { set: { [at('listEd', 'cardDesign.background.colour')]: 'accent' } },
+    ])
+    expect(child.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(child[0]?.[1]).toContain("doesn't offer: Draws no card")
+  })
+
+  it('rejects a child of a marked object no policy names (partMotion.enabled)', () => {
+    const parent = codes([{ set: { [at('heroSplit', 'partMotion')]: { enabled: true } } }])
+    expect(parent).toEqual(['capability-not-verified'])
+    expect(codes([{ set: { [at('heroSplit', 'partMotion.enabled')]: true } }])).toEqual(parent)
+  })
+
+  it('judges an insert into a marked array, and the blocks inside it', () => {
+    const block = {
+      _key: 'b1',
+      _type: 'badgeRow',
+      badges: [{ _key: 'x', label: 'One' }],
+    }
+    const insert = [{ insert: { replace: at('heroSplit', 'supporting[0]'), items: [block] } }]
+    const heroWith = { ...documents['page-home'], pageBuilder: sections }
+    const withSupporting = {
+      ...deps(),
+      documents: {
+        'page-home': {
+          ...heroWith,
+          pageBuilder: sections.map((section) =>
+            section._key === 'heroSplit'
+              ? { ...section, supporting: [{ _key: 's0', _type: 'logoRow' }] }
+              : section,
+          ),
+        },
+      },
+    }
+    // The block policy is Verified: the insert is accepted.
+    expect(rejections(insert, withSupporting)).toEqual([])
+    // Pending, the same insert is rejected: before this check it skipped the slots verdict.
+    const pending = withStatus('hero', 'slots', 'pending', (policy) => policy.part === 'block')
+    const found = rejections(insert, { ...withSupporting, manifest: pending.manifest })
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('supporting')
+  })
+
+  it('leaves unsetting a nested path allowed', () => {
+    expect(accepted([{ unset: [at('listEd', 'cardDesign.background.colour')] }])).toBe(true)
+  })
+})

@@ -411,6 +411,52 @@ export function fieldOffered({
   return { offered: true }
 }
 
+/** A client's view of the Studio: an Editor, who sees none of the agency-only fields. */
+const CLIENT = {
+  id: 'capability-check-client',
+  roles: [{ name: 'editor', title: 'Editor' }],
+}
+
+/** What a rule may depend on: the field's own value, and its parent's. A rule hidden in all of them depends on neither. */
+const PROBE_STATES: readonly { value: unknown; parent: Record<string, unknown> }[] = [
+  { value: undefined, parent: {} },
+  { value: [{ _key: 'probe' }], parent: { variant: 'probe' } },
+  { value: { _key: 'probe' }, parent: { appearance: 'custom' } },
+  { value: 'probe', parent: { variant: 'probe', appearance: 'custom' } },
+]
+
+/** Calls a field's `hidden` rule as `user` in each probe state; a rule that can't be evaluated is undefined. */
+function hiddenIn(field: SchemaField, user: typeof AGENCY | typeof CLIENT): boolean[] | undefined {
+  if (typeof field.hidden !== 'function') return PROBE_STATES.map(() => field.hidden === true)
+  try {
+    return PROBE_STATES.map(({ value, parent }) =>
+      Boolean(
+        (field.hidden as (context: unknown) => unknown)({
+          document: {},
+          parent,
+          value,
+          currentUser: user,
+          path: [field.name],
+        }),
+      ),
+    )
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Whether the Studio keeps a field to the agency: its own `hidden` rule hides it from a client in
+ * every state it was asked about (a field that is hidden only while empty, as a slot is, is not), and
+ * shows it to the agency in at least one. A rule that can't be evaluated is not agency-only. The change
+ * proposal manifest marks every row under an agency-only field as agency-only too.
+ */
+export function agencyOnlyField(field: SchemaField): boolean {
+  const client = hiddenIn(field, CLIENT)
+  const agency = hiddenIn(field, AGENCY)
+  return Boolean(client?.every(Boolean) && agency?.some((hidden) => !hidden))
+}
+
 /** What the availability checks ask of the schema (capability-availability.ts). */
 export interface SchemaGate {
   /** Whether the component has a schema to read (a listing has none of its own). */

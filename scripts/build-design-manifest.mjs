@@ -73,6 +73,7 @@ const { DESIGN_COMPONENTS, gate } = await jiti.import(join(root, 'src/app/design
 const { componentContract, contractSummary } = await jiti.import(
   join(root, 'src/lib/design/capability-manifest.ts'),
 )
+const { agencyOnlyField } = await jiti.import(join(root, 'src/lib/design/schema-capabilities.ts'))
 
 if (!existsSync(join(root, 'schema.json'))) {
   console.error('schema.json is missing. Run `npm run typegen` (it extracts the schema first).')
@@ -103,6 +104,7 @@ try {
     schemaJson: JSON.parse(readFileSync(join(root, 'schema.json'), 'utf8')),
     rulesFor: sectionRulesFor,
     isClientEditable,
+    agencyOnlyField,
     limitsFor: (type) => limitsByType[type],
     capabilitiesFor: (type) => {
       const component = DESIGN_COMPONENTS.find((candidate) => candidate.id === type)

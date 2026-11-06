@@ -328,3 +328,107 @@ describe('listOf and missingPurposes', () => {
     expect(missingPurposes(types)).toEqual(['mediaText'])
   })
 })
+
+describe('nested inline objects and inherited marks (AT3)', () => {
+  const deepSection = {
+    name: 'deep',
+    type: 'object',
+    options: { manifest: { purpose: 'Nested objects.' } },
+    fields: [
+      {
+        name: 'items',
+        type: 'array',
+        of: [
+          {
+            type: 'object',
+            fields: [
+              { name: 'label', type: 'string' },
+              {
+                // An inline object inside an inline array member, as a link's own Appearance is.
+                name: 'design',
+                type: 'object',
+                options: { designSummary: { groups: [] } },
+                hidden: ({ currentUser }) =>
+                  currentUser.roles.some((role) => role.name === 'editor'),
+                fields: [
+                  { name: 'tone', type: 'string' },
+                  {
+                    name: 'inner',
+                    type: 'object',
+                    fields: [{ name: 'size', type: 'string' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'box',
+        type: 'object',
+        fields: [{ name: 'inside', type: 'object', fields: [{ name: 'depth', type: 'number' }] }],
+      },
+      { name: 'loop', type: 'looping' },
+      { name: 'plain', type: 'string' },
+    ],
+  }
+  const looping = {
+    name: 'looping',
+    type: 'object',
+    fields: [
+      { name: 'again', type: 'looping' },
+      { name: 'leaf', type: 'string' },
+    ],
+  }
+  const agencyOnlyField = (field) => typeof field.hidden === 'function'
+  const build = (extra = {}) =>
+    buildDesignManifest(
+      deps({
+        sectionTypes: [deepSection],
+        sharedTypes: [cta, looping],
+        isClientEditable: () => true,
+        schemaJson: [],
+        ...extra,
+      }),
+    )
+  const rowsOf = (manifest) => new Map(manifest.sections[0].fields.map((row) => [row.path, row]))
+
+  it('gives rows to an inline object inside an inline object, at any depth', () => {
+    const rows = rowsOf(build())
+    for (const path of [
+      'items[].design',
+      'items[].design.tone',
+      'items[].design.inner.size',
+      'box.inside.depth',
+    ]) {
+      expect(rows.has(path), path).toBe(true)
+    }
+  })
+
+  it('still stops a named type that holds itself', () => {
+    const rows = rowsOf(build())
+    expect(rows.has('loop.leaf')).toBe(true)
+    expect(rows.has('loop.again')).toBe(true)
+    expect(rows.has('loop.again.leaf')).toBe(false)
+  })
+
+  it('marks every row under an agency-only field as not client-editable', () => {
+    const rows = rowsOf(build({ agencyOnlyField }))
+    expect(rows.get('items[].label').clientEditable).toBe(true)
+    for (const path of ['items[].design', 'items[].design.tone', 'items[].design.inner.size']) {
+      expect(rows.get(path).clientEditable, path).toBe(false)
+    }
+    // Without the check the registry alone decides.
+    expect(rowsOf(build()).get('items[].design.tone').clientEditable).toBe(true)
+  })
+
+  it('marks a design object and everything under it, and nothing else, as design', () => {
+    const rows = rowsOf(build())
+    for (const path of ['items[].design', 'items[].design.tone', 'items[].design.inner.size']) {
+      expect(rows.get(path).design, path).toBe(true)
+    }
+    for (const path of ['items[].label', 'box.inside.depth', 'plain']) {
+      expect(rows.get(path)).not.toHaveProperty('design')
+    }
+  })
+})

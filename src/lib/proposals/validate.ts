@@ -372,14 +372,38 @@ function checkValue(check: ValueCheck, path: string, value: unknown) {
   }
 }
 
-/** Sorts a unit into a part from where it lands: a style, an image design, or one of the look fields. */
-function partOf(scope: Scope | undefined, topField: string | undefined, designDocument: boolean) {
+/**
+ * Sorts a unit into a part from where it lands: a style, an image design, one of the look fields, or a
+ * row the manifest says is a design object (`design: true`, such as a link's own Appearance).
+ */
+function partOf(
+  scope: Scope | undefined,
+  topField: string | undefined,
+  designDocument: boolean,
+  row?: ManifestField,
+) {
   if (designDocument) return 'design'
   if (!scope || !topField) return 'content'
+  if (row?.design === true) return 'design'
   const kind = scope.rows.get(topField)?.kind ?? ''
   return DESIGN_KINDS.has(kind) || DESIGN_FIELDS.has(topField) || topField.endsWith('Design')
     ? 'design'
     : 'content'
+}
+
+/**
+ * The rows above `segments` that are a shared design capability or feed a content source. A value
+ * inside a marked object (`cardDesign.label.size`, `dividerDesign.afterProfile.style`) is judged by the
+ * object's own marker too, so a nested path is never a way round it.
+ */
+function markedAncestors(scope: Scope, segments: readonly PathSegment[]): MarkedField[] {
+  const found: MarkedField[] = []
+  for (let end = 1; end < segments.length; end++) {
+    const path = manifestPath(scope, segments.slice(0, end))
+    const row = path === null ? undefined : scope.rows.get(path)
+    if (path !== null && row && (row.capability || row.contentSource)) found.push({ path, row })
+  }
+  return found
 }
 
 function inspect(unit: Unit, deps: ValidateDeps): Inspection {
@@ -492,7 +516,7 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
   const path = manifestPath(scope, relative)
   const first = relative[0]
   result.field = first?.kind === 'field' ? first.name : undefined
-  result.part = partOf(scope, result.field, designDocument)
+  result.part = partOf(scope, result.field, designDocument, path ? scope.rows.get(path) : undefined)
   if (path === null || !exists(scope, path)) {
     return fail(
       'unknown-path',
@@ -505,6 +529,8 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
   if (top) check.touched.push(top)
 
   if (unit.operation === 'set') {
+    // The value's own markers (checkValue) and those of the objects it sits inside: all must pass.
+    check.marked.push(...markedAncestors(scope, relative))
     checkValue(check, path, unit.value)
   } else if (unit.operation === 'unset') {
     const row = scope.rows.get(path)
@@ -522,6 +548,9 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
       )
     } else {
       check.touched.push(row)
+      // An insert changes the array itself, so a marked array (a slot) is judged, as well as its ancestors.
+      check.marked.push(...markedAncestors(scope, relative))
+      if (row.capability || row.contentSource) check.marked.push({ path, row })
       const current = getAt(scope.fragment, relative)
       const length = Array.isArray(current) ? current.length : 0
       const replaced = unit.position?.where === 'replace' ? 1 : 0

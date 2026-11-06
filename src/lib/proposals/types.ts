@@ -132,6 +132,8 @@ export interface ManifestField {
   /** The content source this field feeds, when a source's evidence names it. */
   contentSource?: string
   clientEditable: boolean
+  /** The field is, or sits inside, a design object (options.designSummary): a change to it is design. */
+  design?: boolean
 }
 
 /** What a policy or source offers in one layout: `verified`, `pending` or `{ notApplicable: reason }`. */
