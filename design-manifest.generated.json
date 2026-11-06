@@ -2009,6 +2009,26 @@
                 "split": "pending",
                 "editorial": "pending",
                 "full-bleed": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "heading": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "intro": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                }
               }
             }
           ],
@@ -2031,6 +2051,26 @@
                 "split": "pending",
                 "editorial": "pending",
                 "full-bleed": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "heading": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "intro": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                }
               }
             }
           ],
@@ -3285,6 +3325,23 @@
                 "side": "pending",
                 "stacked": "pending",
                 "overlay": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "side": "pending",
+                  "stacked": "pending",
+                  "overlay": "pending"
+                },
+                "heading": {
+                  "side": "pending",
+                  "stacked": "pending",
+                  "overlay": "pending"
+                },
+                "intro": {
+                  "side": "pending",
+                  "stacked": "pending",
+                  "overlay": "pending"
+                }
               }
             }
           ],
@@ -3779,7 +3836,11 @@
               ],
               "closingTask": 276,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "body": "pending"
+              }
             }
           ],
           "evidence": []
@@ -3796,7 +3857,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -4183,6 +4249,20 @@
               "availability": {
                 "grid": "pending",
                 "marquee": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "marquee": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "marquee": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "marquee": "pending"
+                }
               }
             }
           ],
@@ -4641,6 +4721,20 @@
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
+              },
+              "roleAvailability": {
+                "quote": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "attribution": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "label": {
+                  "grid": "pending",
+                  "slider": "pending"
+                }
               }
             }
           ],
@@ -4661,6 +4755,20 @@
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "slider": "pending"
+                }
               }
             }
           ],
@@ -5061,7 +5169,11 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "body": "pending"
+              }
             }
           ],
           "evidence": []
@@ -5078,7 +5190,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -5494,7 +5611,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -5771,7 +5893,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -6091,7 +6218,14 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "price": "pending",
+                "body": "pending",
+                "label": "pending",
+                "description": "pending"
+              }
             },
             {
               "policy": "required",
@@ -6105,7 +6239,14 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "price": "pending",
+                "body": "pending",
+                "label": "pending",
+                "description": "pending"
+              }
             }
           ],
           "evidence": []
@@ -6122,7 +6263,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -6454,7 +6600,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -6816,6 +6967,20 @@
                   "notApplicable": "156 item 6 names the cards layout only"
                 },
                 "cards": "pending"
+              },
+              "roleAvailability": {
+                "number": {
+                  "inline": {
+                    "notApplicable": "156 item 6 names the cards layout only"
+                  },
+                  "cards": "pending"
+                },
+                "label": {
+                  "inline": {
+                    "notApplicable": "156 item 6 names the cards layout only"
+                  },
+                  "cards": "pending"
+                }
               }
             }
           ],
@@ -6836,6 +7001,20 @@
               "availability": {
                 "inline": "pending",
                 "cards": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "inline": "pending",
+                  "cards": "pending"
+                },
+                "heading": {
+                  "inline": "pending",
+                  "cards": "pending"
+                },
+                "intro": {
+                  "inline": "pending",
+                  "cards": "pending"
+                }
               }
             }
           ],
@@ -7437,6 +7616,23 @@
                 "grid": "pending",
                 "masonry": "pending",
                 "slider": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "masonry": "pending",
+                  "slider": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "masonry": "pending",
+                  "slider": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "masonry": "pending",
+                  "slider": "pending"
+                }
               }
             }
           ],
@@ -7810,7 +8006,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "body": "pending",
+                "meta": "pending"
+              }
             }
           ],
           "evidence": []
@@ -7827,7 +8028,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -8572,6 +8778,23 @@
                 "grid": "pending",
                 "slider": "pending",
                 "list": "pending"
+              },
+              "roleAvailability": {
+                "title": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "meta": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "body": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                }
               }
             }
           ],
@@ -8593,6 +8816,23 @@
                 "grid": "pending",
                 "slider": "pending",
                 "list": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                }
               }
             }
           ],
@@ -9082,6 +9322,20 @@
               "availability": {
                 "embed": "pending",
                 "ambient": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "embed": "pending",
+                  "ambient": "pending"
+                },
+                "heading": {
+                  "embed": "pending",
+                  "ambient": "pending"
+                },
+                "intro": {
+                  "embed": "pending",
+                  "ambient": "pending"
+                }
               }
             }
           ],
@@ -9432,6 +9686,20 @@
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
+              },
+              "roleAvailability": {
+                "label": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "title": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "body": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                }
               }
             }
           ],
@@ -9452,6 +9720,20 @@
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "heading": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "intro": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                }
               }
             }
           ],
@@ -9806,7 +10088,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -10767,6 +11054,7 @@
           "kind": "object",
           "required": false,
           "capability": "text",
+          "role": "eyebrow",
           "clientEditable": false,
           "design": true
         },
@@ -10907,6 +11195,7 @@
           "kind": "object",
           "required": false,
           "capability": "text",
+          "role": "label",
           "clientEditable": false,
           "design": true
         },
@@ -11009,6 +11298,7 @@
           "kind": "object",
           "required": false,
           "capability": "text",
+          "role": "description",
           "clientEditable": false,
           "design": true
         },
@@ -12190,6 +12480,7 @@
           "required": null,
           "max": null,
           "capability": "text",
+          "role": "eyebrow",
           "clientEditable": false
         },
         {
@@ -12329,6 +12620,7 @@
           "required": null,
           "max": null,
           "capability": "text",
+          "role": "label",
           "clientEditable": false
         },
         {
@@ -12430,6 +12722,7 @@
           "required": null,
           "max": null,
           "capability": "text",
+          "role": "description",
           "clientEditable": false
         },
         {
@@ -15015,13 +15308,39 @@
               ],
               "closingTask": 156,
               "fields": [
-                "cardDesign.label"
+                "cardDesign.eyebrow",
+                "cardDesign.label",
+                "cardDesign.description"
               ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
                 "editorial": "verified",
                 "compact": "verified"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                },
+                "label": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": "verified"
+                },
+                "description": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                }
               }
             },
             {
@@ -15034,19 +15353,73 @@
               ],
               "closingTask": 156,
               "fields": [
-                "links[].design.label"
+                "links[].design.eyebrow",
+                "links[].design.label",
+                "links[].design.description"
               ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
                 "editorial": "verified",
                 "compact": "verified"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                },
+                "label": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": "verified"
+                },
+                "description": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                }
               }
             }
           ],
           "evidence": [
             {
-              "id": "linkList.text.card",
+              "id": "linkList.text.card.eyebrow",
+              "field": "cardDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.card.eyebrow@stacked",
+                "linkList.text.card.eyebrow@cards",
+                "linkList.text.card.eyebrow@editorial"
+              ]
+            },
+            {
+              "id": "linkList.text.item.eyebrow",
+              "field": "links[].design.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.item.eyebrow@stacked",
+                "linkList.text.item.eyebrow@cards",
+                "linkList.text.item.eyebrow@editorial"
+              ]
+            },
+            {
+              "id": "linkList.text.card.label",
               "field": "cardDesign.label",
               "resolvers": [
                 "@/lib/sanity/text-style-options#textLook"
@@ -15054,14 +15427,14 @@
               "render": "src/features/pages/components/sections/link-list",
               "target": "li[data-track-event=\"link_click\"]",
               "cases": [
-                "linkList.text.card@stacked",
-                "linkList.text.card@cards",
-                "linkList.text.card@editorial",
-                "linkList.text.card@compact"
+                "linkList.text.card.label@stacked",
+                "linkList.text.card.label@cards",
+                "linkList.text.card.label@editorial",
+                "linkList.text.card.label@compact"
               ]
             },
             {
-              "id": "linkList.text.item",
+              "id": "linkList.text.item.label",
               "field": "links[].design.label",
               "resolvers": [
                 "@/lib/sanity/text-style-options#textLook"
@@ -15069,10 +15442,38 @@
               "render": "src/features/pages/components/sections/link-list",
               "target": "li[data-track-event=\"link_click\"]",
               "cases": [
-                "linkList.text.item@stacked",
-                "linkList.text.item@cards",
-                "linkList.text.item@editorial",
-                "linkList.text.item@compact"
+                "linkList.text.item.label@stacked",
+                "linkList.text.item.label@cards",
+                "linkList.text.item.label@editorial",
+                "linkList.text.item.label@compact"
+              ]
+            },
+            {
+              "id": "linkList.text.card.description",
+              "field": "cardDesign.description",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.card.description@stacked",
+                "linkList.text.card.description@cards",
+                "linkList.text.card.description@editorial"
+              ]
+            },
+            {
+              "id": "linkList.text.item.description",
+              "field": "links[].design.description",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.item.description@stacked",
+                "linkList.text.item.description@cards",
+                "linkList.text.item.description@editorial"
               ]
             }
           ]
@@ -15094,6 +15495,26 @@
                 "cards": "pending",
                 "editorial": "pending",
                 "compact": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "stacked": "pending",
+                  "cards": "pending",
+                  "editorial": "pending",
+                  "compact": "pending"
+                },
+                "heading": {
+                  "stacked": "pending",
+                  "cards": "pending",
+                  "editorial": "pending",
+                  "compact": "pending"
+                },
+                "intro": {
+                  "stacked": "pending",
+                  "cards": "pending",
+                  "editorial": "pending",
+                  "compact": "pending"
+                }
               }
             }
           ],
@@ -15887,6 +16308,23 @@
                 "list": "pending",
                 "agenda": "pending",
                 "featured": "pending"
+              },
+              "roleAvailability": {
+                "title": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "meta": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "body": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                }
               }
             }
           ],
@@ -15908,6 +16346,23 @@
                 "list": "pending",
                 "agenda": "pending",
                 "featured": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "heading": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "intro": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                }
               }
             }
           ],
@@ -17964,7 +18419,12 @@
                 ],
                 "closingTask": 156,
                 "fields": [],
-                "availability": "pending"
+                "availability": "pending",
+                "roleAvailability": {
+                  "meta": "pending",
+                  "title": "pending",
+                  "body": "pending"
+                }
               }
             ],
             "evidence": []

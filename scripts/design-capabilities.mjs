@@ -50,8 +50,13 @@ const jiti = createJiti(import.meta.url, {
 
 const { DESIGN_COMPONENTS, gate } = await jiti.import(join(root, 'src/app/design-components.ts'))
 const { EVIDENCE } = await jiti.import(join(root, 'src/lib/design/capability-evidence.ts'))
-const { addedGaps, baselineIntegrityProblems, capabilityAvailability, currentBaseline } =
-  await jiti.import(join(root, 'src/lib/design/capability-availability.ts'))
+const {
+  addedGaps,
+  baselineIntegrityProblems,
+  capabilityAvailability,
+  currentBaseline,
+  expandLegacyBaseline,
+} = await jiti.import(join(root, 'src/lib/design/capability-availability.ts'))
 const { BASELINE_CHANGES } = await jiti.import(
   join(root, 'src/lib/design/capability-baseline-changes.ts'),
 )
@@ -74,7 +79,7 @@ const ids = DESIGN_COMPONENTS.map((component) => component.id)
 const write = async (baseline) =>
   writeFileSync(
     file,
-    await format(JSON.stringify({ $comment: COMMENT, ...baseline }), {
+    await format(JSON.stringify({ $comment: COMMENT, version: 2, ...baseline }), {
       ...(await resolveConfig(file)),
       filepath: file,
     }),
@@ -98,7 +103,9 @@ if (!existsSync(file)) {
   console.error('capability-baseline.json is missing. Write it once with --init-baseline.')
   process.exit(1)
 }
-const committed = JSON.parse(readFileSync(file, 'utf8'))
+const committedFile = JSON.parse(readFileSync(file, 'utf8'))
+// A file written before text roles were listed one by one reads as the role entries it stands for.
+const committed = expandLegacyBaseline(committedFile, DESIGN_COMPONENTS)
 
 const admitted = (pair, layout) =>
   BASELINE_CHANGES.some(
@@ -188,7 +195,8 @@ if (process.argv.includes('--against-file') || process.argv.includes('--against-
   } else {
     problems.push(
       ...baselineIntegrityProblems({
-        base: base.baseline,
+        // An older base lists text pairs whole; read it as the roles it stands for.
+        base: expandLegacyBaseline(base.baseline, DESIGN_COMPONENTS),
         head: committed,
         components: ids,
         availability: new Map(

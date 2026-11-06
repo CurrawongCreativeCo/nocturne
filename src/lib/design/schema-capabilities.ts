@@ -1,5 +1,5 @@
 import { provenanceOf } from './builder-provenance'
-import type { CapabilityId, SharedBuilder } from './capabilities'
+import type { CapabilityId, SharedBuilder, TextRole } from './capabilities'
 import type { CapabilityException } from './capability-exceptions'
 
 /**
@@ -28,6 +28,8 @@ export interface Marker {
   capability?: CapabilityId
   /** The shared builder that stamped it: never read from a typed-in option. */
   designBuilder?: SharedBuilder
+  /** The text role the builder stamped the field for: never read from a typed-in option. */
+  role?: TextRole
   /** Why the stamp can't be trusted here (made for another field, or its capability changed). */
   forged?: string
 }
@@ -43,6 +45,7 @@ export function markerOf(field: SchemaField, lookup: TypeLookup): Marker {
   const stamp = ownStamp ?? provenanceOf(named?.options)
   const capability = (field.options?.capability ?? named?.options?.capability) as
     CapabilityId | undefined
+  const textRole = (field.options?.textRole ?? named?.options?.textRole) as TextRole | undefined
   const madeFor = ownStamp ? field.name : named?.name
   const forged = !stamp
     ? undefined
@@ -50,10 +53,14 @@ export function markerOf(field: SchemaField, lookup: TypeLookup): Marker {
       ? `stamped for ${stamp.name}, not ${madeFor ?? field.name}`
       : (stamp.capability ?? undefined) !== capability
         ? `its capability says ${capability ?? 'none'}, but ${stamp.builder} made it as ${stamp.capability ?? 'none'}`
-        : undefined
+        : (stamp.role ?? undefined) !== textRole
+          ? `its text role says ${textRole ?? 'none'}, but ${stamp.builder} made it for ${stamp.role ?? 'none'}`
+          : undefined
   return {
     ...(capability ? { capability } : {}),
     ...(stamp && !forged ? { designBuilder: stamp.builder } : {}),
+    // The role is the stamp's, and only while the stamp is whole.
+    ...(stamp?.role && !forged ? { role: stamp.role } : {}),
     ...(forged ? { forged } : {}),
   }
 }

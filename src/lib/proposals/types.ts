@@ -129,6 +129,8 @@ export interface ManifestField {
   list?: { value: string | number; title: string }[]
   /** The shared design capability this field is, when a shared design builder made it. */
   capability?: string
+  /** The text role this field styles, when a text style builder made it. */
+  role?: string
   /** The content source this field feeds, when a source's evidence names it. */
   contentSource?: string
   clientEditable: boolean
@@ -150,6 +152,8 @@ export interface ManifestCapabilityPolicy {
   fields: string[]
   /** One status, or one per layout. `verified` is the only one that lets a proposal set the value. */
   availability: ManifestStatus | Record<string, ManifestStatus>
+  /** For a policy that names text roles: each role's own availability, shaped as `availability` is. */
+  roleAvailability?: Partial<Record<string, ManifestStatus | Record<string, ManifestStatus>>>
 }
 
 export type ManifestCapability =

@@ -1,4 +1,4 @@
-import type { CapabilityId, ContentSourceId, Scope } from './capabilities'
+import type { CapabilityId, ContentSourceId, Scope, TextRole } from './capabilities'
 
 /**
  * Evidence (task 275; README, "Design capability contract"): each registered adoption of a design
@@ -43,6 +43,12 @@ export interface CapabilityEvidence extends EvidenceBase {
   capability: CapabilityId
   scope: Scope
   part?: string
+  /**
+   * The text role it proves, for a policy that names roles (text, header): one role per entry, and the
+   * probed field must be the one the builder stamped for that role. A role is verified only by its own
+   * entry, so a passing sibling never verifies it.
+   */
+  role?: TextRole
   /** A CSS selector into the component's output: the element the capability renders on. */
   target: string
   /**
@@ -242,6 +248,12 @@ const linkListContent = (thumbnails: boolean): Patch => ({
 const CUSTOMISED = { 'links.0.design.appearance': 'custom' }
 
 const WITH_CARDS = ['stacked', 'cards', 'compact']
+/** The text roles each layout draws: Compact shows the label only. */
+const TEXT_ROLES_DRAWN = [
+  { role: 'eyebrow', layouts: ['stacked', 'cards', 'editorial'] },
+  { role: 'label', layouts: ['stacked', 'cards', 'editorial', 'compact'] },
+  { role: 'description', layouts: ['stacked', 'cards', 'editorial'] },
+] as const
 const WITH_ARROWS = ['stacked', 'cards', 'editorial']
 const ALL_LINK_LIST = ['stacked', 'cards', 'editorial', 'compact']
 
@@ -277,34 +289,27 @@ const linkListEvidence: CapabilityEvidence[] = [
     base: { ...linkListContent(true), ...CUSTOMISED },
     probe: { 'links.0.design.border': 'thick' },
   },
-  {
-    id: 'linkList.text.card',
-    component: 'linkList',
-    capability: 'text',
-    scope: 'card',
-    layouts: ALL_LINK_LIST,
-    field: 'cardDesign.label',
-    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
-    render: LINK_LIST,
-    target: LINK_ITEMS,
-    change: 'content',
-    base: linkListContent(true),
-    probe: { 'cardDesign.label.size': 'large' },
-  },
-  {
-    id: 'linkList.text.item',
-    component: 'linkList',
-    capability: 'text',
-    scope: 'item',
-    layouts: ALL_LINK_LIST,
-    field: 'links[].design.label',
-    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
-    render: LINK_LIST,
-    target: LINK_ITEMS,
-    change: 'content',
-    base: { ...linkListContent(true), ...CUSTOMISED },
-    probe: { 'links.0.design.label.size': 'large' },
-  },
+  // Each text role is proven on its own, on the layouts that draw it (Compact draws the label only), by
+  // probing the field the text style builder made for that role: one passing role never verifies another.
+  ...TEXT_ROLES_DRAWN.flatMap(({ role, layouts }) =>
+    (['card', 'item'] as const).map((scope): CapabilityEvidence => ({
+      id: `linkList.text.${scope}.${role}`,
+      component: 'linkList',
+      capability: 'text',
+      scope,
+      role,
+      layouts,
+      field: scope === 'card' ? `cardDesign.${role}` : `links[].design.${role}`,
+      resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+      render: LINK_LIST,
+      target: LINK_ITEMS,
+      change: 'content',
+      base: scope === 'card' ? linkListContent(true) : { ...linkListContent(true), ...CUSTOMISED },
+      probe: {
+        [scope === 'card' ? `cardDesign.${role}.size` : `links.0.design.${role}.size`]: 'large',
+      },
+    })),
+  ),
   {
     id: 'linkList.icon.card',
     component: 'linkList',

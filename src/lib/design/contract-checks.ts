@@ -4,6 +4,7 @@ import {
   changeRowProblems,
   currentBaseline,
   evidenceProblems,
+  expandLegacyBaseline,
   ratchetProblems,
   sourceTestProblems,
   staleChangeProblems,
@@ -116,7 +117,7 @@ export function contractProblems(inputs: ContractInputs): ContractProblem[] {
     problems.push(
       ...ratchetProblems(
         currentBaseline(components, evidence, gate),
-        baseline,
+        expandLegacyBaseline(baseline, components),
         components.map(({ id }) => id),
       ),
     )
@@ -124,7 +125,7 @@ export function contractProblems(inputs: ContractInputs): ContractProblem[] {
     problems.push(...changeRowProblems(changes))
     problems.push(
       ...staleChangeProblems(
-        baseline,
+        expandLegacyBaseline(baseline, components),
         new Map(
           components.map((component) => [
             component.id,

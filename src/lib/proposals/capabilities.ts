@@ -30,10 +30,14 @@ export function layoutOfSection(section: ManifestSection, stored: unknown): stri
 /**
  * Whether a policy governs a marked field: its evidence probes that field (or a field it contains), or
  * one in the same object (`cardDesign.border` stands for `cardDesign.background`: the same builder, at
- * the same scope). A top-level field has no object to share, so only the exact field counts.
+ * the same scope). A top-level field has no object to share, so only the exact field counts. A field
+ * built for a text role (`byRole`) never takes a sibling's evidence: `cardDesign.label` proves nothing
+ * about `cardDesign.eyebrow`.
  */
-const governs = (probed: string, path: string) => {
+const governs = (probed: string, path: string, byRole = false) => {
   if (path === probed || path.startsWith(`${probed}.`) || path.startsWith(`${probed}[`)) return true
+  // A role's field is judged by that role's own evidence, never by the one beside it in the object.
+  if (byRole) return false
   const object = (value: string) =>
     value.includes('.') ? value.slice(0, value.lastIndexOf('.')) : ''
   return object(probed) !== '' && object(probed) === object(path)
@@ -71,6 +75,7 @@ function capabilityVerdict(
   layout: string | null,
   path: string,
   capability: string,
+  role?: string,
 ): CapabilityVerdict | undefined {
   const reject = (message: string): CapabilityVerdict => ({
     code: 'capability-not-verified',
@@ -93,10 +98,13 @@ function capabilityVerdict(
     )
   }
   const named = entry.policies.filter((policy) =>
-    policy.fields.some((field) => governs(field, path)),
+    policy.fields.some((field) => governs(field, path, role !== undefined)),
   )
+  // A role's field is judged by its own role's status in the policy, not the policy's as a whole.
   const statusOfPolicy = (policy: (typeof entry.policies)[number]) =>
-    statusAt(policy.availability, layout)
+    role !== undefined && policy.roleAvailability
+      ? statusAt(policy.roleAvailability[role] ?? 'pending', layout)
+      : statusAt(policy.availability, layout)
   // A policy the layout opts out of doesn't count against a field another of its policies governs.
   const applicable = (named.length > 0 ? named : entry.policies).filter(
     (policy) => typeof statusOfPolicy(policy) === 'string',
@@ -144,7 +152,7 @@ export function capabilityVerdicts(
       const key = `capability|${path}`
       if (!seen.has(key)) {
         seen.add(key)
-        const verdict = capabilityVerdict(section, layout, path, row.capability)
+        const verdict = capabilityVerdict(section, layout, path, row.capability, row.role)
         if (verdict) verdicts.push(verdict)
       }
     }

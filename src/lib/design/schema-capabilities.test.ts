@@ -8,6 +8,7 @@ import {
   agencyOnlyField,
   exceptionProblems,
   fieldOffered,
+  markerOf,
   privateFields,
   resolveFieldPath,
   type SchemaField,
@@ -305,5 +306,46 @@ describe('agencyOnlyField', () => {
     const needsDocument = ({ document }: { document: { missing: { deep: boolean } } }) =>
       document.missing.deep
     expect(agencyOnlyField(field(needsDocument))).toBe(false)
+  })
+})
+
+describe('a text role is the stamp’s, never a typed-in option', () => {
+  const style: SchemaField = builtBy(
+    'textStyleField',
+    { name: 'label', type: 'string' },
+    'text',
+    'label',
+  )
+
+  it('reads the role the builder stamped', () => {
+    expect(markerOf(style, () => undefined)).toMatchObject({
+      capability: 'text',
+      role: 'label',
+      designBuilder: 'textStyleField',
+    })
+    expect(style.options?.textRole).toBe('label')
+  })
+
+  it('reports a role changed after the builder set it as forged, and trusts none of it', () => {
+    const changed: SchemaField = { ...style, options: { ...style.options, textRole: 'eyebrow' } }
+    const marker = markerOf(changed, () => undefined)
+    expect(marker.forged).toBe('its text role says eyebrow, but textStyleField made it for label')
+    expect(marker.role).toBeUndefined()
+    expect(marker.designBuilder).toBeUndefined()
+  })
+
+  it('reports another field’s stamp copied onto an eyebrow as forged, so it proves no role', () => {
+    const copied: SchemaField = { ...style, name: 'eyebrow' }
+    expect(markerOf(copied, () => undefined).forged).toBe('stamped for label, not eyebrow')
+    expect(markerOf(copied, () => undefined).role).toBeUndefined()
+  })
+
+  it('gives a role typed in by hand, with no stamp, no role at all', () => {
+    const typed: SchemaField = {
+      name: 'label',
+      type: 'string',
+      options: { capability: 'text', textRole: 'label' },
+    }
+    expect(markerOf(typed, () => undefined).role).toBeUndefined()
   })
 })

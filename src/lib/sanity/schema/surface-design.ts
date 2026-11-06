@@ -248,7 +248,7 @@ export function textStyleField({
         : []),
     ],
   })
-  return builtBy('textStyleField', field, 'text')
+  return builtBy('textStyleField', field, 'text', element)
 }
 
 /**

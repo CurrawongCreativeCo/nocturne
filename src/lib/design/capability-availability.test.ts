@@ -5,12 +5,14 @@ import {
   declareCapabilities,
   notApplicable,
   type CapabilityPolicies,
+  type TextRole,
 } from './capabilities'
 import {
   baselineIntegrityProblems,
   capabilityAvailability,
   changeRowProblems,
   evidenceProblems,
+  manifestPathOfPatchKey,
   pendingBaseline,
   ratchetProblems,
   sourceAvailability,
@@ -21,7 +23,7 @@ import {
 import type { BaselineChange } from './capability-baseline-changes'
 import type { CapabilityEvidence, Evidence } from './capability-evidence'
 import type { ContractComponent } from './capability-policy'
-import type { SchemaGate } from './schema-capabilities'
+import type { Marker, SchemaGate } from './schema-capabilities'
 
 type Layout = 'open' | 'boxed'
 
@@ -203,7 +205,16 @@ describe('evidenceProblems', () => {
     expect(messages([{ ...glassEvidence, layouts: ['open'], field: 'style.sparkle' }])).toEqual([
       "Evidence fixtureCards.glass.section: its field doesn't exist (fixtureCards has no field style.sparkle).",
     ])
-    expect(messages([{ ...glassEvidence, layouts: ['open'], field: 'style.edge' }])).toEqual([
+    expect(
+      messages([
+        {
+          ...glassEvidence,
+          layouts: ['open'],
+          field: 'style.edge',
+          probe: { 'style.edge': 'wave' },
+        },
+      ]),
+    ).toEqual([
       "Evidence fixtureCards.glass.section: style.edge isn't marked as glass (it is edge).",
     ])
   })
@@ -604,5 +615,189 @@ describe('baseline integrity against the base commit (AT5)', () => {
   it('ignores a component the site has removed', () => {
     const base = baselineOf()
     expect(check(base, { required: [], conditional: [] }, { components: [] })).toEqual([])
+  })
+})
+
+describe('text roles are verified one by one (AT2)', () => {
+  type TextLayout = 'full' | 'compact'
+  const textComponent: ContractComponent = {
+    id: 'fixtureText',
+    kind: 'section',
+    title: 'Fixture text',
+    layouts: ['full', 'compact'],
+    declaration: declareCapabilities<TextLayout>({
+      ...(Object.fromEntries(
+        CAPABILITY_IDS.map((id) => [id, notApplicable('Draws nothing of this kind')]),
+      ) as unknown as CapabilityPolicies<TextLayout>),
+      text: {
+        policy: 'required',
+        scope: 'card',
+        roles: ['eyebrow', 'label'],
+        layouts: {
+          full: 'applies',
+          compact: { roles: ['label'], reason: 'Compact draws the label role only' },
+        },
+      },
+      header: { policy: 'required', scope: 'section', roles: ['eyebrow', 'heading', 'intro'] },
+    }),
+  }
+  const stamped = (capability: 'text' | 'header', role: TextRole): { marker: Marker } => ({
+    marker: { capability, role, designBuilder: 'textStyleField' },
+  })
+  const textGate: SchemaGate = {
+    hasSchema: () => true,
+    field: (_component, path) =>
+      path === 'card.eyebrow'
+        ? stamped('text', 'eyebrow')
+        : path === 'card.label'
+          ? stamped('text', 'label')
+          : path === 'header.eyebrow'
+            ? stamped('header', 'eyebrow')
+            : path === 'header.heading'
+              ? stamped('header', 'heading')
+              : path === 'card.plain'
+                ? { marker: { capability: 'text', designBuilder: 'textStyleField' } }
+                : { missing: `no field ${path}` },
+    offered: () => ({ offered: true }),
+  }
+  const entry = (
+    role: 'eyebrow' | 'label',
+    over: Partial<CapabilityEvidence> = {},
+  ): CapabilityEvidence => ({
+    id: `fixtureText.text.card.${role}`,
+    component: 'fixtureText',
+    capability: 'text',
+    scope: 'card',
+    role,
+    layouts: ['full', 'compact'],
+    field: `card.${role}`,
+    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+    render: 'src/x.tsx',
+    target: 'li',
+    change: 'content',
+    probe: { [`card.${role}.size`]: 'large' },
+    ...over,
+  })
+  const header = (role: 'eyebrow' | 'heading'): CapabilityEvidence => ({
+    ...entry('eyebrow'),
+    id: `fixtureText.header.section.${role}`,
+    capability: 'header',
+    scope: 'section',
+    role,
+    layouts: ['full', 'compact'],
+    field: `header.${role}`,
+    probe: { [`header.${role}.size`]: 'large' },
+  })
+  const cellsOf = (evidence: readonly Evidence[]) =>
+    capabilityAvailability(textComponent, evidence, textGate)
+  const textCell = (evidence: readonly Evidence[], layout: string) =>
+    cellsOf(evidence).find((cell) => cell.capability === 'text' && cell.layout === layout)
+
+  it('leaves the other roles pending when one passes', () => {
+    const cell = textCell([entry('label', { layouts: ['full'] })], 'full')
+    expect(cell).toMatchObject({
+      status: 'pending',
+      verifiedRoles: ['label'],
+      pendingRoles: ['eyebrow'],
+    })
+    expect(cell?.unverified).toBe('no passing evidence names the eyebrow role')
+    // The baseline lists each role that is waiting where it waits: eyebrow on full (the label passed
+    // there), and the label on compact (its entry only covers full).
+    expect(
+      pendingBaseline(new Map([['fixtureText', cellsOf([entry('label', { layouts: ['full'] })])]]))
+        .required.filter((pair) => pair.capability === 'text')
+        .map((pair) => [pair.role, pair.layouts]),
+    ).toEqual([
+      ['eyebrow', ['full']],
+      ['label', ['compact']],
+    ])
+  })
+
+  it('verifies a layout only when every role it draws has its own entry', () => {
+    expect(
+      textCell([entry('label'), entry('eyebrow', { layouts: ['full'] })], 'full'),
+    ).toMatchObject({
+      status: 'verified',
+      verifiedRoles: ['eyebrow', 'label'],
+      pendingRoles: [],
+    })
+  })
+
+  it('keeps a header with only its eyebrow proven pending, the others listed', () => {
+    const cell = cellsOf([header('eyebrow')]).find((entry) => entry.capability === 'header')
+    expect(cell).toMatchObject({
+      status: 'pending',
+      verifiedRoles: ['eyebrow'],
+      pendingRoles: ['heading', 'intro'],
+    })
+  })
+
+  it('reports compact with the label verified, and the other roles Not applicable there', () => {
+    const cell = textCell([entry('label')], 'compact')
+    expect(cell).toMatchObject({
+      status: 'verified',
+      roles: ['label'],
+      verifiedRoles: ['label'],
+      pendingRoles: [],
+      rolesNotApplicable: { roles: ['eyebrow'], reason: 'Compact draws the label role only' },
+    })
+    // Not pending, so not in the baseline either.
+    expect(
+      pendingBaseline(new Map([['fixtureText', cellsOf([entry('label')])]])).required.filter(
+        (pair) => pair.capability === 'text' && pair.layouts.includes('compact'),
+      ),
+    ).toEqual([])
+  })
+
+  it('leaves a role pending when its evidence names the wrong role or a field with another role’s stamp', () => {
+    // The entry says label, but probes the eyebrow's field.
+    const wrongField = entry('label', { layouts: ['full'], field: 'card.eyebrow' })
+    expect(textCell([wrongField], 'full')?.verifiedRoles).toEqual([])
+    expect(textCell([wrongField], 'full')?.unverified).toContain(
+      "isn't stamped for the label role (it is eyebrow)",
+    )
+    // The entry names no role: it verifies none.
+    const { role: _role, ...noRole } = entry('label', { layouts: ['full'] })
+    expect(textCell([noRole], 'full')?.verifiedRoles).toEqual([])
+    // A field with no stamped role can't prove one.
+    const unstamped = entry('label', { layouts: ['full'], field: 'card.plain' })
+    expect(textCell([unstamped], 'full')?.verifiedRoles).toEqual([])
+  })
+
+  it('flags evidence that names no role, a role the layout doesn’t draw, or another role’s field', () => {
+    const problems = (evidence: CapabilityEvidence[]) =>
+      evidenceProblems([textComponent], evidence, textGate).map((problem) => problem.message)
+    const { role: _role, ...noRole } = entry('label')
+    expect(problems([noRole])).toContain(
+      'Evidence fixtureText.text.card.label: text names text roles (eyebrow, label), and the entry names none.',
+    )
+    expect(problems([entry('eyebrow')])).toContain(
+      "Evidence fixtureText.text.card.eyebrow: the eyebrow role doesn't apply to text at scope card on compact (Compact draws the label role only).",
+    )
+    expect(
+      problems([
+        entry('label', {
+          layouts: ['full'],
+          field: 'card.eyebrow',
+          probe: { 'card.eyebrow.size': 'large' },
+        }),
+      ]),
+    ).toContain(
+      "Evidence fixtureText.text.card.label: card.eyebrow isn't stamped for the label role (it is eyebrow).",
+    )
+    expect(problems([entry('label'), entry('eyebrow', { layouts: ['full'] })])).toEqual([])
+  })
+
+  it('fails a probe on another field (L4)', () => {
+    const found = evidenceProblems(
+      [textComponent],
+      [entry('label', { probe: { 'card.eyebrow.size': 'large' } })],
+      textGate,
+    ).map((problem) => problem.message)
+    expect(found).toEqual([
+      "Evidence fixtureText.text.card.label: its probe sets card.eyebrow.size, which isn't card.label or inside it.",
+    ])
+    // A probe inside the field, with array indexes as the manifest writes them, is fine.
+    expect(manifestPathOfPatchKey('links.0.design.label.size')).toBe('links[].design.label.size')
   })
 })

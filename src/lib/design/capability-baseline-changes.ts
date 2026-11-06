@@ -1,4 +1,4 @@
-import type { CapabilityId, Scope, TaskNumber } from './capabilities'
+import type { CapabilityId, Scope, TaskNumber, TextRole } from './capabilities'
 
 /**
  * Reviewed changes to the capability baseline (task 275 correction; README, "Design capability
@@ -22,6 +22,8 @@ export interface BaselineChange {
   capability: CapabilityId
   scope: Scope
   part?: string
+  /** A text role, for a pair that is listed role by role (text, header). */
+  role?: TextRole
   /** The layouts affected (`null` for a component with one layout). Naming them keeps a row exact. */
   layouts: readonly (string | null)[]
   /** Why: what the gap is, or why the pair does not apply. */

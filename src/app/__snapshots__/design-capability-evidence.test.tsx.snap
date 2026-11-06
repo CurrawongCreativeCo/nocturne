@@ -670,56 +670,140 @@ exports[`design capability evidence > linkList.surface.item@stacked: the probe c
 ]
 `;
 
-exports[`design capability evidence > linkList.text.card@cards: the probe changes the registered target 1`] = `
+exports[`design capability evidence > linkList.text.card.description@cards: the probe changes the registered target 1`] = `
 [
   "523f895f6474e440 (1436 characters)",
   "a541f19b623eac63 (1436 characters)",
 ]
 `;
 
-exports[`design capability evidence > linkList.text.card@compact: the probe changes the registered target 1`] = `
-[
-  "8d317bb63600c4ba (926 characters)",
-  "8ddcb273a988e06b (926 characters)",
-]
-`;
-
-exports[`design capability evidence > linkList.text.card@editorial: the probe changes the registered target 1`] = `
+exports[`design capability evidence > linkList.text.card.description@editorial: the probe changes the registered target 1`] = `
 [
   "9967a0716e65fa63 (1293 characters)",
   "e830ea3209458395 (1293 characters)",
 ]
 `;
 
-exports[`design capability evidence > linkList.text.card@stacked: the probe changes the registered target 1`] = `
+exports[`design capability evidence > linkList.text.card.description@stacked: the probe changes the registered target 1`] = `
 [
   "376ea83169d0a2e5 (1252 characters)",
   "71fe2c96ebb168ea (1252 characters)",
 ]
 `;
 
-exports[`design capability evidence > linkList.text.item@cards: the probe changes the registered target 1`] = `
+exports[`design capability evidence > linkList.text.card.eyebrow@cards: the probe changes the registered target 1`] = `
 [
   "523f895f6474e440 (1436 characters)",
   "a541f19b623eac63 (1436 characters)",
 ]
 `;
 
-exports[`design capability evidence > linkList.text.item@compact: the probe changes the registered target 1`] = `
-[
-  "8d317bb63600c4ba (926 characters)",
-  "8ddcb273a988e06b (926 characters)",
-]
-`;
-
-exports[`design capability evidence > linkList.text.item@editorial: the probe changes the registered target 1`] = `
+exports[`design capability evidence > linkList.text.card.eyebrow@editorial: the probe changes the registered target 1`] = `
 [
   "9967a0716e65fa63 (1293 characters)",
   "e830ea3209458395 (1293 characters)",
 ]
 `;
 
-exports[`design capability evidence > linkList.text.item@stacked: the probe changes the registered target 1`] = `
+exports[`design capability evidence > linkList.text.card.eyebrow@stacked: the probe changes the registered target 1`] = `
+[
+  "376ea83169d0a2e5 (1252 characters)",
+  "71fe2c96ebb168ea (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card.label@cards: the probe changes the registered target 1`] = `
+[
+  "523f895f6474e440 (1436 characters)",
+  "a541f19b623eac63 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card.label@compact: the probe changes the registered target 1`] = `
+[
+  "8d317bb63600c4ba (926 characters)",
+  "8ddcb273a988e06b (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card.label@editorial: the probe changes the registered target 1`] = `
+[
+  "9967a0716e65fa63 (1293 characters)",
+  "e830ea3209458395 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card.label@stacked: the probe changes the registered target 1`] = `
+[
+  "376ea83169d0a2e5 (1252 characters)",
+  "71fe2c96ebb168ea (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.description@cards: the probe changes the registered target 1`] = `
+[
+  "523f895f6474e440 (1436 characters)",
+  "a541f19b623eac63 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.description@editorial: the probe changes the registered target 1`] = `
+[
+  "9967a0716e65fa63 (1293 characters)",
+  "e830ea3209458395 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.description@stacked: the probe changes the registered target 1`] = `
+[
+  "376ea83169d0a2e5 (1252 characters)",
+  "71fe2c96ebb168ea (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.eyebrow@cards: the probe changes the registered target 1`] = `
+[
+  "523f895f6474e440 (1436 characters)",
+  "a541f19b623eac63 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.eyebrow@editorial: the probe changes the registered target 1`] = `
+[
+  "9967a0716e65fa63 (1293 characters)",
+  "e830ea3209458395 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.eyebrow@stacked: the probe changes the registered target 1`] = `
+[
+  "376ea83169d0a2e5 (1252 characters)",
+  "71fe2c96ebb168ea (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.label@cards: the probe changes the registered target 1`] = `
+[
+  "523f895f6474e440 (1436 characters)",
+  "a541f19b623eac63 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.label@compact: the probe changes the registered target 1`] = `
+[
+  "8d317bb63600c4ba (926 characters)",
+  "8ddcb273a988e06b (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.label@editorial: the probe changes the registered target 1`] = `
+[
+  "9967a0716e65fa63 (1293 characters)",
+  "e830ea3209458395 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item.label@stacked: the probe changes the registered target 1`] = `
 [
   "376ea83169d0a2e5 (1252 characters)",
   "71fe2c96ebb168ea (1252 characters)",

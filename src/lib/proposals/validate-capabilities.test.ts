@@ -558,3 +558,114 @@ describe('nested paths can’t bypass validation (AT3)', () => {
     expect(accepted([{ unset: [at('listEd', 'cardDesign.background.colour')] }])).toBe(true)
   })
 })
+
+describe('a text role is judged by its own status (AT2)', () => {
+  const clone = () => JSON.parse(JSON.stringify(manifest)) as DesignManifest
+  const sectionsWithCompact = [
+    ...sections,
+    {
+      _key: 'listCompact',
+      _type: 'linkList',
+      variant: 'compact',
+      links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
+    },
+  ]
+  const withCompact = (changed: DesignManifest = manifest) => ({
+    manifest: changed,
+    documents: {
+      'page-home': {
+        _id: 'page-home',
+        _type: 'page',
+        _rev: 'rev-1',
+        pageBuilder: sectionsWithCompact,
+      },
+    },
+  })
+
+  it('accepts the label on compact and rejects the eyebrow and description there, saying why', () => {
+    expect(
+      accepted([{ set: { [at('listCompact', 'cardDesign.label.size')]: 'large' } }], withCompact()),
+    ).toBe(true)
+    for (const role of ['eyebrow', 'description']) {
+      const found = rejections(
+        [{ set: { [at('listCompact', `cardDesign.${role}.size`)]: 'large' } }],
+        withCompact(),
+      )
+      expect(
+        found.map(([code]) => code),
+        role,
+      ).toEqual(['capability-not-verified'])
+      expect(found[0]?.[1], role).toContain('Compact draws the label role only')
+    }
+  })
+
+  it('accepts all three roles on a layout that draws them', () => {
+    for (const role of ['eyebrow', 'label', 'description']) {
+      expect(
+        accepted([{ set: { [at('listStack', `cardDesign.${role}.size`)]: 'large' } }]),
+        role,
+      ).toBe(true)
+    }
+  })
+
+  it('never lets a Verified role authorise a Pending one beside it (no sibling inference)', () => {
+    const changed = clone()
+    const policy = (
+      changed.sections.find((section) => section.type === 'linkList')?.capabilities?.text as {
+        policies: { scope: string; roleAvailability?: Record<string, unknown> }[]
+      }
+    ).policies.find((entry) => entry.scope === 'card')
+    if (!policy?.roleAvailability)
+      throw new Error('No per-role availability on the Link list text.')
+    // The label stays Verified; the eyebrow is Pending.
+    policy.roleAvailability.eyebrow = 'pending'
+    const given = withCompact(changed)
+    expect(
+      accepted([{ set: { [at('listStack', 'cardDesign.label.size')]: 'large' } }], given),
+    ).toBe(true)
+    const found = rejections(
+      [{ set: { [at('listStack', 'cardDesign.eyebrow.size')]: 'large' } }],
+      given,
+    )
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain("isn't verified")
+    // Judging the object whole, as one value, is judged by each role inside it.
+    expect(
+      rejections(
+        [
+          {
+            set: {
+              [at('listStack', 'cardDesign')]: {
+                label: { size: 'large' },
+                eyebrow: { size: 'large' },
+              },
+            },
+          },
+        ],
+        given,
+      ).map(([code]) => code),
+    ).toEqual(['capability-not-verified'])
+  })
+
+  it('lists each role’s status in the manifest, and a row’s role', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    expect(list?.fields.find((row) => row.path === 'cardDesign.eyebrow')?.role).toBe('eyebrow')
+    expect(list?.fields.find((row) => row.path === 'links[].design.label')?.role).toBe('label')
+    const text = list?.capabilities?.text as {
+      policies: { roleAvailability?: Record<string, unknown> }[]
+    }
+    const card = text.policies[0]?.roleAvailability
+    expect(card?.label).toEqual({
+      stacked: 'verified',
+      cards: 'verified',
+      editorial: 'verified',
+      compact: 'verified',
+    })
+    expect(card?.eyebrow).toEqual({
+      stacked: 'verified',
+      cards: 'verified',
+      editorial: 'verified',
+      compact: { notApplicable: 'Compact draws the label role only' },
+    })
+  })
+})

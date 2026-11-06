@@ -354,8 +354,13 @@ export interface Trigger {
   path?: string
 }
 
-/** A layout either applies, or is not applicable with a reason. */
-export type LayoutRule = 'applies' | { notApplicable: string }
+/**
+ * A layout either applies, is not applicable with a reason, or applies to only some text roles: it draws
+ * those (`roles`, a non-empty strict subset of the policy's) and the rest are Not applicable there, with
+ * the reason. One passing role never verifies another, so a layout that ignores a role must say so.
+ */
+export type LayoutRule =
+  'applies' | { notApplicable: string } | { roles: readonly TextRole[]; reason: string }
 
 interface ScopedPolicy<Layout extends string> {
   scope: Scope | readonly Scope[]

@@ -21,7 +21,12 @@ export const linkListCapabilities = declareCapabilities<LinkListLayout>({
     policy: 'required',
     scope: ['card', 'item'],
     roles: ['eyebrow', 'label', 'description'],
-    note: 'Compact draws the label role only',
+    layouts: {
+      stacked: 'applies',
+      cards: 'applies',
+      editorial: 'applies',
+      compact: { roles: ['label'], reason: 'Compact draws the label role only' },
+    },
   },
   header: { policy: 'required', scope: 'section', roles: ['eyebrow', 'heading', 'intro'] },
   mark: { policy: 'required', scope: ['section', 'card', 'item'] },

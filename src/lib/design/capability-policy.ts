@@ -60,7 +60,10 @@ export interface PolicyCell {
   policy: 'required' | 'conditional' | 'notApplicable'
   reason?: string
   trigger?: Trigger
+  /** The text roles this cell is for: the policy's, or the ones a layout's rule says it draws. */
   roles?: readonly TextRole[]
+  /** The policy's roles this layout doesn't draw, with the layout's reason. */
+  rolesNotApplicable?: { roles: readonly TextRole[]; reason: string }
   /** The task that closes the pair: the policy's `closingTask`, else the capability's owner. */
   closingTask?: number
 }
@@ -98,14 +101,25 @@ export function policyCells(
     for (const scope of scopesOf(policy)) {
       for (const layout of all) {
         const rule = layout === null ? 'applies' : policy.layouts?.[layout]
+        const drawn =
+          rule !== undefined && typeof rule === 'object' && 'roles' in rule ? rule : undefined
+        const roles = drawn ? drawn.roles : policy.roles
         const base = {
           capability,
           scope,
           ...(policy.part ? { part: policy.part } : {}),
           layout,
-          ...(policy.roles ? { roles: policy.roles } : {}),
+          ...(roles ? { roles } : {}),
+          ...(drawn && policy.roles
+            ? {
+                rolesNotApplicable: {
+                  roles: policy.roles.filter((role) => !drawn.roles.includes(role)),
+                  reason: drawn.reason,
+                },
+              }
+            : {}),
         }
-        if (rule === undefined || rule === 'applies') {
+        if (rule === undefined || rule === 'applies' || drawn) {
           cells.push({
             ...base,
             policy: policy.policy,
@@ -113,7 +127,11 @@ export function policyCells(
             closingTask: policy.closingTask ?? owner,
           })
         } else {
-          cells.push({ ...base, policy: 'notApplicable', reason: rule.notApplicable })
+          cells.push({
+            ...base,
+            policy: 'notApplicable',
+            reason: (rule as { notApplicable: string }).notApplicable,
+          })
         }
       }
     }
@@ -237,6 +255,13 @@ export function declarationProblems(component: ContractComponent): ContractProbl
           'Required applies whenever its layouts do: remove the trigger, or make it conditional.',
         )
       }
+      if (definition.roles && (!policy.roles || policy.roles.length === 0)) {
+        problem(
+          id,
+          `${component.id}: ${id} doesn't name its roles.`,
+          `Name the roles it styles, from: ${definition.roles.join(', ')}. Each is verified on its own.`,
+        )
+      }
       if (policy.roles) {
         const allowed: readonly TextRole[] = definition.roles ?? []
         const unknown = policy.roles.filter((role) => !allowed.includes(role))
@@ -286,6 +311,31 @@ export function declarationProblems(component: ContractComponent): ContractProbl
           }
           for (const [layout, rule] of Object.entries(policy.layouts)) {
             if (rule === 'applies') continue
+            if (typeof rule === 'object' && 'roles' in rule) {
+              const own = policy.roles ?? []
+              const wrongRole = rule.roles.filter((role) => !own.includes(role))
+              const wrongReason = reasonProblem(rule.reason)
+              if (
+                own.length === 0 ||
+                rule.roles.length === 0 ||
+                wrongRole.length > 0 ||
+                rule.roles.length >= own.length
+              ) {
+                problem(
+                  id,
+                  `${component.id}: ${id} on layout ${layout} lists roles that aren't a non-empty strict subset of the policy's (${own.join(', ') || 'none'}).`,
+                  'List the roles the layout draws: some of the policy’s roles, not all of them (then it simply applies).',
+                )
+              }
+              if (wrongReason) {
+                problem(
+                  id,
+                  `${component.id}: ${id} on layout ${layout} leaves some roles out but ${wrongReason}.`,
+                  'Say why the layout draws only those roles.',
+                )
+              }
+              continue
+            }
             const wrong = reasonProblem((rule as { notApplicable?: unknown }).notApplicable)
             if (wrong) {
               problem(
@@ -295,7 +345,11 @@ export function declarationProblems(component: ContractComponent): ContractProbl
               )
             }
           }
-          if (!Object.values(policy.layouts).includes('applies')) {
+          if (
+            !Object.values(policy.layouts).some(
+              (rule) => rule === 'applies' || (typeof rule === 'object' && 'roles' in rule),
+            )
+          ) {
             problem(
               id,
               `${component.id}: ${id} applies to none of its layouts.`,
@@ -307,7 +361,15 @@ export function declarationProblems(component: ContractComponent): ContractProbl
       const layouts = component.layouts.length > 0 ? component.layouts : [null]
       for (const scope of scopesOf(policy)) {
         for (const layout of layouts) {
-          if (layout !== null && policy.layouts && policy.layouts[layout] !== 'applies') continue
+          const rule = layout === null ? undefined : policy.layouts?.[layout]
+          if (
+            layout !== null &&
+            policy.layouts &&
+            rule !== 'applies' &&
+            !(typeof rule === 'object' && 'roles' in rule)
+          ) {
+            continue
+          }
           const key = `${scope}|${policy.part ?? ''}|${layout ?? ''}`
           covered.set(key, (covered.get(key) ?? 0) + 1)
         }

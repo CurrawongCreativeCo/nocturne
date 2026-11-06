@@ -1,4 +1,9 @@
-import { SHARED_BUILDERS, type CapabilityId, type SharedBuilder } from './capabilities'
+import {
+  SHARED_BUILDERS,
+  type CapabilityId,
+  type SharedBuilder,
+  type TextRole,
+} from './capabilities'
 
 /**
  * Proof that a shared design builder made a field (task 275). The builders stamp the options they
@@ -14,6 +19,8 @@ export interface Provenance {
   builder: SharedBuilder
   /** The capability the builder made it as, if it is one. */
   capability?: CapabilityId
+  /** The text role it styles, when the builder makes a role's field (a text style). */
+  role?: TextRole
   /** The field or type it was made for: absent for an option fragment (Adjust picture). */
   name?: string
 }

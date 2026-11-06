@@ -285,6 +285,91 @@ describe('declarationProblems', () => {
   })
 })
 
+describe('roles and the layouts that draw some of them', () => {
+  const text = (layouts: Record<Layout, unknown>, roles: unknown = ['eyebrow', 'label']) =>
+    component(
+      policies({
+        text: {
+          policy: 'required',
+          scope: 'card',
+          roles,
+          layouts,
+        } as unknown as CapabilityPolicy<Layout>,
+      }),
+    )
+
+  it('asks a text or header policy to name its roles', () => {
+    expect(
+      messages(
+        component(
+          policies({ text: { policy: 'required', scope: 'card' } as CapabilityPolicy<Layout> }),
+        ),
+      ),
+    ).toEqual(["fixtureCards: text doesn't name its roles."])
+  })
+
+  it('reads a layout that draws only some roles: the others are Not applicable there, with its reason', () => {
+    const cells = policyCells(
+      'text',
+      {
+        policy: 'required',
+        scope: 'card',
+        roles: ['eyebrow', 'label'],
+        layouts: {
+          grid: 'applies',
+          list: { roles: ['label'], reason: 'The list draws the label only' },
+        },
+      },
+      ['grid', 'list'],
+    )
+    expect(cells.map((cell) => [cell.layout, cell.policy, cell.roles])).toEqual([
+      ['grid', 'required', ['eyebrow', 'label']],
+      ['list', 'required', ['label']],
+    ])
+    expect(cells[1]?.rolesNotApplicable).toEqual({
+      roles: ['eyebrow'],
+      reason: 'The list draws the label only',
+    })
+    expect(cells[0]?.rolesNotApplicable).toBeUndefined()
+  })
+
+  it('accepts a rule whose roles are a non-empty strict subset of the policy’s, with a reason', () => {
+    expect(
+      messages(
+        text({
+          grid: 'applies',
+          list: { roles: ['label'], reason: 'The list draws the label only' },
+        }),
+      ),
+    ).toEqual([])
+  })
+
+  it('rejects a rule that lists no role, every role, a role the policy lacks, or gives no reason', () => {
+    const wrong = (rule: unknown) => messages(text({ grid: 'applies', list: rule }))
+    expect(wrong({ roles: [], reason: 'x' })).toHaveLength(1)
+    expect(wrong({ roles: ['eyebrow', 'label'], reason: 'x' })).toHaveLength(1)
+    expect(wrong({ roles: ['title'], reason: 'x' })).toHaveLength(1)
+    expect(wrong({ roles: ['label'], reason: '' })).toEqual([
+      'fixtureCards: text on layout list leaves some roles out but has no reason.',
+    ])
+    // A role rule on a policy that names no roles can't be a subset of anything.
+    expect(
+      messages(text({ grid: 'applies', list: { roles: ['label'], reason: 'x' } }, null)),
+    ).not.toEqual([])
+  })
+
+  it('counts a role rule as applying: a policy whose layouts all draw some roles is not "none"', () => {
+    expect(
+      messages(
+        text({
+          grid: { roles: ['label'], reason: 'The grid draws the label only' },
+          list: { roles: ['eyebrow'], reason: 'The list draws the eyebrow only' },
+        }),
+      ),
+    ).toEqual([])
+  })
+})
+
 describe('policyCells', () => {
   it('spells out the policy for each scope, part and layout, with the task that closes it', () => {
     const cells = policyCells(

@@ -100,6 +100,8 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
   const named = context.types.get(field.type)
   // The shared design capability the field is, when a shared builder marked it (lib/design).
   const capability = field.options?.capability ?? named?.options?.capability
+  // The text role a text style field was built for (the checks refuse a role its stamp doesn't back).
+  const role = field.options?.textRole ?? named?.options?.textRole
   // Agency-only and design-ness are inherited: a field inside one is the same (lib/design/schema-capabilities).
   const agencyOnly = context.agencyOnly === true || context.agencyOnlyField?.(field) === true
   const design = context.design === true || Boolean(field.options?.designSummary)
@@ -112,6 +114,7 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
     }),
     ...(listOf(field) ? { list: listOf(field) } : {}),
     ...(capability ? { capability } : {}),
+    ...(role ? { role } : {}),
     clientEditable: context.editable(context.rootType, topField) && !agencyOnly,
     ...(design ? { design: true } : {}),
   }
