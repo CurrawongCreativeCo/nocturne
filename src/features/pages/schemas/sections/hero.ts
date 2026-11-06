@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 
 import { slotField } from '@/features/pages/slots/slot-field'
 import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { DEFAULT_HEADING_TONES, headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
@@ -369,7 +370,7 @@ export const hero = defineType({
         hasOwnBackgroundImage: () => true,
         // Only these two draw the picture behind the text; a panel sits over it.
         // Full background draws its own text panel, so a section Panel would double it.
-        ownsSurfaces: (section) => layoutOf(section) === 'full-bleed',
+        ownsSurfaces: (section) => ownsSurfaces('hero', section.variant),
         drawsBackground: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
       },
     },

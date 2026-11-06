@@ -1,6 +1,7 @@
 import { BulbOutlineIcon } from '@sanity/icons/BulbOutline'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
@@ -65,7 +66,12 @@ export const ctaBanner = defineType({
     ],
     { spacing: 'compact', align: 'center' },
     // The banner is its own coloured card, so the shared Panel isn't offered.
-    { rules: { type: 'ctaBanner', ownsSurfaces: () => true } },
+    {
+      rules: {
+        type: 'ctaBanner',
+        ownsSurfaces: (section) => ownsSurfaces('ctaBanner', section.variant),
+      },
+    },
   ),
   preview: {
     select: { heading: 'heading', title: 'title', tone: 'style.tone' },

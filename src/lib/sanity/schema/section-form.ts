@@ -52,7 +52,8 @@ export interface SectionFormRules {
   drawsBackground?: (section: SectionValue) => boolean
   /**
    * Whether this layout draws its own surfaces (the Link list's cards), so the shared Panel doesn't
-   * apply and isn't offered. SectionFrame's `ownsSurfaces` is the same rule on the page.
+   * apply and isn't offered. Register `ownsSurfaces` from lib/design/section-surfaces.ts: SectionRenderer
+   * applies the same rule on the page.
    */
   ownsSurfaces?: (section: SectionValue) => boolean
 }

@@ -11,6 +11,7 @@ import {
   GLASS_STRENGTH_TITLES,
   glassContrastProblem,
 } from '@/lib/color/glass-contrast'
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { listsCategories, looksLikeTypedCategories, plainTextParagraphs } from '@/lib/plain-text'
 import { SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { headingPlainText } from '@/lib/sanity/heading-text'
@@ -916,7 +917,12 @@ export const linkList = defineType({
     { align: 'center' },
     // No design option depends on the layout: no picture, and each layout accepts any alignment. Its
     // cards are its own surfaces (glass rows, tinted cards), so the shared Panel isn't offered.
-    { rules: { type: 'linkList', ownsSurfaces: () => true } },
+    {
+      rules: {
+        type: 'linkList',
+        ownsSurfaces: (section) => ownsSurfaces('linkList', section.variant),
+      },
+    },
   ),
   preview: {
     select: {
