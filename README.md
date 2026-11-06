@@ -2686,7 +2686,10 @@ There is no site-wide density setting yet, so "density airy" sets the section's 
    `content-source-not-verified` (with what the source is waiting for). The layout is the one the section is left in once the
    whole proposal is applied (a layout change in the same proposal counts), and a section inserted whole is judged in the layout
    it brings, else its default. Unsetting is never blocked, and fields that carry no capability keep the ordinary checks above.
-   A section the manifest has no declaration for is not judged.
+   A field is judged by the policies that govern it, never by the capability's other policies: the policy whose evidence
+   probes that field, or one in the same object (`cardDesign.border` stands for `cardDesign.background`), so a Verified
+   sibling can't authorise a Pending field, and a marked field no policy names is rejected. A section the manifest has no
+   declaration for can't be judged, so its marked fields are rejected too: the check never fails open.
    **Every `set` and `insert` must also have somewhere to land** (`invalid-path`), whatever it changes. A parent object that
    is missing is created, as the plan writes `setIfMissing` for it (`section.style.panel` on a section with no `style` yet),
    and the value is then judged in full. A parent that can't be created is rejected, never skipped: a field of something

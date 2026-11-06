@@ -219,16 +219,35 @@ describe('a content source that isn’t verified', () => {
     ])
   })
 
-  it('does not judge a section the manifest has no declaration for', () => {
+  it('rejects a marked field on a section the manifest has no declaration for (B1: never fails open)', () => {
     const undeclared = clone()
     const hero = undeclared.sections.find((section) => section.type === 'hero')
     if (hero) delete hero.capabilities
+    const found = rejections(
+      [{ set: { [at('heroFull', 'style.overlay')]: 'strong' } }],
+      deps({ manifest: undeclared }),
+    )
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('hero declares no design capabilities, so style.overlay')
+    // Unmarked fields of the same section keep the ordinary checks.
     expect(
       accepted(
-        [{ set: { [at('heroFull', 'style.overlay')]: 'strong' } }],
+        [{ set: { [at('heroFull', 'style.spacing')]: 'compact' } }],
         deps({ manifest: undeclared }),
       ),
     ).toBe(true)
+  })
+
+  it('rejects a content-source field on a section with no content sources recorded', () => {
+    const undeclared = clone()
+    const location = undeclared.sections.find((section) => section.type === 'location')
+    if (location) delete location.contentSources
+    const found = rejections(
+      [{ set: { [at('place', 'interactiveMap')]: true } }],
+      deps({ manifest: undeclared }),
+    )
+    expect(found.map(([code]) => code)).toEqual(['content-source-not-verified'])
+    expect(found[0]?.[1]).toContain("can't be judged")
   })
 })
 
@@ -328,5 +347,58 @@ describe('a change through a parent that is missing or unusable', () => {
         },
       ]),
     ).toBe(true)
+  })
+})
+
+describe('a marked field is judged by its own policy (B2)', () => {
+  const clone = () => JSON.parse(JSON.stringify(manifest)) as DesignManifest
+  /** The Link list's surface policies, with the card one set to `card` and the item one to `item`. */
+  const withSurface = (card: string, item: string) => {
+    const changed = clone()
+    const list = changed.sections.find((section) => section.type === 'linkList')
+    const surface = list?.capabilities?.surface
+    if (!surface || !('policies' in surface)) throw new Error('No surface policies on linkList.')
+    const policies = surface.policies
+    for (const [scope, status] of [
+      ['card', card],
+      ['item', item],
+    ] as const) {
+      const policy = policies.find((entry) => entry.scope === scope)
+      if (!policy) throw new Error(`No ${scope} surface policy.`)
+      policy.availability = status
+    }
+    return deps({ manifest: changed })
+  }
+
+  it('does not let a Verified sibling policy authorise a Pending field', () => {
+    // The card surface (cardDesign.*) is Pending; the item surface is Verified.
+    const given = withSurface('pending', 'verified')
+    const found = rejections([{ set: { [at('listStack', 'cardDesign.border')]: 'thick' } }], given)
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('isn’t verified'.replace('’', "'"))
+    // The same field is accepted when its own policy is the Verified one.
+    expect(
+      accepted(
+        [{ set: { [at('listStack', 'cardDesign.border')]: 'thick' } }],
+        withSurface('verified', 'pending'),
+      ),
+    ).toBe(true)
+  })
+
+  it('judges the other fields of the same group by the same policy', () => {
+    const pending = withSurface('pending', 'verified')
+    for (const field of ['cardDesign.background', 'cardDesign.borderColour']) {
+      expect(
+        rejections([{ set: { [at('listStack', field)]: 'thick' } }], pending).map(([c]) => c),
+        field,
+      ).toEqual(['capability-not-verified'])
+    }
+  })
+
+  it('rejects a marked field no policy of its capability names, even beside Verified ones', () => {
+    // `links[].icon` is an icon field; the icon policies probe the link design's icon fields, not it.
+    const found = rejections([{ set: { [at('listStack', 'links[_key=="a"].icon')]: 'star' } }])
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('no icon policy names it')
   })
 })

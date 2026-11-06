@@ -32,6 +32,37 @@ describe('builder provenance', () => {
     expect(provenanceOf({ designBuilder: 'surfaceFields' })).toBeUndefined()
   })
 
+  it('hands out a stamp that can’t be edited to change the proof', () => {
+    const field = builtBy('surfaceFields', { name: 'border', type: 'string' }, 'surface')
+    const stamp = provenanceOf(field.options)
+    expect(stamp).toBeDefined()
+    if (!stamp) return
+    const forge = (change: () => void) => {
+      try {
+        change()
+      } catch {
+        // A frozen stamp refuses the change by throwing; either way it must not take.
+      }
+    }
+    forge(() => {
+      ;(stamp as { builder: string }).builder = 'sectionStyle'
+    })
+    forge(() => {
+      ;(stamp as { capability?: string }).capability = 'glass'
+    })
+    forge(() => {
+      ;(stamp as { name?: string }).name = 'shadow'
+    })
+    forge(() => Reflect.deleteProperty(stamp, 'capability'))
+    expect(Object.isFrozen(stamp)).toBe(true)
+    // A second read, and the options a copy of the field would carry, still say what the builder made.
+    expect(provenanceOf(field.options)).toEqual({
+      builder: 'surfaceFields',
+      capability: 'surface',
+      name: 'border',
+    })
+  })
+
   it('is only stamped by each builder’s own module, in this repository', () => {
     expect(
       provenanceSourceProblems([...sources(join(ROOT, 'src')), ...sources(join(ROOT, 'scripts'))]),

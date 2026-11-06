@@ -46,10 +46,12 @@ vi.hoisted(() => {
  */
 const resolvers = vi.hoisted(() => {
   const control = {
-    mode: 'pass' as 'pass' | 'record' | 'replay',
+    mode: 'pass' as 'pass' | 'count' | 'record' | 'replay',
     targets: new Set<string>(),
     recorded: new Map<string, unknown[]>(),
     replayed: new Map<string, number>(),
+    /** `count` mode: how often each claimed export was called, results passed through untouched. */
+    called: new Map<string, number>(),
     /** Every wrapped export, so a claim that isn't wired in fails instead of passing untested. */
     wired: new Set<string>(),
   }
@@ -64,6 +66,10 @@ const resolvers = vi.hoisted(() => {
           name,
           (...args: unknown[]) => {
             if (!control.targets.has(key) || control.mode === 'pass') return call(...args)
+            if (control.mode === 'count') {
+              control.called.set(key, (control.called.get(key) ?? 0) + 1)
+              return call(...args)
+            }
             const kept = control.recorded.get(key) ?? []
             if (control.mode === 'record') {
               const result = call(...args)
@@ -180,14 +186,22 @@ const keyOf = ({ module, export: name }: { module: string; export: string }) => 
 
 /**
  * The same case with every claimed resolver disconnected: each replays to the probe render what it
- * returned with the field unset. Returns that comparison, the connected probe's target, and how many
- * times the renderer reached a claimed resolver.
+ * returned with the field unset. Returns that comparison, the connected probe's target, and the claimed
+ * resolvers the connected probe render never called: every one the entry names must be reached, not
+ * just one. (Counted connected: a resolver downstream of another is not reached once that one is cut.)
  */
 async function runDisconnected(entry: CapabilityEvidence, layout: string | null) {
   const { unset, probed } = await statesOf(entry, layout)
-  const connected = await draw(probed)
   const { control } = resolvers
   control.targets = new Set(entry.resolvers.map(keyOf))
+  control.called = new Map()
+  control.mode = 'count'
+  let connected: string
+  try {
+    connected = await draw(probed)
+  } finally {
+    control.mode = 'pass'
+  }
   control.recorded = new Map()
   control.replayed = new Map()
   control.mode = 'record'
@@ -195,7 +209,9 @@ async function runDisconnected(entry: CapabilityEvidence, layout: string | null)
     const unsetHtml = await draw(unset)
     control.mode = 'replay'
     const probeHtml = await draw(probed)
-    const reached = [...control.replayed.values()].reduce((sum, count) => sum + count, 0)
+    const unreached = entry.resolvers
+      .map(keyOf)
+      .filter((key) => (control.called.get(key) ?? 0) === 0)
     return {
       disconnected: compareTarget(unsetHtml, probeHtml, entry.target, entry.change),
       // The probe with and without its resolvers: they must differ if the resolvers carry it.
@@ -203,13 +219,14 @@ async function runDisconnected(entry: CapabilityEvidence, layout: string | null)
         entry.change === 'appears'
           ? compareTarget(probeHtml, connected, entry.target, entry.change)
           : compareTarget(connected, probeHtml, entry.target, entry.change),
-      reached,
+      unreached,
     }
   } finally {
     control.mode = 'pass'
     control.targets = new Set()
     control.recorded = new Map()
     control.replayed = new Map()
+    control.called = new Map()
   }
 }
 
@@ -240,8 +257,8 @@ describe('design capability evidence', () => {
           `${keyOf(resolver)} isn't wired into the harness`,
         ).toContain(keyOf(resolver))
       }
-      const { disconnected, cut, reached } = await runDisconnected(entry, layout)
-      expect(reached, 'the renderer never reached a claimed resolver').toBeGreaterThan(0)
+      const { disconnected, cut, unreached } = await runDisconnected(entry, layout)
+      expect(unreached, 'claimed resolvers the renderer never reached').toEqual([])
       // What the probe draws depends on the claimed resolvers, and only on them.
       expect(cut.status).toBe('changed')
       expect(disconnected.status).not.toBe('changed')
@@ -260,7 +277,7 @@ describe('design capability evidence', () => {
       },
       'cards',
     )
-    expect(wrong.reached).toBeGreaterThan(0)
+    expect(wrong.unreached).toEqual([])
     expect(wrong.disconnected.status).toBe('changed')
     // A resolver the renderer never reaches for this probe.
     const unused = await runDisconnected(
@@ -271,6 +288,21 @@ describe('design capability evidence', () => {
       'cards',
     )
     expect(unused.disconnected.status).toBe('changed')
+    // A claim that adds an unreached resolver to a true one: the probe still stops changing (the true
+    // one is cut), but the extra resolver is a claim nothing backs, so the entry fails (I1).
+    const never = {
+      module: '@/features/pages/components/sections/testimonials',
+      export: 'Testimonials',
+    }
+    const padded = await runDisconnected(
+      { ...surface, resolvers: [...surface.resolvers, never] },
+      'cards',
+    )
+    expect(padded.disconnected.status).not.toBe('changed')
+    expect(padded.unreached).toEqual([keyOf(never)])
+    expect((await runDisconnected({ ...surface, resolvers: [never] }, 'cards')).unreached).toEqual([
+      keyOf(never),
+    ])
     // The true claim, for contrast: disconnected, the probe no longer reaches the target.
     expect((await runDisconnected(surface, 'cards')).disconnected.status).not.toBe('changed')
   })

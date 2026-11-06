@@ -27,8 +27,17 @@ export function layoutOfSection(section: ManifestSection, stored: unknown): stri
   return section.variants?.[0]?.value ?? null
 }
 
-const matches = (field: string, path: string) =>
-  path === field || path.startsWith(`${field}.`) || path.startsWith(`${field}[`)
+/**
+ * Whether a policy governs a marked field: its evidence probes that field (or a field it contains), or
+ * one in the same object (`cardDesign.border` stands for `cardDesign.background`: the same builder, at
+ * the same scope). A top-level field has no object to share, so only the exact field counts.
+ */
+const governs = (probed: string, path: string) => {
+  if (path === probed || path.startsWith(`${probed}.`) || path.startsWith(`${probed}[`)) return true
+  const object = (value: string) =>
+    value.includes('.') ? value.slice(0, value.lastIndexOf('.')) : ''
+  return object(probed) !== '' && object(probed) === object(path)
+}
 
 /** What a policy or source offers in one layout: `verified`, `pending` or `{ notApplicable: reason }`. */
 function statusAt(
@@ -51,6 +60,69 @@ const where = (section: ManifestSection, layout: string | null) =>
 /** The shared Panel's own fields: where a layout draws its own surfaces they are never offered. */
 const PANEL_FIELD = /(^|\.)panel(Strength)?$/
 
+/**
+ * What is wrong with setting one capability-marked field, if anything. The field is judged by the
+ * policies that govern it (`governs`), never by the capability's other policies: a Verified sibling
+ * can't authorise a Pending field, and a field no policy names isn't verified. A section with no
+ * declaration for the capability can't be judged, so the value is rejected, never let through.
+ */
+function capabilityVerdict(
+  section: ManifestSection,
+  layout: string | null,
+  path: string,
+  capability: string,
+): CapabilityVerdict | undefined {
+  const reject = (message: string): CapabilityVerdict => ({
+    code: 'capability-not-verified',
+    message,
+  })
+  if (!section.capabilities) {
+    return reject(
+      `${section.type} declares no design capabilities, so ${path} (a ${capability} setting) can't be judged.`,
+    )
+  }
+  const entry = section.capabilities[capability]
+  if (!entry) {
+    return reject(
+      `${path} is a ${capability} setting, and ${section.type} doesn't declare ${capability}.`,
+    )
+  }
+  if ('notApplicable' in entry) {
+    return reject(
+      `${path} is a ${capability} setting, which ${section.type} doesn't offer: ${entry.notApplicable}.`,
+    )
+  }
+  const named = entry.policies.filter((policy) =>
+    policy.fields.some((field) => governs(field, path)),
+  )
+  const statusOfPolicy = (policy: (typeof entry.policies)[number]) =>
+    statusAt(policy.availability, layout)
+  // A policy the layout opts out of doesn't count against a field another of its policies governs.
+  const applicable = (named.length > 0 ? named : entry.policies).filter(
+    (policy) => typeof statusOfPolicy(policy) === 'string',
+  )
+  if (applicable.length === 0) {
+    const reasons = (named.length > 0 ? named : entry.policies).flatMap((policy) => {
+      const status = statusOfPolicy(policy)
+      return typeof status === 'object' ? [status.notApplicable] : []
+    })
+    return reject(
+      `${path} is a ${capability} setting, which ${where(section, layout)} doesn't offer: ${[...new Set(reasons)].join('; ')}.`,
+    )
+  }
+  if (named.length > 0 && applicable.every((policy) => statusOfPolicy(policy) === 'verified')) {
+    return undefined
+  }
+  const open = applicable.filter((policy) => statusOfPolicy(policy) !== 'verified')
+  const tasks = [
+    ...new Set(open.flatMap((policy) => (policy.closingTask ? [policy.closingTask] : []))),
+  ]
+  const trigger = open.find((policy) => policy.trigger)?.trigger
+  return reject(
+    `${path} is a ${capability} setting that isn't verified on ${where(section, layout)} yet${named.length === 0 && applicable.some((policy) => statusOfPolicy(policy) === 'verified') ? `: no ${capability} policy names it` : ''}${tasks.length > 0 ? ` (pending: task ${tasks.join(', ')} closes it)` : ''}${trigger ? `. It applies when ${trigger.when.charAt(0).toLowerCase()}${trigger.when.slice(1)}` : ''}.`,
+  )
+}
+
 /** What is wrong with setting the marked fields on a section in this layout, if anything. */
 export function capabilityVerdicts(
   section: ManifestSection,
@@ -68,52 +140,25 @@ export function capabilityVerdicts(
       })
       continue
     }
-    if (row.capability && section.capabilities) {
+    if (row.capability) {
       const key = `capability|${path}`
-      if (seen.has(key)) continue
-      seen.add(key)
-      const entry = section.capabilities[row.capability]
-      if (!entry) {
-        verdicts.push({
-          code: 'capability-not-verified',
-          message: `${path} is a ${row.capability} setting, and ${section.type} doesn't declare ${row.capability}.`,
-        })
-        continue
+      if (!seen.has(key)) {
+        seen.add(key)
+        const verdict = capabilityVerdict(section, layout, path, row.capability)
+        if (verdict) verdicts.push(verdict)
       }
-      if ('notApplicable' in entry) {
-        verdicts.push({
-          code: 'capability-not-verified',
-          message: `${path} is a ${row.capability} setting, which ${section.type} doesn't offer: ${entry.notApplicable}.`,
-        })
-        continue
-      }
-      const named = entry.policies.filter((policy) => policy.fields.some((f) => matches(f, path)))
-      const candidates = named.length > 0 ? named : entry.policies
-      const statuses = candidates.map((policy) => ({
-        policy,
-        status: statusAt(policy.availability, layout),
-      }))
-      if (statuses.some(({ status }) => status === 'verified')) continue
-      const reasons = statuses.flatMap(({ status }) =>
-        typeof status === 'object' ? [status.notApplicable] : [],
-      )
-      if (statuses.length > 0 && reasons.length === statuses.length) {
-        verdicts.push({
-          code: 'capability-not-verified',
-          message: `${path} is a ${row.capability} setting, which ${where(section, layout)} doesn't offer: ${[...new Set(reasons)].join('; ')}.`,
-        })
-        continue
-      }
-      const pending = statuses.find(({ status }) => status === 'pending')?.policy
-      verdicts.push({
-        code: 'capability-not-verified',
-        message: `${path} is a ${row.capability} setting that isn't verified on ${where(section, layout)} yet${pending?.closingTask ? ` (pending: task ${String(pending.closingTask)} closes it)` : ''}${pending?.trigger ? `. It applies when ${pending.trigger.when.charAt(0).toLowerCase()}${pending.trigger.when.slice(1)}` : ''}.`,
-      })
     }
-    if (row.contentSource && section.contentSources) {
+    if (row.contentSource) {
       const key = `source|${path}`
       if (seen.has(key)) continue
       seen.add(key)
+      if (!section.contentSources) {
+        verdicts.push({
+          code: 'content-source-not-verified',
+          message: `${section.type} records no content sources, so ${path} (the ${row.contentSource} source) can't be judged.`,
+        })
+        continue
+      }
       const source = section.contentSources[row.contentSource]
       const status = source ? statusAt(source.availability, layout) : 'pending'
       if (status !== 'verified') {

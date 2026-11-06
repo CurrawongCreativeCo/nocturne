@@ -23,10 +23,11 @@ export interface Provenance {
  * builders call its `builtBy` and `builtOptions`, each only from its own module.
  */
 export function stampProvenance<T extends object>(options: T, provenance: Provenance): T {
-  return { ...options, [PROVENANCE]: provenance }
+  // Frozen, so what `provenanceOf` hands out can't be edited to change the proof.
+  return { ...options, [PROVENANCE]: Object.freeze({ ...provenance }) }
 }
 
-/** The stamp on some options, if a shared builder made them. */
+/** The stamp on some options, if a shared builder made them. It is frozen: it can be read, never changed. */
 export function provenanceOf(options: unknown): Provenance | undefined {
   if (options === null || typeof options !== 'object') return undefined
   const stamp = (options as Record<symbol, unknown>)[PROVENANCE]
