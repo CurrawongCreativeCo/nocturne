@@ -159,6 +159,7 @@
                   "title": "Gift"
                 }
               ],
+              "capability": "icon",
               "clientEditable": true
             }
           ]
@@ -1007,6 +1008,7 @@
           "kind": "array",
           "required": null,
           "max": 1,
+          "capability": "slots",
           "clientEditable": false
         },
         {
@@ -1150,6 +1152,7 @@
               "title": "Gift"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -1371,6 +1374,7 @@
           "path": "partMotion",
           "kind": "object",
           "required": false,
+          "capability": "motion",
           "clientEditable": false
         },
         {
@@ -1861,33 +1865,359 @@
           "variant": null,
           "hasPicture": true,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": true
+          "hasOwnBackgroundImage": true,
+          "drawsBackground": true,
+          "ownsSurfaces": false
         },
         {
           "variant": "overlay",
           "hasPicture": true,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": true
+          "hasOwnBackgroundImage": true,
+          "drawsBackground": true,
+          "ownsSurfaces": false
         },
         {
           "variant": "split",
           "hasPicture": false,
           "fixesAlignment": true,
-          "hasOwnBackgroundImage": true
+          "hasOwnBackgroundImage": true,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "editorial",
           "hasPicture": false,
           "fixesAlignment": true,
-          "hasOwnBackgroundImage": true
+          "hasOwnBackgroundImage": true,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "full-bleed",
           "hasPicture": true,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": true
+          "hasOwnBackgroundImage": true,
+          "drawsBackground": true,
+          "ownsSurfaces": true
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "notApplicable": "Uses Panel (task 218), not a card surface (156 item 10)"
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 213,
+              "availability": {
+                "overlay": "pending",
+                "split": "pending",
+                "editorial": "pending",
+                "full-bleed": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 213,
+              "availability": {
+                "overlay": "pending",
+                "split": "pending",
+                "editorial": "pending",
+                "full-bleed": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "overlay": "pending",
+                "split": "pending",
+                "editorial": "pending",
+                "full-bleed": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "notApplicable": "No surface for a shadow to sit on (146)"
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "item",
+              "trigger": {
+                "kind": "setting",
+                "when": "The section has a call to action: a trailing indicator on its buttons",
+                "path": "ctas",
+                "reachable": true
+              },
+              "closingTask": 137,
+              "availability": {
+                "overlay": "pending",
+                "split": "pending",
+                "editorial": "pending",
+                "full-bleed": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "part": "picture",
+              "closingTask": 177,
+              "availability": {
+                "overlay": {
+                  "notApplicable": "Its picture is the background: see the background part"
+                },
+                "split": "pending",
+                "editorial": {
+                  "notApplicable": "Its small picture isn’t on task 177’s list; the split one is"
+                },
+                "full-bleed": {
+                  "notApplicable": "Its picture is the background: see the background part"
+                }
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "The hero’s picture is set: Focus mode",
+                "path": "backgroundImage",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "overlay": "pending",
+                "split": {
+                  "notApplicable": "Its picture sits beside the text: see the picture part"
+                },
+                "editorial": {
+                  "notApplicable": "Has no background picture"
+                },
+                "full-bleed": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 147,
+              "availability": {
+                "overlay": {
+                  "notApplicable": "Its picture is the background: backgrounds are excluded (147)"
+                },
+                "split": "pending",
+                "editorial": {
+                  "notApplicable": "Its small picture isn’t on task 147’s list"
+                },
+                "full-bleed": {
+                  "notApplicable": "Its picture is the background: backgrounds are excluded (147)"
+                }
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "overlay": "pending",
+                "split": {
+                  "notApplicable": "Task 157 item 2 covers Full background and Image with panel only"
+                },
+                "editorial": {
+                  "notApplicable": "Task 157 item 2 covers Full background and Image with panel only"
+                },
+                "full-bleed": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": {
+                  "notApplicable": "Draws its own panel (it owns its surfaces)"
+                }
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "hero.glass.section",
+              "field": "style.panel",
+              "resolver": "@/lib/sanity/section-panel#resolveSectionPanel",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "hero.glass.section@overlay",
+                "hero.glass.section@split",
+                "hero.glass.section@editorial"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "overlay": "pending",
+                "split": "pending",
+                "editorial": "pending",
+                "full-bleed": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "hero.edge.section",
+              "field": "style.edge",
+              "resolver": "@/components/ui/section-style#resolveEdge",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "hero.edge.section@overlay",
+                "hero.edge.section@split",
+                "hero.edge.section@editorial",
+                "hero.edge.section@full-bleed"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "hero.motion.section",
+              "field": "style.motion",
+              "resolver": "@/components/ui/section-style#sectionMotion",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "hero.motion.section@overlay",
+                "hero.motion.section@split",
+                "hero.motion.section@editorial",
+                "hero.motion.section@full-bleed"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 219,
+              "availability": {
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "hero.slots.supporting",
+              "field": "supporting",
+              "resolver": "@/features/pages/slots/render-slot#renderSlot",
+              "render": "src/features/pages/components/sections/hero",
+              "target": "section > :last-child",
+              "cases": [
+                "hero.slots.supporting@overlay",
+                "hero.slots.supporting@split",
+                "hero.slots.supporting@editorial",
+                "hero.slots.supporting@full-bleed"
+              ]
+            }
+          ]
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "richText",
@@ -1929,7 +2259,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -2112,7 +2444,8 @@
           "path": "media",
           "kind": "array",
           "required": null,
-          "max": null,
+          "max": 1,
+          "capability": "slots",
           "clientEditable": true
         },
         {
@@ -2216,7 +2549,8 @@
           "path": "supporting",
           "kind": "array",
           "required": null,
-          "max": null,
+          "max": 1,
+          "capability": "slots",
           "clientEditable": false
         },
         {
@@ -2542,6 +2876,16 @@
           "title": "Text over media"
         }
       ],
+      "slots": [
+        {
+          "slot": "split.media",
+          "path": "media"
+        },
+        {
+          "slot": "split.supporting",
+          "path": "supporting"
+        }
+      ],
       "presets": [
         {
           "value": "media-right",
@@ -2580,27 +2924,315 @@
           "variant": null,
           "hasPicture": true,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "side",
           "hasPicture": true,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "stacked",
           "hasPicture": true,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "overlay",
           "hasPicture": true,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": true
+          "hasOwnBackgroundImage": true,
+          "drawsBackground": true,
+          "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "notApplicable": "Uses Panel (task 218), not a card surface (156 item 10)"
+        },
+        "text": {
+          "notApplicable": "Its eyebrow and heading are section header roles; its body is rich text"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "side": "pending",
+                "stacked": "pending",
+                "overlay": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "side": "pending",
+                "stacked": "pending",
+                "overlay": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "notApplicable": "No surface for a shadow to sit on (146)"
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "item",
+              "trigger": {
+                "kind": "setting",
+                "when": "The section has a call to action: a trailing indicator on its buttons",
+                "path": "ctas",
+                "reachable": true
+              },
+              "closingTask": 137,
+              "availability": {
+                "side": "pending",
+                "stacked": "pending",
+                "overlay": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "side": "pending",
+                "stacked": "pending",
+                "overlay": {
+                  "notApplicable": "Its media is the background; the shared picture isn’t offered"
+                }
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 147,
+              "availability": {
+                "side": "pending",
+                "stacked": "pending",
+                "overlay": {
+                  "notApplicable": "Its picture is the background: backgrounds are excluded (147)"
+                }
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": {
+                  "notApplicable": "Draws its own picture; the shared overlay isn’t offered"
+                }
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "mediaText.overlay.section",
+              "field": "style.overlay",
+              "resolver": "@/components/ui/section-style#resolveSectionStyle",
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "mediaText.overlay.section@side",
+                "mediaText.overlay.section@stacked"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "mediaText.glass.section",
+              "field": "style.panel",
+              "resolver": "@/lib/sanity/section-panel#resolveSectionPanel",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "mediaText.glass.section@side",
+                "mediaText.glass.section@stacked",
+                "mediaText.glass.section@overlay"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "side": "pending",
+                "stacked": "pending",
+                "overlay": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "mediaText.edge.section",
+              "field": "style.edge",
+              "resolver": "@/components/ui/section-style#resolveEdge",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "mediaText.edge.section@side",
+                "mediaText.edge.section@stacked",
+                "mediaText.edge.section@overlay"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "mediaText.motion.section",
+              "field": "style.motion",
+              "resolver": "@/components/ui/section-style#sectionMotion",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "mediaText.motion.section@side",
+                "mediaText.motion.section@stacked",
+                "mediaText.motion.section@overlay"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 219,
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "mediaText.slots.media",
+              "field": "media",
+              "resolver": "@/features/pages/slots/render-slot#renderSlot",
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "mediaText.slots.media@side",
+                "mediaText.slots.media@stacked",
+                "mediaText.slots.media@overlay"
+              ]
+            },
+            {
+              "id": "mediaText.slots.supporting",
+              "field": "supporting",
+              "resolver": "@/features/pages/slots/render-slot#renderSlot",
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "mediaText.slots.supporting@side",
+                "mediaText.slots.supporting@stacked",
+                "mediaText.slots.supporting@overlay"
+              ]
+            }
+          ]
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "featuresGrid",
@@ -2710,7 +3342,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -2837,19 +3471,25 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "grid",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "marquee",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -3019,21 +3659,320 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "grid",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "slider",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "quote",
+                "attribution",
+                "label"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 146,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Not applicable (158 item 3)"
+        },
+        "action": {
+          "notApplicable": "Not a link (137)"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "part": "avatar",
+              "closingTask": 177,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 147,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "testimonials.overlay.section",
+              "field": "style.overlay",
+              "resolver": "@/components/ui/section-style#resolveSectionStyle",
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "testimonials.overlay.section@grid",
+                "testimonials.overlay.section@slider"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The card’s surface kind is Glass"
+              },
+              "closingTask": 159,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "testimonials.glass.section",
+              "field": "style.panel",
+              "resolver": "@/lib/sanity/section-panel#resolveSectionPanel",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "testimonials.glass.section@grid",
+                "testimonials.glass.section@slider"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "testimonials.edge.section",
+              "field": "style.edge",
+              "resolver": "@/components/ui/section-style#resolveEdge",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "testimonials.edge.section@grid",
+                "testimonials.edge.section@slider"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "testimonials.motion.section",
+              "field": "style.motion",
+              "resolver": "@/components/ui/section-style#sectionMotion",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "testimonials.motion.section@grid",
+                "testimonials.motion.section@slider"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {
+        "testimonials.manual": {
+          "owner": 156,
+          "availability": {
+            "grid": "verified",
+            "slider": "verified"
+          }
+        },
+        "testimonials.google": {
+          "owner": 277,
+          "gate": "Task 277 Phase 1 decision record and the owner’s approval. No Google Cloud setup is approved",
+          "availability": {
+            "grid": "pending",
+            "slider": "pending"
+          }
+        }
+      }
     },
     {
       "type": "faq",
@@ -3110,7 +4049,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -3302,7 +4243,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": true
         }
       ]
     },
@@ -3366,7 +4309,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -3467,7 +4412,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -3539,7 +4486,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -3666,19 +4615,25 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "inline",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "cards",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -3985,25 +4940,33 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "grid",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "masonry",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "slider",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -4111,7 +5074,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -4457,25 +5422,33 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "grid",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "slider",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "list",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -4637,19 +5610,25 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "embed",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "ambient",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": true,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -4775,19 +5754,25 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "vertical",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "alternating",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -4900,7 +5885,9 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     },
@@ -4999,6 +5986,7 @@
           "path": "profile.image",
           "kind": "image",
           "required": null,
+          "capability": "framing",
           "clientEditable": true
         },
         {
@@ -5361,6 +6349,7 @@
               "title": "Gift"
             }
           ],
+          "capability": "icon",
           "clientEditable": true
         },
         {
@@ -5438,6 +6427,7 @@
           "path": "links[].thumbnail",
           "kind": "image",
           "required": null,
+          "capability": "framing",
           "clientEditable": true
         },
         {
@@ -5857,6 +6847,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "surface",
           "clientEditable": false
         },
         {
@@ -5882,6 +6873,7 @@
               "title": "Solid"
             }
           ],
+          "capability": "surface",
           "clientEditable": false
         },
         {
@@ -5907,6 +6899,7 @@
               "title": "Thick"
             }
           ],
+          "capability": "surface",
           "clientEditable": false
         },
         {
@@ -5914,6 +6907,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "surface",
           "clientEditable": false
         },
         {
@@ -5921,6 +6915,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "text",
           "clientEditable": false
         },
         {
@@ -5928,6 +6923,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "text",
           "clientEditable": false
         },
         {
@@ -5935,6 +6931,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "text",
           "clientEditable": false
         },
         {
@@ -5967,6 +6964,7 @@
               "title": "None"
             }
           ],
+          "capability": "action",
           "clientEditable": false
         },
         {
@@ -5974,6 +6972,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "action",
           "clientEditable": false
         },
         {
@@ -5999,6 +6998,7 @@
               "title": "Square"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6006,6 +7006,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6013,6 +7014,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6038,6 +7040,7 @@
               "title": "Solid"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6063,6 +7066,7 @@
               "title": "Thick"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6070,6 +7074,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6204,6 +7209,7 @@
           "kind": "decorativeDivider",
           "required": null,
           "max": null,
+          "capability": "divider",
           "clientEditable": false
         },
         {
@@ -6384,6 +7390,7 @@
               "title": "Gift"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6481,6 +7488,7 @@
           "kind": "decorativeDivider",
           "required": null,
           "max": null,
+          "capability": "divider",
           "clientEditable": false
         },
         {
@@ -6661,6 +7669,7 @@
               "title": "Gift"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -6758,6 +7767,7 @@
           "kind": "decorativeDivider",
           "required": null,
           "max": null,
+          "capability": "divider",
           "clientEditable": false
         },
         {
@@ -6938,6 +7948,7 @@
               "title": "Gift"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -7035,6 +8046,7 @@
           "kind": "decorativeDivider",
           "required": null,
           "max": null,
+          "capability": "divider",
           "clientEditable": false
         },
         {
@@ -7215,6 +8227,7 @@
               "title": "Gift"
             }
           ],
+          "capability": "icon",
           "clientEditable": false
         },
         {
@@ -7337,6 +8350,7 @@
               "title": "Floating"
             }
           ],
+          "capability": "depth",
           "clientEditable": false
         },
         {
@@ -7362,6 +8376,7 @@
               "title": "Floating"
             }
           ],
+          "capability": "depth",
           "clientEditable": false
         },
         {
@@ -7387,6 +8402,7 @@
               "title": "Floating"
             }
           ],
+          "capability": "pictureDepth",
           "clientEditable": false
         },
         {
@@ -7408,6 +8424,7 @@
               "title": "Strong"
             }
           ],
+          "capability": "depth",
           "clientEditable": false
         },
         {
@@ -7429,6 +8446,7 @@
               "title": "Profile picture"
             }
           ],
+          "capability": "depth",
           "clientEditable": false
         },
         {
@@ -7442,6 +8460,7 @@
           "kind": "object",
           "required": null,
           "max": null,
+          "capability": "depth",
           "clientEditable": false
         },
         {
@@ -7568,33 +8587,644 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": true
         },
         {
           "variant": "stacked",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": true
         },
         {
           "variant": "cards",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": true
         },
         {
           "variant": "editorial",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": true
         },
         {
           "variant": "compact",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": true
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Draws no card; the schema hides these fields there"
+                },
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 156,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Draws no card; the schema hides these fields there"
+                },
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.surface.card",
+              "field": "cardDesign.border",
+              "resolver": "@/lib/sanity/surface-options#ringSurfaceLook",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.surface.card@stacked",
+                "linkList.surface.card@cards",
+                "linkList.surface.card@compact"
+              ]
+            },
+            {
+              "id": "linkList.surface.item",
+              "field": "links[].design.border",
+              "resolver": "@/lib/sanity/surface-options#ringSurfaceLook",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.surface.item@stacked",
+                "linkList.surface.item@cards",
+                "linkList.surface.item@compact"
+              ]
+            }
+          ]
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "eyebrow",
+                "label",
+                "description"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "roles": [
+                "eyebrow",
+                "label",
+                "description"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.text.card",
+              "field": "cardDesign.label",
+              "resolver": "@/lib/sanity/text-style-options#textLook",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.text.card@stacked",
+                "linkList.text.card@cards",
+                "linkList.text.card@editorial",
+                "linkList.text.card@compact"
+              ]
+            },
+            {
+              "id": "linkList.text.item",
+              "field": "links[].design.label",
+              "resolver": "@/lib/sanity/text-style-options#textLook",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.text.item@stacked",
+                "linkList.text.item@cards",
+                "linkList.text.item@editorial",
+                "linkList.text.item@compact"
+              ]
+            }
+          ]
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "stacked": "pending",
+                "cards": "pending",
+                "editorial": "pending",
+                "compact": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "stacked": "pending",
+                "cards": "pending",
+                "editorial": "pending",
+                "compact": "pending"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "stacked": "pending",
+                "cards": "pending",
+                "editorial": "pending",
+                "compact": "pending"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 156,
+              "availability": {
+                "stacked": "pending",
+                "cards": "pending",
+                "editorial": "pending",
+                "compact": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 146,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Has no surface for a shadow"
+                },
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 146,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Has no surface for a shadow"
+                },
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.depth.card",
+              "field": "depthDesign.linkShadow",
+              "resolver": "@/lib/sanity/depth-options#resolveDepth",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.depth.card@stacked",
+                "linkList.depth.card@cards",
+                "linkList.depth.card@compact"
+              ]
+            },
+            {
+              "id": "linkList.depth.item",
+              "field": "links[].design.shadow",
+              "resolver": "@/lib/sanity/depth-options#resolveDepth",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.depth.item@stacked",
+                "linkList.depth.item@cards",
+                "linkList.depth.item@compact"
+              ]
+            }
+          ]
+        },
+        "icon": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 158,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Draws no icon"
+                },
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 158,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Draws no icon"
+                },
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.icon.card",
+              "field": "linkDesign.iconShape",
+              "resolver": "@/lib/sanity/surface-options#iconLook",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.icon.card@stacked",
+                "linkList.icon.card@cards",
+                "linkList.icon.card@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.item",
+              "field": "links[].design.iconShape",
+              "resolver": "@/lib/sanity/surface-options#iconLook",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.icon.item@stacked",
+                "linkList.icon.item@cards",
+                "linkList.icon.item@compact"
+              ]
+            }
+          ]
+        },
+        "action": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 137,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": {
+                  "notApplicable": "Draws no arrow"
+                }
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 137,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": {
+                  "notApplicable": "Draws no arrow"
+                }
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.action.card",
+              "field": "linkDesign.arrowStyle",
+              "resolver": "@/components/ui/link-arrow#LinkArrow",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.action.card@stacked",
+                "linkList.action.card@cards",
+                "linkList.action.card@editorial"
+              ]
+            },
+            {
+              "id": "linkList.action.item",
+              "field": "links[].design.arrowStyle",
+              "resolver": "@/components/ui/link-arrow#LinkArrow",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.action.item@stacked",
+                "linkList.action.item@cards",
+                "linkList.action.item@editorial"
+              ]
+            }
+          ]
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "part": "profile",
+              "closingTask": 177,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "part": "thumbnail",
+              "closingTask": 177,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Draws no thumbnails"
+                },
+                "compact": {
+                  "notApplicable": "Draws no thumbnails"
+                }
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "stacked": "pending",
+                "cards": "pending",
+                "editorial": "pending",
+                "compact": "pending"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.framing.profile",
+              "field": "profile.image",
+              "resolver": "@/lib/sanity/image-framing#visibleArea",
+              "render": "src/components/ui/profile-image.tsx",
+              "target": "[data-profile-image]",
+              "cases": [
+                "linkList.framing.profile@stacked",
+                "linkList.framing.profile@cards",
+                "linkList.framing.profile@editorial",
+                "linkList.framing.profile@compact"
+              ]
+            },
+            {
+              "id": "linkList.framing.thumbnail",
+              "field": "links[].thumbnail",
+              "resolver": "@/lib/sanity/image-framing#visibleArea",
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "ul > li:first-child",
+              "cases": [
+                "linkList.framing.thumbnail@stacked",
+                "linkList.framing.thumbnail@cards"
+              ]
+            }
+          ]
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 147,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.pictureDepth.section",
+              "field": "depthDesign.pictureShadow",
+              "resolver": "@/lib/sanity/depth-options#resolveDepth",
+              "render": "src/features/pages/components/sections/link-list/profile.tsx",
+              "target": "[data-profile-image]",
+              "cases": [
+                "linkList.pictureDepth.section@stacked",
+                "linkList.pictureDepth.section@cards",
+                "linkList.pictureDepth.section@editorial",
+                "linkList.pictureDepth.section@compact"
+              ]
+            }
+          ]
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.overlay.section",
+              "field": "style.overlay",
+              "resolver": "@/components/ui/section-style#resolveSectionStyle",
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "linkList.overlay.section@stacked",
+                "linkList.overlay.section@cards",
+                "linkList.overlay.section@editorial",
+                "linkList.overlay.section@compact"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 159,
+              "availability": {
+                "stacked": "pending",
+                "cards": {
+                  "notApplicable": "Row style applies to Stacked only"
+                },
+                "editorial": {
+                  "notApplicable": "Row style applies to Stacked only"
+                },
+                "compact": {
+                  "notApplicable": "Row style applies to Stacked only"
+                }
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.divider.section",
+              "field": "dividerDesign.afterProfile",
+              "resolver": "@/lib/sanity/divider-options#resolveDivider",
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "linkList.divider.section@stacked",
+                "linkList.divider.section@cards",
+                "linkList.divider.section@editorial",
+                "linkList.divider.section@compact"
+              ]
+            }
+          ]
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.edge.section",
+              "field": "style.edge",
+              "resolver": "@/components/ui/section-style#resolveEdge",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "linkList.edge.section@stacked",
+                "linkList.edge.section@cards",
+                "linkList.edge.section@editorial",
+                "linkList.edge.section@compact"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "linkList.motion.section",
+              "field": "style.motion",
+              "resolver": "@/components/ui/section-style#sectionMotion",
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "linkList.motion.section@stacked",
+                "linkList.motion.section@cards",
+                "linkList.motion.section@editorial",
+                "linkList.motion.section@compact"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "events",
@@ -7785,25 +9415,33 @@
           "variant": null,
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "list",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "agenda",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         },
         {
           "variant": "featured",
           "hasPicture": false,
           "fixesAlignment": false,
-          "hasOwnBackgroundImage": false
+          "hasOwnBackgroundImage": false,
+          "drawsBackground": false,
+          "ownsSurfaces": false
         }
       ]
     }
@@ -7920,6 +9558,7 @@
             "title": "Strong"
           }
         ],
+        "capability": "overlay",
         "clientEditable": false
       },
       {
@@ -7944,6 +9583,7 @@
             "title": "Gradient"
           }
         ],
+        "capability": "overlay",
         "clientEditable": false
       },
       {
@@ -7964,12 +9604,14 @@
             "title": "Focused centre"
           }
         ],
+        "capability": "overlay",
         "clientEditable": false
       },
       {
         "path": "overlayGradientTop",
         "kind": "object",
         "required": false,
+        "capability": "overlay",
         "clientEditable": false
       },
       {
@@ -8030,6 +9672,7 @@
         "path": "overlayGradientMiddle",
         "kind": "object",
         "required": false,
+        "capability": "overlay",
         "clientEditable": false
       },
       {
@@ -8090,6 +9733,7 @@
         "path": "overlayGradientBottom",
         "kind": "object",
         "required": false,
+        "capability": "overlay",
         "clientEditable": false
       },
       {
@@ -8245,6 +9889,7 @@
             "title": "Solid card"
           }
         ],
+        "capability": "glass",
         "clientEditable": false
       },
       {
@@ -8265,6 +9910,7 @@
             "title": "Strong"
           }
         ],
+        "capability": "glass",
         "clientEditable": false
       },
       {
@@ -8314,6 +9960,7 @@
             "title": "Parallax · Strong"
           }
         ],
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8334,6 +9981,7 @@
             "title": "Bold"
           }
         ],
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8354,6 +10002,7 @@
             "title": "Slow"
           }
         ],
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8374,6 +10023,7 @@
             "title": "Long"
           }
         ],
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8398,6 +10048,7 @@
             "title": "From above"
           }
         ],
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8414,12 +10065,14 @@
             "title": "On load"
           }
         ],
+        "capability": "motion",
         "clientEditable": false
       },
       {
         "path": "motionCustom",
         "kind": "boolean",
         "required": false,
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8427,6 +10080,7 @@
         "kind": "number",
         "required": null,
         "max": null,
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8434,6 +10088,7 @@
         "kind": "number",
         "required": null,
         "max": null,
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8458,6 +10113,7 @@
             "title": "Linear (steady)"
           }
         ],
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8465,6 +10121,7 @@
         "kind": "number",
         "required": null,
         "max": null,
+        "capability": "motion",
         "clientEditable": false
       },
       {
@@ -8497,6 +10154,7 @@
             "title": "Layered wave"
           }
         ],
+        "capability": "edge",
         "clientEditable": false
       },
       {
@@ -8517,12 +10175,14 @@
             "title": "Large"
           }
         ],
+        "capability": "edge",
         "clientEditable": false
       },
       {
         "path": "edgeFlip",
         "kind": "boolean",
         "required": false,
+        "capability": "edge",
         "clientEditable": false
       },
       {
@@ -8547,6 +10207,7 @@
             "title": "Highlight"
           }
         ],
+        "capability": "edge",
         "clientEditable": false
       },
       {
@@ -8563,12 +10224,14 @@
             "title": "Highlight"
           }
         ],
+        "capability": "edge",
         "clientEditable": false
       },
       {
         "path": "edgeInvert",
         "kind": "boolean",
         "required": false,
+        "capability": "edge",
         "clientEditable": false
       },
       {
@@ -8882,5 +10545,638 @@
       "reveal-distance",
       "marquee-per-logo"
     ]
+  },
+  "designCapabilities": {
+    "registry": {
+      "capabilities": [
+        {
+          "id": "surface",
+          "title": "Surface and border",
+          "does": "The fill, border and corners of a card or other surface",
+          "owner": 156,
+          "scopes": [
+            "section",
+            "card",
+            "item"
+          ]
+        },
+        {
+          "id": "text",
+          "title": "Text roles",
+          "does": "Size, weight and colour for each kind of text, with safe highlights",
+          "owner": 156,
+          "scopes": [
+            "site",
+            "section",
+            "card",
+            "item"
+          ],
+          "roles": [
+            "eyebrow",
+            "heading",
+            "intro",
+            "title",
+            "body",
+            "meta",
+            "quote",
+            "attribution",
+            "price",
+            "number",
+            "label",
+            "description"
+          ]
+        },
+        {
+          "id": "header",
+          "title": "Section header",
+          "does": "One shared eyebrow, heading and intro at the top of a section",
+          "owner": 156,
+          "scopes": [
+            "section"
+          ],
+          "roles": [
+            "eyebrow",
+            "heading",
+            "intro"
+          ]
+        },
+        {
+          "id": "mark",
+          "title": "Decorative mark",
+          "does": "A faint word, picture or icon behind a section, card or item",
+          "owner": 156,
+          "scopes": [
+            "section",
+            "card",
+            "item"
+          ]
+        },
+        {
+          "id": "depth",
+          "title": "Depth and glow",
+          "does": "A shadow level and a glow on a card or other box",
+          "owner": 146,
+          "scopes": [
+            "site",
+            "section",
+            "card",
+            "item"
+          ]
+        },
+        {
+          "id": "icon",
+          "title": "Icon",
+          "does": "An icon from the shared set, in a shared container",
+          "owner": 158,
+          "scopes": [
+            "section",
+            "card",
+            "item"
+          ]
+        },
+        {
+          "id": "action",
+          "title": "Action indicator",
+          "does": "The arrow on a link that covers a whole card, with its states and motion",
+          "owner": 137,
+          "scopes": [
+            "card",
+            "item"
+          ]
+        },
+        {
+          "id": "framing",
+          "title": "Picture framing",
+          "does": "Adjust picture: a picture cropped to the shape the site draws it in",
+          "owner": 177,
+          "scopes": [
+            "section",
+            "card",
+            "item"
+          ]
+        },
+        {
+          "id": "pictureDepth",
+          "title": "Picture depth",
+          "does": "A shadow and glow on a framed picture",
+          "owner": 147,
+          "scopes": [
+            "section",
+            "card",
+            "item"
+          ]
+        },
+        {
+          "id": "overlay",
+          "title": "Overlay",
+          "does": "A wash or gradient over a picture",
+          "owner": 157,
+          "scopes": [
+            "section"
+          ]
+        },
+        {
+          "id": "glass",
+          "title": "Glass",
+          "does": "A glass or solid panel behind content",
+          "owner": 159,
+          "scopes": [
+            "site",
+            "section",
+            "card"
+          ]
+        },
+        {
+          "id": "divider",
+          "title": "Divider",
+          "does": "A decorative divider inside a section",
+          "owner": 151,
+          "scopes": [
+            "section",
+            "item"
+          ]
+        },
+        {
+          "id": "edge",
+          "title": "Section edge",
+          "does": "A shaped edge between a section and the next (built by task 83)",
+          "owner": 151,
+          "scopes": [
+            "section"
+          ]
+        },
+        {
+          "id": "motion",
+          "title": "Motion",
+          "does": "Animation presets for a section and its parts (built by tasks 84 and 85)",
+          "owner": 217,
+          "scopes": [
+            "site",
+            "section",
+            "item"
+          ]
+        },
+        {
+          "id": "slots",
+          "title": "Slots",
+          "does": "Typed places where a section takes one approved block (built by tasks 219 and 193)",
+          "owner": 219,
+          "scopes": [
+            "section"
+          ]
+        }
+      ],
+      "contentSources": [
+        {
+          "id": "testimonials.manual",
+          "title": "Written in Studio",
+          "does": "Quotes typed into the section",
+          "component": "testimonials",
+          "owner": 156
+        },
+        {
+          "id": "testimonials.google",
+          "title": "Google reviews",
+          "does": "Reviews imported from a verified Google Business Profile, as drafts with provenance",
+          "component": "testimonials",
+          "owner": 277,
+          "gate": "Task 277 Phase 1 decision record and the owner’s approval. No Google Cloud setup is approved"
+        },
+        {
+          "id": "location.addressCard",
+          "title": "Address card",
+          "does": "The business address, hours and contact details on a card",
+          "component": "location",
+          "owner": 278
+        },
+        {
+          "id": "location.directionsLink",
+          "title": "Directions link",
+          "does": "Opens Google Maps directions to the address",
+          "component": "location",
+          "owner": 278
+        },
+        {
+          "id": "location.clickToLoadEmbed",
+          "title": "Click-to-load map",
+          "does": "A Google map from the address, loaded only when a visitor asks for it",
+          "component": "location",
+          "owner": 278
+        },
+        {
+          "id": "location.placeIdEmbed",
+          "title": "Place ID map",
+          "does": "A Maps Embed API map for a Google Place ID",
+          "component": "location",
+          "owner": 278,
+          "gate": "A configured Maps Embed API key in a client-owned Google Cloud project. No project, key or billing is approved"
+        },
+        {
+          "id": "cards.written",
+          "title": "Written here",
+          "does": "Cards typed into the section",
+          "owner": 276
+        },
+        {
+          "id": "cards.services",
+          "title": "Services",
+          "does": "Cards listed from Service documents",
+          "owner": 276
+        },
+        {
+          "id": "cards.locations",
+          "title": "Locations",
+          "does": "Cards listed from Location documents",
+          "owner": 276
+        },
+        {
+          "id": "cards.posts",
+          "title": "Recent posts",
+          "does": "Cards listed from the newest posts",
+          "owner": 276
+        }
+      ],
+      "textRoles": [
+        "eyebrow",
+        "heading",
+        "intro",
+        "title",
+        "body",
+        "meta",
+        "quote",
+        "attribution",
+        "price",
+        "number",
+        "label",
+        "description"
+      ]
+    },
+    "slotBlocks": [
+      {
+        "type": "statsBar",
+        "title": "Statistics bar"
+      },
+      {
+        "type": "badgeRow",
+        "title": "Badges",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "text": {
+            "notApplicable": "Drawn small in its host’s type; a block has no text controls of its own"
+          },
+          "header": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "mark": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "depth": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "icon": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "item",
+                "closingTask": 158,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "Has no cropped picture"
+          },
+          "pictureDepth": {
+            "notApplicable": "Has no framed picture"
+          },
+          "overlay": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "glass": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "divider": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "edge": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "motion": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "slots": {
+            "notApplicable": "A block fills a slot: no free nesting"
+          }
+        },
+        "contentSources": {}
+      },
+      {
+        "type": "logoRow",
+        "title": "Logos"
+      },
+      {
+        "type": "launchDate",
+        "title": "Launch date"
+      },
+      {
+        "type": "slotImage",
+        "title": "Image"
+      },
+      {
+        "type": "slotVideo",
+        "title": "Video"
+      }
+    ],
+    "listings": [
+      {
+        "type": "blogPostCards",
+        "title": "Blog post cards",
+        "capabilities": {
+          "surface": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 156,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "text": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "roles": [
+                  "meta",
+                  "title",
+                  "body"
+                ],
+                "closingTask": 156,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "header": {
+            "notApplicable": "The page’s own h1 heads the list"
+          },
+          "mark": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 156,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "depth": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 146,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 137,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "framing": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 177,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "pictureDepth": {
+            "policies": [
+              {
+                "policy": "conditional",
+                "scope": "card",
+                "trigger": {
+                  "kind": "setting",
+                  "when": "The post has a main image",
+                  "path": "mainImage"
+                },
+                "closingTask": 147,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "overlay": {
+            "notApplicable": "No background picture"
+          },
+          "glass": {
+            "policies": [
+              {
+                "policy": "conditional",
+                "scope": "card",
+                "trigger": {
+                  "kind": "setting",
+                  "when": "The card’s surface kind is Glass"
+                },
+                "closingTask": 159,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "divider": {
+            "notApplicable": "Cards have no header position"
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate. Hover lift is recorded under depth (146 item 4)"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
+      }
+    ],
+    "coverage": {
+      "declares": [
+        "section",
+        "slotBlock",
+        "listing"
+      ],
+      "declared": [
+        "hero",
+        "mediaText",
+        "testimonials",
+        "linkList",
+        "badgeRow",
+        "blogPostCards"
+      ],
+      "notDeclaredYet": [
+        "richText",
+        "featuresGrid",
+        "logoCloud",
+        "faq",
+        "ctaBanner",
+        "formSection",
+        "pricingTable",
+        "newsletterSignup",
+        "stats",
+        "gallery",
+        "location",
+        "team",
+        "video",
+        "process",
+        "embed",
+        "events",
+        "statsBar",
+        "logoRow",
+        "launchDate",
+        "slotImage",
+        "slotVideo"
+      ],
+      "notCovered": [
+        {
+          "part": "Site header",
+          "needs": [
+            "glass"
+          ],
+          "tasks": [
+            159
+          ]
+        },
+        {
+          "part": "Mobile drawer",
+          "needs": [
+            "glass"
+          ],
+          "tasks": [
+            7
+          ],
+          "note": "Optional quick actions"
+        },
+        {
+          "part": "Footer",
+          "needs": [
+            "icon",
+            "divider"
+          ],
+          "tasks": [
+            158,
+            151
+          ]
+        },
+        {
+          "part": "Buttons (CtaLink)",
+          "needs": [
+            "surface",
+            "depth",
+            "action"
+          ],
+          "tasks": [
+            148,
+            137
+          ]
+        },
+        {
+          "part": "Booking facade",
+          "needs": [
+            "surface",
+            "depth"
+          ],
+          "tasks": [
+            148
+          ],
+          "note": "Once task 95 exists"
+        },
+        {
+          "part": "Team member pages",
+          "needs": [
+            "icon",
+            "framing",
+            "divider"
+          ],
+          "tasks": [
+            158,
+            177,
+            151
+          ]
+        },
+        {
+          "part": "Event pages",
+          "needs": [
+            "framing",
+            "divider"
+          ],
+          "tasks": [
+            177,
+            151
+          ]
+        },
+        {
+          "part": "Event page card (events/components/event-view.tsx)",
+          "needs": [
+            "surface"
+          ],
+          "tasks": []
+        },
+        {
+          "part": "Blog post page",
+          "needs": [
+            "framing"
+          ],
+          "tasks": [
+            177
+          ]
+        },
+        {
+          "part": "Location pages",
+          "needs": [
+            "surface",
+            "text"
+          ],
+          "tasks": [
+            278
+          ]
+        },
+        {
+          "part": "Service pages (services/components/service-view.tsx)",
+          "needs": [],
+          "tasks": []
+        },
+        {
+          "part": "Search results (search/components/search-view.tsx)",
+          "needs": [],
+          "tasks": []
+        }
+      ]
+    }
   }
 }

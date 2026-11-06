@@ -2349,11 +2349,17 @@ nothing in `src/app` may import it (a test fails if one does), because it would 
   after changing a section's fields, options, presets or rules, `client-editable.ts` or `tokens.json`.
 - **Slots** come from the shared slot registry (`src/features/pages/slots/registry.ts`), never from a list of their own. Top-level
   `slots` lists every registry slot (`name`, `title`, `max`) with the blocks it accepts (`type`, `noun`, `clientEditable` and the
-  block's `fields`). A section that has the field named by a slot (`hero.supporting` is `hero`'s `supporting`) lists it under
-  `slots`, and the registry's `max` becomes that field's `max`. Slots reserved for families that do not exist yet (`split.*`)
-  appear only at the top level. A registry block with no loaded schema type fails the build.
+  block's `fields`). A section lists a slot under `slots` when the registry's `SLOT_FAMILIES` puts the slot's family on it and it
+  has the field the slot names (`hero.supporting` is `hero`'s `supporting`; `split.media` is `mediaText`'s `media`), and the
+  registry's `max` becomes that field's `max`. A registry block with no loaded schema type fails the build.
 - **Rules** are functions, so the script evaluates each section's `registerSectionRules` once with no layout and once per
-  layout, and records `hasPicture`, `fixesAlignment` and `hasOwnBackgroundImage`.
+  layout, and records `hasPicture`, `fixesAlignment`, `hasOwnBackgroundImage`, `drawsBackground` and `ownsSurfaces` (the layout
+  draws its own surfaces, so the shared Panel doesn't apply: `src/lib/design/section-surfaces.ts`, which SectionRenderer also
+  applies on the page).
+- **Design capabilities** (task 275, being rolled out): a field a shared design builder made carries its `capability`. A
+  section that declares its capabilities also lists `capabilities` (each policy, its availability layout by layout and the
+  evidence behind it) and `contentSources`, and top-level `designCapabilities` holds the registry, the slot blocks and listings
+  that declare, and `coverage`: what is declared, what isn't yet, and the parts of the site the manifest says nothing about.
 - **Purpose and example:** give a section type `options.manifest = { purpose, example? }`. The build fails if `hero` or
   `mediaText` (`FAMILY_TYPES` in `scripts/design-manifest-utils.mjs`) has no purpose. Keep an example's keys to fields the
   section has; a test checks it.

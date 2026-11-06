@@ -28,6 +28,16 @@ export const SLOTS = {
 
 export type SlotName = keyof typeof SLOTS
 
+/**
+ * The section type each slot family is on: `split.media` is Image + text's `media` field. Family
+ * names are part of the stored slot names and never change; this map is how the design manifest and
+ * the capability checks find a family's slots on its section.
+ */
+export const SLOT_FAMILIES = {
+  hero: 'hero',
+  split: 'mediaText',
+} as const satisfies Record<string, string>
+
 export interface SlotBlockDefinition {
   /** The Sanity object type the block is stored as (`_type`). */
   schemaType: string

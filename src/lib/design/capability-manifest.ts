@@ -1,0 +1,186 @@
+import {
+  CAPABILITIES,
+  CONTENT_SOURCES,
+  FUTURE_COVERAGE,
+  TEXT_ROLES,
+  type CapabilityId,
+  type ContentSourceId,
+  type Scope,
+  type TextRole,
+  type Trigger,
+} from './capabilities'
+import {
+  capabilityAvailability,
+  sourceAvailability,
+  type AvailabilityCell,
+} from './capability-availability'
+import { EVIDENCE, isCapabilityEvidence, type Evidence } from './capability-evidence'
+import type { ContractComponent } from './capability-policy'
+import type { SchemaGate } from './schema-capabilities'
+
+/**
+ * The design manifest's view of the capability contract (scripts/build-design-manifest.mjs): per
+ * component, each capability's policy with its availability layout by layout and the evidence behind
+ * it, and the content sources apart. Pure and JSON-shaped.
+ */
+
+/** A layout's availability: verified, pending, or not applicable with the reason. */
+export type LayoutStatus = 'verified' | 'pending' | { notApplicable: string }
+
+export interface ManifestPolicy {
+  policy: 'required' | 'conditional'
+  scope: Scope
+  part?: string
+  roles?: readonly TextRole[]
+  trigger?: Trigger & { reachable?: boolean }
+  /** The task that closes what is still pending. */
+  closingTask: number
+  /** One status, or one per layout for a component with layouts. */
+  availability: LayoutStatus | Readonly<Record<string, LayoutStatus>>
+}
+
+export interface ManifestEvidence {
+  id: string
+  field: string
+  /** `module#export` */
+  resolver: string
+  render: string
+  target: string
+  /** The harness cases that run it. */
+  cases: readonly string[]
+}
+
+export type ManifestCapability =
+  | { notApplicable: string }
+  | { policies: readonly ManifestPolicy[]; evidence: readonly ManifestEvidence[] }
+
+export interface ManifestSource {
+  owner: number
+  gate?: string
+  availability: 'verified' | 'pending' | Readonly<Record<string, 'verified' | 'pending'>>
+}
+
+export interface ComponentContract {
+  capabilities: Partial<Record<CapabilityId, ManifestCapability>>
+  contentSources: Partial<Record<ContentSourceId, ManifestSource>>
+}
+
+const statusOf = (cell: AvailabilityCell): LayoutStatus =>
+  cell.status === 'notApplicable' ? { notApplicable: cell.reason ?? '' } : cell.status
+
+function evidenceFor(entries: readonly Evidence[], cases: readonly string[]): ManifestEvidence[] {
+  return entries
+    .map((entry) => ({
+      id: entry.id,
+      field: entry.field,
+      resolver: `${entry.resolver.module}#${entry.resolver.export}`,
+      render: entry.render,
+      target: entry.target,
+      cases: cases.filter((id) => id === entry.id || id.startsWith(`${entry.id}@`)),
+    }))
+    .filter((entry) => entry.cases.length > 0)
+}
+
+/** What one component declares and offers, for its manifest entry. Undefined until it declares. */
+export function componentContract(
+  component: ContractComponent,
+  gate: SchemaGate,
+  evidence: readonly Evidence[] = EVIDENCE,
+): ComponentContract | undefined {
+  if (!component.declaration) return undefined
+  const cells = capabilityAvailability(component, evidence, gate)
+  const capabilities: ComponentContract['capabilities'] = {}
+  for (const capability of CAPABILITIES.map(({ id }) => id)) {
+    const own = cells.filter((cell) => cell.capability === capability)
+    if (own.length > 0 && own.every((cell) => cell.scope === null)) {
+      capabilities[capability] = { notApplicable: own[0]?.reason ?? '' }
+      continue
+    }
+    const groups = new Map<string, AvailabilityCell[]>()
+    for (const cell of own) {
+      const key = `${cell.scope ?? ''}|${cell.part ?? ''}`
+      groups.set(key, [...(groups.get(key) ?? []), cell])
+    }
+    const policies: ManifestPolicy[] = []
+    for (const group of groups.values()) {
+      const applicable = group.find((cell) => cell.policy !== 'notApplicable')
+      if (!applicable?.scope) continue
+      policies.push({
+        policy: applicable.policy === 'required' ? 'required' : 'conditional',
+        scope: applicable.scope,
+        ...(applicable.part ? { part: applicable.part } : {}),
+        ...(applicable.roles ? { roles: applicable.roles } : {}),
+        ...(applicable.trigger
+          ? {
+              trigger: {
+                ...applicable.trigger,
+                ...(applicable.reachable === undefined ? {} : { reachable: applicable.reachable }),
+              },
+            }
+          : {}),
+        closingTask: applicable.closingTask ?? 0,
+        availability:
+          component.layouts.length === 0
+            ? statusOf(applicable)
+            : Object.fromEntries(group.map((cell) => [cell.layout ?? '', statusOf(cell)])),
+      })
+    }
+    const cases = own.flatMap((cell) => cell.evidence ?? [])
+    capabilities[capability] = {
+      policies,
+      evidence: evidenceFor(
+        evidence.filter(
+          (entry) =>
+            isCapabilityEvidence(entry) &&
+            entry.component === component.id &&
+            entry.capability === capability,
+        ),
+        cases,
+      ),
+    }
+  }
+  const contentSources: ComponentContract['contentSources'] = {}
+  const rows = sourceAvailability(component, evidence, gate)
+  for (const source of component.declaration.contentSources) {
+    const own = rows.filter((row) => row.source === source)
+    const first = own[0]
+    if (!first) continue
+    contentSources[source] = {
+      owner: first.owner,
+      ...(first.gate ? { gate: first.gate } : {}),
+      availability:
+        component.layouts.length === 0
+          ? first.status
+          : Object.fromEntries(own.map((row) => [row.layout ?? '', row.status])),
+    }
+  }
+  return { capabilities, contentSources }
+}
+
+/** The contract's registry, the slot blocks and listings, and what the manifest does not cover. */
+export function contractSummary(components: readonly ContractComponent[], gate: SchemaGate) {
+  const outside = (kind: ContractComponent['kind']) =>
+    components
+      .filter((component) => component.kind === kind)
+      .map((component) => ({
+        type: component.id,
+        title: component.title,
+        ...componentContract(component, gate),
+      }))
+  return {
+    registry: {
+      capabilities: CAPABILITIES,
+      contentSources: CONTENT_SOURCES,
+      textRoles: TEXT_ROLES,
+    },
+    slotBlocks: outside('slotBlock'),
+    listings: outside('listing'),
+    coverage: {
+      declares: ['section', 'slotBlock', 'listing'],
+      declared: components.filter((component) => component.declaration).map(({ id }) => id),
+      notDeclaredYet: components.filter((component) => !component.declaration).map(({ id }) => id),
+      // Not sections, slot blocks or listings: nothing here says anything about these.
+      notCovered: FUTURE_COVERAGE,
+    },
+  }
+}
