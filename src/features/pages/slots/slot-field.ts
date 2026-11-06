@@ -1,6 +1,7 @@
 import { defineArrayMember, defineField } from 'sanity'
 
 import { isClientView } from '@/lib/sanity/roles'
+import { builtBy } from '@/lib/sanity/schema/capability-marker'
 
 import { blocksForSlot, SLOT_BLOCKS, SLOTS, slotPreviewUrl, type SlotName } from './registry'
 
@@ -26,7 +27,7 @@ export function slotField({ name, slot }: Options) {
   const nouns = types.map((type) => SLOT_BLOCKS[type].noun)
   const capitalised = orList(nouns).replace(/^./, (first) => first.toUpperCase())
 
-  return defineField({
+  const field = defineField({
     name,
     title,
     description: `${capitalised}. ${max === 1 ? 'One at most.' : `Up to ${String(max)}.`}`,
@@ -44,4 +45,5 @@ export function slotField({ name, slot }: Options) {
       },
     },
   })
+  return builtBy('slotField', field, 'slots')
 }

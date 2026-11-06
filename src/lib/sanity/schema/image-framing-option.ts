@@ -7,9 +7,16 @@ declare module 'sanity' {
   }
 }
 
-/** Opts an image field into "Adjust picture": `options: { ...imageOptions, ...framing('linkListProfile') }`. */
-export function framing(key: FramingKey): { framing: FramingKey } {
-  return { framing: key }
+/**
+ * Opts an image field into "Adjust picture": `options: { ...imageOptions, ...framing('linkListProfile') }`.
+ * It also marks the field as the picture framing capability (lib/design/capabilities.ts).
+ */
+export function framing(key: FramingKey): {
+  framing: FramingKey
+  designBuilder: 'framing'
+  capability: 'framing'
+} {
+  return { framing: key, designBuilder: 'framing', capability: 'framing' }
 }
 
 /** The framing key on an image field's options, if it opted in. */

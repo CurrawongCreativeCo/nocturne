@@ -54,6 +54,7 @@ import {
 } from '@/lib/sanity/profile-image-options'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
+import { markFields } from '@/lib/sanity/schema/capability-marker'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import {
@@ -452,7 +453,7 @@ export const linkListDesignFields = [
         options: { collapsible: true, collapsed: true },
       },
     ],
-    fields: [
+    fields: markFields({ arrowStyle: 'action', arrowColour: 'action' }, [
       presetField({
         name: 'arrowStyle',
         title: 'Arrow style',
@@ -501,7 +502,7 @@ export const linkListDesignFields = [
           )
         },
       }),
-    ],
+    ]),
   }),
   defineField({
     name: 'socialDesign',
@@ -635,73 +636,83 @@ export const linkListDesignFields = [
     description: 'Shadows and a theme-coloured glow. Unset shadows follow the layout.',
     hidden: agencyOnly(),
     options: { collapsible: true, collapsed: true },
-    fields: [
-      presetField({
-        name: 'linkShadow',
-        title: 'Link shadow',
-        description: 'One choice for every link. Empty is the layout’s own.',
-        required: false,
-        initialValue: null,
-        options: SHADOW_LEVELS.map((value) => ({
-          value,
-          title: SHADOW_TITLES[value],
-          description: SHADOW_DESCRIPTIONS[value],
-          thumbnail: shadowThumbnails[value],
-        })),
-        // Editorial links are a ruled list with no surface to lift.
-        hidden: (context) => layoutOf(sectionOf(context)?.variant) === 'editorial',
-      }),
-      defineField({
-        name: 'socialShadow',
-        title: 'Social button shadow',
-        type: 'string',
-        description: 'Only for the shaped icon styles. Empty is the style’s own.',
-        options: radio(SHADOW_LEVELS, SHADOW_TITLES),
-        hidden: (context) => {
-          const section = sectionOf(context)
-          return (
-            section?.socialSource === 'none' ||
-            (section?.socialDesign?.style ?? 'plain') === 'plain'
-          )
-        },
-      }),
-      defineField({
-        name: 'pictureShadow',
-        title: 'Picture shadow',
-        type: 'string',
-        description:
-          'Follows the picture’s own outline, so a round photo or a transparent logo gets no square shadow. Empty is none.',
-        options: radio(SHADOW_LEVELS, SHADOW_TITLES),
-        hidden: (context) => !sectionOf(context)?.profile?.image?.asset,
-      }),
-      defineField({
-        name: 'glow',
-        title: 'Glow',
-        type: 'string',
-        description: 'A soft halo around what you tick below. Strongest on a dark background.',
-        options: radio(GLOW_LEVELS, GLOW_TITLES),
-      }),
-      defineField({
-        name: 'glowTargets',
-        title: 'Glow around',
-        type: 'array',
-        of: [{ type: 'string' }],
-        description: 'The links while nothing is ticked.',
-        options: {
-          list: GLOW_TARGETS.map((value) => ({ value, title: GLOW_TARGET_TITLES[value] })),
-          layout: 'grid',
-        },
-        hidden: glowOff,
-      }),
-      themeColourField({
-        name: 'glowColour',
-        title: 'Glow colour',
-        usage: 'graphic',
-        decorative: true,
-        inherits: 'Primary',
-        choices: GLOW_COLOUR_CHOICES,
-        hidden: glowOff,
-      }),
-    ],
+    fields: markFields(
+      {
+        linkShadow: 'depth',
+        socialShadow: 'depth',
+        pictureShadow: 'pictureDepth',
+        glow: 'depth',
+        glowTargets: 'depth',
+        glowColour: 'depth',
+      },
+      [
+        presetField({
+          name: 'linkShadow',
+          title: 'Link shadow',
+          description: 'One choice for every link. Empty is the layout’s own.',
+          required: false,
+          initialValue: null,
+          options: SHADOW_LEVELS.map((value) => ({
+            value,
+            title: SHADOW_TITLES[value],
+            description: SHADOW_DESCRIPTIONS[value],
+            thumbnail: shadowThumbnails[value],
+          })),
+          // Editorial links are a ruled list with no surface to lift.
+          hidden: (context) => layoutOf(sectionOf(context)?.variant) === 'editorial',
+        }),
+        defineField({
+          name: 'socialShadow',
+          title: 'Social button shadow',
+          type: 'string',
+          description: 'Only for the shaped icon styles. Empty is the style’s own.',
+          options: radio(SHADOW_LEVELS, SHADOW_TITLES),
+          hidden: (context) => {
+            const section = sectionOf(context)
+            return (
+              section?.socialSource === 'none' ||
+              (section?.socialDesign?.style ?? 'plain') === 'plain'
+            )
+          },
+        }),
+        defineField({
+          name: 'pictureShadow',
+          title: 'Picture shadow',
+          type: 'string',
+          description:
+            'Follows the picture’s own outline, so a round photo or a transparent logo gets no square shadow. Empty is none.',
+          options: radio(SHADOW_LEVELS, SHADOW_TITLES),
+          hidden: (context) => !sectionOf(context)?.profile?.image?.asset,
+        }),
+        defineField({
+          name: 'glow',
+          title: 'Glow',
+          type: 'string',
+          description: 'A soft halo around what you tick below. Strongest on a dark background.',
+          options: radio(GLOW_LEVELS, GLOW_TITLES),
+        }),
+        defineField({
+          name: 'glowTargets',
+          title: 'Glow around',
+          type: 'array',
+          of: [{ type: 'string' }],
+          description: 'The links while nothing is ticked.',
+          options: {
+            list: GLOW_TARGETS.map((value) => ({ value, title: GLOW_TARGET_TITLES[value] })),
+            layout: 'grid',
+          },
+          hidden: glowOff,
+        }),
+        themeColourField({
+          name: 'glowColour',
+          title: 'Glow colour',
+          usage: 'graphic',
+          decorative: true,
+          inherits: 'Primary',
+          choices: GLOW_COLOUR_CHOICES,
+          hidden: glowOff,
+        }),
+      ],
+    ),
   }),
 ].map(validateVisible)

@@ -26,6 +26,7 @@ import {
   TEXT_TRACKING_TITLES,
   TEXT_WEIGHTS,
 } from '../text-style-options'
+import { builtBy } from './capability-marker'
 import { themeColourField } from './theme-colour'
 
 declare module 'sanity' {
@@ -158,7 +159,7 @@ export function surfaceFields({
       fieldset,
       hidden: hiddenOr(({ parent }) => valueOf(parent, 'border') === 'none'),
     }),
-  ]
+  ].map((field) => builtBy('surfaceFields', field, 'surface'))
 }
 
 type TextElement = 'eyebrow' | 'label' | 'description'
@@ -181,7 +182,7 @@ export function textStyleField({
   hidden,
 }: Level & { element: TextElement; fieldset?: string; hidden?: ConditionalProperty }) {
   const { title, description } = TEXT_ELEMENT[element]
-  return defineField({
+  const field = defineField({
     name: element,
     title,
     type: 'object',
@@ -245,6 +246,7 @@ export function textStyleField({
         : []),
     ],
   })
+  return builtBy('textStyleField', field, 'text')
 }
 
 /**
@@ -336,5 +338,5 @@ export function iconDesignFields({
         (context) => plain(context) || valueOf(context.parent, 'iconBorder') === 'none',
       ),
     }),
-  ]
+  ].map((field) => builtBy('iconDesignFields', field, 'icon'))
 }

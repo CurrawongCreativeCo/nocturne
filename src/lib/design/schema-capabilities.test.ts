@@ -1,0 +1,231 @@
+import { describe, expect, it } from 'vitest'
+
+import type { CapabilityException } from './capability-exceptions'
+import {
+  exceptionProblems,
+  fieldOffered,
+  privateFields,
+  resolveFieldPath,
+  type SchemaField,
+} from './schema-capabilities'
+
+/** A small in-memory schema: a shared style type, a shared divider type and one section. */
+const style: SchemaField = {
+  name: 'fixtureStyle',
+  type: 'object',
+  options: { designBuilder: 'sectionStyle' },
+  fields: [
+    { name: 'tone', type: 'string' },
+    {
+      name: 'panel',
+      type: 'string',
+      options: { designBuilder: 'sectionStyle', capability: 'glass' },
+      hidden: ({ document }: { document: { pageBuilder: { layout?: string }[] } }) =>
+        document.pageBuilder[0]?.layout === 'boxed',
+    },
+  ],
+}
+const divider: SchemaField = {
+  name: 'fixtureDivider',
+  type: 'object',
+  options: { designBuilder: 'decorativeDivider', capability: 'divider' },
+  fields: [{ name: 'style', type: 'string' }],
+}
+const types = new Map([style, divider].map((type) => [type.name, type]))
+const lookup = (name: string) => types.get(name)
+
+const section = (extra: SchemaField[] = []): SchemaField => ({
+  name: 'fixtureSection',
+  type: 'object',
+  options: { presets: [{ value: 'shiny', set: { finish: 'shiny' } }] },
+  fields: [
+    { name: 'title', type: 'string', group: 'content' },
+    { name: 'finish', type: 'string', group: 'content', hidden: true },
+    { name: 'style', type: 'fixtureStyle', group: 'design' },
+    {
+      name: 'cardDesign',
+      type: 'object',
+      group: 'design',
+      fields: [
+        {
+          name: 'border',
+          type: 'string',
+          options: { designBuilder: 'surfaceFields', capability: 'surface' },
+        },
+        { name: 'divider', type: 'fixtureDivider' },
+      ],
+    },
+    {
+      name: 'items',
+      type: 'array',
+      group: 'content',
+      of: [
+        {
+          name: 'item',
+          type: 'object',
+          fields: [
+            {
+              name: 'design',
+              type: 'object',
+              hidden: ({ parent }: { parent?: { title?: string } }) => !parent?.title,
+              fields: [{ name: 'shadow', type: 'string', options: { capability: 'depth' } }],
+            },
+          ],
+        },
+      ],
+    },
+    ...extra,
+  ],
+})
+
+const exception = (row: Partial<CapabilityException> = {}): CapabilityException => ({
+  component: 'fixtureSection',
+  fields: ['items[].design.shadow'],
+  justification: 'Written inline until the shared builder exists.',
+  reviewer: 'owner',
+  reviewed: '2026-11-06',
+  status: 'temporary',
+  removalTask: 146,
+  nature: 'design',
+  marked: { 'items[].design.shadow': 'depth' },
+  ...row,
+})
+
+describe('privateFields', () => {
+  it('passes fields made by shared builders, boxes of them, and reviewed exceptions', () => {
+    expect(privateFields(section(), lookup, [exception()])).toEqual([])
+  })
+
+  it('finds a private design control, whatever it is called', () => {
+    const found = privateFields(
+      section([
+        { name: 'shadow', type: 'string', group: 'design' },
+        { name: 'sparkle', type: 'string', group: 'design' },
+      ]),
+      lookup,
+      [exception()],
+    )
+    expect(found).toEqual([
+      { path: 'shadow', problem: 'unbuilt' },
+      { path: 'sparkle', problem: 'unbuilt' },
+    ])
+  })
+
+  it('does not judge content fields by their names', () => {
+    expect(
+      privateFields(section([{ name: 'border', type: 'string', group: 'content' }]), lookup, [
+        exception(),
+      ]),
+    ).toEqual([])
+  })
+
+  it('refuses a capability marker no builder set, unless an exception lists and marks it', () => {
+    expect(privateFields(section(), lookup, [])).toEqual([
+      { path: 'items[].design.shadow', capability: 'depth', problem: 'unreviewedMarker' },
+    ])
+    expect(privateFields(section(), lookup, [exception({ marked: {} })])).toEqual([
+      { path: 'items[].design.shadow', capability: 'depth', problem: 'markerMismatch' },
+    ])
+    expect(
+      privateFields(section(), lookup, [exception({ nature: 'query', marked: undefined })]),
+    ).toEqual([{ path: 'items[].design.shadow', capability: 'depth', problem: 'markedNonDesign' }])
+  })
+})
+
+describe('exceptionProblems', () => {
+  const components = new Map([['fixtureSection', section()]])
+
+  it('accepts a complete row', () => {
+    expect(exceptionProblems([exception()], components, lookup)).toEqual([])
+  })
+
+  it('needs a justification, a reviewer and date, and a removal task while temporary', () => {
+    const messages = exceptionProblems(
+      [exception({ justification: ' ', reviewer: '', removalTask: undefined })],
+      components,
+      lookup,
+    ).map((problem) => problem.message)
+    expect(messages).toEqual([
+      'fixtureSection: items[].design.shadow has no justification.',
+      'fixtureSection: items[].design.shadow has no reviewer and review date.',
+      'fixtureSection: items[].design.shadow is temporary with no removal task.',
+    ])
+  })
+
+  it('flags rows for missing fields, query settings with markers, and fields a builder now makes', () => {
+    const messages = exceptionProblems(
+      [
+        exception({ fields: ['items[].design.glow'], marked: undefined }),
+        exception({
+          fields: ['finish'],
+          nature: 'query',
+          status: 'permanent',
+          removalTask: undefined,
+          marked: { finish: 'depth' },
+        }),
+        exception({ fields: ['cardDesign.border'], marked: undefined }),
+      ],
+      components,
+      lookup,
+    ).map((problem) => problem.message)
+    expect(messages).toEqual([
+      "fixtureSection: items[].design.glow doesn't exist.",
+      'fixtureSection: finish is a query setting with a capability marker.',
+      'fixtureSection: cardDesign.border is now made by surfaceFields, so its exception is stale.',
+    ])
+  })
+})
+
+describe('resolveFieldPath', () => {
+  it('follows objects, named types and list items, with the marker found', () => {
+    expect(resolveFieldPath(section(), 'style.panel', lookup)).toMatchObject({
+      marker: { capability: 'glass', designBuilder: 'sectionStyle' },
+    })
+    expect(resolveFieldPath(section(), 'cardDesign.divider', lookup)).toMatchObject({
+      marker: { capability: 'divider', designBuilder: 'decorativeDivider' },
+    })
+    expect(resolveFieldPath(section(), 'items[].design.shadow', lookup)).toMatchObject({
+      marker: { capability: 'depth' },
+    })
+    expect(resolveFieldPath(section(), 'style.sparkle', lookup)).toEqual({
+      missing: 'fixtureSection has no field style.sparkle',
+    })
+  })
+})
+
+describe('fieldOffered', () => {
+  const offered = (layout: string, path: string, state: Record<string, unknown> = {}) =>
+    fieldOffered({
+      type: section(),
+      section: { _key: 's1', _type: 'fixtureSection', layout, ...state },
+      path,
+      lookup,
+    })
+
+  it('evaluates the schema’s own hidden rules for the layout and state', () => {
+    expect(offered('open', 'style.panel')).toEqual({ offered: true })
+    expect(offered('boxed', 'style.panel')).toEqual({
+      offered: false,
+      reason: 'style.panel is hidden for this layout and state',
+    })
+    expect(
+      offered('open', 'items[].design.shadow', { items: [{ _key: 'i1', title: 'One' }] }),
+    ).toEqual({ offered: true })
+    expect(offered('open', 'items[].design.shadow', { items: [{ _key: 'i1' }] })).toEqual({
+      offered: false,
+      reason: 'items.design is hidden for this layout and state',
+    })
+  })
+
+  it('counts a hidden field a preset sets to the value held', () => {
+    expect(offered('open', 'finish', { finish: 'shiny' })).toEqual({ offered: true })
+    expect(offered('open', 'finish', { finish: 'matt' })).toMatchObject({ offered: false })
+  })
+
+  it('says when the state has no list item to check', () => {
+    expect(offered('open', 'items[].design.shadow')).toEqual({
+      offered: false,
+      reason: 'items[].design.shadow: the state has no items item to check',
+    })
+  })
+})

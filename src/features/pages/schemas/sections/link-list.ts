@@ -26,6 +26,7 @@ import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
+import { markFields } from '@/lib/sanity/schema/capability-marker'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
 import { framing } from '@/lib/sanity/schema/image-framing-option'
@@ -377,7 +378,7 @@ const linkAppearanceField = defineField({
       options: { collapsible: true, collapsed: true },
     },
   ],
-  fields: [
+  fields: markFields({ shadow: 'depth', arrowStyle: 'action', arrowColour: 'action' }, [
     defineField({
       name: 'appearance',
       title: 'Design',
@@ -484,7 +485,7 @@ const linkAppearanceField = defineField({
         return arrow === 'none'
       }),
     }),
-  ],
+  ]),
 })
 
 const linkItem = defineArrayMember({

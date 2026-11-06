@@ -9,6 +9,7 @@ import {
 import { customRange, isMotionPreset } from '@/components/motion/presets'
 import { backgroundContrastProblem } from '@/lib/color/background-contrast'
 import { overlayGradientContrastProblem } from '@/lib/color/overlay-gradient-contrast'
+import type { CapabilityId } from '@/lib/design/capabilities'
 
 import {
   GRADIENT_OPACITY_RANGE,
@@ -77,6 +78,7 @@ import {
 } from '../section-style-options'
 import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
+import { builtBy } from './capability-marker'
 import { imageField } from './image-field'
 import { presetField } from './preset-field'
 import {
@@ -293,12 +295,45 @@ declare module 'sanity' {
   }
 }
 
+/**
+ * The section style's fields that are shared design capabilities (lib/design/capabilities.ts), so the
+ * checks and the manifest can find them. Every other field here is the section style's own (tone,
+ * background, spacing, width): shared by every section, but not one of the capabilities.
+ */
+const CAPABILITY_FIELDS: Readonly<Record<string, CapabilityId>> = {
+  overlay: 'overlay',
+  overlayColor: 'overlay',
+  overlayGradient: 'overlay',
+  overlayGradientTop: 'overlay',
+  overlayGradientMiddle: 'overlay',
+  overlayGradientBottom: 'overlay',
+  panel: 'glass',
+  panelStrength: 'glass',
+  motion: 'motion',
+  motionIntensity: 'motion',
+  motionDuration: 'motion',
+  motionDelay: 'motion',
+  motionDirection: 'motion',
+  motionTrigger: 'motion',
+  motionCustom: 'motion',
+  motionDurationMs: 'motion',
+  motionDistancePx: 'motion',
+  motionEasing: 'motion',
+  motionThreshold: 'motion',
+  edge: 'edge',
+  edgeHeight: 'edge',
+  edgeFlip: 'edge',
+  edgeAccent: 'edge',
+  edgeLayer: 'edge',
+  edgeInvert: 'edge',
+}
+
 export const sectionStyle = defineType({
   name: 'sectionStyle',
   title: 'Section design',
   type: 'object',
   // The fields are rendered straight into the Design tab, not in a box of their own.
-  options: { frameless: true },
+  options: { frameless: true, designBuilder: 'sectionStyle' },
   fieldsets: [
     {
       name: 'motionAdvanced',
@@ -1115,7 +1150,11 @@ export const sectionStyle = defineType({
           return RESERVED_ANCHORS.includes(value) ? `"${value}" is used by the site itself` : true
         }),
     }),
-  ],
+  ].map((field) =>
+    field.name in CAPABILITY_FIELDS
+      ? builtBy('sectionStyle', field, CAPABILITY_FIELDS[field.name])
+      : field,
+  ),
 })
 
 /**

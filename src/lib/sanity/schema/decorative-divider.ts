@@ -60,7 +60,13 @@ export const decorativeDivider = defineType({
   name: 'decorativeDivider',
   title: 'Divider',
   type: 'object',
-  options: { collapsible: true, collapsed: true },
+  // A shared design capability (lib/design/capabilities.ts): every field of this type is one.
+  options: {
+    collapsible: true,
+    collapsed: true,
+    designBuilder: 'decorativeDivider',
+    capability: 'divider',
+  },
   fieldsets: [
     {
       name: 'colours',
