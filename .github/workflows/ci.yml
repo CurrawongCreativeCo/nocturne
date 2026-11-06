@@ -84,6 +84,28 @@ jobs:
             exit 1
           }
 
+      # The baseline may only change by evidence or by a reviewed row (capability-baseline-changes.ts), and
+      # that is only visible against the commit the change is made on: the pull request's base, or the
+      # commit before this push. A missing base baseline fails here: the template always has one. (Not part
+      # of `npm run check`: the generator jobs have no base to compare with.) A new branch has no previous
+      # commit (an all-zero sha), so there is nothing to compare with then.
+      - name: Capability baseline only changes by evidence or a reviewed row
+        id: base-baseline
+        if: ${{ (github.event.pull_request.base.sha || github.event.before) != '0000000000000000000000000000000000000000' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.before }}
+          path: .ci-base
+          persist-credentials: false
+          sparse-checkout: capability-baseline.json
+          sparse-checkout-cone-mode: false
+
+      - name: Compare the capability baseline with the base commit's
+        if: ${{ steps.base-baseline.outcome == 'success' }}
+        run: |
+          npm run design-capabilities -- --against-file .ci-base/capability-baseline.json
+          rm -rf .ci-base
+
       # `.env.example` and the README's settings table are written from the feature registries.
       - name: .env.example and the README settings table are committed and current
         run: |

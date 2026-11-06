@@ -11,6 +11,7 @@ import {
   sourceAvailability,
   type CapabilityBaseline,
 } from '@/lib/design/capability-availability'
+import { BASELINE_CHANGES } from '@/lib/design/capability-baseline-changes'
 import { EVIDENCE } from '@/lib/design/capability-evidence'
 import { CAPABILITY_EXCEPTIONS } from '@/lib/design/capability-exceptions'
 import { declarationProblems, type ContractProblem } from '@/lib/design/capability-policy'
@@ -50,6 +51,7 @@ describe('the design capability contract', () => {
         lookup: lookupType,
         exceptions: CAPABILITY_EXCEPTIONS,
         baseline: committed,
+        changes: BASELINE_CHANGES,
         readSource: (path) => {
           try {
             return readFileSync(join(import.meta.dirname, '..', '..', path), 'utf8')

@@ -91,6 +91,7 @@ function inputs(overrides: Partial<ContractInputs> = {}, schema = section()): Co
     lookup,
     exceptions: [],
     baseline,
+    changes: [],
     readSource: () => undefined,
     ...overrides,
   }
@@ -210,6 +211,29 @@ describe('contractProblems', () => {
     expect(messages({ ...base, baseline: closed })).toEqual([
       'fixtureSection: edge (required, section) is no longer pending, but the baseline still lists it.',
     ])
+  })
+})
+
+describe('the reviewed baseline changes', () => {
+  const row = {
+    kind: 'admit' as const,
+    component: 'fixtureSection',
+    capability: 'glass' as const,
+    scope: 'section' as const,
+    layouts: [null],
+    reason: 'Waits for task 159.',
+    reviewer: 'owner',
+    reviewed: '2026-11-07',
+  }
+
+  it('fails a row that no longer explains anything, and one that is incomplete', () => {
+    // Glass is verified here, so there is no gap for the row to admit.
+    expect(messages(inputs({ changes: [row] }))).toEqual([
+      "fixtureSection: glass (section): an admit row covers a gap the baseline doesn't list (it is closed, or never pending).",
+    ])
+    expect(messages(inputs({ changes: [{ ...row, reviewer: '' }] }))).toContain(
+      'fixtureSection: glass (section): its baseline change (admit) has no reviewer and review date.',
+    )
   })
 })
 

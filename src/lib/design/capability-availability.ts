@@ -8,6 +8,7 @@ import {
   type TextRole,
   type Trigger,
 } from './capabilities'
+import type { BaselineChange } from './capability-baseline-changes'
 import { isCapabilityEvidence, type Evidence } from './capability-evidence'
 import { applyPatch } from './capability-patch'
 import {
@@ -417,6 +418,12 @@ export function currentBaseline(
   )
 }
 
+/** The gaps pending now that the committed baseline doesn't list: what `--update-baseline` may add. */
+export function addedGaps(current: CapabilityBaseline, committed: CapabilityBaseline) {
+  const listed = listedCells(committed)
+  return [...listedCells(current)].filter(([key]) => !listed.has(key)).map(([, cell]) => cell)
+}
+
 /**
  * The baseline may only shrink: a pending pair or layout it doesn't list is a new gap, and one it lists
  * that is no longer pending must be removed. Entries for components a site has removed are ignored.
@@ -442,6 +449,17 @@ export function ratchetProblems(
         })
       }
     }
+    for (const [key, entry] of pending) {
+      const known = listed.get(key)
+      if (known && known.closingTask !== entry.closingTask) {
+        problems.push({
+          component: entry.component,
+          capability: entry.capability,
+          message: `${entry.component}: ${entry.capability} (${policy}, ${entry.scope}${entry.part ? `, ${entry.part}` : ''}) closes with task ${entry.closingTask}, but the baseline says task ${known.closingTask}.`,
+          fix: 'Reassigning a gap is a reviewed change: update the baseline (npm run design-capabilities -- --update-baseline) in the same commit as the declaration, and say why in the pull request.',
+        })
+      }
+    }
     for (const [key, entry] of listed) {
       if (!components.includes(entry.component)) continue
       const still = pending.get(key)
@@ -455,6 +473,204 @@ export function ratchetProblems(
         })
       }
     }
+  }
+  return problems
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Baseline integrity: the baseline against the one on the base commit
+
+const rowCovers = (
+  row: Pick<BaselineChange, 'component' | 'capability' | 'scope' | 'part' | 'layouts'>,
+  pair: Pick<BaselineEntry, 'component' | 'capability' | 'scope' | 'part'>,
+  layout: string | null,
+) =>
+  row.component === pair.component &&
+  row.capability === pair.capability &&
+  row.scope === pair.scope &&
+  (row.part ?? '') === (pair.part ?? '') &&
+  row.layouts.includes(layout)
+
+const describePair = (pair: BaselineEntry, layout: string | null, policy: string) =>
+  `${pair.component}: ${pair.capability} (${policy}, ${pair.scope}${pair.part ? `, ${pair.part}` : ''})${layout === null ? '' : ` on ${layout}`}`
+
+/** Every (pair, layout) a baseline lists, keyed, with the policy list it is in. */
+function listedCells(baseline: CapabilityBaseline) {
+  const cells = new Map<string, { pair: BaselineEntry; layout: string | null; policy: string }>()
+  for (const policy of ['required', 'conditional'] as const) {
+    for (const pair of baseline[policy]) {
+      for (const layout of pair.layouts) {
+        cells.set(`${policy}|${pairKey(pair)}|${layout ?? ''}`, { pair, layout, policy })
+      }
+    }
+  }
+  return cells
+}
+
+/** Rows that are incomplete: no reason, reviewer or review date, or no layouts. */
+export function changeRowProblems(changes: readonly BaselineChange[]): ContractProblem[] {
+  const problems: ContractProblem[] = []
+  for (const row of changes) {
+    const where = `${row.component}: ${row.capability} (${row.scope}${row.part ? `, ${row.part}` : ''})`
+    const problem = (message: string, fix: string) =>
+      problems.push({ component: row.component, capability: row.capability, message, fix })
+    if (!row.reason.trim()) {
+      problem(`${where}: its baseline change (${row.kind}) has no reason.`, 'Say why.')
+    }
+    if (!row.reviewer.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(row.reviewed)) {
+      problem(
+        `${where}: its baseline change (${row.kind}) has no reviewer and review date.`,
+        'Record who reviewed it, and when (capability-baseline-changes.ts).',
+      )
+    }
+    if (row.layouts.length === 0) {
+      problem(
+        `${where}: its baseline change (${row.kind}) names no layouts.`,
+        'Name the layouts it covers.',
+      )
+    }
+    if (row.kind === 'downgrade' && row.closingTask !== undefined) {
+      problem(
+        `${where}: a downgrade names a closing task.`,
+        'A downgrade closes nothing: drop the task.',
+      )
+    }
+  }
+  return problems
+}
+
+/**
+ * What the baseline's reviewed register and the current availability say about the committed baseline
+ * (`head`) alone: an admit row must cover a pair that is pending now and listed, with the task the
+ * baseline gives it; a downgrade row must cover a cell the policy now says is Not applicable. Anything
+ * else is stale and fails, so a row can't outlive the thing it explained.
+ */
+export function staleChangeProblems(
+  head: CapabilityBaseline,
+  availability: ReadonlyMap<string, readonly AvailabilityCell[]>,
+  changes: readonly BaselineChange[],
+): ContractProblem[] {
+  const problems: ContractProblem[] = []
+  const listed = listedCells(head)
+  for (const row of changes) {
+    const where = `${row.component}: ${row.capability} (${row.scope}${row.part ? `, ${row.part}` : ''})`
+    const stale = (message: string, fix: string) =>
+      problems.push({ component: row.component, capability: row.capability, message, fix })
+    for (const layout of row.layouts) {
+      const on = layout === null ? '' : ` on ${layout}`
+      if (row.kind === 'admit') {
+        const hit = [...listed.values()].find(
+          ({ pair, layout: listedLayout }) =>
+            listedLayout === layout && rowCovers(row, pair, layout),
+        )
+        if (!hit) {
+          stale(
+            `${where}${on}: an admit row covers a gap the baseline doesn't list (it is closed, or never pending).`,
+            'Delete the row from capability-baseline-changes.ts.',
+          )
+        } else if (row.closingTask !== undefined && row.closingTask !== hit.pair.closingTask) {
+          stale(
+            `${where}${on}: the admit row says task ${row.closingTask}, the baseline says task ${hit.pair.closingTask}.`,
+            'Make them agree.',
+          )
+        }
+      } else {
+        const cells = availability.get(row.component) ?? []
+        const matching = cells.filter(
+          (cell) =>
+            cell.capability === row.capability &&
+            cell.layout === layout &&
+            (cell.scope === null || cell.scope === row.scope) &&
+            (cell.part ?? '') === (row.part ?? ''),
+        )
+        const notApplicable =
+          matching.length > 0 && matching.every((cell) => cell.status === 'notApplicable')
+        const declared = cells.some(
+          (cell) =>
+            cell.capability === row.capability &&
+            cell.layout === layout &&
+            cell.scope === row.scope &&
+            (cell.part ?? '') === (row.part ?? '') &&
+            cell.status !== 'notApplicable',
+        )
+        if (!notApplicable || declared) {
+          stale(
+            `${where}${on}: a downgrade row covers a cell the policy doesn't say is Not applicable.`,
+            'Delete the row, or make the policy Not applicable with its reason.',
+          )
+        }
+      }
+    }
+  }
+  return problems
+}
+
+export interface BaselineIntegrityInputs {
+  /** The baseline on the base commit (the merge base, or the base branch). */
+  base: CapabilityBaseline
+  /** The baseline in this checkout. */
+  head: CapabilityBaseline
+  /** The components this site has: entries for others (a section a client removed) are ignored. */
+  components: readonly string[]
+  /** Every component's availability today: what a removed gap is judged against. */
+  availability: ReadonlyMap<string, readonly AvailabilityCell[]>
+  changes: readonly BaselineChange[]
+}
+
+/**
+ * The baseline against its base commit. A pair or layout that was added needs an admit row. One that was
+ * removed must be verified now (evidence closed it), or Not applicable with a downgrade row: a pair that
+ * is still pending, or that was only deleted by hand, fails. The static ratchet already makes the
+ * baseline equal what is pending today, so these two checks together mean the file can only change by
+ * evidence or by a reviewed row.
+ */
+export function baselineIntegrityProblems({
+  base,
+  head,
+  components,
+  availability,
+  changes,
+}: BaselineIntegrityInputs): ContractProblem[] {
+  const problems: ContractProblem[] = []
+  const before = listedCells(base)
+  const after = listedCells(head)
+  for (const [key, { pair, layout, policy }] of after) {
+    if (before.has(key) || !components.includes(pair.component)) continue
+    if (changes.some((row) => row.kind === 'admit' && rowCovers(row, pair, layout))) continue
+    problems.push({
+      component: pair.component,
+      capability: pair.capability,
+      message: `${describePair(pair, layout, policy)} is in the baseline now and wasn't on the base commit, and no admit row covers it.`,
+      fix: 'A gap is never added by hand. Add evidence for it, or, if it genuinely cannot close in this task, add a reviewed admit row (src/lib/design/capability-baseline-changes.ts) with the reason and the task that closes it.',
+    })
+  }
+  for (const [key, { pair, layout, policy }] of before) {
+    if (after.has(key) || !components.includes(pair.component)) continue
+    const cells = (availability.get(pair.component) ?? []).filter(
+      (cell) =>
+        cell.capability === pair.capability &&
+        cell.layout === layout &&
+        cell.scope === pair.scope &&
+        (cell.part ?? '') === (pair.part ?? ''),
+    )
+    if (cells.length > 0 && cells.every((cell) => cell.status === 'verified')) continue
+    const pending = cells.some((cell) => cell.status === 'pending')
+    if (
+      !pending &&
+      changes.some((row) => row.kind === 'downgrade' && rowCovers(row, pair, layout))
+    ) {
+      continue
+    }
+    problems.push({
+      component: pair.component,
+      capability: pair.capability,
+      message: pending
+        ? `${describePair(pair, layout, policy)} was on the base commit's baseline, is gone from it now, and is still pending.`
+        : `${describePair(pair, layout, policy)} was on the base commit's baseline and is gone from it, but it isn't verified: its policy changed to Not applicable (or it was removed) and no downgrade row says why.`,
+      fix: pending
+        ? 'Only evidence closes a gap. Restore the entry, or add the evidence that verifies it.'
+        : 'Add a reviewed downgrade row (src/lib/design/capability-baseline-changes.ts) with the reason the component never needed it, or restore the policy.',
+    })
   }
   return problems
 }

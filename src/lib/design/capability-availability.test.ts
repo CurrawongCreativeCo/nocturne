@@ -7,14 +7,18 @@ import {
   type CapabilityPolicies,
 } from './capabilities'
 import {
+  baselineIntegrityProblems,
   capabilityAvailability,
+  changeRowProblems,
   evidenceProblems,
   pendingBaseline,
   ratchetProblems,
   sourceAvailability,
   sourceTestProblems,
+  staleChangeProblems,
   type CapabilityBaseline,
 } from './capability-availability'
+import type { BaselineChange } from './capability-baseline-changes'
 import type { CapabilityEvidence, Evidence } from './capability-evidence'
 import type { ContractComponent } from './capability-policy'
 import type { SchemaGate } from './schema-capabilities'
@@ -396,5 +400,209 @@ describe('sourceTestProblems', () => {
         "Evidence fixtureCards.glass.section: its test file gone.test.tsx doesn't exist.",
       ])
     })
+  })
+})
+
+describe('baseline integrity against the base commit (AT5)', () => {
+  const FIXTURE = 'fixtureCards'
+  const glassOpen: CapabilityEvidence = { ...glassEvidence, layouts: ['open'] }
+  const edgeEvidence: CapabilityEvidence = {
+    ...glassEvidence,
+    id: 'fixtureCards.edge.section',
+    capability: 'edge',
+    field: 'style.edge',
+    layouts: ['open'],
+    probe: { 'style.edge': 'wave' },
+  }
+  const availabilityOf = (evidence: readonly Evidence[] = [], of = component) =>
+    new Map([[FIXTURE, capabilityAvailability(of, evidence, gate)]])
+  /** The baseline the fixture would have with this evidence. */
+  const baselineOf = (evidence: readonly Evidence[] = [], of = component) =>
+    pendingBaseline(availabilityOf(evidence, of))
+  const check = (
+    base: CapabilityBaseline,
+    head: CapabilityBaseline,
+    over: Partial<Parameters<typeof baselineIntegrityProblems>[0]> = {},
+  ) =>
+    baselineIntegrityProblems({
+      base,
+      head,
+      components: [FIXTURE],
+      availability: availabilityOf(),
+      changes: [],
+      ...over,
+    }).map((problem) => problem.message)
+
+  const admit = (over: Partial<BaselineChange> = {}): BaselineChange => ({
+    kind: 'admit',
+    component: FIXTURE,
+    capability: 'edge',
+    scope: 'section',
+    layouts: ['open'],
+    reason: 'Cannot close in this task.',
+    reviewer: 'owner',
+    reviewed: '2026-11-07',
+    closingTask: 151,
+    ...over,
+  })
+  const downgrade = (over: Partial<BaselineChange> = {}): BaselineChange =>
+    admit({
+      kind: 'downgrade',
+      reason: 'Boxed never draws an edge.',
+      closingTask: undefined,
+      ...over,
+    })
+
+  it('passes a baseline that is unchanged', () => {
+    expect(check(baselineOf(), baselineOf())).toEqual([])
+  })
+
+  it('fails a hand edit that adds a pair or a layout', () => {
+    // The base closed the edge gap with evidence; the head lists it again by hand.
+    const found = check(baselineOf([edgeEvidence]), baselineOf())
+    expect(found).toEqual([
+      "fixtureCards: edge (required, section) on open is in the baseline now and wasn't on the base commit, and no admit row covers it.",
+    ])
+    // A layout added to a pair that was already there.
+    const withLayout: CapabilityBaseline = {
+      ...baselineOf(),
+      required: baselineOf().required.map((entry) =>
+        entry.capability === 'glass' ? { ...entry, layouts: ['open', 'boxed', 'extra'] } : entry,
+      ),
+    }
+    expect(check(baselineOf(), withLayout)).toEqual([
+      "fixtureCards: glass (required, section) on extra is in the baseline now and wasn't on the base commit, and no admit row covers it.",
+    ])
+  })
+
+  it('fails deleting the evidence and listing the gap by hand, though the static ratchet agrees', () => {
+    const head = baselineOf() // the evidence is gone, so the gap is real, and the file says so
+    expect(ratchetProblems(baselineOf(), head, [FIXTURE])).toEqual([])
+    expect(check(baselineOf([edgeEvidence]), head)).toHaveLength(1)
+  })
+
+  it('passes a gap with a reviewed admit row, and fails one with an incomplete row', () => {
+    const base = baselineOf([edgeEvidence])
+    expect(check(base, baselineOf(), { changes: [admit()] })).toEqual([])
+    // A row for another layout, capability or component doesn't cover it.
+    for (const other of [
+      admit({ layouts: ['boxed'] }),
+      admit({ capability: 'glass' }),
+      admit({ component: 'other' }),
+      admit({ part: 'extra' }),
+    ]) {
+      expect(check(base, baselineOf(), { changes: [other] })).toHaveLength(1)
+    }
+    expect(changeRowProblems([admit({ reason: ' ' })]).map((problem) => problem.message)).toEqual([
+      'fixtureCards: edge (section): its baseline change (admit) has no reason.',
+    ])
+    expect(changeRowProblems([admit({ reviewer: '' })])).toHaveLength(1)
+    expect(changeRowProblems([admit({ reviewed: 'yesterday' })])).toHaveLength(1)
+    expect(changeRowProblems([admit({ layouts: [] })])).toHaveLength(1)
+    expect(changeRowProblems([admit()])).toEqual([])
+  })
+
+  it('passes a gap that evidence closed, and fails one that is only gone from the file', () => {
+    const base = baselineOf()
+    // Verified now: glass on open has a passing case.
+    expect(
+      check(base, baselineOf([glassOpen]), { availability: availabilityOf([glassOpen]) }),
+    ).toEqual([])
+    // Deleted from the file while still pending.
+    const found = check(base, { ...base, required: base.required.slice(1) })
+    // The glass entry covers two layouts, and each is a removal.
+    expect(found).toHaveLength(2)
+    for (const message of found) {
+      expect(message).toContain('is gone from it now, and is still pending')
+    }
+  })
+
+  it('fails a Required pair made Not applicable with no row, and passes it with a downgrade row', () => {
+    const declared = component.declaration
+    if (!declared) throw new Error('The fixture component has no declaration.')
+    const notApplicableEdge: ContractComponent = {
+      ...component,
+      declaration: declareCapabilities<Layout>(
+        { ...declared.capabilities, edge: notApplicable('Draws no edge after all') },
+        { contentSources: ['testimonials.manual', 'testimonials.google'] },
+      ),
+    }
+    const base = baselineOf()
+    const head = baselineOf([], notApplicableEdge)
+    const availability = availabilityOf([], notApplicableEdge)
+    const found = check(base, head, { availability })
+    expect(found).toHaveLength(1)
+    expect(found[0]).toContain("isn't verified")
+    expect(check(base, head, { availability, changes: [downgrade()] })).toEqual([])
+    // The row is fine while the cell is Not applicable, and stale once it isn't.
+    expect(staleChangeProblems(head, availability, [downgrade()])).toEqual([])
+    expect(
+      staleChangeProblems(base, availabilityOf(), [downgrade()]).map((p) => p.message),
+    ).toEqual([
+      "fixtureCards: edge (section) on open: a downgrade row covers a cell the policy doesn't say is Not applicable.",
+    ])
+  })
+
+  it('fails a closing task that drifted between the declaration and the baseline', () => {
+    const drifted: CapabilityBaseline = {
+      ...baselineOf(),
+      required: baselineOf().required.map((entry) =>
+        entry.capability === 'edge' ? { ...entry, closingTask: 999 } : entry,
+      ),
+    }
+    expect(ratchetProblems(baselineOf(), drifted, [FIXTURE]).map((p) => p.message)).toEqual([
+      'fixtureCards: edge (required, section) closes with task 151, but the baseline says task 999.',
+    ])
+  })
+
+  it('fails an admit row that outlived its gap, or names another task', () => {
+    const head = baselineOf()
+    expect(staleChangeProblems(head, availabilityOf(), [admit()])).toEqual([])
+    // The gap closed: the row has nothing to explain.
+    const closed = baselineOf([edgeEvidence])
+    expect(
+      staleChangeProblems(closed, availabilityOf([edgeEvidence]), [admit()]).map((p) => p.message),
+    ).toEqual([
+      "fixtureCards: edge (section) on open: an admit row covers a gap the baseline doesn't list (it is closed, or never pending).",
+    ])
+    expect(
+      staleChangeProblems(head, availabilityOf(), [admit({ closingTask: 77 })]).map(
+        (p) => p.message,
+      ),
+    ).toEqual([
+      'fixtureCards: edge (section) on open: the admit row says task 77, the baseline says task 151.',
+    ])
+  })
+
+  it('lets a new component in with admit rows, and fails it without them', () => {
+    const base: CapabilityBaseline = { required: [], conditional: [] } // the component isn't in the base
+    const head = baselineOf()
+    const rows = head.required.flatMap((entry) =>
+      entry.layouts.map((layout) =>
+        admit({
+          capability: entry.capability,
+          scope: entry.scope,
+          layouts: [layout],
+          closingTask: entry.closingTask,
+        }),
+      ),
+    )
+    const conditional = head.conditional.flatMap((entry) =>
+      entry.layouts.map((layout) =>
+        admit({
+          capability: entry.capability,
+          scope: entry.scope,
+          layouts: [layout],
+          closingTask: entry.closingTask,
+        }),
+      ),
+    )
+    expect(check(base, head)).toHaveLength(5)
+    expect(check(base, head, { changes: [...rows, ...conditional] })).toEqual([])
+  })
+
+  it('ignores a component the site has removed', () => {
+    const base = baselineOf()
+    expect(check(base, { required: [], conditional: [] }, { components: [] })).toEqual([])
   })
 })

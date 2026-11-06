@@ -1,11 +1,15 @@
 import { FUTURE_COVERAGE, type FutureCoverage } from './capabilities'
 import {
+  capabilityAvailability,
+  changeRowProblems,
   currentBaseline,
   evidenceProblems,
   ratchetProblems,
   sourceTestProblems,
+  staleChangeProblems,
   type CapabilityBaseline,
 } from './capability-availability'
+import type { BaselineChange } from './capability-baseline-changes'
 import type { Evidence } from './capability-evidence'
 import type { CapabilityException } from './capability-exceptions'
 import {
@@ -61,6 +65,8 @@ export interface ContractInputs {
   exceptions: readonly CapabilityException[]
   /** The committed capability-baseline.json. */
   baseline: CapabilityBaseline
+  /** The reviewed baseline changes (capability-baseline-changes.ts). */
+  changes: readonly BaselineChange[]
   /** The text of a file by its path from the repository root, for the content sources' test files. */
   readSource: (path: string) => string | undefined
 }
@@ -81,7 +87,8 @@ export function futureCoverageProblems(parts: readonly FutureCoverage[]): Contra
 }
 
 export function contractProblems(inputs: ContractInputs): ContractProblem[] {
-  const { components, evidence, gate, schemas, lookup, exceptions, baseline, readSource } = inputs
+  const { components, evidence, gate, schemas, lookup, exceptions, baseline, changes, readSource } =
+    inputs
   const problems: ContractProblem[] = []
 
   for (const component of components) problems.push(...declarationProblems(component))
@@ -111,6 +118,20 @@ export function contractProblems(inputs: ContractInputs): ContractProblem[] {
         currentBaseline(components, evidence, gate),
         baseline,
         components.map(({ id }) => id),
+      ),
+    )
+    // The reviewed register: complete rows, and none that outlived what it explained.
+    problems.push(...changeRowProblems(changes))
+    problems.push(
+      ...staleChangeProblems(
+        baseline,
+        new Map(
+          components.map((component) => [
+            component.id,
+            capabilityAvailability(component, evidence, gate),
+          ]),
+        ),
+        changes,
       ),
     )
   }
