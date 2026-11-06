@@ -54,7 +54,7 @@ const glassEvidence: CapabilityEvidence = {
   scope: 'section',
   layouts: ['open', 'boxed'],
   field: 'style.panel',
-  resolver: { module: '@/lib/sanity/section-panel', export: 'resolveSectionPanel' },
+  resolvers: [{ module: '@/lib/sanity/section-panel', export: 'resolveSectionPanel' }],
   render: 'src/components/ui/section-frame.tsx',
   target: 'section > :last-child',
   change: 'attributes',
@@ -144,10 +144,9 @@ describe('sourceAvailability', () => {
       source: 'testimonials.manual',
       layouts: ['open', 'boxed'],
       field: 'items',
-      resolver: {
-        module: '@/features/pages/components/sections/testimonials',
-        export: 'Testimonials',
-      },
+      resolvers: [
+        { module: '@/features/pages/components/sections/testimonials', export: 'Testimonials' },
+      ],
       render: 'src/features/pages/components/sections/testimonials',
       target: 'section > :last-child',
       change: 'content',

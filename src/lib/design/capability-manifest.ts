@@ -42,8 +42,10 @@ export interface ManifestPolicy {
 export interface ManifestEvidence {
   id: string
   field: string
-  /** `module#export` */
-  resolver: string
+  /** Each `module#export` the renderer reaches the target through. */
+  resolvers: readonly string[]
+  /** Set when part of the path is the component's own code: its resolver evidence is partial. */
+  inline?: string
   render: string
   target: string
   /** The harness cases that run it. */
@@ -73,7 +75,8 @@ function evidenceFor(entries: readonly Evidence[], cases: readonly string[]): Ma
     .map((entry) => ({
       id: entry.id,
       field: entry.field,
-      resolver: `${entry.resolver.module}#${entry.resolver.export}`,
+      resolvers: entry.resolvers.map((resolver) => `${resolver.module}#${resolver.export}`),
+      ...(entry.inline ? { inline: entry.inline } : {}),
       render: entry.render,
       target: entry.target,
       cases: cases.filter((id) => id === entry.id || id.startsWith(`${entry.id}@`)),

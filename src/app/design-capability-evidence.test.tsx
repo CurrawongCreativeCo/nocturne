@@ -31,6 +31,87 @@ vi.hoisted(() => {
   vi.setSystemTime(new Date('2026-11-06T09:00:00+11:00'))
 })
 
+/**
+ * Disconnecting a claimed resolver (S2). Every resolver module the evidence names is wrapped: in
+ * `record` mode the claimed export's results are kept as the field-unset render produces them; in
+ * `replay` mode the probe render gets those same results back instead, so whatever the probe would
+ * reach through that resolver is cut off. If the target still changes, the renderer doesn't depend on
+ * the resolver the entry claims, and the claim fails.
+ */
+const resolvers = vi.hoisted(() => {
+  const control = {
+    mode: 'pass' as 'pass' | 'record' | 'replay',
+    targets: new Set<string>(),
+    recorded: new Map<string, unknown[]>(),
+    replayed: new Map<string, number>(),
+    /** Every wrapped export, so a claim that isn't wired in fails instead of passing untested. */
+    wired: new Set<string>(),
+  }
+  const wrap = (module: string, original: Record<string, unknown>) =>
+    Object.fromEntries(
+      Object.entries(original).map(([name, value]) => {
+        if (typeof value !== 'function') return [name, value]
+        const key = `${module}#${name}`
+        control.wired.add(key)
+        const call = value as (...args: unknown[]) => unknown
+        return [
+          name,
+          (...args: unknown[]) => {
+            if (!control.targets.has(key) || control.mode === 'pass') return call(...args)
+            const kept = control.recorded.get(key) ?? []
+            if (control.mode === 'record') {
+              const result = call(...args)
+              control.recorded.set(key, [...kept, result])
+              return result
+            }
+            const index = control.replayed.get(key) ?? 0
+            control.replayed.set(key, index + 1)
+            return index < kept.length ? kept[index] : kept.at(-1)
+          },
+        ]
+      }),
+    )
+  return { control, wrap }
+})
+
+vi.mock('@/components/ui/link-arrow', async (load) =>
+  resolvers.wrap('@/components/ui/link-arrow', await load()),
+)
+vi.mock('@/components/ui/section-style', async (load) =>
+  resolvers.wrap('@/components/ui/section-style', await load()),
+)
+vi.mock('@/features/pages/components/sections/testimonials', async (load) =>
+  resolvers.wrap('@/features/pages/components/sections/testimonials', await load()),
+)
+vi.mock('@/features/pages/slots/render-slot', async (load) =>
+  resolvers.wrap('@/features/pages/slots/render-slot', await load()),
+)
+vi.mock('@/features/pages/utils/link-card-design', async (load) =>
+  resolvers.wrap('@/features/pages/utils/link-card-design', await load()),
+)
+vi.mock('@/features/pages/utils/split-layout', async (load) =>
+  resolvers.wrap('@/features/pages/utils/split-layout', await load()),
+)
+vi.mock('@/lib/sanity/image', async (load) => resolvers.wrap('@/lib/sanity/image', await load()))
+vi.mock('@/lib/sanity/depth-options', async (load) =>
+  resolvers.wrap('@/lib/sanity/depth-options', await load()),
+)
+vi.mock('@/lib/sanity/divider-options', async (load) =>
+  resolvers.wrap('@/lib/sanity/divider-options', await load()),
+)
+vi.mock('@/lib/sanity/image-framing', async (load) =>
+  resolvers.wrap('@/lib/sanity/image-framing', await load()),
+)
+vi.mock('@/lib/sanity/section-panel', async (load) =>
+  resolvers.wrap('@/lib/sanity/section-panel', await load()),
+)
+vi.mock('@/lib/sanity/surface-options', async (load) =>
+  resolvers.wrap('@/lib/sanity/surface-options', await load()),
+)
+vi.mock('@/lib/sanity/text-style-options', async (load) =>
+  resolvers.wrap('@/lib/sanity/text-style-options', await load()),
+)
+
 vi.mock('next-sanity/image', () => ({
   Image: (props: Record<string, unknown>) =>
     createElement('img', {
@@ -74,15 +155,53 @@ async function draw(raw: RawSection) {
   return renderSections(await projectSections([raw]), { belowHeading: true })
 }
 
-async function runCase(entry: Evidence, layout: string | null) {
+async function statesOf(entry: Evidence, layout: string | null) {
   const picture = await fixturePictureId()
   const seed = await gallerySeed(entry.component, layout)
   const unset = withPicture(
     applyPatch(applyPatch(seed, entry.base), unsetFor(entry.probe)),
     picture,
   )
-  const probed = withPicture(applyPatch(unset, entry.probe), picture)
+  return { unset, probed: withPicture(applyPatch(unset, entry.probe), picture) }
+}
+
+async function runCase(entry: Evidence, layout: string | null) {
+  const { unset, probed } = await statesOf(entry, layout)
   return compareTarget(await draw(unset), await draw(probed), entry.target, entry.change)
+}
+
+const keyOf = ({ module, export: name }: { module: string; export: string }) => `${module}#${name}`
+
+/**
+ * The same case with every claimed resolver disconnected: each replays to the probe render what it
+ * returned with the field unset. Returns that comparison, the connected probe's target, and how many
+ * times the renderer reached a claimed resolver.
+ */
+async function runDisconnected(entry: Evidence, layout: string | null) {
+  const { unset, probed } = await statesOf(entry, layout)
+  const connected = await draw(probed)
+  const { control } = resolvers
+  control.targets = new Set(entry.resolvers.map(keyOf))
+  control.recorded = new Map()
+  control.replayed = new Map()
+  control.mode = 'record'
+  try {
+    const unsetHtml = await draw(unset)
+    control.mode = 'replay'
+    const probeHtml = await draw(probed)
+    const reached = [...control.replayed.values()].reduce((sum, count) => sum + count, 0)
+    return {
+      disconnected: compareTarget(unsetHtml, probeHtml, entry.target, entry.change),
+      // The probe with and without its resolvers: they must differ if the resolvers carry it.
+      cut: compareTarget(connected, probeHtml, entry.target, entry.change),
+      reached,
+    }
+  } finally {
+    control.mode = 'pass'
+    control.targets = new Set()
+    control.recorded = new Map()
+    control.replayed = new Map()
+  }
 }
 
 const cases = EVIDENCE.flatMap((entry) =>
@@ -100,13 +219,60 @@ describe('design capability evidence', () => {
     ).toMatchSnapshot()
   })
 
+  it.each(cases)(
+    '$id: disconnecting the claimed resolvers stops the probe reaching the target',
+    async ({ entry, layout }) => {
+      for (const resolver of entry.resolvers) {
+        expect(
+          resolvers.control.wired,
+          `${keyOf(resolver)} isn't wired into the harness`,
+        ).toContain(keyOf(resolver))
+      }
+      const { disconnected, cut, reached } = await runDisconnected(entry, layout)
+      expect(reached, 'the renderer never reached a claimed resolver').toBeGreaterThan(0)
+      // What the probe draws depends on the claimed resolvers.
+      expect(cut.status).toBe('changed')
+      // And, unless part of the path is the component's own code, only on them.
+      if (!entry.inline) expect(disconnected.status).not.toBe('changed')
+    },
+  )
+
+  it('fails a resolver claim the renderer does not depend on (S2 mutation)', async () => {
+    const surface = EVIDENCE.find((entry) => entry.id === 'linkList.surface.card')
+    expect(surface).toBeDefined()
+    if (!surface) return
+    // A real resolver the Link list calls, but not the one its card surface comes from.
+    const wrong = await runDisconnected(
+      {
+        ...surface,
+        resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+      },
+      'cards',
+    )
+    expect(wrong.reached).toBeGreaterThan(0)
+    expect(wrong.disconnected.status).toBe('changed')
+    // A resolver the renderer never reaches for this probe.
+    const unused = await runDisconnected(
+      {
+        ...surface,
+        resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+      },
+      'cards',
+    )
+    expect(unused.disconnected.status).toBe('changed')
+    // The true claim, for contrast: disconnected, the probe no longer reaches the target.
+    expect((await runDisconnected(surface, 'cards')).disconnected.status).not.toBe('changed')
+  })
+
   it.each(EVIDENCE.map((entry) => ({ id: entry.id, entry })))(
-    '$id: the resolver and the render path it names exist',
+    '$id: the resolvers and the render path it names exist',
     async ({ entry }) => {
-      const exported = (await import(
-        /* @vite-ignore */ entry.resolver.module.replace(/^@\//, '/src/')
-      )) as Record<string, unknown>
-      expect(typeof exported[entry.resolver.export]).toBe('function')
+      for (const resolver of entry.resolvers) {
+        const exported = (await import(
+          /* @vite-ignore */ resolver.module.replace(/^@\//, '/src/')
+        )) as Record<string, unknown>
+        expect(typeof exported[resolver.export], keyOf(resolver)).toBe('function')
+      }
       expect(existsSync(join(ROOT, entry.render))).toBe(true)
     },
   )

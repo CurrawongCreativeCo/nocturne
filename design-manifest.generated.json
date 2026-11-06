@@ -2099,7 +2099,9 @@
             {
               "id": "hero.glass.section",
               "field": "style.panel",
-              "resolver": "@/lib/sanity/section-panel#resolveSectionPanel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -2144,7 +2146,10 @@
             {
               "id": "hero.edge.section",
               "field": "style.edge",
-              "resolver": "@/components/ui/section-style#resolveEdge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
               "cases": [
@@ -2174,7 +2179,9 @@
             {
               "id": "hero.motion.section",
               "field": "style.motion",
-              "resolver": "@/components/ui/section-style#sectionMotion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -2204,14 +2211,28 @@
             {
               "id": "hero.slots.supporting",
               "field": "supporting",
-              "resolver": "@/features/pages/slots/render-slot#renderSlot",
+              "resolvers": [
+                "@/features/pages/slots/render-slot#renderSlot"
+              ],
               "render": "src/features/pages/components/sections/hero",
               "target": "section > :last-child",
               "cases": [
                 "hero.slots.supporting@overlay",
                 "hero.slots.supporting@split",
-                "hero.slots.supporting@editorial",
                 "hero.slots.supporting@full-bleed"
+              ]
+            },
+            {
+              "id": "hero.slots.supporting.editorial",
+              "field": "supporting",
+              "resolvers": [
+                "@/features/pages/slots/render-slot#renderSlot"
+              ],
+              "inline": "Editorial widens its grid for the slot in the component itself (hero/editorial.tsx)",
+              "render": "src/features/pages/components/sections/hero",
+              "target": "section > :last-child",
+              "cases": [
+                "hero.slots.supporting.editorial@editorial"
               ]
             }
           ]
@@ -3082,7 +3103,9 @@
             {
               "id": "mediaText.overlay.section",
               "field": "style.overlay",
-              "resolver": "@/components/ui/section-style#resolveSectionStyle",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
               "render": "src/components/ui/section-background.tsx",
               "target": "[data-section-background]",
               "cases": [
@@ -3109,7 +3132,9 @@
             {
               "id": "mediaText.glass.section",
               "field": "style.panel",
-              "resolver": "@/lib/sanity/section-panel#resolveSectionPanel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -3152,7 +3177,10 @@
             {
               "id": "mediaText.edge.section",
               "field": "style.edge",
-              "resolver": "@/components/ui/section-style#resolveEdge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
               "cases": [
@@ -3180,7 +3208,9 @@
             {
               "id": "mediaText.motion.section",
               "field": "style.motion",
-              "resolver": "@/components/ui/section-style#sectionMotion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -3208,7 +3238,9 @@
             {
               "id": "mediaText.slots.media",
               "field": "media",
-              "resolver": "@/features/pages/slots/render-slot#renderSlot",
+              "resolvers": [
+                "@/features/pages/utils/split-layout#chooseMedia"
+              ],
               "render": "src/features/pages/components/sections/media-text.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -3220,7 +3252,9 @@
             {
               "id": "mediaText.slots.supporting",
               "field": "supporting",
-              "resolver": "@/features/pages/slots/render-slot#renderSlot",
+              "resolvers": [
+                "@/features/pages/slots/render-slot#renderSlot"
+              ],
               "render": "src/features/pages/components/sections/media-text.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -3837,7 +3871,9 @@
             {
               "id": "testimonials.overlay.section",
               "field": "style.overlay",
-              "resolver": "@/components/ui/section-style#resolveSectionStyle",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
               "render": "src/components/ui/section-background.tsx",
               "target": "[data-section-background]",
               "cases": [
@@ -3876,7 +3912,9 @@
             {
               "id": "testimonials.glass.section",
               "field": "style.panel",
-              "resolver": "@/lib/sanity/section-panel#resolveSectionPanel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -3916,7 +3954,10 @@
             {
               "id": "testimonials.edge.section",
               "field": "style.edge",
-              "resolver": "@/components/ui/section-style#resolveEdge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
               "cases": [
@@ -3942,7 +3983,9 @@
             {
               "id": "testimonials.motion.section",
               "field": "style.motion",
-              "resolver": "@/components/ui/section-style#sectionMotion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -8658,9 +8701,11 @@
             {
               "id": "linkList.surface.card",
               "field": "cardDesign.border",
-              "resolver": "@/lib/sanity/surface-options#ringSurfaceLook",
+              "resolvers": [
+                "@/lib/sanity/surface-options#ringSurfaceLook"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.surface.card@stacked",
                 "linkList.surface.card@cards",
@@ -8670,9 +8715,11 @@
             {
               "id": "linkList.surface.item",
               "field": "links[].design.border",
-              "resolver": "@/lib/sanity/surface-options#ringSurfaceLook",
+              "resolvers": [
+                "@/lib/sanity/surface-options#ringSurfaceLook"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.surface.item@stacked",
                 "linkList.surface.item@cards",
@@ -8720,9 +8767,11 @@
             {
               "id": "linkList.text.card",
               "field": "cardDesign.label",
-              "resolver": "@/lib/sanity/text-style-options#textLook",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.text.card@stacked",
                 "linkList.text.card@cards",
@@ -8733,9 +8782,11 @@
             {
               "id": "linkList.text.item",
               "field": "links[].design.label",
-              "resolver": "@/lib/sanity/text-style-options#textLook",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.text.item@stacked",
                 "linkList.text.item@cards",
@@ -8837,9 +8888,11 @@
             {
               "id": "linkList.depth.card",
               "field": "depthDesign.linkShadow",
-              "resolver": "@/lib/sanity/depth-options#resolveDepth",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveDepth"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.depth.card@stacked",
                 "linkList.depth.card@cards",
@@ -8849,9 +8902,11 @@
             {
               "id": "linkList.depth.item",
               "field": "links[].design.shadow",
-              "resolver": "@/lib/sanity/depth-options#resolveDepth",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveDepth"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.depth.item@stacked",
                 "linkList.depth.item@cards",
@@ -8893,9 +8948,11 @@
             {
               "id": "linkList.icon.card",
               "field": "linkDesign.iconShape",
-              "resolver": "@/lib/sanity/surface-options#iconLook",
+              "resolvers": [
+                "@/lib/sanity/surface-options#iconLook"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.icon.card@stacked",
                 "linkList.icon.card@cards",
@@ -8905,9 +8962,11 @@
             {
               "id": "linkList.icon.item",
               "field": "links[].design.iconShape",
-              "resolver": "@/lib/sanity/surface-options#iconLook",
+              "resolvers": [
+                "@/lib/sanity/surface-options#iconLook"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.icon.item@stacked",
                 "linkList.icon.item@cards",
@@ -8949,9 +9008,12 @@
             {
               "id": "linkList.action.card",
               "field": "linkDesign.arrowStyle",
-              "resolver": "@/components/ui/link-arrow#LinkArrow",
+              "resolvers": [
+                "@/features/pages/utils/link-card-design#resolveLinkCardDesign",
+                "@/components/ui/link-arrow#LinkArrow"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.action.card@stacked",
                 "linkList.action.card@cards",
@@ -8961,9 +9023,12 @@
             {
               "id": "linkList.action.item",
               "field": "links[].design.arrowStyle",
-              "resolver": "@/components/ui/link-arrow#LinkArrow",
+              "resolvers": [
+                "@/features/pages/utils/link-card-design#resolveLinkCardDesign",
+                "@/components/ui/link-arrow#LinkArrow"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.action.item@stacked",
                 "linkList.action.item@cards",
@@ -9025,7 +9090,9 @@
             {
               "id": "linkList.framing.profile",
               "field": "profile.image",
-              "resolver": "@/lib/sanity/image-framing#visibleArea",
+              "resolvers": [
+                "@/lib/sanity/image#urlFor"
+              ],
               "render": "src/components/ui/profile-image.tsx",
               "target": "[data-profile-image]",
               "cases": [
@@ -9038,9 +9105,11 @@
             {
               "id": "linkList.framing.thumbnail",
               "field": "links[].thumbnail",
-              "resolver": "@/lib/sanity/image-framing#visibleArea",
+              "resolvers": [
+                "@/lib/sanity/image-framing#visibleArea"
+              ],
               "render": "src/features/pages/components/sections/link-list",
-              "target": "ul > li:first-child",
+              "target": "li[data-track-event=\"link_click\"]",
               "cases": [
                 "linkList.framing.thumbnail@stacked",
                 "linkList.framing.thumbnail@cards"
@@ -9066,7 +9135,9 @@
             {
               "id": "linkList.pictureDepth.section",
               "field": "depthDesign.pictureShadow",
-              "resolver": "@/lib/sanity/depth-options#resolveDepth",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveDepth"
+              ],
               "render": "src/features/pages/components/sections/link-list/profile.tsx",
               "target": "[data-profile-image]",
               "cases": [
@@ -9096,7 +9167,9 @@
             {
               "id": "linkList.overlay.section",
               "field": "style.overlay",
-              "resolver": "@/components/ui/section-style#resolveSectionStyle",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
               "render": "src/components/ui/section-background.tsx",
               "target": "[data-section-background]",
               "cases": [
@@ -9148,7 +9221,9 @@
             {
               "id": "linkList.divider.section",
               "field": "dividerDesign.afterProfile",
-              "resolver": "@/lib/sanity/divider-options#resolveDivider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
               "render": "src/components/ui/decorative-divider.tsx",
               "target": "section > :last-child",
               "cases": [
@@ -9178,7 +9253,10 @@
             {
               "id": "linkList.edge.section",
               "field": "style.edge",
-              "resolver": "@/components/ui/section-style#resolveEdge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
               "cases": [
@@ -9208,7 +9286,9 @@
             {
               "id": "linkList.motion.section",
               "field": "style.motion",
-              "resolver": "@/components/ui/section-style#sectionMotion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
               "render": "src/components/ui/section-frame.tsx",
               "target": "section > :last-child",
               "cases": [

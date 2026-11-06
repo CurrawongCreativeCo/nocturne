@@ -25,8 +25,18 @@ interface EvidenceBase {
   layouts?: readonly string[]
   /** The schema field the probe sets, as a manifest path (`style.panel`, `links[].design.border`). */
   field: string
-  /** The resolver the renderer calls, checked to exist. */
-  resolver: { module: string; export: string }
+  /**
+   * The resolvers the renderer reaches the target through, each checked to exist. The harness
+   * disconnects them all at once (replaying what they returned with the field unset), and the probe
+   * must then stop changing the target: the claim is the whole path, not just an export that exists.
+   */
+  resolvers: readonly { module: string; export: string }[]
+  /**
+   * Set when part of the path is the component's own code rather than a resolver (a layout that
+   * adapts inline). The harness then only checks that cutting the resolvers changes what the probe
+   * draws, and the resolver evidence is reported as partial.
+   */
+  inline?: string
   /** The file or folder that draws the target, checked to exist. */
   render: string
   /** A CSS selector into the component's output: the element the capability renders on. */
@@ -75,7 +85,7 @@ const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component'
     capability: 'overlay',
     scope: 'section',
     field: 'style.overlay',
-    resolver: { module: '@/components/ui/section-style', export: 'resolveSectionStyle' },
+    resolvers: [{ module: '@/components/ui/section-style', export: 'resolveSectionStyle' }],
     render: 'src/components/ui/section-background.tsx',
     target: '[data-section-background]',
     change: 'content',
@@ -86,7 +96,7 @@ const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component'
     capability: 'glass',
     scope: 'section',
     field: 'style.panel',
-    resolver: { module: '@/lib/sanity/section-panel', export: 'resolveSectionPanel' },
+    resolvers: [{ module: '@/lib/sanity/section-panel', export: 'resolveSectionPanel' }],
     render: 'src/components/ui/section-frame.tsx',
     target: SECTION_CONTAINER,
     change: 'attributes',
@@ -96,7 +106,12 @@ const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component'
     capability: 'edge',
     scope: 'section',
     field: 'style.edge',
-    resolver: { module: '@/components/ui/section-style', export: 'resolveEdge' },
+    // SectionFrame draws the edge's frame from the resolved style; SectionRenderer pulls the next
+    // section up under it through resolveEdge.
+    resolvers: [
+      { module: '@/components/ui/section-style', export: 'resolveSectionStyle' },
+      { module: '@/components/ui/section-style', export: 'resolveEdge' },
+    ],
     render: 'src/components/ui/section-frame.tsx',
     // The element directly around the section: the edge's frame once there is one.
     target: ':has(> section)',
@@ -107,7 +122,7 @@ const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component'
     capability: 'motion',
     scope: 'section',
     field: 'style.motion',
-    resolver: { module: '@/components/ui/section-style', export: 'sectionMotion' },
+    resolvers: [{ module: '@/components/ui/section-style', export: 'sectionMotion' }],
     render: 'src/components/ui/section-frame.tsx',
     target: SECTION_CONTAINER,
     change: 'content',
@@ -160,7 +175,8 @@ const SLOT_IMAGE = [{ _key: 'probe-image', _type: 'slotImage', image: PICTURE }]
 // The Link list
 
 const LINK_LIST = 'src/features/pages/components/sections/link-list'
-const FIRST_LINK = 'ul > li:first-child'
+// Every link item (the list's other <ul>s hold categories and social icons).
+const LINK_ITEMS = 'li[data-track-event="link_click"]'
 
 const link = (key: string, thumbnail: boolean) => ({
   _key: key,
@@ -204,9 +220,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'card',
     layouts: WITH_CARDS,
     field: 'cardDesign.border',
-    resolver: { module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' },
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: linkListContent(true),
     probe: { 'cardDesign.border': 'thick' },
@@ -218,9 +234,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'item',
     layouts: WITH_CARDS,
     field: 'links[].design.border',
-    resolver: { module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' },
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: { ...linkListContent(true), ...CUSTOMISED },
     probe: { 'links.0.design.border': 'thick' },
@@ -232,9 +248,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'card',
     layouts: ALL_LINK_LIST,
     field: 'cardDesign.label',
-    resolver: { module: '@/lib/sanity/text-style-options', export: 'textLook' },
+    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: linkListContent(true),
     probe: { 'cardDesign.label.size': 'large' },
@@ -246,9 +262,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'item',
     layouts: ALL_LINK_LIST,
     field: 'links[].design.label',
-    resolver: { module: '@/lib/sanity/text-style-options', export: 'textLook' },
+    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: { ...linkListContent(true), ...CUSTOMISED },
     probe: { 'links.0.design.label.size': 'large' },
@@ -260,9 +276,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'card',
     layouts: WITH_CARDS,
     field: 'linkDesign.iconShape',
-    resolver: { module: '@/lib/sanity/surface-options', export: 'iconLook' },
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: linkListContent(false),
     probe: { 'linkDesign.iconShape': 'circle' },
@@ -274,9 +290,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'item',
     layouts: WITH_CARDS,
     field: 'links[].design.iconShape',
-    resolver: { module: '@/lib/sanity/surface-options', export: 'iconLook' },
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: { ...linkListContent(false), ...CUSTOMISED },
     probe: { 'links.0.design.iconShape': 'circle' },
@@ -288,9 +304,13 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'card',
     layouts: WITH_ARROWS,
     field: 'linkDesign.arrowStyle',
-    resolver: { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+    resolvers: [
+      // Whether there is an arrow, and which, is the card design; LinkArrow draws it.
+      { module: '@/features/pages/utils/link-card-design', export: 'resolveLinkCardDesign' },
+      { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+    ],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: linkListContent(true),
     probe: { 'linkDesign.arrowStyle': 'arrow' },
@@ -302,9 +322,13 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'item',
     layouts: WITH_ARROWS,
     field: 'links[].design.arrowStyle',
-    resolver: { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+    resolvers: [
+      // Whether there is an arrow, and which, is the card design; LinkArrow draws it.
+      { module: '@/features/pages/utils/link-card-design', export: 'resolveLinkCardDesign' },
+      { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+    ],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: { ...linkListContent(true), ...CUSTOMISED },
     probe: { 'links.0.design.arrowStyle': 'arrow' },
@@ -316,9 +340,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'card',
     layouts: WITH_CARDS,
     field: 'depthDesign.linkShadow',
-    resolver: { module: '@/lib/sanity/depth-options', export: 'resolveDepth' },
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveDepth' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: linkListContent(true),
     probe: { 'depthDesign.linkShadow': 'floating' },
@@ -330,9 +354,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'item',
     layouts: WITH_CARDS,
     field: 'links[].design.shadow',
-    resolver: { module: '@/lib/sanity/depth-options', export: 'resolveDepth' },
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveDepth' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: { ...linkListContent(true), ...CUSTOMISED },
     probe: { 'links.0.design.shadow': 'floating' },
@@ -344,7 +368,7 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'section',
     layouts: ALL_LINK_LIST,
     field: 'depthDesign.pictureShadow',
-    resolver: { module: '@/lib/sanity/depth-options', export: 'resolveDepth' },
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveDepth' }],
     render: `${LINK_LIST}/profile.tsx`,
     target: '[data-profile-image]',
     change: 'attributes',
@@ -359,7 +383,8 @@ const linkListEvidence: CapabilityEvidence[] = [
     part: 'profile',
     layouts: ALL_LINK_LIST,
     field: 'profile.image',
-    resolver: { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+    // The profile picture is cropped by the image URL itself (Sanity's crop and hotspot).
+    resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
     render: 'src/components/ui/profile-image.tsx',
     target: '[data-profile-image]',
     change: 'content',
@@ -374,9 +399,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     part: 'thumbnail',
     layouts: ['stacked', 'cards'],
     field: 'links[].thumbnail',
-    resolver: { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+    resolvers: [{ module: '@/lib/sanity/image-framing', export: 'visibleArea' }],
     render: LINK_LIST,
-    target: FIRST_LINK,
+    target: LINK_ITEMS,
     change: 'content',
     base: linkListContent(true),
     probe: { 'links.0.thumbnail.crop': CROPPED },
@@ -388,7 +413,7 @@ const linkListEvidence: CapabilityEvidence[] = [
     scope: 'section',
     layouts: ALL_LINK_LIST,
     field: 'dividerDesign.afterProfile',
-    resolver: { module: '@/lib/sanity/divider-options', export: 'resolveDivider' },
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
     render: 'src/components/ui/decorative-divider.tsx',
     target: SECTION_CONTAINER,
     change: 'content',
@@ -411,9 +436,24 @@ export const EVIDENCE: readonly Evidence[] = [
     component: 'hero',
     capability: 'slots',
     scope: 'section',
-    layouts: ['overlay', 'split', 'editorial', 'full-bleed'],
+    layouts: ['overlay', 'split', 'full-bleed'],
     field: 'supporting',
-    resolver: { module: '@/features/pages/slots/render-slot', export: 'renderSlot' },
+    resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
+    render: 'src/features/pages/components/sections/hero',
+    target: SECTION_CONTAINER,
+    change: 'content',
+    base: { supporting: null },
+    probe: { supporting: STATS_BAR },
+  },
+  {
+    id: 'hero.slots.supporting.editorial',
+    component: 'hero',
+    capability: 'slots',
+    scope: 'section',
+    layouts: ['editorial'],
+    inline: 'Editorial widens its grid for the slot in the component itself (hero/editorial.tsx)',
+    field: 'supporting',
+    resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
     render: 'src/features/pages/components/sections/hero',
     target: SECTION_CONTAINER,
     change: 'content',
@@ -433,7 +473,8 @@ export const EVIDENCE: readonly Evidence[] = [
     scope: 'section',
     layouts: ['side', 'stacked', 'overlay'],
     field: 'media',
-    resolver: { module: '@/features/pages/slots/render-slot', export: 'renderSlot' },
+    // The media slot's picture is chosen here and drawn as the section's framed picture.
+    resolvers: [{ module: '@/features/pages/utils/split-layout', export: 'chooseMedia' }],
     render: 'src/features/pages/components/sections/media-text.tsx',
     target: SECTION_CONTAINER,
     change: 'content',
@@ -447,7 +488,7 @@ export const EVIDENCE: readonly Evidence[] = [
     scope: 'section',
     layouts: ['side', 'stacked', 'overlay'],
     field: 'supporting',
-    resolver: { module: '@/features/pages/slots/render-slot', export: 'renderSlot' },
+    resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
     render: 'src/features/pages/components/sections/media-text.tsx',
     target: SECTION_CONTAINER,
     change: 'content',
@@ -466,10 +507,9 @@ export const EVIDENCE: readonly Evidence[] = [
     source: 'testimonials.manual',
     layouts: ['grid', 'slider'],
     field: 'items',
-    resolver: {
-      module: '@/features/pages/components/sections/testimonials',
-      export: 'Testimonials',
-    },
+    resolvers: [
+      { module: '@/features/pages/components/sections/testimonials', export: 'Testimonials' },
+    ],
     render: 'src/features/pages/components/sections/testimonials',
     target: SECTION_CONTAINER,
     change: 'content',

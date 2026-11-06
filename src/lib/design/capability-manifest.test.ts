@@ -49,7 +49,7 @@ const evidence: CapabilityEvidence[] = [
     scope: 'section',
     layouts: ['open'],
     field: 'style.panel',
-    resolver: { module: '@/lib/sanity/section-panel', export: 'resolveSectionPanel' },
+    resolvers: [{ module: '@/lib/sanity/section-panel', export: 'resolveSectionPanel' }],
     render: 'src/components/ui/section-frame.tsx',
     target: 'section > :last-child',
     change: 'attributes',
@@ -83,7 +83,7 @@ describe('componentContract', () => {
         {
           id: 'fixtureCards.glass.section',
           field: 'style.panel',
-          resolver: '@/lib/sanity/section-panel#resolveSectionPanel',
+          resolvers: ['@/lib/sanity/section-panel#resolveSectionPanel'],
           render: 'src/components/ui/section-frame.tsx',
           target: 'section > :last-child',
           cases: ['fixtureCards.glass.section@open'],
