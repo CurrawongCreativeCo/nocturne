@@ -15,6 +15,10 @@ export const REASONS = {
   notASlotFamily: 'Not a slot family (DE-2: slots only where two real designs need them)',
   usesPanel: 'Uses Panel (task 218), not a card surface (156 item 10)',
   functional: 'A functional element: no marks on embeds or video players (156 part A5)',
+  noCardSurface: 'No card surface (156 item 10)',
+  headerTextOnly: 'Its only text is the section header, covered by that capability',
+  notOn158: 'Not applicable (158 item 3)',
+  noText: 'Holds no text that takes a role',
 } as const
 
 export const NOT_APPLICABLE = Object.fromEntries(

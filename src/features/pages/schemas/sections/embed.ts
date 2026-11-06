@@ -23,6 +23,8 @@ import {
   EmbedTallThumbnail,
 } from '@/lib/sanity/schema/thumbnails/embed-thumbnails'
 
+import { embedCapabilities } from './embed-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2 over the full content width.
@@ -38,6 +40,7 @@ export const embed = defineType({
   title: 'Embed',
   type: 'object',
   icon: PlugIcon,
+  options: { designCapabilities: embedCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,

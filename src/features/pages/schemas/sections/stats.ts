@@ -13,6 +13,8 @@ import {
   StatsInlineThumbnail,
 } from '@/lib/sanity/schema/thumbnails/stats-thumbnails'
 
+import { statsCapabilities } from './stats-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced.
@@ -55,6 +57,7 @@ export const stats = defineType({
   title: 'Stats',
   type: 'object',
   icon: ChartUpwardIcon,
+  options: { designCapabilities: statsCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

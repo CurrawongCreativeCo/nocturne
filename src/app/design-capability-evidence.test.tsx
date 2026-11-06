@@ -83,6 +83,9 @@ vi.mock('@/components/ui/section-style', async (load) =>
 vi.mock('@/features/pages/components/sections/testimonials', async (load) =>
   resolvers.wrap('@/features/pages/components/sections/testimonials', await load()),
 )
+vi.mock('@/features/pages/components/sections/location', async (load) =>
+  resolvers.wrap('@/features/pages/components/sections/location', await load()),
+)
 vi.mock('@/features/pages/slots/render-slot', async (load) =>
   resolvers.wrap('@/features/pages/slots/render-slot', await load()),
 )

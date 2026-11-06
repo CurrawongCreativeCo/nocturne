@@ -15,6 +15,8 @@ import {
 } from '@/lib/sanity/schema/thumbnails/team-thumbnails'
 import { teamPortraitControls } from '@/lib/sanity/team-portrait'
 
+import { teamCapabilities } from './team-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced over max-w-measure-narrow.
@@ -54,6 +56,7 @@ export const team = defineType({
   title: 'Team',
   type: 'object',
   icon: UsersIcon,
+  options: { designCapabilities: teamCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,

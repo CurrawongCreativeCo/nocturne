@@ -204,6 +204,12 @@ describe('evidenceProblems', () => {
     ])
   })
 
+  it('refuses evidence for a part the declaration doesn’t register', () => {
+    expect(messages([{ ...glassEvidence, layouts: ['open'], part: 'halo' }])).toEqual([
+      'Evidence fixtureCards.glass.section: the declaration has no policy for glass at scope section, part halo on open.',
+    ])
+  })
+
   it('refuses evidence for an undeclared component, missing layouts and a reused id', () => {
     expect(messages([glassEvidence], [{ ...component, declaration: undefined }])).toEqual([
       'Evidence fixtureCards.glass.section: fixtureCards has no declaration to verify.',

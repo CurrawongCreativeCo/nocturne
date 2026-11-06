@@ -5,11 +5,14 @@ import { accessField } from '@/lib/sanity/schema/access-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { richTextCapabilities } from './rich-text-capabilities'
+
 export const richText = defineType({
   name: 'richText',
   title: 'Rich text',
   type: 'object',
   icon: TextIcon,
+  options: { designCapabilities: richTextCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

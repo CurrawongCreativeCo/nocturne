@@ -9,6 +9,8 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { ctaBannerCapabilities } from './cta-banner-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced over max-w-5xl.
@@ -22,6 +24,7 @@ export const ctaBanner = defineType({
   title: 'Call to action banner',
   type: 'object',
   icon: BulbOutlineIcon,
+  options: { designCapabilities: ctaBannerCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

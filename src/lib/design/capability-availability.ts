@@ -342,6 +342,22 @@ export function pendingBaseline(
   }
 }
 
+/** Every component's pending pairs today: what the committed baseline must equal. */
+export function currentBaseline(
+  components: readonly ContractComponent[],
+  evidence: readonly Evidence[],
+  gate: SchemaGate,
+): CapabilityBaseline {
+  return pendingBaseline(
+    new Map(
+      components.map((component) => [
+        component.id,
+        capabilityAvailability(component, evidence, gate),
+      ]),
+    ),
+  )
+}
+
 /**
  * The baseline may only shrink: a pending pair or layout it doesn't list is a new gap, and one it lists
  * that is no longer pending must be removed. Entries for components a site has removed are ignored.

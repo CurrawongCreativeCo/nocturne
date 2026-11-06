@@ -12,6 +12,7 @@
     "brand-assets": "node scripts/build-studio-brand-assets.mjs",
     "editor-guide": "node scripts/build-editor-guide.mjs",
     "design-manifest": "node scripts/build-design-manifest.mjs",
+    "design-capabilities": "node scripts/design-capabilities.mjs",
     "typegen": "npm run tokens && npm run brand-assets && sanity schema extract --path=./schema.json --enforce-required-fields --force && npm run editor-guide && npm run design-manifest && sanity typegen generate",
     "typegen:watch": "sanity typegen generate --watch",
     "lint": "eslint . --max-warnings 0",

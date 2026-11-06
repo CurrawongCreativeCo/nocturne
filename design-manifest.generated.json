@@ -2284,7 +2284,171 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "notApplicable": "No card surface (156 item 10)"
+        },
+        "text": {
+          "notApplicable": "Its body is rich text, styled by its blocks"
+        },
+        "header": {
+          "notApplicable": "Has no heading field"
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "notApplicable": "No surface for a shadow to sit on (146)"
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "richText.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "richText.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "richText.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "richText.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "richText.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "richText.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "richText.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "richText.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "mediaText",
@@ -3380,7 +3544,250 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "variant",
+                "when": "A layout or look draws its items on a card (the grid has no such option today)"
+              },
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "title",
+                "body"
+              ],
+              "closingTask": 276,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "variant",
+                "when": "A layout or look draws its items on a card (the grid has no such option today)"
+              },
+              "closingTask": 146,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 158,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "action": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "An item has a link (the field doesn’t exist today)"
+              },
+              "closingTask": 137,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Its icons and pictures are drawn whole, with no frame"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "featuresGrid.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "featuresGrid.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            },
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "Items are drawn on a card whose surface kind is Glass"
+              },
+              "closingTask": 159,
+              "availability": "pending"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "featuresGrid.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "featuresGrid.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "featuresGrid.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "featuresGrid.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "featuresGrid.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "featuresGrid.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "logoCloud",
@@ -3525,7 +3932,212 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "notApplicable": "No card surface (156 item 10)"
+        },
+        "text": {
+          "notApplicable": "Its only text is the section header, covered by that capability"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "marquee": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "marquee": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "notApplicable": "No surface for a shadow to sit on (146)"
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "grid": "pending",
+                "marquee": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Logos (147)"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "grid": "verified",
+                "marquee": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "logoCloud.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "logoCloud.overlay.section@grid",
+                "logoCloud.overlay.section@marquee"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "grid": "verified",
+                "marquee": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "logoCloud.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "logoCloud.glass.section@grid",
+                "logoCloud.glass.section@marquee"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "pending",
+                "marquee": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "verified",
+                "marquee": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "logoCloud.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "logoCloud.edge.section@grid",
+                "logoCloud.edge.section@marquee"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "grid": "verified",
+                "marquee": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "logoCloud.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "logoCloud.motion.section@grid",
+                "logoCloud.motion.section@marquee"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "testimonials",
@@ -4096,7 +4708,222 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "title",
+                "body"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The FAQ item style is Cards (the setting arrives with 156)"
+              },
+              "closingTask": 146,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "The chevron is a disclosure state, not an icon choice (137)"
+        },
+        "action": {
+          "notApplicable": "Accordion chevrons are excluded (137 item 5)"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "faq.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "faq.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "faq.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "faq.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "faq.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "faq.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "faq.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "faq.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "ctaBanner",
@@ -4290,7 +5117,201 @@
           "drawsBackground": false,
           "ownsSurfaces": true
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 159,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "notApplicable": "Its heading and text are section header roles"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 146,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "item",
+              "trigger": {
+                "kind": "setting",
+                "when": "The section has a call to action: a trailing indicator on its buttons",
+                "path": "ctas",
+                "reachable": true
+              },
+              "closingTask": 137,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ctaBanner.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "ctaBanner.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ctaBanner.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "ctaBanner.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ctaBanner.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "ctaBanner.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "formSection",
@@ -4356,7 +5377,200 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 148,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "notApplicable": "Its only text is the section header, covered by that capability"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 148,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "formSection.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "formSection.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "formSection.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "formSection.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "formSection.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "formSection.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "formSection.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "formSection.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "pricingTable",
@@ -4459,7 +5673,276 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": "pending"
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "title",
+                "price",
+                "body",
+                "label",
+                "description"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "roles": [
+                "title",
+                "price",
+                "body",
+                "label",
+                "description"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": "pending"
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 146,
+              "availability": "pending"
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "closingTask": 146,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "A plan lists features, each drawn with a checkmark",
+                "path": "plans",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "action": {
+          "notApplicable": "Has buttons, not a whole-card link (148)"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "pricingTable.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "pricingTable.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            },
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The card’s surface kind is Glass"
+              },
+              "closingTask": 159,
+              "availability": "pending"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "pricingTable.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "pricingTable.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "pricingTable.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "pricingTable.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "pricingTable.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "pricingTable.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "newsletterSignup",
@@ -4533,7 +6016,200 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 148,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "notApplicable": "Its only text is the section header, covered by that capability"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 148,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "newsletterSignup.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "newsletterSignup.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "newsletterSignup.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "newsletterSignup.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "newsletterSignup.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "newsletterSignup.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "newsletterSignup.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "newsletterSignup.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "stats",
@@ -4678,7 +6354,285 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "inline": {
+                  "notApplicable": "Draws no card"
+                },
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "number",
+                "label"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "inline": {
+                  "notApplicable": "156 item 6 names the cards layout only"
+                },
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "inline": "pending",
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "inline": "pending",
+                "cards": "pending"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "inline": {
+                  "notApplicable": "Draws no card"
+                },
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "variant",
+                "when": "The layout is Cards"
+              },
+              "closingTask": 146,
+              "availability": {
+                "inline": {
+                  "notApplicable": "Draws no card"
+                },
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Not applicable (158 item 3)"
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "inline": "pending",
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "inline": "verified",
+                "cards": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "stats.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "stats.overlay.section@inline",
+                "stats.overlay.section@cards"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "inline": "verified",
+                "cards": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The card’s surface kind is Glass"
+              },
+              "closingTask": 159,
+              "availability": {
+                "inline": {
+                  "notApplicable": "Draws no card"
+                },
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "stats.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "stats.glass.section@inline",
+                "stats.glass.section@cards"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "inline": "pending",
+                "cards": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "inline": "verified",
+                "cards": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "stats.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "stats.edge.section@inline",
+                "stats.edge.section@cards"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "inline": "verified",
+                "cards": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "stats.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "stats.motion.section@inline",
+                "stats.motion.section@cards"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "gallery",
@@ -5011,7 +6965,247 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "notApplicable": "No card surface (156 item 10)"
+        },
+        "text": {
+          "notApplicable": "Its only text is the section header, covered by that capability"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "masonry": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "masonry": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "notApplicable": "No surface for a shadow to sit on (146)"
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "notApplicable": "Slider and lightbox controls are excluded (137 item 5)"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "part": "tile",
+              "closingTask": 177,
+              "availability": {
+                "grid": "pending",
+                "masonry": "pending",
+                "slider": "pending"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "grid": "pending",
+                "masonry": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 147,
+              "availability": {
+                "grid": "pending",
+                "masonry": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "gallery.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "gallery.overlay.section@grid",
+                "gallery.overlay.section@masonry",
+                "gallery.overlay.section@slider"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "gallery.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "gallery.glass.section@grid",
+                "gallery.glass.section@masonry",
+                "gallery.glass.section@slider"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "pending",
+                "masonry": "pending",
+                "slider": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "gallery.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "gallery.edge.section@grid",
+                "gallery.edge.section@masonry",
+                "gallery.edge.section@slider"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "gallery.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "gallery.motion.section@grid",
+                "gallery.motion.section@masonry",
+                "gallery.motion.section@slider"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "location",
@@ -5121,7 +7315,269 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "title",
+                "body",
+                "meta"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": "pending"
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 146,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 158,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "trigger": {
+                "kind": "setting",
+                "when": "A map image is set",
+                "path": "mapImage",
+                "reachable": true
+              },
+              "closingTask": 147,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "location.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "location.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            },
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The card’s surface kind is Glass"
+              },
+              "closingTask": 159,
+              "availability": "pending"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "location.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "location.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "location.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "location.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "location.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "location.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {
+        "location.addressCard": {
+          "owner": 278,
+          "availability": "verified"
+        },
+        "location.directionsLink": {
+          "owner": 278,
+          "availability": "verified"
+        },
+        "location.clickToLoadEmbed": {
+          "owner": 278,
+          "availability": "verified"
+        },
+        "location.placeIdEmbed": {
+          "owner": 278,
+          "gate": "A configured Maps Embed API key in a client-owned Google Cloud project. No project, key or billing is approved",
+          "availability": "pending"
+        }
+      }
     },
     {
       "type": "team",
@@ -5493,7 +7949,324 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "title",
+                "meta",
+                "body"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 146,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Its social icons are on member pages, not in this section"
+        },
+        "action": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 137,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "part": "portrait",
+              "closingTask": 177,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 147,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "team.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "team.overlay.section@grid",
+                "team.overlay.section@slider",
+                "team.overlay.section@list"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The card’s surface kind is Glass"
+              },
+              "closingTask": 159,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "team.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "team.glass.section@grid",
+                "team.glass.section@slider",
+                "team.glass.section@list"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "pending",
+                "slider": "pending",
+                "list": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "team.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "team.edge.section@grid",
+                "team.edge.section@slider",
+                "team.edge.section@list"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "team.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "team.motion.section@grid",
+                "team.motion.section@slider",
+                "team.motion.section@list"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "video",
@@ -5673,7 +8446,201 @@
           "drawsBackground": true,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "notApplicable": "No card surface (156 item 10)"
+        },
+        "text": {
+          "notApplicable": "Its only text is the section header, covered by that capability"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "embed": "pending",
+                "ambient": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "notApplicable": "A functional element: no marks on embeds or video players (156 part A5)"
+        },
+        "depth": {
+          "notApplicable": "No surface for a shadow to sit on (146)"
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "embed": "pending",
+                "ambient": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "embed": "verified",
+                "ambient": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "video.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "video.overlay.section@embed",
+                "video.overlay.section@ambient"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "embed": "verified",
+                "ambient": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "video.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "video.glass.section@embed",
+                "video.glass.section@ambient"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "embed": "pending",
+                "ambient": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "embed": "verified",
+                "ambient": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "video.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "video.edge.section@embed",
+                "video.edge.section@ambient"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "embed": "verified",
+                "ambient": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "video.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "video.motion.section@embed",
+                "video.motion.section@ambient"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "process",
@@ -5817,7 +8784,239 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "notApplicable": "No card surface; its markers are icons (156 item 10)"
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "label",
+                "title",
+                "body"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "vertical": "pending",
+                "alternating": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "vertical": "pending",
+                "alternating": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "vertical": "pending",
+                "alternating": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "notApplicable": "No surface for a shadow to sit on (146)"
+        },
+        "icon": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 158,
+              "availability": {
+                "vertical": "pending",
+                "alternating": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "vertical": "pending",
+                "alternating": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "vertical": "verified",
+                "alternating": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "process.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "process.overlay.section@vertical",
+                "process.overlay.section@alternating"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "vertical": "verified",
+                "alternating": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "process.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "process.glass.section@vertical",
+                "process.glass.section@alternating"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "vertical": "pending",
+                "alternating": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "vertical": "verified",
+                "alternating": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "process.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "process.edge.section@vertical",
+                "process.edge.section@alternating"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "vertical": "verified",
+                "alternating": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "process.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "process.motion.section@vertical",
+                "process.motion.section@alternating"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "embed",
@@ -5932,7 +9131,192 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 148,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "notApplicable": "Its only text is the section header, covered by that capability"
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "notApplicable": "A functional element: no marks on embeds or video players (156 part A5)"
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 148,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Draws no icon from the set"
+        },
+        "action": {
+          "notApplicable": "No link covers a whole card"
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "notApplicable": "Has no framed picture"
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "embed.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "embed.overlay.section"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "embed.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "embed.glass.section"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "pending"
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "embed.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "embed.edge.section"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": "verified"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "embed.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "embed.motion.section"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     },
     {
       "type": "linkList",
@@ -9523,7 +12907,354 @@
           "drawsBackground": false,
           "ownsSurfaces": false
         }
-      ]
+      ],
+      "capabilities": {
+        "surface": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "list": {
+                  "notApplicable": "Rows get Text only (156 item 6)"
+                },
+                "agenda": {
+                  "notApplicable": "Rows get Text only (156 item 6)"
+                },
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "text": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "roles": [
+                "title",
+                "meta",
+                "body"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "list": "pending",
+                "agenda": "pending",
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "header": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "roles": [
+                "eyebrow",
+                "heading",
+                "intro"
+              ],
+              "closingTask": 156,
+              "availability": {
+                "list": "pending",
+                "agenda": "pending",
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "mark": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 156,
+              "availability": {
+                "list": "pending",
+                "agenda": "pending",
+                "featured": "pending"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 156,
+              "availability": {
+                "list": {
+                  "notApplicable": "Rows have no card"
+                },
+                "agenda": {
+                  "notApplicable": "Rows have no card"
+                },
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "depth": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 146,
+              "availability": {
+                "list": {
+                  "notApplicable": "Rows have no card"
+                },
+                "agenda": {
+                  "notApplicable": "Rows have no card"
+                },
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "icon": {
+          "notApplicable": "Not applicable (158 item 3)"
+        },
+        "action": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "closingTask": 137,
+              "availability": {
+                "list": "pending",
+                "agenda": {
+                  "notApplicable": "137 item 4 names the list and the featured card only"
+                },
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "framing": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "card",
+              "part": "picture",
+              "closingTask": 177,
+              "availability": {
+                "list": {
+                  "notApplicable": "Draws no event picture"
+                },
+                "agenda": {
+                  "notApplicable": "Draws no event picture"
+                },
+                "featured": "pending"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "background",
+              "trigger": {
+                "kind": "setting",
+                "when": "A background picture is set: Focus mode",
+                "path": "style.image",
+                "reachable": true
+              },
+              "closingTask": 177,
+              "availability": {
+                "list": "pending",
+                "agenda": "pending",
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "pictureDepth": {
+          "policies": [
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The featured event has a picture"
+              },
+              "closingTask": 147,
+              "availability": {
+                "list": {
+                  "notApplicable": "Draws no event picture"
+                },
+                "agenda": {
+                  "notApplicable": "Draws no event picture"
+                },
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "overlay": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 157,
+              "availability": {
+                "list": "verified",
+                "agenda": "verified",
+                "featured": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "events.overlay.section",
+              "field": "style.overlay",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-background]",
+              "cases": [
+                "events.overlay.section@list",
+                "events.overlay.section@agenda",
+                "events.overlay.section@featured"
+              ]
+            }
+          ]
+        },
+        "glass": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 159,
+              "availability": {
+                "list": "verified",
+                "agenda": "verified",
+                "featured": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "card",
+              "trigger": {
+                "kind": "setting",
+                "when": "The card’s surface kind is Glass"
+              },
+              "closingTask": 159,
+              "availability": {
+                "list": {
+                  "notApplicable": "Rows have no card"
+                },
+                "agenda": {
+                  "notApplicable": "Rows have no card"
+                },
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "events.glass.section",
+              "field": "style.panel",
+              "resolvers": [
+                "@/lib/sanity/section-panel#resolveSectionPanel"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "events.glass.section@list",
+                "events.glass.section@agenda",
+                "events.glass.section@featured"
+              ]
+            }
+          ]
+        },
+        "divider": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "list": "pending",
+                "agenda": "pending",
+                "featured": "pending"
+              }
+            }
+          ],
+          "evidence": []
+        },
+        "edge": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 151,
+              "availability": {
+                "list": "verified",
+                "agenda": "verified",
+                "featured": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "events.edge.section",
+              "field": "style.edge",
+              "resolvers": [
+                "@/components/ui/section-style#resolveSectionStyle",
+                "@/components/ui/section-style#resolveEdge"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": ":has(> section)",
+              "cases": [
+                "events.edge.section@list",
+                "events.edge.section@agenda",
+                "events.edge.section@featured"
+              ]
+            }
+          ]
+        },
+        "motion": {
+          "policies": [
+            {
+              "policy": "required",
+              "scope": "section",
+              "closingTask": 217,
+              "availability": {
+                "list": "verified",
+                "agenda": "verified",
+                "featured": "verified"
+              }
+            }
+          ],
+          "evidence": [
+            {
+              "id": "events.motion.section",
+              "field": "style.motion",
+              "resolvers": [
+                "@/components/ui/section-style#sectionMotion"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "section > :last-child",
+              "cases": [
+                "events.motion.section@list",
+                "events.motion.section@agenda",
+                "events.motion.section@featured"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+        }
+      },
+      "contentSources": {}
     }
   ],
   "sectionStyle": {
@@ -10894,7 +14625,55 @@
     "slotBlocks": [
       {
         "type": "statsBar",
-        "title": "Statistics bar"
+        "title": "Statistics bar",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "text": {
+            "notApplicable": "Drawn small in its host’s type; a block has no text controls of its own"
+          },
+          "header": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "mark": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "depth": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "Has no cropped picture"
+          },
+          "pictureDepth": {
+            "notApplicable": "Has no framed picture"
+          },
+          "overlay": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "glass": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "divider": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "edge": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "motion": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "slots": {
+            "notApplicable": "A block fills a slot: no free nesting"
+          }
+        },
+        "contentSources": {}
       },
       {
         "type": "badgeRow",
@@ -10958,19 +14737,219 @@
       },
       {
         "type": "logoRow",
-        "title": "Logos"
+        "title": "Logos",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "text": {
+            "notApplicable": "Holds no text that takes a role"
+          },
+          "header": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "mark": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "depth": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "Logos are drawn whole (177)"
+          },
+          "pictureDepth": {
+            "notApplicable": "Logos (147)"
+          },
+          "overlay": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "glass": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "divider": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "edge": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "motion": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "slots": {
+            "notApplicable": "A block fills a slot: no free nesting"
+          }
+        },
+        "contentSources": {}
       },
       {
         "type": "launchDate",
-        "title": "Launch date"
+        "title": "Launch date",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "text": {
+            "notApplicable": "Drawn small in its host’s type; a block has no text controls of its own"
+          },
+          "header": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "mark": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "depth": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "Has no cropped picture"
+          },
+          "pictureDepth": {
+            "notApplicable": "Has no framed picture"
+          },
+          "overlay": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "glass": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "divider": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "edge": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "motion": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "slots": {
+            "notApplicable": "A block fills a slot: no free nesting"
+          }
+        },
+        "contentSources": {}
       },
       {
         "type": "slotImage",
-        "title": "Image"
+        "title": "Image",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "text": {
+            "notApplicable": "Holds no text that takes a role"
+          },
+          "header": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "mark": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "depth": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "item",
+                "closingTask": 177,
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "pictureDepth": {
+            "notApplicable": "Framed by its host’s Image design (147 adopts it on Image + text)"
+          },
+          "overlay": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "glass": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "divider": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "edge": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "motion": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "slots": {
+            "notApplicable": "A block fills a slot: no free nesting"
+          }
+        },
+        "contentSources": {}
       },
       {
         "type": "slotVideo",
-        "title": "Video"
+        "title": "Video",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "text": {
+            "notApplicable": "Holds no text that takes a role"
+          },
+          "header": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "mark": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "depth": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "Has no cropped picture"
+          },
+          "pictureDepth": {
+            "notApplicable": "Has no framed picture"
+          },
+          "overlay": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "glass": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "divider": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "edge": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "motion": {
+            "notApplicable": "A slot block sits inside its host section, which owns this"
+          },
+          "slots": {
+            "notApplicable": "A block fills a slot: no free nesting"
+          }
+        },
+        "contentSources": {}
       }
     ],
     "listings": [
@@ -11113,16 +15092,11 @@
       ],
       "declared": [
         "hero",
-        "mediaText",
-        "testimonials",
-        "linkList",
-        "badgeRow",
-        "blogPostCards"
-      ],
-      "notDeclaredYet": [
         "richText",
+        "mediaText",
         "featuresGrid",
         "logoCloud",
+        "testimonials",
         "faq",
         "ctaBanner",
         "formSection",
@@ -11135,13 +15109,17 @@
         "video",
         "process",
         "embed",
+        "linkList",
         "events",
         "statsBar",
+        "badgeRow",
         "logoRow",
         "launchDate",
         "slotImage",
-        "slotVideo"
+        "slotVideo",
+        "blogPostCards"
       ],
+      "notDeclaredYet": [],
       "notCovered": [
         {
           "part": "Site header",

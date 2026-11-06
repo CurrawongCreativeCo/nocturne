@@ -4,6 +4,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { MAX_STAT_DECIMALS, formatStat } from '@/lib/stats/format-stat'
 
 import { lengthWarning } from './length-guidance'
+import { statsBarCapabilities } from './stats-bar-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 export const STAT_LIMITS = {
@@ -107,6 +108,7 @@ export const statsBar = defineType({
   title: 'Statistics bar',
   type: 'object',
   icon: ChartUpwardIcon,
+  options: { designCapabilities: statsBarCapabilities },
   fields: [
     defineField({
       name: 'items',

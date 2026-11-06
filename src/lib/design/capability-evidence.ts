@@ -423,6 +423,44 @@ const linkListEvidence: CapabilityEvidence[] = [
 ]
 
 // ---------------------------------------------------------------------------------------------------
+// Location's content sources, drawn by the section itself from Business info
+
+const LOCATION = {
+  component: 'location',
+  resolvers: [{ module: '@/features/pages/components/sections/location', export: 'Location' }],
+  render: 'src/features/pages/components/sections/location',
+  target: SECTION_CONTAINER,
+  change: 'content',
+} as const
+
+const locationSources: SourceEvidence[] = [
+  {
+    ...LOCATION,
+    id: 'location.addressCard',
+    source: 'location.addressCard',
+    field: 'showHours',
+    // The card is what shows without a map image.
+    base: { mapImage: null },
+    probe: { showHours: false },
+  },
+  {
+    ...LOCATION,
+    id: 'location.directionsLink',
+    source: 'location.directionsLink',
+    field: 'directionsLabel',
+    probe: { directionsLabel: 'Find us' },
+  },
+  {
+    ...LOCATION,
+    id: 'location.clickToLoadEmbed',
+    source: 'location.clickToLoadEmbed',
+    field: 'interactiveMap',
+    base: { mapImage: null },
+    probe: { interactiveMap: true },
+  },
+]
+
+// ---------------------------------------------------------------------------------------------------
 // The registry
 
 export const EVIDENCE: readonly Evidence[] = [
@@ -518,6 +556,59 @@ export const EVIDENCE: readonly Evidence[] = [
     },
     probe: { 'items.0.quote': 'Different kind words.' },
   },
+  ...frameEvidence('richText', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('featuresGrid', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('logoCloud', {
+    overlay: ['grid', 'marquee'],
+    glass: ['grid', 'marquee'],
+    edge: ['grid', 'marquee'],
+    motion: ['grid', 'marquee'],
+  }),
+  ...frameEvidence('faq', { overlay: true, glass: true, edge: true, motion: true }),
+  // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
+  ...frameEvidence('ctaBanner', { overlay: true, edge: true, motion: true }),
+  ...frameEvidence('formSection', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('pricingTable', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('newsletterSignup', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('stats', {
+    overlay: ['inline', 'cards'],
+    glass: ['inline', 'cards'],
+    edge: ['inline', 'cards'],
+    motion: ['inline', 'cards'],
+  }),
+  ...frameEvidence('gallery', {
+    overlay: ['grid', 'masonry', 'slider'],
+    glass: ['grid', 'masonry', 'slider'],
+    edge: ['grid', 'masonry', 'slider'],
+    motion: ['grid', 'masonry', 'slider'],
+  }),
+  ...frameEvidence('location', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('team', {
+    overlay: ['grid', 'slider', 'list'],
+    glass: ['grid', 'slider', 'list'],
+    edge: ['grid', 'slider', 'list'],
+    motion: ['grid', 'slider', 'list'],
+  }),
+  ...frameEvidence('video', {
+    overlay: ['embed', 'ambient'],
+    glass: ['embed', 'ambient'],
+    edge: ['embed', 'ambient'],
+    motion: ['embed', 'ambient'],
+  }),
+  ...frameEvidence('process', {
+    overlay: ['vertical', 'alternating'],
+    glass: ['vertical', 'alternating'],
+    edge: ['vertical', 'alternating'],
+    motion: ['vertical', 'alternating'],
+  }),
+  ...frameEvidence('embed', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('events', {
+    overlay: ['list', 'agenda', 'featured'],
+    glass: ['list', 'agenda', 'featured'],
+    edge: ['list', 'agenda', 'featured'],
+    motion: ['list', 'agenda', 'featured'],
+  }),
+  ...locationSources,
   ...frameEvidence('linkList', {
     overlay: ALL_LINK_LIST,
     edge: ALL_LINK_LIST,

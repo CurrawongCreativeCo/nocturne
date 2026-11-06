@@ -1,9 +1,15 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
   capabilityAvailability,
+  currentBaseline,
   evidenceProblems,
+  ratchetProblems,
   sourceAvailability,
+  type CapabilityBaseline,
 } from '@/lib/design/capability-availability'
 import { EVIDENCE } from '@/lib/design/capability-evidence'
 import { CAPABILITY_EXCEPTIONS } from '@/lib/design/capability-exceptions'
@@ -17,34 +23,6 @@ import { COMPONENT_SCHEMAS, DESIGN_COMPONENTS, gate, lookupType } from './design
  * contract"). Each failure names the component, the capability and the fix.
  */
 
-/**
- * Components not declared yet. Stage 2 of task 275 declares a representative slice first; this list
- * only shrinks, and is gone once every component is declared.
- */
-const NOT_DECLARED_YET = [
-  'richText',
-  'featuresGrid',
-  'logoCloud',
-  'faq',
-  'ctaBanner',
-  'formSection',
-  'pricingTable',
-  'newsletterSignup',
-  'stats',
-  'gallery',
-  'location',
-  'team',
-  'video',
-  'process',
-  'embed',
-  'events',
-  'statsBar',
-  'logoRow',
-  'launchDate',
-  'slotImage',
-  'slotVideo',
-]
-
 const explain = (problems: readonly ContractProblem[]) =>
   problems.map((problem) => `${problem.message} Fix: ${problem.fix}`)
 
@@ -53,7 +31,7 @@ describe('the design capability contract', () => {
     const undeclared = DESIGN_COMPONENTS.filter((component) => !component.declaration).map(
       (component) => component.id,
     )
-    expect(undeclared).toEqual(NOT_DECLARED_YET)
+    expect(undeclared).toEqual([])
   })
 
   it('has a reviewed declaration for every declared component', () => {
@@ -109,6 +87,22 @@ describe('the design capability contract', () => {
     expect(
       exceptionProblems(CAPABILITY_EXCEPTIONS, COMPONENT_SCHEMAS, lookupType).map(
         (problem) => `${problem.message} Fix: ${problem.fix}`,
+      ),
+    ).toEqual([])
+  })
+
+  it('keeps the committed baseline: no new gap, and every closed gap removed', () => {
+    const committed = JSON.parse(
+      readFileSync(join(import.meta.dirname, '..', '..', 'capability-baseline.json'), 'utf8'),
+    ) as CapabilityBaseline
+    const current = currentBaseline(DESIGN_COMPONENTS, EVIDENCE, gate)
+    expect(
+      explain(
+        ratchetProblems(
+          current,
+          committed,
+          DESIGN_COMPONENTS.map((component) => component.id),
+        ),
       ),
     ).toEqual([])
   })
