@@ -3463,11 +3463,13 @@
               "scope": "section",
               "part": "placement",
               "closingTask": 219,
-              "fields": [],
+              "fields": [
+                "supporting"
+              ],
               "availability": {
-                "side": "pending",
-                "stacked": "pending",
-                "overlay": "pending"
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
               }
             }
           ],
@@ -3498,6 +3500,51 @@
                 "mediaText.slots.supporting@side",
                 "mediaText.slots.supporting@stacked",
                 "mediaText.slots.supporting@overlay"
+              ]
+            },
+            {
+              "id": "mediaText.slots.placement.media",
+              "field": "supporting",
+              "resolvers": [
+                "@/features/pages/slots/render-slot#renderSlot"
+              ],
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "section .space-y-8 > :not([data-slot-video]) + [data-slot-video]",
+              "cases": [
+                "mediaText.slots.placement.media@side",
+                "mediaText.slots.placement.media@stacked"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/media-text-placement.spec.ts",
+                  "cases": [
+                    "nothing leaves the window on any layout",
+                    "the video sits under the picture, in the picture's column",
+                    "the picture and the video sit above the text, in one column",
+                    "the video is the media, in its own column on a wide screen"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "mediaText.slots.placement.text",
+              "field": "supporting",
+              "resolvers": [
+                "@/features/pages/slots/render-slot#renderSlot"
+              ],
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "section .mt-8 > [data-slot-video]",
+              "cases": [
+                "mediaText.slots.placement.text@overlay"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/media-text-placement.spec.ts",
+                  "cases": [
+                    "nothing leaves the window on any layout",
+                    "the video is in the text, under the buttons, over the picture"
+                  ]
+                }
               ]
             }
           ]
@@ -15742,11 +15789,12 @@
           ]
         },
         {
-          "part": "Event page card (events/components/event-view.tsx)",
+          "part": "Event details card (events/components/event-view.tsx)",
           "needs": [
             "surface"
           ],
-          "tasks": []
+          "tasks": [],
+          "declaredBy": 156
         },
         {
           "part": "Blog post page",
@@ -15768,14 +15816,16 @@
           ]
         },
         {
-          "part": "Service pages (services/components/service-view.tsx)",
+          "part": "Service page (services/components/service-view.tsx)",
           "needs": [],
-          "tasks": []
+          "tasks": [],
+          "declaredBy": 156
         },
         {
           "part": "Search results (search/components/search-view.tsx)",
           "needs": [],
-          "tasks": []
+          "tasks": [],
+          "declaredBy": 156
         }
       ]
     }

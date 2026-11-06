@@ -323,7 +323,49 @@ describe('sourceTestProblems', () => {
     ])
   })
 
-  it('ignores capability evidence', () => {
+  it('ignores capability evidence that is not a placement and names no measurements', () => {
     expect(sourceTestProblems([glassEvidence], read)).toEqual([])
+  })
+
+  describe('a placement, which only browser measurements can prove', () => {
+    const placement = (measured?: { file: string; cases: string[] }[]): Evidence => ({
+      ...glassEvidence,
+      id: 'fixtureCards.slots.placement',
+      capability: 'slots',
+      part: 'placement',
+      ...(measured ? { measured } : {}),
+    })
+
+    it('accepts one whose measurements exist', () => {
+      expect(
+        messages(placement([{ file: 'a.test.tsx', cases: ['draws each stored quote'] }])),
+      ).toEqual([])
+    })
+
+    it('refuses one with no measurements, a missing file or case, or a switched-off test', () => {
+      expect(messages(placement())).toEqual([
+        'Evidence fixtureCards.slots.placement: placement evidence names no browser measurements.',
+      ])
+      expect(messages(placement([{ file: 'gone.test.tsx', cases: ['x'] }]))).toEqual([
+        "Evidence fixtureCards.slots.placement: its test file gone.test.tsx doesn't exist.",
+      ])
+      expect(
+        messages(placement([{ file: 'a.test.tsx', cases: ['sits under the picture'] }])),
+      ).toEqual([
+        'Evidence fixtureCards.slots.placement: a.test.tsx has no test "sits under the picture".',
+      ])
+      expect(
+        messages(placement([{ file: 'skipped.test.tsx', cases: ['draws each stored quote'] }])),
+      ).toEqual([
+        'Evidence fixtureCards.slots.placement: skipped.test.tsx skips, focuses or expects failure in a test.',
+      ])
+    })
+
+    it('checks the measurements of any capability evidence that names them', () => {
+      const named: Evidence = { ...glassEvidence, measured: [{ file: 'gone.test.tsx', cases: [] }] }
+      expect(messages(named)).toEqual([
+        "Evidence fixtureCards.glass.section: its test file gone.test.tsx doesn't exist.",
+      ])
+    })
   })
 })

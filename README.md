@@ -2418,7 +2418,10 @@ owning tasks (156, 158, 137, 146 and the rest) adopt them one at a time. Three t
   resolvers, replaying what they returned with the field unset, and requires the probe to stop changing the target, so a
   named export that exists but isn't called fails. A target that is missing or ignored fails the check. A claim covers only what
   its target proves: the slots' evidence proves a block is drawn (`part: 'block'`), not how each layout makes room for it
-  and places it (`part: 'placement'`, pending until something tests that).
+  and places it (`part: 'placement'`). A placement is only ever claimed with `measured`: browser tests, named by file and
+  case, that measure where each layout puts the block at phone, tablet and desktop widths (a jsdom render has no layout), and
+  the check requires them to exist and not be skipped. Image + text's placement is verified that way
+  (`tests/e2e/media-text-placement.spec.ts`); the hero's is still pending (task 213).
 - **Content sources** are not probed as whole components, which would prove nothing about one source of several. Each is
   verified by tests written for it, named in its evidence by file and case: what it draws from what is stored, what it draws
   nothing without, and that disconnecting the resolver it comes through removes it. The check requires the cases to exist and
@@ -2441,7 +2444,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
 | Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R…   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
 | Rich text (`richText`)                   | –       | –    | –      | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R◐    |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R…     | R…   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Testimonials (`testimonials`), 2 layouts | R…      | R…   | R…     | R…   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
@@ -2469,7 +2472,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope and part) | Verified | Partly verified | Pending |
 | --------------------------------------------- | -------- | --------------- | ------- |
-| Required                                      | 93       | 0               | 127     |
+| Required                                      | 94       | 0               | 126     |
 | Conditional                                   | 0        | 0               | 40      |
 
 Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2487,10 +2490,9 @@ Every Required or Conditional pair that is not verified is in `capability-baseli
 | 159          | 3                | 8                   |
 | 177          | 7                | 20                  |
 | 213          | 3                | 0                   |
-| 219          | 1                | 0                   |
 | 276          | 1                | 0                   |
 
-**Evidence.** 94 capability entries, 201 cases (an entry's layouts are one case each). Each case renders the component through `SectionRenderer` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 96 capability entries, 204 cases (an entry's layouts are one case each). Each case renders the component through `SectionRenderer` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -2547,22 +2549,22 @@ Every Required or Conditional pair that is not verified is in `capability-baseli
 | `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                      |
 | `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                            |
 
-**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Three have no owning task yet.
+**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. 3 have no capability task yet: the task in `Declared by` brings them into the contract, which is not ownership of their design capabilities. Each capability's own closing task is set when the part is declared.
 
-| Not covered by the contract                          | Capabilities it will need | Owning task                |
-| ---------------------------------------------------- | ------------------------- | -------------------------- |
-| Site header                                          | Glass                     | 159                        |
-| Mobile drawer                                        | Glass                     | 7 (Optional quick actions) |
-| Footer                                               | Icon, Divider             | 158, 151                   |
-| Buttons (CtaLink)                                    | Surface, Depth, Action    | 148, 137                   |
-| Booking facade                                       | Surface, Depth            | 148 (Once task 95 exists)  |
-| Team member pages                                    | Icon, Framing, Divider    | 158, 177, 151              |
-| Event pages                                          | Framing, Divider          | 177, 151                   |
-| Event page card (events/components/event-view.tsx)   | Surface                   | **None named yet**         |
-| Blog post page                                       | Framing                   | 177                        |
-| Location pages                                       | Surface, Text             | 278                        |
-| Service pages (services/components/service-view.tsx) | Not assessed              | **None named yet**         |
-| Search results (search/components/search-view.tsx)   | Not assessed              | **None named yet**         |
+| Not covered by the contract                           | Capabilities it will need | Capability tasks           | Declared by          |
+| ----------------------------------------------------- | ------------------------- | -------------------------- | -------------------- |
+| Site header                                           | Glass                     | 159                        | Its capability tasks |
+| Mobile drawer                                         | Glass                     | 7 (Optional quick actions) | Its capability tasks |
+| Footer                                                | Icon, Divider             | 158, 151                   | Its capability tasks |
+| Buttons (CtaLink)                                     | Surface, Depth, Action    | 148, 137                   | Its capability tasks |
+| Booking facade                                        | Surface, Depth            | 148 (Once task 95 exists)  | Its capability tasks |
+| Team member pages                                     | Icon, Framing, Divider    | 158, 177, 151              | Its capability tasks |
+| Event pages                                           | Framing, Divider          | 177, 151                   | Its capability tasks |
+| Event details card (events/components/event-view.tsx) | Surface                   | Set when declared          | Task 156             |
+| Blog post page                                        | Framing                   | 177                        | Its capability tasks |
+| Location pages                                        | Surface, Text             | 278                        | Its capability tasks |
+| Service page (services/components/service-view.tsx)   | Not assessed              | Set when declared          | Task 156             |
+| Search results (search/components/search-view.tsx)    | Not assessed              | Set when declared          | Task 156             |
 
 <!-- design-capabilities:end -->
 
@@ -2685,6 +2687,11 @@ There is no site-wide density setting yet, so "density airy" sets the section's 
    whole proposal is applied (a layout change in the same proposal counts), and a section inserted whole is judged in the layout
    it brings, else its default. Unsetting is never blocked, and fields that carry no capability keep the ordinary checks above.
    A section the manifest has no declaration for is not judged.
+   **Every `set` and `insert` must also have somewhere to land** (`invalid-path`), whatever it changes. A parent object that
+   is missing is created, as the plan writes `setIfMissing` for it (`section.style.panel` on a section with no `style` yet),
+   and the value is then judged in full. A parent that can't be created is rejected, never skipped: a field of something
+   that isn't an object, a list member that isn't there, or an `insert` into a list that was never filled in. Unsetting a value
+   that isn't there is a harmless no-op.
 5. **Permissions.** A patch to anything clients may not edit (`CLIENT_EDITABLE`, through the manifest's `clientEditable`) is
    marked `needsAgencyReview`. `validate` only reports it. **`apply` enforces it:** unless the token is an Administrator's or
    Developer's, those patches are rejected as `agency-permission-required`, and the part they belong to is not written. A proposal
@@ -3372,6 +3379,11 @@ look passes axe and fits at 375, 768 and 1280 px; the media sits where the layou
 button until clicked. The gallery has an entry for each look (`media-text-media-left`, `-stacked`, `-overlay`,
 `-supporting-video`, `-media-video`); the older entries use `image`, so their unchanged baselines show saved pages render
 as before. The new baselines are Linux-only: create them with the **Update visual baselines** workflow.
+`tests/e2e/media-text-placement.spec.ts` measures where each layout puts the supporting video at 375, 768 and 1280 px, on
+the `/media-text-placement` fixture page (not in the gallery, so it has no baseline): under the picture in the media column
+(Media left or right, Stacked), under the buttons over the picture (Text over media), or alone as the media when there is no
+picture. The video block is at most 36rem wide and starts at the picture's left edge. It is the evidence for the placement
+in the design capability contract.
 
 ### Image design
 

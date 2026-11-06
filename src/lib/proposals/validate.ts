@@ -7,7 +7,7 @@ import {
   getAt,
   insertAt,
   parsePath,
-  setAt,
+  setCreatingParents,
   unsetAt,
   type InsertPosition,
   type PathSegment,
@@ -583,16 +583,44 @@ function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspec
   return result
 }
 
-/** The document after `unit`, for checks that need the result (limits are checked before; this is for design). */
+/**
+ * The document after `unit`, for checks that need the result (limits are checked before; this is for
+ * design). A set creates the object fields it goes through, as the plan will (plan.ts); an unset of a
+ * value that isn't there changes nothing. Throws when a set or an insert has nowhere to land.
+ */
 function applyUnit(document: DocumentSnapshot, unit: Unit): DocumentSnapshot {
   const segments = parsePath(unit.path)
   if (!segments) return document
-  if (unit.operation === 'set') return setAt(document, segments, unit.value)
+  if (unit.operation === 'set') return setCreatingParents(document, segments, unit.value)
   if (unit.operation === 'unset') return unsetAt(document, segments)
   if (unit.operation === 'insert' && unit.position && Array.isArray(unit.value)) {
     return insertAt(document, segments, unit.position.where, unit.value)
   }
   return document
+}
+
+/**
+ * The document after `units`, in order. A unit that can't be applied (a set or an insert through a
+ * parent that is missing and can't be created, or isn't an object or a list) is rejected, never
+ * skipped: a skipped unit would be accepted without the checks that read the result, and the write would
+ * then fail or land somewhere unchecked. A rejected unit is left out of the result.
+ */
+function applyUnits(
+  document: DocumentSnapshot,
+  units: { unit: Unit; inspection: Inspection }[],
+): DocumentSnapshot {
+  let patched = document
+  for (const { unit, inspection } of units) {
+    try {
+      patched = applyUnit(patched, unit)
+    } catch (error) {
+      const message = `${unit.path} can't be applied to ${unit.documentId}: ${error instanceof Error ? error.message : 'it goes through something that is missing or is not an object or list'} The proposal can't set or insert through a parent that isn't there and can't be created.`
+      if (!inspection.reasons.some((reason) => reason.message === message)) {
+        inspection.reasons.push(reject('invalid-path', message))
+      }
+    }
+  }
+  return patched
 }
 
 /**
@@ -605,25 +633,26 @@ function checkCapabilities(
   units: { unit: Unit; inspection: Inspection }[],
   deps: ValidateDeps,
 ) {
-  // Best effort: a unit that can't be applied here (a value set on a section with no `style` object yet)
-  // is skipped, so the layout is still read from every change that can be, and never from nothing.
-  let patched = document
-  for (const { unit } of units) {
-    try {
-      patched = applyUnit(patched, unit)
-    } catch {
-      continue
-    }
-  }
+  const patched = applyUnits(document, units)
   const sections = Array.isArray(patched.pageBuilder) ? (patched.pageBuilder as unknown[]) : []
   for (const { inspection } of units) {
+    if (inspection.reasons.length > 0) continue
     if (inspection.marked.length === 0 || !inspection.sectionKey) continue
     const section = sections.find(
       (item): item is Record<string, unknown> =>
         isRecord(item) && item._key === inspection.sectionKey,
     )
     const entry = deps.manifest.sections.find((candidate) => candidate.type === section?._type)
-    if (!section || !entry) continue
+    if (!section || !entry) {
+      // Not found once the whole proposal is applied: its values can't be checked, so they're rejected.
+      inspection.reasons.push(
+        reject(
+          'invalid-path',
+          `The section this change is to can't be found once the proposal's other changes are applied, so its design values can't be checked.`,
+        ),
+      )
+      continue
+    }
     for (const verdict of capabilityVerdicts(
       entry,
       layoutOfSection(entry, section.variant),
@@ -639,14 +668,7 @@ function checkBrandContrast(
   document: DocumentSnapshot,
   units: { unit: Unit; inspection: Inspection }[],
 ) {
-  let patched = document
-  for (const { unit } of units) {
-    try {
-      patched = applyUnit(patched, unit)
-    } catch {
-      return
-    }
-  }
+  const patched = applyUnits(document, units)
   const before = new Set(
     resolveDesignTokens(document as DesignOverrides)
       .checks.filter((c) => !c.pass)
@@ -672,14 +694,7 @@ function checkPanels(
   units: { unit: Unit; inspection: Inspection }[],
   deps: ValidateDeps,
 ) {
-  let patched = document
-  for (const { unit } of units) {
-    try {
-      patched = applyUnit(patched, unit)
-    } catch {
-      return
-    }
-  }
+  const patched = applyUnits(document, units)
   const site = deps.documents.designSettings
     ? resolveDesignTokens(deps.documents.designSettings as DesignOverrides).colours
     : undefined
@@ -744,6 +759,20 @@ export function validateProposal(proposal: unknown, deps: ValidateDeps): Proposa
   }
 
   const inspected = explode(typed).map((unit) => ({ unit, inspection: inspect(unit, deps) }))
+
+  // Every set and insert must have somewhere to land, whatever it changes. A parent object that is
+  // missing is created, as the plan does; one that can't be (a missing list member, or a field of
+  // something that isn't an object) rejects the change here, before any check that reads the result.
+  for (const documentId of new Set(inspected.map((entry) => entry.unit.documentId))) {
+    const document = deps.documents[documentId]
+    if (document?._type !== 'page' && document?._type !== 'designSettings') continue
+    applyUnits(
+      document,
+      inspected.filter(
+        (entry) => entry.unit.documentId === documentId && entry.inspection.reasons.length === 0,
+      ),
+    )
+  }
 
   // Capability and content-source values are judged against the manifest, whichever part they are in.
   const withMarked = new Set(

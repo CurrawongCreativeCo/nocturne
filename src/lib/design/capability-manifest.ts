@@ -59,6 +59,8 @@ export interface ManifestEvidence {
   target: string
   /** The harness cases that run it. */
   cases: readonly string[]
+  /** The browser tests that measure what the harness can't (a placement), by file and case. */
+  measured?: readonly { file: string; cases: readonly string[] }[]
 }
 
 export type ManifestCapability =
@@ -97,6 +99,7 @@ function evidenceFor(
       render: entry.render,
       target: entry.target,
       cases: cases.filter((id) => id === entry.id || id.startsWith(`${entry.id}@`)),
+      ...(entry.measured ? { measured: entry.measured } : {}),
     }))
     .filter((entry) => entry.cases.length > 0)
 }

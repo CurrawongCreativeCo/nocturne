@@ -1,3 +1,4 @@
+import { FUTURE_COVERAGE, type FutureCoverage } from './capabilities'
 import {
   currentBaseline,
   evidenceProblems,
@@ -65,6 +66,20 @@ export interface ContractInputs {
 }
 
 /** What is wrong with the contract, as `{ component, capability?, message, fix }`. */
+/**
+ * Every part the contract doesn't cover yet has a task to bring it in (`declaredBy`) or tasks that will
+ * implement a capability on it. A part with neither could be forgotten, so it can't be listed.
+ */
+export function futureCoverageProblems(parts: readonly FutureCoverage[]): ContractProblem[] {
+  return parts
+    .filter((part) => part.tasks.length === 0 && part.declaredBy === undefined)
+    .map((part) => ({
+      component: part.part,
+      message: `${part.part} is listed as not covered by the contract, and no task is named to bring it in.`,
+      fix: 'Name the task that declares it (`declaredBy`) or the tasks that will add its capabilities (`tasks`) in FUTURE_COVERAGE (src/lib/design/capabilities.ts).',
+    }))
+}
+
 export function contractProblems(inputs: ContractInputs): ContractProblem[] {
   const { components, evidence, gate, schemas, lookup, exceptions, baseline, readSource } = inputs
   const problems: ContractProblem[] = []
@@ -72,6 +87,7 @@ export function contractProblems(inputs: ContractInputs): ContractProblem[] {
   for (const component of components) problems.push(...declarationProblems(component))
   problems.push(...evidenceProblems(components, evidence, gate))
   problems.push(...sourceTestProblems(evidence, readSource))
+  problems.push(...futureCoverageProblems(FUTURE_COVERAGE))
 
   for (const [name, type] of schemas) {
     for (const found of privateFields(type, lookup, exceptions)) {

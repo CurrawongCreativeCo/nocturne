@@ -53,7 +53,7 @@ export const mediaTextCapabilities = declareCapabilities<SplitLayout>({
       policy: 'required',
       scope: 'section',
       part: 'placement',
-      note: 'Each layout places the media and the extra block: responsive behaviour no evidence covers yet',
+      note: 'Each layout places the media and the extra block: measured in a browser at phone, tablet and desktop widths',
     },
   ],
 })

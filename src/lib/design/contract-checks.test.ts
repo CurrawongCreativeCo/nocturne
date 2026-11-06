@@ -13,7 +13,12 @@ import { currentBaseline, type CapabilityBaseline } from './capability-availabil
 import type { CapabilityEvidence } from './capability-evidence'
 import type { CapabilityException } from './capability-exceptions'
 import type { ContractComponent } from './capability-policy'
-import { contractProblems, formatProblem, type ContractInputs } from './contract-checks'
+import {
+  contractProblems,
+  formatProblem,
+  futureCoverageProblems,
+  type ContractInputs,
+} from './contract-checks'
 import { schemaGate, type SchemaField } from './schema-capabilities'
 
 /** A small contract: one section, a shared style type and one reviewed declaration. */
@@ -205,5 +210,31 @@ describe('contractProblems', () => {
     expect(messages({ ...base, baseline: closed })).toEqual([
       'fixtureSection: edge (required, section) is no longer pending, but the baseline still lists it.',
     ])
+  })
+})
+
+describe('futureCoverageProblems', () => {
+  it('accepts a part with a declaring task, or with capability tasks', () => {
+    expect(
+      futureCoverageProblems([
+        { part: 'A view', needs: [], tasks: [], declaredBy: 156 },
+        { part: 'A header', needs: ['glass'], tasks: [159] },
+      ]),
+    ).toEqual([])
+  })
+
+  it('refuses a part nobody is named for, so it cannot be forgotten', () => {
+    const found = futureCoverageProblems([{ part: 'A view', needs: [], tasks: [] }])
+    expect(found).toHaveLength(1)
+    expect(found[0]?.message).toBe(
+      'A view is listed as not covered by the contract, and no task is named to bring it in.',
+    )
+    expect(found[0]?.fix).toContain('declaredBy')
+  })
+
+  it('is part of the contract checks, which the real list passes', () => {
+    expect(
+      contractProblems(inputs()).filter((problem) => problem.message.includes('not covered')),
+    ).toEqual([])
   })
 })

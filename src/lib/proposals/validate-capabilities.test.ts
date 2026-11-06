@@ -30,6 +30,11 @@ const sections = [
   { _key: 'cta', _type: 'ctaBanner' },
   { _key: 'place', _type: 'location' },
   { _key: 'plain', _type: 'richText' },
+  // A parent that is there but isn't an object, and lists that were never filled in.
+  { _key: 'scalarStyle', _type: 'hero', variant: 'split', style: 'oops' },
+  { _key: 'emptyList', _type: 'linkList', variant: 'stacked' },
+  { _key: 'quotes', _type: 'testimonials' },
+  { _key: 'quotesFilled', _type: 'testimonials', items: [{ _key: 'q1', _type: 'testimonial' }] },
 ]
 
 const documents = {
@@ -223,6 +228,105 @@ describe('a content source that isn’t verified', () => {
         [{ set: { [at('heroFull', 'style.overlay')]: 'strong' } }],
         deps({ manifest: undeclared }),
       ),
+    ).toBe(true)
+  })
+})
+
+describe('a change through a parent that is missing or unusable', () => {
+  const codesOf = (patches: ChangeProposal['changes'][number]['patches']) =>
+    rejections(patches).map(([code]) => code)
+
+  it('creates a missing object parent, as the plan does, and still judges the value', () => {
+    // `listStack` has no `style` object yet: the plan writes `setIfMissing`, so this is a real change.
+    expect(accepted([{ set: { [at('heroSplit', 'style.panel')]: 'glass' } }])).toBe(true)
+    expect(codesOf([{ set: { [at('listStack', 'style.panel')]: 'glass' } }])).toEqual([
+      'capability-not-verified',
+    ])
+    expect(codesOf([{ set: { [at('heroFull', 'style.overlay')]: 'strong' } }])).toEqual([
+      'capability-not-verified',
+    ])
+  })
+
+  it('judges the layout a proposal sets in the same change, through the missing parent', () => {
+    expect(
+      accepted([
+        {
+          set: {
+            [at('heroFull', 'variant')]: 'split',
+            [at('heroFull', 'style.panel')]: 'glass',
+          },
+        },
+      ]),
+    ).toBe(true)
+  })
+
+  it('rejects a set through a parent that exists but is not an object, saying why', () => {
+    const found = rejections([{ set: { [at('scalarStyle', 'style.panel')]: 'glass' } }])
+    expect(found.map(([code]) => code)).toEqual(['invalid-path'])
+    expect(found[0]?.[1]).toContain("can't be applied")
+    expect(found[0]?.[1]).toContain("can't set or insert through a parent")
+  })
+
+  it('rejects an insert into a list that was never filled in, never skipping the checks', () => {
+    const item = { _key: 'new', _type: 'linkListItem', label: 'Two' }
+    expect(codesOf([{ insert: { after: at('emptyList', 'links[-1]'), items: [item] } }])).toEqual([
+      'invalid-path',
+    ])
+    // The same insert into a list that exists is an ordinary, accepted change.
+    expect(accepted([{ insert: { after: at('listStack', 'links[-1]'), items: [item] } }])).toBe(
+      true,
+    )
+  })
+
+  it('rejects a change to a content source whose list is missing, accepts it when it is there', () => {
+    const quote = { _key: 'q2', _type: 'testimonial', quote: 'Great', name: 'A' }
+    expect(codesOf([{ insert: { after: at('quotes', 'items[-1]'), items: [quote] } }])).toEqual([
+      'invalid-path',
+    ])
+    expect(accepted([{ insert: { after: at('quotesFilled', 'items[-1]'), items: [quote] } }])).toBe(
+      true,
+    )
+  })
+
+  it('rejects a design value on a section the same proposal removes, rather than not checking it', () => {
+    const found = rejections([
+      { unset: [`pageBuilder[_key=="heroSplit"]`] },
+      { set: { [at('heroSplit', 'style.panel')]: 'glass' } },
+    ])
+    expect(found.map(([code]) => code)).toEqual(['invalid-path'])
+    expect(found[0]?.[1]).toContain("can't be applied")
+  })
+
+  it('rejects an unusable parent whichever part the value is in, and keeps the other part writable', () => {
+    const result = validateProposal(
+      proposal([
+        {
+          set: {
+            [at('scalarStyle', 'style.panel')]: 'glass',
+            [at('plain', 'title')]: 'unknown',
+          },
+        },
+      ]),
+      deps(),
+    )
+    expect(result.design.rejected.map((patch) => patch.path)).toEqual([
+      at('scalarStyle', 'style.panel'),
+    ])
+    expect(result.design.applies).toBe(false)
+  })
+
+  it('leaves unsetting a value that is not there as a harmless change', () => {
+    // Nothing to remove, a missing parent, or a parent that isn't an object: all no-ops, all accepted.
+    expect(
+      accepted([
+        {
+          unset: [
+            at('listStack', 'style.panel'),
+            at('heroSplit', 'style.panel'),
+            at('scalarStyle', 'style.panel'),
+          ],
+        },
+      ]),
     ).toBe(true)
   })
 })

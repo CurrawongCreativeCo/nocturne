@@ -1,6 +1,6 @@
 # Plan amendments from task 275 (proposed, not applied)
 
-**Status:** recorded on 6 November 2026 under the owner's decision B ("keep the additional anatomy-based
+**Status:** recorded on 6 November 2026 (and 7 November 2026 for task 156's second block and the slot placement) under the owner's decision B ("keep the additional anatomy-based
 Required pairs"). **Nothing here has been applied.** The published build plan and every task status stay
 as they are until the owner separately approves applying these blocks.
 
@@ -30,6 +30,17 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
   closing task 148 (148 item 6). The CTA banner's inner card surface is Required with closing task 159
   (159 item 3 chooses Panel or card glass). Features grid surfaces are Conditional on a layout or look
   that draws items on a card (task 276).
+```
+
+```text
+ADDITION (7 November 2026, from task 275's final review; owner's decision on future coverage)
+Task 156 is the initial declaration owner for three views the contract doesn't cover yet: the event
+details card (`events/components/event-view.tsx`), the service page (`services/components/service-view.tsx`)
+and search results (`search/components/search-view.tsx`). This is ownership of bringing each view into
+the capability contract (declaring it: its anatomy, which capabilities apply, and each capability's
+closing task), not ownership of all its eventual design capabilities. Each capability's closing task is
+set when the view is declared, and stays with the task that implements it. DONE WHEN also includes: the
+three views are declared, so the contract no longer lists them as not covered.
 ```
 
 ## Task 146
@@ -134,14 +145,20 @@ verified are tracked in the baseline like Required ones. Contradictory policies 
 component, scope, part and layout are rejected.
 ```
 
-## Slot placement in Image + text (no open owner)
+## Slot placement in Image + text (resolved, no amendment)
 
-Task 275 records Image + text's slot placement (each layout places the media and the extra block)
-as Required and pending, with closing task 219 (done). No open task owns it: the plan needs one, or
-a decision that the responsive layout is covered by the section gallery's visual baselines instead.
+Task 275 first recorded Image + text's slot placement (each layout places the media and the extra block)
+as Required and pending, with closing task 219 (done) and no open owner. On 7 November 2026 it was
+measured instead: `tests/e2e/media-text-placement.spec.ts` checks every layout (Media left and right,
+Stacked, Text over media, and no picture) at 375, 768 and 1280 px on a fixture page, and the existing
+layout puts the supporting block where each layout says (under the picture in the media column, or under
+the buttons over the picture). So the placement is Verified, the pending baseline entry is removed, and no
+task needs to own it. The layout itself was not changed. If the placement is ever found wrong, the
+corrective work belongs to the split-family owner, task 193. The hero's placement stays pending, with
+task 213 as its closing task (see task 213 above).
 
-## Still to decide (final acceptance of task 275, not Stage 2)
+## Still to decide (final acceptance of task 275)
 
-- **Owners for three standalone views** in the contract's future-coverage list: the event page card
-  (`events/components/event-view.tsx`), service pages (`services/components/service-view.tsx`) and
-  search results (`search/components/search-view.tsx`). No design task names them yet.
+- Nothing is unassigned: the three views have task 156 as their declaration owner (task 156 above).
+  Whether task 156's size or priority changes because of them is for the plan's owner to say when the
+  amendments are applied.

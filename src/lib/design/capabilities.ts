@@ -288,9 +288,19 @@ export const DESIGN_GROUPS = [
 
 /**
  * Parts of the site the contract doesn't cover yet: not sections, slot blocks or listings, so nothing
- * declares them and the manifest says nothing about them. Each names the tasks that will need it;
- * an empty list means no task names it yet.
+ * declares them and the manifest says nothing about them. `tasks` are the tasks that will implement a
+ * capability on the part (each capability's own closing task is set when the part is declared).
+ * `declaredBy` is the task that brings the part into the contract, which is not ownership of its
+ * eventual design capabilities. Every part has one or the other (`futureCoverageProblems`).
  */
+export interface FutureCoverage {
+  part: string
+  needs: readonly CapabilityId[]
+  tasks: readonly TaskNumber[]
+  note?: string
+  declaredBy?: TaskNumber
+}
+
 export const FUTURE_COVERAGE = [
   { part: 'Site header', needs: ['glass'], tasks: [159] },
   { part: 'Mobile drawer', needs: ['glass'], tasks: [7], note: 'Optional quick actions' },
@@ -304,17 +314,27 @@ export const FUTURE_COVERAGE = [
   },
   { part: 'Team member pages', needs: ['icon', 'framing', 'divider'], tasks: [158, 177, 151] },
   { part: 'Event pages', needs: ['framing', 'divider'], tasks: [177, 151] },
-  { part: 'Event page card (events/components/event-view.tsx)', needs: ['surface'], tasks: [] },
+  {
+    part: 'Event details card (events/components/event-view.tsx)',
+    needs: ['surface'],
+    tasks: [],
+    declaredBy: 156,
+  },
   { part: 'Blog post page', needs: ['framing'], tasks: [177] },
   { part: 'Location pages', needs: ['surface', 'text'], tasks: [278] },
-  { part: 'Service pages (services/components/service-view.tsx)', needs: [], tasks: [] },
-  { part: 'Search results (search/components/search-view.tsx)', needs: [], tasks: [] },
-] as const satisfies readonly {
-  part: string
-  needs: readonly CapabilityId[]
-  tasks: readonly TaskNumber[]
-  note?: string
-}[]
+  {
+    part: 'Service page (services/components/service-view.tsx)',
+    needs: [],
+    tasks: [],
+    declaredBy: 156,
+  },
+  {
+    part: 'Search results (search/components/search-view.tsx)',
+    needs: [],
+    tasks: [],
+    declaredBy: 156,
+  },
+] as const satisfies readonly FutureCoverage[]
 
 /** The reason a generated declaration starts with. The checks reject it, so a person must review. */
 export const NOT_REVIEWED = 'Not reviewed yet'

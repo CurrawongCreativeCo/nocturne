@@ -102,14 +102,6 @@
       "closingTask": 151
     },
     {
-      "component": "mediaText",
-      "capability": "slots",
-      "scope": "section",
-      "part": "placement",
-      "layouts": ["side", "stacked", "overlay"],
-      "closingTask": 219
-    },
-    {
       "component": "featuresGrid",
       "capability": "text",
       "scope": "card",

@@ -861,6 +861,12 @@ exports[`design capability evidence > mediaText.slots.media@side: the probe chan
 
 exports[`design capability evidence > mediaText.slots.media@stacked: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > mediaText.slots.placement.media@side: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.slots.placement.media@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.slots.placement.text@overlay: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > mediaText.slots.supporting@overlay: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > mediaText.slots.supporting@side: the probe changes the registered target 1`] = `[]`;

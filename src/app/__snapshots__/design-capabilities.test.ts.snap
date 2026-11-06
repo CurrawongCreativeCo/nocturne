@@ -441,9 +441,9 @@ exports[`the design capability contract > mediaText: reports what it offers toda
     "slots required section/block @side: verified",
     "slots required section/block @stacked: verified",
     "slots required section/block @overlay: verified",
-    "slots required section/placement @side: pending (219)",
-    "slots required section/placement @stacked: pending (219)",
-    "slots required section/placement @overlay: pending (219)",
+    "slots required section/placement @side: verified",
+    "slots required section/placement @stacked: verified",
+    "slots required section/placement @overlay: verified",
   ],
   "sources": [],
 }

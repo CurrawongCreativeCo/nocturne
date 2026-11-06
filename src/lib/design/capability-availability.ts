@@ -186,9 +186,11 @@ export function sourceAvailability(
 }
 
 /**
- * A content source is verified by tests written for it (SourceEvidence.tests). Each named case must
- * exist in its file, and the file must not skip, focus or fail tests on purpose. The tests themselves
- * run in `npm test`; this checks they can't be deleted or switched off while the source stays verified.
+ * Evidence that rests on tests written for it: a content source is verified by them
+ * (SourceEvidence.tests), and a placement is proven by the ones that measure it in a browser
+ * (CapabilityEvidence.measured). Each named case must exist in its file, and the file must not skip,
+ * focus or fail tests on purpose. The tests themselves run in `npm test` or the e2e jobs; this checks
+ * they can't be deleted or switched off while the claim stays verified.
  */
 export function sourceTestProblems(
   evidence: readonly Evidence[],
@@ -196,17 +198,28 @@ export function sourceTestProblems(
 ): ContractProblem[] {
   const problems: ContractProblem[] = []
   for (const entry of evidence) {
-    if (!('source' in entry)) continue
+    const isSource = 'source' in entry
+    const measured = isSource ? undefined : entry.measured
+    const named = isSource ? entry.tests : (measured ?? [])
+    const placement = !isSource && entry.part === 'placement'
+    if (!isSource && !placement && measured === undefined) continue
     const problem = (message: string, fix: string) =>
       problems.push({
         component: entry.component,
+        ...(isSource ? {} : { capability: entry.capability }),
         message: `Evidence ${entry.id}: ${message}`,
         fix,
       })
-    const fix =
-      'A content source is verified only by tests written for it: write the test, or take the case out of the evidence (the source is then pending).'
-    if (entry.tests.length === 0) problem('it names no tests.', fix)
-    for (const { file, cases } of entry.tests) {
+    const fix = isSource
+      ? 'A content source is verified only by tests written for it: write the test, or take the case out of the evidence (the source is then pending).'
+      : 'Placement is verified only by tests that measure it in a browser: write them and name them in `measured`, or take the evidence out (the placement is then pending).'
+    if (named.length === 0) {
+      problem(
+        isSource ? 'it names no tests.' : 'placement evidence names no browser measurements.',
+        fix,
+      )
+    }
+    for (const { file, cases } of named) {
       const text = read(file)
       if (text === undefined) {
         problem(`its test file ${file} doesn't exist.`, fix)

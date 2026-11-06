@@ -93,13 +93,22 @@ describe('capabilityDocs', () => {
     expect(docs).toMatch(/`cards.services` \| – \| pending \(no component declares it yet\)/)
   })
 
-  it('keeps the three unassigned future-coverage parts visible', () => {
-    const unassigned = docs.split('\n').filter((line) => line.includes('**None named yet**'))
-    expect(unassigned.map((line) => line.split('|')[1]?.trim())).toEqual([
-      'Event page card (events/components/event-view.tsx)',
-      'Service pages (services/components/service-view.tsx)',
-      'Search results (search/components/search-view.tsx)',
+  it('keeps the three views that are not covered yet visible, each with the task that declares it', () => {
+    const rows = docs
+      .split('\n')
+      .filter((line) => line.includes('Not assessed') || line.includes('Set when declared'))
+      .map((line) => line.split('|').map((cell) => cell.trim()))
+    expect(rows.map((cells) => [cells[1], cells[4]])).toEqual([
+      ['Event details card (events/components/event-view.tsx)', 'Task 156'],
+      ['Service page (services/components/service-view.tsx)', 'Task 156'],
+      ['Search results (search/components/search-view.tsx)', 'Task 156'],
     ])
+    // Declaring a view is not owning its capabilities: those closing tasks are set when it is declared.
+    for (const cells of rows) expect(cells[3]).toBe('Set when declared')
+  })
+
+  it('leaves no part without a task of some kind', () => {
+    expect(docs).not.toContain('None named yet')
   })
 })
 

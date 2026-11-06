@@ -50,6 +50,13 @@ export interface CapabilityEvidence extends EvidenceBase {
    * it (`appears`: the element is absent with the field unset).
    */
   change: 'attributes' | 'content' | 'appears'
+  /**
+   * Tests that measure what the probe can't: where a layout puts something at each width, which only a
+   * browser can show. Checked to exist and not be switched off (`sourceTestProblems`), and required for
+   * any evidence of a `placement` part: the harness proves that the block is drawn in the wrapper the
+   * layout gives it, the measurements prove where that wrapper is.
+   */
+  measured?: readonly SourceTests[]
 }
 
 /** Test cases written for one content source, by file and by name. */
@@ -441,6 +448,7 @@ const LOCATION = {
   render: 'src/features/pages/components/sections/location',
 } as const
 
+const MEDIA_TEXT_PLACEMENT_TESTS = 'tests/e2e/media-text-placement.spec.ts'
 const LOCATION_SOURCE_TESTS = 'src/features/pages/components/sections/location/sources.test.tsx'
 const LOCATION_FACADE_TESTS =
   'src/features/pages/components/sections/location/click-to-load.test.tsx'
@@ -578,6 +586,62 @@ export const EVIDENCE: readonly Evidence[] = [
     change: 'appears',
     base: { media: SLOT_IMAGE, supporting: null },
     probe: { supporting: SLOT_VIDEO },
+  },
+  // Placement: the layouts put the supporting block in the wrapper they give it (the harness), and
+  // that wrapper sits where each layout says at phone, tablet and desktop widths (the measurements).
+  // Side and Stacked share the media column, under the picture; Text over media puts it in the text,
+  // under the buttons. The layouts themselves are unchanged.
+  {
+    id: 'mediaText.slots.placement.media',
+    component: 'mediaText',
+    capability: 'slots',
+    scope: 'section',
+    part: 'placement',
+    layouts: ['side', 'stacked'],
+    field: 'supporting',
+    resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
+    render: 'src/features/pages/components/sections/media-text.tsx',
+    // Drawn straight after the picture, in the wrapper the media column gives it.
+    target: 'section .space-y-8 > :not([data-slot-video]) + [data-slot-video]',
+    change: 'appears',
+    base: { media: SLOT_IMAGE, supporting: null },
+    probe: { supporting: SLOT_VIDEO },
+    measured: [
+      {
+        file: MEDIA_TEXT_PLACEMENT_TESTS,
+        cases: [
+          'nothing leaves the window on any layout',
+          "the video sits under the picture, in the picture's column",
+          'the picture and the video sit above the text, in one column',
+          'the video is the media, in its own column on a wide screen',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'mediaText.slots.placement.text',
+    component: 'mediaText',
+    capability: 'slots',
+    scope: 'section',
+    part: 'placement',
+    layouts: ['overlay'],
+    field: 'supporting',
+    resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
+    render: 'src/features/pages/components/sections/media-text.tsx',
+    // Drawn in the text, in the block under the buttons.
+    target: 'section .mt-8 > [data-slot-video]',
+    change: 'appears',
+    base: { media: SLOT_IMAGE, supporting: null },
+    probe: { supporting: SLOT_VIDEO },
+    measured: [
+      {
+        file: MEDIA_TEXT_PLACEMENT_TESTS,
+        cases: [
+          'nothing leaves the window on any layout',
+          'the video is in the text, under the buttons, over the picture',
+        ],
+      },
+    ],
   },
   ...frameEvidence('testimonials', {
     overlay: ['grid', 'slider'],

@@ -197,15 +197,17 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
   )
 
   const future = table(
-    ['Not covered by the contract', 'Capabilities it will need', 'Owning task'],
+    ['Not covered by the contract', 'Capabilities it will need', 'Capability tasks', 'Declared by'],
     FUTURE_COVERAGE.map((part) => [
       part.part,
       part.needs.length > 0 ? part.needs.map((id) => SHORT[id]).join(', ') : 'Not assessed',
       part.tasks.length > 0
         ? part.tasks.join(', ') + ('note' in part ? ` (${part.note})` : '')
-        : '**None named yet**',
+        : 'Set when declared',
+      'declaredBy' in part ? `Task ${String(part.declaredBy)}` : 'Its capability tasks',
     ]),
   )
+  const withoutTasks = FUTURE_COVERAGE.filter((part) => part.tasks.length === 0).length
 
   return [
     '**Components by capabilities.** `R` is Required and `C` Conditional. `✓` means every applicable layout and scope is verified, `…` none is yet, `◐` some are. `*` means some layouts or scopes opt out, with a reason in the declaration. `–` is Not applicable. The design manifest (`design-manifest.generated.json`) has the same by layout, with each policy, trigger, closing task and the evidence behind it.',
@@ -223,7 +225,7 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
     ),
     '**Reviewed exceptions.** Fields in a Design group that no shared builder made. An exception records how a field was built; it is never evidence that a capability works.',
     exceptionTable,
-    '**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Three have no owning task yet.',
+    `**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. ${String(withoutTasks)} have no capability task yet: the task in \`Declared by\` brings them into the contract, which is not ownership of their design capabilities. Each capability's own closing task is set when the part is declared.`,
     future,
   ].join('\n\n')
 }
