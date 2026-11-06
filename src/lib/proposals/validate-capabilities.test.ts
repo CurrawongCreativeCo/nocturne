@@ -749,6 +749,32 @@ describe('supported icon changes are accepted, and unsupported ones are not (AT7
     }
   })
 
+  it('judges each divider position by its own evidence: one failing position never rides on the others', () => {
+    const changed = clone()
+    const icon = changed.sections.find((section) => section.type === 'linkList')?.capabilities?.icon
+    if (!icon || !('policies' in icon)) throw new Error('No icon policies on the Link list.')
+    const parts = icon.policies.filter((policy) => policy.part?.startsWith('divider.'))
+    expect(parts.map((policy) => policy.part)).toHaveLength(4)
+    const failing = parts.find((policy) => policy.part === 'divider.aboveSocial')
+    if (!failing) throw new Error('No aboveSocial divider part.')
+    failing.availability = Object.fromEntries(
+      Object.keys(failing.availability as Record<string, unknown>).map((layout) => [
+        layout,
+        'pending',
+      ]),
+    )
+    const given = deps({ manifest: changed })
+    const at4 = (position: string) => [
+      { set: { [at('listStack', `dividerDesign.${position}.icon`)]: 'star' } },
+    ]
+    for (const position of ['afterCategories', 'afterProfile', 'belowSocial']) {
+      expect(rejections(at4(position), given), position).toEqual([])
+    }
+    const found = rejections(at4('aboveSocial'), given)
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain("isn't verified")
+  })
+
   it('accepts a badge row with an icon in all four hero layouts', () => {
     const row = {
       _key: 'br',

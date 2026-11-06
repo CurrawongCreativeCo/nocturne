@@ -801,3 +801,114 @@ describe('text roles are verified one by one (AT2)', () => {
     expect(manifestPathOfPatchKey('links.0.design.label.size')).toBe('links[].design.label.size')
   })
 })
+
+describe('independent controls are verified apart (icon positions)', () => {
+  const POSITIONS = ['afterCategories', 'afterProfile', 'aboveSocial', 'belowSocial'] as const
+  const iconComponent: ContractComponent = {
+    id: 'fixtureDividers',
+    kind: 'section',
+    title: 'Fixture dividers',
+    layouts: [],
+    declaration: declareCapabilities({
+      ...(Object.fromEntries(
+        CAPABILITY_IDS.map((id) => [id, notApplicable('Draws nothing of this kind')]),
+      ) as unknown as CapabilityPolicies),
+      icon: POSITIONS.map((position) => ({
+        policy: 'conditional' as const,
+        scope: 'section' as const,
+        part: `divider.${position}`,
+        trigger: {
+          kind: 'setting' as const,
+          when: `The ${position} divider’s centre is an icon`,
+          path: `${position}.centre`,
+        },
+      })) as unknown as CapabilityPolicies['icon'],
+    }),
+  }
+  const iconGate: SchemaGate = {
+    hasSchema: () => true,
+    field: (_component, path) =>
+      path.endsWith('.icon')
+        ? { marker: { capability: 'icon', designBuilder: 'badgeIconField' } }
+        : { marker: {} },
+    offered: () => ({ offered: true }),
+  }
+  const entryFor = (
+    position: string,
+    over: Partial<CapabilityEvidence> = {},
+  ): CapabilityEvidence => ({
+    id: `fixtureDividers.icon.${position}`,
+    component: 'fixtureDividers',
+    capability: 'icon',
+    scope: 'section',
+    part: `divider.${position}`,
+    field: `${position}.icon`,
+    resolvers: [{ module: '@/components/ui/badge-icon', export: 'BadgeIcon' }],
+    render: 'src/x.tsx',
+    target: 'svg',
+    change: 'appears',
+    probe: { [`${position}.icon`]: 'star' },
+    ...over,
+  })
+  const all = POSITIONS.map((position) => entryFor(position))
+  /** Every case passes except the one named, which the harness found unchanged. */
+  const results = (failing?: string) =>
+    new Map(
+      all.map((entry) => [
+        entry.id,
+        entry.id === failing ? ('ignored' as const) : ('changed' as const),
+      ]),
+    )
+
+  it('verifies every position that works and leaves the one that doesn’t pending', () => {
+    const failing = 'fixtureDividers.icon.aboveSocial'
+    const cells = capabilityAvailability(iconComponent, all, iconGate, results(failing))
+    const status: Record<string, string> = {}
+    for (const cell of cells.filter((entry) => entry.capability === 'icon')) {
+      status[cell.part ?? ''] = cell.status
+    }
+    expect(status).toEqual({
+      'divider.afterCategories': 'verified',
+      'divider.afterProfile': 'verified',
+      'divider.aboveSocial': 'pending',
+      'divider.belowSocial': 'verified',
+    })
+    // The baseline names the one position, not the whole capability.
+    expect(
+      pendingBaseline(new Map([['fixtureDividers', cells]])).conditional.map((pair) => pair.part),
+    ).toEqual(['divider.aboveSocial'])
+  })
+
+  it('verifies all four when all four work', () => {
+    const cells = capabilityAvailability(iconComponent, all, iconGate, results())
+    expect(
+      cells
+        .filter((cell) => cell.capability === 'icon')
+        .every((cell) => cell.status === 'verified'),
+    ).toBe(true)
+  })
+
+  it('refuses entries for different fields that would share one cell', () => {
+    // Both on the same part: one that passes would verify the one that doesn't.
+    const shared = [
+      entryFor('afterProfile'),
+      entryFor('aboveSocial', { part: 'divider.afterProfile' }),
+    ]
+    const found = evidenceProblems([iconComponent], shared, iconGate).map(
+      (problem) => problem.message,
+    )
+    expect(found).toHaveLength(1)
+    expect(found[0]).toContain(
+      'is proven by entries for different fields (afterProfile.icon, aboveSocial.icon)',
+    )
+    // Each on its own part, and several entries for the same field, are fine.
+    expect(evidenceProblems([iconComponent], all, iconGate)).toEqual([])
+    expect(
+      evidenceProblems(
+        [iconComponent],
+        [...all, entryFor('afterProfile', { id: 'fixtureDividers.icon.again' })],
+        iconGate,
+      ),
+    ).toEqual([])
+  })
+})

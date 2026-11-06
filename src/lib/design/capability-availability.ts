@@ -412,6 +412,34 @@ export function evidenceProblems(
       }
     }
   }
+  // Independent controls are separate parts. Two entries that prove different fields in the same cell
+  // (capability, scope, part, role and layout) would let one that works verify the one that doesn't, so
+  // each such field needs its own part. Entries that prove the same field are alternative paths to it.
+  const owners = new Map<string, Map<string, string[]>>()
+  for (const entry of evidence) {
+    if (!isCapabilityEvidence(entry)) continue
+    for (const layout of casesOf(entry)) {
+      const key = `${entry.component}|${entry.capability}|${entry.scope}|${entry.part ?? ''}|${entry.role ?? ''}|${layout ?? ''}`
+      const fields = owners.get(key) ?? new Map<string, string[]>()
+      fields.set(entry.field, [...(fields.get(entry.field) ?? []), entry.id])
+      owners.set(key, fields)
+    }
+  }
+  const reported = new Set<string>()
+  for (const [key, fields] of owners) {
+    if (fields.size < 2) continue
+    const [component = '', capability = '', scope = '', part = ''] = key.split('|')
+    const ids = [...new Set([...fields.values()].flat())]
+    const signature = `${component}|${capability}|${scope}|${part}|${[...fields.keys()].join(',')}`
+    if (reported.has(signature)) continue
+    reported.add(signature)
+    problems.push({
+      component,
+      capability: capability as CapabilityId,
+      message: `${component}: ${capability} (${scope}${part ? `, ${part}` : ''}) is proven by entries for different fields (${[...fields.keys()].join(', ')}), so one that passes would verify one that doesn't (${ids.join(', ')}).`,
+      fix: 'Give each independently editable control its own policy part in the declaration, with its evidence on that part. Several entries for the same field are fine.',
+    })
+  }
   return problems
 }
 

@@ -3589,10 +3589,23 @@
             {
               "policy": "required",
               "scope": "section",
-              "part": "block",
+              "part": "block.media",
               "closingTask": 219,
               "fields": [
-                "media",
+                "media"
+              ],
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "section",
+              "part": "block.supporting",
+              "closingTask": 219,
+              "fields": [
                 "supporting"
               ],
               "availability": {
@@ -15632,6 +15645,7 @@
             {
               "policy": "required",
               "scope": "card",
+              "part": "container",
               "closingTask": 158,
               "fields": [
                 "linkDesign.iconShape"
@@ -15648,9 +15662,26 @@
             {
               "policy": "required",
               "scope": "item",
+              "part": "container",
               "closingTask": 158,
               "fields": [
-                "links[].design.iconShape",
+                "links[].design.iconShape"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Draws no icon"
+                },
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "part": "identity",
+              "closingTask": 158,
+              "fields": [
                 "links[].icon"
               ],
               "availability": {
@@ -15665,18 +15696,78 @@
             {
               "policy": "conditional",
               "scope": "section",
-              "part": "divider",
+              "part": "divider.afterCategories",
               "trigger": {
                 "kind": "setting",
-                "when": "A divider’s centre is an icon",
+                "when": "The after-categories divider’s centre is an icon",
+                "path": "dividerDesign.afterCategories.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
+                "dividerDesign.afterCategories.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider.afterProfile",
+              "trigger": {
+                "kind": "setting",
+                "when": "The after-profile divider’s centre is an icon",
                 "path": "dividerDesign.afterProfile.centre",
                 "reachable": true
               },
               "closingTask": 158,
               "fields": [
-                "dividerDesign.afterCategories.icon",
-                "dividerDesign.afterProfile.icon",
-                "dividerDesign.aboveSocial.icon",
+                "dividerDesign.afterProfile.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider.aboveSocial",
+              "trigger": {
+                "kind": "setting",
+                "when": "The above-social divider’s centre is an icon",
+                "path": "dividerDesign.aboveSocial.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
+                "dividerDesign.aboveSocial.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider.belowSocial",
+              "trigger": {
+                "kind": "setting",
+                "when": "The below-social divider’s centre is an icon",
+                "path": "dividerDesign.belowSocial.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
                 "dividerDesign.belowSocial.icon"
               ],
               "availability": {

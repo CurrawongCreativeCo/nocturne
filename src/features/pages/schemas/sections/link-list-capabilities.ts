@@ -1,7 +1,22 @@
-import { declareCapabilities } from '@/lib/design/capabilities'
+import { declareCapabilities, type ConditionalPolicy } from '@/lib/design/capabilities'
 import { backgroundFraming, NOT_APPLICABLE } from '@/lib/design/common-policies'
 
 type LinkListLayout = 'stacked' | 'cards' | 'editorial' | 'compact'
+
+const ICON_LAYOUTS = {
+  stacked: 'applies',
+  cards: 'applies',
+  compact: 'applies',
+  editorial: { notApplicable: 'Draws no icon' },
+} as const
+
+/** The four places the Link list draws a divider, each with its own centre. */
+const DIVIDER_POSITIONS = [
+  { position: 'afterCategories', title: 'after-categories' },
+  { position: 'afterProfile', title: 'after-profile' },
+  { position: 'aboveSocial', title: 'above-social' },
+  { position: 'belowSocial', title: 'below-social' },
+] as const
 
 const ROWS_ONLY = { notApplicable: 'Row style applies to Stacked only' }
 
@@ -40,29 +55,28 @@ export const linkListCapabilities = declareCapabilities<LinkListLayout>({
       editorial: { notApplicable: 'Has no surface for a shadow' },
     },
   },
+  // Each independently editable icon control is its own part, so one that works never verifies another:
+  // the container (shape and colours), which icon a link shows, and the centre icon of each divider
+  // position. A part is verified only by evidence for its own field.
   icon: [
     {
       policy: 'required',
       scope: ['card', 'item'],
-      layouts: {
-        stacked: 'applies',
-        cards: 'applies',
-        compact: 'applies',
-        editorial: { notApplicable: 'Draws no icon' },
-      },
+      part: 'container',
+      layouts: ICON_LAYOUTS,
     },
-    // A divider's centre can be an icon from the same set (its own position in the section).
-    {
+    { policy: 'required', scope: 'item', part: 'identity', layouts: ICON_LAYOUTS },
+    ...DIVIDER_POSITIONS.map(({ position, title }): ConditionalPolicy<LinkListLayout> => ({
       policy: 'conditional',
       scope: 'section',
-      part: 'divider',
+      part: `divider.${position}`,
       trigger: {
         kind: 'setting',
-        when: 'A divider’s centre is an icon',
-        path: 'dividerDesign.afterProfile.centre',
+        when: `The ${title} divider’s centre is an icon`,
+        path: `dividerDesign.${position}.centre`,
       },
-    },
-  ],
+    })),
+  ] as const,
   action: {
     policy: 'required',
     scope: ['card', 'item'],
