@@ -21,6 +21,7 @@ import {
   type ImageDesignShape,
 } from '../image-design-options'
 import { hiddenFromClients } from '../roles'
+import { builtOptions } from './capability-marker'
 import { presetField, type PresetOptionsContext } from './preset-field'
 import { sectionAtStylePath } from './section-form'
 import {
@@ -85,7 +86,7 @@ export const imageDesign = defineType({
   type: 'object',
   // The three pictures sit straight in the Design tab, not in a box of their own. A shared design
   // type, though none of its settings is one of the capabilities (lib/design/capabilities.ts).
-  options: { frameless: true, designBuilder: 'imageDesign' },
+  options: builtOptions('imageDesign', { frameless: true }),
   fieldsets: [
     {
       name: 'more',

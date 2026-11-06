@@ -78,7 +78,7 @@ import {
 } from '../section-style-options'
 import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
-import { builtBy } from './capability-marker'
+import { builtBy, builtOptions } from './capability-marker'
 import { imageField } from './image-field'
 import { presetField } from './preset-field'
 import {
@@ -333,7 +333,7 @@ export const sectionStyle = defineType({
   title: 'Section design',
   type: 'object',
   // The fields are rendered straight into the Design tab, not in a box of their own.
-  options: { frameless: true, designBuilder: 'sectionStyle' },
+  options: builtOptions('sectionStyle', { frameless: true }),
   fieldsets: [
     {
       name: 'motionAdvanced',

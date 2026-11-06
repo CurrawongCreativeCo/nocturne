@@ -20,6 +20,7 @@ import {
   DIVIDER_WIDTH_TITLES,
 } from '../divider-options'
 import { badgeIconField } from './badge-icon-field'
+import { builtOptions } from './capability-marker'
 import { imageField } from './image-field'
 import { lengthWarning } from './length-guidance'
 import { presetField } from './preset-field'
@@ -61,12 +62,7 @@ export const decorativeDivider = defineType({
   title: 'Divider',
   type: 'object',
   // A shared design capability (lib/design/capabilities.ts): every field of this type is one.
-  options: {
-    collapsible: true,
-    collapsed: true,
-    designBuilder: 'decorativeDivider',
-    capability: 'divider',
-  },
+  options: builtOptions('decorativeDivider', { collapsible: true, collapsed: true }, 'divider'),
   fieldsets: [
     {
       name: 'colours',

@@ -1,3 +1,4 @@
+import { provenanceOf } from './builder-provenance'
 import type { CapabilityId, SharedBuilder } from './capabilities'
 import type { CapabilityException } from './capability-exceptions'
 
@@ -25,22 +26,39 @@ export type TypeLookup = (name: string) => SchemaField | undefined
 
 export interface Marker {
   capability?: CapabilityId
+  /** The shared builder that stamped it: never read from a typed-in option. */
   designBuilder?: SharedBuilder
+  /** Why the stamp can't be trusted here (made for another field, or its capability changed). */
+  forged?: string
+}
+
+/**
+ * The field's marker: its capability, and the builder whose provenance stamp it carries (on its own
+ * options, else its named type's). A stamp made for another field, or a capability changed after the
+ * builder set it, is reported as forged and proves nothing.
+ */
+export function markerOf(field: SchemaField, lookup: TypeLookup): Marker {
+  const named = lookup(field.type)
+  const ownStamp = provenanceOf(field.options)
+  const stamp = ownStamp ?? provenanceOf(named?.options)
+  const capability = (field.options?.capability ?? named?.options?.capability) as
+    CapabilityId | undefined
+  const madeFor = ownStamp ? field.name : named?.name
+  const forged = !stamp
+    ? undefined
+    : stamp.name !== undefined && stamp.name !== madeFor
+      ? `stamped for ${stamp.name}, not ${madeFor ?? field.name}`
+      : (stamp.capability ?? undefined) !== capability
+        ? `its capability says ${capability ?? 'none'}, but ${stamp.builder} made it as ${stamp.capability ?? 'none'}`
+        : undefined
+  return {
+    ...(capability ? { capability } : {}),
+    ...(stamp && !forged ? { designBuilder: stamp.builder } : {}),
+    ...(forged ? { forged } : {}),
+  }
 }
 
 const MAX_DEPTH = 8
-
-/** The field's own marker, else the named type's. */
-export function markerOf(field: SchemaField, lookup: TypeLookup): Marker {
-  const own = field.options ?? {}
-  const named = lookup(field.type)?.options ?? {}
-  const capability = (own.capability ?? named.capability) as CapabilityId | undefined
-  const designBuilder = (own.designBuilder ?? named.designBuilder) as SharedBuilder | undefined
-  return {
-    ...(capability ? { capability } : {}),
-    ...(designBuilder ? { designBuilder } : {}),
-  }
-}
 
 /** The fields inside an object field: its own, or its named type's. */
 function fieldsOf(field: SchemaField, lookup: TypeLookup): readonly SchemaField[] | undefined {
@@ -126,8 +144,12 @@ export interface PrivateField {
   path: string
   /** The capability marker it carries without a shared builder, if any. */
   capability?: CapabilityId
-  /** Why the field is private: a design control no shared builder made, or a marker with no review. */
-  problem: 'unbuilt' | 'unreviewedMarker' | 'markerMismatch' | 'markedNonDesign'
+  /**
+   * Why the field is private: a design control no shared builder made, a marker with no review, or a
+   * builder's stamp that doesn't belong to it.
+   */
+  problem:
+    'unbuilt' | 'unreviewedMarker' | 'markerMismatch' | 'markedNonDesign' | 'forgedProvenance'
 }
 
 /**
@@ -143,6 +165,13 @@ export function privateFields(
   const found: PrivateField[] = []
   walkFields(type, lookup, ({ path, field, marker, top }) => {
     const exception = exceptionFor(exceptions, type.name, path)
+    if (marker.forged) {
+      found.push({
+        path,
+        ...(marker.capability ? { capability: marker.capability } : {}),
+        problem: 'forgedProvenance',
+      })
+    }
     if (marker.capability && !marker.designBuilder) {
       if (!exception) {
         found.push({ path, capability: marker.capability, problem: 'unreviewedMarker' })

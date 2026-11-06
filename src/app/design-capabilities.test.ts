@@ -77,6 +77,34 @@ describe('the design capability contract', () => {
     expect(found).toEqual([])
   })
 
+  it('refuses a forged or borrowed builder marker on a real section (S1 mutation)', () => {
+    const linkList = COMPONENT_SCHEMAS.get('linkList')
+    const testimonials = COMPONENT_SCHEMAS.get('testimonials')
+    const avatar = testimonials?.fields?.find((field) => field.name === 'avatarDesign')
+    expect(linkList && avatar).toBeTruthy()
+    if (!linkList || !avatar) return
+    const mutated = {
+      ...linkList,
+      fields: [
+        ...(linkList.fields ?? []),
+        // A builder typed in by hand, and a real builder's stamp copied from another field.
+        {
+          name: 'sparkle',
+          type: 'string',
+          group: 'design',
+          options: { designBuilder: 'surfaceFields', capability: 'surface' },
+        },
+        { name: 'halo', type: 'string', group: 'design', options: avatar.options },
+      ],
+    }
+    expect(privateFields(mutated, lookupType, CAPABILITY_EXCEPTIONS)).toEqual([
+      { path: 'sparkle', capability: 'surface', problem: 'unreviewedMarker' },
+      { path: 'sparkle', problem: 'unbuilt' },
+      { path: 'halo', problem: 'forgedProvenance' },
+      { path: 'halo', problem: 'unbuilt' },
+    ])
+  })
+
   it('keeps the exception register complete and current', () => {
     expect(
       exceptionProblems(CAPABILITY_EXCEPTIONS, COMPONENT_SCHEMAS, lookupType).map(

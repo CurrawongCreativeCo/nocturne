@@ -1,4 +1,5 @@
 import { isFramingKey, type FramingKey } from '../image-frame-geometry'
+import { builtOptions } from './capability-marker'
 
 declare module 'sanity' {
   interface ImageOptions {
@@ -11,12 +12,8 @@ declare module 'sanity' {
  * Opts an image field into "Adjust picture": `options: { ...imageOptions, ...framing('linkListProfile') }`.
  * It also marks the field as the picture framing capability (lib/design/capabilities.ts).
  */
-export function framing(key: FramingKey): {
-  framing: FramingKey
-  designBuilder: 'framing'
-  capability: 'framing'
-} {
-  return { framing: key, designBuilder: 'framing', capability: 'framing' }
+export function framing(key: FramingKey): { framing: FramingKey; capability?: 'framing' } {
+  return builtOptions('framing', { framing: key }, 'framing')
 }
 
 /** The framing key on an image field's options, if it opted in. */

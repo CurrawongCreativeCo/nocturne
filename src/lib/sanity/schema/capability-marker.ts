@@ -1,3 +1,4 @@
+import { stampProvenance } from '@/lib/design/builder-provenance'
 import type {
   CapabilityId,
   DesignCapabilityDeclaration,
@@ -11,8 +12,6 @@ declare module 'sanity' {
      * made the field, or by `markCapability` on a field the exception register lists.
      */
     capability?: CapabilityId
-    /** The shared builder that made this field: how the capability checks tell shared from private. */
-    designBuilder?: SharedBuilder
     /** On a section, slot block or listing type: what it should offer (task 275). */
     designCapabilities?: DesignCapabilityDeclaration
   }
@@ -20,23 +19,48 @@ declare module 'sanity' {
 
 /**
  * How a field says which shared design capability it is and what made it (README, "Design capability
- * contract"). Only options change: nothing is stored, and the Studio draws the field as before.
+ * contract"). Only options change: nothing is stored, and the Studio draws the field as before. What
+ * made a field is a provenance stamp (lib/design/builder-provenance.ts) that can't be typed by hand;
+ * each builder may stamp only from its own module, which a test checks.
  */
 
-type WithOptions = object & { options?: unknown }
+type WithOptions = object & { name?: string; options?: unknown }
 
 function withOptions<T extends WithOptions>(field: T, extra: Record<string, unknown>): T {
   const options = (field.options ?? {}) as Record<string, unknown>
   return { ...field, options: { ...options, ...extra } }
 }
 
-/** Marks a field a shared builder made, and the capability it is when it is one. */
+/** Marks a field (or named type) a shared builder made, and the capability it is when it is one. */
 export function builtBy<T extends WithOptions>(
-  designBuilder: SharedBuilder,
+  builder: SharedBuilder,
   field: T,
   capability?: CapabilityId,
+): T & { options: Record<string, unknown> } {
+  const options = (field.options ?? {}) as Record<string, unknown>
+  return {
+    ...field,
+    options: stampProvenance(
+      { ...options, ...(capability ? { capability } : {}) },
+      {
+        builder,
+        ...(capability ? { capability } : {}),
+        ...(field.name ? { name: field.name } : {}),
+      },
+    ),
+  }
+}
+
+/** Options a shared builder hands out as a fragment, such as Adjust picture's `framing(key)`. */
+export function builtOptions<T extends object>(
+  builder: SharedBuilder,
+  options: T,
+  capability?: CapabilityId,
 ): T {
-  return withOptions(field, { designBuilder, ...(capability ? { capability } : {}) })
+  return stampProvenance(
+    { ...options, ...(capability ? { capability } : {}) },
+    { builder, ...(capability ? { capability } : {}) },
+  )
 }
 
 /**

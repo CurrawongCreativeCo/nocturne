@@ -258,20 +258,20 @@ export type ContentSourceId = (typeof CONTENT_SOURCES)[number]['id']
 
 /**
  * The shared builders a design field may be made by (judged by how a field was built, never by its
- * name). Each marks what it creates; a field in a Design group made any other way needs a reviewed
- * exception (capability-exceptions.ts).
+ * name), each with the one module allowed to stamp its provenance (builder-provenance.ts). A field in a
+ * Design group made any other way needs a reviewed exception (capability-exceptions.ts).
  */
 export const SHARED_BUILDERS = {
-  sectionStyle: 'The shared section style (lib/sanity/schema/section-style.ts)',
-  surfaceFields: 'Card surfaces (lib/sanity/schema/surface-design.ts)',
-  textStyleField: 'Text styles (lib/sanity/schema/surface-design.ts)',
-  iconDesignFields: 'Icon containers (lib/sanity/schema/surface-design.ts)',
-  badgeIconField: 'Icons from the set (lib/sanity/schema/badge-icon-field.ts)',
-  framing: 'Adjust picture (lib/sanity/schema/image-framing-option.ts)',
-  decorativeDivider: 'Decorative dividers (lib/sanity/schema/decorative-divider.ts)',
-  slotField: 'Slots (features/pages/slots/slot-field.ts)',
-  imageDesign: 'Image design (lib/sanity/schema/image-design.ts)',
-  avatarDesignField: 'Avatars (lib/sanity/schema/avatar-design.ts)',
+  sectionStyle: 'src/lib/sanity/schema/section-style.ts',
+  surfaceFields: 'src/lib/sanity/schema/surface-design.ts',
+  textStyleField: 'src/lib/sanity/schema/surface-design.ts',
+  iconDesignFields: 'src/lib/sanity/schema/surface-design.ts',
+  badgeIconField: 'src/lib/sanity/schema/badge-icon-field.ts',
+  framing: 'src/lib/sanity/schema/image-framing-option.ts',
+  decorativeDivider: 'src/lib/sanity/schema/decorative-divider.ts',
+  slotField: 'src/features/pages/slots/slot-field.ts',
+  imageDesign: 'src/lib/sanity/schema/image-design.ts',
+  avatarDesignField: 'src/lib/sanity/schema/avatar-design.ts',
 } as const
 
 export type SharedBuilder = keyof typeof SHARED_BUILDERS

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { builtBy, builtOptions } from '@/lib/sanity/schema/capability-marker'
+
 import type { CapabilityException } from './capability-exceptions'
 import {
   exceptionProblems,
@@ -9,28 +11,35 @@ import {
   type SchemaField,
 } from './schema-capabilities'
 
-/** A small in-memory schema: a shared style type, a shared divider type and one section. */
+/**
+ * A small in-memory schema: a shared style type, a shared divider type and one section, made with the
+ * real provenance stamps (lib/sanity/schema/capability-marker.ts).
+ */
 const style: SchemaField = {
   name: 'fixtureStyle',
   type: 'object',
-  options: { designBuilder: 'sectionStyle' },
+  options: builtOptions('sectionStyle', {}),
   fields: [
     { name: 'tone', type: 'string' },
-    {
-      name: 'panel',
-      type: 'string',
-      options: { designBuilder: 'sectionStyle', capability: 'glass' },
-      hidden: ({ document }: { document: { pageBuilder: { layout?: string }[] } }) =>
-        document.pageBuilder[0]?.layout === 'boxed',
-    },
+    builtBy(
+      'sectionStyle',
+      {
+        name: 'panel',
+        type: 'string',
+        hidden: ({ document }: { document: { pageBuilder: { layout?: string }[] } }) =>
+          document.pageBuilder[0]?.layout === 'boxed',
+      },
+      'glass',
+    ),
   ],
 }
 const divider: SchemaField = {
   name: 'fixtureDivider',
   type: 'object',
-  options: { designBuilder: 'decorativeDivider', capability: 'divider' },
+  options: builtOptions('decorativeDivider', {}, 'divider'),
   fields: [{ name: 'style', type: 'string' }],
 }
+const border = builtBy('surfaceFields', { name: 'border', type: 'string' }, 'surface')
 const types = new Map([style, divider].map((type) => [type.name, type]))
 const lookup = (name: string) => types.get(name)
 
@@ -46,14 +55,7 @@ const section = (extra: SchemaField[] = []): SchemaField => ({
       name: 'cardDesign',
       type: 'object',
       group: 'design',
-      fields: [
-        {
-          name: 'border',
-          type: 'string',
-          options: { designBuilder: 'surfaceFields', capability: 'surface' },
-        },
-        { name: 'divider', type: 'fixtureDivider' },
-      ],
+      fields: [border, { name: 'divider', type: 'fixtureDivider' }],
     },
     {
       name: 'items',
@@ -132,6 +134,42 @@ describe('privateFields', () => {
   })
 })
 
+describe('builder provenance (S1)', () => {
+  it('ignores a builder typed into a field’s options by hand', () => {
+    const forged = {
+      name: 'glow',
+      type: 'string',
+      group: 'design',
+      options: { designBuilder: 'surfaceFields', capability: 'surface' },
+    }
+    expect(privateFields(section([forged]), lookup, [exception()])).toEqual([
+      { path: 'glow', capability: 'surface', problem: 'unreviewedMarker' },
+      { path: 'glow', problem: 'unbuilt' },
+    ])
+  })
+
+  it('refuses a stamp reused from another field', () => {
+    const borrowed = { name: 'glow', type: 'string', group: 'design', options: border.options }
+    expect(privateFields(section([borrowed]), lookup, [exception()])).toEqual([
+      { path: 'glow', capability: 'surface', problem: 'forgedProvenance' },
+      { path: 'glow', capability: 'surface', problem: 'unreviewedMarker' },
+      { path: 'glow', problem: 'unbuilt' },
+    ])
+  })
+
+  it('refuses a stamped field whose capability was changed afterwards', () => {
+    const relabelled = {
+      ...border,
+      name: 'border',
+      group: 'design',
+      options: { ...border.options, capability: 'glass' },
+    }
+    expect(
+      privateFields(section([{ ...relabelled, name: 'border' }]), lookup, [exception()]),
+    ).toContainEqual({ path: 'border', capability: 'glass', problem: 'forgedProvenance' })
+  })
+})
+
 describe('exceptionProblems', () => {
   const components = new Map([['fixtureSection', section()]])
 
@@ -184,6 +222,14 @@ describe('resolveFieldPath', () => {
     expect(resolveFieldPath(section(), 'cardDesign.divider', lookup)).toMatchObject({
       marker: { capability: 'divider', designBuilder: 'decorativeDivider' },
     })
+    // A typed-in builder is not provenance.
+    expect(
+      resolveFieldPath(
+        section([{ name: 'forged', type: 'string', options: { designBuilder: 'sectionStyle' } }]),
+        'forged',
+        lookup,
+      ),
+    ).toEqual({ field: expect.anything() as unknown, marker: {} })
     expect(resolveFieldPath(section(), 'items[].design.shadow', lookup)).toMatchObject({
       marker: { capability: 'depth' },
     })
