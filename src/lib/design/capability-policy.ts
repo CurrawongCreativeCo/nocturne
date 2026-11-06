@@ -116,6 +116,9 @@ function reasonProblem(reason: unknown): string | undefined {
   return undefined
 }
 
+const REASON_FIX =
+  'Review it: make it Required, Conditional (with a typed trigger) or Not applicable with the reason it does not apply to this component. README, "Design capability contract", says how.'
+
 /**
  * Everything wrong with a component's declaration. Empty when it declares every capability once, with
  * reviewed reasons, typed triggers, every layout accounted for and no two policies for the same scope,
@@ -162,11 +165,7 @@ export function declarationProblems(component: ContractComponent): ContractProbl
     if (!Array.isArray(entry) && single.policy === 'notApplicable') {
       const wrong = reasonProblem(single.reason)
       if (wrong) {
-        problem(
-          id,
-          `${component.id}: ${id} is not applicable but ${wrong}.`,
-          'Write the reviewed reason it does not apply to this component.',
-        )
+        problem(id, `${component.id}: ${id} is not applicable but ${wrong}.`, REASON_FIX)
       }
       continue
     }

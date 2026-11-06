@@ -2392,6 +2392,212 @@ layout, `clientEditable`, undetermined constraints, a missing purpose, a removed
 (byte-identical output, `--check` passing and failing) and `src/features/pages/schemas/design-manifest.test.ts` (every section present, every preset value in its
 field's list, nothing under `src/app` imports the manifest).
 
+#### Design capability contract
+
+The shared design abilities (surface and border, text roles, section header, decorative mark, depth and glow, icon, action
+indicator, picture framing, picture depth, overlay, glass, divider, section edge, motion and slots) are described once, in
+`src/lib/design/`, and every **section, slot block and listing** (the blog's post cards) declares what it should offer of
+each. It is a contract and its checks, not a feature: no component adopts a capability by being declared, and the
+owning tasks (156, 158, 137, 146 and the rest) adopt them one at a time. Three things are kept apart:
+
+- **Policy** is what a component _should_ offer. It is written by hand with `declareCapabilities`, in a `<name>-capabilities.ts`
+  file beside the schema and wired in as `options.designCapabilities`, and never switches anything on. Every capability gets
+  one entry: **Required**, **Conditional** with a typed trigger (the component's anatomy, a layout or a stored setting, never
+  a task's progress), or **Not applicable** with a reason. A policy can name its `scope` (site, section, card or item; a list
+  when it applies at several), its `layouts` (every layout accounted for, by name), a `part` (when two policies share a scope)
+  and a `closingTask` (when another task than the capability's owner implements it here).
+- **Availability** is what it offers today, and is never written down. A layout is **verified** only when the schema offers
+  the marked field there (the Studio's own `hidden` rules, evaluated as an agency user, or a preset that sets it), the
+  policy applies to that layout, an evidence entry registers a render target for it and its probe case passes. Anything
+  else is **pending**. An exception, a declaration or a scratch probe never counts.
+- **Evidence** (`src/lib/design/capability-evidence.ts`) is one entry per adoption: the component, the schema field its
+  probe sets, the resolvers the renderer reaches the target through, the file that draws it, a CSS selector for the
+  element it renders on, and the layouts it covers. `src/app/design-capability-evidence.test.tsx` renders each case
+  through `SectionRenderer` (the section gallery's fixtures) with the field unset and then probed, and requires the target
+  to exist both times, to keep its snapshot while unset and to change with the probe. It then disconnects the claimed
+  resolvers, replaying what they returned with the field unset, and requires the probe to stop changing the target, so a
+  named export that exists but isn't called fails. A target that is missing or ignored fails the check.
+
+Which fields are shared design controls is judged by **how they were built**, never by their names. Each shared builder
+marks the fields it makes with a provenance stamp that can't be typed by hand (`src/lib/design/builder-provenance.ts`;
+`options.capability` says which capability). A field in a component's Design group that no shared builder made needs a row
+in the reviewed exceptions (`src/lib/design/capability-exceptions.ts`): its field, justification, reviewer, whether it is
+permanent or temporary, and the task that removes it. Query and content-source settings are never design capabilities.
+
+The tables below are generated from the declarations and the evidence by `npm run design-capability-docs` (also run by
+`npm run typegen`; CI fails when the committed README differs).
+
+<!-- design-capabilities:start -->
+
+**Components by capabilities.** `R` is Required and `C` Conditional. `✓` means every applicable layout and scope is verified, `…` none is yet, `◐` some are. `*` means some layouts or scopes opt out, with a reason in the declaration. `–` is Not applicable. The design manifest (`design-manifest.generated.json`) has the same by layout, with each policy, trigger, closing task and the evidence behind it.
+
+| Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
+| ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R…   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R✓    |
+| Rich text (`richText`)                   | –       | –    | –      | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
+| Features grid (`featuresGrid`)           | C…      | R…   | R…     | R…   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R…      | R…   | R…     | R…   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| FAQ (`faq`)                              | R…      | R…   | R…     | R…   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R…     | R…   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
+| Form (`formSection`)                     | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Pricing table (`pricingTable`)           | R…      | R…   | R…     | R…   | R…    | C…   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Newsletter signup (`newsletterSignup`)   | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Stats (`stats`), 2 layouts               | R…*     | R…*  | R…     | R…*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R…     | R…   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Location (`location`)                    | R…      | R…   | R…     | R…   | R…    | R…   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R…      | R…   | R…     | R…   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Video (`video`), 2 layouts               | –       | –    | R…     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Process (`process`), 2 layouts           | –       | R…   | R…     | R…   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Embed (`embed`)                          | R…      | –    | R…     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R…   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R…*     | R…   | R…     | R…*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R…   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Launch date (`launchDate`)               | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R…      | –          | –       | –     | –       | –    | –      | –     |
+| Video (`slotVideo`)                      | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Blog post cards (`blogPostCards`)        | R…      | R…   | –      | R…   | R…    | –    | R…     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
+
+| Pairs (component, capability, scope and part) | Verified | Partly verified | Pending |
+| --------------------------------------------- | -------- | --------------- | ------- |
+| Required                                      | 93       | 0               | 125     |
+| Conditional                                   | 0        | 0               | 40      |
+
+Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
+
+| Closing task | Required pending | Conditional pending |
+| ------------ | ---------------- | ------------------- |
+| 137          | 3                | 4                   |
+| 146          | 8                | 3                   |
+| 147          | 5                | 3                   |
+| 148          | 6                | 0                   |
+| 151          | 19               | 0                   |
+| 156          | 66               | 1                   |
+| 157          | 1                | 0                   |
+| 158          | 4                | 1                   |
+| 159          | 3                | 8                   |
+| 177          | 7                | 20                  |
+| 213          | 2                | 0                   |
+| 276          | 1                | 0                   |
+
+**Evidence.** 99 entries, 206 cases (an entry's layouts are one case each). Each case renders the component through `SectionRenderer` with the field unset and then probed, and must change the registered target, also with the claimed resolvers disconnected. Partial claims: `hero.slots.supporting.editorial` (Editorial widens its grid for the slot in the component itself (hero/editorial.tsx)).
+
+**Capabilities and their owners**
+
+| Capability                     | Owning task | What it does                                                                       |
+| ------------------------------ | ----------- | ---------------------------------------------------------------------------------- |
+| Surface and border (`surface`) | 156         | The fill, border and corners of a card or other surface                            |
+| Text roles (`text`)            | 156         | Size, weight and colour for each kind of text, with safe highlights                |
+| Section header (`header`)      | 156         | One shared eyebrow, heading and intro at the top of a section                      |
+| Decorative mark (`mark`)       | 156         | A faint word, picture or icon behind a section, card or item                       |
+| Depth and glow (`depth`)       | 146         | A shadow level and a glow on a card or other box                                   |
+| Icon (`icon`)                  | 158         | An icon from the shared set, in a shared container                                 |
+| Action indicator (`action`)    | 137         | The arrow on a link that covers a whole card, with its states and motion           |
+| Picture framing (`framing`)    | 177         | Adjust picture: a picture cropped to the shape the site draws it in                |
+| Picture depth (`pictureDepth`) | 147         | A shadow and glow on a framed picture                                              |
+| Overlay (`overlay`)            | 157         | A wash or gradient over a picture                                                  |
+| Glass (`glass`)                | 159         | A glass or solid panel behind content                                              |
+| Divider (`divider`)            | 151         | A decorative divider inside a section                                              |
+| Section edge (`edge`)          | 151         | A shaped edge between a section and the next (built by task 83)                    |
+| Motion (`motion`)              | 217         | Animation presets for a section and its parts (built by tasks 84 and 85)           |
+| Slots (`slots`)                | 219         | Typed places where a section takes one approved block (built by tasks 219 and 193) |
+
+**Content sources** are recorded apart from design capabilities and never stand in for them. Generic tabs are deliberately not a capability.
+
+| Source                      | Component      | Availability                           | Owning task | Approval gate                                                                                                  |
+| --------------------------- | -------------- | -------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
+| `testimonials.manual`       | `testimonials` | verified                               | 156         | –                                                                                                              |
+| `testimonials.google`       | `testimonials` | pending                                | 277         | Task 277 Phase 1 decision record and the owner’s approval. No Google Cloud setup is approved                   |
+| `location.addressCard`      | `location`     | verified                               | 278         | –                                                                                                              |
+| `location.directionsLink`   | `location`     | verified                               | 278         | –                                                                                                              |
+| `location.clickToLoadEmbed` | `location`     | verified                               | 278         | –                                                                                                              |
+| `location.placeIdEmbed`     | `location`     | pending                                | 278         | A configured Maps Embed API key in a client-owned Google Cloud project. No project, key or billing is approved |
+| `cards.written`             | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+| `cards.services`            | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+| `cards.locations`           | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+| `cards.posts`               | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+
+**Reviewed exceptions.** Fields in a Design group that no shared builder made. An exception records how a field was built; it is never evidence that a capability works.
+
+| Component   | Fields                                                                                                                                                                              | Class     | Nature        | Reviewer | Removal task | Why it stays                                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `hero`      | `eyebrowDesign`                                                                                                                                                                     | temporary | design        | owner    | 213          | Separator and colours for the eyebrow label list. Colour and type overlap the eyebrow text role.                      |
+| `hero`      | `proportion`                                                                                                                                                                        | permanent | layout        | owner    | –            | How Split shares the width between text and picture. A layout choice no capability covers.                            |
+| `hero`      | `imageShape`                                                                                                                                                                        | temporary | legacy        | owner    | 213          | Hidden and superseded by Image design, kept so stored choices still draw. Removing it needs a dry-run migration.      |
+| `logoCloud` | `logoColour`                                                                                                                                                                        | permanent | design        | owner    | –            | How logos are tinted. Specific to logos, and no capability covers it.                                                 |
+| `gallery`   | `columns`                                                                                                                                                                           | permanent | layout        | owner    | –            | Pictures across on a wide screen. A layout count.                                                                     |
+| `location`  | `interactiveMap`                                                                                                                                                                    | permanent | contentSource | owner    | –            | Switches the click-to-load map on: a content-source setting that sits in Advanced. The source needs its own evidence. |
+| `embed`     | `customHeight`                                                                                                                                                                      | permanent | layout        | owner    | –            | The exact height of a third-party frame, under Advanced.                                                              |
+| `events`    | `category`                                                                                                                                                                          | permanent | query         | owner    | –            | A query filter that sits in Advanced. Not a look.                                                                     |
+| `events`    | `count`                                                                                                                                                                             | permanent | query         | owner    | –            | A query limit that sits in Advanced. Not a look.                                                                      |
+| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 156          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.           |
+| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 156          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                       |
+| `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 158          | The social icon container and colour, overlapping the icon capability.                                                |
+| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.              |
+| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                      |
+| `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                            |
+
+**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Three have no owning task yet.
+
+| Not covered by the contract                          | Capabilities it will need | Owning task                |
+| ---------------------------------------------------- | ------------------------- | -------------------------- |
+| Site header                                          | Glass                     | 159                        |
+| Mobile drawer                                        | Glass                     | 7 (Optional quick actions) |
+| Footer                                               | Icon, Divider             | 158, 151                   |
+| Buttons (CtaLink)                                    | Surface, Depth, Action    | 148, 137                   |
+| Booking facade                                       | Surface, Depth            | 148 (Once task 95 exists)  |
+| Team member pages                                    | Icon, Framing, Divider    | 158, 177, 151              |
+| Event pages                                          | Framing, Divider          | 177, 151                   |
+| Event page card (events/components/event-view.tsx)   | Surface                   | **None named yet**         |
+| Blog post page                                       | Framing                   | 177                        |
+| Location pages                                       | Surface, Text             | 278                        |
+| Service pages (services/components/service-view.tsx) | Not assessed              | **None named yet**         |
+| Search results (search/components/search-view.tsx)   | Not assessed              | **None named yet**         |
+
+<!-- design-capabilities:end -->
+
+**Inheritance.** One rule at every level: unset inherits, and None, Off, Transparent and Flat are values. Per property the
+most specific defined value wins, in this order: the design tokens (`tokens.json`), the site's decisions (Brand colours and
+Design settings), the family and layout preset (code), the section's own choices, then an item's own (a Link list link,
+a pricing plan). Never use `||` or `??` on a stored value before resolving it, a resolver returns only what was chosen, and
+a component replaces only the classes for the properties that were chosen (`src/lib/sanity/design-overrides.ts`). Visitor
+preferences (reduced motion, reduced transparency, more contrast) and render-time contrast fallbacks always win.
+
+**Adopting a capability.** A capability's owning task builds its shared parts first (a builder that marks its fields, a
+resolver, a component), then, for each component its contract lists as Required:
+
+1. build the field with the shared builder, in the component's Design group, in the standard groups (Cards, Text, Icons,
+   Actions, Pictures, Decoration, then the section style's own);
+2. have the component call the shared resolver and draw the result on its own element, replacing only the classes for what
+   was chosen, so a component with nothing set renders exactly as before;
+3. register an evidence entry for it (the field, its resolvers, the file, the element and the layouts it covers);
+4. run `npm run test` (the harness checks it renders and changes, with its resolvers disconnected, and snapshots the unset
+   output) and `npm run design-capabilities -- --update-baseline`, which removes the pairs that are now verified.
+
+**Recording Not applicable.** A component implements only the capabilities that suit its anatomy, and Not applicable is
+a reviewed, legitimate answer: write the reason a reader would accept ("No card surface", "Draws no icon"), naming the layout
+or the part when only some do not apply. `Not reviewed yet`, the reason `npm run new:section` starts with, is rejected by
+the checks, so a new section can't merge until each capability is reviewed. If a capability a component needs is missing
+from the contract, stop and propose it for the template: never write a private surface, text, header, mark, depth, icon,
+arrow, framing, overlay, glass or divider control.
+
+**The checks** run in `npm run check` and CI, and each failure names the component, the capability and the fix:
+
+- every section, slot block and listing declares every capability, with reviewed reasons, typed triggers, every layout
+  accounted for and no contradictory policy for the same scope, part and layout;
+- evidence claims only what the schema offers and the policy applies to, and the harness cases pass;
+- no new private design field: one no shared builder made and no reviewed exception covers;
+- the baseline (`capability-baseline.json`, written once by `npm run design-capabilities -- --init-baseline`) only shrinks. A
+  Required or Conditional pair that isn't verified and isn't listed fails, and a listed pair that is now verified fails
+  until `-- --update-baseline` removes it, which refuses to add anything;
+- the generated README tables are current.
+
+**Change proposals** reject, with the reason, a design value in a capability-marked field, or a content source, that isn't
+verified for the section's layout (see _Change proposals_). Fields that carry no capability keep their ordinary checks.
+
 #### Change proposals
 
 A change proposal is a JSON file that describes edits to a page or to Brand colours as data, never code. A person, a script or
@@ -5878,8 +6084,8 @@ tooling: `npm run check` (or CI) is the shared gate.
 npm run new:section pricing-table
 ```
 
-This creates the schema, GROQ fragment, component and thumbnail, registers each one, adds a placeholder
-to the section gallery's fixtures, and runs typegen.
+This creates the schema, its design capability declaration, GROQ fragment, component and thumbnail, registers each one,
+adds a placeholder to the section gallery's fixtures, and runs typegen.
 The section is immediately in Studio's _Add item_ menu with a title and text field, a **Design** tab (the shared
 `style`, see [Section style](#section-style)) and a `SectionFrame` in its component. Then:
 
@@ -5891,10 +6097,15 @@ The section is immediately in Studio's _Add item_ menu with a title and text fie
    initial style), and style it with the
    [design tokens](#design-tokens) (`bg-surface-alt`, `text-ink-muted`, `py-section`, `text-h2`): a raw colour class fails the
    `no-raw-palette` test
-4. Optionally replace `public/section-previews/pricingTable.svg`
-5. Give the placeholder entry the generator added to the section gallery (`gallerySections` in
+4. Review each design capability in `src/features/pages/schemas/sections/pricing-table-capabilities.ts`. The generator
+   starts every one as Not applicable with the reason "Not reviewed yet", and `npm run check` fails until each is Required,
+   Conditional (with a trigger) or Not applicable (with a reason). See
+   [Design capability contract](#design-capability-contract).
+5. Optionally replace `public/section-previews/pricingTable.svg`
+6. Give the placeholder entry the generator added to the section gallery (`gallerySections` in
    `tests/e2e/fixtures/dataset.mjs`) real content, one entry per variant, then add the screenshot baselines
-   with `npm run test:e2e:update` (see _Section gallery and visual regression_).
+   with `npm run test:e2e:update` (see _Section gallery and visual regression_). The section's parity and capability
+   snapshots are written the first time `npm run test` runs; review and commit them.
 
 Guidance is not automatic for new fields: give `imageField` the spot's `aspect` (`'4:3'`), `minWidth` (px) and/or
 `orientation`, and add `lengthWarning(rule, max, 'Headings')` (`src/lib/sanity/schema/length-guidance.ts`) to titles and

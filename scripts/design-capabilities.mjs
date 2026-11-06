@@ -1,15 +1,17 @@
 /**
- * The design capability baseline (task 275; README, "Design capability contract"): the legacy gaps,
- * Required and Conditional pairs that aren't verified yet, committed as capability-baseline.json.
- * It may only shrink: a new gap fails the check (a new component or layout adopts what applies), and a
- * gap that has closed must be removed.
+ * The design capability contract's static checks and its baseline (task 275; README, "Design
+ * capability contract"). The baseline, capability-baseline.json, lists the legacy gaps: Required and
+ * Conditional pairs that aren't verified yet, with the task that closes each. It may only shrink: a new
+ * gap fails the check (a new component or layout adopts what applies), and a closed gap must be removed.
  *
- *   npm run design-capabilities                       checks the baseline (also run by npm run check)
+ *   npm run design-capabilities                       every static check, each failure naming the
+ *                                                     component, the capability and the fix
+ *                                                     (also run by npm run check and CI)
  *   npm run design-capabilities -- --update-baseline  removes closed gaps; refuses to add new ones
  *   npm run design-capabilities -- --init-baseline    writes the first baseline; refuses if one exists
  *
  * Availability comes from the declarations, the schema markers and the registered evidence. Evidence
- * counts as passing here because the harness test in `npm run check` fails otherwise.
+ * counts as passing here because the harness tests in `npm test` fail otherwise.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -32,6 +34,15 @@ const { DESIGN_COMPONENTS, gate } = await jiti.import(join(root, 'src/app/design
 const { EVIDENCE } = await jiti.import(join(root, 'src/lib/design/capability-evidence.ts'))
 const { currentBaseline, ratchetProblems } = await jiti.import(
   join(root, 'src/lib/design/capability-availability.ts'),
+)
+const { COMPONENT_SCHEMAS, lookupType } = await jiti.import(
+  join(root, 'src/app/design-components.ts'),
+)
+const { CAPABILITY_EXCEPTIONS } = await jiti.import(
+  join(root, 'src/lib/design/capability-exceptions.ts'),
+)
+const { contractProblems, formatProblem } = await jiti.import(
+  join(root, 'src/lib/design/contract-checks.ts'),
 )
 
 const COMMENT =
@@ -68,12 +79,12 @@ if (!existsSync(file)) {
   process.exit(1)
 }
 const committed = JSON.parse(readFileSync(file, 'utf8'))
-const problems = ratchetProblems(current, committed, ids)
-const added = problems.filter((problem) => problem.message.includes("isn't in the baseline"))
+const ratchet = ratchetProblems(current, committed, ids)
+const added = ratchet.filter((problem) => problem.message.includes("isn't in the baseline"))
 
 if (process.argv.includes('--update-baseline')) {
   if (added.length > 0) {
-    for (const problem of added) console.error(`✗ ${problem.message}\n  ${problem.fix}`)
+    for (const problem of added) console.error(formatProblem(problem))
     console.error('The baseline only shrinks, so nothing was written.')
     process.exit(1)
   }
@@ -82,8 +93,22 @@ if (process.argv.includes('--update-baseline')) {
   process.exit(0)
 }
 
+const problems = contractProblems({
+  components: DESIGN_COMPONENTS,
+  evidence: EVIDENCE,
+  gate,
+  schemas: COMPONENT_SCHEMAS,
+  lookup: lookupType,
+  exceptions: CAPABILITY_EXCEPTIONS,
+  baseline: committed,
+})
 if (problems.length > 0) {
-  for (const problem of problems) console.error(`✗ ${problem.message}\n  ${problem.fix}`)
+  for (const problem of problems) console.error(formatProblem(problem))
+  console.error(
+    `\n${problems.length} design capability problem${problems.length === 1 ? '' : 's'}. README, "Design capability contract" says how to adopt or record each capability.`,
+  )
   process.exit(1)
 }
-console.log(`The capability baseline is current: ${count(current)}.`)
+console.log(
+  `The design capability contract holds: ${ids.length} components declared, ${count(current)} in the baseline.`,
+)

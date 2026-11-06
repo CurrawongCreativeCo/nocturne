@@ -14,6 +14,7 @@ import {
 import { EVIDENCE } from '@/lib/design/capability-evidence'
 import { CAPABILITY_EXCEPTIONS } from '@/lib/design/capability-exceptions'
 import { declarationProblems, type ContractProblem } from '@/lib/design/capability-policy'
+import { contractProblems, formatProblem } from '@/lib/design/contract-checks'
 import { exceptionProblems, privateFields } from '@/lib/design/schema-capabilities'
 
 import { COMPONENT_SCHEMAS, DESIGN_COMPONENTS, gate, lookupType } from './design-components'
@@ -27,6 +28,23 @@ const explain = (problems: readonly ContractProblem[]) =>
   problems.map((problem) => `${problem.message} Fix: ${problem.fix}`)
 
 describe('the design capability contract', () => {
+  it('passes every static check, as `npm run design-capabilities` runs them', () => {
+    const committed = JSON.parse(
+      readFileSync(join(import.meta.dirname, '..', '..', 'capability-baseline.json'), 'utf8'),
+    ) as CapabilityBaseline
+    expect(
+      contractProblems({
+        components: DESIGN_COMPONENTS,
+        evidence: EVIDENCE,
+        gate,
+        schemas: COMPONENT_SCHEMAS,
+        lookup: lookupType,
+        exceptions: CAPABILITY_EXCEPTIONS,
+        baseline: committed,
+      }).map(formatProblem),
+    ).toEqual([])
+  })
+
   it('covers every section, slot block and listing', () => {
     const undeclared = DESIGN_COMPONENTS.filter((component) => !component.declaration).map(
       (component) => component.id,
@@ -107,23 +125,21 @@ describe('the design capability contract', () => {
     ).toEqual([])
   })
 
-  it('reports what each declared component offers today', () => {
-    const report = Object.fromEntries(
-      DESIGN_COMPONENTS.filter((component) => component.declaration).map((component) => [
-        component.id,
-        {
-          capabilities: capabilityAvailability(component, EVIDENCE, gate)
-            .filter((cell) => cell.status !== 'notApplicable')
-            .map(
-              (cell) =>
-                `${cell.capability} ${cell.policy} ${cell.scope ?? ''}${cell.part ? `/${cell.part}` : ''}${cell.layout ? ` @${cell.layout}` : ''}: ${cell.status}${cell.status === 'pending' ? ` (${String(cell.closingTask)})` : ''}`,
-            ),
-          sources: sourceAvailability(component, EVIDENCE, gate).map(
-            (row) => `${row.source}${row.layout ? ` @${row.layout}` : ''}: ${row.status}`,
+  // One snapshot per component, so a new section adds its own and no existing one changes.
+  it.each(DESIGN_COMPONENTS.map((component) => ({ id: component.id, component })))(
+    '$id: reports what it offers today',
+    ({ component }) => {
+      expect({
+        capabilities: capabilityAvailability(component, EVIDENCE, gate)
+          .filter((cell) => cell.status !== 'notApplicable')
+          .map(
+            (cell) =>
+              `${cell.capability} ${cell.policy} ${cell.scope ?? ''}${cell.part ? `/${cell.part}` : ''}${cell.layout ? ` @${cell.layout}` : ''}: ${cell.status}${cell.status === 'pending' ? ` (${String(cell.closingTask)})` : ''}`,
           ),
-        },
-      ]),
-    )
-    expect(report).toMatchSnapshot()
-  })
+        sources: sourceAvailability(component, EVIDENCE, gate).map(
+          (row) => `${row.source}${row.layout ? ` @${row.layout}` : ''}: ${row.status}`,
+        ),
+      }).toMatchSnapshot()
+    },
+  )
 })

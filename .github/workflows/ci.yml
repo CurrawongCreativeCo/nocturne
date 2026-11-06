@@ -74,6 +74,16 @@ jobs:
             exit 1
           }
 
+      # `npm run typegen` also rewrites the README's Design capability contract tables from the
+      # declarations and the evidence. (`npm run check` also fails when a declaration, evidence entry or
+      # exception breaks the contract, or the baseline in capability-baseline.json grows.)
+      - name: README design capability tables are committed and current
+        run: |
+          git diff --exit-code README.md || {
+            echo "::error::The README's Design capability contract tables are stale. Run 'npm run design-capability-docs' (or 'npm run typegen') and commit README.md."
+            exit 1
+          }
+
       # `.env.example` and the README's settings table are written from the feature registries.
       - name: .env.example and the README settings table are committed and current
         run: |
@@ -130,9 +140,35 @@ jobs:
 
       - run: npm ci
 
-      - name: Generate, then run every check
+      - name: Generate
+        run: ${{ matrix.command }}
+
+      # A generated section declares every design capability as Not applicable with the reason "Not
+      # reviewed yet", which the checks reject: a new section can't merge until a person has reviewed it.
+      # Prove that, then give the throwaway section a reason so the rest of the checks can run on it.
+      - name: A new section can't merge before its capabilities are reviewed
+        if: startsWith(matrix.name, 'section')
         run: |
-          ${{ matrix.command }}
+          if npm run design-capabilities > review.log 2>&1; then
+            echo "::error::A generated section passed the design capability check without being reviewed."
+            exit 1
+          fi
+          grep -q 'still says "Not reviewed yet"' review.log || {
+            cat review.log
+            echo "::error::The design capability check failed, but not for the generated section's unreviewed capabilities."
+            exit 1
+          }
+          sed -i "s/Not reviewed yet/Smoke test section: nothing to review/" src/features/pages/schemas/sections/ci-smoke-*-capabilities.ts
+          # The committed design manifest and README tables were written with the old reason.
+          npm run design-manifest
+          npm run design-capability-docs
+
+      # VITEST_NEW_SNAPSHOTS lets the new section write its first output-parity and capability snapshots
+      # (a missing snapshot fails in CI); anything that changed still fails.
+      - name: Run every check
+        env:
+          VITEST_NEW_SNAPSHOTS: '1'
+        run: |
           npx next typegen
           npm run check
 
