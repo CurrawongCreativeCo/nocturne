@@ -30,6 +30,10 @@ const outArg = process.argv.indexOf('--out')
 const outFile =
   outArg > -1 ? process.argv[outArg + 1] : join(root, 'design-manifest.generated.json')
 
+// The schemas import the site's config, which insists on a project; this check never talks to one.
+process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||= 'design-contract-check'
+process.env.NEXT_PUBLIC_SANITY_DATASET ||= 'production'
+
 const jiti = createJiti(import.meta.url, {
   alias: { '@': join(root, 'src') },
   interopDefault: true,

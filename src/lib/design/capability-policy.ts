@@ -18,13 +18,26 @@ import {
  * manifest generator and the tests share it.
  */
 
-/** A component the contract covers: a section type, a slot block or a listing. */
+/** Where a slot block can be placed: a host section, its slot field and the host's layouts. */
+export interface SlotHost {
+  section: string
+  /** The host's slot field (`supporting`, `media`). */
+  slot: string
+  layouts: readonly string[]
+}
+
+/**
+ * A component the contract covers: a section type, a slot block, a listing (cards drawn from
+ * documents, such as the blog's) or a view (a page that isn't a section, such as the footer).
+ */
 export interface ContractComponent {
   id: string
-  kind: 'section' | 'slotBlock' | 'listing'
+  kind: 'section' | 'slotBlock' | 'listing' | 'view'
   title: string
   /** Its layouts (a section's `variant` values); empty for a component with one layout. */
   layouts: readonly string[]
+  /** A slot block only: every host it is allowed in. Its evidence must hold in all of them. */
+  hosts?: readonly SlotHost[]
   declaration?: DesignCapabilityDeclaration
 }
 

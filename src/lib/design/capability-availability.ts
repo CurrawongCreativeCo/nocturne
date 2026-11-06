@@ -270,6 +270,14 @@ export function evidenceProblems(
       )
       continue
     }
+    // A slot block is proven inside its hosts: with none, there is nowhere to draw it.
+    if (component.kind === 'slotBlock' && (component.hosts ?? []).length === 0) {
+      problem(
+        `${entry.component} is a slot block that no slot lists, so there is no host to prove it in.`,
+        'Add the block to a slot in the registry (features/pages/slots/registry.ts), or remove the evidence.',
+      )
+      continue
+    }
     if (component.layouts.length > 0 && !entry.layouts?.length) {
       problem(
         `${entry.component} has layouts, and the entry names none.`,

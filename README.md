@@ -2463,7 +2463,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R…   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
 | Events (`events`), 3 layouts             | R…*     | R…   | R…     | R…*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
-| Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R…   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Launch date (`launchDate`)               | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R…      | –          | –       | –     | –       | –    | –      | –     |
@@ -2472,7 +2472,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope and part) | Verified | Partly verified | Pending |
 | --------------------------------------------- | -------- | --------------- | ------- |
-| Required                                      | 94       | 0               | 126     |
+| Required                                      | 95       | 0               | 125     |
 | Conditional                                   | 0        | 0               | 40      |
 
 Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2486,13 +2486,13 @@ Every Required or Conditional pair that is not verified is in `capability-baseli
 | 151          | 19               | 0                   |
 | 156          | 66               | 1                   |
 | 157          | 1                | 0                   |
-| 158          | 4                | 1                   |
+| 158          | 3                | 1                   |
 | 159          | 3                | 8                   |
 | 177          | 7                | 20                  |
 | 213          | 3                | 0                   |
 | 276          | 1                | 0                   |
 
-**Evidence.** 96 capability entries, 204 cases (an entry's layouts are one case each). Each case renders the component through `SectionRenderer` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 97 capability entries, 205 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 

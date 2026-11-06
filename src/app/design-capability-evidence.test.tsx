@@ -4,6 +4,8 @@ import { join } from 'node:path'
 import { createElement, type ComponentType } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { VIEW_DRAWERS } from '@/app/design-capability-views'
+import { DESIGN_COMPONENTS } from '@/app/design-components'
 import {
   fingerprint,
   fixturePictureId,
@@ -12,7 +14,7 @@ import {
   renderSections,
   type RawSection,
 } from '@/features/pages/components/section-renderer.fixtures'
-import { caseId, casesOf } from '@/lib/design/capability-availability'
+import { capabilityAvailability, caseId, casesOf } from '@/lib/design/capability-availability'
 import {
   EVIDENCE,
   isCapabilityEvidence,
@@ -20,8 +22,10 @@ import {
   type Evidence,
   type Patch,
 } from '@/lib/design/capability-evidence'
-import { compareTarget } from '@/lib/design/capability-harness'
+import { compareTarget, type TargetComparison } from '@/lib/design/capability-harness'
 import { applyPatch, withPicture } from '@/lib/design/capability-patch'
+import { schemaGate, type SchemaField } from '@/lib/design/schema-capabilities'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 
 /**
  * The evidence harness (task 275; README, "Design capability contract"): one case per registered
@@ -86,6 +90,9 @@ const resolvers = vi.hoisted(() => {
   return { control, wrap }
 })
 
+vi.mock('@/components/ui/badge-icon', async (load) =>
+  resolvers.wrap('@/components/ui/badge-icon', await load()),
+)
 vi.mock('@/components/ui/link-arrow', async (load) =>
   resolvers.wrap('@/components/ui/link-arrow', await load()),
 )
@@ -167,9 +174,20 @@ async function draw(raw: RawSection) {
   return renderSections(await projectSections([raw]), { belowHeading: true })
 }
 
-async function statesOf(entry: Evidence, layout: string | null) {
-  const picture = await fixturePictureId()
-  const seed = await gallerySeed(entry.component, layout)
+/**
+ * One render the case compares: the component with the capability unset, and with the probe. A section
+ * is drawn by SectionRenderer; a slot block inside every host it is allowed in (one rendering per host
+ * and host layout); a listing or a view by its own drawer (VIEW_DRAWERS). `label` names the host or
+ * layout for a message and the committed snapshot.
+ */
+interface Rendering {
+  label: string
+  unset: () => Promise<string>
+  probed: () => Promise<string>
+}
+
+/** The stored state both renders start from, and the one with the probe on top. */
+function twoStates(seed: Record<string, unknown>, entry: Evidence, picture: string) {
   const unset = withPicture(
     applyPatch(applyPatch(seed, entry.base), unsetFor(entry.probe)),
     picture,
@@ -177,9 +195,104 @@ async function statesOf(entry: Evidence, layout: string | null) {
   return { unset, probed: withPicture(applyPatch(unset, entry.probe), picture) }
 }
 
-async function runCase(entry: CapabilityEvidence, layout: string | null) {
-  const { unset, probed } = await statesOf(entry, layout)
-  return compareTarget(await draw(unset), await draw(probed), entry.target, entry.change)
+/**
+ * Every rendering an entry's case needs. A section: one, in the layout. A slot block: the block, built
+ * from the entry's own values, placed in the host's slot, for each host and host layout, and each must
+ * pass. A listing or view: one, by its drawer, or a failure that says what to add.
+ */
+async function renderingsOf(
+  entry: Evidence,
+  layout: string | null,
+  { components = DESIGN_COMPONENTS, drawers = VIEW_DRAWERS } = {},
+): Promise<Rendering[]> {
+  const component = components.find((candidate) => candidate.id === entry.component)
+  const picture = await fixturePictureId()
+  if (!component) throw new Error(`${entry.component} isn't a component the contract covers.`)
+  if (component.kind === 'section') {
+    const seed = await gallerySeed(entry.component, layout)
+    const states = twoStates(seed, entry, picture)
+    return [
+      {
+        label: layout ?? entry.component,
+        unset: () => draw(states.unset as RawSection),
+        probed: () => draw(states.probed as RawSection),
+      },
+    ]
+  }
+  if (component.kind === 'slotBlock') {
+    const hosts = component.hosts ?? []
+    if (hosts.length === 0) {
+      throw new Error(
+        `${entry.component} is a slot block with no host: the slot registry lists none.`,
+      )
+    }
+    const block = { _key: 'capability-probe-block', _type: entry.component }
+    const states = twoStates(block, entry, picture)
+    return hosts.flatMap((host) =>
+      host.layouts.map((hostLayout) => ({
+        label: `${host.section}.${host.slot}@${hostLayout}`,
+        unset: async () =>
+          draw(await placed(host.section, hostLayout, host.slot, states.unset, picture)),
+        probed: async () =>
+          draw(await placed(host.section, hostLayout, host.slot, states.probed, picture)),
+      })),
+    )
+  }
+  const drawer = drawers[entry.component]
+  if (!drawer) {
+    throw new Error(
+      `${entry.component} is a ${component.kind} and has no drawer. Add one to VIEW_DRAWERS in src/app/design-capability-views.tsx: it must draw the real component from the data the site gives it.`,
+    )
+  }
+  const states = twoStates(await drawer.seed(), entry, picture)
+  return [
+    {
+      label: entry.component,
+      unset: () => drawer.draw(states.unset),
+      probed: () => drawer.draw(states.probed),
+    },
+  ]
+}
+
+/** The host's gallery section with the block in its slot. */
+async function placed(
+  section: string,
+  layout: string,
+  slot: string,
+  block: Record<string, unknown>,
+  picture: string,
+): Promise<RawSection> {
+  const seed = await gallerySeed(section, layout)
+  return withPicture({ ...seed, [slot]: [block] }, picture)
+}
+
+/** The case's result across its renderings: `changed` only when every one is, else the first failure. */
+async function runCase(
+  entry: CapabilityEvidence,
+  layout: string | null,
+): Promise<TargetComparison & { renderings: string[] }> {
+  const results: (TargetComparison & { label: string })[] = []
+  for (const rendering of await renderingsOf(entry, layout)) {
+    results.push({
+      label: rendering.label,
+      ...compareTarget(
+        await rendering.unset(),
+        await rendering.probed(),
+        entry.target,
+        entry.change,
+      ),
+    })
+  }
+  const failed = results.find((result) => result.status !== 'changed')
+  const many = results.length > 1
+  return {
+    status: failed?.status ?? 'changed',
+    // One rendering: its unset target, as ever. Several: each one's, under the host it was drawn in.
+    unset: many
+      ? results.flatMap((result) => result.unset.map((html) => `${result.label}: ${html}`))
+      : (results[0]?.unset ?? []),
+    renderings: results.map((result) => result.label),
+  }
 }
 
 const keyOf = ({ module, export: name }: { module: string; export: string }) => `${module}#${name}`
@@ -191,47 +304,65 @@ const keyOf = ({ module, export: name }: { module: string; export: string }) => 
  * just one. (Counted connected: a resolver downstream of another is not reached once that one is cut.)
  */
 async function runDisconnected(entry: CapabilityEvidence, layout: string | null) {
-  const { unset, probed } = await statesOf(entry, layout)
   const { control } = resolvers
-  control.targets = new Set(entry.resolvers.map(keyOf))
-  control.called = new Map()
-  control.mode = 'count'
-  let connected: string
-  try {
-    connected = await draw(probed)
-  } finally {
-    control.mode = 'pass'
-  }
-  control.recorded = new Map()
-  control.replayed = new Map()
-  control.mode = 'record'
-  try {
-    const unsetHtml = await draw(unset)
-    control.mode = 'replay'
-    const probeHtml = await draw(probed)
-    const unreached = entry.resolvers
-      .map(keyOf)
-      .filter((key) => (control.called.get(key) ?? 0) === 0)
-    return {
-      disconnected: compareTarget(unsetHtml, probeHtml, entry.target, entry.change),
-      // The probe with and without its resolvers: they must differ if the resolvers carry it.
-      cut:
-        entry.change === 'appears'
-          ? compareTarget(probeHtml, connected, entry.target, entry.change)
-          : compareTarget(connected, probeHtml, entry.target, entry.change),
-      unreached,
+  const keys = entry.resolvers.map(keyOf)
+  const outcomes: {
+    label: string
+    disconnected: TargetComparison
+    cut: TargetComparison
+    unreached: string[]
+  }[] = []
+  for (const rendering of await renderingsOf(entry, layout)) {
+    control.targets = new Set(keys)
+    control.called = new Map()
+    control.mode = 'count'
+    let connected: string
+    try {
+      connected = await rendering.probed()
+    } finally {
+      control.mode = 'pass'
     }
-  } finally {
-    control.mode = 'pass'
-    control.targets = new Set()
     control.recorded = new Map()
     control.replayed = new Map()
-    control.called = new Map()
+    control.mode = 'record'
+    try {
+      const unsetHtml = await rendering.unset()
+      control.mode = 'replay'
+      const probeHtml = await rendering.probed()
+      outcomes.push({
+        label: rendering.label,
+        disconnected: compareTarget(unsetHtml, probeHtml, entry.target, entry.change),
+        // The probe with and without its resolvers: they must differ if the resolvers carry it.
+        cut:
+          entry.change === 'appears'
+            ? compareTarget(probeHtml, connected, entry.target, entry.change)
+            : compareTarget(connected, probeHtml, entry.target, entry.change),
+        unreached: keys.filter((key) => (control.called.get(key) ?? 0) === 0),
+      })
+    } finally {
+      control.mode = 'pass'
+      control.targets = new Set()
+      control.recorded = new Map()
+      control.replayed = new Map()
+      control.called = new Map()
+    }
+  }
+  // The claim holds only if it holds in every rendering: report the first that doesn't.
+  const [first] = outcomes
+  if (!first) throw new Error(`${entry.id} has no rendering to compare.`)
+  const worst = (pick: (outcome: (typeof outcomes)[number]) => boolean) =>
+    outcomes.find(pick) ?? first
+  return {
+    renderings: outcomes.map((outcome) => outcome.label),
+    disconnected: worst((outcome) => outcome.disconnected.status === 'changed').disconnected,
+    cut: worst((outcome) => outcome.cut.status !== 'changed').cut,
+    unreached: [...new Set(outcomes.flatMap((outcome) => outcome.unreached))],
   }
 }
 
 // A content source isn't probed as a whole component: it has tests of its own (see sourceTestProblems).
 const CAPABILITY_EVIDENCE = EVIDENCE.filter(isCapabilityEvidence)
+const CROPPED = { _type: 'sanity.imageCrop', top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 }
 
 const cases = CAPABILITY_EVIDENCE.flatMap((entry) =>
   casesOf(entry).map((layout) => ({ id: caseId(entry, layout), entry, layout })),
@@ -319,4 +450,144 @@ describe('design capability evidence', () => {
       expect(existsSync(join(ROOT, entry.render))).toBe(true)
     },
   )
+})
+
+describe('slot blocks, listings and views obtain evidence (AT1)', () => {
+  const component = (id: string) => {
+    const found = DESIGN_COMPONENTS.find((candidate) => candidate.id === id)
+    if (!found) throw new Error(`${id} isn't a contract component.`)
+    return found
+  }
+
+  it('lists a slot block’s hosts from the registry, each in all of the host’s layouts', () => {
+    expect(component('badgeRow').hosts).toEqual([
+      {
+        section: 'hero',
+        slot: 'supporting',
+        layouts: ['overlay', 'split', 'editorial', 'full-bleed'],
+      },
+    ])
+    expect(component('slotImage').hosts?.map((host) => `${host.section}.${host.slot}`)).toEqual([
+      'mediaText.media',
+    ])
+    expect(component('slotVideo').hosts?.map((host) => `${host.section}.${host.slot}`)).toEqual([
+      'hero.supporting',
+      'mediaText.media',
+      'mediaText.supporting',
+    ])
+    for (const block of DESIGN_COMPONENTS.filter((entry) => entry.kind === 'slotBlock')) {
+      expect(block.hosts?.length, `${block.id} has a host`).toBeGreaterThan(0)
+    }
+  })
+
+  it('draws the registered badge row evidence in all four hero layouts, and every one passes', async () => {
+    const entry = CAPABILITY_EVIDENCE.find((candidate) => candidate.id === 'badgeRow.icon.item')
+    if (!entry) throw new Error('The badge row has no registered evidence.')
+    const result = await runCase(entry, null)
+    expect(result.renderings).toEqual([
+      'hero.supporting@overlay',
+      'hero.supporting@split',
+      'hero.supporting@editorial',
+      'hero.supporting@full-bleed',
+    ])
+    expect(result.status).toBe('changed')
+    // The claim is the whole path: with the icon resolver cut, no host shows the probe.
+    const cut = await runDisconnected(entry, null)
+    expect(cut.unreached).toEqual([])
+    expect(cut.cut.status).toBe('changed')
+    expect(cut.disconnected.status).not.toBe('changed')
+  })
+
+  it('fails the block when a single host doesn’t show it', async () => {
+    const entry = CAPABILITY_EVIDENCE.find((candidate) => candidate.id === 'badgeRow.icon.item')
+    if (!entry) throw new Error('The badge row has no registered evidence.')
+    // A target the block draws in no host: every rendering finds it missing, so the case can't pass.
+    const result = await runCase({ ...entry, target: '[data-never-drawn]' }, null)
+    expect(result.status).toBe('missing')
+  })
+
+  describe('a blog listing, from its own schema', () => {
+    // The real post card, drawn from a projected fixture post. The schema is made in memory here: the
+    // post's main image stamped as framing, as Task 156 will make the real one.
+    const post: SchemaField = {
+      name: 'post',
+      type: 'document',
+      fields: [{ name: 'mainImage', type: 'image', options: framing('linkListProfile') }],
+    }
+    const listing: SchemaField = {
+      name: 'blogPostCards',
+      type: 'object',
+      fields: [{ name: 'post', type: 'post' }],
+    }
+    const gate = schemaGate(new Map([['blogPostCards', listing]]), (name) =>
+      name === 'post' ? post : undefined,
+    )
+    const entry: CapabilityEvidence = {
+      id: 'blogPostCards.framing.card',
+      component: 'blogPostCards',
+      capability: 'framing',
+      scope: 'card',
+      field: 'post.mainImage',
+      resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
+      render: 'src/features/blog/components/post-card.tsx',
+      target: 'article img',
+      change: 'attributes',
+      probe: { 'post.mainImage.crop': CROPPED },
+    }
+
+    it('verifies when the real card’s picture changes with the probe', async () => {
+      const result = await runCase(entry, null)
+      expect(result.status).toBe('changed')
+      const cells = capabilityAvailability(
+        component('blogPostCards'),
+        [entry],
+        gate,
+        new Map([[caseId(entry, null), result.status]]),
+      )
+      expect(
+        cells.find((cell) => cell.capability === 'framing' && cell.scope === 'card')?.status,
+      ).toBe('verified')
+    })
+
+    it('fails when the claimed resolver is disconnected, or isn’t the one the card uses', async () => {
+      const connected = await runDisconnected(entry, null)
+      expect(connected.unreached).toEqual([])
+      expect(connected.cut.status).toBe('changed')
+      expect(connected.disconnected.status).not.toBe('changed')
+      // A resolver the card never calls can't carry the claim.
+      const wrong = await runDisconnected(
+        { ...entry, resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }] },
+        null,
+      )
+      expect(wrong.unreached).toEqual(['@/lib/sanity/surface-options#iconLook'])
+      expect(wrong.disconnected.status).toBe('changed')
+    })
+
+    it('is pending while the probed field is not the one the card reads', async () => {
+      const result = await runCase({ ...entry, probe: { 'post.title': 'A different title' } }, null)
+      // The title is text, not the picture: the picture is unchanged, so the claim can't stand.
+      expect(result.status).toBe('ignored')
+    })
+  })
+
+  it('refuses a listing or view with no drawer, saying what to add', async () => {
+    const entry: CapabilityEvidence = {
+      id: 'footer.social.view',
+      component: 'footer',
+      capability: 'icon',
+      scope: 'item',
+      field: 'social',
+      resolvers: [],
+      render: 'src/components/layout/footer.tsx',
+      target: 'footer',
+      change: 'content',
+      probe: { social: [] },
+    }
+    const view = { id: 'footer', kind: 'view', title: 'Footer', layouts: [] } as const
+    await expect(renderingsOf(entry, null, { components: [view], drawers: {} })).rejects.toThrow(
+      /footer is a view and has no drawer\. Add one to VIEW_DRAWERS in src\/app\/design-capability-views\.tsx/,
+    )
+    // The real listing has one.
+    expect(Object.keys(VIEW_DRAWERS)).toContain('blogPostCards')
+  })
 })

@@ -215,7 +215,7 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
     totals,
     `Every Required or Conditional pair that is not verified is in \`capability-baseline.json\`, with the task that closes it. It only shrinks.`,
     closing,
-    `**Evidence.** ${String(capabilityEvidence.length)} capability entries, ${String(cases)} cases (an entry's layouts are one case each). Each case renders the component through \`SectionRenderer\` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The ${String(sourceEvidence.length)} content source entries are verified by tests written for each source, which the check requires to exist.`,
+    `**Evidence.** ${String(capabilityEvidence.length)} capability entries, ${String(cases)} cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through \`SectionRenderer\`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, \`VIEW_DRAWERS\`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The ${String(sourceEvidence.length)} content source entries are verified by tests written for each source, which the check requires to exist.`,
     '**Capabilities and their owners**',
     owners,
     '**Content sources** are recorded apart from design capabilities and never stand in for them. Generic tabs are deliberately not a capability.',

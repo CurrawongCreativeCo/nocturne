@@ -1,9 +1,30 @@
 import { createRequire } from 'node:module'
 
-// jsdom (a dev dependency the Studio tests already use) ships no types: type the one call made.
+import type { ReactElement } from 'react'
+import { renderToReadableStream } from 'react-dom/server'
+
+// jsdom (a dev dependency the Studio tests already use) ships no types: type the one call made. It is
+// loaded on first use, so a test that only renders (the section fixtures) doesn't pay for it.
 const load = createRequire(import.meta.url)
-const { JSDOM } = load('jsdom') as {
-  JSDOM: new (html: string) => { window: { document: Document } }
+let dom: (new (html: string) => { window: { document: Document } }) | undefined
+const jsdom = () => (dom ??= (load('jsdom') as { JSDOM: NonNullable<typeof dom> }).JSDOM)
+
+/**
+ * The HTML React streams for an element, once everything that suspends (async parts, a members-only
+ * gate) has finished. A render error is thrown, never swallowed into the HTML. The one renderer the
+ * section fixtures and every adapter (a slot block, a listing, a view) share.
+ */
+export async function renderToHtml(element: ReactElement): Promise<string> {
+  const errors: unknown[] = []
+  const stream = await renderToReadableStream(element, {
+    onError: (error) => {
+      errors.push(error)
+    },
+  })
+  await stream.allReady
+  const html = await new Response(stream).text()
+  if (errors.length > 0) throw errors[0] instanceof Error ? errors[0] : new Error(String(errors[0]))
+  return html
 }
 
 /**
@@ -33,6 +54,7 @@ function describe(element: Element, change: 'attributes' | 'content'): string {
 
 /** Some server-rendered HTML as a document, for tests that read what a component drew. */
 export function parseHtml(html: string): Document {
+  const JSDOM = jsdom()
   return new JSDOM(`<!doctype html><html><body>${html}</body></html>`).window.document
 }
 

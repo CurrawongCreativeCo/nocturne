@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto'
 
 import * as groq from 'groq-js'
 import { createElement } from 'react'
-import { renderToReadableStream } from 'react-dom/server'
 
+import { renderToHtml } from '@/lib/design/capability-harness'
 import type { LocationBusiness } from '@/types/business'
 
 import { pageBuilderFragment } from '../api/sections'
@@ -77,6 +77,30 @@ export async function projectSections(raw: readonly RawSection[]): Promise<PageS
   return result?.sections ?? []
 }
 
+/**
+ * A document as a query's fragment returns it: `raw` is added to the fixture documents and projected by
+ * `fragment` with the same GROQ engine as the page query. How a listing or a view gets the data its real
+ * component is given (the blog's cards are drawn from `postCardFields`).
+ */
+export async function projectFragment(
+  fragment: string,
+  raw: Record<string, unknown> & { _id: string; _type: string },
+): Promise<unknown> {
+  const { documents } = await loadDataset()
+  const tree = parse(`*[_id == "${raw._id}"][0]{ ${fragment} }`, { params: { members: true } })
+  const value = await evaluate(tree, {
+    dataset: [...documents.filter((doc) => doc._id !== raw._id), raw],
+    params: { members: true },
+    timestamp: new Date(),
+  })
+  return value.get()
+}
+
+/** The fixture documents, for a view's drawer to start from (a post, a team member). */
+export async function fixtureDocuments(): Promise<readonly Record<string, unknown>[]> {
+  return (await loadDataset()).documents
+}
+
 /** The fixtures' picture asset, for content that needs a real image. */
 export async function fixturePictureId(): Promise<string> {
   const { documents } = await loadDataset()
@@ -122,8 +146,7 @@ export async function renderSections(
   sections: readonly PageSection[],
   options: RenderOptions = {},
 ): Promise<string> {
-  const errors: unknown[] = []
-  const stream = await renderToReadableStream(
+  return renderToHtml(
     createElement(SectionRenderer, {
       documentId: 'fixture-page',
       documentType: 'page',
@@ -137,16 +160,7 @@ export async function renderSections(
       business,
       ...options,
     }),
-    {
-      onError: (error) => {
-        errors.push(error)
-      },
-    },
   )
-  await stream.allReady
-  const html = await new Response(stream).text()
-  if (errors.length > 0) throw errors[0] instanceof Error ? errors[0] : new Error(String(errors[0]))
-  return html
 }
 
 /** A short, stable fingerprint of some output, for snapshots that must not change. */

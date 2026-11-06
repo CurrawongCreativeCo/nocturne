@@ -834,13 +834,6 @@
       "closingTask": 151
     },
     {
-      "component": "badgeRow",
-      "capability": "icon",
-      "scope": "item",
-      "layouts": [null],
-      "closingTask": 158
-    },
-    {
       "component": "slotImage",
       "capability": "framing",
       "scope": "item",

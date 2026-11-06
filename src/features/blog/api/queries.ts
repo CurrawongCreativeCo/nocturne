@@ -9,7 +9,7 @@ import { imageFields, portableTextFields, seoFields } from '@/lib/sanity/fragmen
  */
 
 /** What a post card (index, category, related posts, RSS feed) needs. */
-const postCardFields = /* groq */ `
+export const postCardFields = /* groq */ `
   _id,
   title,
   "slug": slug.current,

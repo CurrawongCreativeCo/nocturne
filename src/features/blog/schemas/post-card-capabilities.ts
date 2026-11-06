@@ -3,7 +3,8 @@ import { GLASS_CARD, NOT_APPLICABLE } from '@/lib/design/common-policies'
 
 /**
  * The blog post cards' design capabilities (task 275): a listing, not a section, drawn on the blog
- * index, its category pages and a post's related posts. Its settings will live in Blog settings.
+ * index, its category pages and a post's related posts. Its schema is the post the card shows (`post`);
+ * its settings will live in Blog settings (task 156).
  */
 export const postCardCapabilities = declareCapabilities({
   surface: { policy: 'required', scope: 'card' },
@@ -17,7 +18,7 @@ export const postCardCapabilities = declareCapabilities({
   pictureDepth: {
     policy: 'conditional',
     scope: 'card',
-    trigger: { kind: 'setting', when: 'The post has a main image', path: 'mainImage' },
+    trigger: { kind: 'setting', when: 'The post has a main image', path: 'post.mainImage' },
   },
   overlay: notApplicable('No background picture'),
   glass: { policy: 'conditional', scope: 'card', trigger: GLASS_CARD },

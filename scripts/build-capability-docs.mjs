@@ -14,6 +14,10 @@ import { format, resolveConfig } from 'prettier'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const readmeFile = join(root, 'README.md')
 
+// The schemas import the site's config, which insists on a project; this check never talks to one.
+process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||= 'design-contract-check'
+process.env.NEXT_PUBLIC_SANITY_DATASET ||= 'production'
+
 const jiti = createJiti(import.meta.url, {
   alias: { '@': join(root, 'src') },
   interopDefault: true,

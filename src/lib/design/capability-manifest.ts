@@ -225,8 +225,9 @@ export function contractSummary(components: readonly ContractComponent[], gate: 
     },
     slotBlocks: outside('slotBlock'),
     listings: outside('listing'),
+    views: outside('view'),
     coverage: {
-      declares: ['section', 'slotBlock', 'listing'],
+      declares: ['section', 'slotBlock', 'listing', 'view'],
       declared: components.filter((component) => component.declaration).map(({ id }) => id),
       notDeclaredYet: components.filter((component) => !component.declaration).map(({ id }) => id),
       // Not sections, slot blocks or listings: nothing here says anything about these.

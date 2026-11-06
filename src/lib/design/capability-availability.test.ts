@@ -210,6 +210,35 @@ describe('evidenceProblems', () => {
     ])
   })
 
+  it('refuses a slot block no slot lists: there is no host to prove it in', () => {
+    const block: ContractComponent = {
+      id: 'orphanBlock',
+      kind: 'slotBlock',
+      title: 'Orphan',
+      layouts: [],
+      hosts: [],
+      declaration: component.declaration,
+    }
+    const entry: CapabilityEvidence = {
+      ...glassEvidence,
+      id: 'orphan.glass',
+      component: 'orphanBlock',
+    }
+    const withoutLayouts = { ...entry, layouts: undefined }
+    const found = evidenceProblems([block], [withoutLayouts], gate)
+    expect(found.map((problem) => problem.message)).toEqual([
+      'Evidence orphan.glass: orphanBlock is a slot block that no slot lists, so there is no host to prove it in.',
+    ])
+    // With a host the same entry passes this check.
+    expect(
+      evidenceProblems(
+        [{ ...block, hosts: [{ section: 'hero', slot: 'supporting', layouts: ['split'] }] }],
+        [withoutLayouts],
+        gate,
+      ),
+    ).toEqual([])
+  })
+
   it('refuses evidence for an undeclared component, missing layouts and a reused id', () => {
     expect(messages([glassEvidence], [{ ...component, declaration: undefined }])).toEqual([
       'Evidence fixtureCards.glass.section: fixtureCards has no declaration to verify.',

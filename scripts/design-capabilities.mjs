@@ -24,6 +24,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 // `--baseline <file>` reads and writes another file; the tests use it.
 const fileArg = process.argv.indexOf('--baseline')
 const file = fileArg > -1 ? process.argv[fileArg + 1] : join(root, 'capability-baseline.json')
+// The schemas import the site's config, which insists on a project; this check never talks to one.
+process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||= 'design-contract-check'
+process.env.NEXT_PUBLIC_SANITY_DATASET ||= 'production'
+
 const jiti = createJiti(import.meta.url, {
   alias: { '@': join(root, 'src') },
   interopDefault: true,

@@ -3,7 +3,7 @@
 exports[`the design capability contract > badgeRow: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "icon required item: pending (158)",
+    "icon required item: verified",
   ],
   "sources": [],
 }

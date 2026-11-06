@@ -17666,11 +17666,26 @@
                 "policy": "required",
                 "scope": "item",
                 "closingTask": 158,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "badges[].icon"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "badgeRow.icon.item",
+                "field": "badges[].icon",
+                "resolvers": [
+                  "@/components/ui/badge-icon#BadgeIcon"
+                ],
+                "render": "src/components/ui/badge-row.tsx",
+                "target": "[data-badge-row] li",
+                "cases": [
+                  "badgeRow.icon.item"
+                ]
+              }
+            ]
           },
           "action": {
             "notApplicable": "No link covers a whole card"
@@ -18016,7 +18031,8 @@
                 "trigger": {
                   "kind": "setting",
                   "when": "The post has a main image",
-                  "path": "mainImage"
+                  "path": "post.mainImage",
+                  "reachable": true
                 },
                 "closingTask": 147,
                 "fields": [],
@@ -18060,11 +18076,13 @@
         "contentSources": {}
       }
     ],
+    "views": [],
     "coverage": {
       "declares": [
         "section",
         "slotBlock",
-        "listing"
+        "listing",
+        "view"
       ],
       "declared": [
         "hero",

@@ -1,5 +1,14 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`design capability evidence > badgeRow.icon.item: the probe changes the registered target 1`] = `
+[
+  "5819dcc4ccdde04c (164 characters)",
+  "4d1944c52a48918f (162 characters)",
+  "87309cb45a57f37b (166 characters)",
+  "4a087ad1957fc043 (167 characters)",
+]
+`;
+
 exports[`design capability evidence > ctaBanner.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",

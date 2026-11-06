@@ -189,6 +189,24 @@ const SLOT_VIDEO = [
 ]
 const SLOT_IMAGE = [{ _key: 'probe-image', _type: 'slotImage', image: PICTURE }]
 
+// Slot blocks are proven inside every host the registry allows them in (ContractComponent.hosts): the
+// block is built from `base` and `probe`, which are relative to the block, and placed in the host's slot.
+const slotBlockEvidence: CapabilityEvidence[] = [
+  {
+    id: 'badgeRow.icon.item',
+    component: 'badgeRow',
+    capability: 'icon',
+    scope: 'item',
+    field: 'badges[].icon',
+    resolvers: [{ module: '@/components/ui/badge-icon', export: 'BadgeIcon' }],
+    render: 'src/components/ui/badge-row.tsx',
+    target: '[data-badge-row] li',
+    change: 'content',
+    base: { badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned' }] },
+    probe: { 'badges.0.icon': 'star' },
+  },
+]
+
 // ---------------------------------------------------------------------------------------------------
 // The Link list
 
@@ -738,4 +756,5 @@ export const EVIDENCE: readonly Evidence[] = [
     motion: ALL_LINK_LIST,
   }),
   ...linkListEvidence,
+  ...slotBlockEvidence,
 ]

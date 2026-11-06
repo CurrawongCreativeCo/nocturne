@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   capabilityAvailability,
@@ -18,6 +18,15 @@ import { contractProblems, formatProblem } from '@/lib/design/contract-checks'
 import { exceptionProblems, privateFields } from '@/lib/design/schema-capabilities'
 
 import { COMPONENT_SCHEMAS, DESIGN_COMPONENTS, gate, lookupType } from './design-components'
+
+// The blog's post schema reads the site's config, which insists on a Sanity project; nothing here uses one.
+vi.mock('@/config/env', () => ({
+  projectId: 'design-contract-check',
+  dataset: 'production',
+  apiVersion: '2026-10-01',
+  siteLanguage: 'en',
+  studioUrl: '/studio',
+}))
 
 /**
  * The design capability contract's checks on the real schemas (task 275; README, "Design capability
