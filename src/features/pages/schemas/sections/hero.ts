@@ -30,6 +30,7 @@ import {
   HeroSplitThumbnail,
 } from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
+import { heroCapabilities } from './hero-capabilities'
 import { heroEyebrowDesignField } from './hero-eyebrow'
 import { heroPartMotionField } from './hero-part-motion'
 import { imageSideOptions } from './image-side'
@@ -219,6 +220,7 @@ export const hero = defineType({
   // The preset bar above the form: the one place to choose a hero's design (README, "Hero presets").
   options: {
     ...presetsOption(HERO_PRESETS, HERO_PRESET_LABELS),
+    designCapabilities: heroCapabilities,
     manifest: {
       purpose:
         'The opening section of a page: a heading, a short introduction and up to two buttons, with an optional picture in one of four layouts.',

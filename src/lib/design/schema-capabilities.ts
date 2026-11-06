@@ -12,6 +12,7 @@ import type { CapabilityException } from './capability-exceptions'
 export interface SchemaField {
   name: string
   type: string
+  title?: string
   group?: string | readonly string[]
   fields?: readonly SchemaField[]
   of?: readonly SchemaField[]
@@ -383,6 +384,8 @@ export function fieldOffered({
 
 /** What the availability checks ask of the schema (capability-availability.ts). */
 export interface SchemaGate {
+  /** Whether the component has a schema to read (a listing has none of its own). */
+  hasSchema: (component: string) => boolean
   /** The field an evidence entry probes, with its marker, or why it doesn't exist. */
   field: (component: string, path: string) => { marker: Marker } | { missing: string }
   /** Whether the component's schema offers the field in the entry's state, on a layout. */
@@ -400,6 +403,7 @@ export function schemaGate(
   lookup: TypeLookup,
 ): SchemaGate {
   return {
+    hasSchema: (component) => components.has(component),
     field: (component, path) => {
       const type = components.get(component)
       if (!type) return { missing: `${component} has no schema` }

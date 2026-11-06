@@ -13,6 +13,8 @@ import {
   TestimonialsSliderThumbnail,
 } from '@/lib/sanity/schema/thumbnails/testimonials-thumbnails'
 
+import { testimonialsCapabilities } from './testimonials-capabilities'
+
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced over max-w-measure-narrow.
@@ -43,6 +45,7 @@ export const testimonials = defineType({
   title: 'Testimonials',
   type: 'object',
   icon: CommentIcon,
+  options: { designCapabilities: testimonialsCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(

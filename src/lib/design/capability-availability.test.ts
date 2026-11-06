@@ -63,6 +63,7 @@ const glassEvidence: CapabilityEvidence = {
 
 /** A schema where `style.panel` is glass and hidden on Boxed, and `style.edge` is an edge. */
 const gate: SchemaGate = {
+  hasSchema: () => true,
   field: (_component, path) =>
     path === 'style.panel'
       ? { marker: { capability: 'glass', designBuilder: 'sectionStyle' } }

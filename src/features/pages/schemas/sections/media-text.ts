@@ -23,6 +23,7 @@ import {
 } from '@/lib/sanity/schema/thumbnails/split-thumbnails'
 
 import { imageSideOptions } from './image-side'
+import { mediaTextCapabilities } from './media-text-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 export const LIMITS = {
@@ -145,6 +146,7 @@ export const mediaText = defineType({
   // The preset bar above the form: the one place to choose a look (README, "Image + text").
   options: {
     ...presetsOption(SPLIT_PRESETS, SPLIT_PRESET_LABELS),
+    designCapabilities: mediaTextCapabilities,
     manifest: {
       purpose:
         'Media beside, above or behind a block of text, with an optional title, up to two buttons and one extra block such as a video. Use it to explain one idea with a picture or a video.',

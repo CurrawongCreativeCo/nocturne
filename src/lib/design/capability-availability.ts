@@ -126,7 +126,7 @@ export function capabilityAvailability(
       }))
       const passing = reasons.filter((reason) => reason.why === undefined).map(({ id }) => id)
       const reachable =
-        cell.trigger?.path === undefined
+        cell.trigger?.path === undefined || !gate.hasSchema(component.id)
           ? undefined
           : !('missing' in gate.field(component.id, cell.trigger.path))
       cells.push({

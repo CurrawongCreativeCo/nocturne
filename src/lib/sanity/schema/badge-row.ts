@@ -2,6 +2,7 @@ import { TagIcon } from '@sanity/icons/Tag'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { badgeIconField } from './badge-icon-field'
+import { badgeRowCapabilities } from './badge-row-capabilities'
 import { lengthWarning } from './length-guidance'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -22,6 +23,7 @@ export const badgeRow = defineType({
   title: 'Badges',
   type: 'object',
   icon: TagIcon,
+  options: { designCapabilities: badgeRowCapabilities },
   fields: [
     defineField({
       name: 'badges',

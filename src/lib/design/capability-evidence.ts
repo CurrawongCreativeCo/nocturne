@@ -98,8 +98,8 @@ const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component'
     field: 'style.edge',
     resolver: { module: '@/components/ui/section-style', export: 'resolveEdge' },
     render: 'src/components/ui/section-frame.tsx',
-    // The edge wraps the whole section in its frame.
-    target: 'body > :first-child',
+    // The element directly around the section: the edge's frame once there is one.
+    target: ':has(> section)',
     change: 'attributes',
     probe: { 'style.edge': 'wave' },
   },
@@ -193,6 +193,9 @@ const WITH_CARDS = ['stacked', 'cards', 'compact']
 const WITH_ARROWS = ['stacked', 'cards', 'editorial']
 const ALL_LINK_LIST = ['stacked', 'cards', 'editorial', 'compact']
 
+// Glass rows draw today (glass-row.tsx), but `rowStyle` is set inline rather than by a shared glass
+// builder, so it carries no glass marker and its evidence would be refused: the pair stays pending
+// until task 159's single glass system.
 const linkListEvidence: CapabilityEvidence[] = [
   {
     id: 'linkList.surface.card',
@@ -343,7 +346,7 @@ const linkListEvidence: CapabilityEvidence[] = [
     field: 'depthDesign.pictureShadow',
     resolver: { module: '@/lib/sanity/depth-options', export: 'resolveDepth' },
     render: `${LINK_LIST}/profile.tsx`,
-    target: ':has(> [data-profile-image])',
+    target: '[data-profile-image]',
     change: 'attributes',
     base: linkListContent(true),
     probe: { 'depthDesign.pictureShadow': 'floating' },
@@ -391,20 +394,6 @@ const linkListEvidence: CapabilityEvidence[] = [
     change: 'content',
     base: linkListContent(true),
     probe: { 'dividerDesign.afterProfile': { _type: 'decorativeDivider', style: 'line' } },
-  },
-  {
-    id: 'linkList.glass.card',
-    component: 'linkList',
-    capability: 'glass',
-    scope: 'card',
-    layouts: ['stacked'],
-    field: 'rowStyle',
-    resolver: { module: '@/lib/sanity/surface-options', export: 'glassSurfaceLook' },
-    render: `${LINK_LIST}/glass-row.tsx`,
-    target: FIRST_LINK,
-    change: 'content',
-    base: linkListContent(true),
-    probe: { rowStyle: 'glass' },
   },
 ]
 

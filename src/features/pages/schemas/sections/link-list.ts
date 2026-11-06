@@ -54,6 +54,7 @@ import {
 import { textOrImageFields } from '@/lib/sanity/schema/wordmark'
 import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
 
+import { linkListCapabilities } from './link-list-capabilities'
 import { linkListDesignFields, withCardContrast } from './link-list-design'
 import {
   LINK_LIST_RECOMMENDED_MAX,
@@ -678,7 +679,7 @@ export const linkList = defineType({
   type: 'object',
   icon: BlockElementIcon,
   // The preset bar above the form: the one place to choose a layout (README, "Link list").
-  options: presetsOption(LINK_LIST_PRESETS),
+  options: { ...presetsOption(LINK_LIST_PRESETS), designCapabilities: linkListCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,

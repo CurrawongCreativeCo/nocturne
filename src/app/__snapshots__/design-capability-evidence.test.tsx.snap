@@ -1,0 +1,673 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`design capability evidence > hero.edge.section@editorial: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > hero.edge.section@full-bleed: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > hero.edge.section@overlay: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > hero.edge.section@split: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > hero.glass.section@editorial: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-content grid items-end gap-12 lg:gap-20">",
+]
+`;
+
+exports[`design capability evidence > hero.glass.section@overlay: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-4xl text-center">",
+]
+`;
+
+exports[`design capability evidence > hero.glass.section@split: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-measure grid items-center gap-12 lg:gap-16">",
+]
+`;
+
+exports[`design capability evidence > hero.motion.section@editorial: the probe changes the registered target 1`] = `
+[
+  "d3c08f8a72871f3c (1670 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.motion.section@full-bleed: the probe changes the registered target 1`] = `
+[
+  "74cd0311f04b965b (1775 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.motion.section@overlay: the probe changes the registered target 1`] = `
+[
+  "eb1c0641dd178399 (1723 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.motion.section@split: the probe changes the registered target 1`] = `
+[
+  "f5ea95615c76cb68 (1205 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.slots.supporting@editorial: the probe changes the registered target 1`] = `
+[
+  "d3c08f8a72871f3c (1670 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.slots.supporting@full-bleed: the probe changes the registered target 1`] = `
+[
+  "74cd0311f04b965b (1775 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.slots.supporting@overlay: the probe changes the registered target 1`] = `
+[
+  "eb1c0641dd178399 (1723 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.slots.supporting@split: the probe changes the registered target 1`] = `
+[
+  "f5ea95615c76cb68 (1205 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.action.card@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.action.card@editorial: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "9967a0716e65fa63 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.action.card@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.action.item@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.action.item@editorial: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "9967a0716e65fa63 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.action.item@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.depth.card@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.depth.card@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.depth.card@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.depth.item@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.depth.item@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.depth.item@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.divider.section@cards: the probe changes the registered target 1`] = `
+[
+  "eed824fdd0874428 (4921 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.divider.section@compact: the probe changes the registered target 1`] = `
+[
+  "721fd9ca12847c5a (3847 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.divider.section@editorial: the probe changes the registered target 1`] = `
+[
+  "b4469d78ce0fbbd4 (4574 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.divider.section@stacked: the probe changes the registered target 1`] = `
+[
+  "3ce2e2be8eb6bf47 (4537 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.edge.section@cards: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > linkList.edge.section@compact: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > linkList.edge.section@editorial: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > linkList.edge.section@stacked: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > linkList.framing.profile@cards: the probe changes the registered target 1`] = `
+[
+  "31b3c451fb6a07da (311 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.framing.profile@compact: the probe changes the registered target 1`] = `
+[
+  "a9f4efa2b862fb6b (303 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.framing.profile@editorial: the probe changes the registered target 1`] = `
+[
+  "b2feb515dc089d42 (303 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.framing.profile@stacked: the probe changes the registered target 1`] = `
+[
+  "31b3c451fb6a07da (311 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.framing.thumbnail@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.framing.thumbnail@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.card@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "317a7014fcfadab7 (1575 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.card@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.card@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "3b61a42773a033f3 (1353 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.item@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "317a7014fcfadab7 (1575 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.item@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.icon.item@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "3b61a42773a033f3 (1353 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.motion.section@cards: the probe changes the registered target 1`] = `
+[
+  "8be2378196e8ea6a (7303 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.motion.section@compact: the probe changes the registered target 1`] = `
+[
+  "c924fb7d041ca17a (5513 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.motion.section@editorial: the probe changes the registered target 1`] = `
+[
+  "d828dba020ef4fc0 (6572 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.motion.section@stacked: the probe changes the registered target 1`] = `
+[
+  "d264213487436920 (6339 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.overlay.section@cards: the probe changes the registered target 1`] = `
+[
+  "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.overlay.section@compact: the probe changes the registered target 1`] = `
+[
+  "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.overlay.section@editorial: the probe changes the registered target 1`] = `
+[
+  "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.overlay.section@stacked: the probe changes the registered target 1`] = `
+[
+  "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.pictureDepth.section@cards: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit mb-4 mx-auto" data-profile-image="circle">",
+]
+`;
+
+exports[`design capability evidence > linkList.pictureDepth.section@compact: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit mb-4" data-profile-image="circle">",
+]
+`;
+
+exports[`design capability evidence > linkList.pictureDepth.section@editorial: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit mb-4" data-profile-image="circle">",
+]
+`;
+
+exports[`design capability evidence > linkList.pictureDepth.section@stacked: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit mb-4 mx-auto" data-profile-image="circle">",
+]
+`;
+
+exports[`design capability evidence > linkList.surface.card@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.surface.card@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.surface.card@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.surface.item@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.surface.item@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.surface.item@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card@editorial: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "9967a0716e65fa63 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.card@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item@cards: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "523f895f6474e440 (1436 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item@compact: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "8d317bb63600c4ba (926 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item@editorial: the probe changes the registered target 1`] = `
+[
+  "1606e228a477738c (50 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "9967a0716e65fa63 (1293 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.text.item@stacked: the probe changes the registered target 1`] = `
+[
+  "480f36013256ed55 (66 characters)",
+  "a5f03b91cb8b0270 (612 characters)",
+  "376ea83169d0a2e5 (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.edge.section@overlay: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > mediaText.edge.section@side: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > mediaText.edge.section@stacked: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > mediaText.glass.section@overlay: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > mediaText.glass.section@side: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-content grid items-center gap-12 lg:gap-16 lg:grid-cols-2 lg:[&>:first-child]:order-2 lg:[&>:last-child]:order-1" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > mediaText.glass.section@stacked: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-measure flex flex-col gap-12 lg:gap-16 [&>:last-child]:order-first" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > mediaText.motion.section@overlay: the probe changes the registered target 1`] = `
+[
+  "27cdbff68f33dfc4 (1063 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.motion.section@side: the probe changes the registered target 1`] = `
+[
+  "c86230300c74dac8 (1333 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.motion.section@stacked: the probe changes the registered target 1`] = `
+[
+  "86c93e7e3c0260c4 (1311 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.overlay.section@side: the probe changes the registered target 1`] = `
+[
+  "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.overlay.section@stacked: the probe changes the registered target 1`] = `
+[
+  "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.slots.media@overlay: the probe changes the registered target 1`] = `
+[
+  "f32b82e1ce093905 (1098 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.slots.media@side: the probe changes the registered target 1`] = `
+[
+  "f46700a157f0823f (1098 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.slots.media@stacked: the probe changes the registered target 1`] = `
+[
+  "f1d2a8e314277be5 (1090 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.slots.supporting@overlay: the probe changes the registered target 1`] = `
+[
+  "27cdbff68f33dfc4 (1063 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.slots.supporting@side: the probe changes the registered target 1`] = `
+[
+  "c86230300c74dac8 (1333 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.slots.supporting@stacked: the probe changes the registered target 1`] = `
+[
+  "86c93e7e3c0260c4 (1311 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.edge.section@grid: the probe changes the registered target 1`] = `
+[
+  "<body>",
+]
+`;
+
+exports[`design capability evidence > testimonials.edge.section@slider: the probe changes the registered target 1`] = `
+[
+  "<body>",
+  "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > testimonials.glass.section@grid: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > testimonials.glass.section@slider: the probe changes the registered target 1`] = `
+[
+  "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+  "<p aria-atomic="true" aria-live="polite" class="sr-only">",
+]
+`;
+
+exports[`design capability evidence > testimonials.manual@grid: the probe changes the registered target 1`] = `
+[
+  "3c319666dce112a6 (611 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.manual@slider: the probe changes the registered target 1`] = `
+[
+  "3aad03f41d477aa2 (1496 characters)",
+  "194d073417972434 (61 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.motion.section@grid: the probe changes the registered target 1`] = `
+[
+  "fc6f356efe668789 (1678 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.motion.section@slider: the probe changes the registered target 1`] = `
+[
+  "0b9137dfe722a167 (6483 characters)",
+  "194d073417972434 (61 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.overlay.section@grid: the probe changes the registered target 1`] = `
+[
+  "6d05cdc2f4558242 (456 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.overlay.section@slider: the probe changes the registered target 1`] = `
+[
+  "6d05cdc2f4558242 (456 characters)",
+]
+`;

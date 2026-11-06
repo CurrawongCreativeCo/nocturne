@@ -77,6 +77,14 @@ export async function projectSections(raw: readonly RawSection[]): Promise<PageS
   return result?.sections ?? []
 }
 
+/** The fixtures' picture asset, for content that needs a real image. */
+export async function fixturePictureId(): Promise<string> {
+  const { documents } = await loadDataset()
+  const asset = documents.find((doc) => doc._type === 'sanity.imageAsset')
+  if (typeof asset?._id !== 'string') throw new Error('The fixtures have no picture asset.')
+  return asset._id
+}
+
 /** The gallery page's sections in page order, without the halves drawn inside another's frame. */
 export async function gallerySections(): Promise<RawSection[]> {
   const { documents } = await loadDataset()
