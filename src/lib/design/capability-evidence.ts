@@ -108,9 +108,24 @@ const CROPPED = { _type: 'sanity.imageCrop', top: 0.2, bottom: 0.2, left: 0.2, r
 
 const SECTION_CONTAINER = 'section > :last-child'
 
-type FrameCapability = 'overlay' | 'glass' | 'edge' | 'motion'
+type FrameCapability = 'overlay' | 'glass' | 'edge' | 'motion' | 'mark'
 
 const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component' | 'layouts'>> = {
+  // A mark draws nothing until it is chosen, so the claim is that the probe draws it, from SectionFrame, on
+  // every section whose policy allows one (the unit test of the schema, renderer and policy agreeing is in
+  // src/app/design-capabilities.test.ts). Words stand for the kinds; the Testimonials entries cover each.
+  mark: {
+    capability: 'mark',
+    scope: 'section',
+    field: 'style.mark',
+    resolvers: [
+      { module: '@/lib/sanity/decorative-mark-options', export: 'resolveDecorativeMark' },
+    ],
+    render: 'src/components/ui/section-frame.tsx',
+    target: '[data-decorative-mark="section"]',
+    change: 'appears',
+    probe: { 'style.mark.kind': 'text', 'style.mark.text': 'Thanks' },
+  },
   overlay: {
     capability: 'overlay',
     scope: 'section',
@@ -638,6 +653,7 @@ const locationSources: SourceEvidence[] = [
 
 export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('hero', {
+    mark: ['overlay', 'split', 'editorial', 'full-bleed'],
     glass: ['overlay', 'split', 'editorial'],
     edge: ['overlay', 'split', 'editorial', 'full-bleed'],
     motion: ['overlay', 'split', 'editorial', 'full-bleed'],
@@ -661,6 +677,7 @@ export const EVIDENCE: readonly Evidence[] = [
     probe: { supporting: STATS_BAR },
   },
   ...frameEvidence('mediaText', {
+    mark: ['side', 'stacked', 'overlay'],
     overlay: ['side', 'stacked'],
     glass: ['side', 'stacked', 'overlay'],
     edge: ['side', 'stacked', 'overlay'],
@@ -804,10 +821,11 @@ export const EVIDENCE: readonly Evidence[] = [
     base: TESTIMONIAL_CONTENT,
     probe: { [`headerDesign.${role}.size`]: 'large' },
   })),
-  // A mark draws nothing until it is chosen, so its claim is that the probe draws it. Words and an icon
-  // here; a picture needs a frame document, which the browser checks measure with everything else.
+  // A mark draws nothing until it is chosen, so its claim is that the probe draws it. Each kind has its own
+  // entry: a picture's is drawn from an approved frame document the fixtures hold, resolved through the
+  // page query, and its mask is measured in a browser (a mask loads with CORS: card-design.spec.ts).
   ...(['section', 'card'] as const).flatMap((scope) =>
-    (['text', 'icon'] as const).map((kind): CapabilityEvidence => {
+    (['text', 'icon', 'picture'] as const).map((kind): CapabilityEvidence => {
       const path = scope === 'section' ? 'style.mark' : 'cardDesign.mark'
       return {
         id: `testimonials.mark.${scope}.${kind}`,
@@ -826,7 +844,13 @@ export const EVIDENCE: readonly Evidence[] = [
         probe:
           kind === 'text'
             ? { [`${path}.kind`]: 'text', [`${path}.text`]: 'Thanks' }
-            : { [`${path}.kind`]: 'icon', [`${path}.icon`]: 'heart' },
+            : kind === 'icon'
+              ? { [`${path}.kind`]: 'icon', [`${path}.icon`]: 'heart' }
+              : // An approved frame, resolved to its CDN artwork by the page query like a real one.
+                {
+                  [`${path}.kind`]: 'picture',
+                  [`${path}.picture`]: { _type: 'reference', _ref: 'frame-picture' },
+                },
         measured: [{ file: 'tests/e2e/card-design.spec.ts', cases: [MARK_MEASURED[scope]] }],
       }
     }),
@@ -863,34 +887,74 @@ export const EVIDENCE: readonly Evidence[] = [
       },
     ],
   },
-  ...frameEvidence('richText', { overlay: true, glass: true, edge: true, motion: true }),
-  ...frameEvidence('featuresGrid', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('richText', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...frameEvidence('featuresGrid', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
   ...frameEvidence('logoCloud', {
+    mark: ['grid', 'marquee'],
     overlay: ['grid', 'marquee'],
     glass: ['grid', 'marquee'],
     edge: ['grid', 'marquee'],
     motion: ['grid', 'marquee'],
   }),
-  ...frameEvidence('faq', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
   // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
-  ...frameEvidence('ctaBanner', { overlay: true, edge: true, motion: true }),
-  ...frameEvidence('formSection', { overlay: true, glass: true, edge: true, motion: true }),
-  ...frameEvidence('pricingTable', { overlay: true, glass: true, edge: true, motion: true }),
-  ...frameEvidence('newsletterSignup', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('ctaBanner', { mark: true, overlay: true, edge: true, motion: true }),
+  ...frameEvidence('formSection', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...frameEvidence('pricingTable', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...frameEvidence('newsletterSignup', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
   ...frameEvidence('stats', {
+    mark: ['inline', 'cards'],
     overlay: ['inline', 'cards'],
     glass: ['inline', 'cards'],
     edge: ['inline', 'cards'],
     motion: ['inline', 'cards'],
   }),
   ...frameEvidence('gallery', {
+    mark: ['grid', 'masonry', 'slider'],
     overlay: ['grid', 'masonry', 'slider'],
     glass: ['grid', 'masonry', 'slider'],
     edge: ['grid', 'masonry', 'slider'],
     motion: ['grid', 'masonry', 'slider'],
   }),
-  ...frameEvidence('location', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('location', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
   ...frameEvidence('team', {
+    mark: ['grid', 'slider', 'list'],
     overlay: ['grid', 'slider', 'list'],
     glass: ['grid', 'slider', 'list'],
     edge: ['grid', 'slider', 'list'],
@@ -903,6 +967,7 @@ export const EVIDENCE: readonly Evidence[] = [
     motion: ['embed', 'ambient'],
   }),
   ...frameEvidence('process', {
+    mark: ['vertical', 'alternating'],
     overlay: ['vertical', 'alternating'],
     glass: ['vertical', 'alternating'],
     edge: ['vertical', 'alternating'],
@@ -910,6 +975,7 @@ export const EVIDENCE: readonly Evidence[] = [
   }),
   ...frameEvidence('embed', { overlay: true, glass: true, edge: true, motion: true }),
   ...frameEvidence('events', {
+    mark: ['list', 'agenda', 'featured'],
     overlay: ['list', 'agenda', 'featured'],
     glass: ['list', 'agenda', 'featured'],
     edge: ['list', 'agenda', 'featured'],
@@ -917,6 +983,7 @@ export const EVIDENCE: readonly Evidence[] = [
   }),
   ...locationSources,
   ...frameEvidence('linkList', {
+    mark: ['stacked', 'cards', 'editorial', 'compact'],
     overlay: ALL_LINK_LIST,
     edge: ALL_LINK_LIST,
     motion: ALL_LINK_LIST,

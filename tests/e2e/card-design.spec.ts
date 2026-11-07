@@ -190,6 +190,44 @@ for (const viewport of WIDTHS) {
   })
 }
 
+test('a tinted picture mark paints, whether or not the image CDN sends a CORS header', async ({
+  page,
+}) => {
+  // Measured, not assumed: Chromium paints a CSS mask from a cross-origin image either way (WebKit was
+  // checked by hand on 7 November 2026, Firefox not at all). Painting means pixels, not a computed style:
+  // the section is drawn with and without the mark, and the two must differ.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const paints = async (cors: boolean) => {
+    await page.unrouteAll({ behavior: 'ignoreErrors' })
+    await page.route('https://cdn.sanity.io/**', (route) =>
+      route.fulfill({
+        contentType: 'image/svg+xml',
+        headers: {
+          'cache-control': 'no-store',
+          ...(cors ? { 'access-control-allow-origin': '*' } : {}),
+        },
+        body: PICTURE,
+      }),
+    )
+    await page.goto(PAGE)
+    const marked = section(page, 'A picture in the theme colour')
+    await marked.scrollIntoViewIfNeeded()
+    await page.waitForLoadState('networkidle')
+    const height = await heightOf(marked)
+    const drawn = await marked.screenshot()
+    await marked.locator('[data-decorative-mark]').evaluate((element) => {
+      ;(element as HTMLElement).style.display = 'none'
+    })
+    return { painted: !drawn.equals(await marked.screenshot()), height }
+  }
+  const allowed = await paints(true)
+  const bare = await paints(false)
+  expect(allowed.painted).toBe(true)
+  expect(bare.painted).toBe(true)
+  // The mark never takes part in layout.
+  expect(bare.height).toBe(allowed.height)
+})
+
 test('a mark set to Hidden on phones shows only from the tablet up', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(PAGE)
