@@ -60,6 +60,9 @@ let blogSettingsPatch = null
 /** Whether the header menu has dropdowns; switched by POST /__fixture/navigation/<flat|nested>. */
 let navigationPatch = null
 
+/** How many queries the lake has served, for GET /__fixture/query-count. */
+let queryCount = 0
+
 /** Writes the site made (the Stripe webhook syncing prices), served back by GET /__fixture/mutations. */
 const mutations = []
 
@@ -194,6 +197,13 @@ createServer(async (req, res) => {
     res.end(JSON.stringify({ transactionId: 'fixture', results: [] }))
     return
   }
+  // Every query served so far, so a spec can hold a page to the request budget (README, "Request budget").
+  if (req.method === 'GET' && url.pathname === '/__fixture/query-count') {
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify({ count: queryCount }))
+    return
+  }
+
   if (!url.pathname.includes('/data/query/')) {
     res.writeHead(404).end()
     return
@@ -206,6 +216,7 @@ createServer(async (req, res) => {
     return
   }
 
+  queryCount += 1
   let query = url.searchParams.get('query') ?? ''
   let params = {}
   let perspective = url.searchParams.get('perspective') ?? 'published'

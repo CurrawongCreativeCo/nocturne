@@ -3121,14 +3121,7 @@ documents.push({
     }),
     headerFamily('featuresGrid', 'Features header', { intro: 'An intro.' }),
     headerFamily('logoCloud', 'Logos header', { intro: 'An intro.' }),
-    // A page's panels are read from its `ctas` and rich text, not yet from a Link list's links, so the
-    // panel the Link lists below open must also be opened from somewhere else on the page.
-    headerFamily(
-      'ctaBanner',
-      'CTA header',
-      { text: 'An intro.' },
-      { ctas: [cta('Open enquiry', panel('panel-enquire', '/about'))] },
-    ),
+    headerFamily('ctaBanner', 'CTA header', { text: 'An intro.' }),
     headerFamily('process', 'Process header', { intro: 'An intro.' }),
     headerFamily('gallery', 'Gallery header', { intro: 'An intro.' }),
     headerFamily('newsletterSignup', 'Newsletter header', { text: 'An intro.' }),

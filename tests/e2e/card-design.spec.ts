@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Locator, type Page } from '@playwright/test'
 
+import { FAKE_SANITY_PORT } from './constants'
 import { test } from './fixtures/test'
 
 /**
@@ -278,9 +279,19 @@ for (const viewport of WIDTHS) {
       })
     }
 
-    test('a link that opens a panel still opens it, from the keyboard, with a mark inside', async ({
+    test('a link alone brings its panel to the page, and opening it costs no Sanity request', async ({
       page,
+      request,
     }) => {
+      const served = async () =>
+        (
+          (await (
+            await request.get(`http://localhost:${String(FAKE_SANITY_PORT)}/__fixture/query-count`)
+          ).json()) as { count: number }
+        ).count
+      // The first visit may fill a cache; the budget is for the visitors after it.
+      await open(page)
+      const before = await served()
       await open(page)
       const button = section(page, 'Links cards family')
         .locator('li[data-track-event="link_click"]')
@@ -290,6 +301,7 @@ for (const viewport of WIDTHS) {
       await button.focus()
       await page.keyboard.press('Enter')
       await expect(page.getByRole('dialog')).toBeVisible()
+      expect(await served()).toBe(before)
     })
 
     test('a customised plan draws its own mark, and the others the card’s', async ({ page }) => {
