@@ -250,6 +250,41 @@ for (const viewport of WIDTHS) {
       }
     })
 
+    for (const [heading, defaultToken] of [
+      ['Features header', 'text-h2'],
+      ['Logos header', 'text-small'],
+      ['CTA header', 'text-h2'],
+      ['Process header', 'text-h2'],
+      ['Gallery header', 'text-h2'],
+      ['Newsletter header', 'text-h2'],
+    ] as const) {
+      test(`${heading}: the eyebrow, heading and intro are each their own role, in order`, async ({
+        page,
+      }) => {
+        await open(page)
+        const found = section(page, heading)
+        const order = await found.evaluate((element) =>
+          [...element.querySelectorAll('[data-text-role]')]
+            .map((node) => node.getAttribute('data-text-role'))
+            .filter((role) => role === 'eyebrow' || role === 'heading' || role === 'intro'),
+        )
+        expect(order).toEqual(['eyebrow', 'heading', 'intro'])
+        // The heading a step smaller: its default size is gone, and the rest of its classes stay.
+        const classes =
+          (await found.locator('[data-text-role="heading"]').getAttribute('class')) ?? ''
+        expect(classes.split(' ')).not.toContain(defaultToken)
+        expect(classes).toContain('font-semibold')
+      })
+    }
+
+    test('a Process step takes its label, title and description roles', async ({ page }) => {
+      await open(page)
+      const step = section(page, 'Process steps').locator('[data-process-step]').first()
+      await expect(step.locator('[data-text-role="label"]')).toHaveClass(/text-body|text-lead/)
+      await expect(step.locator('[data-text-role="title"]')).toHaveClass(/text-body/)
+      await expect(step.locator('[data-text-role="body"]')).toHaveClass(/text-small/)
+    })
+
     test('the FAQ’s Divided list draws no card; its Cards keep the mark on a closed question and still open', async ({
       page,
     }) => {
