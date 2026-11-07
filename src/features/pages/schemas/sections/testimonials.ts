@@ -1,18 +1,13 @@
 import { CommentIcon } from '@sanity/icons/Comment'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
-import { scopedGroupTitle } from '@/lib/sanity/design-summary'
 import { headingPlainText } from '@/lib/sanity/heading-text'
-import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
-import { withCardTextContrast } from '@/lib/sanity/schema/card-contrast-warning'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
-import { presetsOption } from '@/lib/sanity/schema/preset-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
-import { surfaceFields, textRoleField } from '@/lib/sanity/schema/surface-design'
 import {
   TESTIMONIAL_CARD_PRESETS,
   TESTIMONIAL_ROLE_COLOURS,
@@ -24,6 +19,7 @@ import {
 import { permissionWarning, sourceDateWarning, TESTIMONIAL_SOURCES } from '@/lib/testimonial-source'
 import { missingHighlights } from '@/lib/text-highlights'
 
+import { cardDesignField, eyebrowField, headerDesignField } from '../card-design-fields'
 import { testimonialsCapabilities } from './testimonials-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -71,13 +67,7 @@ export const testimonials = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({
-        name: 'eyebrow',
-        title: 'Eyebrow',
-        type: 'string',
-        description: 'A short line above the title. Optional.',
-        validation: (rule) => rule.max(LIMITS.eyebrow).warning(),
-      }),
+      eyebrowField(LIMITS.eyebrow),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -185,58 +175,14 @@ export const testimonials = defineType({
           }),
         ],
       }),
-      defineField({
-        name: 'headerDesign',
-        title: scopedGroupTitle('Section header', 'section'),
-        type: 'object',
-        group: 'design',
-        description: 'The eyebrow, title and intro. Inherit uses the section’s own.',
-        hidden: hiddenFromClients,
-        options: { collapsible: true, collapsed: true },
-        fields: (['eyebrow', 'heading', 'intro'] as const).map((role) =>
-          textRoleField({ role, inherits: 'the section’s own', capability: 'header' }),
-        ),
-      }),
-      defineField({
-        name: 'cardDesign',
-        title: scopedGroupTitle('Cards', 'card'),
-        type: 'object',
-        group: 'design',
+      headerDesignField(),
+      cardDesignField({
         description:
-          'Shared background, border and text for every quote. Inherit uses the default card.',
-        hidden: hiddenFromClients,
-        options: {
-          collapsible: true,
-          collapsed: false,
-          ...presetsOption(TESTIMONIAL_CARD_PRESETS),
-        },
-        fieldsets: [
-          {
-            name: 'text',
-            title: 'Text',
-            description: 'The quote, the person’s name and the small lines under it.',
-            options: { collapsible: true, collapsed: true },
-          },
-        ],
-        fields: [
-          ...surfaceFields({ inherits: 'the default card' }).map((field) =>
-            withCardTextContrast(field, TESTIMONIAL_ROLE_COLOURS),
-          ),
-          textRoleField({
-            role: 'quote',
-            inherits: 'the default card',
-            fieldset: 'text',
-            highlight: true,
-          }),
-          textRoleField({ role: 'attribution', inherits: 'the default card', fieldset: 'text' }),
-          textRoleField({ role: 'label', inherits: 'the default card', fieldset: 'text' }),
-          defineField({
-            name: 'mark',
-            title: 'Decorative mark',
-            type: 'decorativeMark',
-            description: 'One faint mark behind each card’s text.',
-          }),
-        ],
+          'Shared background, border, text and mark for every quote. Inherit uses the default card.',
+        presets: TESTIMONIAL_CARD_PRESETS,
+        roles: [{ role: 'quote', highlight: true }, { role: 'attribution' }, { role: 'label' }],
+        inherits: 'the default card',
+        defaults: TESTIMONIAL_ROLE_COLOURS,
       }),
       avatarDesignField({
         name: 'avatarDesign',

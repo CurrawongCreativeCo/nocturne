@@ -274,6 +274,7 @@ export const SHARED_BUILDERS = {
   surfaceFields: 'src/lib/sanity/schema/surface-design.ts',
   textRoleField: 'src/lib/sanity/schema/surface-design.ts',
   iconDesignFields: 'src/lib/sanity/schema/surface-design.ts',
+  itemAppearanceField: 'src/features/pages/schemas/item-appearance.ts',
   badgeIconField: 'src/lib/sanity/schema/badge-icon-field.ts',
   framing: 'src/lib/sanity/schema/image-framing-option.ts',
   decorativeDivider: 'src/lib/sanity/schema/decorative-divider.ts',

@@ -2082,16 +2082,34 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "overlay": "pending",
-                "split": "pending",
-                "editorial": "pending",
-                "full-bleed": "pending"
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "hero.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "hero.mark.section@overlay",
+                "hero.mark.section@split",
+                "hero.mark.section@editorial",
+                "hero.mark.section@full-bleed"
+              ]
+            }
+          ]
         },
         "depth": {
           "notApplicable": "No surface for a shadow to sit on (146)"
@@ -2450,11 +2468,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "richText.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "richText.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "notApplicable": "No surface for a shadow to sit on (146)"
@@ -3353,15 +3386,32 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "side": "pending",
-                "stacked": "pending",
-                "overlay": "pending"
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "mediaText.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "mediaText.mark.section@side",
+                "mediaText.mark.section@stacked",
+                "mediaText.mark.section@overlay"
+              ]
+            }
+          ]
         },
         "depth": {
           "notApplicable": "No surface for a shadow to sit on (146)"
@@ -3886,11 +3936,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "featuresGrid.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "featuresGrid.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -4287,14 +4352,30 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "grid": "pending",
-                "marquee": "pending"
+                "grid": "verified",
+                "marquee": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "logoCloud.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "logoCloud.mark.section@grid",
+                "logoCloud.mark.section@marquee"
+              ]
+            }
+          ]
         },
         "depth": {
           "notApplicable": "No surface for a shadow to sit on (146)"
@@ -6037,6 +6118,27 @@
               ]
             },
             {
+              "id": "testimonials.mark.section.picture",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"section\"][data-mark-kind=\"picture\"]",
+              "cases": [
+                "testimonials.mark.section.picture@grid",
+                "testimonials.mark.section.picture@slider"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/card-design.spec.ts",
+                  "cases": [
+                    "a section mark sits behind its content, clipped to its section, with no layout shift"
+                  ]
+                }
+              ]
+            },
+            {
               "id": "testimonials.mark.card.text",
               "field": "cardDesign.mark",
               "resolvers": [
@@ -6068,6 +6170,27 @@
               "cases": [
                 "testimonials.mark.card.icon@grid",
                 "testimonials.mark.card.icon@slider"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/card-design.spec.ts",
+                  "cases": [
+                    "a card mark sits behind its text, clipped to its card, with no layout shift"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "testimonials.mark.card.picture",
+              "field": "cardDesign.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"card\"][data-mark-kind=\"picture\"]",
+              "cases": [
+                "testimonials.mark.card.picture@grid",
+                "testimonials.mark.card.picture@slider"
               ],
               "measured": [
                 {
@@ -6489,8 +6612,10 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             },
             {
               "policy": "required",
@@ -6500,7 +6625,20 @@
               "availability": "pending"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "faq.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "faq.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -6910,11 +7048,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "ctaBanner.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "ctaBanner.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -7192,11 +7345,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "formSection.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "formSection.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -7562,8 +7730,10 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             },
             {
               "policy": "required",
@@ -7580,7 +7750,20 @@
               "availability": "pending"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "pricingTable.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "pricingTable.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -7899,11 +8082,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "newsletterSignup.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "newsletterSignup.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -8309,10 +8507,12 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "inline": "pending",
-                "cards": "pending"
+                "inline": "verified",
+                "cards": "verified"
               }
             },
             {
@@ -8328,7 +8528,21 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "stats.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "stats.mark.section@inline",
+                "stats.mark.section@cards"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -8927,15 +9141,32 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "grid": "pending",
-                "masonry": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "gallery.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "gallery.mark.section@grid",
+                "gallery.mark.section@masonry",
+                "gallery.mark.section@slider"
+              ]
+            }
+          ]
         },
         "depth": {
           "notApplicable": "No surface for a shadow to sit on (146)"
@@ -9327,8 +9558,10 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.mark"
+              ],
+              "availability": "verified"
             },
             {
               "policy": "required",
@@ -9338,7 +9571,20 @@
               "availability": "pending"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "location.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "location.mark.section"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -10127,11 +10373,13 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending",
-                "list": "pending"
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
               }
             },
             {
@@ -10146,7 +10394,22 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "team.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "team.mark.section@grid",
+                "team.mark.section@slider",
+                "team.mark.section@list"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -11028,14 +11291,30 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "vertical": "pending",
-                "alternating": "pending"
+                "vertical": "verified",
+                "alternating": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "process.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "process.mark.section@vertical",
+                "process.mark.section@alternating"
+              ]
+            }
+          ]
         },
         "depth": {
           "notApplicable": "No surface for a shadow to sit on (146)"
@@ -16905,12 +17184,14 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "stacked": "pending",
-                "cards": "pending",
-                "editorial": "pending",
-                "compact": "pending"
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
               }
             },
             {
@@ -16938,7 +17219,23 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "linkList.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "linkList.mark.section@stacked",
+                "linkList.mark.section@cards",
+                "linkList.mark.section@editorial",
+                "linkList.mark.section@compact"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -17931,11 +18228,13 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "list": "pending",
-                "agenda": "pending",
-                "featured": "pending"
+                "list": "verified",
+                "agenda": "verified",
+                "featured": "verified"
               }
             },
             {
@@ -17954,7 +18253,22 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "events.mark.section",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/section-frame.tsx",
+              "target": "[data-decorative-mark=\"section\"]",
+              "cases": [
+                "events.mark.section@list",
+                "events.mark.section@agenda",
+                "events.mark.section@featured"
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [

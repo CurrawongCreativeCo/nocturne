@@ -138,8 +138,10 @@ export function resolveTextStyle(input: TextStyleInput | null | undefined): Text
 
 /** What a layout draws for one text element with nothing chosen. */
 export interface OwnText {
-  /** The step Medium is. */
-  size: TypeStep
+  /** The class Medium is: a step on the type scale, or (with `scale`) one the scale doesn't hold. */
+  size: TypeStep | (string & {})
+  /** The scale step a size off the scale (`text-4xl`) is stepped from: Small is one below, Large one above. */
+  scale?: TypeStep
   /** The size used while none is chosen; Medium unless the element starts smaller (an eyebrow). */
   defaultSize?: TextSize
   weight: TextWeight
@@ -147,6 +149,9 @@ export interface OwnText {
   colour?: string
   textCase?: TextCase
 }
+
+const isTypeStep = (value: string): value is TypeStep =>
+  (TYPE_SCALE as readonly string[]).includes(value)
 
 /** `size` moved `step` steps along the type scale, kept on it. */
 export function stepType(size: TypeStep, step: number): TypeStep {
@@ -162,7 +167,10 @@ export function textLook(
   style: TextStyle,
   own: OwnText,
 ): { className: string; style?: CSSProperties } {
-  const size = stepType(own.size, STEP[style.size ?? own.defaultSize ?? 'medium'])
+  const step = STEP[style.size ?? own.defaultSize ?? 'medium']
+  const from = own.scale ?? own.size
+  // Medium is the family's own class, whatever it is; the other steps move along the scale.
+  const size = step === 0 || !isTypeStep(from) ? own.size : stepType(from, step)
   const textCase = style.textCase ?? own.textCase ?? 'normal'
   const tracking = style.tracking ?? (textCase === 'uppercase' ? 'wide' : undefined)
   const classes = [

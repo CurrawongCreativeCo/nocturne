@@ -1,0 +1,250 @@
+import {
+  defineField,
+  type ConditionalProperty,
+  type ConditionalPropertyCallback,
+  type FieldDefinition,
+} from 'sanity'
+
+import { BODY_TEXT_RATIO } from '@/lib/color/background-contrast'
+import {
+  worstCardTextContrast,
+  type RoleDefaultColours,
+  type StoredCardLevel,
+} from '@/lib/color/card-contrast'
+import type { TextRole } from '@/lib/design/capabilities'
+import { cardFamilySummary } from '@/lib/sanity/card-design-summary'
+import { scopedGroupTitle } from '@/lib/sanity/design-summary'
+import { hiddenFromClients } from '@/lib/sanity/roles'
+import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
+import { presetsOption, type PresetDefinition } from '@/lib/sanity/schema/preset-field'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
+import { surfaceFields, textRoleField, textRoleParts } from '@/lib/sanity/schema/surface-design'
+
+import { itemAppearanceField, notCustomised } from './item-appearance'
+import { enclosingOfArray, memberOfArray } from '../utils/schema-path'
+
+/**
+ * The shared forms of a card family's design (task 156): the section header's eyebrow and Design box, the
+ * Cards box at section level and the same fields behind an Appearance switch at item level. Every field is
+ * built by a shared builder (surfaceFields, textRoleField, itemAppearanceField, the decorativeMark type), so
+ * a family composes them and never writes a design control of its own. The family says which roles it
+ * draws; the renderer must draw each one it lists (the capability evidence proves it).
+ */
+
+export interface CardRole {
+  role: TextRole
+  /** Offers highlighted words (short card text only). */
+  highlight?: boolean
+  /** Hides the role where the layout doesn't draw it. */
+  hidden?: ConditionalProperty
+}
+
+const both =
+  (...callbacks: (ConditionalProperty | undefined)[]): ConditionalPropertyCallback =>
+  (context) =>
+    callbacks.some((callback) =>
+      typeof callback === 'function' ? callback(context) : callback === true,
+    )
+
+/** The optional eyebrow every section with a heading can have: no migration, empty draws nothing. */
+export const eyebrowField = (max = 40) =>
+  defineField({
+    name: 'eyebrow',
+    title: 'Eyebrow',
+    type: 'string',
+    description: 'A short line above the title. Optional.',
+    validation: (rule) => rule.max(max).warning(),
+  })
+
+/** The section header's three roles, agency only. */
+export const headerDesignField = () =>
+  defineField({
+    name: 'headerDesign',
+    title: scopedGroupTitle('Section header', 'section'),
+    type: 'object',
+    group: 'design',
+    description: 'The eyebrow, title and intro. Inherit uses the section’s own.',
+    hidden: hiddenFromClients,
+    options: { collapsible: true, collapsed: true },
+    fields: (['eyebrow', 'heading', 'intro'] as const).map((role) =>
+      textRoleField({ role, inherits: 'the section’s own', capability: 'header' }),
+    ),
+  })
+
+interface CardFieldsConfig {
+  /** What Inherit means here: "the default card", "the section’s card design". */
+  inherits: string
+  inItem?: boolean
+  roles: readonly CardRole[]
+  /** The fill and border, hidden where the layout draws no surface. Off for a family with none. */
+  surface?: { hidden?: ConditionalPropertyCallback } | false
+  /** A decorative mark at this level. */
+  mark?: boolean
+  /** What each role is drawn in until one is chosen, for the background's contrast warning. */
+  defaults: RoleDefaultColours
+  /** The array an item's design sits in, for the item-level contrast warning. */
+  itemArray?: string
+  /** Hides every field (an item's, until it is customised). */
+  hidden?: ConditionalPropertyCallback
+}
+
+/**
+ * The warning on a Background colour (task 156): the worst of the card's text on the background it draws,
+ * chosen text colours included, with the site's Brand colours. A warning, never an error.
+ */
+function withTextContrast<T extends FieldDefinition>(
+  field: T,
+  { defaults, itemArray }: Pick<CardFieldsConfig, 'defaults' | 'itemArray'>,
+): T {
+  if (field.name !== 'background') return field
+  return {
+    ...field,
+    validation: (rule: { custom: (fn: unknown) => { warning: () => unknown } }) =>
+      rule
+        .custom(
+          async (
+            _value: unknown,
+            context: {
+              document?: unknown
+              path?: unknown
+              getClient: (options: { apiVersion: string }) => never
+            },
+          ) => {
+            type Level = StoredCardLevel & { appearance?: string }
+            const path = context.path as never
+            const section = (
+              itemArray
+                ? enclosingOfArray(context.document, path, itemArray)
+                : sectionAtStylePath(context.document, path)
+            ) as { cardDesign?: Level; style?: { tone?: string } } | undefined
+            const member = itemArray
+              ? (memberOfArray(context.document, path, itemArray) as { design?: Level } | undefined)
+              : undefined
+            const own = member?.design?.appearance === 'custom' ? member.design : undefined
+            const { colours } = await fetchBrandColours(
+              context.getClient({ apiVersion: '2025-01-01' }),
+            )
+            const worst = worstCardTextContrast({
+              levels: [section?.cardDesign, own],
+              defaults,
+              tone: section?.style?.tone,
+              site: colours,
+            })
+            if (!worst || worst.ratio >= BODY_TEXT_RATIO) return true
+            return `Text may be hard to read on this background: ${worst.ratio.toFixed(1)}:1 (text needs ${String(BODY_TEXT_RATIO)}:1). Choose a stronger or different colour, or change the text colours under Text.`
+          },
+        )
+        .warning(),
+  }
+}
+
+/** The fields of a card's design: fill and border, one object per role, a mark. */
+export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
+  const { inherits, inItem, roles, surface = {}, mark = true, hidden } = config
+  return [
+    ...(surface === false
+      ? []
+      : surfaceFields({
+          inherits,
+          inItem,
+          hidden: both(hidden, surface.hidden),
+        }).map((field) => withTextContrast(field, config))),
+    ...roles.map(({ role, highlight, hidden: roleHidden }) =>
+      textRoleField({
+        role,
+        inherits,
+        inItem,
+        fieldset: 'text',
+        highlight,
+        hidden: both(hidden, roleHidden),
+      }),
+    ),
+    ...(mark
+      ? [
+          defineField({
+            name: 'mark',
+            title: 'Decorative mark',
+            type: 'decorativeMark',
+            description: inItem
+              ? 'One faint mark behind this card’s text, instead of the section’s card mark.'
+              : 'One faint mark behind each card’s text.',
+            hidden,
+          }),
+        ]
+      : []),
+  ]
+}
+
+const TEXT_FIELDSET = {
+  name: 'text',
+  title: 'Text',
+  options: { collapsible: true, collapsed: true },
+}
+
+/** A family's Cards box, agency only, at section level. */
+export function cardDesignField({
+  title = scopedGroupTitle('Cards', 'card'),
+  description = 'Shared background, border, text and mark for every card. Inherit uses the default card.',
+  presets,
+  ...config
+}: Omit<CardFieldsConfig, 'inItem' | 'hidden'> & {
+  title?: string
+  description?: string
+  presets?: readonly PresetDefinition[]
+}) {
+  return defineField({
+    name: 'cardDesign',
+    title,
+    type: 'object',
+    group: 'design',
+    description,
+    hidden: hiddenFromClients,
+    options: {
+      collapsible: true,
+      collapsed: false,
+      ...(presets ? presetsOption(presets) : {}),
+    },
+    fieldsets: [TEXT_FIELDSET],
+    fields: cardDesignFields(config),
+  })
+}
+
+/**
+ * One item's Appearance (a pricing plan's), agency only: the same fields as the Cards box behind the
+ * shared Customise switch, with the design summary above them. Inherit uses the section's Cards box.
+ */
+export function itemDesignField({
+  noun,
+  ...config
+}: Omit<CardFieldsConfig, 'inItem' | 'hidden' | 'inherits'> & {
+  /** What an item is called in a sentence: "plan". */
+  noun: string
+}) {
+  return defineField({
+    name: 'design',
+    title: 'Appearance',
+    type: 'object',
+    description: `This ${noun} follows the section’s card design (Design tab). Customise it to change only what you pick here.`,
+    hidden: hiddenFromClients,
+    options: {
+      collapsible: true,
+      collapsed: true,
+      designSummary: cardFamilySummary({
+        noun,
+        roles: config.roles.map(({ role }) => role),
+        rolePartsOf: textRoleParts,
+        mark: config.mark ?? true,
+      }),
+    },
+    fieldsets: [TEXT_FIELDSET],
+    fields: [
+      itemAppearanceField({ inheritLabel: 'Use the section’s card design' }),
+      ...cardDesignFields({
+        ...config,
+        inherits: 'the section’s card design',
+        inItem: true,
+        hidden: notCustomised,
+      }),
+    ],
+  })
+}

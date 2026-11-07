@@ -193,6 +193,19 @@ const TEXT_ROLE_FIELDS: Record<
   description: { title: 'Description', description: MEDIUM_IS_OWN, leading: true },
 }
 
+/** The stored parts of a role's object, in form order: what the field offers and the summary names. */
+export function textRoleParts(role: TextRole): string[] {
+  const { letters, leading, italic } = TEXT_ROLE_FIELDS[role]
+  return [
+    'size',
+    'weight',
+    'colour',
+    ...(letters ? ['textCase', 'tracking'] : []),
+    ...(leading ? ['leading'] : []),
+    ...(italic ? ['fontStyle'] : []),
+  ]
+}
+
 /**
  * One text role's look: size, weight and colour for every role, plus capitals and spacing (eyebrow,
  * label), line height (intro, body, quote, description) and italic (quote). `highlight` adds how the

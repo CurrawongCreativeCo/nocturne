@@ -2473,26 +2473,26 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
-| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R…   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
-| Rich text (`richText`)                   | –       | –    | –      | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
-| Features grid (`featuresGrid`)           | C…      | R…   | R…     | R…   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
+| Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R✓   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
+| Features grid (`featuresGrid`)           | C…      | R…   | R…     | R✓   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| FAQ (`faq`)                              | R…      | R…   | R…     | R…   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Call to action banner (`ctaBanner`)      | R…      | –    | R…     | R…   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
-| Form (`formSection`)                     | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Pricing table (`pricingTable`)           | R…      | R…   | R…     | R…   | R…    | C…   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Newsletter signup (`newsletterSignup`)   | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Stats (`stats`), 2 layouts               | R…*     | R…*  | R…     | R…*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R…     | R…   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Location (`location`)                    | R…      | R…   | R…     | R…   | R…    | R…   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R…      | R…   | R…     | R…   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| FAQ (`faq`)                              | R…      | R…   | R…     | R◐   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R…     | R✓   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
+| Form (`formSection`)                     | R…      | –    | R…     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Pricing table (`pricingTable`)           | R…      | R…   | R…     | R◐   | R…    | C…   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Newsletter signup (`newsletterSignup`)   | R…      | –    | R…     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Stats (`stats`), 2 layouts               | R…*     | R…*  | R…     | R◐*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R…     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Location (`location`)                    | R…      | R…   | R…     | R◐   | R…    | R…   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R…      | R…   | R…     | R◐   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R…     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Process (`process`), 2 layouts           | –       | R…   | R…     | R…   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Process (`process`), 2 layouts           | –       | R…   | R…     | R✓   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Embed (`embed`)                          | R…      | –    | R…     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R…   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R…*     | R…   | R…     | R…*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R◐   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R…*     | R…   | R…     | R◐*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R◐   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2503,7 +2503,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 110      | 0               | 180     |
+| Required                                                 | 127      | 0               | 163     |
 | Conditional                                              | 4        | 0               | 40      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2515,7 +2515,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
 | 151          | 19               | 0                   |
-| 156          | 115              | 1                   |
+| 156          | 98               | 1                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
@@ -2523,7 +2523,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 213          | 7                | 0                   |
 | 276          | 2                | 0                   |
 
-**Evidence.** 117 capability entries, 258 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 136 capability entries, 296 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
