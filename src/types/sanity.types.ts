@@ -80,7 +80,7 @@ export type HeaderDesign = {
 
 export type CardDesign = {
   background?: Background
-  backgroundStrength?: 'light' | 'medium' | 'strong' | 'solid'
+  backgroundStrength?: 'wash' | 'light' | 'medium' | 'strong' | 'solid'
   border?: 'none' | 'thin' | 'medium' | 'thick'
   borderColour?: BorderColour
   quote?: Quote
@@ -155,7 +155,7 @@ export type CategoryDesign = {
 
 export type LinkListCardDesign = {
   background?: CardDesignBackground
-  backgroundStrength?: 'light' | 'medium' | 'strong' | 'solid'
+  backgroundStrength?: 'wash' | 'light' | 'medium' | 'strong' | 'solid'
   border?: 'none' | 'thin' | 'medium' | 'thick'
   borderColour?: CardDesignBorderColour
   eyebrow?: CardDesignEyebrow
@@ -169,7 +169,7 @@ export type LinkDesign = {
   iconShape?: 'plain' | 'circle' | 'rounded' | 'square'
   iconColour?: LinkDesignIconColour
   iconBackground?: LinkDesignIconBackground
-  iconBackgroundStrength?: 'light' | 'medium' | 'strong' | 'solid'
+  iconBackgroundStrength?: 'wash' | 'light' | 'medium' | 'strong' | 'solid'
   iconBorder?: 'none' | 'thin' | 'medium' | 'thick'
   iconBorderColour?: LinkDesignIconBorderColour
 }
@@ -179,7 +179,7 @@ export type SocialDesign = {
   position?: 'above' | 'below'
   iconColour?: SocialDesignIconColour
   background?: SocialDesignBackground
-  backgroundStrength?: 'light' | 'medium' | 'strong' | 'solid'
+  backgroundStrength?: 'wash' | 'light' | 'medium' | 'strong' | 'solid'
   border?: 'none' | 'thin' | 'medium' | 'thick'
   borderColour?: SocialDesignBorderColour
 }
@@ -406,7 +406,7 @@ export type Thumbnail = {
 export type Design = {
   appearance?: 'custom'
   background?: DesignBackground
-  backgroundStrength?: 'light' | 'medium' | 'strong' | 'solid'
+  backgroundStrength?: 'wash' | 'light' | 'medium' | 'strong' | 'solid'
   border?: 'none' | 'thin' | 'medium' | 'thick'
   borderColour?: DesignBorderColour
   shadow?: 'flat' | 'soft' | 'raised' | 'floating'
@@ -416,7 +416,7 @@ export type Design = {
   iconShape?: 'plain' | 'circle' | 'rounded' | 'square'
   iconColour?: IconColour
   iconBackground?: IconBackground
-  iconBackgroundStrength?: 'light' | 'medium' | 'strong' | 'solid'
+  iconBackgroundStrength?: 'wash' | 'light' | 'medium' | 'strong' | 'solid'
   iconBorder?: 'none' | 'thin' | 'medium' | 'thick'
   iconBorderColour?: IconBorderColour
   arrowStyle?: 'chevron' | 'arrow' | 'external' | 'none'
@@ -4344,7 +4344,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
               | null
             hex: string | null
           } | null
-          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
           border: 'medium' | 'none' | 'thick' | 'thin' | null
           borderColour: {
             colour:
@@ -4413,7 +4413,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
               | null
             hex: string | null
           } | null
-          iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+          iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
           iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
           iconBorderColour: {
             colour:
@@ -4441,7 +4441,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
               | null
             hex: string | null
           } | null
-          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
           border: 'medium' | 'none' | 'thick' | 'thin' | null
           borderColour: {
             colour:
@@ -4794,7 +4794,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
                 | null
               hex: string | null
             } | null
-            backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+            backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
             border: 'medium' | 'none' | 'thick' | 'thin' | null
             borderColour: {
               colour:
@@ -4877,7 +4877,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
                 | null
               hex: string | null
             } | null
-            iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+            iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
             iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
             iconBorderColour: {
               colour:
@@ -6506,7 +6506,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
               | null
             hex: string | null
           } | null
-          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+          backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
           border: 'medium' | 'none' | 'thick' | 'thin' | null
           borderColour: {
             colour:
@@ -11721,7 +11721,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               border: 'medium' | 'none' | 'thick' | 'thin' | null
               borderColour: {
                 colour:
@@ -11832,7 +11832,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
               iconBorderColour: {
                 colour:
@@ -11874,7 +11874,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               border: 'medium' | 'none' | 'thick' | 'thin' | null
               borderColour: {
                 colour:
@@ -12290,7 +12290,7 @@ export type PAGE_QUERY_RESULT = {
                     | null
                   hex: string | null
                 } | null
-                backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+                backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
                 border: 'medium' | 'none' | 'thick' | 'thin' | null
                 borderColour: {
                   colour:
@@ -12387,7 +12387,7 @@ export type PAGE_QUERY_RESULT = {
                     | null
                   hex: string | null
                 } | null
-                iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+                iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
                 iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
                 iconBorderColour: {
                   colour:
@@ -12737,7 +12737,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               border: 'medium' | 'none' | 'thick' | 'thin' | null
               borderColour: {
                 colour:
@@ -12848,7 +12848,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
               iconBorderColour: {
                 colour:
@@ -12890,7 +12890,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               border: 'medium' | 'none' | 'thick' | 'thin' | null
               borderColour: {
                 colour:
@@ -13306,7 +13306,7 @@ export type PAGE_QUERY_RESULT = {
                     | null
                   hex: string | null
                 } | null
-                backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+                backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
                 border: 'medium' | 'none' | 'thick' | 'thin' | null
                 borderColour: {
                   colour:
@@ -13403,7 +13403,7 @@ export type PAGE_QUERY_RESULT = {
                     | null
                   hex: string | null
                 } | null
-                iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+                iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
                 iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
                 iconBorderColour: {
                   colour:
@@ -17739,7 +17739,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               border: 'medium' | 'none' | 'thick' | 'thin' | null
               borderColour: {
                 colour:
@@ -18172,7 +18172,7 @@ export type PAGE_QUERY_RESULT = {
                   | null
                 hex: string | null
               } | null
-              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | null
+              backgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
               border: 'medium' | 'none' | 'thick' | 'thin' | null
               borderColour: {
                 colour:

@@ -5069,6 +5069,10 @@
           "required": false,
           "list": [
             {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
               "value": "light",
               "title": "Light"
             },
@@ -12203,6 +12207,10 @@
           "required": false,
           "list": [
             {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
               "value": "light",
               "title": "Light"
             },
@@ -12871,6 +12879,10 @@
           "kind": "string",
           "required": false,
           "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
             {
               "value": "light",
               "title": "Light"
@@ -13694,6 +13706,10 @@
           "max": null,
           "list": [
             {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
               "value": "light",
               "title": "Light"
             },
@@ -14416,6 +14432,10 @@
           "max": null,
           "list": [
             {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
               "value": "light",
               "title": "Light"
             },
@@ -14670,6 +14690,10 @@
           "required": null,
           "max": null,
           "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
             {
               "value": "light",
               "title": "Light"

@@ -134,7 +134,7 @@ export function surfaceFields({
       name: 'backgroundStrength',
       title: 'Background strength',
       description:
-        'How much of the colour shows. Light, Medium and Strong keep glass see-through; Solid hides the photo.',
+        'How much of the colour shows. Wash is a faint tint. Light, Medium and Strong keep glass see-through; Solid hides the photo.',
       values: SURFACE_STRENGTHS,
       titles: SURFACE_STRENGTH_TITLES,
       inherits: `${inherits} (the glass strength on Glass rows, else Solid)`,
@@ -386,7 +386,7 @@ export function iconDesignFields({
     choiceField({
       name: 'iconBackgroundStrength',
       title: 'Container strength',
-      description: 'Light, Medium and Strong let the card show through.',
+      description: 'Wash, Light, Medium and Strong let the card show through.',
       values: SURFACE_STRENGTHS,
       titles: SURFACE_STRENGTH_TITLES,
       inherits: `${inherits} (Solid)`,

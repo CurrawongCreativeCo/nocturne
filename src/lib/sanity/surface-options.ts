@@ -47,10 +47,11 @@ const RING_WIDTH: Record<SurfaceBorder, string> = {
   thick: 'ring-3',
 }
 
-/** How much of the background colour shows: the glass strengths, then Solid. */
-export const SURFACE_STRENGTHS = ['light', 'medium', 'strong', 'solid'] as const
+/** How much of the background colour shows: a faint Wash, the glass strengths, then Solid. */
+export const SURFACE_STRENGTHS = ['wash', 'light', 'medium', 'strong', 'solid'] as const
 export type SurfaceStrength = (typeof SURFACE_STRENGTHS)[number]
 export const SURFACE_STRENGTH_TITLES: Record<SurfaceStrength, string> = {
+  wash: 'Wash',
   light: 'Light',
   medium: 'Medium',
   strong: 'Strong',
@@ -58,6 +59,8 @@ export const SURFACE_STRENGTH_TITLES: Record<SurfaceStrength, string> = {
 }
 /** 0 to 1. The see-through strengths are the glass tokens', so a tint matches the glass it sits in. */
 export const SURFACE_STRENGTH_FRACTION: Record<SurfaceStrength, number> = {
+  // A faint tint (task 156): light enough that muted text keeps its contrast. Not a glass token.
+  wash: 0.12,
   light: glass.light,
   medium: glass.medium,
   strong: glass.strong,
