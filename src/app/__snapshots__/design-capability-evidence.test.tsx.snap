@@ -1110,6 +1110,26 @@ exports[`design capability evidence > location.glass.section: the probe changes 
 ]
 `;
 
+exports[`design capability evidence > location.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > location.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > location.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > location.mark.card.cards: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > location.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > location.motion.section: the probe changes the registered target 1`] = `
@@ -1121,6 +1141,56 @@ exports[`design capability evidence > location.motion.section: the probe changes
 exports[`design capability evidence > location.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > location.surface.card.cards: the probe changes the registered target 1`] = `
+[
+  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line border-t-4 border-accent">",
+  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line ">",
+  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line ">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.cards.body: the probe changes the registered target 1`] = `
+[
+  "<address class="mt-3 text-lead not-italic" data-text-role="body">",
+  "<div class="mt-2 flex flex-col gap-1 text-lead" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.cards.meta: the probe changes the registered target 1`] = `
+[
+  "<dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-small" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.cards.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="flex items-center gap-2 text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.picture.body: the probe changes the registered target 1`] = `
+[
+  "<address class="mt-3 text-lead not-italic" data-text-role="body">",
+  "<div class="mt-2 flex flex-col gap-1 text-lead" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.picture.meta: the probe changes the registered target 1`] = `
+[
+  "<dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-small" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.picture.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="flex items-center gap-2 text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
 ]
 `;
 

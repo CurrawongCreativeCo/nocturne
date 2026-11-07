@@ -471,68 +471,6 @@
     },
     {
       "component": "location",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
-      "capability": "text",
-      "scope": "card",
-      "role": "title",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
-      "capability": "text",
-      "scope": "card",
-      "role": "body",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
-      "capability": "text",
-      "scope": "card",
-      "role": "meta",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "location",
       "capability": "depth",
       "scope": "card",
       "layouts": [null],

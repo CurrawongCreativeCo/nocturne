@@ -372,11 +372,11 @@ exports[`the design capability contract > linkList: reports what it offers today
 exports[`the design capability contract > location: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "text required card: pending (156)",
-    "header required section: pending (156)",
+    "surface required card: verified",
+    "text required card: verified",
+    "header required section: verified",
     "mark required section: verified",
-    "mark required card: pending (156)",
+    "mark required card: verified",
     "depth required card: pending (146)",
     "icon required section: pending (158)",
     "framing conditional section/background: pending (177)",

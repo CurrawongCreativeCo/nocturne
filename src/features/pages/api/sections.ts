@@ -336,6 +336,14 @@ export const locationFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign {
+      ${surfaceProjection},
+      title { ${roleStyleProjection} },
+      body { ${roleStyleProjection} },
+      meta { ${roleStyleProjection} },
+      mark { ${decorativeMarkFields} }
+    },
     mapImage { ${imageFields} },
     showHours,
     showOpenNow,

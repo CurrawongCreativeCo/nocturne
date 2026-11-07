@@ -95,6 +95,14 @@ const PLAN_BASE: Patch = {
 
 const FAMILIES: readonly Family[] = [
   {
+    component: 'location',
+    base: { eyebrow: 'Find us', intro: 'An intro.', mapImage: null },
+    boxes: [
+      { field: 'headerDesign', at: 'headerDesign' },
+      { field: 'cardDesign', at: 'cardDesign' },
+    ],
+  },
+  {
     component: 'stats',
     base: { eyebrow: 'In numbers', intro: 'An intro.' },
     boxes: [{ field: 'headerDesign', at: 'headerDesign' }],

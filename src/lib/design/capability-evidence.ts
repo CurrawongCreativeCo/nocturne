@@ -1135,6 +1135,26 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['grid', 'masonry', 'slider'],
     motion: ['grid', 'masonry', 'slider'],
   }),
+  // Without a map image the details are cards, the look that proves a fill, a border and a mark. Beside one
+  // they stack on the section, so that look proves only its text. Each look proves its own.
+  ...cardFamilyEvidence({
+    component: 'location',
+    look: 'cards',
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    cardTarget: 'div.rounded-card.p-8',
+    base: { eyebrow: 'Find us', intro: 'An intro.', mapImage: null },
+    roles: ['title', 'body', 'meta'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'location',
+    look: 'picture',
+    parts: ['text'],
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    cardTarget: 'div.rounded-card.p-8',
+    base: { mapImage: PICTURE },
+    roles: ['title', 'body', 'meta'],
+  }),
   ...frameEvidence('location', {
     mark: true,
     overlay: true,

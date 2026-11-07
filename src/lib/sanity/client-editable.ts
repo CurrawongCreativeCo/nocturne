@@ -265,6 +265,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   location: {
     editable: [
+      'eyebrow',
       'heading',
       'title',
       'intro',
@@ -275,7 +276,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'showSocial',
       'directionsLabel',
     ],
-    agencyOnly: ['access', 'style', 'interactiveMap'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
   },
   team: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'selection', 'members'],
