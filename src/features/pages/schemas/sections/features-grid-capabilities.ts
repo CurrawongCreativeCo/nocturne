@@ -8,7 +8,7 @@ const ON_A_CARD = {
 
 /** The features grid's design capabilities (task 275). Task 276 turns it into the cards family. */
 export const featuresGridCapabilities = declareCapabilities({
-  surface: { policy: 'conditional', scope: 'card', trigger: ON_A_CARD },
+  surface: { policy: 'conditional', scope: 'card', trigger: ON_A_CARD, closingTask: 276 },
   text: { policy: 'required', scope: 'card', roles: ['title', 'body'], closingTask: 276 },
   header: { policy: 'required', scope: 'section', roles: ['eyebrow', 'heading', 'intro'] },
   mark: { policy: 'required', scope: 'section' },

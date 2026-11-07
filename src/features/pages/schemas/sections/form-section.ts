@@ -3,6 +3,7 @@ import { defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -28,6 +29,7 @@ export const formSection = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -51,6 +53,7 @@ export const formSection = defineType({
         description: 'Create forms under Forms in the sidebar. One form can be used on many pages.',
         validation: (rule) => rule.required(),
       }),
+      headerDesignField(),
       accessField,
     ],
     { align: 'start' },

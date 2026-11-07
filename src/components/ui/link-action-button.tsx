@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import type { OverlayKind } from '@/config/link-actions'
+import type { TextRole } from '@/lib/design/capabilities'
 
 /**
  * A panel or booking trigger: a real <button> that opens an overlay. It is plain server markup, so
@@ -15,6 +16,7 @@ export function LinkActionButton({
   fallbackHref,
   title,
   className,
+  textRole,
   children,
 }: {
   kind: OverlayKind
@@ -24,6 +26,7 @@ export function LinkActionButton({
   /** The dialog's title; added to the accessible name so the button says what it opens. */
   title?: string
   className?: string
+  textRole?: TextRole
   children: ReactNode
 }) {
   const button = (
@@ -33,6 +36,7 @@ export function LinkActionButton({
       data-overlay-kind={kind}
       data-overlay-id={id}
       className={className}
+      data-text-role={textRole}
     >
       {children}
       {title && <span className="sr-only"> (opens {title})</span>}

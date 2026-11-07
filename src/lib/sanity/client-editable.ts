@@ -37,6 +37,8 @@ export const AGENCY_ONLY_TYPES: ReadonlySet<string> = new Set([
   'sectionStyle',
   'imageDesign',
   'decorativeDivider',
+  'decorativeMark',
+  'blogSettings',
   // new-type:agency-only
 ])
 
@@ -220,50 +222,51 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     // The layout (`variant`, set by the presets) and the extra block are the agency's; clients change
     // the words, the buttons and the picture or video in the media slot.
     editable: ['eyebrow', 'heading', 'title', 'body', 'ctas', 'media', 'image', 'imagePosition'],
-    agencyOnly: ['variant', 'supporting', 'imageDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'variant', 'supporting', 'imageDesign', 'access', 'style'],
   },
   featuresGrid: {
-    editable: ['heading', 'title', 'intro', 'columns', 'items'],
-    agencyOnly: ['access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'columns', 'items'],
+    agencyOnly: ['headerDesign', 'access', 'style'],
   },
   logoCloud: {
-    editable: ['heading', 'title', 'logos'],
-    agencyOnly: ['variant', 'access', 'style', 'logoColour'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'logos'],
+    agencyOnly: ['headerDesign', 'variant', 'access', 'style', 'logoColour'],
   },
   testimonials: {
-    editable: ['heading', 'title', 'items'],
-    agencyOnly: ['variant', 'avatarDesign', 'access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
+    agencyOnly: ['variant', 'cardDesign', 'headerDesign', 'avatarDesign', 'access', 'style'],
   },
   faq: {
-    editable: ['heading', 'title', 'intro', 'items'],
-    agencyOnly: ['access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
   },
   ctaBanner: {
-    editable: ['heading', 'title', 'text', 'ctas', 'tone'],
-    agencyOnly: ['access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'ctas', 'tone'],
+    agencyOnly: ['headerDesign', 'access', 'style'],
   },
   formSection: {
-    editable: ['heading', 'title', 'text', 'form'],
-    agencyOnly: ['access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'form'],
+    agencyOnly: ['headerDesign', 'access', 'style'],
   },
   pricingTable: {
-    editable: ['heading', 'title', 'intro', 'plans'],
-    agencyOnly: ['access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'plans'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
   },
   newsletterSignup: {
-    editable: ['heading', 'title', 'text', 'submitLabel', 'successMessage'],
-    agencyOnly: ['access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'submitLabel', 'successMessage'],
+    agencyOnly: ['headerDesign', 'access', 'style'],
   },
   stats: {
-    editable: ['heading', 'title', 'intro', 'items'],
-    agencyOnly: ['variant', 'access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
+    agencyOnly: ['variant', 'headerDesign', 'cardDesign', 'access', 'style'],
   },
   gallery: {
-    editable: ['heading', 'title', 'intro', 'images'],
-    agencyOnly: ['variant', 'imageDesign', 'access', 'style', 'columns'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'images'],
+    agencyOnly: ['headerDesign', 'variant', 'imageDesign', 'access', 'style', 'columns'],
   },
   location: {
     editable: [
+      'eyebrow',
       'heading',
       'title',
       'intro',
@@ -274,14 +277,23 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'showSocial',
       'directionsLabel',
     ],
-    agencyOnly: ['access', 'style', 'interactiveMap'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
   },
   team: {
-    editable: ['heading', 'title', 'text', 'selection', 'members'],
-    agencyOnly: ['variant', 'imageDesign', 'portraitDesign', 'access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'selection', 'members'],
+    agencyOnly: [
+      'variant',
+      'headerDesign',
+      'cardDesign',
+      'imageDesign',
+      'portraitDesign',
+      'access',
+      'style',
+    ],
   },
   video: {
     editable: [
+      'eyebrow',
       'heading',
       'title',
       'text',
@@ -292,21 +304,23 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'captions',
       'aspectRatio',
     ],
-    agencyOnly: ['variant', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'variant', 'access', 'style'],
   },
   process: {
-    editable: ['heading', 'title', 'intro', 'steps'],
-    agencyOnly: ['variant', 'access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'steps'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'variant', 'access', 'style'],
   },
   embed: {
-    editable: ['heading', 'title', 'text', 'provider', 'url', 'height'],
-    agencyOnly: ['access', 'style', 'customHeight'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'provider', 'url', 'height'],
+    agencyOnly: ['headerDesign', 'access', 'style', 'customHeight'],
   },
   linkList: {
     editable: [
       'variant',
+      'eyebrow',
       'heading',
       'title',
+      'intro',
       'headingDisplay',
       'headingImage',
       'profile',
@@ -319,6 +333,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'rowStyle',
     ],
     agencyOnly: [
+      'headerDesign',
       'profileDesign',
       'categoryDesign',
       'cardDesign',
@@ -331,8 +346,8 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     ],
   },
   events: {
-    editable: ['heading', 'title', 'text', 'seeAllLink', 'seeAllLabel'],
-    agencyOnly: ['variant', 'access', 'style', 'category', 'count'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'seeAllLink', 'seeAllLabel'],
+    agencyOnly: ['variant', 'headerDesign', 'cardDesign', 'access', 'style', 'category', 'count'],
   },
   navItem: {
     editable: ['label', 'link', 'children'],

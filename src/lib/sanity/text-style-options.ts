@@ -43,6 +43,13 @@ export const TEXT_LEADING_TITLES: Record<TextLeading, string> = {
   relaxed: 'Relaxed',
 }
 
+export const TEXT_FONT_STYLES = ['normal', 'italic'] as const
+export type TextFontStyle = (typeof TEXT_FONT_STYLES)[number]
+export const TEXT_FONT_STYLE_TITLES: Record<TextFontStyle, string> = {
+  normal: 'Upright',
+  italic: 'Italic',
+}
+
 /** The colours a card's text offers (Inherit and Custom too). */
 export const TEXT_COLOUR_CHOICES = ['ink', 'muted', 'accent', 'accent-2', 'highlight'] as const
 const OFFERED: readonly ThemeColour[] = ['inherit', ...TEXT_COLOUR_CHOICES, 'custom']
@@ -72,6 +79,10 @@ const TRACKING_CLASS: Record<TextTracking, string> = {
   wide: 'tracking-[0.08em]',
   wider: 'tracking-[0.16em]',
 }
+const FONT_STYLE_CLASS: Record<TextFontStyle, string> = {
+  normal: 'not-italic',
+  italic: 'italic',
+}
 const LEADING_CLASS: Record<TextLeading, string> = {
   tight: 'leading-snug',
   normal: '',
@@ -86,6 +97,7 @@ export interface TextStyleInput {
   textCase?: string | null
   tracking?: string | null
   leading?: string | null
+  fontStyle?: string | null
 }
 
 /** A resolved text layer: a property is present only when it was chosen. */
@@ -96,6 +108,7 @@ export interface TextStyle {
   textCase?: TextCase
   tracking?: TextTracking
   leading?: TextLeading
+  fontStyle?: TextFontStyle
 }
 
 const pick = <T extends string>(allowed: readonly T[], value: string | null | undefined) => {
@@ -118,13 +131,17 @@ export function resolveTextStyle(input: TextStyleInput | null | undefined): Text
   if (tracking !== undefined) style.tracking = tracking
   const leading = pick(TEXT_LEADINGS, input?.leading)
   if (leading !== undefined) style.leading = leading
+  const fontStyle = pick(TEXT_FONT_STYLES, input?.fontStyle)
+  if (fontStyle !== undefined) style.fontStyle = fontStyle
   return style
 }
 
 /** What a layout draws for one text element with nothing chosen. */
 export interface OwnText {
-  /** The step Medium is. */
-  size: TypeStep
+  /** The class Medium is: a step on the type scale, or (with `scale`) one the scale doesn't hold. */
+  size: TypeStep | (string & {})
+  /** The scale step a size off the scale (`text-4xl`) is stepped from: Small is one below, Large one above. */
+  scale?: TypeStep
   /** The size used while none is chosen; Medium unless the element starts smaller (an eyebrow). */
   defaultSize?: TextSize
   weight: TextWeight
@@ -132,6 +149,9 @@ export interface OwnText {
   colour?: string
   textCase?: TextCase
 }
+
+const isTypeStep = (value: string): value is TypeStep =>
+  (TYPE_SCALE as readonly string[]).includes(value)
 
 /** `size` moved `step` steps along the type scale, kept on it. */
 export function stepType(size: TypeStep, step: number): TypeStep {
@@ -147,7 +167,10 @@ export function textLook(
   style: TextStyle,
   own: OwnText,
 ): { className: string; style?: CSSProperties } {
-  const size = stepType(own.size, STEP[style.size ?? own.defaultSize ?? 'medium'])
+  const step = STEP[style.size ?? own.defaultSize ?? 'medium']
+  const from = own.scale ?? own.size
+  // Medium is the family's own class, whatever it is; the other steps move along the scale.
+  const size = step === 0 || !isTypeStep(from) ? own.size : stepType(from, step)
   const textCase = style.textCase ?? own.textCase ?? 'normal'
   const tracking = style.tracking ?? (textCase === 'uppercase' ? 'wide' : undefined)
   const classes = [
@@ -156,6 +179,7 @@ export function textLook(
     textCase === 'uppercase' ? 'uppercase' : '',
     tracking ? TRACKING_CLASS[tracking] : '',
     style.leading ? LEADING_CLASS[style.leading] : '',
+    style.fontStyle ? FONT_STYLE_CLASS[style.fontStyle] : '',
     style.colour === undefined ? (own.colour ?? '') : '',
   ]
   return {

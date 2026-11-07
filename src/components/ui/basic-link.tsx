@@ -6,6 +6,7 @@ import {
   type BasicLink as BasicLinkData,
   type LinkData,
 } from '@/components/ui/resolve-basic-link'
+import type { TextRole } from '@/lib/design/capabilities'
 
 /** Tells screen-reader users a link opens a new tab (WCAG G201); sighted users see the tab open. */
 export function NewTabNotice() {
@@ -16,10 +17,12 @@ export function NewTabNotice() {
 export function ResolvedAnchor({
   resolved,
   className,
+  textRole,
   children,
 }: {
   resolved: BasicLinkData
   className?: string
+  textRole?: TextRole
   children: ReactNode
 }) {
   if (resolved.kind === 'page') {
@@ -27,6 +30,7 @@ export function ResolvedAnchor({
       <Link
         href={resolved.href}
         className={className}
+        data-text-role={textRole}
         {...(resolved.newTab && { target: '_blank' })}
       >
         {children}
@@ -40,6 +44,7 @@ export function ResolvedAnchor({
     <a
       href={resolved.href}
       className={className}
+      data-text-role={textRole}
       {...(newTab && { target: '_blank', rel: 'noopener noreferrer' })}
     >
       {children}

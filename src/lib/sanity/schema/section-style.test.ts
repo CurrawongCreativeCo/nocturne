@@ -82,6 +82,7 @@ describe('sectionStyle', () => {
       'imageRepeat',
       'imageStrengthPercent',
       'imageFixed',
+      'mark',
       'panel',
       'panelStrength',
       'motion',

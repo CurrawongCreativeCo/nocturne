@@ -3,6 +3,7 @@ import {
   CONTENT_SOURCES,
   FUTURE_COVERAGE,
   type CapabilityId,
+  type FutureCoverage,
   type ContentSourceDefinition,
 } from './capabilities'
 import {
@@ -221,7 +222,9 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
       'declaredBy' in part ? `Task ${String(part.declaredBy)}` : 'Its capability tasks',
     ]),
   )
-  const withoutTasks = FUTURE_COVERAGE.filter((part) => part.tasks.length === 0).length
+  const withoutTasks = (FUTURE_COVERAGE as readonly FutureCoverage[]).filter(
+    (part) => part.tasks.length === 0,
+  ).length
 
   return [
     '**Components by capabilities.** `R` is Required and `C` Conditional. `✓` means every applicable layout and scope is verified, `…` none is yet, `◐` some are. `*` means some layouts or scopes opt out, with a reason in the declaration. `–` is Not applicable. The design manifest (`design-manifest.generated.json`) has the same by layout, with each policy, trigger, closing task and the evidence behind it.',
@@ -239,7 +242,11 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
     ),
     '**Reviewed exceptions.** Fields in a Design group that no shared builder made. An exception records how a field was built; it is never evidence that a capability works.',
     exceptionTable,
-    `**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. ${String(withoutTasks)} have no capability task yet: the task in \`Declared by\` brings them into the contract, which is not ownership of their design capabilities. Each capability's own closing task is set when the part is declared.`,
+    `**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. ${
+      withoutTasks > 0
+        ? `${String(withoutTasks)} have no capability task yet: the task in \`Declared by\` brings them into the contract, which is not ownership of their design capabilities. Each capability's own closing task is set when the part is declared.`
+        : 'Each has the tasks that will add its capabilities.'
+    }`,
     future,
   ].join('\n\n')
 }

@@ -1508,6 +1508,32 @@ export const navigationNested = {
   ],
 }
 
+/**
+ * Blog settings with a designed post card (tests/e2e/blog-card-design.spec.ts). Not in the fixtures: the
+ * fake Content Lake adds it only while a test asks, so no other blog test or baseline sees a designed card.
+ */
+export const blogSettingsDesigned = {
+  _id: 'blogSettings',
+  _type: 'blogSettings',
+  cardDesign: {
+    background: { colour: 'accent' },
+    backgroundStrength: 'wash',
+    border: 'thin',
+    borderColour: { colour: 'accent' },
+    meta: { weight: 'semibold' },
+    title: { size: 'small', weight: 'medium' },
+    body: { size: 'small' },
+    mark: {
+      _type: 'decorativeMark',
+      kind: 'icon',
+      icon: 'heart',
+      anchor: 'bottom-right',
+      size: 'small',
+      opacity: 12,
+    },
+  },
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 
@@ -2818,6 +2844,304 @@ documents.push({
         }),
       ],
     },
+  ],
+})
+
+/**
+ * A real page of the shared card design (task 156, tests/e2e/card-design.spec.ts): each card family's
+ * tint, border, text change, highlight and decorative mark at each scope. Not indexed, and not in the
+ * section gallery, so it adds no visual baseline.
+ */
+const cardDesignQuotes = (id, extra = {}) =>
+  ['Sam Sample', 'Alex Example', 'Robin Rowe'].map((name, index) => ({
+    _key: `${id}-${String(index)}`,
+    _type: 'testimonial',
+    quote: 'They changed how we work, and every week since has been calmer and clearer.',
+    name,
+    role: 'Owner, Example Co',
+    ...extra,
+  }))
+const cardDesignSection = (id, title, extra = {}) => ({
+  _key: id,
+  _type: 'testimonials',
+  title,
+  items: cardDesignQuotes(id),
+  ...extra,
+})
+const markStyle = (extra) => ({ _type: 'decorativeMark', ...extra })
+const framePicture = { _type: 'reference', _ref: 'frame-picture' }
+const familyDesign = {
+  background: { colour: 'accent' },
+  backgroundStrength: 'wash',
+  border: 'medium',
+  borderColour: { colour: 'accent' },
+  mark: markStyle({
+    kind: 'icon',
+    icon: 'heart',
+    anchor: 'bottom-right',
+    size: 'small',
+    opacity: 10,
+  }),
+}
+/**
+ * A gallery section of this type with a header design (task 156): its own title, an eyebrow, an intro, and the
+ * heading a step smaller. `intro` names the field that section's intro is in.
+ */
+const headerFamily = (type, title, intro, extra = {}) => {
+  const seed = gallerySections.find((section) => section._type === type)
+  return {
+    ...structuredClone(seed),
+    _key: `header-${type}`,
+    title,
+    heading: undefined,
+    eyebrow: 'Eyebrow',
+    ...intro,
+    headerDesign: { heading: { size: 'small' } },
+    ...extra,
+  }
+}
+const familySection = (type, title, extra) => ({
+  _key: `family-${type}-${title.replace(/\W+/g, '-').toLowerCase()}`,
+  _type: type,
+  title,
+  eyebrow: 'Eyebrow',
+  ...extra,
+})
+/** A Link list with a card mark, a link with its own, and a link that opens a panel. */
+const familyLink = (key, link, design) => ({
+  _key: key,
+  _type: 'linkListItem',
+  eyebrow: 'Eyebrow',
+  label: `Open ${key}`,
+  description: 'A short description.',
+  link: { _type: 'link', ...link },
+  ...(design ? { design } : {}),
+})
+const linkFamily = (title, extra) =>
+  familySection('linkList', title, {
+    headingDisplay: 'text',
+    // Several Link lists on one page: social icons would draw the same named landmark in each.
+    socialSource: 'custom',
+    socialLinks: [],
+    ...extra,
+    cardDesign: {
+      mark: markStyle({ kind: 'text', text: 'Card', anchor: 'bottom-right', opacity: 10 }),
+    },
+    links: [
+      familyLink(
+        'own',
+        { linkType: 'external', url: 'https://example.com/own' },
+        {
+          appearance: 'custom',
+          mark: markStyle({ kind: 'icon', icon: 'heart', anchor: 'top-right', opacity: 12 }),
+        },
+      ),
+      familyLink('list', { linkType: 'external', url: 'https://example.com/list' }),
+      familyLink('panel', {
+        linkType: 'panel',
+        panel: { _type: 'reference', _ref: 'panel-enquire' },
+      }),
+    ],
+  })
+documents.push({
+  _id: 'page-card-design',
+  _type: 'page',
+  title: 'Card design',
+  slug: { _type: 'slug', current: 'card-design' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    cardDesignSection('plain', 'No mark'),
+    cardDesignSection('marked-section', 'Section mark', {
+      style: { mark: markStyle({ kind: 'text', text: 'Thanks', size: 'large', opacity: 10 }) },
+    }),
+    cardDesignSection('marked-card', 'Card mark', {
+      cardDesign: {
+        mark: markStyle({ kind: 'icon', icon: 'heart', anchor: 'bottom-right', opacity: 12 }),
+      },
+    }),
+    cardDesignSection('tinted', 'A tint and a highlight', {
+      cardDesign: {
+        background: { colour: 'accent' },
+        backgroundStrength: 'light',
+        border: 'none',
+        quote: { size: 'large', fontStyle: 'italic' },
+        attribution: { colour: { colour: 'ink' } },
+        label: { colour: { colour: 'ink' } },
+      },
+      items: cardDesignQuotes('tinted', {
+        highlights: ['changed how we work'],
+        source: 'client-feedback',
+        date: '2026-03-12',
+        rating: 5,
+      }),
+    }),
+    cardDesignSection('outlined', 'A border and a text change', {
+      cardDesign: {
+        background: { colour: 'transparent' },
+        backgroundStrength: 'solid',
+        border: 'medium',
+        borderColour: { colour: 'accent' },
+        attribution: { weight: 'medium', colour: { colour: 'accent' } },
+        label: { textCase: 'uppercase', size: 'small' },
+      },
+      eyebrow: 'What people say',
+      intro: 'A sentence or two about the people we have worked with.',
+    }),
+    cardDesignSection('picture-tinted', 'A picture in the theme colour', {
+      style: {
+        mark: markStyle({
+          kind: 'picture',
+          picture: framePicture,
+          anchor: 'top-right',
+          size: 'large',
+          offsetX: 20,
+          rotation: 15,
+          colour: { colour: 'accent' },
+          opacity: 30,
+        }),
+      },
+    }),
+    cardDesignSection('picture-own', 'A picture in its own colours', {
+      cardDesign: {
+        mark: markStyle({
+          kind: 'picture',
+          picture: framePicture,
+          keepColours: true,
+          anchor: 'top-left',
+          offsetX: -25,
+          offsetY: -25,
+          size: 'large',
+          opacity: 30,
+        }),
+      },
+    }),
+    cardDesignSection('panel-content', 'A mark on a panel', {
+      style: {
+        panel: 'solid',
+        mark: markStyle({ kind: 'text', text: 'Thanks', size: 'large', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('panel-behind', 'A mark behind a panel', {
+      style: {
+        panel: 'solid',
+        mark: markStyle({
+          kind: 'text',
+          text: 'Thanks',
+          size: 'large',
+          layer: 'panel',
+          opacity: 10,
+        }),
+      },
+    }),
+    cardDesignSection('phone-hidden', 'A mark hidden on phones', {
+      style: {
+        mark: markStyle({ kind: 'icon', icon: 'star', phoneScale: 'hidden', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('slider', 'A slider with card marks', {
+      variant: 'slider',
+      cardDesign: {
+        mark: markStyle({ kind: 'text', text: 'Thanks', anchor: 'top-right', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('heavy', 'A mark too strong for its text', {
+      style: {
+        tone: 'default',
+        mark: markStyle({
+          kind: 'icon',
+          icon: 'heart',
+          size: 'large',
+          opacity: 40,
+          colour: { colour: 'ink' },
+        }),
+      },
+    }),
+    familySection('pricingTable', 'Pricing family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, price: { size: 'small' } },
+      plans: [
+        plan('price_Starter1', {
+          features: ['One project', 'Email support'],
+          description: 'For small teams.',
+          meta: '90 minutes',
+        }),
+        plan('price_Pro1', {
+          features: ['Unlimited projects'],
+          highlighted: true,
+          badgeText: 'Best value',
+          design: {
+            appearance: 'custom',
+            border: 'thick',
+            mark: markStyle({ kind: 'text', text: 'Best', anchor: 'top-right', opacity: 10 }),
+          },
+        }),
+      ],
+    }),
+    familySection('team', 'Team family', {
+      text: 'An intro.',
+      selection: 'all',
+      cardDesign: { ...familyDesign, title: { size: 'small' } },
+    }),
+    familySection('team', 'Team list family', {
+      variant: 'list',
+      text: 'An intro.',
+      selection: 'all',
+      cardDesign: familyDesign,
+    }),
+    familySection('events', 'Events family', {
+      variant: 'featured',
+      text: 'An intro.',
+      cardDesign: { ...familyDesign, title: { weight: 'medium' } },
+    }),
+    familySection('events', 'Events list family', {
+      text: 'An intro.',
+      // Opens a panel no other button on this page opens, so it only works if its link brings the panel.
+      seeAllLink: panel('panel-hours', '/about'),
+      seeAllLabel: 'Open the hours',
+      cardDesign: { ...familyDesign, title: { weight: 'medium' } },
+    }),
+    familySection('faq', 'FAQ default family', {
+      intro: 'An intro.',
+      cardDesign: familyDesign,
+      items: [{ _key: 'q1', question: 'A question?', answer: [block(['An answer.'])] }],
+    }),
+    familySection('faq', 'FAQ cards family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, itemStyle: 'cards' },
+      items: [
+        { _key: 'q1', question: 'A question?', answer: [block(['An answer.'])] },
+        { _key: 'q2', question: 'Another question?', answer: [block(['Another answer.'])] },
+      ],
+    }),
+    familySection('stats', 'Stats family', {
+      variant: 'cards',
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, number: { size: 'small' } },
+      items: [
+        { _key: 's1', _type: 'statItem', value: 250, decimals: 0, suffix: '+', label: 'Projects' },
+        { _key: 's2', _type: 'statItem', value: 12, decimals: 0, label: 'Years' },
+      ],
+    }),
+    headerFamily('featuresGrid', 'Features header', { intro: 'An intro.' }),
+    headerFamily('logoCloud', 'Logos header', { intro: 'An intro.' }),
+    headerFamily('ctaBanner', 'CTA header', { text: 'An intro.' }),
+    headerFamily('process', 'Process header', { intro: 'An intro.' }),
+    headerFamily('gallery', 'Gallery header', { intro: 'An intro.' }),
+    headerFamily('newsletterSignup', 'Newsletter header', { text: 'An intro.' }),
+    familySection('process', 'Process steps', {
+      variant: 'vertical',
+      cardDesign: { label: { size: 'large' }, title: { size: 'small' }, body: { size: 'small' } },
+      steps: [{ _key: 'ps1', _type: 'step', label: 'One', title: 'Meet', text: 'We talk.' }],
+    }),
+    familySection('location', 'Location family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, body: { size: 'small' } },
+    }),
+    linkFamily('Links stacked family', { variant: 'stacked' }),
+    linkFamily('Links cards family', { variant: 'cards' }),
+    linkFamily('Links editorial family', { variant: 'editorial' }),
+    linkFamily('Links compact family', { variant: 'compact' }),
+    linkFamily('Links glass family', { variant: 'stacked', rowStyle: 'glass' }),
   ],
 })
 

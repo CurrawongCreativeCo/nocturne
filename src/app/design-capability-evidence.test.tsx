@@ -5,15 +5,17 @@ import { createElement, type ComponentType } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { VIEW_DRAWERS } from '@/app/design-capability-views'
-import { DESIGN_COMPONENTS } from '@/app/design-components'
+import { DESIGN_COMPONENTS, gate } from '@/app/design-components'
 import {
   fingerprint,
   fixturePictureId,
   gallerySeed,
   projectSections,
   renderSections,
+  stableOutput,
   type RawSection,
 } from '@/features/pages/components/section-renderer.fixtures'
+import type { TextRole } from '@/lib/design/capabilities'
 import { capabilityAvailability, caseId, casesOf } from '@/lib/design/capability-availability'
 import {
   EVIDENCE,
@@ -22,7 +24,11 @@ import {
   type Evidence,
   type Patch,
 } from '@/lib/design/capability-evidence'
-import { compareTarget, type TargetComparison } from '@/lib/design/capability-harness'
+import {
+  compareTarget,
+  leakedTextRoles,
+  type TargetComparison,
+} from '@/lib/design/capability-harness'
 import { applyPatch, withPicture } from '@/lib/design/capability-patch'
 import { schemaGate, type SchemaField } from '@/lib/design/schema-capabilities'
 import { framing } from '@/lib/sanity/schema/image-framing-option'
@@ -35,6 +41,10 @@ import { framing } from '@/lib/sanity/schema/image-framing-option'
  * target is snapshotted, so an adoption that changes a component's default output shows in review.
  * Availability can only be verified for a layout whose case passes here.
  */
+
+// Each case renders a whole section twice or more through the page query: under a loaded machine (the
+// full suite, CI) the default five seconds is not always enough, and a timeout is not a failed claim.
+vi.setConfig({ testTimeout: 30_000 })
 
 vi.hoisted(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
@@ -58,6 +68,8 @@ const resolvers = vi.hoisted(() => {
     called: new Map<string, number>(),
     /** Every wrapped export, so a claim that isn't wired in fails instead of passing untested. */
     wired: new Set<string>(),
+    /** A deliberate fault for the mutation tests: what an export's result becomes, in any mode. */
+    mutate: new Map<string, (result: never) => unknown>(),
   }
   const wrap = (module: string, original: Record<string, unknown>) =>
     Object.fromEntries(
@@ -69,6 +81,8 @@ const resolvers = vi.hoisted(() => {
         return [
           name,
           (...args: unknown[]) => {
+            const mutation = control.mutate.get(key)
+            if (mutation) return mutation(call(...args) as never)
             if (!control.targets.has(key) || control.mode === 'pass') return call(...args)
             if (control.mode === 'count') {
               control.called.set(key, (control.called.get(key) ?? 0) + 1)
@@ -115,6 +129,12 @@ vi.mock('@/features/pages/utils/split-layout', async (load) =>
   resolvers.wrap('@/features/pages/utils/split-layout', await load()),
 )
 vi.mock('@/lib/sanity/image', async (load) => resolvers.wrap('@/lib/sanity/image', await load()))
+vi.mock('@/lib/sanity/card-design', async (load) =>
+  resolvers.wrap('@/lib/sanity/card-design', await load()),
+)
+vi.mock('@/lib/sanity/decorative-mark-options', async (load) =>
+  resolvers.wrap('@/lib/sanity/decorative-mark-options', await load()),
+)
 vi.mock('@/lib/sanity/depth-options', async (load) =>
   resolvers.wrap('@/lib/sanity/depth-options', await load()),
 )
@@ -273,18 +293,17 @@ async function placed(
 async function runCase(
   entry: CapabilityEvidence,
   layout: string | null,
-): Promise<TargetComparison & { renderings: string[] }> {
+): Promise<TargetComparison & { renderings: string[]; leaked: TextRole[] }> {
   const results: (TargetComparison & { label: string })[] = []
+  const leaked = new Set<TextRole>()
   for (const rendering of await renderingsOf(entry, layout)) {
+    const unset = await rendering.unset()
+    const probed = await rendering.probed()
     results.push({
       label: rendering.label,
-      ...compareTarget(
-        await rendering.unset(),
-        await rendering.probed(),
-        entry.target,
-        entry.change,
-      ),
+      ...compareTarget(unset, probed, entry.target, entry.change),
     })
+    if (entry.role) for (const role of leakedTextRoles(unset, probed, entry.role)) leaked.add(role)
   }
   const failed = results.find((result) => result.status !== 'changed')
   const many = results.length > 1
@@ -295,6 +314,7 @@ async function runCase(
       ? results.flatMap((result) => result.unset.map((html) => `${result.label}: ${html}`))
       : (results[0]?.unset ?? []),
     renderings: results.map((result) => result.label),
+    leaked: [...leaked],
   }
 }
 
@@ -374,11 +394,17 @@ const cases = CAPABILITY_EVIDENCE.flatMap((entry) =>
 describe('design capability evidence', () => {
   it.each(cases)('$id: the probe changes the registered target', async ({ entry, layout }) => {
     const result = await runCase(entry, layout)
-    expect(result.status).toBe('changed')
+    expect(
+      result.status,
+      `${entry.id}: the unset target was ${JSON.stringify(result.unset).slice(0, 400)}`,
+    ).toBe('changed')
+    expect(result.leaked, 'other text roles the probe also changed').toEqual([])
     expect(
       entry.change === 'attributes'
         ? result.unset
-        : result.unset.map((html) => `${fingerprint(html)} (${String(html.length)} characters)`),
+        : result.unset.map(
+            (html) => `${fingerprint(html)} (${String(stableOutput(html).length)} characters)`,
+          ),
     ).toMatchSnapshot()
   })
 
@@ -453,6 +479,109 @@ describe('design capability evidence', () => {
       expect(existsSync(join(ROOT, entry.render))).toBe(true)
     },
   )
+})
+
+describe('a look that is a setting has independent evidence', () => {
+  const entryFor = (id: string) => {
+    const entry = CAPABILITY_EVIDENCE.find((candidate) => candidate.id === id)
+    if (!entry) throw new Error(`No evidence entry ${id}.`)
+    return entry
+  }
+
+  it('registers each FAQ look apart, and only Cards claims a card', () => {
+    const ids = CAPABILITY_EVIDENCE.filter((entry) => entry.component === 'faq').map(({ id }) => id)
+    for (const role of ['title', 'body']) {
+      expect(ids).toContain(`faq.text.card.divided.${role}`)
+      expect(ids).toContain(`faq.text.card.cards.${role}`)
+    }
+    expect(ids).toContain('faq.surface.card.cards')
+    expect(ids).toContain('faq.mark.card.cards')
+    expect(ids).not.toContain('faq.surface.card.divided')
+    expect(ids).not.toContain('faq.mark.card.divided')
+  })
+
+  it('a Cards claim fails on the Divided list: there is no card to find or to mark', async () => {
+    for (const id of ['faq.surface.card.cards', 'faq.mark.card.cards']) {
+      const entry = entryFor(id)
+      expect((await runCase(entry, null)).status).toBe('changed')
+      const divided = await runCase({ ...entry, base: { 'cardDesign.itemStyle': 'divided' } }, null)
+      expect(divided.status).not.toBe('changed')
+    }
+  })
+
+  it('the Studio only offers what each look draws', async () => {
+    const seed = await gallerySeed('faq', null)
+    const offered = (itemStyle: string | undefined) =>
+      gate.offered('faq', null, 'cardDesign.border', { ...seed, cardDesign: { itemStyle } }).offered
+    expect(offered(undefined)).toBe(false)
+    expect(offered('divided')).toBe(false)
+    expect(offered('cards')).toBe(true)
+  })
+})
+
+describe('a text role proves its own element', () => {
+  const LINK_DESIGN = '@/features/pages/utils/link-card-design#resolveLinkCardDesign'
+  const crossed = (design: Record<string, unknown>) => ({
+    ...design,
+    eyebrow: design.description,
+    description: design.eyebrow,
+  })
+  const entryFor = (id: string) => {
+    const entry = CAPABILITY_EVIDENCE.find((candidate) => candidate.id === id)
+    if (!entry) throw new Error(`No evidence entry ${id}.`)
+    return entry
+  }
+  const withCrossedWiring = async <T,>(run: () => Promise<T>) => {
+    resolvers.control.mutate.set(LINK_DESIGN, crossed)
+    try {
+      return await run()
+    } finally {
+      resolvers.control.mutate.clear()
+    }
+  }
+
+  it.each(['linkList.text.card.eyebrow', 'linkList.text.card.description'])(
+    '%s fails when the eyebrow and description wiring is crossed',
+    async (id) => {
+      const entry = entryFor(id)
+      const healthy = await runCase(entry, 'cards')
+      expect(healthy.status).toBe('changed')
+      expect(healthy.leaked).toEqual([])
+      const mutated = await withCrossedWiring(() => runCase(entry, 'cards'))
+      // The role's own element no longer follows its field, and the other role's now does.
+      expect(mutated.status).toBe('ignored')
+      expect(mutated.leaked).toEqual([id.endsWith('eyebrow') ? 'description' : 'eyebrow'])
+    },
+  )
+
+  it('a quote card fails when its quote and attribution wiring is crossed', async () => {
+    const key = '@/lib/sanity/card-design#resolveCardDesign'
+    const crossText = (design: { text: Record<string, unknown> }) => ({
+      ...design,
+      text: { ...design.text, quote: design.text.attribution, attribution: design.text.quote },
+    })
+    const entry = entryFor('testimonials.text.card.quote')
+    resolvers.control.mutate.set(key, crossText)
+    try {
+      const mutated = await runCase(entry, 'grid')
+      expect(mutated.status).toBe('ignored')
+      expect(mutated.leaked).toEqual(['attribution'])
+    } finally {
+      resolvers.control.mutate.clear()
+    }
+    expect((await runCase(entry, 'grid')).status).toBe('changed')
+  })
+
+  it('a target as broad as the whole card would have passed the same fault', async () => {
+    const entry = {
+      ...entryFor('linkList.text.card.eyebrow'),
+      target: 'li',
+      change: 'content' as const,
+    }
+    const mutated = await withCrossedWiring(() => runCase(entry, 'cards'))
+    // Which is why evidenceProblems refuses a role entry whose target isn't the role's own element.
+    expect(mutated.status).toBe('changed')
+  })
 })
 
 describe('slot blocks, listings and views obtain evidence (AT1)', () => {

@@ -19,3 +19,16 @@ export function ownsSurfaces(type: string | undefined, layout: string | null | u
   const rule = type ? OWNS_SURFACES[type] : undefined
   return rule ? rule(layout ?? undefined) : false
 }
+
+// Functional sections: no marks on embeds or video players (their capability declarations say the same,
+// which src/app/design-capabilities.test.ts holds them to). `npm run new:section` also lists a new section
+// here: its mark capability starts "Not reviewed yet", so the Studio offers no mark until it is reviewed.
+const NO_SECTION_MARK: ReadonlySet<string> = new Set([
+  'embed',
+  'video',
+  // new-section:no-mark
+])
+
+/** Whether a section of this type takes a section-level decorative mark. */
+export const takesSectionMark = (type: string | undefined): boolean =>
+  type ? !NO_SECTION_MARK.has(type) : false

@@ -3,6 +3,7 @@ import type { CSSProperties, ElementType, ReactNode } from 'react'
 
 import { gradientCssFor, type GradientChoice } from '@/config/heading-gradients'
 import { validColour } from '@/lib/color/heading-gradient'
+import type { TextRole } from '@/lib/design/capabilities'
 import {
   EMPHASIS_TREATMENTS,
   hasHeadingText,
@@ -19,7 +20,10 @@ interface Props {
   /** Shown when there are no words in `blocks`: the old string title, or the plain text. */
   fallback?: string | null
   className?: string
+  style?: CSSProperties
   id?: string
+  /** The text role this heading draws (lib/design/capabilities.ts). */
+  textRole?: TextRole
 }
 
 type Treatment = (typeof EMPHASIS_TREATMENTS)[number]
@@ -74,10 +78,18 @@ function styleFor(
  * the `[data-emphasis]` rules in globals.css, which use the design tokens and the section's tone.
  * Text goes through untouched, so Visual Editing's edit markers (stega) still work inside the spans.
  */
-export function RichHeading({ as: Heading, blocks, fallback, className, id }: Props) {
+export function RichHeading({
+  as: Heading,
+  blocks,
+  fallback,
+  className,
+  style,
+  id,
+  textRole,
+}: Props) {
   if (!hasHeadingText(blocks)) {
     return (
-      <Heading id={id} className={className}>
+      <Heading id={id} className={className} style={style} data-text-role={textRole}>
         {fallback}
       </Heading>
     )
@@ -117,7 +129,7 @@ export function RichHeading({ as: Heading, blocks, fallback, className, id }: Pr
   }
 
   return (
-    <Heading id={id} className={className}>
+    <Heading id={id} className={className} style={style} data-text-role={textRole}>
       {content}
     </Heading>
   )

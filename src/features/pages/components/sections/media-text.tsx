@@ -10,10 +10,23 @@ import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { chooseMedia, drawnSplitLayout, videoHasSource } from '@/features/pages/utils/split-layout'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
 import { renderSlot } from '../../slots/render-slot'
 import type { SectionProps } from '../../types'
 import { HeroBackground } from './hero/hero-background'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
+
+/** What the eyebrow, heading and intro (the body) draw with nothing chosen, so the steps move from them. */
+const OWN_EYEBROW = {
+  size: 'text-small',
+  weight: 'semibold',
+  textCase: 'uppercase',
+  colour: 'text-accent-text',
+} as const
+const OWN_HEADING = { size: 'text-h2', weight: 'semibold' } as const
+const OWN_INTRO = { size: 'text-lead', weight: 'regular', colour: 'text-ink-muted' } as const
 
 export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) {
   const { eyebrow, heading, body, ctas, imagePosition } = data
@@ -69,10 +82,27 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
       }
   const { tone, text, justify } = sectionTraits(data.style, defaults)
 
+  const header = resolveTextRoles(data.headerDesign, HEADER_ROLES)
+  const heading$ = textRoleProps(
+    'heading',
+    'mt-2 text-h2 font-semibold text-balance',
+    OWN_HEADING,
+    header.heading,
+  )
+  const intro$ = textRoleProps('intro', 'mt-4 text-lead text-ink-muted', OWN_INTRO, header.intro)
+
   const copy = (
     <div className={text}>
       {eyebrow && (
-        <p className="text-small font-semibold tracking-wide text-accent-text uppercase">
+        <p
+          {...textRoleProps(
+            'eyebrow',
+            'text-small font-semibold tracking-wide text-accent-text uppercase',
+            OWN_EYEBROW,
+            header.eyebrow,
+            'tracking-wide',
+          )}
+        >
           {eyebrow}
         </p>
       )}
@@ -80,9 +110,11 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
         as="h2"
         blocks={heading}
         fallback={title}
-        className="mt-2 text-h2 font-semibold text-balance"
+        className={heading$.className}
+        style={heading$.style}
+        textRole="heading"
       />
-      <RichText value={body} className="mt-4 text-lead text-ink-muted" />
+      <RichText value={body} className={intro$.className} style={intro$.style} textRole="intro" />
       <CtaGroup ctas={ctas} surface={ctaSurfaceFor(tone)} className={`mt-8 ${justify}`} />
       {overlay && supporting && <div className="mt-8">{supporting}</div>}
     </div>

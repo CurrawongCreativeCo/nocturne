@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import type { PresetThumbnailProps } from '../preset-field'
 import { Heading, Line, Lines, Wireframe } from './wireframe'
 
@@ -41,6 +43,67 @@ export function TestimonialsSliderThumbnail(_props: PresetThumbnailProps) {
       <circle cx={80} cy={100} r={2.5} style={{ ...card, fillOpacity: 0 }} />
       <circle cx={88} cy={100} r={2.5} style={{ ...card, fillOpacity: 0 }} />
       <circle cx={102} cy={100} r={3.5} style={{ ...card, fillOpacity: 0 }} />
+    </Wireframe>
+  )
+}
+
+/** A quote and a name inside three small cards, each drawn in the preset's own look. */
+function CardPreset({
+  label,
+  look,
+  quoteLines = 3,
+}: {
+  label: string
+  look: CSSProperties
+  quoteLines?: number
+}) {
+  return (
+    <Wireframe label={label}>
+      {[10, 58, 106].map((x) => (
+        <g key={x}>
+          <rect x={x} y={26} width={44} height={68} rx={3} style={look} />
+          <Lines x={x + 6} y={36} w={32} count={quoteLines} />
+          <Line x={x + 6} y={82} w={16} />
+        </g>
+      ))}
+    </Wireframe>
+  )
+}
+
+const NO_FILL = { fill: 'none', stroke: 'none' }
+
+export function CardPresetQuietThumbnail(_props: PresetThumbnailProps) {
+  return <CardPreset label="card-preset-quiet" look={NO_FILL} />
+}
+
+export function CardPresetOutlinedThumbnail(_props: PresetThumbnailProps) {
+  return (
+    <CardPreset
+      label="card-preset-outlined"
+      look={{ fill: 'none', stroke: FG, strokeWidth: 1.5 }}
+    />
+  )
+}
+
+export function CardPresetTintedThumbnail(_props: PresetThumbnailProps) {
+  return (
+    <CardPreset label="card-preset-tinted" look={{ fill: FG, fillOpacity: 0.16, stroke: 'none' }} />
+  )
+}
+
+export function CardPresetStatementThumbnail(_props: PresetThumbnailProps) {
+  return (
+    <Wireframe label="card-preset-statement">
+      {[10, 58, 106].map((x) => (
+        <g key={x} transform={`translate(${String(x + 2)} 30) skewX(-8)`}>
+          <Line x={4} y={0} w={38} />
+          <Line x={4} y={12} w={38} />
+          <Line x={4} y={24} w={26} />
+        </g>
+      ))}
+      {[10, 58, 106].map((x) => (
+        <Line key={x} x={x + 6} y={82} w={16} />
+      ))}
     </Wireframe>
   )
 }

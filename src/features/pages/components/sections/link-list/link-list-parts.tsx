@@ -2,12 +2,12 @@ import { stegaClean } from 'next-sanity'
 import { Fragment, Suspense, useId } from 'react'
 
 import { DecorativeDivider } from '@/components/ui/decorative-divider'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits } from '@/components/ui/section-style'
 import { SocialLinks } from '@/components/ui/social-links'
 import { glassStrengthOf } from '@/lib/color/glass-contrast'
 import { requestTime } from '@/lib/request-time'
+import { cardMarkChoice } from '@/lib/sanity/card-design'
 import { resolveDepth } from '@/lib/sanity/depth-options'
 import {
   LINK_LIST_DIVIDER_PLACEMENTS,
@@ -26,9 +26,10 @@ import { themeColourCss } from '@/lib/sanity/theme-colour'
 import { showsWordmark } from '@/lib/sanity/wordmark-options'
 
 import { LinkGroupHeading } from './link-group-heading'
+import { LinkListHeading } from './link-list-heading'
 import type { LinkContext, LinkListLayout, ListLink, StoredLink } from './link-list-types'
 import { Profile, hasProfile } from './profile'
-import { WordmarkHeading, type WordmarkImage } from './wordmark-heading'
+import type { WordmarkImage } from './wordmark-heading'
 import type { SectionProps } from '../../../types'
 import {
   cardOverrides,
@@ -102,6 +103,10 @@ async function DueLinkGroups({
   return <LinkGroups links={drawableLinks(prepared, await requestTime())} {...rest} />
 }
 
+/** A level's text colours without its fill, for a layout that doesn't draw one. */
+const textOnly = <T extends object>(level: T | null | undefined) =>
+  level ? { ...level, background: undefined, backgroundStrength: undefined } : undefined
+
 export function LinkListView({
   data,
   business,
@@ -128,10 +133,21 @@ export function LinkListView({
     rowStyle,
     showArrows: data.showArrows,
   })
+  const noCards = stegaClean(data.variant) === 'editorial'
   const contextFor = (link: ListLink): LinkContext => {
     const own = cardOverrides(link.item.design)
     const design = own ? layerLinkCardDesign(listDesign, resolveLinkCardDesign(own)) : listDesign
+    const { input, scope } = cardMarkChoice(data.cardDesign, own)
     return {
+      mark: {
+        input,
+        scope,
+        tone: traits.tone,
+        // A ruled row draws no card, so the mark is measured on the section whatever a box has stored.
+        levels: [data.cardDesign, own].map((level) => (noCards ? textOnly(level) : level)),
+        backdrop: Boolean(data.style?.image?.asset) || Boolean(data.style?.gradient),
+        glass: rowStyle === 'glass' ? glassStrength : null,
+      },
       surface,
       thumbnailSize,
       rowStyle,
@@ -158,7 +174,7 @@ export function LinkListView({
   const dividers = resolveLinkListDividers(data.dividerDesign)
   const parts = linkListParts({
     profile: hasProfile(data),
-    heading: Boolean(headingWordmark ?? title),
+    heading: Boolean(headingWordmark ?? title) || Boolean(data.eyebrow) || Boolean(data.intro),
     social: socials.some((profile) => profile.url),
     socialsBelow,
     dividers: LINK_LIST_DIVIDER_PLACEMENTS.filter((placement) => dividers[placement]),
@@ -216,22 +232,19 @@ export function LinkListView({
               />
             )
           case 'heading':
-            return headingWordmark ? (
-              <WordmarkHeading
+            return (
+              <LinkListHeading
                 key="heading"
-                as={title ? Title : 'div'}
-                alt={title}
-                image={headingWordmark}
+                eyebrow={data.eyebrow}
+                intro={data.intro}
+                title={title}
+                heading={data.heading}
+                wordmark={headingWordmark}
+                level={Title}
+                beside={besideDivider('heading', 1)}
+                hasName={hasName}
                 preload={Boolean(isFirst) && !hasName}
-                className={besideDivider('heading', 1) ? '' : 'mb-8'}
-              />
-            ) : (
-              <RichHeading
-                key="heading"
-                as={Title}
-                blocks={data.heading}
-                fallback={title}
-                className={`${besideDivider('heading', 1) ? '' : 'mb-8'} text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
+                design={data.headerDesign}
               />
             )
           case 'social':

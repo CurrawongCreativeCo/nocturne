@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { NewTabNotice, ResolvedAnchor } from '@/components/ui/basic-link'
 import { LinkActionButton } from '@/components/ui/link-action-button'
 import { resolveLink, type LinkData } from '@/components/ui/resolve-link'
+import type { TextRole } from '@/lib/design/capabilities'
 
 export type { LinkData }
 export { NewTabNotice }
@@ -15,10 +16,13 @@ export { NewTabNotice }
 export function SanityLink({
   link,
   className,
+  textRole,
   children,
 }: {
   link: LinkData | null | undefined
   className?: string
+  /** The text role this link's own element draws (lib/design/capabilities.ts), when its classes carry one. */
+  textRole?: TextRole
   children: ReactNode
 }) {
   const resolved = resolveLink(link)
@@ -32,6 +36,7 @@ export function SanityLink({
         fallbackHref={resolved.fallbackHref}
         title={resolved.title}
         className={className}
+        textRole={textRole}
       >
         {children}
       </LinkActionButton>
@@ -39,13 +44,18 @@ export function SanityLink({
   }
   if (resolved.kind === 'booking') {
     return (
-      <LinkActionButton kind="booking" fallbackHref={resolved.fallbackHref} className={className}>
+      <LinkActionButton
+        kind="booking"
+        fallbackHref={resolved.fallbackHref}
+        className={className}
+        textRole={textRole}
+      >
         {children}
       </LinkActionButton>
     )
   }
   return (
-    <ResolvedAnchor resolved={resolved} className={className}>
+    <ResolvedAnchor resolved={resolved} className={className} textRole={textRole}>
       {children}
     </ResolvedAnchor>
   )

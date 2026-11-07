@@ -9,11 +9,57 @@ exports[`design capability evidence > badgeRow.icon.item: the probe changes the 
 ]
 `;
 
+exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `
+[
+  "<article class="group relative flex h-full flex-col">",
+]
+`;
+
+exports[`design capability evidence > blogPostCards.text.card.body: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > blogPostCards.text.card.meta: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-small text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > blogPostCards.text.card.title: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
 exports[`design capability evidence > ctaBanner.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
 ]
 `;
+
+exports[`design capability evidence > ctaBanner.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > ctaBanner.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > ctaBanner.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted mx-auto" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > ctaBanner.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > ctaBanner.motion.section: the probe changes the registered target 1`] = `
 [
@@ -39,9 +85,27 @@ exports[`design capability evidence > embed.glass.section: the probe changes the
 ]
 `;
 
+exports[`design capability evidence > embed.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > embed.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > embed.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > embed.motion.section: the probe changes the registered target 1`] = `
 [
-  "61459d75ccdc7f79 (1141 characters)",
+  "08d19df0a8b76dbf (1137 characters)",
 ]
 `;
 
@@ -87,21 +151,83 @@ exports[`design capability evidence > events.glass.section@list: the probe chang
 ]
 `;
 
+exports[`design capability evidence > events.header.section.eyebrow@agenda: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.eyebrow@featured: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.eyebrow@list: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.heading@agenda: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.heading@featured: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.heading@list: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.intro@agenda: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.intro@featured: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > events.header.section.intro@list: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > events.mark.card@featured: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > events.mark.section@agenda: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > events.mark.section@featured: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > events.mark.section@list: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > events.motion.section@agenda: the probe changes the registered target 1`] = `
 [
-  "a2730764a39ed4c0 (4775 characters)",
+  "e2864f0d8915a9c1 (4776 characters)",
 ]
 `;
 
 exports[`design capability evidence > events.motion.section@featured: the probe changes the registered target 1`] = `
 [
-  "11c08ed54de36b66 (5229 characters)",
+  "3719767cdbebc5e8 (5230 characters)",
 ]
 `;
 
 exports[`design capability evidence > events.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "6b4668ca9fd46965 (7191 characters)",
+  "668f9fe35c01a726 (7192 characters)",
 ]
 `;
 
@@ -123,6 +249,94 @@ exports[`design capability evidence > events.overlay.section@list: the probe cha
 ]
 `;
 
+exports[`design capability evidence > events.surface.card@featured: the probe changes the registered target 1`] = `
+[
+  "<article class="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-card ring-1 ring-line">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.body@agenda: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.body@featured: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.body@list: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.meta@agenda: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-medium text-ink-muted sm:pt-1" data-text-role="meta">",
+  "<p class="mt-1 text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small font-medium text-ink-muted sm:pt-1" data-text-role="meta">",
+  "<p class="mt-1 text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small font-medium text-ink-muted sm:pt-1" data-text-role="meta">",
+  "<p class="mt-1 text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small font-medium text-ink-muted sm:pt-1" data-text-role="meta">",
+  "<p class="mt-1 text-small text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.meta@featured: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.meta@list: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+  "<p class="text-small text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.title@agenda: the probe changes the registered target 1`] = `
+[
+  "<h4 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h4 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h4 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h4 class="text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.title@featured: the probe changes the registered target 1`] = `
+[
+  "<h3 class="mt-2 text-h3 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="mt-1 text-lead font-semibold text-balance" data-text-role="title">",
+  "<h3 class="mt-1 text-lead font-semibold text-balance" data-text-role="title">",
+  "<h3 class="mt-1 text-lead font-semibold text-balance" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > events.text.card.title@list: the probe changes the registered target 1`] = `
+[
+  "<h3 class="mt-1 text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="mt-1 text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="mt-1 text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="mt-1 text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
 exports[`design capability evidence > faq.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -135,6 +349,28 @@ exports[`design capability evidence > faq.glass.section: the probe changes the r
 ]
 `;
 
+exports[`design capability evidence > faq.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > faq.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > faq.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > faq.mark.card.cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > faq.mark.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > faq.motion.section: the probe changes the registered target 1`] = `
 [
   "b69a7d6d457deb28 (1502 characters)",
@@ -144,6 +380,41 @@ exports[`design capability evidence > faq.motion.section: the probe changes the 
 exports[`design capability evidence > faq.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > faq.surface.card.cards: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line">",
+]
+`;
+
+exports[`design capability evidence > faq.text.card.cards.body: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-2 text-ink-muted" data-text-role="body">",
+  "<div class="mt-2 text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > faq.text.card.cards.title: the probe changes the registered target 1`] = `
+[
+  "<summary class="flex list-none items-center justify-between gap-4 text-lead font-medium [&::-webkit-details-marker]:hidden" data-text-role="title">",
+  "<summary class="flex list-none items-center justify-between gap-4 text-lead font-medium [&::-webkit-details-marker]:hidden" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > faq.text.card.divided.body: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-2 text-ink-muted" data-text-role="body">",
+  "<div class="mt-2 text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > faq.text.card.divided.title: the probe changes the registered target 1`] = `
+[
+  "<summary class="flex list-none items-center justify-between gap-4 text-lead font-medium [&::-webkit-details-marker]:hidden" data-text-role="title">",
+  "<summary class="flex list-none items-center justify-between gap-4 text-lead font-medium [&::-webkit-details-marker]:hidden" data-text-role="title">",
 ]
 `;
 
@@ -158,6 +429,26 @@ exports[`design capability evidence > featuresGrid.glass.section: the probe chan
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
 ]
 `;
+
+exports[`design capability evidence > featuresGrid.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > featuresGrid.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > featuresGrid.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > featuresGrid.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > featuresGrid.motion.section: the probe changes the registered target 1`] = `
 [
@@ -183,9 +474,29 @@ exports[`design capability evidence > formSection.glass.section: the probe chang
 ]
 `;
 
+exports[`design capability evidence > formSection.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > formSection.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading" id="_R_5_">",
+]
+`;
+
+exports[`design capability evidence > formSection.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > formSection.mark.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > formSection.motion.section: the probe changes the registered target 1`] = `
 [
-  "e2db196244253adb (350 characters)",
+  "b21b14f6541a730a (350 characters)",
 ]
 `;
 
@@ -232,6 +543,66 @@ exports[`design capability evidence > gallery.glass.section@slider: the probe ch
   "<p aria-atomic="true" aria-live="polite" class="sr-only">",
 ]
 `;
+
+exports[`design capability evidence > gallery.header.section.eyebrow@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.eyebrow@masonry: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.eyebrow@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.heading@grid: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.heading@masonry: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.heading@slider: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.intro@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.intro@masonry: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.intro@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > gallery.mark.section@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > gallery.mark.section@masonry: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > gallery.mark.section@slider: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > gallery.motion.section@grid: the probe changes the registered target 1`] = `
 [
@@ -311,6 +682,14 @@ exports[`design capability evidence > hero.glass.section@split: the probe change
   "<div class="mx-auto w-full max-w-measure grid items-center gap-12 lg:gap-16">",
 ]
 `;
+
+exports[`design capability evidence > hero.mark.section@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.mark.section@full-bleed: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.mark.section@overlay: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.mark.section@split: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > hero.motion.section@editorial: the probe changes the registered target 1`] = `
 [
@@ -514,6 +893,78 @@ exports[`design capability evidence > linkList.framing.thumbnail@stacked: the pr
 ]
 `;
 
+exports[`design capability evidence > linkList.header.section.eyebrow@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.eyebrow@compact: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.eyebrow@editori…: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.eyebrow@stacked: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@cards: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@compact: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@editori…: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@stacked: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@compact: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@editorial: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@stacked: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > linkList.icon.card@cards: the probe changes the registered target 1`] = `
 [
   "317a7014fcfadab7 (1575 characters)",
@@ -608,6 +1059,34 @@ exports[`design capability evidence > linkList.icon.item@stacked: the probe chan
   "0ba5bbb116837f4e (1353 characters)",
 ]
 `;
+
+exports[`design capability evidence > linkList.mark.card.glass@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@compact: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item.glass@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@compact: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.section@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.section@compact: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.section@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.section@stacked: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > linkList.motion.section@cards: the probe changes the registered target 1`] = `
 [
@@ -725,141 +1204,141 @@ exports[`design capability evidence > linkList.surface.item@stacked: the probe c
 
 exports[`design capability evidence > linkList.text.card.description@cards: the probe changes the registered target 1`] = `
 [
-  "523f895f6474e440 (1436 characters)",
-  "a541f19b623eac63 (1436 characters)",
+  "<span class="text-small font-normal text-ink-muted mt-0.5 text-pretty" data-text-role="description">",
+  "<span class="text-small font-normal text-ink-muted mt-0.5 text-pretty" data-text-role="description">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.description@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "<span class="text-body font-normal text-ink-muted mt-1 text-pretty" data-text-role="description">",
+  "<span class="text-body font-normal text-ink-muted mt-1 text-pretty" data-text-role="description">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.description@stacked: the probe changes the registered target 1`] = `
 [
-  "376ea83169d0a2e5 (1252 characters)",
-  "71fe2c96ebb168ea (1252 characters)",
+  "<span class="text-small font-normal opacity-80" data-text-role="description">",
+  "<span class="text-small font-normal opacity-80" data-text-role="description">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.eyebrow@cards: the probe changes the registered target 1`] = `
 [
-  "523f895f6474e440 (1436 characters)",
-  "a541f19b623eac63 (1436 characters)",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.eyebrow@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "<span class="mb-0.5 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
+  "<span class="mb-0.5 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.eyebrow@stacked: the probe changes the registered target 1`] = `
 [
-  "376ea83169d0a2e5 (1252 characters)",
-  "71fe2c96ebb168ea (1252 characters)",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] opacity-80" data-link-eyebrow="" data-text-role="eyebrow">",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] opacity-80" data-link-eyebrow="" data-text-role="eyebrow">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.label@cards: the probe changes the registered target 1`] = `
 [
-  "523f895f6474e440 (1436 characters)",
-  "a541f19b623eac63 (1436 characters)",
+  "<span class="text-body font-semibold text-balance" data-text-role="label">",
+  "<span class="text-body font-semibold text-balance" data-text-role="label">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.label@compact: the probe changes the registered target 1`] = `
 [
-  "8d317bb63600c4ba (926 characters)",
-  "8ddcb273a988e06b (926 characters)",
+  "<a class="inline-flex min-h-10 items-center gap-2 rounded-pill px-4 text-ink transition-[color,background-color,transform] duration-(--duration-fast) ease-out motion-safe:active:scale-[0.98] motion-reduce:transition-none text-small font-medium bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line " data-text-role="label" href="https://example.com/l1">",
+  "<a class="inline-flex min-h-10 items-center gap-2 rounded-pill px-4 text-ink transition-[color,background-color,transform] duration-(--duration-fast) ease-out motion-safe:active:scale-[0.98] motion-reduce:transition-none text-small font-medium bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line " data-text-role="label" href="https://example.com/l2">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.label@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "<span class="text-h3 font-semibold text-balance" data-text-role="label">",
+  "<span class="text-h3 font-semibold text-balance" data-text-role="label">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.card.label@stacked: the probe changes the registered target 1`] = `
 [
-  "376ea83169d0a2e5 (1252 characters)",
-  "71fe2c96ebb168ea (1252 characters)",
+  "<span class="text-body font-semibold" data-text-role="label">",
+  "<span class="text-body font-semibold" data-text-role="label">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.description@cards: the probe changes the registered target 1`] = `
 [
-  "523f895f6474e440 (1436 characters)",
-  "a541f19b623eac63 (1436 characters)",
+  "<span class="text-small font-normal text-ink-muted mt-0.5 text-pretty" data-text-role="description">",
+  "<span class="text-small font-normal text-ink-muted mt-0.5 text-pretty" data-text-role="description">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.description@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "<span class="text-body font-normal text-ink-muted mt-1 text-pretty" data-text-role="description">",
+  "<span class="text-body font-normal text-ink-muted mt-1 text-pretty" data-text-role="description">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.description@stacked: the probe changes the registered target 1`] = `
 [
-  "376ea83169d0a2e5 (1252 characters)",
-  "71fe2c96ebb168ea (1252 characters)",
+  "<span class="text-small font-normal opacity-80" data-text-role="description">",
+  "<span class="text-small font-normal opacity-80" data-text-role="description">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.eyebrow@cards: the probe changes the registered target 1`] = `
 [
-  "523f895f6474e440 (1436 characters)",
-  "a541f19b623eac63 (1436 characters)",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.eyebrow@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "<span class="mb-0.5 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
+  "<span class="mb-0.5 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-link-eyebrow="" data-text-role="eyebrow">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.eyebrow@stacked: the probe changes the registered target 1`] = `
 [
-  "376ea83169d0a2e5 (1252 characters)",
-  "71fe2c96ebb168ea (1252 characters)",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] opacity-80" data-link-eyebrow="" data-text-role="eyebrow">",
+  "<span class="mb-0.5 text-xs font-medium uppercase tracking-[0.08em] opacity-80" data-link-eyebrow="" data-text-role="eyebrow">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.label@cards: the probe changes the registered target 1`] = `
 [
-  "523f895f6474e440 (1436 characters)",
-  "a541f19b623eac63 (1436 characters)",
+  "<span class="text-body font-semibold text-balance" data-text-role="label">",
+  "<span class="text-body font-semibold text-balance" data-text-role="label">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.label@compact: the probe changes the registered target 1`] = `
 [
-  "8d317bb63600c4ba (926 characters)",
-  "8ddcb273a988e06b (926 characters)",
+  "<a class="inline-flex min-h-10 items-center gap-2 rounded-pill px-4 text-ink transition-[color,background-color,transform] duration-(--duration-fast) ease-out motion-safe:active:scale-[0.98] motion-reduce:transition-none text-small font-medium bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line " data-text-role="label" href="https://example.com/l1">",
+  "<a class="inline-flex min-h-10 items-center gap-2 rounded-pill px-4 text-ink transition-[color,background-color,transform] duration-(--duration-fast) ease-out motion-safe:active:scale-[0.98] motion-reduce:transition-none text-small font-medium bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line " data-text-role="label" href="https://example.com/l2">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.label@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "<span class="text-h3 font-semibold text-balance" data-text-role="label">",
+  "<span class="text-h3 font-semibold text-balance" data-text-role="label">",
 ]
 `;
 
 exports[`design capability evidence > linkList.text.item.label@stacked: the probe changes the registered target 1`] = `
 [
-  "376ea83169d0a2e5 (1252 characters)",
-  "71fe2c96ebb168ea (1252 characters)",
+  "<span class="text-body font-semibold" data-text-role="label">",
+  "<span class="text-body font-semibold" data-text-role="label">",
 ]
 `;
 
@@ -875,6 +1354,28 @@ exports[`design capability evidence > location.glass.section: the probe changes 
 ]
 `;
 
+exports[`design capability evidence > location.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > location.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > location.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > location.mark.card.cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > location.mark.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > location.motion.section: the probe changes the registered target 1`] = `
 [
   "591c19c5778c869a (2889 characters)",
@@ -884,6 +1385,56 @@ exports[`design capability evidence > location.motion.section: the probe changes
 exports[`design capability evidence > location.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > location.surface.card.cards: the probe changes the registered target 1`] = `
+[
+  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line border-t-4 border-accent">",
+  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line ">",
+  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line ">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.cards.body: the probe changes the registered target 1`] = `
+[
+  "<address class="mt-3 text-lead not-italic" data-text-role="body">",
+  "<div class="mt-2 flex flex-col gap-1 text-lead" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.cards.meta: the probe changes the registered target 1`] = `
+[
+  "<dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-small" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.cards.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="flex items-center gap-2 text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.picture.body: the probe changes the registered target 1`] = `
+[
+  "<address class="mt-3 text-lead not-italic" data-text-role="body">",
+  "<div class="mt-2 flex flex-col gap-1 text-lead" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.picture.meta: the probe changes the registered target 1`] = `
+[
+  "<dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-small" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > location.text.card.picture.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="flex items-center gap-2 text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold" data-text-role="title">",
 ]
 `;
 
@@ -910,6 +1461,46 @@ exports[`design capability evidence > logoCloud.glass.section@marquee: the probe
   "<div class="mx-auto w-full max-w-content">",
 ]
 `;
+
+exports[`design capability evidence > logoCloud.header.section.eyebrow@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted text-center" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.eyebrow@marquee: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted text-center" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.heading@grid: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-small font-semibold text-ink-muted text-center" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.heading@marquee: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-small font-semibold text-ink-muted text-center" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.intro@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted text-center" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.intro@marquee: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted text-center" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.mark.section@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > logoCloud.mark.section@marquee: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > logoCloud.motion.section@grid: the probe changes the registered target 1`] = `
 [
@@ -971,6 +1562,66 @@ exports[`design capability evidence > mediaText.glass.section@stacked: the probe
 ]
 `;
 
+exports[`design capability evidence > mediaText.header.section.eyebrow@overlay: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.eyebrow@side: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.eyebrow@stacked: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.heading@overlay: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.heading@side: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.heading@stacked: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.intro@overlay: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-4 text-lead text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.intro@side: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-4 text-lead text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.intro@stacked: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-4 text-lead text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > mediaText.mark.section@overlay: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.mark.section@side: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.mark.section@stacked: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > mediaText.motion.section@overlay: the probe changes the registered target 1`] = `
 [
   "27cdbff68f33dfc4 (1063 characters)",
@@ -1031,9 +1682,29 @@ exports[`design capability evidence > newsletterSignup.glass.section: the probe 
 ]
 `;
 
+exports[`design capability evidence > newsletterSignup.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > newsletterSignup.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading" id="_R_5_">",
+]
+`;
+
+exports[`design capability evidence > newsletterSignup.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > newsletterSignup.mark.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > newsletterSignup.motion.section: the probe changes the registered target 1`] = `
 [
-  "fcd180c46c9784c9 (356 characters)",
+  "45e1f6020ed503f1 (356 characters)",
 ]
 `;
 
@@ -1055,15 +1726,123 @@ exports[`design capability evidence > pricingTable.glass.section: the probe chan
 ]
 `;
 
+exports[`design capability evidence > pricingTable.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading" id="_R_5_">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.mark.card: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > pricingTable.mark.item: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > pricingTable.mark.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > pricingTable.motion.section: the probe changes the registered target 1`] = `
 [
-  "96bb407fc4c73f80 (4073 characters)",
+  "3e0f9de8503f93c4 (4073 characters)",
 ]
 `;
 
 exports[`design capability evidence > pricingTable.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > pricingTable.surface.card: the probe changes the registered target 1`] = `
+[
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-1 ring-line ring-inset">",
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-2 ring-ink ring-inset">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.surface.item: the probe changes the registered target 1`] = `
+[
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-1 ring-line ring-inset">",
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-2 ring-ink ring-inset">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.body: the probe changes the registered target 1`] = `
+[
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.description: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 text-small text-ink-muted" data-text-role="description">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.label: the probe changes the registered target 1`] = `
+[
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-small text-ink-muted" data-text-role="label">",
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.price: the probe changes the registered target 1`] = `
+[
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.body: the probe changes the registered target 1`] = `
+[
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.description: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 text-small text-ink-muted" data-text-role="description">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.label: the probe changes the registered target 1`] = `
+[
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-small text-ink-muted" data-text-role="label">",
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.price: the probe changes the registered target 1`] = `
+[
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
 ]
 `;
 
@@ -1091,6 +1870,46 @@ exports[`design capability evidence > process.glass.section@vertical: the probe 
 ]
 `;
 
+exports[`design capability evidence > process.header.section.eyebrow@alternat…: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.eyebrow@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.heading@alternat…: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.heading@vertical: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.intro@alternating: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.intro@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > process.mark.section@alternating: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > process.mark.section@vertical: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > process.motion.section@alternating: the probe changes the registered target 1`] = `
 [
   "05eb4ad6b3f1e38c (3207 characters)",
@@ -1115,6 +1934,48 @@ exports[`design capability evidence > process.overlay.section@vertical: the prob
 ]
 `;
 
+exports[`design capability evidence > process.text.card.body@alternating: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.body@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.label@alternating: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.label@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.title@alternating: the probe changes the registered target 1`] = `
+[
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.title@vertical: the probe changes the registered target 1`] = `
+[
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
+]
+`;
+
 exports[`design capability evidence > richText.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -1126,6 +1987,8 @@ exports[`design capability evidence > richText.glass.section: the probe changes 
   "<div class="mx-auto w-full max-w-measure text-lead text-ink" data-reveal="" style="opacity:0;transform:translateY(24px)">",
 ]
 `;
+
+exports[`design capability evidence > richText.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > richText.motion.section: the probe changes the registered target 1`] = `
 [
@@ -1163,6 +2026,48 @@ exports[`design capability evidence > stats.glass.section@inline: the probe chan
 ]
 `;
 
+exports[`design capability evidence > stats.header.section.eyebrow@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.eyebrow@inline: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.heading@cards: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.heading@inline: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.intro@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.intro@inline: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > stats.mark.card@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > stats.mark.section@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > stats.mark.section@inline: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > stats.motion.section@cards: the probe changes the registered target 1`] = `
 [
   "8e2399d8157c2a80 (1756 characters)",
@@ -1184,6 +2089,33 @@ exports[`design capability evidence > stats.overlay.section@cards: the probe cha
 exports[`design capability evidence > stats.overlay.section@inline: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > stats.surface.card@cards: the probe changes the registered target 1`] = `
+[
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+]
+`;
+
+exports[`design capability evidence > stats.text.card.label@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > stats.text.card.number@cards: the probe changes the registered target 1`] = `
+[
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:7ch">",
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:5ch">",
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:5ch">",
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:2ch">",
 ]
 `;
 
@@ -1225,9 +2157,75 @@ exports[`design capability evidence > team.glass.section@slider: the probe chang
 ]
 `;
 
+exports[`design capability evidence > team.header.section.eyebrow@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.eyebrow@list: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.eyebrow@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.heading@grid: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.heading@list: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.heading@slider: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.intro@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.intro@list: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > team.header.section.intro@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > team.mark.card@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.mark.card@list: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.mark.card@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.mark.section@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.mark.section@list: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.mark.section@slider: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > team.motion.section@grid: the probe changes the registered target 1`] = `
 [
-  "b0cc4b8d7e3f0ef8 (3091 characters)",
+  "f50f74fe6d57b509 (3092 characters)",
 ]
 `;
 
@@ -1262,6 +2260,106 @@ exports[`design capability evidence > team.overlay.section@slider: the probe cha
 ]
 `;
 
+exports[`design capability evidence > team.surface.card@grid: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+]
+`;
+
+exports[`design capability evidence > team.surface.card@list: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+]
+`;
+
+exports[`design capability evidence > team.surface.card@slider: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.body@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-3 text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-3 text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-3 text-pretty text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.body@list: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-3 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-3 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-3 max-w-measure text-pretty text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.body@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 text-pretty text-ink-muted" data-text-role="body">",
+  "<p class="mt-3 text-pretty text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.meta@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.meta@list: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.meta@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+  "<p class="mt-1 text-small font-medium text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.title@grid: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.title@list: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > team.text.card.title@slider: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+  "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
 exports[`design capability evidence > testimonials.edge.section@grid: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -1288,6 +2386,66 @@ exports[`design capability evidence > testimonials.glass.section@slider: the pro
 ]
 `;
 
+exports[`design capability evidence > testimonials.header.section.eyebrow@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > testimonials.header.section.eyebrow@sli…: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > testimonials.header.section.heading@grid: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > testimonials.header.section.heading@sli…: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > testimonials.header.section.intro@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > testimonials.header.section.intro@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > testimonials.mark.card.icon@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.icon@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.picture@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.picture@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.text@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.text@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.icon@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.icon@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.picture@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.picture@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.text@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.text@slider: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > testimonials.motion.section@grid: the probe changes the registered target 1`] = `
 [
   "fc6f356efe668789 (1678 characters)",
@@ -1310,6 +2468,58 @@ exports[`design capability evidence > testimonials.overlay.section@grid: the pro
 exports[`design capability evidence > testimonials.overlay.section@slider: the probe changes the registered target 1`] = `
 [
   "6d05cdc2f4558242 (456 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.surface.card@grid: the probe changes the registered target 1`] = `
+[
+  "<figure class="flex h-full w-full flex-col rounded-card bg-surface p-8 shadow-card ring-1 ring-line">",
+]
+`;
+
+exports[`design capability evidence > testimonials.surface.card@slider: the probe changes the registered target 1`] = `
+[
+  "<figure class="flex h-full w-full flex-col rounded-card bg-surface p-8 shadow-card ring-1 ring-line">",
+]
+`;
+
+exports[`design capability evidence > testimonials.text.card.attribution@grid: the probe changes the registered target 1`] = `
+[
+  "<div class="font-semibold" data-text-role="attribution">",
+  "<div class="text-small text-ink-muted" data-text-role="attribution">",
+]
+`;
+
+exports[`design capability evidence > testimonials.text.card.attribution@slid…: the probe changes the registered target 1`] = `
+[
+  "<div class="font-semibold" data-text-role="attribution">",
+  "<div class="text-small text-ink-muted" data-text-role="attribution">",
+]
+`;
+
+exports[`design capability evidence > testimonials.text.card.label@grid: the probe changes the registered target 1`] = `
+[
+  "<div class="text-small text-ink-muted" data-text-role="label">",
+  "<div class="text-small text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > testimonials.text.card.label@slider: the probe changes the registered target 1`] = `
+[
+  "<div class="text-small text-ink-muted" data-text-role="label">",
+  "<div class="text-small text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > testimonials.text.card.quote@grid: the probe changes the registered target 1`] = `
+[
+  "<blockquote class="flex-1 text-lead text-pretty text-ink [&>p+p]:mt-[0.75em]" data-text-role="quote">",
+]
+`;
+
+exports[`design capability evidence > testimonials.text.card.quote@slider: the probe changes the registered target 1`] = `
+[
+  "<blockquote class="flex-1 text-lead text-pretty text-ink [&>p+p]:mt-[0.75em]" data-text-role="quote">",
 ]
 `;
 
@@ -1337,6 +2547,42 @@ exports[`design capability evidence > video.glass.section@embed: the probe chang
 ]
 `;
 
+exports[`design capability evidence > video.header.section.eyebrow@ambient: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.eyebrow@embed: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.heading@ambient: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.heading@embed: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.intro@ambient: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.intro@embed: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > video.motion.section@ambient: the probe changes the registered target 1`] = `
 [
   "02f39caa0f569dd7 (276 characters)",
@@ -1345,7 +2591,7 @@ exports[`design capability evidence > video.motion.section@ambient: the probe ch
 
 exports[`design capability evidence > video.motion.section@embed: the probe changes the registered target 1`] = `
 [
-  "29fdbae2171e0f56 (1616 characters)",
+  "b4031d5650277a5f (1612 characters)",
 ]
 `;
 

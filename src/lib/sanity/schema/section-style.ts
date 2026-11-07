@@ -10,6 +10,7 @@ import { customRange, isMotionPreset } from '@/components/motion/presets'
 import { backgroundContrastProblem } from '@/lib/color/background-contrast'
 import { overlayGradientContrastProblem } from '@/lib/color/overlay-gradient-contrast'
 import type { CapabilityId } from '@/lib/design/capabilities'
+import { takesSectionMark } from '@/lib/design/section-surfaces'
 
 import {
   GRADIENT_OPACITY_RANGE,
@@ -693,6 +694,14 @@ export const sectionStyle = defineType({
       initialValue: false,
       // Cover the screen already holds the picture still.
       hidden: imageOptionHidden('fixed'),
+    }),
+    defineField({
+      name: 'mark',
+      title: 'Decorative mark',
+      type: 'decorativeMark',
+      description: 'One faint mark behind the whole section.',
+      hidden: ({ document, path }) =>
+        !takesSectionMark(sectionAtStylePath(document, path as never)?._type),
     }),
     presetField({
       name: 'panel',

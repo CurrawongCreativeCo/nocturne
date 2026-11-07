@@ -113,15 +113,136 @@ describe('testimonials.manual: quotes written in Studio', () => {
       expect(after[0]).not.toContain('Quote one.')
     })
 
-    it('draws no source label, rating or review markup', async () => {
+    it('draws no source label or rating unless stored', async () => {
       const html = await draw(layout, stored)
       const lower = html.toLowerCase()
       // Google reviews are their own source (task 277); a written quote is never labelled as one.
       expect(lower).not.toContain('google')
-      for (const invented of ['aggregaterating', 'ratingvalue', 'reviewrating', 'itemtype']) {
+      expect(lower).not.toContain('rated')
+      expect(parseHtml(html).querySelectorAll('time')).toHaveLength(0)
+    })
+
+    it('draws a stored source, date, rating and attribution as plain words, with no review markup', async () => {
+      const html = await draw(layout, [
+        {
+          ...item('q1', 'Quote one.', 'Alex Example'),
+          attribution: 'Client since 2019',
+          source: 'google-review',
+          date: '2026-03-12',
+          rating: 4,
+        },
+      ])
+      const [card] = cards(html)
+      expect(card?.querySelector('figcaption')?.textContent).toContain('Client since 2019')
+      expect(card?.querySelector('figcaption')?.textContent).toContain(
+        'Google review · March 12, 2026',
+      )
+      expect(card?.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
+        'Rated 4 out of 5',
+      )
+      // Plain words only: no logo, badge, link or markup that claims a review.
+      expect(card?.querySelector('figcaption a, figcaption img')).toBeNull()
+      const lower = html.toLowerCase()
+      for (const invented of [
+        'aggregaterating',
+        'ratingvalue',
+        'reviewrating',
+        'itemtype',
+        'itemprop',
+      ]) {
         expect(lower).not.toContain(invented)
       }
       expect(parseHtml(html).querySelectorAll('script[type="application/ld+json"]')).toHaveLength(0)
+    })
+
+    it('never draws the permission confirmation', async () => {
+      const html = await draw(layout, [
+        { ...item('q1', 'Quote one.', 'Alex Example'), permissionToPublish: true },
+      ])
+      expect(html.toLowerCase()).not.toContain('permission')
+    })
+
+    it('marks exact phrases without changing the words', async () => {
+      const html = await draw(layout, [
+        {
+          ...item('q1', 'They changed how we work.', 'Alex'),
+          highlights: ['changed how', 'missing'],
+        },
+      ])
+      const [card] = cards(html)
+      expect(card?.querySelector('blockquote')?.textContent).toBe('“They changed how we work.”')
+      const marks = [...(card?.querySelectorAll('mark') ?? [])].map((mark) => mark.textContent)
+      expect(marks).toEqual(['changed how'])
+    })
+
+    it('draws the section title from heading text, not only the old plain title', async () => {
+      const seed = await gallerySeed('testimonials', layout)
+      const { title: _title, ...rest } = seed as RawSection & { title?: string }
+      const section = {
+        ...rest,
+        items: stored,
+        heading: [
+          {
+            _key: 'b1',
+            _type: 'block',
+            style: 'normal',
+            markDefs: [],
+            children: [{ _key: 's1', _type: 'span', text: 'Kind words', marks: [] }],
+          },
+        ],
+      } as RawSection
+      const html = await renderSections(await projectSections([section]), { belowHeading: true })
+      expect(parseHtml(html).querySelector('h2, h3')?.textContent).toBe('Kind words')
+    })
+
+    it('takes the heading over the old title when both are stored, and draws one heading only', async () => {
+      const seed = await gallerySeed('testimonials', layout)
+      const section = {
+        ...seed,
+        title: 'Old title',
+        items: stored,
+        heading: [
+          {
+            _key: 'b1',
+            _type: 'block',
+            style: 'normal',
+            markDefs: [],
+            children: [{ _key: 's1', _type: 'span', text: 'New heading', marks: [] }],
+          },
+        ],
+      } as RawSection
+      const html = await renderSections(await projectSections([section]), { belowHeading: true })
+      const headings = [...parseHtml(html).querySelectorAll('h1, h2')]
+      expect(headings.map((heading) => heading.textContent)).toEqual(['New heading'])
+      expect(html).not.toContain('Old title')
+    })
+
+    it('falls back to the old title when the heading has no words', async () => {
+      const seed = await gallerySeed('testimonials', layout)
+      const section = { ...seed, title: 'Old title', items: stored, heading: [] } as RawSection
+      const html = await renderSections(await projectSections([section]), { belowHeading: true })
+      const headings = [...parseHtml(html).querySelectorAll('h1, h2')]
+      expect(headings.map((heading) => heading.textContent)).toEqual(['Old title'])
+    })
+
+    it('keeps Other internal: the date stands alone, with no empty separator', async () => {
+      const [other] = cards(
+        await draw(layout, [
+          { ...item('q1', 'Quote one.', 'Alex'), source: 'other', date: '2026-03-12' },
+        ]),
+      )
+      const meta = other?.querySelector('time')?.parentElement
+      expect(meta?.textContent).toBe('March 12, 2026')
+      expect(other?.textContent).not.toContain('Other')
+      const [sourceOnly] = cards(
+        await draw(layout, [{ ...item('q1', 'Quote one.', 'Alex'), source: 'email' }]),
+      )
+      expect(sourceOnly?.querySelector('figcaption')?.textContent).toContain('Email')
+      expect(sourceOnly?.querySelector('figcaption')?.textContent).not.toContain('·')
+      const [otherOnly] = cards(
+        await draw(layout, [{ ...item('q1', 'Quote one.', 'Alex'), source: 'other' }]),
+      )
+      expect(otherOnly?.querySelector('figcaption')?.textContent).toBe('Alex')
     })
 
     it('draws no cards without items', async () => {

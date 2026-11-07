@@ -158,6 +158,7 @@ describe('the Link list link, as the same summary configured with its own words'
       'Text',
       'Icon',
       'Arrow',
+      'Decoration',
     ])
   })
 

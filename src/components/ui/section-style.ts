@@ -7,6 +7,7 @@ import {
   type MotionContext,
 } from '@/components/motion/presets'
 import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
+import type { MarkInput } from '@/lib/sanity/decorative-mark-options'
 import type { OverlayGradientInput } from '@/lib/sanity/overlay-gradient'
 import {
   SECTION_ALIGNS,
@@ -104,6 +105,8 @@ export interface SectionStyleInput {
   edgeHeightMobile?: number | null
   edgeHeightTablet?: number | null
   edgeHeightDesktop?: number | null
+  /** A faint word, picture or icon behind the section (README, "Decorative marks"). */
+  mark?: MarkInput | null
   /** A panel behind the content: 'none', 'glass' or 'solid' (README, "Section panels"); unset is none. */
   panel?: string | null
   /** Advanced: how see-through the glass starts; unset follows the glass tokens. */

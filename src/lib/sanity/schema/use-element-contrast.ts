@@ -1,6 +1,6 @@
 import { useFormValue, type StringInputProps } from 'sanity'
 
-import { cardSurface, type StoredCardSurface } from '@/lib/color/card-contrast'
+import { cardSurface, chosenTextColours, type StoredCardSurface } from '@/lib/color/card-contrast'
 import { glassRowsStrength } from '@/lib/color/glass-contrast'
 import { surfaceColourCheck } from '@/lib/color/surface-contrast'
 import { themeColourContrast, type ColourUsage } from '@/lib/color/theme-colour-contrast'
@@ -83,6 +83,10 @@ export function useElementContrast(
           own: itemPath
             ? cardSurface(item?.design?.appearance === 'custom' ? item.design : {})
             : undefined,
+          foregrounds: chosenTextColours(
+            section?.cardDesign,
+            item?.design?.appearance === 'custom' ? item.design : undefined,
+          ),
           tone,
           glass: rowsGlass,
           site: brand.colours,

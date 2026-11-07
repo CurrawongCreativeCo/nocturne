@@ -1,6 +1,7 @@
 import {
   capabilityById,
   CONTENT_SOURCES,
+  textRoleTarget,
   type CapabilityId,
   type ContentSourceDefinition,
   type ContentSourceId,
@@ -355,6 +356,13 @@ export function evidenceProblems(
       }
     }
     if (isCapabilityEvidence(entry)) {
+      if (entry.role && !entry.target.includes(textRoleTarget(entry.role))) {
+        problem(
+          `it proves the ${entry.role} role, but its target (${entry.target}) isn't that role's own element.`,
+          `Target ${textRoleTarget(entry.role)}, and draw that attribute on the element the role styles.`,
+        )
+        continue
+      }
       if (field.marker.capability !== entry.capability) {
         problem(
           `${entry.field} isn't marked as ${entry.capability}${field.marker.capability ? ` (it is ${field.marker.capability})` : ''}.`,

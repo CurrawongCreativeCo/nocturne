@@ -1,8 +1,18 @@
 import { ChartUpwardIcon } from '@sanity/icons/ChartUpward'
-import { defineArrayMember, defineField, defineType } from 'sanity'
+import {
+  defineArrayMember,
+  defineField,
+  defineType,
+  type ConditionalPropertyCallback,
+} from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -52,6 +62,14 @@ const EXAMPLE_ITEMS = [
   { _type: 'statItem', value: 12, decimals: 0, label: 'Years in business' },
 ]
 
+/** The text roles a stat card draws (stats-capabilities.ts), and what each is drawn in. */
+export const STATS_ROLES = [{ role: 'number' }, { role: 'label' }] as const
+export const STATS_ROLE_COLOURS = { number: 'ink', label: 'muted' } as const
+
+/** Only the Cards layout draws a card, so the Cards box is offered only there. Empty is Inline. */
+const notCards: ConditionalPropertyCallback = ({ parent }) =>
+  ((parent as { variant?: string } | undefined)?.variant ?? 'inline') !== 'cards'
+
 export const stats = defineType({
   name: 'stats',
   title: 'Stats',
@@ -62,6 +80,7 @@ export const stats = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -85,6 +104,15 @@ export const stats = defineType({
         initialValue: EXAMPLE_ITEMS,
         validation: (rule) =>
           rule.required().min(STATS_SECTION_ITEMS.min).max(STATS_SECTION_ITEMS.max),
+      }),
+      headerDesignField(),
+      cardDesignField({
+        description:
+          'Only the Cards layout draws a card: its fill, border, figure and label text, and mark.',
+        roles: STATS_ROLES,
+        defaults: STATS_ROLE_COLOURS,
+        inherits: 'the card’s own',
+        boxHidden: notCards,
       }),
       accessField,
       // Shown first in the Content tab.

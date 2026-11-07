@@ -15,9 +15,14 @@ import { BASELINE_CHANGES } from '@/lib/design/capability-baseline-changes'
 import { DESIGN_CONTEXTS } from '@/lib/design/capability-design-contexts'
 import { EVIDENCE } from '@/lib/design/capability-evidence'
 import { CAPABILITY_EXCEPTIONS } from '@/lib/design/capability-exceptions'
-import { declarationProblems, type ContractProblem } from '@/lib/design/capability-policy'
+import {
+  declarationProblems,
+  policyCells,
+  type ContractProblem,
+} from '@/lib/design/capability-policy'
 import { contractProblems, formatProblem } from '@/lib/design/contract-checks'
 import { exceptionProblems, privateFields } from '@/lib/design/schema-capabilities'
+import { takesSectionMark } from '@/lib/design/section-surfaces'
 
 import { COMPONENT_SCHEMAS, DESIGN_COMPONENTS, gate, lookupType } from './design-components'
 
@@ -162,4 +167,32 @@ describe('the design capability contract', () => {
       }).toMatchSnapshot()
     },
   )
+})
+
+describe('where a section-level decorative mark is offered', () => {
+  it('matches every section’s declaration: the schema, the renderer and the policy agree', () => {
+    for (const component of DESIGN_COMPONENTS) {
+      if (component.kind !== 'section' || !component.declaration) continue
+      const cells = policyCells(
+        'mark',
+        component.declaration.capabilities.mark,
+        component.layouts,
+      ).filter((cell) => cell.scope === 'section' && cell.policy !== 'notApplicable')
+      expect(takesSectionMark(component.id), component.id).toBe(cells.length > 0)
+    }
+  })
+})
+
+describe('the tests that prove the contract can’t be switched off', () => {
+  // A crash, a worker exit and a focused test already fail the run; a skipped one passes it silently.
+  it.each([
+    'src/app/design-capability-evidence.test.tsx',
+    'src/app/design-control-effects.test.tsx',
+    'src/components/ui/decorative-mark-controls.test.tsx',
+  ])('%s skips, focuses and expects the failure of nothing', (file) => {
+    const source = readFileSync(join(import.meta.dirname, '..', '..', file), 'utf8')
+    expect(source).not.toMatch(
+      /\b(it|test|describe)\.(skip|skipIf|runIf|todo|only|fails)\b|\bx(it|describe)\(/,
+    )
+  })
 })

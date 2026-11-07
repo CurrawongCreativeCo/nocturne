@@ -9,19 +9,21 @@ import { headingLevelFor, TeamHeader } from './team-header'
 import type { SectionProps } from '../../../types'
 
 export function TeamSlider({ data, isFirst }: SectionProps<'team'>) {
-  const { block, text } = sectionTraits(data.style, DEFAULTS)
+  const { block, text, tone } = sectionTraits(data.style, DEFAULTS)
   const members = data.members ?? []
   if (members.length === 0) return null
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
-      <TeamHeader data={data} classes={`${block} ${text}`} />
+      <TeamHeader data={data} block={block} text={text} />
       <LazySlider label={sectionTitle(data) ?? 'Our team'} perView={{ base: 1, sm: 2, lg: 3 }} gap>
         {members.map((member, index) => (
           <TeamCard
             key={member._id}
             member={member}
             design={data.imageDesign}
+            cardDesign={data.cardDesign}
+            tone={tone}
             headingLevel={headingLevelFor(data)}
             eager={isFirst && index === 0}
           />

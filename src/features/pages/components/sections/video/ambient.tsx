@@ -1,15 +1,17 @@
 import { stegaClean } from 'next-sanity'
 
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import { LazyAmbientPlayer } from './ambient-player-lazy'
 import type { SectionProps } from '../../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // Like the hero's Full background layout: words over a dimmed picture on the dark tone.
 const DEFAULTS: SectionDefaults = {
@@ -48,13 +50,14 @@ export function VideoAmbient({ data, isFirst }: SectionProps<'video'>) {
         ) : undefined
       }
     >
-      <RichHeading
-        as="h2"
-        blocks={heading}
-        fallback={title}
-        className="text-h2 font-semibold text-balance"
+      <SectionHeader
+        as={null}
+        eyebrow={data.eyebrow}
+        title={title}
+        heading={heading}
+        intro={text}
+        design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
       />
-      <PlainText text={text} className="mt-4 text-lead text-pretty text-ink-muted" />
     </SectionFrame>
   )
 }

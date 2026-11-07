@@ -1,11 +1,13 @@
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { StatFigure } from '@/components/ui/stat-figure'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'center', motion: 'reveal' }
@@ -19,19 +21,15 @@ export function StatsInline({ data, isFirst }: SectionProps<'stats'>) {
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
-      {(title || intro) && (
-        <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
-          {title && (
-            <RichHeading
-              as="h2"
-              blocks={heading}
-              fallback={title}
-              className="text-h2 font-semibold text-balance"
-            />
-          )}
-          <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
-        </header>
-      )}
+      <SectionHeader
+        eyebrow={data.eyebrow}
+        title={title}
+        heading={heading}
+        intro={intro}
+        design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        block={block}
+        text={text}
+      />
       <ul
         className={`flex flex-wrap gap-x-16 gap-y-12 ${align === 'center' ? 'justify-center text-center' : ''}`}
       >

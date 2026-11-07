@@ -185,6 +185,22 @@ describe('evidenceProblems', () => {
     expect(messages([{ ...glassEvidence, layouts: ['open'] }])).toEqual([])
   })
 
+  it('refuses a text role whose target isn’t that role’s own element', () => {
+    const broad: CapabilityEvidence = {
+      ...glassEvidence,
+      layouts: ['open'],
+      role: 'eyebrow',
+      target: 'li',
+    }
+    expect(messages([broad])).toEqual([
+      "Evidence fixtureCards.glass.section: it proves the eyebrow role, but its target (li) isn't that role's own element.",
+    ])
+    const description: CapabilityEvidence = { ...broad, target: '[data-text-role="description"]' }
+    expect(messages([description])).toEqual([
+      'Evidence fixtureCards.glass.section: it proves the eyebrow role, but its target ([data-text-role="description"]) isn\'t that role\'s own element.',
+    ])
+  })
+
   it('refuses a claim on a layout the schema hides, or the declaration excludes', () => {
     expect(messages([glassEvidence])).toEqual([
       "Evidence fixtureCards.glass.section: the schema doesn't offer style.panel on boxed (style.panel is hidden for this layout and state).",
@@ -642,7 +658,7 @@ describe('text roles are verified one by one (AT2)', () => {
     }),
   }
   const stamped = (capability: 'text' | 'header', role: TextRole): { marker: Marker } => ({
-    marker: { capability, role, designBuilder: 'textStyleField' },
+    marker: { capability, role, designBuilder: 'textRoleField' },
   })
   const textGate: SchemaGate = {
     hasSchema: () => true,
@@ -656,7 +672,7 @@ describe('text roles are verified one by one (AT2)', () => {
             : path === 'header.heading'
               ? stamped('header', 'heading')
               : path === 'card.plain'
-                ? { marker: { capability: 'text', designBuilder: 'textStyleField' } }
+                ? { marker: { capability: 'text', designBuilder: 'textRoleField' } }
                 : { missing: `no field ${path}` },
     offered: () => ({ offered: true }),
   }
@@ -673,7 +689,7 @@ describe('text roles are verified one by one (AT2)', () => {
     field: `card.${role}`,
     resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
     render: 'src/x.tsx',
-    target: 'li',
+    target: `[data-text-role="${role}"]`,
     change: 'content',
     probe: { [`card.${role}.size`]: 'large' },
     ...over,
