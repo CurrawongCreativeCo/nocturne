@@ -1,6 +1,8 @@
 import { stegaClean } from 'next-sanity'
 
 import { BADGE_ICONS } from './badge-icons'
+import { frameMaskUrl } from './frame-mask'
+import { isCdnUrl } from './image-design-options'
 import { themeColourCss, type ThemeColour, type ThemeColourInput } from './theme-colour'
 
 /**
@@ -152,8 +154,8 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 const numberOr = (value: number | null | undefined, fallback: number) =>
   typeof value === 'number' && Number.isFinite(value) ? value : fallback
 
-// Only the image CDN's own URLs reach CSS: nothing that could close the url() or fetch from elsewhere.
-const SAFE_ARTWORK_URL = /^https:\/\/cdn\.sanity\.io\/[\w./-]+(?:\?[\w=&.%-]*)?$/
+/** Twice the widest a mark is drawn (70% of a 80rem container, at most): a faint mark needs no more. */
+const PICTURE_WIDTH = 1280
 
 function contentOf(input: MarkInput): MarkContent | null {
   switch (pick(MARK_KINDS, input.kind)) {
@@ -170,8 +172,12 @@ function contentOf(input: MarkInput): MarkContent | null {
       }
     }
     case 'picture': {
-      const url = stegaClean(input.pictureUrl ?? '')
-      if (!SAFE_ARTWORK_URL.test(url)) return null
+      // Only the image CDN's own URLs reach CSS, resized like every approved frame (frameMaskUrl): a
+      // 2400 px original is never downloaded for a faint mark, and nothing can close the url().
+      const url = isCdnUrl(input.pictureUrl)
+        ? frameMaskUrl(stegaClean(input.pictureUrl), PICTURE_WIDTH)
+        : undefined
+      if (!url) return null
       return { kind: 'picture', url, keepColours: stegaClean(input.keepColours) === true }
     }
     case 'icon': {
@@ -191,7 +197,7 @@ export function resolveDecorativeMark(input: MarkInput | null | undefined): Reso
   if (!input) return null
   const content = contentOf(input)
   if (!content) return null
-  const anchor = pick(MARK_ANCHORS, input.anchor) ?? 'middle-centre'
+  const anchor = pick(MARK_ANCHORS, input.anchor) ?? 'top-centre'
   const [vertical, horizontal] = anchor.split('-') as [Vertical, Horizontal]
   const rotation = clamp(numberOr(input.rotation, 0), -MARK_ROTATION_MAX, MARK_ROTATION_MAX)
   const colour = themeColourCss(input.colour, MARK_COLOURS)

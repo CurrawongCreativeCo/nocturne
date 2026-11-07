@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { MARK_ANCHORS, markAnchorTitle, resolveDecorativeMark } from './decorative-mark-options'
 
+const PICTURE_URL =
+  'https://cdn.sanity.io/images/p/d/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-100x100.png'
 const text = (extra = {}) => resolveDecorativeMark({ kind: 'text', text: 'Thanks', ...extra })
 
 describe('resolveDecorativeMark', () => {
@@ -27,7 +29,9 @@ describe('resolveDecorativeMark', () => {
     expect(markAnchorTitle('top-left')).toBe('Top left')
     expect(text({ anchor: 'bottom-right' })).toMatchObject({ x: 100, y: 100 })
     expect(text({ anchor: 'top-centre' })).toMatchObject({ x: 50, y: 0 })
-    expect(text({ anchor: 'nowhere' })).toMatchObject({ x: 50, y: 50 })
+    // Top centre unless chosen: a middle mark hides behind cards stacked full width on a phone.
+    expect(text({ anchor: 'nowhere' })).toMatchObject({ x: 50, y: 0 })
+    expect(text({})).toMatchObject({ x: 50, y: 0 })
   })
 
   it('keeps an offset within ±25% of the container', () => {
@@ -45,7 +49,7 @@ describe('resolveDecorativeMark', () => {
     expect(text({ opacity: 90 })?.opacity).toBe(0.2)
     expect(text({ opacity: 0 })?.opacity).toBe(0.02)
     expect(resolveDecorativeMark({ kind: 'icon', icon: 'heart', opacity: 90 })?.opacity).toBe(0.2)
-    const picture = { kind: 'picture', pictureUrl: 'https://cdn.sanity.io/images/a/b/c.png' }
+    const picture = { kind: 'picture', pictureUrl: PICTURE_URL }
     expect(resolveDecorativeMark({ ...picture, opacity: 90 })?.opacity).toBe(0.4)
   })
 
@@ -54,11 +58,18 @@ describe('resolveDecorativeMark', () => {
     expect(mark?.kind === 'text' && mark.text).toHaveLength(24)
   })
 
+  it('draws a picture from the image CDN resized like an approved frame, never the original', () => {
+    const mark = resolveDecorativeMark({ kind: 'picture', pictureUrl: PICTURE_URL })
+    expect(mark?.kind === 'picture' && mark.url).toContain('w=1280')
+    expect(mark?.kind === 'picture' && mark.url).toContain('fm=webp')
+  })
+
   it('only lets the image CDN’s own URLs reach CSS', () => {
     for (const pictureUrl of [
       'https://evil.example/a.png',
       'https://cdn.sanity.io/a.png) url(https://evil.example/b.png',
       'javascript:alert(1)',
+      'http://cdn.sanity.io/images/p/d/a.png',
     ]) {
       expect(resolveDecorativeMark({ kind: 'picture', pictureUrl })).toBeNull()
     }

@@ -158,7 +158,8 @@ function SectionFrameView({
     input: style?.mark,
     scope: 'section',
     tone: resolved.tone,
-    backdrop: Boolean(resolved.image ?? resolved.gradient) || Boolean(panel),
+    // Only a picture or gradient is unknown behind the text: a panel without one is a known colour.
+    backdrop: Boolean(resolved.image ?? resolved.gradient),
   } as const
   const markInContainer = mark && markInPanel ? <DecorativeMark {...markProps} nested /> : null
   const markClass = !mark ? '' : markInPanel ? 'relative isolate' : 'relative'

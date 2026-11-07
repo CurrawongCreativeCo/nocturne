@@ -29,6 +29,7 @@ import {
 import { badgeIconField } from './badge-icon-field'
 import { fetchBrandColours } from './brand-colours'
 import { builtOptions } from './capability-marker'
+import { allowsPanel, sectionAtStylePath } from './section-form'
 import { choiceField } from './surface-design'
 import { themeColourField } from './theme-colour'
 
@@ -104,7 +105,7 @@ export function markOpacityWarning(
     ownColours: kind === 'picture' && mark.keepColours === true,
     tone: style.tone,
     ...(context.levels.length > 0 ? { levels: context.levels } : {}),
-    backdrop: Boolean(style.image ?? style.gradient ?? (style.panel && style.panel !== 'none')),
+    backdrop: Boolean(style.image ?? (style.gradient && style.gradient !== 'none')),
     site: context.site,
   })
   if (safe >= opacity) return true
@@ -232,7 +233,7 @@ export const decorativeMark = defineType({
       title: 'Anchor',
       type: 'string',
       fieldset: 'position',
-      description: 'Where it sits. Empty is the middle.',
+      description: 'Where it sits. Empty is the top centre.',
       options: { list: MARK_ANCHORS.map((value) => ({ value, title: markAnchorTitle(value) })) },
       hidden: off,
     }),
@@ -270,9 +271,13 @@ export const decorativeMark = defineType({
       fieldset: 'position',
       description: 'Only matters on a section with a panel. Empty is behind the content.',
       options: radio(MARK_LAYERS, (layer) => MARK_LAYER_TITLES[layer]),
-      // A card or an item has no panel of its own.
-      hidden: ({ path, parent }) =>
-        (markOf(parent).kind ?? 'none') === 'none' || !path.includes('style'),
+      // Only a section's mark has a panel to go behind, and only a section with one.
+      hidden: ({ document, path, parent }) => {
+        if ((markOf(parent).kind ?? 'none') === 'none' || !path.includes('style')) return true
+        const section = sectionAtStylePath(document, path)
+        const panel = (section?.style as { panel?: string } | undefined)?.panel
+        return !allowsPanel(section) || !panel || panel === 'none'
+      },
     }),
   ],
 })

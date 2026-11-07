@@ -58,14 +58,19 @@ describe('DecorativeMark', () => {
   })
 
   it('draws a picture as a mask that takes a tint, or in its own colours', async () => {
-    const pictureUrl = 'https://cdn.sanity.io/images/a/b/c.png'
+    const pictureUrl =
+      'https://cdn.sanity.io/images/p/d/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-100x100.png'
     const tinted = box(await draw({ kind: 'picture', pictureUrl }))?.querySelector('span')
-    expect(tinted?.getAttribute('style')).toContain(`mask-image:url(${pictureUrl})`)
+    expect(tinted?.getAttribute('style')).toMatch(
+      /mask-image:url\(https:\/\/cdn\.sanity\.io\/images\/p\/d\/[^)]*w=1280/,
+    )
     expect(tinted?.getAttribute('style')).toContain('background-color:currentColor')
     const own = box(await draw({ kind: 'picture', pictureUrl, keepColours: true }))?.querySelector(
       'span',
     )
-    expect(own?.getAttribute('style')).toContain(`background-image:url(${pictureUrl})`)
+    expect(own?.getAttribute('style')).toContain(
+      'background-image:url(https://cdn.sanity.io/images/p/d/',
+    )
     expect(own?.getAttribute('style')).not.toContain('mask-image')
   })
 
