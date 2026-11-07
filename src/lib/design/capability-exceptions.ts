@@ -146,11 +146,12 @@ export const CAPABILITY_EXCEPTIONS: readonly CapabilityException[] = [
   {
     component: 'linkList',
     fields: ['socialDesign'],
-    justification: 'The social icon container and colour, overlapping the icon capability.',
+    justification:
+      'The social icon container and colour, overlapping the icon capability. Task 158 draws them through the shared IconContainer, but the stored paths (style, iconColour, background, backgroundStrength, border, borderColour) differ from the shared builder’s (iconShape, iconBackground, iconBorder …), so replacing the field would rename saved values. Owner decision, 8 November 2026: preserve the stored values and replace the field in task 281, which gains this in its scope.',
     reviewer: OWNER,
     reviewed: APPROVED,
     status: 'temporary',
-    removalTask: 158,
+    removalTask: 281,
     nature: 'design',
   },
   {
