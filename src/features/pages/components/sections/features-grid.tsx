@@ -1,9 +1,10 @@
+import { ItemIcon } from '@/components/ui/item-icon'
 import { PlainText } from '@/components/ui/plain-text'
-import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveIconDesign } from '@/lib/sanity/surface-options'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../types'
@@ -23,6 +24,7 @@ export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
   const { heading, intro, columns, items } = data
   const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
+  const iconDesign = resolveIconDesign(data.iconDesign)
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
@@ -38,13 +40,7 @@ export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
       <ul className={`grid grid-cols-1 gap-x-8 gap-y-12 ${columnClasses[columns]}`}>
         {items.map((item) => (
           <li key={item._key}>
-            <SanityImage
-              image={item.icon}
-              alt=""
-              width={48}
-              height={48}
-              className="mb-4 size-12 object-contain"
-            />
+            <ItemIcon name={item.iconName} image={item.icon} design={iconDesign} />
             <h3 className="text-lead font-semibold">{item.title}</h3>
             <PlainText text={item.text} className="mt-2 text-ink-muted" />
           </li>

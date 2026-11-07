@@ -227,6 +227,36 @@ interface CardFamilyEvidence {
 }
 
 /**
+ * The icon container's evidence (task 158): a set icon is drawn in `data-icon-shape`, which the section's
+ * Icons box changes. `base` gives the content a set icon to draw; the probe picks a container shape.
+ */
+function iconContainerEvidence(config: {
+  component: string
+  layouts?: readonly string[]
+  render: string
+  base: Patch
+  scope?: 'card' | 'section'
+  box?: string
+  target?: string
+}): CapabilityEvidence {
+  const box = config.box ?? 'iconDesign'
+  return {
+    id: `${config.component}.icon.${config.scope ?? 'card'}`,
+    component: config.component,
+    ...(config.layouts ? { layouts: config.layouts } : {}),
+    capability: 'icon',
+    scope: config.scope ?? 'card',
+    field: `${box}.iconShape`,
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
+    render: config.render,
+    base: config.base,
+    target: config.target ?? '[data-icon-shape]',
+    change: 'attributes',
+    probe: { [`${box}.iconShape`]: 'circle' },
+  }
+}
+
+/**
  * The evidence of a card family's shared design: the same cases for every family, so a role, a part and a
  * scope are each proven on their own. A role's target is that role's own element (data-text-role), the
  * surface's the card, a mark's the mark's own box, and the item scope sets the item's Appearance first.
@@ -1053,6 +1083,13 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  iconContainerEvidence({
+    component: 'featuresGrid',
+    render: 'src/components/ui/item-icon.tsx',
+    base: {
+      items: [{ _key: 'probe-feature', _type: 'featureItem', title: 'Fast', iconName: 'star' }],
+    },
+  }),
   ...frameEvidence('featuresGrid', {
     mark: true,
     overlay: true,
@@ -1296,6 +1333,17 @@ export const EVIDENCE: readonly Evidence[] = [
     },
     roles: ['label', 'title', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  iconContainerEvidence({
+    component: 'process',
+    layouts: ['vertical', 'alternating'],
+    render: 'src/components/ui/item-icon.tsx',
+    base: {
+      steps: [
+        { _key: 'probe-step-1', _type: 'step', title: 'Meet', iconName: 'star' },
+        { _key: 'probe-step-2', _type: 'step', title: 'Build', iconName: 'heart' },
+      ],
+    },
   }),
   ...frameEvidence('process', {
     mark: ['vertical', 'alternating'],

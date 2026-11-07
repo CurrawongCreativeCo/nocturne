@@ -21,7 +21,12 @@ import { itemAppearanceField, notCustomised } from '@/lib/sanity/schema/item-app
 import { presetsOption, type PresetDefinition } from '@/lib/sanity/schema/preset-field'
 import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
-import { surfaceFields, textRoleField, textRoleParts } from '@/lib/sanity/schema/surface-design'
+import {
+  iconDesignFields,
+  surfaceFields,
+  textRoleField,
+  textRoleParts,
+} from '@/lib/sanity/schema/surface-design'
 
 /**
  * The shared forms of a card family's design (task 156): the section header's eyebrow and Design box, the
@@ -79,6 +84,31 @@ export const headerDesignField = (
         hidden: hidden[role],
       }),
     ),
+  })
+
+/**
+ * The Icons box (task 158): the container, fill, strength, border and colour of the section's set icons.
+ * Agency only. `own` is the shape each icon has with nothing chosen (plain: no container), so the fill and
+ * border are only offered once there is one. `hidden` hides it where the layout draws no icons.
+ */
+export const iconsDesignField = ({
+  hidden,
+  inherits = 'the default (no container)',
+}: { hidden?: ConditionalPropertyCallback; inherits?: string } = {}) =>
+  defineField({
+    name: 'iconDesign',
+    title: scopedGroupTitle('Icons', 'card'),
+    type: 'object',
+    group: 'design',
+    description:
+      'The container and colour of the icons chosen from the set. Uploaded icons and images are always drawn whole.',
+    hidden: both(hiddenFromClients, hidden),
+    options: { collapsible: true, collapsed: true },
+    fields: iconDesignFields({
+      inherits,
+      shapeOf: (context) =>
+        (context.parent as { iconShape?: string } | undefined)?.iconShape ?? 'plain',
+    }),
   })
 
 /** A Background warning's options, for a family with glass or wording of its own (the Link list). */

@@ -448,6 +448,12 @@ exports[`design capability evidence > featuresGrid.header.section.intro: the pro
 ]
 `;
 
+exports[`design capability evidence > featuresGrid.icon.card: the probe changes the registered target 1`] = `
+[
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+]
+`;
+
 exports[`design capability evidence > featuresGrid.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > featuresGrid.motion.section: the probe changes the registered target 1`] = `
@@ -1903,6 +1909,20 @@ exports[`design capability evidence > process.header.section.intro@alternating: 
 exports[`design capability evidence > process.header.section.intro@vertical: the probe changes the registered target 1`] = `
 [
   "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > process.icon.card@alternating: the probe changes the registered target 1`] = `
+[
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+]
+`;
+
+exports[`design capability evidence > process.icon.card@vertical: the probe changes the registered target 1`] = `
+[
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
 ]
 `;
 

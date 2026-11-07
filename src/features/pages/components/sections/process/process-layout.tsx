@@ -53,6 +53,7 @@ export function ProcessLayout({ data, isFirst, lineClassName, sideOf }: Props) {
               side={sideOf(index)}
               plan={plan}
               cardDesign={data.cardDesign}
+              iconDesign={data.iconDesign}
             />
           ))}
         </ol>

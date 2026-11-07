@@ -4,10 +4,12 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { scopedGroupTitle } from '@/lib/sanity/design-summary'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
 import {
   cardDesignField,
   eyebrowField,
   headerDesignField,
+  iconsDesignField,
 } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -142,13 +144,19 @@ export const process = defineType({
                 rows: 3,
                 validation: (rule) => lengthWarning(rule, LIMITS.stepText, 'Step text'),
               }),
+              badgeIconField({
+                name: 'iconName',
+                title: 'Icon from the set',
+                description:
+                  'Optional. Chosen from the shared set. When both this and an uploaded icon are set, this one is drawn; the uploaded icon is kept and used again if this is cleared.',
+              }),
               imageField({
                 name: 'icon',
                 title: 'Icon / image',
                 // Decorative: the step title next to it says what it means.
                 requireAlt: false,
                 description:
-                  'Optional. SVG or square image. Decorative, so screen readers skip it.',
+                  'Optional. SVG or square image, drawn whole. Decorative, so screen readers skip it. Not drawn when an icon from the set is chosen.',
               }),
             ],
             preview: { select: { title: 'title', subtitle: 'label', media: 'icon' } },
@@ -156,6 +164,7 @@ export const process = defineType({
         ],
       }),
       headerDesignField(),
+      iconsDesignField(),
       cardDesignField({
         title: scopedGroupTitle('Steps', 'card'),
         description:

@@ -226,7 +226,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   featuresGrid: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'columns', 'items'],
-    agencyOnly: ['headerDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'access', 'style'],
   },
   logoCloud: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'logos'],
@@ -308,7 +308,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   process: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'steps'],
-    agencyOnly: ['headerDesign', 'cardDesign', 'variant', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'variant', 'access', 'style'],
   },
   embed: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'provider', 'url', 'height'],

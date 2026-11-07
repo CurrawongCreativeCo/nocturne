@@ -118,6 +118,15 @@ export const mediaTextFragment = /* groq */ `
   }
 `
 
+const iconDesignProjection = /* groq */ `
+  iconShape,
+  iconColour { colour, hex },
+  iconBackground { colour, hex },
+  iconBackgroundStrength,
+  iconBorder,
+  iconBorderColour { colour, hex }
+`
+
 export const featuresGridFragment = /* groq */ `
   _type == "featuresGrid" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -127,10 +136,12 @@ export const featuresGridFragment = /* groq */ `
     intro,
     ${headerDesignProjection},
     columns,
+    iconDesign { ${iconDesignProjection} },
     items[] {
       _key,
       title,
       text,
+      iconName,
       icon { ${imageFields} }
     }
   }
@@ -436,11 +447,13 @@ export const processFragment = /* groq */ `
       title { ${roleStyleProjection} },
       body { ${roleStyleProjection} }
     },
+    iconDesign { ${iconDesignProjection} },
     steps[] {
       _key,
       label,
       title,
       text,
+      iconName,
       icon { ${imageFields} }
     }
   }
@@ -459,15 +472,6 @@ export const embedFragment = /* groq */ `
     height,
     customHeight
   }
-`
-
-const iconDesignProjection = /* groq */ `
-  iconShape,
-  iconColour { colour, hex },
-  iconBackground { colour, hex },
-  iconBackgroundStrength,
-  iconBorder,
-  iconBorderColour { colour, hex }
 `
 
 export const linkListFragment = /* groq */ `
