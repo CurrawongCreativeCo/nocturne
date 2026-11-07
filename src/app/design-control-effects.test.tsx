@@ -96,7 +96,48 @@ const PLAN_BASE: Patch = {
   ],
 }
 
+/** A link drawing every role, an icon and an arrow. */
+const FIXTURE_LINK = (key: string) => ({
+  _key: key,
+  _type: 'linkListItem',
+  eyebrow: 'Eyebrow',
+  label: 'Fixture link',
+  description: 'A short description.',
+  icon: 'phone',
+  link: { _type: 'link', linkType: 'external', url: `https://example.com/${key}` },
+})
+
 const FAMILIES: readonly Family[] = [
+  {
+    component: 'linkList',
+    base: { links: [FIXTURE_LINK('l1'), FIXTURE_LINK('l2')], showArrows: true },
+    boxes: [
+      { field: 'cardDesign', at: 'cardDesign' },
+      {
+        field: 'links[].design',
+        at: 'links.0.design',
+        switchOn: { 'links.0.design.appearance': 'custom' },
+      },
+    ],
+  },
+  // The same boxes on a Glass row, which draws its own surface.
+  {
+    component: 'linkList',
+    layout: 'stacked',
+    base: {
+      links: [FIXTURE_LINK('l1'), FIXTURE_LINK('l2')],
+      showArrows: true,
+      rowStyle: 'glass',
+    },
+    boxes: [
+      { field: 'cardDesign', at: 'cardDesign' },
+      {
+        field: 'links[].design',
+        at: 'links.0.design',
+        switchOn: { 'links.0.design.appearance': 'custom' },
+      },
+    ],
+  },
   {
     component: 'linkList',
     base: {

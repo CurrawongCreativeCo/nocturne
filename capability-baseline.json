@@ -402,20 +402,6 @@
     },
     {
       "component": "linkList",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": ["stacked", "cards", "editorial", "compact"],
-      "closingTask": 156
-    },
-    {
-      "component": "linkList",
-      "capability": "mark",
-      "scope": "item",
-      "layouts": ["stacked", "cards", "editorial", "compact"],
-      "closingTask": 156
-    },
-    {
-      "component": "linkList",
       "capability": "glass",
       "scope": "card",
       "layouts": ["stacked"],

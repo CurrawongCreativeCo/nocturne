@@ -1,12 +1,7 @@
 import { defineField, type ConditionalPropertyCallback, type FieldDefinition } from 'sanity'
 
 import { BODY_TEXT_RATIO } from '@/lib/color/background-contrast'
-import {
-  cardLabelHex,
-  cardTextContrast,
-  layeredCardSurface,
-  type StoredCardSurface,
-} from '@/lib/color/card-contrast'
+import { type StoredCardSurface } from '@/lib/color/card-contrast'
 import { glassRowsStrength } from '@/lib/color/glass-contrast'
 import {
   GLOW_COLOUR_CHOICES,
@@ -53,17 +48,15 @@ import {
   PROFILE_IMAGE_SIZE_TITLES,
 } from '@/lib/sanity/profile-image-options'
 import { hiddenFromClients } from '@/lib/sanity/roles'
-import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
 import { markFields } from '@/lib/sanity/schema/capability-marker'
-import { presetField } from '@/lib/sanity/schema/preset-field'
-import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
-import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import {
-  choiceField,
-  iconDesignFields,
-  surfaceFields,
-  textRoleField,
-} from '@/lib/sanity/schema/surface-design'
+  cardDesignField,
+  withCardTextContrast,
+  type CardContrastWarning,
+} from '@/lib/sanity/schema/card-design-fields'
+import { presetField } from '@/lib/sanity/schema/preset-field'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
+import { choiceField, iconDesignFields } from '@/lib/sanity/schema/surface-design'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
   linkArrowThumbnails,
@@ -146,52 +139,24 @@ const noSocials: ConditionalPropertyCallback = (context) =>
   sectionOf(context)?.socialSource === 'none'
 
 /**
- * Adds a warning to a card's Background colour: the label measured on the background the card draws
- * (the card's choice over the list's, lib/color/card-contrast.ts), with the site's Brand colours.
- * Other fields pass through unchanged, so it can map over `surfaceFields`.
+ * The Link list's Background colour warning, from the shared one: it measures the label on the background
+ * the card draws (the card's choice over the list's) and says so, and over Glass rows it measures the
+ * lightest and darkest a photo could be. Other fields pass through, so it can map over `surfaceFields`.
  */
+const LINK_CONTRAST: CardContrastWarning = {
+  roles: ['label'],
+  glassOf: glassRowsStrength,
+  message: (ratio, onGlass) =>
+    `The label may be hard to read on this background: ${ratio}:1 (text needs ${String(BODY_TEXT_RATIO)}:1)${onGlass ? ', measured over the lightest or darkest part of a photo' : ''}. Choose a stronger or different colour, or change the label colour under Text.`,
+}
+const LINK_DEFAULT_COLOURS = { label: 'ink' } as const
+
 export function withCardContrast<T extends FieldDefinition>(field: T, { inItem = false } = {}): T {
-  if (field.name !== 'background') return field
-  return {
-    ...field,
-    validation: (rule: { custom: (fn: unknown) => { warning: () => unknown } }) =>
-      rule
-        .custom(
-          async (
-            _value: unknown,
-            context: {
-              document?: unknown
-              path?: unknown
-              getClient: (options: { apiVersion: string }) => never
-            },
-          ) => {
-            const path = context.path as never
-            const section = (
-              inItem ? enclosingOfArray(context.document, path, 'links') : sectionOf(context)
-            ) as Section | undefined
-            const link = inItem
-              ? (memberOfArray(context.document, path, 'links') as
-                  { design?: StoredCardSurface & { appearance?: string } } | undefined)
-              : undefined
-            const card = link?.design?.appearance === 'custom' ? link.design : undefined
-            const surface = layeredCardSurface(section?.cardDesign, card)
-            const tone = section?.style?.tone
-            const { colours } = await fetchBrandColours(
-              context.getClient({ apiVersion: '2025-01-01' }),
-            )
-            const result = cardTextContrast({
-              foreground: cardLabelHex(surface, tone, colours),
-              surface,
-              tone,
-              glass: glassRowsStrength(section),
-              site: colours,
-            })
-            if (!result || result.ratio >= BODY_TEXT_RATIO) return true
-            return `The label may be hard to read on this background: ${result.ratio.toFixed(1)}:1 (text needs ${BODY_TEXT_RATIO}:1)${glassRowsStrength(section) ? ', measured over the lightest or darkest part of a photo' : ''}. Choose a stronger or different colour, or change the label colour under Text.`
-          },
-        )
-        .warning(),
-  }
+  return withCardTextContrast(field, {
+    defaults: LINK_DEFAULT_COLOURS,
+    contrast: LINK_CONTRAST,
+    ...(inItem ? { itemArray: 'links' } : {}),
+  })
 }
 
 /** Editorial links are a ruled list, with no card to colour. */
@@ -400,41 +365,20 @@ export const linkListDesignFields = [
       }),
     ],
   }),
-  defineField({
-    name: 'cardDesign',
+  cardDesignField({
     title: scopedTitle('Cards', 'list'),
-    type: 'object',
-    group: 'design',
     description:
       'Shared background, border and text. Inherit uses the layout. Override one link in Content → Appearance.',
-    hidden: agencyOnly(),
-    options: { collapsible: true, collapsed: false },
-    fieldsets: [
-      {
-        name: 'text',
-        title: 'Text',
-        description: 'Eyebrow, label and description.',
-        options: { collapsible: true, collapsed: true },
-      },
+    textDescription: 'Eyebrow, label and description.',
+    inherits: 'the layout’s own',
+    roles: [
+      { role: 'eyebrow', hidden: isCompact },
+      { role: 'label' },
+      { role: 'description', hidden: isCompact },
     ],
-    fields: [
-      ...surfaceFields({ inherits: 'the layout’s own', hidden: isEditorial }).map((field) =>
-        withCardContrast(field),
-      ),
-      textRoleField({
-        role: 'eyebrow',
-        inherits: 'the layout’s own',
-        fieldset: 'text',
-        hidden: isCompact,
-      }),
-      textRoleField({ role: 'label', inherits: 'the layout’s own', fieldset: 'text' }),
-      textRoleField({
-        role: 'description',
-        inherits: 'the layout’s own',
-        fieldset: 'text',
-        hidden: isCompact,
-      }),
-    ],
+    surface: { hidden: isEditorial },
+    defaults: LINK_DEFAULT_COLOURS,
+    contrast: LINK_CONTRAST,
   }),
   defineField({
     name: 'linkDesign',

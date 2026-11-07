@@ -13,6 +13,8 @@ import {
   linkShadow,
   ownEyebrow,
   type OwnLinkText,
+  LinkMark,
+  withMark,
 } from './link-design'
 import { LinkListView } from './link-list-parts'
 import { type LinkListLayout } from './link-list-types'
@@ -53,7 +55,7 @@ const layout: LinkListLayout = {
   profile: { picture: PICTURE, name: 'text-h3' },
   listClassName: 'grid gap-4 md:grid-cols-2',
   renderLink: (link, context) => {
-    const { thumbnailSize, arrow, arrowStyle, design } = context
+    const { thumbnailSize, arrow, arrowStyle, design, mark } = context
     const large = thumbnailSize === 'large'
     const depth = linkShadow(context, 'card', 'shadow-card')
     const look = ringSurfaceLook(design.surface, SURFACE)
@@ -91,8 +93,12 @@ const layout: LinkListLayout = {
       >
         <SanityLink
           link={link.link}
-          className={`${CARD} ${look.className} ${depth.className} ${large ? 'flex-col gap-3' : 'items-center gap-4'} ${link.large && ownBorder ? FEATURED_BORDER : ''}`}
+          className={withMark(
+            `${CARD} ${look.className} ${depth.className} ${large ? 'flex-col gap-3' : 'items-center gap-4'} ${link.large && ownBorder ? FEATURED_BORDER : ''}`,
+            mark,
+          )}
         >
+          <LinkMark mark={mark} />
           {large && (thumbnail || link.item.icon) ? (
             <span className={`${TILE} w-full ${link.large ? 'aspect-video' : 'aspect-[4/3]'}`}>
               <LinkVisual

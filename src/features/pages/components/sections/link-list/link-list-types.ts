@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 
+import type { DecorativeMarkProps } from '@/components/ui/decorative-mark'
 import type { ProfileImageScale } from '@/components/ui/profile-image'
 import type { SectionDefaults } from '@/components/ui/section-style'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
@@ -40,4 +41,6 @@ export interface LinkContext {
   linkDepth: BoxDepth
   /** This link's card design: the list's Cards and icons, with the link's own Appearance over it. */
   design: LinkCardDesign
+  /** This link's decorative mark: its own once customised, else the list's. Unset draws nothing. */
+  mark: Omit<DecorativeMarkProps, 'nested' | 'as'>
 }

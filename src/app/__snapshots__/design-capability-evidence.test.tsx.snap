@@ -1060,6 +1060,26 @@ exports[`design capability evidence > linkList.icon.item@stacked: the probe chan
 ]
 `;
 
+exports[`design capability evidence > linkList.mark.card.glass@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@compact: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.card@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item.glass@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@cards: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@compact: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > linkList.mark.item@stacked: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > linkList.mark.section@cards: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > linkList.mark.section@compact: the probe changes the registered target 1`] = `[]`;

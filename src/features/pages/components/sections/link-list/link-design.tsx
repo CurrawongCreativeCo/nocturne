@@ -2,8 +2,11 @@ import { stegaClean } from 'next-sanity'
 import type { CSSProperties, ReactNode } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
+import { DecorativeMark } from '@/components/ui/decorative-mark'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { trackAttributes } from '@/lib/analytics/track-script'
+import type { MarkFill } from '@/lib/color/mark-contrast'
+import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
 import { OWN_SHADOW } from '@/lib/sanity/depth-options'
 import type { ThumbnailServed } from '@/lib/sanity/link-thumbnail-framing'
 import { iconLook, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
@@ -28,6 +31,26 @@ export function linkShadow(
 ): { className: string; style: CSSProperties | undefined } {
   const depth = context.linkDepth(OWN_SHADOW[own])
   return depth ?? { className: ownClass, style: undefined }
+}
+
+/** The link's element once it holds a mark, which is laid out behind its text. Unset adds nothing. */
+export const withMark = (className: string, mark: LinkContext['mark']) =>
+  resolveDecorativeMark(mark.input) ? `${className} relative isolate` : className
+
+/**
+ * A link's decorative mark, inside the link's own element so it follows its corners and hover. A `span`,
+ * since a link can be a `<button>`, which holds phrasing content only. Hidden from assistive technology
+ * and never hit by the pointer, so the card is still the one link it was, with the same accessible name.
+ */
+export function LinkMark({
+  mark,
+  fill,
+}: {
+  mark: LinkContext['mark']
+  /** The card's own colours, when it isn't the tone's surface (the featured link's filled button). */
+  fill?: MarkFill
+}) {
+  return <DecorativeMark {...mark} fill={fill} as="span" nested />
 }
 
 /**

@@ -22,7 +22,7 @@ export { isChosen, listLabels }
  */
 
 /** The groups of a link's Appearance, in the order the form shows them. */
-export const LINK_DESIGN_GROUPS = ['card', 'text', 'icon', 'arrow'] as const
+export const LINK_DESIGN_GROUPS = ['card', 'text', 'icon', 'arrow', 'decoration'] as const
 export type LinkDesignGroup = (typeof LINK_DESIGN_GROUPS)[number]
 
 export const LINK_DESIGN_GROUP_TITLES: Record<LinkDesignGroup, string> = {
@@ -30,6 +30,7 @@ export const LINK_DESIGN_GROUP_TITLES: Record<LinkDesignGroup, string> = {
   text: 'Text',
   icon: 'Icon',
   arrow: 'Arrow',
+  decoration: 'Decoration',
 }
 
 /** At which level a group of design controls applies. */
@@ -85,6 +86,7 @@ export const LINK_DESIGN_PROPERTIES: readonly LinkDesignProperty[] = [
   { group: 'icon', key: 'iconBorderColour', label: 'container border colour' },
   { group: 'arrow', key: 'arrowStyle', label: 'arrow style' },
   { group: 'arrow', key: 'arrowColour', label: 'arrow colour' },
+  { group: 'decoration', key: 'mark', part: 'kind', label: 'decorative mark' },
 ]
 
 /**

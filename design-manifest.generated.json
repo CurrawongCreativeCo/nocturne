@@ -23596,6 +23596,13 @@
           "design": true
         },
         {
+          "path": "links[].design.mark",
+          "kind": "decorativeMark",
+          "required": false,
+          "clientEditable": false,
+          "design": true
+        },
+        {
           "path": "thumbnailSize",
           "kind": "string",
           "required": true,
@@ -24741,6 +24748,13 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.mark",
+          "kind": "decorativeMark",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -27855,28 +27869,86 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "cardDesign.mark"
+              ],
               "availability": {
-                "stacked": "pending",
-                "cards": "pending",
-                "editorial": "pending",
-                "compact": "pending"
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
               }
             },
             {
               "policy": "required",
               "scope": "item",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "links[].design.mark"
+              ],
               "availability": {
-                "stacked": "pending",
-                "cards": "pending",
-                "editorial": "pending",
-                "compact": "pending"
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
               }
             }
           ],
           "evidence": [
+            {
+              "id": "linkList.mark.card",
+              "field": "cardDesign.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"card\"]",
+              "cases": [
+                "linkList.mark.card@stacked",
+                "linkList.mark.card@cards",
+                "linkList.mark.card@editorial",
+                "linkList.mark.card@compact"
+              ]
+            },
+            {
+              "id": "linkList.mark.item",
+              "field": "links[].design.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"item\"]",
+              "cases": [
+                "linkList.mark.item@stacked",
+                "linkList.mark.item@cards",
+                "linkList.mark.item@editorial",
+                "linkList.mark.item@compact"
+              ]
+            },
+            {
+              "id": "linkList.mark.card.glass",
+              "field": "cardDesign.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"card\"]",
+              "cases": [
+                "linkList.mark.card.glass@stacked"
+              ]
+            },
+            {
+              "id": "linkList.mark.item.glass",
+              "field": "links[].design.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"item\"]",
+              "cases": [
+                "linkList.mark.item.glass@stacked"
+              ]
+            },
             {
               "id": "linkList.mark.section",
               "field": "style.mark",

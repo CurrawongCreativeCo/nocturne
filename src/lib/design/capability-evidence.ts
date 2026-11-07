@@ -1349,6 +1349,28 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // A mark at card and at item scope, each its own claim, on every layout and on a Glass row.
+  ...cardFamilyEvidence({
+    component: 'linkList',
+    layouts: ALL_LINK_LIST,
+    parts: ['mark'],
+    render: `${LINK_LIST}/link-design.tsx`,
+    cardTarget: '',
+    base: linkListContent(true),
+    roles: [],
+    item: { array: 'links' },
+  }),
+  ...cardFamilyEvidence({
+    component: 'linkList',
+    look: 'glass',
+    layouts: ['stacked'],
+    parts: ['mark'],
+    render: `${LINK_LIST}/glass-row.tsx`,
+    cardTarget: '',
+    base: { ...linkListContent(true), rowStyle: 'glass' },
+    roles: [],
+    item: { array: 'links' },
+  }),
   ...frameEvidence('linkList', {
     mark: ['stacked', 'cards', 'editorial', 'compact'],
     overlay: ALL_LINK_LIST,

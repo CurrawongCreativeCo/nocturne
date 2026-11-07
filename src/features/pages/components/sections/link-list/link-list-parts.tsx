@@ -7,6 +7,7 @@ import { ctaSurfaceFor, sectionTraits } from '@/components/ui/section-style'
 import { SocialLinks } from '@/components/ui/social-links'
 import { glassStrengthOf } from '@/lib/color/glass-contrast'
 import { requestTime } from '@/lib/request-time'
+import { cardMarkChoice } from '@/lib/sanity/card-design'
 import { resolveDepth } from '@/lib/sanity/depth-options'
 import {
   LINK_LIST_DIVIDER_PLACEMENTS,
@@ -102,6 +103,10 @@ async function DueLinkGroups({
   return <LinkGroups links={drawableLinks(prepared, await requestTime())} {...rest} />
 }
 
+/** A level's text colours without its fill, for a layout that doesn't draw one. */
+const textOnly = <T extends object>(level: T | null | undefined) =>
+  level ? { ...level, background: undefined, backgroundStrength: undefined } : undefined
+
 export function LinkListView({
   data,
   business,
@@ -128,10 +133,21 @@ export function LinkListView({
     rowStyle,
     showArrows: data.showArrows,
   })
+  const noCards = stegaClean(data.variant) === 'editorial'
   const contextFor = (link: ListLink): LinkContext => {
     const own = cardOverrides(link.item.design)
     const design = own ? layerLinkCardDesign(listDesign, resolveLinkCardDesign(own)) : listDesign
+    const { input, scope } = cardMarkChoice(data.cardDesign, own)
     return {
+      mark: {
+        input,
+        scope,
+        tone: traits.tone,
+        // A ruled row draws no card, so the mark is measured on the section whatever a box has stored.
+        levels: [data.cardDesign, own].map((level) => (noCards ? textOnly(level) : level)),
+        backdrop: Boolean(data.style?.image?.asset) || Boolean(data.style?.gradient),
+        glass: rowStyle === 'glass' ? glassStrength : null,
+      },
       surface,
       thumbnailSize,
       rowStyle,

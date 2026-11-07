@@ -522,7 +522,8 @@ export const linkListFragment = /* groq */ `
       ${surfaceProjection},
       eyebrow { ${textStyleProjection} },
       label { ${textStyleProjection} },
-      description { ${textStyleProjection} }
+      description { ${textStyleProjection} },
+      mark { ${decorativeMarkFields} }
     },
     linkDesign {
       arrowStyle,
@@ -578,6 +579,7 @@ export const linkListFragment = /* groq */ `
         eyebrow { ${textStyleProjection} },
         label { ${textStyleProjection} },
         description { ${textStyleProjection} },
+        mark { ${decorativeMarkFields} },
         ${iconDesignProjection},
         arrowStyle,
         arrowColour { colour, hex }

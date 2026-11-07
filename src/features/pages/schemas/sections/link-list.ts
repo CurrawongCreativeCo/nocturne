@@ -33,6 +33,10 @@ import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
 import { framing } from '@/lib/sanity/schema/image-framing-option'
+import {
+  itemAppearanceField,
+  notCustomised as notCustomisedItem,
+} from '@/lib/sanity/schema/item-appearance'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
@@ -334,8 +338,7 @@ const linkContext = ({ document, path }: Parameters<ConditionalPropertyCallback>
 
 /** The Appearance options only show once "Customise this card" is chosen, and only to the agency. */
 const notCustomised: ConditionalPropertyCallback = (context) =>
-  hiddenFromClients(context) ||
-  (context.parent as StoredLinkDesign | undefined)?.appearance !== 'custom'
+  hiddenFromClients(context) || notCustomisedItem(context)
 
 const notCustomisedOr =
   (
@@ -383,19 +386,14 @@ const linkAppearanceField = defineField({
       title: scopedTitle(LINK_DESIGN_GROUP_TITLES.arrow, 'link'),
       options: { collapsible: true, collapsed: true },
     },
+    {
+      name: 'decoration',
+      title: scopedTitle(LINK_DESIGN_GROUP_TITLES.decoration, 'link'),
+      options: { collapsible: true, collapsed: true },
+    },
   ],
   fields: markFields({ shadow: 'depth', arrowStyle: 'action', arrowColour: 'action' }, [
-    defineField({
-      name: 'appearance',
-      title: 'Design',
-      type: 'string',
-      options: {
-        list: [{ value: 'custom', title: 'Customise this card' }],
-        layout: 'radio',
-        direction: 'horizontal',
-        inheritable: 'Use the Link list design',
-      },
-    }),
+    itemAppearanceField({ inheritLabel: 'Use the Link list design' }),
     ...surfaceFields({
       inherits: CARD_INHERITS,
       inItem: true,
@@ -490,6 +488,14 @@ const linkAppearanceField = defineField({
               }))
         return arrow === 'none'
       }),
+    }),
+    defineField({
+      name: 'mark',
+      title: 'Decorative mark',
+      type: 'decorativeMark',
+      description: 'One faint mark behind this link’s text, instead of the list’s card mark.',
+      fieldset: 'decoration',
+      hidden: notCustomised,
     }),
   ]),
 })
