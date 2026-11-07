@@ -90,7 +90,7 @@ describe('DecorativeMark', () => {
     expect(style).toContain('left:calc(100% + -10%)')
     expect(style).toContain('top:calc(0% + 0%)')
     expect(style).toContain('translate(-100%, 0%) rotate(15deg)')
-    expect(style).toContain('width:20cqi')
+    expect(style).toContain('width:min(20cqi, 100cqb)')
   })
 
   it('scales or hides on phones with CSS alone', async () => {

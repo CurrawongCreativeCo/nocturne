@@ -125,7 +125,7 @@ const FAMILIES: readonly Family[] = [
   // The same box on the Cards look, which also offers a fill and a border.
   {
     component: 'faq',
-    base: { itemStyle: 'cards' },
+    base: { 'cardDesign.itemStyle': 'cards' },
     boxes: [{ field: 'cardDesign', at: 'cardDesign' }],
   },
   {

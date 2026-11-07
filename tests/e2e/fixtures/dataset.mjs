@@ -2844,6 +2844,26 @@ const cardDesignSection = (id, title, extra = {}) => ({
 })
 const markStyle = (extra) => ({ _type: 'decorativeMark', ...extra })
 const framePicture = { _type: 'reference', _ref: 'frame-picture' }
+const familyDesign = {
+  background: { colour: 'accent' },
+  backgroundStrength: 'wash',
+  border: 'medium',
+  borderColour: { colour: 'accent' },
+  mark: markStyle({
+    kind: 'icon',
+    icon: 'heart',
+    anchor: 'bottom-right',
+    size: 'small',
+    opacity: 10,
+  }),
+}
+const familySection = (type, title, extra) => ({
+  _key: `family-${type}-${title.replace(/\W+/g, '-').toLowerCase()}`,
+  _type: type,
+  title,
+  eyebrow: 'Eyebrow',
+  ...extra,
+})
 documents.push({
   _id: 'page-card-design',
   _type: 'page',
@@ -2956,6 +2976,73 @@ documents.push({
           colour: { colour: 'ink' },
         }),
       },
+    }),
+    familySection('pricingTable', 'Pricing family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, price: { size: 'small' } },
+      plans: [
+        plan('price_Starter1', {
+          features: ['One project', 'Email support'],
+          description: 'For small teams.',
+          meta: '90 minutes',
+        }),
+        plan('price_Pro1', {
+          features: ['Unlimited projects'],
+          highlighted: true,
+          badgeText: 'Best value',
+          design: {
+            appearance: 'custom',
+            border: 'thick',
+            mark: markStyle({ kind: 'text', text: 'Best', anchor: 'top-right', opacity: 10 }),
+          },
+        }),
+      ],
+    }),
+    familySection('team', 'Team family', {
+      text: 'An intro.',
+      selection: 'all',
+      cardDesign: { ...familyDesign, title: { size: 'small' } },
+    }),
+    familySection('team', 'Team list family', {
+      variant: 'list',
+      text: 'An intro.',
+      selection: 'all',
+      cardDesign: familyDesign,
+    }),
+    familySection('events', 'Events family', {
+      variant: 'featured',
+      text: 'An intro.',
+      cardDesign: { ...familyDesign, title: { weight: 'medium' } },
+    }),
+    familySection('events', 'Events list family', {
+      text: 'An intro.',
+      cardDesign: { ...familyDesign, title: { weight: 'medium' } },
+    }),
+    familySection('faq', 'FAQ default family', {
+      intro: 'An intro.',
+      cardDesign: familyDesign,
+      items: [{ _key: 'q1', question: 'A question?', answer: [block(['An answer.'])] }],
+    }),
+    familySection('faq', 'FAQ cards family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, itemStyle: 'cards' },
+      items: [
+        { _key: 'q1', question: 'A question?', answer: [block(['An answer.'])] },
+        { _key: 'q2', question: 'Another question?', answer: [block(['Another answer.'])] },
+      ],
+    }),
+    familySection('stats', 'Stats family', {
+      variant: 'cards',
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, number: { size: 'small' } },
+      items: [
+        { _key: 's1', _type: 'statItem', value: 250, decimals: 0, suffix: '+', label: 'Projects' },
+        { _key: 's2', _type: 'statItem', value: 12, decimals: 0, label: 'Years' },
+      ],
+    }),
+    familySection('location', 'Location family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, body: { size: 'small' } },
     }),
   ],
 })

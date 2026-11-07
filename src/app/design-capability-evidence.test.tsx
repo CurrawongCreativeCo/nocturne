@@ -504,7 +504,7 @@ describe('a look that is a setting has independent evidence', () => {
     for (const id of ['faq.surface.card.cards', 'faq.mark.card.cards']) {
       const entry = entryFor(id)
       expect((await runCase(entry, null)).status).toBe('changed')
-      const divided = await runCase({ ...entry, base: { itemStyle: 'divided' } }, null)
+      const divided = await runCase({ ...entry, base: { 'cardDesign.itemStyle': 'divided' } }, null)
       expect(divided.status).not.toBe('changed')
     }
   })
@@ -512,7 +512,7 @@ describe('a look that is a setting has independent evidence', () => {
   it('the Studio only offers what each look draws', async () => {
     const seed = await gallerySeed('faq', null)
     const offered = (itemStyle: string | undefined) =>
-      gate.offered('faq', null, 'cardDesign.border', { ...seed, itemStyle }).offered
+      gate.offered('faq', null, 'cardDesign.border', { ...seed, cardDesign: { itemStyle } }).offered
     expect(offered(undefined)).toBe(false)
     expect(offered('divided')).toBe(false)
     expect(offered('cards')).toBe(true)

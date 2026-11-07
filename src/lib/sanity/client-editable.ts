@@ -238,7 +238,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   faq: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
-    agencyOnly: ['itemStyle', 'headerDesign', 'cardDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
   },
   ctaBanner: {
     editable: ['heading', 'title', 'text', 'ctas', 'tone'],

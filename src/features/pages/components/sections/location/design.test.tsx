@@ -134,7 +134,11 @@ describe('Location: a chosen role reaches text that sets its own classes', () =>
 })
 
 describe('Location’s Studio controls', () => {
-  type Field = { name: string; hidden?: unknown; fields?: Field[] }
+  interface Field {
+    name: string
+    hidden?: unknown
+    fields?: Field[]
+  }
   const box = (location.fields as unknown as Field[]).find(({ name }) => name === 'cardDesign')
   const hiddenWith = (mapImage: unknown, name: string) =>
     (box?.fields?.find((field) => field.name === name)?.hidden as (c: unknown) => boolean)({

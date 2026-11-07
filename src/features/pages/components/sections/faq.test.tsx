@@ -49,7 +49,7 @@ const CARD = { border: 'thick', mark: { kind: 'icon', icon: 'heart' } }
 describe('FAQ: the Divided list, the default', () => {
   it('is what an unset section draws: a ruled list of details, with no card', async () => {
     const unset = await draw()
-    const explicit = await draw({ itemStyle: 'divided' })
+    const explicit = await draw({ cardDesign: { itemStyle: 'divided' } })
     expect(explicit.body.innerHTML).toBe(unset.body.innerHTML)
     expect(unset.querySelector('.divide-y.divide-line')).not.toBeNull()
     expect(unset.querySelector('details')?.className).toBe('group py-5')
@@ -74,7 +74,7 @@ describe('FAQ: the Divided list, the default', () => {
 
 describe('FAQ: the Cards item style', () => {
   it('draws each question in its own card, and no ruled list', async () => {
-    const document = await draw({ itemStyle: 'cards' })
+    const document = await draw({ cardDesign: { itemStyle: 'cards' } })
     const cards = [...document.querySelectorAll('div.relative.rounded-card')]
     expect(cards.length).toBe(document.querySelectorAll('details').length)
     expect(cards.length).toBeGreaterThan(1)
@@ -83,8 +83,7 @@ describe('FAQ: the Cards item style', () => {
 
   it('takes the fill, border and text roles', async () => {
     const document = await draw({
-      itemStyle: 'cards',
-      cardDesign: { border: 'thick', title: { weight: 'semibold' } },
+      cardDesign: { itemStyle: 'cards', border: 'thick', title: { weight: 'semibold' } },
     })
     const card = document.querySelector('div.relative.rounded-card')
     expect(card?.className).toContain('ring-3')
@@ -92,30 +91,31 @@ describe('FAQ: the Cards item style', () => {
   })
 
   it('keeps the mark outside the <details>, so a closed question still shows it', async () => {
-    const document = await draw({ itemStyle: 'cards', cardDesign: CARD })
+    const document = await draw({ cardDesign: { ...CARD, itemStyle: 'cards' } })
     const mark = document.querySelector('[data-decorative-mark="card"]')
     expect(mark?.closest('details')).toBeNull()
     expect(mark?.parentElement?.querySelector(':scope > details')).not.toBeNull()
   })
 
   it('stays a native accordion', async () => {
-    const document = await draw({ itemStyle: 'cards' })
+    const document = await draw({ cardDesign: { itemStyle: 'cards' } })
     expect(document.querySelector('details > summary')).not.toBeNull()
     expect(document.querySelector('details')?.hasAttribute('open')).toBe(false)
   })
 })
 
 describe('FAQ’s Studio controls', () => {
-  type Field = { name: string; hidden?: unknown; fields?: Field[] }
+  interface Field {
+    name: string
+    hidden?: unknown
+    fields?: Field[]
+  }
   const fields = faq.fields as unknown as Field[]
   const hiddenOn = (itemStyle: string | undefined, name: string) => {
     const field = fields
       .find((candidate) => candidate.name === 'cardDesign')
       ?.fields?.find((candidate) => candidate.name === name)
-    return (field?.hidden as (context: unknown) => boolean)({
-      document: { pageBuilder: [{ _key: 's', _type: 'faq', itemStyle }] },
-      path: ['pageBuilder', { _key: 's' }, 'cardDesign', name],
-    })
+    return (field?.hidden as (context: unknown) => boolean)({ parent: { itemStyle } })
   }
 
   it('offers the fill, border and mark on Cards only', () => {

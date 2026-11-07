@@ -49,7 +49,8 @@ function placement(mark: ResolvedMark, opacity: number): CSSProperties {
 function MarkContent({ mark, opacity }: { mark: ResolvedMark; opacity: number }) {
   const position = placement(mark, opacity)
   const sizes = MARK_SIZE_CQI[mark.size]
-  const box = { ...position, width: `${String(sizes.box)}cqi` }
+  // No taller than what it sits in, so a short, wide card (a closed FAQ question) shows a whole mark.
+  const box = { ...position, width: `min(${String(sizes.box)}cqi, 100cqb)` }
   switch (mark.kind) {
     case 'text':
       return (

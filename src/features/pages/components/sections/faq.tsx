@@ -1,16 +1,16 @@
 import { stegaClean, toPlainText } from 'next-sanity'
 
-import { JsonLd } from '@/components/ui/json-ld'
 import { CardSurface } from '@/components/ui/card-surface'
+import { JsonLd } from '@/components/ui/json-ld'
 import { RichText } from '@/components/ui/rich-text'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { resolveCardDesign, type CardDesign } from '@/lib/sanity/card-design'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 import { graph } from '@/lib/structured-data/graph'
 import { buildFaqPage } from '@/lib/structured-data/nodes/faq-page'
-import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../types'
 
@@ -63,7 +63,7 @@ export function Faq({ data, isFirst, page }: SectionProps<'faq'>) {
   const title = sectionTitle(data)
   const { text, tone } = sectionTraits(data.style, DEFAULTS)
   // Empty is the Divided list. A card's mark sits outside the <details>, which hides what it holds while closed.
-  const cards = stegaClean(data.itemStyle) === 'cards'
+  const cards = stegaClean(data.cardDesign?.itemStyle) === 'cards'
   const look = resolveCardDesign(data.cardDesign, ROLES)
 
   return (

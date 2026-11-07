@@ -4,6 +4,11 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -15,7 +20,6 @@ import {
 } from '@/lib/sanity/schema/thumbnails/team-thumbnails'
 import { teamPortraitControls } from '@/lib/sanity/team-portrait'
 
-import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { teamCapabilities } from './team-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */

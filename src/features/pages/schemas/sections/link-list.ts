@@ -35,6 +35,7 @@ import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
+import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle, variantField } from '@/lib/sanity/schema/section-variant'
 import {
@@ -64,7 +65,6 @@ import {
   ownIconShape,
   usesArrow,
 } from '../../utils/link-list'
-import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {

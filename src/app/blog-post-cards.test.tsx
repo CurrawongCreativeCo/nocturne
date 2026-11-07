@@ -1,8 +1,8 @@
 import { createElement } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { COMPONENT_SCHEMAS, lookupType } from '@/app/design-components'
 import { VIEW_DRAWERS } from '@/app/design-capability-views'
+import { COMPONENT_SCHEMAS, lookupType } from '@/app/design-components'
 import { DESIGN_CONTEXTS } from '@/lib/design/capability-design-contexts'
 import { parseHtml } from '@/lib/design/capability-harness'
 import { privateFields, type SchemaField } from '@/lib/design/schema-capabilities'

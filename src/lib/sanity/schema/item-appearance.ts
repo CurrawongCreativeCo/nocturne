@@ -1,6 +1,5 @@
 import { defineField, type ConditionalPropertyCallback } from 'sanity'
 
-import { hiddenFromClients } from '@/lib/sanity/roles'
 import { builtBy } from '@/lib/sanity/schema/capability-marker'
 
 /**
@@ -34,7 +33,7 @@ export function itemAppearanceField({
 
 /**
  * How a family draws its items, when more than one way is a setting and not a layout (FAQ's Divided list
- * or Cards): stored on the section, unset is the first, which is what the family always drew. Agency only.
+ * or Cards): the first field of its Cards box, unset is the first value, which is what the family always drew.
  * Each value is its own look and needs its own evidence (capability-evidence.ts, cardFamilyEvidence's `look`).
  */
 export function itemStyleField<T extends string>({
@@ -50,9 +49,7 @@ export function itemStyleField<T extends string>({
     name: 'itemStyle',
     title: 'Item style',
     type: 'string',
-    group: 'design',
     description,
-    hidden: hiddenFromClients,
     options: {
       list: values.map((value) => ({ value, title: titles[value] })),
       layout: 'radio',

@@ -6525,22 +6525,6 @@
           "clientEditable": true
         },
         {
-          "path": "itemStyle",
-          "kind": "string",
-          "required": false,
-          "list": [
-            {
-              "value": "divided",
-              "title": "Divided list"
-            },
-            {
-              "value": "cards",
-              "title": "Cards"
-            }
-          ],
-          "clientEditable": false
-        },
-        {
           "path": "headerDesign",
           "kind": "object",
           "required": false,
@@ -6897,6 +6881,22 @@
           "path": "cardDesign",
           "kind": "object",
           "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.itemStyle",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "divided",
+              "title": "Divided list"
+            },
+            {
+              "value": "cards",
+              "title": "Cards"
+            }
+          ],
           "clientEditable": false
         },
         {
@@ -7527,7 +7527,7 @@
               "trigger": {
                 "kind": "setting",
                 "when": "The FAQ item style is Cards",
-                "path": "itemStyle",
+                "path": "cardDesign.itemStyle",
                 "reachable": true
               },
               "closingTask": 146,

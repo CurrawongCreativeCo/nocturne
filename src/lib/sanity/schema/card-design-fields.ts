@@ -22,7 +22,6 @@ import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { surfaceFields, textRoleField, textRoleParts } from '@/lib/sanity/schema/surface-design'
 
-
 /**
  * The shared forms of a card family's design (task 156): the section header's eyebrow and Design box, the
  * Cards box at section level and the same fields behind an Appearance switch at item level. Every field is
@@ -189,6 +188,7 @@ export function cardDesignField({
   description = 'Shared background, border, text and mark for every card. Inherit uses the default card.',
   presets,
   boxHidden,
+  lead = [],
   ...config
 }: Omit<CardFieldsConfig, 'inItem' | 'hidden'> & {
   title?: string
@@ -196,6 +196,8 @@ export function cardDesignField({
   presets?: readonly PresetDefinition[]
   /** Hides the whole box where the layout draws nothing it could change. Its `parent` is the section. */
   boxHidden?: ConditionalPropertyCallback
+  /** Fields that come first in the box (an item style, which decides what the rest apply to). */
+  lead?: readonly FieldDefinition[]
 }) {
   return defineField({
     name: 'cardDesign',
@@ -210,7 +212,7 @@ export function cardDesignField({
       ...(presets ? presetsOption(presets) : {}),
     },
     fieldsets: [TEXT_FIELDSET],
-    fields: cardDesignFields(config),
+    fields: [...lead, ...cardDesignFields(config)],
   })
 }
 

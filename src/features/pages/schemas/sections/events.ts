@@ -3,6 +3,11 @@ import { defineField, defineType, type ConditionalPropertyCallback } from 'sanit
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
@@ -14,7 +19,6 @@ import {
   EventsListThumbnail,
 } from '@/lib/sanity/schema/thumbnails/events-thumbnails'
 
-import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { eventsCapabilities } from './events-capabilities'
 import { EVENTS_MAX_COUNT } from '../../utils/events'
 

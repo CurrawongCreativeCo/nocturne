@@ -4377,6 +4377,23 @@ overlay, plus the unset defaults on a light and a dark tone). The fixture's `des
 colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
 the real guard for pictures is the Studio warning and the overlay values above.
 
+### Card design
+
+Every card family composes the same shared parts (task 156), so a family states which text roles it draws and writes no design control of its own: `cardDesignField`, `headerDesignField`, `eyebrowField`, `itemDesignField` (`src/lib/sanity/schema/card-design-fields.ts`), `CardSurface`, `SectionHeader` and `DecorativeMark`. All are agency only, and with nothing set a family draws what it always drew.
+
+| Family          | Text roles                             | Where the fill, border and card mark apply                                                                                                                  |
+| --------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Testimonials    | quote, attribution, label              | every layout                                                                                                                                                |
+| Pricing table   | title, price, body, label, description | every plan, and a customised plan's own Appearance                                                                                                          |
+| Team            | title, meta, body                      | grid and slider cards, and the list's rows                                                                                                                  |
+| Events          | title, meta, body                      | Featured only; List and Agenda are text only                                                                                                                |
+| FAQ             | title, body                            | the **Cards** item style only; **Divided list**, the default, is text only                                                                                  |
+| Stats           | number, label                          | the **Cards** layout only; Inline offers no Cards box                                                                                                       |
+| Location        | title, body, meta                      | the details' panels, without a map image; beside one they are text only                                                                                     |
+| Blog post cards | meta, title, body                      | every card, from the **Blog settings** document; a chosen fill or border also brings the card's corners and padding, since a card has no surface by default |
+
+A control is offered only where it does something: `src/app/design-control-effects.test.tsx` reads each family's real schema and fails if any control offered on a layout or look leaves the output unchanged. A look that is a setting rather than a layout (FAQ's item style, Location's map image) has its own evidence for what it draws. An item style is the first field of its Cards box (`itemStyleField`), and unset is the first value.
+
 ### Decorative marks
 
 A faint word, picture or icon behind a section, card or item (task 156): the shared `decorativeMark` type (`src/lib/sanity/schema/decorative-mark.ts`), drawn by one server component, `DecorativeMark` (`src/components/ui/decorative-mark.tsx`), with no JavaScript. Empty or None draws nothing, and adds nothing to the page's markup. A section's sits in `style.mark`, on every section except Embed and Video (`takesSectionMark`, held to each section's capability declaration by a test); a card family's sits in its Cards box as `cardDesign.mark`. Testimonials offer both. No component offers the item scope yet: Pricing plans adopt it first.
@@ -4386,6 +4403,7 @@ A faint word, picture or icon behind a section, card or item (task 156): the sha
 - **Layers:** picture, then overlay, then the mark, then the panel, then the content. On a section with a panel the mark sits inside the panel by default, over its fill; _Behind the panel_ puts it under. On a card it sits over the card's fill and under its text.
 - **Decorative only:** `aria-hidden`, no pointer events, never focusable, clipped to its own box, absolutely placed, so it can't cause a horizontal scroll, reach a neighbour or shift layout.
 - **Contrast:** `markOpacityAt` (`src/lib/color/mark-contrast.ts`) measures the text against its surface with the mark composited over it. A combination that fails lowers the opacity when drawn, or drops the mark if no opacity is safe; Studio's Opacity field warns with the same decision, and it is never an error. A picture in its own colours counts as anything from black to white, and so does what sits behind the text on a section with a picture or gradient. A panel without one is a known colour.
+- **Size:** relative to the container's width, and no taller than the container, so a short, wide card shows a whole mark.
 - **Position:** unset is the top centre, where a mark stays visible above cards that stack full width on a phone. A middle-anchored section mark sits behind opaque cards, so it is mostly hidden there: use the top, or a card mark. The Layer control only appears on a section that has a panel.
 
 Card contrast is one lookup for any family (`src/lib/color/card-contrast.ts`): each role in its chosen colour across the section, card and item levels, else the colour the family draws it in (`RoleDefaultColours`). `withCardTextContrast` adds the Background colour warning from it. The Link list's own warning moves to it when the Link list adopts the shared builders.

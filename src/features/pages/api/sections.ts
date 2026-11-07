@@ -220,9 +220,9 @@ export const faqFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    itemStyle,
     ${headerDesignProjection},
     cardDesign {
+      itemStyle,
       ${surfaceProjection},
       title { ${roleStyleProjection} },
       body { ${roleStyleProjection} },

@@ -16,7 +16,7 @@ export const faqCapabilities = declareCapabilities({
     trigger: {
       kind: 'setting',
       when: 'The FAQ item style is Cards',
-      path: 'itemStyle',
+      path: 'cardDesign.itemStyle',
     },
   },
   icon: notApplicable('The chevron is a disclosure state, not an icon choice (137)'),

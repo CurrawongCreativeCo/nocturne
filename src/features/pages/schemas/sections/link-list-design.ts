@@ -56,6 +56,7 @@ import { hiddenFromClients } from '@/lib/sanity/roles'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
 import { markFields } from '@/lib/sanity/schema/capability-marker'
 import { presetField } from '@/lib/sanity/schema/preset-field'
+import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import {
   choiceField,
@@ -86,7 +87,6 @@ import {
 } from '@/lib/sanity/surface-options'
 
 import { defaultLinkArrow, ownIconShape, usesArrow } from '../../utils/link-list'
-import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 
 /**
  * The Link list's own Design options (agency only, like the rest of Design), in four boxes above the

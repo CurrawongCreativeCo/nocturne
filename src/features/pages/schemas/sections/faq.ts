@@ -8,14 +8,16 @@ import {
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
-import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { itemStyleField } from '@/lib/sanity/schema/item-appearance'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
-
 
 import { faqCapabilities } from './faq-capabilities'
 
@@ -34,8 +36,8 @@ export const FAQ_ROLES = [{ role: 'title' }, { role: 'body' }] as const
 export const FAQ_ROLE_COLOURS = { title: 'ink', body: 'muted' } as const
 
 /** Only the Cards style draws a card, so only it has a fill, a border and a mark to set. */
-const notCards: ConditionalPropertyCallback = ({ document, path }) =>
-  (sectionAtStylePath(document, path) as { itemStyle?: string } | undefined)?.itemStyle !== 'cards'
+const notCards: ConditionalPropertyCallback = ({ parent }) =>
+  (parent as { itemStyle?: string } | undefined)?.itemStyle !== 'cards'
 
 export const faq = defineType({
   name: 'faq',
@@ -88,11 +90,6 @@ export const faq = defineType({
           }),
         ],
       }),
-      itemStyleField({
-        values: FAQ_ITEM_STYLES,
-        titles: { divided: 'Divided list', cards: 'Cards' },
-        description: 'A ruled list, or each question in its own card. Empty is the Divided list.',
-      }),
       headerDesignField(),
       cardDesignField({
         description:
@@ -100,6 +97,14 @@ export const faq = defineType({
         roles: FAQ_ROLES,
         defaults: FAQ_ROLE_COLOURS,
         inherits: 'the item style’s own',
+        lead: [
+          itemStyleField({
+            values: FAQ_ITEM_STYLES,
+            titles: { divided: 'Divided list', cards: 'Cards' },
+            description:
+              'A ruled list, or each question in its own card. Empty is the Divided list.',
+          }),
+        ],
         surface: { hidden: notCards },
         markHidden: notCards,
       }),

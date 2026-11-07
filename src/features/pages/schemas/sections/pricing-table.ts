@@ -4,17 +4,17 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
-import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
-import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
-import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
-import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
-
 import {
   cardDesignField,
   eyebrowField,
   headerDesignField,
   itemDesignField,
 } from '@/lib/sanity/schema/card-design-fields'
+import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
+import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
+import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+
 import { pricingTableCapabilities } from './pricing-table-capabilities'
 
 interface PlanValue {

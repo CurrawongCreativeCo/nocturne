@@ -8,6 +8,11 @@ import {
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -18,7 +23,6 @@ import {
   StatsInlineThumbnail,
 } from '@/lib/sanity/schema/thumbnails/stats-thumbnails'
 
-import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { statsCapabilities } from './stats-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */

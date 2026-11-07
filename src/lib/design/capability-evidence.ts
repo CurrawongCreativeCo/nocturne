@@ -1063,7 +1063,7 @@ export const EVIDENCE: readonly Evidence[] = [
     parts: ['surface', 'text', 'mark'],
     render: 'src/features/pages/components/sections/faq.tsx',
     cardTarget: 'div.relative.rounded-card',
-    base: { itemStyle: 'cards' },
+    base: { 'cardDesign.itemStyle': 'cards' },
     roles: ['title', 'body'],
   }),
   ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
