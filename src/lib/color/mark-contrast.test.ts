@@ -67,6 +67,32 @@ describe('markOpacityAt', () => {
     expect(lowInk).toBeLessThan(plain)
   })
 
+  it('measures a card with its own fill on that fill, in its own text colour, not on the tone', () => {
+    const site = { ...colorHex, cta: '#000000', ctaInk: '#777777' }
+    const onTone = markOpacityAt({ opacity: 0.4, tone: 'default', site })
+    const onFill = markOpacityAt({
+      opacity: 0.4,
+      tone: 'default',
+      fill: { background: 'cta', foreground: 'ctaInk' },
+      site,
+    })
+    expect(onFill).toBeLessThan(onTone)
+  })
+
+  it('a chosen background wins over the card’s own fill', () => {
+    const site = { ...colorHex, cta: '#000000', ctaInk: '#777777' }
+    const chosen = { background: { colour: 'custom', hex: '#ffffff' } }
+    expect(
+      markOpacityAt({
+        opacity: 0.2,
+        tone: 'default',
+        levels: [chosen],
+        fill: { background: 'cta', foreground: 'ctaInk' },
+        site,
+      }),
+    ).toBe(markOpacityAt({ opacity: 0.2, tone: 'default', levels: [chosen], site }))
+  })
+
   it('takes the item’s level over the section’s', () => {
     // Text that only just reads on white, under a dark mark: the item's white decides, not the section's grey.
     const text = { quote: { colour: { colour: 'custom', hex: '#6b6b6b' } } }

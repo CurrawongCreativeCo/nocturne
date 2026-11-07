@@ -56,6 +56,12 @@ export function safeMarkOpacity({
 
 const ANY_PICTURE = ['#000000', '#ffffff']
 
+/** Which of the site's colours a card's own fill and its text are, by name. */
+export interface MarkFill {
+  background: keyof ColourSet
+  foreground: keyof ColourSet
+}
+
 /** The mark's safe opacity where it is drawn. The site's and the Studio's one decision. */
 export function markOpacityAt({
   opacity,
@@ -65,6 +71,7 @@ export function markOpacityAt({
   levels,
   backdrop = false,
   glass = null,
+  fill,
   site = colorHex,
 }: {
   opacity: number
@@ -78,6 +85,11 @@ export function markOpacityAt({
   /** A picture, gradient or panel sits behind the text, which this can't measure exactly. */
   backdrop?: boolean
   glass?: GlassStrength | null
+  /**
+   * The colours a card draws on its own when no background is chosen, for a card that isn't the tone's
+   * surface (a Link list's filled button): the mark and the text are measured on them instead.
+   */
+  fill?: MarkFill
   site?: ColourSet
 }): number {
   const ink = themeColourHex('ink', null, tone, site) ?? tonePalette(tone, site).colors.ink
@@ -87,17 +99,27 @@ export function markOpacityAt({
     {},
   )
   const onCard = levels !== undefined
+  const chosenBackground = onCard ? surfaceBackgrounds({ surface, tone, glass, site }) : null
+  const ownFill = fill && !chosenBackground ? fill : undefined
   const surfaces = [
-    ...(onCard
-      ? (surfaceBackgrounds({ surface, tone, glass, site }) ?? [toneSurfaceColour(tone, site)])
-      : [tonePalette(tone, site).background]),
+    ...(ownFill
+      ? [site[ownFill.background]]
+      : onCard
+        ? (chosenBackground ?? [toneSurfaceColour(tone, site)])
+        : [tonePalette(tone, site).background]),
     ...(backdrop ? ANY_PICTURE : []),
   ]
   const chosen = chosenTextColours(...(levels ?? []))
     .map((choice) => themeColourHex(choice.colour, choice.hex, tone, site))
     .filter((hex): hex is string => Boolean(hex))
+  const text = ownFill ? site[ownFill.foreground] : ink
   const marks = ownColours
     ? ANY_PICTURE
-    : [(colour ? themeColourHex(colour.colour, colour.hex, tone, site) : null) ?? ink]
-  return safeMarkOpacity({ opacity, marks, surfaces, foregrounds: [ink, muted, ...chosen] })
+    : [(colour ? themeColourHex(colour.colour, colour.hex, tone, site) : null) ?? text]
+  return safeMarkOpacity({
+    opacity,
+    marks,
+    surfaces,
+    foregrounds: ownFill ? [text, ...chosen] : [ink, muted, ...chosen],
+  })
 }

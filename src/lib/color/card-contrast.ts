@@ -91,23 +91,28 @@ export type RoleDefaultColours = Readonly<Partial<Record<TextRole, 'ink' | 'mute
 export function worstCardTextContrast({
   levels,
   defaults,
+  roles = TEXT_ROLES,
   tone,
   glass = null,
   site,
 }: {
   levels: readonly (StoredCardLevel | null | undefined)[]
   defaults: RoleDefaultColours
+  /** The roles to measure, for a family whose warning names one (a Link list's label). */
+  roles?: readonly TextRole[]
   tone: string | null | undefined
   glass?: GlassStrength | null
   site?: ColourSet
 }): SurfaceContrast | null {
   const surface = levels.reduce<StoredSurface>((under, level) => layeredSurface(under, level), {})
-  const hexes = TEXT_ROLES.map((role) => {
-    const chosen = chosenFor(role, levels)
-    if (chosen) return themeColourHex(chosen.colour, chosen.hex, tone, site)
-    const own = defaults[role]
-    return own ? themeColourHex(own, null, tone, site) : null
-  }).filter((hex): hex is string => Boolean(hex))
+  const hexes = roles
+    .map((role) => {
+      const chosen = chosenFor(role, levels)
+      if (chosen) return themeColourHex(chosen.colour, chosen.hex, tone, site)
+      const own = defaults[role]
+      return own ? themeColourHex(own, null, tone, site) : null
+    })
+    .filter((hex): hex is string => Boolean(hex))
   const results = hexes
     .map((foreground) => surfaceTextContrast({ foreground, surface, tone, glass, site }))
     .filter((result): result is SurfaceContrast => result !== null)

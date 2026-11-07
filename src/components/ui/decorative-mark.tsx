@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { BADGE_ICON_PATHS } from '@/components/ui/badge-icon'
 import type { StoredCardLevel } from '@/lib/color/card-contrast'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
-import { markOpacityAt } from '@/lib/color/mark-contrast'
+import { markOpacityAt, type MarkFill } from '@/lib/color/mark-contrast'
 import type { BadgeIconName } from '@/lib/sanity/badge-icons'
 import {
   MARK_SIZE_CQI,
@@ -30,6 +30,10 @@ export interface DecorativeMarkProps {
    * section, drawn before a content container that is `relative`.
    */
   nested?: boolean
+  /** The box's element: a `span` where only phrasing content is allowed (inside a link or a button). */
+  as?: 'div' | 'span'
+  /** A card's own fill and text colours, when it isn't the tone's surface. */
+  fill?: MarkFill
 }
 
 const ALIGN_CLASS = { left: 'text-left', centre: 'text-center', right: 'text-right' } as const
@@ -130,6 +134,8 @@ async function LoadedMark({
   backdrop,
   glass,
   nested = false,
+  as: Box = 'div',
+  fill,
 }: DecorativeMarkProps & { mark: ResolvedMark }) {
   const design = await (await siteDesign()).getSiteDesign()
   const opacity = markOpacityAt({
@@ -140,6 +146,7 @@ async function LoadedMark({
     levels,
     backdrop,
     glass,
+    fill,
     site: design?.colours,
   })
   if (opacity === 0) return null
@@ -150,13 +157,13 @@ async function LoadedMark({
         ? 'max-md:[--mark-scale:0.6]'
         : ''
   return (
-    <div
+    <Box
       aria-hidden="true"
       data-decorative-mark={scope}
       data-mark-kind={mark.kind}
       className={`[container-type:size] pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit] select-none ${nested ? '-z-10' : ''} ${phone}`.trim()}
     >
       <MarkContent mark={mark} opacity={opacity} />
-    </div>
+    </Box>
   )
 }

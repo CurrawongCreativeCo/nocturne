@@ -11,6 +11,7 @@ import {
   type RoleDefaultColours,
   type StoredCardLevel,
 } from '@/lib/color/card-contrast'
+import type { GlassStrength } from '@/lib/color/glass-contrast'
 import type { TextRole } from '@/lib/design/capabilities'
 import { cardFamilySummary } from '@/lib/sanity/card-design-summary'
 import { scopedGroupTitle } from '@/lib/sanity/design-summary'
@@ -80,6 +81,16 @@ export const headerDesignField = (
     ),
   })
 
+/** A Background warning's options, for a family with glass or wording of its own (the Link list). */
+export interface CardContrastWarning {
+  /** The roles to measure. Default: every role. */
+  roles?: readonly TextRole[]
+  /** The strength of the glass behind the text, for a family that draws some. */
+  glassOf?: (section: never) => GlassStrength | null
+  /** The warning's words. Default: "Text may be hard to read on this background". */
+  message?: (ratio: string, onGlass: boolean) => string
+}
+
 interface CardFieldsConfig {
   /** What Inherit means here: "the default card", "the section’s card design". */
   inherits: string
@@ -95,6 +106,8 @@ interface CardFieldsConfig {
   defaults?: RoleDefaultColours
   /** The array an item's design sits in, for the item-level contrast warning. */
   itemArray?: string
+  /** How a family words and measures the warning, when its own differs. */
+  contrast?: CardContrastWarning
   /** Hides every field (an item's, until it is customised). */
   hidden?: ConditionalPropertyCallback
 }
@@ -103,9 +116,13 @@ interface CardFieldsConfig {
  * The warning on a Background colour (task 156): the worst of the card's text on the background it draws,
  * chosen text colours included, with the site's Brand colours. A warning, never an error.
  */
-function withTextContrast<T extends FieldDefinition>(
+export function withCardTextContrast<T extends FieldDefinition>(
   field: T,
-  { defaults = {}, itemArray }: Pick<CardFieldsConfig, 'defaults' | 'itemArray'>,
+  {
+    defaults = {},
+    itemArray,
+    contrast = {},
+  }: Pick<CardFieldsConfig, 'defaults' | 'itemArray' | 'contrast'>,
 ): T {
   if (field.name !== 'background') return field
   return {
@@ -135,13 +152,17 @@ function withTextContrast<T extends FieldDefinition>(
             const { colours } = await fetchBrandColours(
               context.getClient({ apiVersion: '2025-01-01' }),
             )
+            const glass = contrast.glassOf?.(section as never) ?? null
             const worst = worstCardTextContrast({
               levels: [section?.cardDesign, own],
               defaults,
+              roles: contrast.roles,
               tone: section?.style?.tone,
+              glass,
               site: colours,
             })
             if (!worst || worst.ratio >= BODY_TEXT_RATIO) return true
+            if (contrast.message) return contrast.message(worst.ratio.toFixed(1), glass !== null)
             return `Text may be hard to read on this background: ${worst.ratio.toFixed(1)}:1 (text needs ${String(BODY_TEXT_RATIO)}:1). Choose a stronger or different colour, or change the text colours under Text.`
           },
         )
@@ -159,7 +180,7 @@ export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
           inherits,
           inItem,
           hidden: both(hidden, surface.hidden),
-        }).map((field) => withTextContrast(field, config))),
+        }).map((field) => withCardTextContrast(field, config))),
     ...roles.map(({ role, highlight, hidden: roleHidden }) =>
       textRoleField({
         role,
@@ -186,11 +207,12 @@ export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
   ]
 }
 
-const TEXT_FIELDSET = {
+const textFieldset = (description?: string) => ({
   name: 'text',
   title: 'Text',
+  ...(description ? { description } : {}),
   options: { collapsible: true, collapsed: true },
-}
+})
 
 /** A family's Cards box, agency only, at section level. */
 export function cardDesignField({
@@ -199,6 +221,7 @@ export function cardDesignField({
   presets,
   boxHidden,
   lead = [],
+  textDescription,
   ...config
 }: Omit<CardFieldsConfig, 'inItem' | 'hidden'> & {
   title?: string
@@ -208,6 +231,8 @@ export function cardDesignField({
   boxHidden?: ConditionalPropertyCallback
   /** Fields that come first in the box (an item style, which decides what the rest apply to). */
   lead?: readonly FieldDefinition[]
+  /** The line under the Text group's title. */
+  textDescription?: string
 }) {
   return defineField({
     name: 'cardDesign',
@@ -221,7 +246,7 @@ export function cardDesignField({
       collapsed: false,
       ...(presets ? presetsOption(presets) : {}),
     },
-    fieldsets: [TEXT_FIELDSET],
+    fieldsets: [textFieldset(textDescription)],
     fields: [...lead, ...cardDesignFields(config)],
   })
 }
@@ -253,7 +278,7 @@ export function itemDesignField({
         mark: config.mark ?? true,
       }),
     },
-    fieldsets: [TEXT_FIELDSET],
+    fieldsets: [textFieldset()],
     fields: [
       itemAppearanceField({ inheritLabel: 'Use the section’s card design' }),
       ...cardDesignFields({
