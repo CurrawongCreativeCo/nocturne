@@ -100,12 +100,13 @@ describe.each(LAYOUTS)('Team on the %s layout', (layout) => {
   })
 })
 
-describe('Team’s header is drawn exactly as before', () => {
-  it('keeps the intro’s classes under a title, with no margin or size named', async () => {
+describe('Team’s header', () => {
+  it('spaces the intro under a title and draws it as lead text (the old class had no space)', async () => {
     const document = await draw('grid', { title: 'Meet the team', text: 'An intro.' })
-    expect(document.querySelector('[data-text-role="intro"]')?.className).toBe(
-      'mt-4text-lead text-pretty text-ink-muted',
-    )
+    const classes = document.querySelector('[data-text-role="intro"]')?.className.split(' ')
+    expect(classes).toContain('mt-4')
+    expect(classes).toContain('text-lead')
+    expect(classes).not.toContain('mt-4text-lead')
   })
 
   it('draws an intro with no title as the lead text it is', async () => {

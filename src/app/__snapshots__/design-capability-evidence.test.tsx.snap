@@ -127,19 +127,19 @@ exports[`design capability evidence > events.header.section.heading@list: the pr
 
 exports[`design capability evidence > events.header.section.intro@agenda: the probe changes the registered target 1`] = `
 [
-  "<p class="mt-4text-lead text-pretty text-ink-muted" data-text-role="intro">",
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
 exports[`design capability evidence > events.header.section.intro@featured: the probe changes the registered target 1`] = `
 [
-  "<p class="mt-4text-lead text-pretty text-ink-muted" data-text-role="intro">",
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
 exports[`design capability evidence > events.header.section.intro@list: the probe changes the registered target 1`] = `
 [
-  "<p class="mt-4text-lead text-pretty text-ink-muted" data-text-role="intro">",
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
@@ -153,19 +153,19 @@ exports[`design capability evidence > events.mark.section@list: the probe change
 
 exports[`design capability evidence > events.motion.section@agenda: the probe changes the registered target 1`] = `
 [
-  "a2730764a39ed4c0 (4775 characters)",
+  "e2864f0d8915a9c1 (4776 characters)",
 ]
 `;
 
 exports[`design capability evidence > events.motion.section@featured: the probe changes the registered target 1`] = `
 [
-  "11c08ed54de36b66 (5229 characters)",
+  "3719767cdbebc5e8 (5230 characters)",
 ]
 `;
 
 exports[`design capability evidence > events.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "6b4668ca9fd46965 (7191 characters)",
+  "668f9fe35c01a726 (7192 characters)",
 ]
 `;
 
@@ -1575,19 +1575,19 @@ exports[`design capability evidence > team.header.section.heading@slider: the pr
 
 exports[`design capability evidence > team.header.section.intro@grid: the probe changes the registered target 1`] = `
 [
-  "<p class="mt-4text-lead text-pretty text-ink-muted" data-text-role="intro">",
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
 exports[`design capability evidence > team.header.section.intro@list: the probe changes the registered target 1`] = `
 [
-  "<p class="mt-4text-lead text-pretty text-ink-muted" data-text-role="intro">",
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
 exports[`design capability evidence > team.header.section.intro@slider: the probe changes the registered target 1`] = `
 [
-  "<p class="mt-4text-lead text-pretty text-ink-muted" data-text-role="intro">",
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
@@ -1605,7 +1605,7 @@ exports[`design capability evidence > team.mark.section@slider: the probe change
 
 exports[`design capability evidence > team.motion.section@grid: the probe changes the registered target 1`] = `
 [
-  "b0cc4b8d7e3f0ef8 (3091 characters)",
+  "f50f74fe6d57b509 (3092 characters)",
 ]
 `;
 

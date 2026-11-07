@@ -3689,7 +3689,7 @@ the [Location](#location) section and team profile pages.
 
 Team members are documents (`teamMember`, in `src/features/team`), shown by the **Team** section and, when the site has
 
-- **Design (task 156, agency only).** A _Section header_ box (eyebrow, title and intro) and a _Cards_ box: fill, border, three text roles (title is the name, meta the role line, body the short bio) and a decorative mark, for the grid and slider cards and the list's rows alike, which draw the same surface. A section decorative mark sits in the section's own Design tab. Everything is empty by default and an empty design draws what the section always drew. The intro still has no margin or size under a title, exactly as it has always been drawn: that looks like a typo (`mt-4text-lead`) and fixing it is a visible change for review.profile pages, on their own page at `/team/<slug>`.
+- **Design (task 156, agency only).** A _Section header_ box (eyebrow, title and intro) and a _Cards_ box: fill, border, three text roles (title is the name, meta the role line, body the short bio) and a decorative mark, for the grid and slider cards and the list's rows alike, which draw the same surface. A section decorative mark sits in the section's own Design tab. Everything is empty by default and an empty design draws what the section always drew.profile pages, on their own page at `/team/<slug>`.
 
 - **A member.** _Name_ (required), _Role_, _Portrait_ (required, square, 800 px or wider; alt text is required and the usual
   image guidance warns about size and shape), _Short bio_ (up to 300 characters; the cards and the page's search
@@ -3898,7 +3898,7 @@ mode make sure the filter above includes `place`. Switching it off removes the r
 
 A content calendar: what is on, when and where. Events are documents (`event`, in `src/features/events`), shown by the
 
-- **Design (task 156, agency only).** A _Section header_ box and a _Cards_ box. The text roles (title, meta for the date, time and place, body for the summary) apply to every layout. Only **Featured** draws a card, so its fill, border and decorative mark are offered there alone: List and Agenda rows are text only, and Studio hides those controls on them. A section decorative mark works on every layout. Empty by default, and an empty design draws what the section always drew (its intro is drawn as Team's is, see above).**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
+- **Design (task 156, agency only).** A _Section header_ box and a _Cards_ box. The text roles (title, meta for the date, time and place, body for the summary) apply to every layout. Only **Featured** draws a card, so its fill, border and decorative mark are offered there alone: List and Agenda rows are text only, and Studio hides those controls on them. A section decorative mark works on every layout. Empty by default, and an empty design draws what the section always drew.**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
   to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
   calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
   list and an agenda, which is what most clients need.

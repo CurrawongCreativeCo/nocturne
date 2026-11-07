@@ -83,6 +83,21 @@ describe.each(LAYOUTS)('Events on the %s layout', (layout) => {
   })
 })
 
+describe('Events’ header', () => {
+  it('spaces the intro under a title and draws it as lead text (the old class had no space)', async () => {
+    const document = await draw('list', { title: 'What’s on', text: 'An intro.' })
+    const classes = roles(document, 'intro')[0]?.className.split(' ')
+    expect(classes).toContain('mt-4')
+    expect(classes).toContain('text-lead')
+    expect(classes).not.toContain('mt-4text-lead')
+  })
+
+  it('needs no margin on an intro with no title above it', async () => {
+    const document = await draw('list', { title: null, heading: null, text: 'An intro.' })
+    expect(roles(document, 'intro')[0]?.className).toBe('text-lead text-pretty text-ink-muted')
+  })
+})
+
 describe('Events: the card only Featured draws', () => {
   const design = { border: 'thick', mark: { kind: 'icon', icon: 'heart' } }
 

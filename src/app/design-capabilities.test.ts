@@ -182,3 +182,17 @@ describe('where a section-level decorative mark is offered', () => {
     }
   })
 })
+
+describe('the tests that prove the contract can’t be switched off', () => {
+  // A crash, a worker exit and a focused test already fail the run; a skipped one passes it silently.
+  it.each([
+    'src/app/design-capability-evidence.test.tsx',
+    'src/app/design-control-effects.test.tsx',
+    'src/components/ui/decorative-mark-controls.test.tsx',
+  ])('%s skips, focuses and expects the failure of nothing', (file) => {
+    const source = readFileSync(join(import.meta.dirname, '..', '..', file), 'utf8')
+    expect(source).not.toMatch(
+      /\b(it|test|describe)\.(skip|skipIf|runIf|todo|only|fails)\b|\bx(it|describe)\(/,
+    )
+  })
+})

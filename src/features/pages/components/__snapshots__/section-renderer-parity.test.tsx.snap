@@ -45,51 +45,51 @@ exports[`SectionRenderer output parity > embed keeps its output for every layout
 exports[`SectionRenderer output parity > events keeps its output for every layout and stored panel choice 1`] = `
 {
   "agenda · panel glass": {
-    "hash": "149fc5998d4c072f",
+    "hash": "25ca04a58d80fb42",
     "panel": "tinted",
   },
   "agenda · panel none": {
-    "hash": "6f55163c8e2fbfb7",
+    "hash": "fb8975afd16d86ff",
     "panel": null,
   },
   "agenda · panel solid": {
-    "hash": "6186f86b7188e46c",
+    "hash": "eb986a3824fdd106",
     "panel": "solid",
   },
   "agenda · panel unset": {
-    "hash": "6f55163c8e2fbfb7",
+    "hash": "fb8975afd16d86ff",
     "panel": null,
   },
   "featured · panel glass": {
-    "hash": "3fa0005fc0ba9087",
+    "hash": "f1fedaab0b3c87d9",
     "panel": "tinted",
   },
   "featured · panel none": {
-    "hash": "5db2acf5089f4e8d",
+    "hash": "3967f3d9372798f4",
     "panel": null,
   },
   "featured · panel solid": {
-    "hash": "8d7f52393b5f263f",
+    "hash": "daed030ff39e3f02",
     "panel": "solid",
   },
   "featured · panel unset": {
-    "hash": "5db2acf5089f4e8d",
+    "hash": "3967f3d9372798f4",
     "panel": null,
   },
   "list · panel glass": {
-    "hash": "3f84e7f827076f9b",
+    "hash": "74e7f1e5842450ac",
     "panel": "tinted",
   },
   "list · panel none": {
-    "hash": "5ac92521d554f93d",
+    "hash": "6cf50b08bdf36bbc",
     "panel": null,
   },
   "list · panel solid": {
-    "hash": "700242c5e839cc0a",
+    "hash": "47b4bbaba5fde43c",
     "panel": "solid",
   },
   "list · panel unset": {
-    "hash": "5ac92521d554f93d",
+    "hash": "6cf50b08bdf36bbc",
     "panel": null,
   },
 }
@@ -666,19 +666,19 @@ exports[`SectionRenderer output parity > stats keeps its output for every layout
 exports[`SectionRenderer output parity > team keeps its output for every layout and stored panel choice 1`] = `
 {
   "grid · panel glass": {
-    "hash": "e87e761007e3d052",
+    "hash": "d6974c044e31298c",
     "panel": "tinted",
   },
   "grid · panel none": {
-    "hash": "7c7a99be36101769",
+    "hash": "619c4352cd9ea3cd",
     "panel": null,
   },
   "grid · panel solid": {
-    "hash": "5e915998bf97dc35",
+    "hash": "d17d6c2832909683",
     "panel": "solid",
   },
   "grid · panel unset": {
-    "hash": "7c7a99be36101769",
+    "hash": "619c4352cd9ea3cd",
     "panel": null,
   },
   "list · panel glass": {

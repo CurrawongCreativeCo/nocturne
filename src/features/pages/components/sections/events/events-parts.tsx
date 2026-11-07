@@ -196,8 +196,8 @@ function Header({ data, block, text }: { data: EventsData; block: string; text: 
       title={title}
       heading={data.heading}
       intro={data.text}
-      // Kept exactly as it has always been drawn (see Team's header): with a title the intro names no margin.
-      introClass={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
+      // With no title above it, the intro needs no margin.
+      introClass={title ? undefined : 'text-lead text-pretty text-ink-muted'}
       design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
       block={block}
       text={text}

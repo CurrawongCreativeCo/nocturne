@@ -55,8 +55,8 @@ export function SectionHeader({
   /** The element around the header, for a section that has always drawn a `div`. */
   as?: 'header' | 'div'
   /**
-   * The intro's own classes, for a section whose intro has always been drawn with different ones
-   * (Team's, which names no margin without a title). Its text role's own look is still `OWN_INTRO`.
+   * The intro's own classes, for a section whose intro is drawn differently (Team's, with no margin when
+   * no title sits above it). Its text role's own look is still `OWN_INTRO`.
    */
   introClass?: string
 }) {

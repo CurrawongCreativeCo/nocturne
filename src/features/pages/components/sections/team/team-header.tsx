@@ -26,9 +26,8 @@ export function TeamHeader({
       title={title}
       heading={data.heading}
       intro={data.text}
-      // Kept exactly as it has always been drawn: with a title there is no space between "mt-4" and
-      // "text-lead", so the intro under a title names neither. Fixing it is a visible change, for review.
-      introClass={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
+      // With no title above it, the intro needs no margin.
+      introClass={title ? undefined : 'text-lead text-pretty text-ink-muted'}
       design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
       block={block}
       text={text}
