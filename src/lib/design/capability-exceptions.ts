@@ -127,7 +127,9 @@ export const CAPABILITY_EXCEPTIONS: readonly CapabilityException[] = [
     reviewer: OWNER,
     reviewed: APPROVED,
     status: 'temporary',
-    removalTask: 156,
+    // Proposed task 281 (Legacy Link list design migration, preserving stored data): provisional until
+    // the canonical plan publishes it. No stored data is migrated before then.
+    removalTask: 281,
     nature: 'design',
   },
   {
@@ -138,7 +140,7 @@ export const CAPABILITY_EXCEPTIONS: readonly CapabilityException[] = [
     reviewer: OWNER,
     reviewed: APPROVED,
     status: 'temporary',
-    removalTask: 156,
+    removalTask: 281,
     nature: 'design',
   },
   {

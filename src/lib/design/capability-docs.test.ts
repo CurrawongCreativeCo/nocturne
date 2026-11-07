@@ -93,18 +93,17 @@ describe('capabilityDocs', () => {
     expect(docs).toMatch(/`cards.services` \| – \| pending \(no component declares it yet\)/)
   })
 
-  it('keeps the three views that are not covered yet visible, each with the task that declares it', () => {
-    const rows = docs
-      .split('\n')
-      .filter((line) => line.includes('Not assessed') || line.includes('Set when declared'))
-      .map((line) => line.split('|').map((cell) => cell.trim()))
-    expect(rows.map((cells) => [cells[1], cells[4]])).toEqual([
-      ['Event details card (events/components/event-view.tsx)', 'Task 156'],
-      ['Service page (services/components/service-view.tsx)', 'Task 156'],
-      ['Search results (search/components/search-view.tsx)', 'Task 156'],
-    ])
-    // Declaring a view is not owning its capabilities: those closing tasks are set when it is declared.
-    for (const cells of rows) expect(cells[3]).toBe('Set when declared')
+  it('no longer lists the three declared views as parts the contract does not cover', () => {
+    for (const path of [
+      'events/components/event-view',
+      'services/components/service-view',
+      'search/components/search-view',
+    ]) {
+      expect(docs).not.toContain(path)
+    }
+    // Declaring a part is what `declaredBy` is for: none is waiting on a task to be declared.
+    expect(docs).not.toContain('Set when declared')
+    expect(docs).not.toContain('Not assessed')
   })
 
   it('leaves no part without a task of some kind', () => {

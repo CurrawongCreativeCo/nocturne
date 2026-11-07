@@ -1,10 +1,13 @@
 import { blogSettings } from '@/features/blog/schemas/blog-settings'
 import { post } from '@/features/blog/schemas/post'
 import { postCardCapabilities } from '@/features/blog/schemas/post-card-capabilities'
+import { eventDetailsCardCapabilities } from '@/features/events/schemas/event-details-card-capabilities'
 import { sectionTypes } from '@/features/pages/schemas/sections'
 import { slotImage } from '@/features/pages/schemas/slot-image'
 import { slotVideo } from '@/features/pages/schemas/slot-video'
 import { SLOT_BLOCKS, SLOT_FAMILIES } from '@/features/pages/slots/registry'
+import { searchResultsCapabilities } from '@/features/search/schemas/search-results-capabilities'
+import { servicePageCapabilities } from '@/features/services/schemas/service-page-capabilities'
 import type { DesignCapabilityDeclaration } from '@/lib/design/capabilities'
 import type { ContractComponent, SlotHost } from '@/lib/design/capability-policy'
 import { schemaGate, type SchemaField } from '@/lib/design/schema-capabilities'
@@ -115,6 +118,27 @@ export const DESIGN_COMPONENTS: readonly ContractComponent[] = [
       declaration: declarationOf(type),
     }
   }),
+  {
+    id: 'eventDetailsCard',
+    kind: 'view',
+    title: 'Event details card',
+    layouts: [],
+    declaration: eventDetailsCardCapabilities,
+  },
+  {
+    id: 'servicePage',
+    kind: 'view',
+    title: 'Service page',
+    layouts: [],
+    declaration: servicePageCapabilities,
+  },
+  {
+    id: 'searchResults',
+    kind: 'view',
+    title: 'Search results',
+    layouts: [],
+    declaration: searchResultsCapabilities,
+  },
   {
     id: 'blogPostCards',
     kind: 'listing',

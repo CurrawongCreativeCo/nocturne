@@ -62,6 +62,18 @@ exports[`the design capability contract > embed: reports what it offers today 1`
 }
 `;
 
+exports[`the design capability contract > eventDetailsCard: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: pending (280)",
+    "text required card: pending (280)",
+    "mark required card: pending (280)",
+    "depth required card: pending (146)",
+  ],
+  "sources": [],
+}
+`;
+
 exports[`the design capability contract > events: reports what it offers today 1`] = `
 {
   "capabilities": [
@@ -128,7 +140,7 @@ exports[`the design capability contract > faq: reports what it offers today 1`] 
 exports[`the design capability contract > featuresGrid: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface conditional card: pending (156)",
+    "surface conditional card: pending (276)",
     "text required card: pending (276)",
     "header required section: verified",
     "mark required section: verified",
@@ -554,6 +566,26 @@ exports[`the design capability contract > richText: reports what it offers today
     "divider required section: pending (151)",
     "edge required section: verified",
     "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > searchResults: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required section: pending (280)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > servicePage: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required section: pending (280)",
+    "framing required section: pending (177)",
+    "divider required section: pending (151)",
   ],
   "sources": [],
 }

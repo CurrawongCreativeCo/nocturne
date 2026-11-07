@@ -35,6 +35,34 @@ export interface BaselineChange {
   closingTask?: TaskNumber
 }
 
+/**
+ * The three views task 156 declares (the event details card, the service page and search results). Their
+ * design is not stored anywhere yet, so each pair is admitted with its closing task. Task 280 ("Standalone
+ * view design settings and adoption") is proposed and not yet in the canonical plan: its number is
+ * provisional until the plan publishes it. Approved in principle by the owner on 7 November 2026.
+ */
+const VIEW_ROW = {
+  kind: 'admit',
+  layouts: [null],
+  reviewer: 'owner',
+  reviewed: '2026-11-07',
+} as const
+const viewText = (
+  component: string,
+  scope: 'card' | 'section',
+  roles: readonly TextRole[],
+  reason: string,
+): BaselineChange[] =>
+  roles.map((role) => ({
+    ...VIEW_ROW,
+    component,
+    capability: 'text',
+    scope,
+    role,
+    reason,
+    closingTask: 280,
+  }))
+
 export const BASELINE_CHANGES: readonly BaselineChange[] = [
   {
     kind: 'admit',
@@ -48,4 +76,65 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
     reviewed: '2026-11-07',
     closingTask: 158,
   },
+  {
+    ...VIEW_ROW,
+    component: 'eventDetailsCard',
+    capability: 'surface',
+    scope: 'card',
+    reason:
+      'The card’s fill, border and corners are fixed in the component. Task 280 gives the view a design to store them in.',
+    closingTask: 280,
+  },
+  ...viewText(
+    'eventDetailsCard',
+    'card',
+    ['title', 'label', 'body', 'meta'],
+    'The card’s text is styled in the component. Task 280 gives the view text roles.',
+  ),
+  {
+    ...VIEW_ROW,
+    component: 'eventDetailsCard',
+    capability: 'mark',
+    scope: 'card',
+    reason:
+      'A card with no decorative mark yet. It comes with the Cards box task 280 adds, as on every other card.',
+    closingTask: 280,
+  },
+  {
+    ...VIEW_ROW,
+    component: 'eventDetailsCard',
+    capability: 'depth',
+    scope: 'card',
+    reason: 'The card draws a fixed shadow, with no depth control yet.',
+    closingTask: 146,
+  },
+  ...viewText(
+    'servicePage',
+    'section',
+    ['heading', 'intro', 'price', 'title', 'body', 'label', 'description'],
+    'The page’s text is styled in the component. Task 280 gives the view text roles.',
+  ),
+  {
+    ...VIEW_ROW,
+    component: 'servicePage',
+    capability: 'framing',
+    scope: 'section',
+    reason: 'The page’s picture has a fixed 16:9 crop, with no Adjust picture yet.',
+    closingTask: 177,
+  },
+  {
+    ...VIEW_ROW,
+    component: 'servicePage',
+    capability: 'divider',
+    scope: 'section',
+    reason:
+      'The rules between the page’s groups are plain borders, with no decorative divider yet, as on the Team member page.',
+    closingTask: 151,
+  },
+  ...viewText(
+    'searchResults',
+    'section',
+    ['title', 'meta', 'body'],
+    'The results’ text is styled in the component. Task 280 gives the view text roles.',
+  ),
 ]

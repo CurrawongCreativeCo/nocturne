@@ -4641,7 +4641,7 @@
                 "kind": "variant",
                 "when": "A layout or look draws its items on a card (the grid has no such option today)"
               },
-              "closingTask": 156,
+              "closingTask": 276,
               "fields": [],
               "availability": "pending"
             }
@@ -32181,7 +32181,276 @@
         "contentSources": {}
       }
     ],
-    "views": [],
+    "views": [
+      {
+        "type": "eventDetailsCard",
+        "title": "Event details card",
+        "capabilities": {
+          "surface": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 280,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "text": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "roles": [
+                  "title",
+                  "label",
+                  "body",
+                  "meta"
+                ],
+                "closingTask": 280,
+                "fields": [],
+                "availability": "pending",
+                "roleAvailability": {
+                  "title": "pending",
+                  "label": "pending",
+                  "body": "pending",
+                  "meta": "pending"
+                }
+              }
+            ],
+            "evidence": []
+          },
+          "header": {
+            "notApplicable": "Not a section: the card’s heading is its title role, with no eyebrow or intro"
+          },
+          "mark": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 280,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "depth": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "card",
+                "closingTask": 146,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "The card holds no picture. The event’s picture is the page’s (Event pages, task 177)"
+          },
+          "pictureDepth": {
+            "notApplicable": "The card holds no picture"
+          },
+          "overlay": {
+            "notApplicable": "No picture with a wash over it"
+          },
+          "glass": {
+            "notApplicable": "Sits on the page’s plain background, so a glass panel has nothing to show through"
+          },
+          "divider": {
+            "notApplicable": "The rule above Add to calendar is the group’s border, not a divider position"
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
+      },
+      {
+        "type": "servicePage",
+        "title": "Service page",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "Draws no card: its groups are separated by a rule"
+          },
+          "text": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "roles": [
+                  "heading",
+                  "intro",
+                  "price",
+                  "title",
+                  "body",
+                  "label",
+                  "description"
+                ],
+                "closingTask": 280,
+                "fields": [],
+                "availability": "pending",
+                "roleAvailability": {
+                  "heading": "pending",
+                  "intro": "pending",
+                  "price": "pending",
+                  "title": "pending",
+                  "body": "pending",
+                  "label": "pending",
+                  "description": "pending"
+                }
+              }
+            ],
+            "evidence": []
+          },
+          "header": {
+            "notApplicable": "A page, not a section: its h1 and summary are the heading and intro text roles"
+          },
+          "mark": {
+            "notApplicable": "A page, not a section, and it draws no card"
+          },
+          "depth": {
+            "notApplicable": "No surface for a shadow to sit on (146)"
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card. Its enquiry button is Buttons (CtaLink), tasks 148 and 137"
+          },
+          "framing": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 177,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "pictureDepth": {
+            "notApplicable": "Draws no shadow or glow on its picture"
+          },
+          "overlay": {
+            "notApplicable": "No picture with a wash over it"
+          },
+          "glass": {
+            "notApplicable": "No card surface (156 item 10)"
+          },
+          "divider": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 151,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
+      },
+      {
+        "type": "searchResults",
+        "title": "Search results",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "Results are rows, with no card"
+          },
+          "text": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "roles": [
+                  "title",
+                  "meta",
+                  "body"
+                ],
+                "closingTask": 280,
+                "fields": [],
+                "availability": "pending",
+                "roleAvailability": {
+                  "title": "pending",
+                  "meta": "pending",
+                  "body": "pending"
+                }
+              }
+            ],
+            "evidence": []
+          },
+          "header": {
+            "notApplicable": "The page’s h1 is drawn by the route (app/(site)/search/page.tsx), outside this view"
+          },
+          "mark": {
+            "notApplicable": "Results are rows, with no card to carry one"
+          },
+          "depth": {
+            "notApplicable": "No surface for a shadow to sit on (146)"
+          },
+          "icon": {
+            "notApplicable": "Draws no icon from the set"
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "Has no framed picture"
+          },
+          "pictureDepth": {
+            "notApplicable": "Has no framed picture"
+          },
+          "overlay": {
+            "notApplicable": "Draws no picture"
+          },
+          "glass": {
+            "notApplicable": "No card surface (156 item 10)"
+          },
+          "divider": {
+            "notApplicable": "Results are spaced rows, with no rule or divider position"
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
+      }
+    ],
     "coverage": {
       "declares": [
         "section",
@@ -32216,6 +32485,9 @@
         "launchDate",
         "slotImage",
         "slotVideo",
+        "eventDetailsCard",
+        "servicePage",
+        "searchResults",
         "blogPostCards"
       ],
       "notDeclaredYet": [],
@@ -32260,7 +32532,8 @@
           "tasks": [
             148,
             137
-          ]
+          ],
+          "note": "Task 148 also adopts the search form’s hand-styled button"
         },
         {
           "part": "Booking facade",
@@ -32298,14 +32571,6 @@
           ]
         },
         {
-          "part": "Event details card (events/components/event-view.tsx)",
-          "needs": [
-            "surface"
-          ],
-          "tasks": [],
-          "declaredBy": 156
-        },
-        {
           "part": "Blog post page",
           "needs": [
             "framing"
@@ -32323,18 +32588,6 @@
           "tasks": [
             278
           ]
-        },
-        {
-          "part": "Service page (services/components/service-view.tsx)",
-          "needs": [],
-          "tasks": [],
-          "declaredBy": 156
-        },
-        {
-          "part": "Search results (search/components/search-view.tsx)",
-          "needs": [],
-          "tasks": [],
-          "declaredBy": 156
         }
       ]
     }

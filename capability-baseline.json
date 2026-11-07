@@ -451,6 +451,153 @@
       "closingTask": 177
     },
     {
+      "component": "eventDetailsCard",
+      "capability": "surface",
+      "scope": "card",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "eventDetailsCard",
+      "capability": "text",
+      "scope": "card",
+      "role": "title",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "eventDetailsCard",
+      "capability": "text",
+      "scope": "card",
+      "role": "label",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "eventDetailsCard",
+      "capability": "text",
+      "scope": "card",
+      "role": "body",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "eventDetailsCard",
+      "capability": "text",
+      "scope": "card",
+      "role": "meta",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "eventDetailsCard",
+      "capability": "mark",
+      "scope": "card",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "eventDetailsCard",
+      "capability": "depth",
+      "scope": "card",
+      "layouts": [null],
+      "closingTask": 146
+    },
+    {
+      "component": "servicePage",
+      "capability": "text",
+      "scope": "section",
+      "role": "heading",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "servicePage",
+      "capability": "text",
+      "scope": "section",
+      "role": "intro",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "servicePage",
+      "capability": "text",
+      "scope": "section",
+      "role": "price",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "servicePage",
+      "capability": "text",
+      "scope": "section",
+      "role": "title",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "servicePage",
+      "capability": "text",
+      "scope": "section",
+      "role": "body",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "servicePage",
+      "capability": "text",
+      "scope": "section",
+      "role": "label",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "servicePage",
+      "capability": "text",
+      "scope": "section",
+      "role": "description",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "servicePage",
+      "capability": "framing",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 177
+    },
+    {
+      "component": "servicePage",
+      "capability": "divider",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 151
+    },
+    {
+      "component": "searchResults",
+      "capability": "text",
+      "scope": "section",
+      "role": "title",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "searchResults",
+      "capability": "text",
+      "scope": "section",
+      "role": "meta",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
+      "component": "searchResults",
+      "capability": "text",
+      "scope": "section",
+      "role": "body",
+      "layouts": [null],
+      "closingTask": 280
+    },
+    {
       "component": "blogPostCards",
       "capability": "depth",
       "scope": "card",
@@ -516,7 +663,7 @@
       "capability": "surface",
       "scope": "card",
       "layouts": [null],
-      "closingTask": 156
+      "closingTask": 276
     },
     {
       "component": "featuresGrid",

@@ -316,7 +316,12 @@ export const FUTURE_COVERAGE = [
   { part: 'Site header', needs: ['glass'], tasks: [159] },
   { part: 'Mobile drawer', needs: ['glass'], tasks: [7], note: 'Optional quick actions' },
   { part: 'Footer', needs: ['icon', 'divider'], tasks: [158, 151] },
-  { part: 'Buttons (CtaLink)', needs: ['surface', 'depth', 'action'], tasks: [148, 137] },
+  {
+    part: 'Buttons (CtaLink)',
+    needs: ['surface', 'depth', 'action'],
+    tasks: [148, 137],
+    note: 'Task 148 also adopts the search form’s hand-styled button',
+  },
   {
     part: 'Booking facade',
     needs: ['surface', 'depth'],
@@ -325,26 +330,8 @@ export const FUTURE_COVERAGE = [
   },
   { part: 'Team member pages', needs: ['icon', 'framing', 'divider'], tasks: [158, 177, 151] },
   { part: 'Event pages', needs: ['framing', 'divider'], tasks: [177, 151] },
-  {
-    part: 'Event details card (events/components/event-view.tsx)',
-    needs: ['surface'],
-    tasks: [],
-    declaredBy: 156,
-  },
   { part: 'Blog post page', needs: ['framing'], tasks: [177] },
   { part: 'Location pages', needs: ['surface', 'text'], tasks: [278] },
-  {
-    part: 'Service page (services/components/service-view.tsx)',
-    needs: [],
-    tasks: [],
-    declaredBy: 156,
-  },
-  {
-    part: 'Search results (search/components/search-view.tsx)',
-    needs: [],
-    tasks: [],
-    declaredBy: 156,
-  },
 ] as const satisfies readonly FutureCoverage[]
 
 /** The reason a generated declaration starts with. The checks reject it, so a person must review. */

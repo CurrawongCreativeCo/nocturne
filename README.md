@@ -2501,11 +2501,14 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Launch date (`launchDate`)               | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R…      | –          | –       | –     | –       | –    | –      | –     |
 | Video (`slotVideo`)                      | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Event details card (`eventDetailsCard`)  | R…      | R…   | –      | R…   | R…    | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
+| Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R…    | –    | R…     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 225      | 0               | 65      |
+| Required                                                 | 225      | 0               | 84      |
 | Conditional                                              | 4        | 0               | 40      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2513,17 +2516,17 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
 | 137          | 3                | 4                   |
-| 146          | 8                | 3                   |
+| 146          | 9                | 3                   |
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
-| 151          | 19               | 0                   |
-| 156          | 0                | 1                   |
+| 151          | 20               | 0                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
-| 177          | 7                | 20                  |
+| 177          | 8                | 20                  |
 | 213          | 7                | 0                   |
-| 276          | 2                | 0                   |
+| 276          | 2                | 1                   |
+| 280          | 16               | 0                   |
 
 **Evidence.** 241 capability entries, 471 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
@@ -2575,29 +2578,26 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | `embed`     | `customHeight`                                                                                                                                                                      | permanent | layout        | owner    | –            | The exact height of a third-party frame, under Advanced.                                                              |
 | `events`    | `category`                                                                                                                                                                          | permanent | query         | owner    | –            | A query filter that sits in Advanced. Not a look.                                                                     |
 | `events`    | `count`                                                                                                                                                                             | permanent | query         | owner    | –            | A query limit that sits in Advanced. Not a look.                                                                      |
-| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 156          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.           |
-| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 156          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                       |
+| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 281          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.           |
+| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 281          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                       |
 | `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 158          | The social icon container and colour, overlapping the icon capability.                                                |
 | `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.              |
 | `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                      |
 | `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                            |
 
-**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. 3 have no capability task yet: the task in `Declared by` brings them into the contract, which is not ownership of their design capabilities. Each capability's own closing task is set when the part is declared.
+**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Each has the tasks that will add its capabilities.
 
-| Not covered by the contract                           | Capabilities it will need | Capability tasks           | Declared by          |
-| ----------------------------------------------------- | ------------------------- | -------------------------- | -------------------- |
-| Site header                                           | Glass                     | 159                        | Its capability tasks |
-| Mobile drawer                                         | Glass                     | 7 (Optional quick actions) | Its capability tasks |
-| Footer                                                | Icon, Divider             | 158, 151                   | Its capability tasks |
-| Buttons (CtaLink)                                     | Surface, Depth, Action    | 148, 137                   | Its capability tasks |
-| Booking facade                                        | Surface, Depth            | 148 (Once task 95 exists)  | Its capability tasks |
-| Team member pages                                     | Icon, Framing, Divider    | 158, 177, 151              | Its capability tasks |
-| Event pages                                           | Framing, Divider          | 177, 151                   | Its capability tasks |
-| Event details card (events/components/event-view.tsx) | Surface                   | Set when declared          | Task 156             |
-| Blog post page                                        | Framing                   | 177                        | Its capability tasks |
-| Location pages                                        | Surface, Text             | 278                        | Its capability tasks |
-| Service page (services/components/service-view.tsx)   | Not assessed              | Set when declared          | Task 156             |
-| Search results (search/components/search-view.tsx)    | Not assessed              | Set when declared          | Task 156             |
+| Not covered by the contract | Capabilities it will need | Capability tasks                                                     | Declared by          |
+| --------------------------- | ------------------------- | -------------------------------------------------------------------- | -------------------- |
+| Site header                 | Glass                     | 159                                                                  | Its capability tasks |
+| Mobile drawer               | Glass                     | 7 (Optional quick actions)                                           | Its capability tasks |
+| Footer                      | Icon, Divider             | 158, 151                                                             | Its capability tasks |
+| Buttons (CtaLink)           | Surface, Depth, Action    | 148, 137 (Task 148 also adopts the search form’s hand-styled button) | Its capability tasks |
+| Booking facade              | Surface, Depth            | 148 (Once task 95 exists)                                            | Its capability tasks |
+| Team member pages           | Icon, Framing, Divider    | 158, 177, 151                                                        | Its capability tasks |
+| Event pages                 | Framing, Divider          | 177, 151                                                             | Its capability tasks |
+| Blog post page              | Framing                   | 177                                                                  | Its capability tasks |
+| Location pages              | Surface, Text             | 278                                                                  | Its capability tasks |
 
 <!-- design-capabilities:end -->
 
