@@ -1035,6 +1035,27 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['grid', 'marquee'],
     motion: ['grid', 'marquee'],
   }),
+  // The Divided list is the default and draws no card; Cards is a setting. Each look proves its own text, and
+  // only Cards proves a fill, a border and a mark. Unset is Divided, so its base stores nothing.
+  ...cardFamilyEvidence({
+    component: 'faq',
+    look: 'divided',
+    parts: ['text', 'header'],
+    render: 'src/features/pages/components/sections/faq.tsx',
+    cardTarget: 'details',
+    base: { eyebrow: 'Questions', intro: 'An intro.' },
+    roles: ['title', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'faq',
+    look: 'cards',
+    parts: ['surface', 'text', 'mark'],
+    render: 'src/features/pages/components/sections/faq.tsx',
+    cardTarget: 'div.relative.rounded-card',
+    base: { itemStyle: 'cards' },
+    roles: ['title', 'body'],
+  }),
   ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
   // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
   ...frameEvidence('ctaBanner', { mark: true, overlay: true, edge: true, motion: true }),

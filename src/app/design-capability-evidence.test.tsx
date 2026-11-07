@@ -5,7 +5,7 @@ import { createElement, type ComponentType } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { VIEW_DRAWERS } from '@/app/design-capability-views'
-import { DESIGN_COMPONENTS } from '@/app/design-components'
+import { DESIGN_COMPONENTS, gate } from '@/app/design-components'
 import {
   fingerprint,
   fixturePictureId,
@@ -479,6 +479,44 @@ describe('design capability evidence', () => {
       expect(existsSync(join(ROOT, entry.render))).toBe(true)
     },
   )
+})
+
+describe('a look that is a setting has independent evidence', () => {
+  const entryFor = (id: string) => {
+    const entry = CAPABILITY_EVIDENCE.find((candidate) => candidate.id === id)
+    if (!entry) throw new Error(`No evidence entry ${id}.`)
+    return entry
+  }
+
+  it('registers each FAQ look apart, and only Cards claims a card', () => {
+    const ids = CAPABILITY_EVIDENCE.filter((entry) => entry.component === 'faq').map(({ id }) => id)
+    for (const role of ['title', 'body']) {
+      expect(ids).toContain(`faq.text.card.divided.${role}`)
+      expect(ids).toContain(`faq.text.card.cards.${role}`)
+    }
+    expect(ids).toContain('faq.surface.card.cards')
+    expect(ids).toContain('faq.mark.card.cards')
+    expect(ids).not.toContain('faq.surface.card.divided')
+    expect(ids).not.toContain('faq.mark.card.divided')
+  })
+
+  it('a Cards claim fails on the Divided list: there is no card to find or to mark', async () => {
+    for (const id of ['faq.surface.card.cards', 'faq.mark.card.cards']) {
+      const entry = entryFor(id)
+      expect((await runCase(entry, null)).status).toBe('changed')
+      const divided = await runCase({ ...entry, base: { itemStyle: 'divided' } }, null)
+      expect(divided.status).not.toBe('changed')
+    }
+  })
+
+  it('the Studio only offers what each look draws', async () => {
+    const seed = await gallerySeed('faq', null)
+    const offered = (itemStyle: string | undefined) =>
+      gate.offered('faq', null, 'cardDesign.border', { ...seed, itemStyle }).offered
+    expect(offered(undefined)).toBe(false)
+    expect(offered('divided')).toBe(false)
+    expect(offered('cards')).toBe(true)
+  })
 })
 
 describe('a text role proves its own element', () => {

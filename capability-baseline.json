@@ -248,60 +248,6 @@
     },
     {
       "component": "faq",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "faq",
-      "capability": "text",
-      "scope": "card",
-      "role": "title",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "faq",
-      "capability": "text",
-      "scope": "card",
-      "role": "body",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "faq",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "faq",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "faq",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "faq",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "faq",
       "capability": "divider",
       "scope": "section",
       "layouts": [null],

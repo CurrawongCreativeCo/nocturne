@@ -1,13 +1,21 @@
 import { HelpCircleIcon } from '@sanity/icons/HelpCircle'
-import { defineArrayMember, defineField, defineType } from 'sanity'
+import {
+  defineArrayMember,
+  defineField,
+  defineType,
+  type ConditionalPropertyCallback,
+} from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { cardDesignField, eyebrowField, headerDesignField } from '../card-design-fields'
+import { itemStyleField } from '../item-appearance'
 import { faqCapabilities } from './faq-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -17,6 +25,16 @@ const LIMITS = {
   // text-lead in max-w-measure-narrow: about four lines.
   intro: 200,
 } as const
+
+const FAQ_ITEM_STYLES = ['divided', 'cards'] as const
+
+/** The text roles every item style draws (faq-capabilities.ts), and what each is drawn in. */
+export const FAQ_ROLES = [{ role: 'title' }, { role: 'body' }] as const
+export const FAQ_ROLE_COLOURS = { title: 'ink', body: 'muted' } as const
+
+/** Only the Cards style draws a card, so only it has a fill, a border and a mark to set. */
+const notCards: ConditionalPropertyCallback = ({ document, path }) =>
+  (sectionAtStylePath(document, path) as { itemStyle?: string } | undefined)?.itemStyle !== 'cards'
 
 export const faq = defineType({
   name: 'faq',
@@ -28,6 +46,7 @@ export const faq = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -67,6 +86,21 @@ export const faq = defineType({
             preview: { select: { title: 'question' } },
           }),
         ],
+      }),
+      itemStyleField({
+        values: FAQ_ITEM_STYLES,
+        titles: { divided: 'Divided list', cards: 'Cards' },
+        description: 'A ruled list, or each question in its own card. Empty is the Divided list.',
+      }),
+      headerDesignField(),
+      cardDesignField({
+        description:
+          'Text for every item style. Only Cards draws a card, so its fill, border and mark are shown there.',
+        roles: FAQ_ROLES,
+        defaults: FAQ_ROLE_COLOURS,
+        inherits: 'the item style’s own',
+        surface: { hidden: notCards },
+        markHidden: notCards,
       }),
       accessField,
     ],

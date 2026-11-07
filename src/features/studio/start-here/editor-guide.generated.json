@@ -262,6 +262,14 @@
       "title": "FAQ",
       "fields": [
         {
+          "name": "eyebrow",
+          "title": "Eyebrow",
+          "kind": "Short text",
+          "required": false,
+          "description": "A short line above the title. Optional.",
+          "length": "Up to 40 characters"
+        },
+        {
           "name": "heading",
           "title": "Section title",
           "kind": "Formatted text",

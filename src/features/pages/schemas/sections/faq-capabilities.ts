@@ -1,7 +1,10 @@
 import { declareCapabilities, notApplicable } from '@/lib/design/capabilities'
 import { backgroundFraming, NOT_APPLICABLE } from '@/lib/design/common-policies'
 
-/** The FAQ's design capabilities (task 275). Task 156 adds the Cards item style. */
+/**
+ * The FAQ's design capabilities (task 275). The Divided list (the default) draws no card, so a card's fill,
+ * border and mark apply on the Cards item style, a setting (task 156): each look has its own evidence.
+ */
 export const faqCapabilities = declareCapabilities({
   surface: { policy: 'required', scope: 'card' },
   text: { policy: 'required', scope: 'card', roles: ['title', 'body'] },
@@ -12,7 +15,8 @@ export const faqCapabilities = declareCapabilities({
     scope: 'card',
     trigger: {
       kind: 'setting',
-      when: 'The FAQ item style is Cards (the setting arrives with 156)',
+      when: 'The FAQ item style is Cards',
+      path: 'itemStyle',
     },
   },
   icon: notApplicable('The chevron is a disclosure state, not an icon choice (137)'),

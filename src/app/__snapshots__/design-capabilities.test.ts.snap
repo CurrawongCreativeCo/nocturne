@@ -108,11 +108,11 @@ exports[`the design capability contract > events: reports what it offers today 1
 exports[`the design capability contract > faq: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "text required card: pending (156)",
-    "header required section: pending (156)",
+    "surface required card: verified",
+    "text required card: verified",
+    "header required section: verified",
     "mark required section: verified",
-    "mark required card: pending (156)",
+    "mark required card: verified",
     "depth conditional card: pending (146)",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",

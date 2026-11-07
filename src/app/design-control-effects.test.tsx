@@ -93,6 +93,20 @@ const PLAN_BASE: Patch = {
 
 const FAMILIES: readonly Family[] = [
   {
+    component: 'faq',
+    base: { eyebrow: 'Questions', intro: 'An intro.' },
+    boxes: [
+      { field: 'headerDesign', at: 'headerDesign' },
+      { field: 'cardDesign', at: 'cardDesign' },
+    ],
+  },
+  // The same box on the Cards look, which also offers a fill and a border.
+  {
+    component: 'faq',
+    base: { itemStyle: 'cards' },
+    boxes: [{ field: 'cardDesign', at: 'cardDesign' }],
+  },
+  {
     component: 'events',
     base: { eyebrow: 'What’s on', text: 'An intro.' },
     boxes: [
