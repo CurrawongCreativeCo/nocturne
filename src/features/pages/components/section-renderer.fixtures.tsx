@@ -178,5 +178,26 @@ export function stableOutput(html: string): string {
   })
 }
 
+const ID_ATTRIBUTE = /\sid="([^"]+)"/g
+const REFERENCE_ATTRIBUTE =
+  /\s(?:for|aria-(?:labelledby|describedby|controls|owns|details|errormessage|flowto|activedescendant))="([^"]+)"/g
+
+/**
+ * What `stableOutput` must not hide: an id used twice, and an attribute that points at an id nothing has.
+ * Renaming keeps both visible (two uses of one id stay one name), and the parity test fails on either.
+ */
+export function idProblems(html: string): string[] {
+  const seen = new Map<string, number>()
+  for (const [, id = ''] of html.matchAll(ID_ATTRIBUTE)) seen.set(id, (seen.get(id) ?? 0) + 1)
+  const duplicates = [...seen].filter(([, count]) => count > 1).map(([id]) => `duplicate id: ${id}`)
+  const broken = [...html.matchAll(REFERENCE_ATTRIBUTE)].flatMap(([match, ids = '']) =>
+    ids
+      .split(/\s+/)
+      .filter((id) => id && !seen.has(id))
+      .map((id) => `broken reference: ${match.trim().split('=')[0] ?? ''} -> ${id}`),
+  )
+  return [...duplicates, ...broken]
+}
+
 export const fingerprint = (html: string) =>
   createHash('sha256').update(stableOutput(html)).digest('hex').slice(0, 16)

@@ -7,6 +7,7 @@ import type { FullSection, PageSection, SectionGate } from '../types'
 import {
   fingerprint,
   gallerySeed,
+  idProblems,
   projectSections,
   renderSections,
   type RawSection,
@@ -92,6 +93,8 @@ const panelOf = (html: string) => /data-panel="([^"]+)"/.exec(html)?.[1] ?? null
 
 async function caseOf(raw: RawSection, options?: Parameters<typeof renderSections>[1]) {
   const html = await renderSections(await projectSections([raw]), options)
+  // Generated ids are renamed for the hash, so their integrity is checked here on the real output.
+  expect(idProblems(html), `${raw._type}: ids in the output`).toEqual([])
   return { hash: fingerprint(html), panel: panelOf(html) }
 }
 
@@ -183,5 +186,34 @@ describe('SectionRenderer output parity', () => {
         .then((sections) => renderSections(sections)),
     ])
     expect(unsetHtml).toBe(firstHtml)
+  })
+})
+
+describe('stableOutput keeps what the ids mean', () => {
+  it('renames generated ids by first appearance, so their letters don’t matter', () => {
+    expect(fingerprint('<p id="_R_dt_"></p><b aria-describedby="_R_dt_"></b>')).toBe(
+      fingerprint('<p id="_R_9t_"></p><b aria-describedby="_R_9t_"></b>'),
+    )
+  })
+
+  it('still sees a reference moved to another element', () => {
+    const right = '<p id="_R_a_"></p><p id="_R_b_"></p><b aria-describedby="_R_a_"></b>'
+    const wrong = '<p id="_R_a_"></p><p id="_R_b_"></p><b aria-describedby="_R_b_"></b>'
+    expect(fingerprint(wrong)).not.toBe(fingerprint(right))
+  })
+
+  it('still sees one id used twice where there were two', () => {
+    const two = '<p id="_R_a_"></p><p id="_R_b_"></p>'
+    const one = '<p id="_R_a_"></p><p id="_R_a_"></p>'
+    expect(fingerprint(one)).not.toBe(fingerprint(two))
+  })
+
+  it('reports duplicate ids and references to nothing, which a hash of a new baseline wouldn’t', () => {
+    expect(idProblems('<p id="_R_a_"></p><b aria-describedby="_R_a_"></b>')).toEqual([])
+    expect(idProblems('<p id="_R_a_"></p><p id="_R_a_"></p>')).toEqual(['duplicate id: _R_a_'])
+    expect(idProblems('<b aria-labelledby="_R_a_ _R_b_"></b><p id="_R_a_"></p>')).toEqual([
+      'broken reference: aria-labelledby -> _R_b_',
+    ])
+    expect(idProblems('<label for="_R_z_"></label>')).toEqual(['broken reference: for -> _R_z_'])
   })
 })
