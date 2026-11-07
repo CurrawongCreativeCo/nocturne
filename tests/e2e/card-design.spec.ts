@@ -222,6 +222,76 @@ for (const viewport of WIDTHS) {
       expect(await size('Location family', 'body')).toBeLessThan(18.5)
     })
 
+    // Each Link list layout, and a Glass row: the link is the card, so the mark is inside it.
+    for (const heading of [
+      'Links stacked family',
+      'Links cards family',
+      'Links editorial family',
+      'Links compact family',
+      'Links glass family',
+    ]) {
+      test(`${heading}: a link draws its own mark or the card’s, clipped to it, and is still one link`, async ({
+        page,
+      }) => {
+        await open(page)
+        const links = section(page, heading).locator('li[data-track-event="link_click"]')
+        await expect(links).toHaveCount(3)
+
+        const own = links.nth(0).getByRole('link')
+        const list = links.nth(1).getByRole('link')
+        const panel = links.nth(2).getByRole('button')
+        await expect(own.locator('[data-decorative-mark="item"]')).toHaveCount(1)
+        await expect(own.locator('[data-decorative-mark="card"]')).toHaveCount(0)
+        await expect(list.locator('[data-decorative-mark="card"]')).toHaveCount(1)
+        await expect(panel.locator('[data-decorative-mark="card"]')).toHaveCount(1)
+        await expectClipped(own.locator('[data-decorative-mark]'))
+        await expectClipped(list.locator('[data-decorative-mark]'))
+
+        // The mark takes the link's corners and size: drawn within it, whatever the layout.
+        const inside = await list.evaluate((link) => {
+          const outer = link.getBoundingClientRect()
+          const mark = link.querySelector('[data-decorative-mark]')?.getBoundingClientRect()
+          return (
+            mark !== undefined &&
+            mark.left >= outer.left - 1 &&
+            mark.right <= outer.right + 1 &&
+            mark.top >= outer.top - 1 &&
+            mark.bottom <= outer.bottom + 1
+          )
+        })
+        expect(inside).toBe(true)
+
+        // The pointer and the keyboard reach the link, not the mark, and the name is the link's own.
+        await expect(own).toHaveAccessibleName(/Open own/)
+        await expect(own).not.toHaveAccessibleName(/Card/)
+        await expect(own).toHaveAttribute('href', 'https://example.com/own')
+        await own.focus()
+        await expect(own).toBeFocused()
+        await page.keyboard.press('Tab')
+        await expect(list).toBeFocused()
+        const hit = await list.evaluate((link) => {
+          const { left, top, width, height } = link.getBoundingClientRect()
+          const under = document.elementFromPoint(left + width / 2, top + height / 2)
+          return under !== null && link.contains(under) && !under.closest('[data-decorative-mark]')
+        })
+        expect(hit).toBe(true)
+      })
+    }
+
+    test('a link that opens a panel still opens it, from the keyboard, with a mark inside', async ({
+      page,
+    }) => {
+      await open(page)
+      const button = section(page, 'Links cards family')
+        .locator('li[data-track-event="link_click"]')
+        .nth(2)
+        .getByRole('button')
+      await expect(button.locator('[data-decorative-mark="card"]')).toHaveCount(1)
+      await button.focus()
+      await page.keyboard.press('Enter')
+      await expect(page.getByRole('dialog')).toBeVisible()
+    })
+
     test('a customised plan draws its own mark, and the others the card’s', async ({ page }) => {
       await open(page)
       const plans = section(page, 'Pricing family').locator('ul.grid > li')

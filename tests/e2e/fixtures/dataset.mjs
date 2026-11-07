@@ -2907,6 +2907,42 @@ const familySection = (type, title, extra) => ({
   eyebrow: 'Eyebrow',
   ...extra,
 })
+/** A Link list with a card mark, a link with its own, and a link that opens a panel. */
+const familyLink = (key, link, design) => ({
+  _key: key,
+  _type: 'linkListItem',
+  eyebrow: 'Eyebrow',
+  label: `Open ${key}`,
+  description: 'A short description.',
+  link: { _type: 'link', ...link },
+  ...(design ? { design } : {}),
+})
+const linkFamily = (title, extra) =>
+  familySection('linkList', title, {
+    headingDisplay: 'text',
+    // Several Link lists on one page: social icons would draw the same named landmark in each.
+    socialSource: 'custom',
+    socialLinks: [],
+    ...extra,
+    cardDesign: {
+      mark: markStyle({ kind: 'text', text: 'Card', anchor: 'bottom-right', opacity: 10 }),
+    },
+    links: [
+      familyLink(
+        'own',
+        { linkType: 'external', url: 'https://example.com/own' },
+        {
+          appearance: 'custom',
+          mark: markStyle({ kind: 'icon', icon: 'heart', anchor: 'top-right', opacity: 12 }),
+        },
+      ),
+      familyLink('list', { linkType: 'external', url: 'https://example.com/list' }),
+      familyLink('panel', {
+        linkType: 'panel',
+        panel: { _type: 'reference', _ref: 'panel-enquire' },
+      }),
+    ],
+  })
 documents.push({
   _id: 'page-card-design',
   _type: 'page',
@@ -3085,7 +3121,14 @@ documents.push({
     }),
     headerFamily('featuresGrid', 'Features header', { intro: 'An intro.' }),
     headerFamily('logoCloud', 'Logos header', { intro: 'An intro.' }),
-    headerFamily('ctaBanner', 'CTA header', { text: 'An intro.' }),
+    // A page's panels are read from its `ctas` and rich text, not yet from a Link list's links, so the
+    // panel the Link lists below open must also be opened from somewhere else on the page.
+    headerFamily(
+      'ctaBanner',
+      'CTA header',
+      { text: 'An intro.' },
+      { ctas: [cta('Open enquiry', panel('panel-enquire', '/about'))] },
+    ),
     headerFamily('process', 'Process header', { intro: 'An intro.' }),
     headerFamily('gallery', 'Gallery header', { intro: 'An intro.' }),
     headerFamily('newsletterSignup', 'Newsletter header', { text: 'An intro.' }),
@@ -3098,6 +3141,11 @@ documents.push({
       intro: 'An intro.',
       cardDesign: { ...familyDesign, body: { size: 'small' } },
     }),
+    linkFamily('Links stacked family', { variant: 'stacked' }),
+    linkFamily('Links cards family', { variant: 'cards' }),
+    linkFamily('Links editorial family', { variant: 'editorial' }),
+    linkFamily('Links compact family', { variant: 'compact' }),
+    linkFamily('Links glass family', { variant: 'stacked', rowStyle: 'glass' }),
   ],
 })
 
