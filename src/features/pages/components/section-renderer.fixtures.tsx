@@ -164,11 +164,19 @@ export async function renderSections(
 }
 
 /**
- * A short, stable fingerprint of some output, for snapshots that must not change. The text role marker
- * (`data-text-role`) is left out: it styles nothing, so adding it to an element is not a change in output,
- * and these snapshots prove every class and every other attribute stayed the same.
+ * Output as the parity snapshots compare it: what a visitor can see or a style can reach, without two
+ * things that aren't a design's to promise. The text role marker (`data-text-role`) styles nothing. React's
+ * generated ids (`_R_dt_`) depend on where a component sits in the tree, so moving a header into a shared
+ * component changes their letters and nothing else: each is renamed by its first appearance, so which
+ * element a `for`, `aria-describedby` or `aria-labelledby` points at is still compared.
  */
-export const withoutTextRoles = (html: string) => html.replace(/ data-text-role="[a-z]+"/g, '')
+export function stableOutput(html: string): string {
+  const seen = new Map<string, string>()
+  return html.replace(/ data-text-role="[a-z]+"/g, '').replace(/_R_[a-z0-9]+_/g, (id) => {
+    if (!seen.has(id)) seen.set(id, `_R_${String(seen.size + 1)}_`)
+    return seen.get(id) ?? id
+  })
+}
 
 export const fingerprint = (html: string) =>
-  createHash('sha256').update(withoutTextRoles(html)).digest('hex').slice(0, 16)
+  createHash('sha256').update(stableOutput(html)).digest('hex').slice(0, 16)

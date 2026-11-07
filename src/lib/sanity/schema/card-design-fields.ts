@@ -55,8 +55,13 @@ export const eyebrowField = (max = 40) =>
     validation: (rule) => rule.max(max).warning(),
   })
 
-/** The section header's three roles, agency only. */
-export const headerDesignField = () =>
+/**
+ * The section header's three roles, agency only. `hidden` hides a role where the section doesn't draw it
+ * as text (a Link list's heading shown as a wordmark picture).
+ */
+export const headerDesignField = (
+  hidden: Partial<Record<'eyebrow' | 'heading' | 'intro', ConditionalPropertyCallback>> = {},
+) =>
   defineField({
     name: 'headerDesign',
     title: scopedGroupTitle('Section header', 'section'),
@@ -66,7 +71,12 @@ export const headerDesignField = () =>
     hidden: hiddenFromClients,
     options: { collapsible: true, collapsed: true },
     fields: (['eyebrow', 'heading', 'intro'] as const).map((role) =>
-      textRoleField({ role, inherits: 'the section’s own', capability: 'header' }),
+      textRoleField({
+        role,
+        inherits: 'the section’s own',
+        capability: 'header',
+        hidden: hidden[role],
+      }),
     ),
   })
 
@@ -82,7 +92,7 @@ interface CardFieldsConfig {
   /** Hides the mark where the layout draws no card to hold it. */
   markHidden?: ConditionalPropertyCallback
   /** What each role is drawn in until one is chosen, for the background's contrast warning. */
-  defaults: RoleDefaultColours
+  defaults?: RoleDefaultColours
   /** The array an item's design sits in, for the item-level contrast warning. */
   itemArray?: string
   /** Hides every field (an item's, until it is customised). */
@@ -95,7 +105,7 @@ interface CardFieldsConfig {
  */
 function withTextContrast<T extends FieldDefinition>(
   field: T,
-  { defaults, itemArray }: Pick<CardFieldsConfig, 'defaults' | 'itemArray'>,
+  { defaults = {}, itemArray }: Pick<CardFieldsConfig, 'defaults' | 'itemArray'>,
 ): T {
   if (field.name !== 'background') return field
   return {

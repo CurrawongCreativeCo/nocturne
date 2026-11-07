@@ -28,10 +28,18 @@ export function textRoleProps(
   base: string,
   own: OwnText,
   style: TextStyle,
+  /**
+   * Classes in `base` the role owns that its own look can't name (an eyebrow's `tracking-wide`, which
+   * isn't the spaced capitals' value): dropped once anything is chosen, so two never compete.
+   */
+  alsoOwned = '',
 ): TextRoleProps {
   const look = textLook(style, own)
+  const unchanged = look.className === textLook({}, own).className
   return {
-    className: swapClasses(base, textLook({}, own).className, look.className),
+    className: unchanged
+      ? base
+      : swapClasses(base, `${textLook({}, own).className} ${alsoOwned}`.trim(), look.className),
     ...(look.style ? { style: look.style } : {}),
     'data-text-role': role,
   }
