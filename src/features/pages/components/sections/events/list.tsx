@@ -1,10 +1,12 @@
-import { PlainText } from '@/components/ui/plain-text'
 import type { SectionDefaults } from '@/components/ui/section-style'
+import { resolveCardDesign } from '@/lib/sanity/card-design'
 
 import {
   DateBadge,
+  EVENT_ROLES,
   EventPills,
   EventsView,
+  EventSummary,
   EventTitle,
   WhenAndWhere,
   type EventsLayout,
@@ -35,32 +37,37 @@ function Chevron() {
 const layout: EventsLayout = {
   defaults: DEFAULTS,
   placeholderClassName: 'min-h-72 rounded-card bg-surface-alt motion-safe:animate-pulse',
-  render: (entries, { level }) => (
-    <ul className="divide-y divide-line border-y border-line">
-      {entries.map((entry) => (
-        <li
-          key={`${entry.event._id}-${entry.occurrence.start}`}
-          className="group relative flex items-start gap-4 px-2 py-6 transition-colors hover:bg-surface-alt sm:gap-6 sm:px-4"
-        >
-          <DateBadge entry={entry} />
-          <div className="min-w-0 flex-1">
-            <WhenAndWhere entry={entry} />
-            <EventTitle
-              entry={entry}
-              level={level}
-              className="mt-1 text-h4 font-semibold text-balance"
-            />
-            <PlainText
-              text={entry.event.summary}
-              className="mt-2 max-w-measure text-pretty text-ink-muted"
-            />
-            <EventPills entry={entry} />
-          </div>
-          <Chevron />
-        </li>
-      ))}
-    </ul>
-  ),
+  render: (entries, { level, cardDesign }) => {
+    const look = resolveCardDesign(cardDesign, EVENT_ROLES)
+    return (
+      <ul className="divide-y divide-line border-y border-line">
+        {entries.map((entry) => (
+          <li
+            key={`${entry.event._id}-${entry.occurrence.start}`}
+            className="group relative flex items-start gap-4 px-2 py-6 transition-colors hover:bg-surface-alt sm:gap-6 sm:px-4"
+          >
+            <DateBadge entry={entry} />
+            <div className="min-w-0 flex-1">
+              <WhenAndWhere entry={entry} look={look} />
+              <EventTitle
+                entry={entry}
+                level={level}
+                className="mt-1 text-h4 font-semibold text-balance"
+                look={look}
+              />
+              <EventSummary
+                entry={entry}
+                className="mt-2 max-w-measure text-pretty text-ink-muted"
+                look={look}
+              />
+              <EventPills entry={entry} />
+            </div>
+            <Chevron />
+          </li>
+        ))}
+      </ul>
+    )
+  },
 }
 
 /** List: the next events, a row each. A repeating event appears once, at its next date. */

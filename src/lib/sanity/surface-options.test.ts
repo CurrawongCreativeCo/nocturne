@@ -6,6 +6,8 @@ import {
   resolveIconDesign,
   resolveSurface,
   ringSurfaceLook,
+  SURFACE_STRENGTHS,
+  SURFACE_STRENGTH_FRACTION,
 } from './surface-options'
 
 const OWN = { background: 'bg-surface hover:bg-surface-alt', border: 'ring-1 ring-inset ring-line' }
@@ -34,6 +36,32 @@ describe('resolveSurface', () => {
     expect(resolveSurface({ borderColour: { colour: 'custom', hex: '#B8962E' } })).toEqual({
       borderColour: '#b8962e',
     })
+  })
+})
+
+describe('the Wash strength', () => {
+  it('is a faint 12% tint, below every glass strength, and still a choice a card can store', () => {
+    expect(resolveSurface({ backgroundStrength: 'wash' })).toEqual({ strength: 'wash' })
+    expect(SURFACE_STRENGTH_FRACTION.wash).toBe(0.12)
+    expect(SURFACE_STRENGTH_FRACTION.wash).toBeLessThan(SURFACE_STRENGTH_FRACTION.light)
+    expect(SURFACE_STRENGTHS[0]).toBe('wash')
+  })
+
+  it('draws a ring surface and glass at 12% of the colour', () => {
+    const design = resolveSurface({ background: { colour: 'accent' }, backgroundStrength: 'wash' })
+    expect(
+      (ringSurfaceLook(design, OWN).style as Record<string, string>)['--surface-bg'],
+    ).toContain('12%')
+    expect(
+      (glassSurfaceLook(design, { strength: 'medium' }).style as Record<string, string>)[
+        '--glass-tint'
+      ],
+    ).toContain('12%')
+  })
+
+  it('leaves the existing strengths where they were, so stored Light is still Light', () => {
+    expect(SURFACE_STRENGTH_FRACTION.light).toBe(0.55)
+    expect(resolveSurface({ backgroundStrength: 'light' })).toEqual({ strength: 'light' })
   })
 })
 

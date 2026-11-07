@@ -1,8 +1,8 @@
 import { createElement } from 'react'
 
-import { postCardFields } from '@/features/blog/api/queries'
+import { blogSettingsFields, postCardFields } from '@/features/blog/api/queries'
 import { PostCard } from '@/features/blog/components/post-card'
-import type { PostCardData } from '@/features/blog/types'
+import type { BlogCardDesign, PostCardData } from '@/features/blog/types'
 import {
   fixtureDocuments,
   projectFragment,
@@ -34,12 +34,18 @@ export const VIEW_DRAWERS: Readonly<Record<string, ViewDrawer>> = {
     seed: async () => {
       const post = (await fixtureDocuments()).find((doc) => doc._type === 'post')
       if (!post) throw new Error('The fixtures have no post to draw a card from.')
-      return { post: structuredClone(post) }
+      return { post: structuredClone(post), settings: {} }
     },
     draw: async (state) => {
       const raw = { ...(state.post as Record<string, unknown>), _id: PROBE_POST, _type: 'post' }
       const post = (await projectFragment(postCardFields, raw)) as PostCardData
-      return renderToHtml(createElement(PostCard, { post }))
+      // Blog settings, projected as the site reads it, so a card is drawn from what the page is given.
+      const settings = (await projectFragment(blogSettingsFields, {
+        ...(state.settings as Record<string, unknown>),
+        _id: 'blogSettings',
+        _type: 'blogSettings',
+      })) as { cardDesign?: BlogCardDesign }
+      return renderToHtml(createElement(PostCard, { post, cardDesign: settings.cardDesign }))
     },
   },
 }

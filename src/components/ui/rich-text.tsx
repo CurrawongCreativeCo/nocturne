@@ -1,7 +1,9 @@
 import { PortableText, type PortableTextComponents, type PortableTextProps } from 'next-sanity'
+import type { CSSProperties } from 'react'
 
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink, type LinkData } from '@/components/ui/sanity-link'
+import type { TextRole } from '@/lib/design/capabilities'
 import type { SanityImageData } from '@/types/sanity'
 
 /**
@@ -61,13 +63,18 @@ const components: PortableTextComponents = {
 export function RichText({
   value,
   className,
+  style,
+  textRole,
 }: {
   value: PortableTextProps['value'] | null | undefined
   className?: string
+  style?: CSSProperties
+  /** The text role this body draws (lib/design/capabilities.ts). */
+  textRole?: TextRole
 }) {
   if (!value || (Array.isArray(value) && value.length === 0)) return null
   return (
-    <div className={className}>
+    <div className={className} style={style} data-text-role={textRole}>
       <PortableText value={value} components={components} />
     </div>
   )

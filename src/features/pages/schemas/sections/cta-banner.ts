@@ -4,6 +4,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -29,6 +30,7 @@ export const ctaBanner = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Title',
@@ -65,6 +67,7 @@ export const ctaBanner = defineType({
         },
         validation: (rule) => rule.required(),
       }),
+      headerDesignField(),
       accessField,
     ],
     { spacing: 'compact', align: 'center' },

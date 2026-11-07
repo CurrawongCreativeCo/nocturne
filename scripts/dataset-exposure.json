@@ -65,6 +65,10 @@
       "why": "Every redirect is visible to anyone who follows it."
     },
     "stripePrice": { "class": "published", "why": "Prices are shown on the website." },
+    "blogSettings": {
+      "class": "published",
+      "why": "Holds only the look of the blog's post cards, which every blog page shows. No personal or secret data."
+    },
     "experiment": {
       "class": "internal",
       "why": "Test configuration; no personal data. Visible if the dataset is public."

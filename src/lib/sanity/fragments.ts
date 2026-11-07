@@ -206,7 +206,28 @@ export const splitSupportingFields = /* groq */ `
  * A section's shared layout and style options (schema: lib/sanity/schema/section-style.ts). Every
  * section fragment projects it as `style { ${sectionStyleFields} }`; SectionFrame reads it.
  */
+/** A decorative mark (lib/sanity/schema/decorative-mark.ts), its approved picture resolved to a CDN URL. */
+export const decorativeMarkFields = /* groq */ `
+  kind,
+  text,
+  font,
+  align,
+  "pictureUrl": picture->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,
+  keepColours,
+  icon,
+  size,
+  phoneScale,
+  anchor,
+  offsetX,
+  offsetY,
+  colour { colour, hex },
+  opacity,
+  rotation,
+  layer
+`
+
 export const sectionStyleFields = /* groq */ `
+  mark { ${decorativeMarkFields} },
   tone,
   spacing,
   width,

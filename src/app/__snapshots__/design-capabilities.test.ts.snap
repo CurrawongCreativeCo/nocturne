@@ -13,9 +13,9 @@ exports[`the design capability contract > badgeRow: reports what it offers today
 exports[`the design capability contract > blogPostCards: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "text required card: pending (156)",
-    "mark required card: pending (156)",
+    "surface required card: verified",
+    "text required card: verified",
+    "mark required card: verified",
     "depth required card: pending (146)",
     "action required card: pending (137)",
     "framing required card: pending (177)",
@@ -30,8 +30,8 @@ exports[`the design capability contract > ctaBanner: reports what it offers toda
 {
   "capabilities": [
     "surface required card: pending (159)",
-    "header required section: pending (156)",
-    "mark required section: pending (156)",
+    "header required section: verified",
+    "mark required section: verified",
     "depth required card: pending (146)",
     "action conditional item: pending (137)",
     "framing conditional section/background: pending (177)",
@@ -49,7 +49,7 @@ exports[`the design capability contract > embed: reports what it offers today 1`
 {
   "capabilities": [
     "surface required card: pending (148)",
-    "header required section: pending (156)",
+    "header required section: verified",
     "depth required card: pending (148)",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
@@ -62,20 +62,32 @@ exports[`the design capability contract > embed: reports what it offers today 1`
 }
 `;
 
+exports[`the design capability contract > eventDetailsCard: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: pending (280)",
+    "text required card: pending (280)",
+    "mark required card: pending (280)",
+    "depth required card: pending (146)",
+  ],
+  "sources": [],
+}
+`;
+
 exports[`the design capability contract > events: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card @featured: pending (156)",
-    "text required card @list: pending (156)",
-    "text required card @agenda: pending (156)",
-    "text required card @featured: pending (156)",
-    "header required section @list: pending (156)",
-    "header required section @agenda: pending (156)",
-    "header required section @featured: pending (156)",
-    "mark required section @list: pending (156)",
-    "mark required section @agenda: pending (156)",
-    "mark required section @featured: pending (156)",
-    "mark required card @featured: pending (156)",
+    "surface required card @featured: verified",
+    "text required card @list: verified",
+    "text required card @agenda: verified",
+    "text required card @featured: verified",
+    "header required section @list: verified",
+    "header required section @agenda: verified",
+    "header required section @featured: verified",
+    "mark required section @list: verified",
+    "mark required section @agenda: verified",
+    "mark required section @featured: verified",
+    "mark required card @featured: verified",
     "depth required card @featured: pending (146)",
     "action required card @list: pending (137)",
     "action required card @featured: pending (137)",
@@ -108,11 +120,11 @@ exports[`the design capability contract > events: reports what it offers today 1
 exports[`the design capability contract > faq: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "text required card: pending (156)",
-    "header required section: pending (156)",
-    "mark required section: pending (156)",
-    "mark required card: pending (156)",
+    "surface required card: verified",
+    "text required card: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "mark required card: verified",
     "depth conditional card: pending (146)",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
@@ -128,10 +140,10 @@ exports[`the design capability contract > faq: reports what it offers today 1`] 
 exports[`the design capability contract > featuresGrid: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface conditional card: pending (156)",
+    "surface conditional card: pending (276)",
     "text required card: pending (276)",
-    "header required section: pending (156)",
-    "mark required section: pending (156)",
+    "header required section: verified",
+    "mark required section: verified",
     "depth conditional card: pending (146)",
     "icon required card: pending (158)",
     "action conditional card: pending (137)",
@@ -151,8 +163,8 @@ exports[`the design capability contract > formSection: reports what it offers to
 {
   "capabilities": [
     "surface required card: pending (148)",
-    "header required section: pending (156)",
-    "mark required section: pending (156)",
+    "header required section: verified",
+    "mark required section: verified",
     "depth required card: pending (148)",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
@@ -168,12 +180,12 @@ exports[`the design capability contract > formSection: reports what it offers to
 exports[`the design capability contract > gallery: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @grid: pending (156)",
-    "header required section @masonry: pending (156)",
-    "header required section @slider: pending (156)",
-    "mark required section @grid: pending (156)",
-    "mark required section @masonry: pending (156)",
-    "mark required section @slider: pending (156)",
+    "header required section @grid: verified",
+    "header required section @masonry: verified",
+    "header required section @slider: verified",
+    "mark required section @grid: verified",
+    "mark required section @masonry: verified",
+    "mark required section @slider: verified",
     "framing required card/tile @grid: pending (177)",
     "framing required card/tile @masonry: pending (177)",
     "framing required card/tile @slider: pending (177)",
@@ -214,10 +226,10 @@ exports[`the design capability contract > hero: reports what it offers today 1`]
     "header required section @split: pending (213)",
     "header required section @editorial: pending (213)",
     "header required section @full-bleed: pending (213)",
-    "mark required section @overlay: pending (156)",
-    "mark required section @split: pending (156)",
-    "mark required section @editorial: pending (156)",
-    "mark required section @full-bleed: pending (156)",
+    "mark required section @overlay: verified",
+    "mark required section @split: verified",
+    "mark required section @editorial: verified",
+    "mark required section @full-bleed: verified",
     "action conditional item @overlay: pending (137)",
     "action conditional item @split: pending (137)",
     "action conditional item @editorial: pending (137)",
@@ -280,22 +292,22 @@ exports[`the design capability contract > linkList: reports what it offers today
     "text required item @cards: verified",
     "text required item @editorial: verified",
     "text required item @compact: verified",
-    "header required section @stacked: pending (156)",
-    "header required section @cards: pending (156)",
-    "header required section @editorial: pending (156)",
-    "header required section @compact: pending (156)",
-    "mark required section @stacked: pending (156)",
-    "mark required section @cards: pending (156)",
-    "mark required section @editorial: pending (156)",
-    "mark required section @compact: pending (156)",
-    "mark required card @stacked: pending (156)",
-    "mark required card @cards: pending (156)",
-    "mark required card @editorial: pending (156)",
-    "mark required card @compact: pending (156)",
-    "mark required item @stacked: pending (156)",
-    "mark required item @cards: pending (156)",
-    "mark required item @editorial: pending (156)",
-    "mark required item @compact: pending (156)",
+    "header required section @stacked: verified",
+    "header required section @cards: verified",
+    "header required section @editorial: verified",
+    "header required section @compact: verified",
+    "mark required section @stacked: verified",
+    "mark required section @cards: verified",
+    "mark required section @editorial: verified",
+    "mark required section @compact: verified",
+    "mark required card @stacked: verified",
+    "mark required card @cards: verified",
+    "mark required card @editorial: verified",
+    "mark required card @compact: verified",
+    "mark required item @stacked: verified",
+    "mark required item @cards: verified",
+    "mark required item @editorial: verified",
+    "mark required item @compact: verified",
     "depth required card @stacked: verified",
     "depth required card @cards: verified",
     "depth required card @compact: verified",
@@ -372,11 +384,11 @@ exports[`the design capability contract > linkList: reports what it offers today
 exports[`the design capability contract > location: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "text required card: pending (156)",
-    "header required section: pending (156)",
-    "mark required section: pending (156)",
-    "mark required card: pending (156)",
+    "surface required card: verified",
+    "text required card: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "mark required card: verified",
     "depth required card: pending (146)",
     "icon required section: pending (158)",
     "framing conditional section/background: pending (177)",
@@ -400,10 +412,10 @@ exports[`the design capability contract > location: reports what it offers today
 exports[`the design capability contract > logoCloud: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @grid: pending (156)",
-    "header required section @marquee: pending (156)",
-    "mark required section @grid: pending (156)",
-    "mark required section @marquee: pending (156)",
+    "header required section @grid: verified",
+    "header required section @marquee: verified",
+    "mark required section @grid: verified",
+    "mark required section @marquee: verified",
     "framing conditional section/background @grid: pending (177)",
     "framing conditional section/background @marquee: pending (177)",
     "overlay required section @grid: verified",
@@ -431,12 +443,12 @@ exports[`the design capability contract > logoRow: reports what it offers today 
 exports[`the design capability contract > mediaText: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @side: pending (156)",
-    "header required section @stacked: pending (156)",
-    "header required section @overlay: pending (156)",
-    "mark required section @side: pending (156)",
-    "mark required section @stacked: pending (156)",
-    "mark required section @overlay: pending (156)",
+    "header required section @side: verified",
+    "header required section @stacked: verified",
+    "header required section @overlay: verified",
+    "mark required section @side: verified",
+    "mark required section @stacked: verified",
+    "mark required section @overlay: verified",
     "action conditional item @side: pending (137)",
     "action conditional item @stacked: pending (137)",
     "action conditional item @overlay: pending (137)",
@@ -476,8 +488,8 @@ exports[`the design capability contract > newsletterSignup: reports what it offe
 {
   "capabilities": [
     "surface required card: pending (148)",
-    "header required section: pending (156)",
-    "mark required section: pending (156)",
+    "header required section: verified",
+    "mark required section: verified",
     "depth required card: pending (148)",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
@@ -493,14 +505,14 @@ exports[`the design capability contract > newsletterSignup: reports what it offe
 exports[`the design capability contract > pricingTable: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "surface required item: pending (156)",
-    "text required card: pending (156)",
-    "text required item: pending (156)",
-    "header required section: pending (156)",
-    "mark required section: pending (156)",
-    "mark required card: pending (156)",
-    "mark required item: pending (156)",
+    "surface required card: verified",
+    "surface required item: verified",
+    "text required card: verified",
+    "text required item: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "mark required card: verified",
+    "mark required item: verified",
     "depth required card: pending (146)",
     "depth required item: pending (146)",
     "icon conditional card: pending (158)",
@@ -519,12 +531,12 @@ exports[`the design capability contract > pricingTable: reports what it offers t
 exports[`the design capability contract > process: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "text required card @vertical: pending (156)",
-    "text required card @alternating: pending (156)",
-    "header required section @vertical: pending (156)",
-    "header required section @alternating: pending (156)",
-    "mark required section @vertical: pending (156)",
-    "mark required section @alternating: pending (156)",
+    "text required card @vertical: verified",
+    "text required card @alternating: verified",
+    "header required section @vertical: verified",
+    "header required section @alternating: verified",
+    "mark required section @vertical: verified",
+    "mark required section @alternating: verified",
     "icon required card @vertical: pending (158)",
     "icon required card @alternating: pending (158)",
     "framing conditional section/background @vertical: pending (177)",
@@ -547,13 +559,33 @@ exports[`the design capability contract > process: reports what it offers today 
 exports[`the design capability contract > richText: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "mark required section: pending (156)",
+    "mark required section: verified",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
     "glass required section: verified",
     "divider required section: pending (151)",
     "edge required section: verified",
     "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > searchResults: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required section: pending (280)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > servicePage: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required section: pending (280)",
+    "framing required section: pending (177)",
+    "divider required section: pending (151)",
   ],
   "sources": [],
 }
@@ -578,13 +610,13 @@ exports[`the design capability contract > slotVideo: reports what it offers toda
 exports[`the design capability contract > stats: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card @cards: pending (156)",
-    "text required card @cards: pending (156)",
-    "header required section @inline: pending (156)",
-    "header required section @cards: pending (156)",
-    "mark required section @inline: pending (156)",
-    "mark required section @cards: pending (156)",
-    "mark required card @cards: pending (156)",
+    "surface required card @cards: verified",
+    "text required card @cards: verified",
+    "header required section @inline: verified",
+    "header required section @cards: verified",
+    "mark required section @inline: verified",
+    "mark required section @cards: verified",
+    "mark required card @cards: verified",
     "depth conditional card @cards: pending (146)",
     "framing conditional section/background @inline: pending (177)",
     "framing conditional section/background @cards: pending (177)",
@@ -614,21 +646,21 @@ exports[`the design capability contract > statsBar: reports what it offers today
 exports[`the design capability contract > team: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card @grid: pending (156)",
-    "surface required card @slider: pending (156)",
-    "surface required card @list: pending (156)",
-    "text required card @grid: pending (156)",
-    "text required card @slider: pending (156)",
-    "text required card @list: pending (156)",
-    "header required section @grid: pending (156)",
-    "header required section @slider: pending (156)",
-    "header required section @list: pending (156)",
-    "mark required section @grid: pending (156)",
-    "mark required section @slider: pending (156)",
-    "mark required section @list: pending (156)",
-    "mark required card @grid: pending (156)",
-    "mark required card @slider: pending (156)",
-    "mark required card @list: pending (156)",
+    "surface required card @grid: verified",
+    "surface required card @slider: verified",
+    "surface required card @list: verified",
+    "text required card @grid: verified",
+    "text required card @slider: verified",
+    "text required card @list: verified",
+    "header required section @grid: verified",
+    "header required section @slider: verified",
+    "header required section @list: verified",
+    "mark required section @grid: verified",
+    "mark required section @slider: verified",
+    "mark required section @list: verified",
+    "mark required card @grid: verified",
+    "mark required card @slider: verified",
+    "mark required card @list: verified",
     "depth required card @grid: pending (146)",
     "depth required card @slider: pending (146)",
     "depth required card @list: pending (146)",
@@ -670,16 +702,16 @@ exports[`the design capability contract > team: reports what it offers today 1`]
 exports[`the design capability contract > testimonials: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card @grid: pending (156)",
-    "surface required card @slider: pending (156)",
-    "text required card @grid: pending (156)",
-    "text required card @slider: pending (156)",
-    "header required section @grid: pending (156)",
-    "header required section @slider: pending (156)",
-    "mark required section @grid: pending (156)",
-    "mark required section @slider: pending (156)",
-    "mark required card @grid: pending (156)",
-    "mark required card @slider: pending (156)",
+    "surface required card @grid: verified",
+    "surface required card @slider: verified",
+    "text required card @grid: verified",
+    "text required card @slider: verified",
+    "header required section @grid: verified",
+    "header required section @slider: verified",
+    "mark required section @grid: verified",
+    "mark required section @slider: verified",
+    "mark required card @grid: verified",
+    "mark required card @slider: verified",
     "depth required card @grid: pending (146)",
     "depth required card @slider: pending (146)",
     "framing required card/avatar @grid: pending (177)",
@@ -713,8 +745,8 @@ exports[`the design capability contract > testimonials: reports what it offers t
 exports[`the design capability contract > video: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @embed: pending (156)",
-    "header required section @ambient: pending (156)",
+    "header required section @embed: verified",
+    "header required section @ambient: verified",
     "framing conditional section/background @embed: pending (177)",
     "framing conditional section/background @ambient: pending (177)",
     "overlay required section @embed: verified",

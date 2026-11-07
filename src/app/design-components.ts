@@ -1,9 +1,13 @@
+import { blogSettings } from '@/features/blog/schemas/blog-settings'
 import { post } from '@/features/blog/schemas/post'
 import { postCardCapabilities } from '@/features/blog/schemas/post-card-capabilities'
+import { eventDetailsCardCapabilities } from '@/features/events/schemas/event-details-card-capabilities'
 import { sectionTypes } from '@/features/pages/schemas/sections'
 import { slotImage } from '@/features/pages/schemas/slot-image'
 import { slotVideo } from '@/features/pages/schemas/slot-video'
 import { SLOT_BLOCKS, SLOT_FAMILIES } from '@/features/pages/slots/registry'
+import { searchResultsCapabilities } from '@/features/search/schemas/search-results-capabilities'
+import { servicePageCapabilities } from '@/features/services/schemas/service-page-capabilities'
 import type { DesignCapabilityDeclaration } from '@/lib/design/capabilities'
 import type { ContractComponent, SlotHost } from '@/lib/design/capability-policy'
 import { schemaGate, type SchemaField } from '@/lib/design/schema-capabilities'
@@ -11,6 +15,7 @@ import * as badgeRow from '@/lib/sanity/schema/badge-row'
 import * as blockContent from '@/lib/sanity/schema/block-content'
 import * as cta from '@/lib/sanity/schema/cta'
 import * as decorativeDivider from '@/lib/sanity/schema/decorative-divider'
+import * as decorativeMark from '@/lib/sanity/schema/decorative-mark'
 import * as headingText from '@/lib/sanity/schema/heading-text'
 import * as imageDesign from '@/lib/sanity/schema/image-design'
 import * as launchDate from '@/lib/sanity/schema/launch-date'
@@ -33,11 +38,13 @@ const named = [
   slotVideo,
   // The document a listing's cards show: the blog's cards are drawn from a post.
   post,
+  blogSettings,
   ...[
     badgeRow,
     blockContent,
     cta,
     decorativeDivider,
+    decorativeMark,
     headingText,
     imageDesign,
     launchDate,
@@ -112,6 +119,27 @@ export const DESIGN_COMPONENTS: readonly ContractComponent[] = [
     }
   }),
   {
+    id: 'eventDetailsCard',
+    kind: 'view',
+    title: 'Event details card',
+    layouts: [],
+    declaration: eventDetailsCardCapabilities,
+  },
+  {
+    id: 'servicePage',
+    kind: 'view',
+    title: 'Service page',
+    layouts: [],
+    declaration: servicePageCapabilities,
+  },
+  {
+    id: 'searchResults',
+    kind: 'view',
+    title: 'Search results',
+    layouts: [],
+    declaration: searchResultsCapabilities,
+  },
+  {
     id: 'blogPostCards',
     kind: 'listing',
     title: 'Blog post cards',
@@ -122,14 +150,16 @@ export const DESIGN_COMPONENTS: readonly ContractComponent[] = [
 
 /**
  * The schema of a listing or a view: made from the real document types it draws, so evidence reads the
- * same fields the Studio shows. Blog post cards draw a post. Task 156 adds Blog settings (`settings`) as
- * a second field, once that document exists; nothing here invents one.
+ * same fields the Studio shows. Blog post cards draw a post, in the design Blog settings holds.
  */
 const VIEW_SCHEMAS: readonly SchemaField[] = [
   {
     name: 'blogPostCards',
     type: 'object',
-    fields: [{ name: 'post', type: 'post', group: 'content' }],
+    fields: [
+      { name: 'post', type: 'post', group: 'content' },
+      { name: 'settings', type: 'blogSettings', group: 'design' },
+    ],
   },
 ]
 

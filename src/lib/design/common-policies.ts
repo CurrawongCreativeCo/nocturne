@@ -19,6 +19,9 @@ export const REASONS = {
   headerTextOnly: 'Its only text is the section header, covered by that capability',
   notOn158: 'Not applicable (158 item 3)',
   noText: 'Holds no text that takes a role',
+  noEdge: 'Not a section, so it has no edge',
+  noFrameToAnimate: 'Has no section frame to animate',
+  noWashedPicture: 'No picture with a wash over it',
 } as const
 
 export const NOT_APPLICABLE = Object.fromEntries(

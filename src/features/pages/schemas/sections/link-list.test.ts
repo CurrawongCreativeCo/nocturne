@@ -266,7 +266,8 @@ describe('the link design summary', () => {
     if (!found) throw new Error(`No field ${name}`)
     return found
   }
-  const links = named(linkList.fields as unknown as Field[], 'links')
+  const listFields = linkList.fields as unknown as Field[]
+  const links = named(listFields, 'links')
   const appearance = named(links.of?.[0]?.fields, 'design')
 
   it('knows every field of a link’s Appearance, in its group, and nothing else', () => {
@@ -278,8 +279,94 @@ describe('the link design summary', () => {
           : [`${field.fieldset}:${field.name}`],
       )
     const fromSummary = LINK_DESIGN_PROPERTIES.map(
-      (property) => `${property.group}:${property.key}${property.part ? `.${property.part}` : ''}`,
+      // A mark is one choice in the form (its own type), and the summary reads it by its kind.
+      (property) =>
+        `${property.group}:${property.key}${property.part && property.key !== 'mark' ? `.${property.part}` : ''}`,
     )
     expect(fromSummary).toEqual(fromSchema)
+  })
+})
+
+describe('the Appearance switch and the card’s contrast warning, from the shared builders', () => {
+  interface Built {
+    name: string
+    validation?: (rule: unknown) => unknown
+    fields?: Built[]
+    of?: Built[]
+    options?: { list?: { value: string; title: string }[]; inheritable?: string }
+    initialValue?: unknown
+  }
+  const named = (list: readonly Built[] | undefined, name: string) => {
+    const found = list?.find((candidate) => candidate.name === name)
+    if (!found) throw new Error(`No field ${name}`)
+    return found
+  }
+  const top = linkList.fields as unknown as Built[]
+  const card = named(top, 'cardDesign')
+  const item = named(named(top, 'links').of?.[0]?.fields, 'design')
+
+  const warningOf = (field: Built) => {
+    let run: ((value: unknown, context: unknown) => Promise<unknown>) | undefined
+    const rule = {
+      custom: (fn: typeof run) => {
+        run = fn
+        return { warning: () => rule }
+      },
+    }
+    field.validation?.(rule)
+    if (!run) throw new Error(`${field.name} has no warning`)
+    return run
+  }
+  const client = () => ({ fetch: () => Promise.resolve(null) })
+  const DARK = { background: { colour: 'custom', hex: '#000000' }, strength: 'solid' }
+  const INK_ON_DARK = { label: { colour: { colour: 'custom', hex: '#111111' } } }
+  const context = (section: Record<string, unknown>, path: unknown[]) => ({
+    document: { pageBuilder: [{ _key: 's', _type: 'linkList', ...section }] },
+    path: ['pageBuilder', { _key: 's' }, ...path],
+    getClient: client,
+  })
+
+  it('stores the same value it always stored, and its wording is the Link list’s', () => {
+    const appearance = named(item.fields, 'appearance')
+    expect(appearance.options?.list).toEqual([{ value: 'custom', title: 'Customise this card' }])
+    expect(appearance.options?.inheritable).toBe('Use the Link list design')
+  })
+
+  it('warns about the label at card scope, in the Link list’s own words', async () => {
+    const result = await warningOf(named(card.fields, 'background'))(
+      undefined,
+      context({ cardDesign: { ...DARK, ...INK_ON_DARK } }, ['cardDesign', 'background']),
+    )
+    expect(result).toMatch(
+      /^The label may be hard to read on this background: [\d.]+:1 \(text needs 4\.5:1\)\.? ?/,
+    )
+    expect(result).toContain('Choose a stronger or different colour')
+    expect(result).not.toContain('measured over')
+  })
+
+  it('warns at item scope only when the item is customised', async () => {
+    const path = ['links', { _key: 'l' }, 'design', 'background']
+    const background = named(item.fields, 'background')
+    const links = (appearance: string) => ({
+      links: [{ _key: 'l', design: { appearance, ...DARK, ...INK_ON_DARK } }],
+    })
+    expect(await warningOf(background)(undefined, context(links('custom'), path))).toMatch(
+      /^The label may be hard to read/,
+    )
+    expect(await warningOf(background)(undefined, context(links('list'), path))).toBe(true)
+  })
+
+  it('names the photo when a Glass row is measured', async () => {
+    const result = await warningOf(named(card.fields, 'background'))(
+      undefined,
+      context(
+        {
+          rowStyle: 'glass',
+          cardDesign: { ...DARK, ...INK_ON_DARK },
+        },
+        ['cardDesign', 'background'],
+      ),
+    )
+    expect(result).toContain('measured over the lightest or darkest part of a photo')
   })
 })

@@ -1,11 +1,22 @@
 import { PinIcon } from '@sanity/icons/Pin'
-import { defineField, defineType, type PreviewValue } from 'sanity'
+import {
+  defineField,
+  defineType,
+  type ConditionalPropertyCallback,
+  type PreviewValue,
+} from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
@@ -21,6 +32,17 @@ const LIMITS = {
   directionsLabel: 30,
 } as const
 
+/** The text roles the details draw (location-capabilities.ts), and what each is drawn in. */
+export const LOCATION_ROLES = [{ role: 'title' }, { role: 'body' }, { role: 'meta' }] as const
+export const LOCATION_ROLE_COLOURS = { title: 'ink', body: 'muted', meta: 'ink' } as const
+
+/** Beside a map image the details stack with no card, so there is no fill, border or mark to set. */
+const hasPicture: ConditionalPropertyCallback = ({ document, path }) =>
+  Boolean(
+    (sectionAtStylePath(document, path) as { mapImage?: { asset?: unknown } } | undefined)?.mapImage
+      ?.asset,
+  )
+
 export const location = defineType({
   name: 'location',
   title: 'Location',
@@ -34,6 +56,7 @@ export const location = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Title',
@@ -95,6 +118,16 @@ export const location = defineType({
           rule.required(),
           lengthWarning(rule, LIMITS.directionsLabel, 'Labels'),
         ],
+      }),
+      headerDesignField(),
+      cardDesignField({
+        description:
+          'Text for the address, contact and hours. They sit on cards only without a map image, so a card’s fill, border and mark are shown then.',
+        roles: LOCATION_ROLES,
+        defaults: LOCATION_ROLE_COLOURS,
+        inherits: 'the section’s own',
+        surface: { hidden: hasPicture },
+        markHidden: hasPicture,
       }),
       accessField,
     ],

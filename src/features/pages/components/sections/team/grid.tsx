@@ -9,19 +9,21 @@ import type { SectionProps } from '../../../types'
 export const DEFAULTS: SectionDefaults = { tone: 'alt', container: 'max-w-content', align: 'start' }
 
 export function TeamGrid({ data, isFirst }: SectionProps<'team'>) {
-  const { block, text } = sectionTraits(data.style, DEFAULTS)
+  const { block, text, tone } = sectionTraits(data.style, DEFAULTS)
   const members = data.members ?? []
   if (members.length === 0) return null
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
-      <TeamHeader data={data} classes={`${block} ${text}`} />
+      <TeamHeader data={data} block={block} text={text} />
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {members.map((member, index) => (
           <li key={member._id}>
             <TeamCard
               member={member}
               design={data.imageDesign}
+              cardDesign={data.cardDesign}
+              tone={tone}
               headingLevel={headingLevelFor(data)}
               eager={isFirst && index === 0}
             />

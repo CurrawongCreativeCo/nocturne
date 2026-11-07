@@ -23,12 +23,15 @@ const DESIGN_VISUAL_SPEC = /design-settings-visual\.spec\.ts/
 const PANEL_PALETTE_SPEC = /section-panel-rendering\.spec\.ts/
 // Serves a header menu with dropdowns, which every page's header would show.
 const NAV_SUBMENUS_SPEC = /nav-submenus\.spec\.ts/
+// Gives the blog's post cards a design, which every blog page would show.
+const BLOG_CARD_SPEC = /blog-card-design\.spec\.ts/
 const ISOLATED_SPECS = [
   EXPERIMENTS_SPEC,
   DESIGN_SPEC,
   DESIGN_VISUAL_SPEC,
   PANEL_PALETTE_SPEC,
   NAV_SUBMENUS_SPEC,
+  BLOG_CARD_SPEC,
 ]
 
 /**
@@ -112,6 +115,14 @@ export default defineConfig({
       name: 'nav-submenus',
       testMatch: NAV_SUBMENUS_SPEC,
       dependencies: ['panel-palettes'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Designed post cards on every blog page; after `nav-submenus` so no other test, and no visual
+      // baseline, ever sees one. It switches the design off again when it ends.
+      name: 'blog-card-design',
+      testMatch: BLOG_CARD_SPEC,
+      dependencies: ['nav-submenus'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

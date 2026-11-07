@@ -137,6 +137,14 @@
       "title": "Testimonials",
       "fields": [
         {
+          "name": "eyebrow",
+          "title": "Eyebrow",
+          "kind": "Short text",
+          "required": false,
+          "description": "A short line above the title. Optional.",
+          "length": "Up to 40 characters"
+        },
+        {
           "name": "heading",
           "title": "Section title",
           "kind": "Formatted text",
@@ -151,6 +159,13 @@
           "length": "Up to 60 characters"
         },
         {
+          "name": "intro",
+          "title": "Intro",
+          "kind": "Long text",
+          "required": false,
+          "description": "A sentence or two under the title. Optional."
+        },
+        {
           "name": "items",
           "title": "Testimonials",
           "kind": "List",
@@ -161,6 +176,13 @@
               "title": "Quote",
               "kind": "Long text",
               "required": true
+            },
+            {
+              "name": "highlights",
+              "title": "Highlighted words",
+              "kind": "List",
+              "required": false,
+              "description": "Words to stand out, copied exactly from the quote. The quote itself stays as written."
             },
             {
               "name": "name",
@@ -176,11 +198,60 @@
               "description": "e.g. \"CEO, Acme\""
             },
             {
+              "name": "attribution",
+              "title": "Attribution line",
+              "kind": "Short text",
+              "required": false,
+              "description": "An extra line under the name, e.g. \"Client since 2019\". Optional."
+            },
+            {
               "name": "avatar",
               "title": "Avatar",
               "kind": "Image",
               "required": false,
               "imageSize": "800 × 800 px, square."
+            },
+            {
+              "name": "source",
+              "title": "Where it came from",
+              "kind": "Choice",
+              "required": false,
+              "description": "Shown as plain words on the card. Other is kept here but not shown.",
+              "choices": [
+                "Client feedback",
+                "Email",
+                "Survey",
+                "Google review",
+                "Other"
+              ]
+            },
+            {
+              "name": "date",
+              "title": "Date",
+              "kind": "Other",
+              "required": false,
+              "description": "When the client wrote it. Shown on the card."
+            },
+            {
+              "name": "rating",
+              "title": "Rating",
+              "kind": "Choice",
+              "required": false,
+              "description": "Only if the place it came from had a rating. Shown as stars, for this quote alone.",
+              "choices": [
+                "Undefined",
+                "Undefined",
+                "Undefined",
+                "Undefined",
+                "Undefined"
+              ]
+            },
+            {
+              "name": "permissionToPublish",
+              "title": "Permission to publish",
+              "kind": "Switch",
+              "required": false,
+              "description": "The person agreed to their words and name being shown here. Never shown on the site."
             }
           ]
         }
@@ -190,6 +261,14 @@
       "name": "faq",
       "title": "FAQ",
       "fields": [
+        {
+          "name": "eyebrow",
+          "title": "Eyebrow",
+          "kind": "Short text",
+          "required": false,
+          "description": "A short line above the title. Optional.",
+          "length": "Up to 40 characters"
+        },
         {
           "name": "heading",
           "title": "Section title",
@@ -237,6 +316,14 @@
       "name": "ctaBanner",
       "title": "Call to action banner",
       "fields": [
+        {
+          "name": "eyebrow",
+          "title": "Eyebrow",
+          "kind": "Short text",
+          "required": false,
+          "description": "A short line above the title. Optional.",
+          "length": "Up to 40 characters"
+        },
         {
           "name": "heading",
           "title": "Title",

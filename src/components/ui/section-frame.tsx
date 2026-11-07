@@ -4,6 +4,7 @@ import { LazyFloat } from '@/components/motion/float-lazy'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
 import { enterProps, revealChild, type ParallaxPlan } from '@/components/motion/presets'
+import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
 import {
   panelChoice,
   panelDomProps,
@@ -12,6 +13,7 @@ import {
 } from '@/lib/sanity/section-panel'
 import type { SiteDesign } from '@/lib/sanity/site-design'
 
+import { DecorativeMark } from './decorative-mark'
 import { SectionBackground } from './section-background'
 import {
   closeToTop,
@@ -147,8 +149,22 @@ function SectionFrameView({
       Boolean(resolved.edge) || resolved.motion === 'parallax' || resolved.motion === 'float',
   })
   const panelProps = panel ? panelDomProps(panel) : undefined
+  // A mark sits above the background and overlay. With a panel it stays behind the content unless asked
+  // to go behind the panel: inside the panel's box, over its fill. The container is only made a stacking
+  // layer when there is a mark to lay it over.
+  const mark = resolveDecorativeMark(style?.mark)
+  const markInPanel = Boolean(panel) && mark?.layer !== 'panel'
+  const markProps = {
+    input: style?.mark,
+    scope: 'section',
+    tone: resolved.tone,
+    // Only a picture or gradient is unknown behind the text: a panel without one is a known colour.
+    backdrop: Boolean(resolved.image ?? resolved.gradient),
+  } as const
+  const markInContainer = mark && markInPanel ? <DecorativeMark {...markProps} nested /> : null
+  const markClass = !mark ? '' : markInPanel ? 'relative isolate' : 'relative'
   const containerClass =
-    `${resolved.containerClass} ${containerClassName} ${panelProps?.className ?? ''}`.trim()
+    `${resolved.containerClass} ${containerClassName} ${panelProps?.className ?? ''} ${markClass}`.trim()
   const panelAttributes = panelProps
     ? {
         'data-panel': panelProps.render,
@@ -182,6 +198,25 @@ function SectionFrameView({
       {mediaNode}
     </>
   )
+  // Only present with a mark: an empty slot would shift every useId below it (the parity snapshots hold this).
+  const backLayers =
+    mark && !markInPanel ? (
+      <>
+        {background}
+        <DecorativeMark {...markProps} />
+      </>
+    ) : (
+      background
+    )
+  const withMark = (inside: ReactNode) =>
+    markInContainer ? (
+      <>
+        {markInContainer}
+        {inside}
+      </>
+    ) : (
+      inside
+    )
 
   const section = (
     <section
@@ -199,7 +234,7 @@ function SectionFrameView({
         placement={resolved.backgroundImage}
         isFirst={isFirst}
       />
-      {background}
+      {backLayers}
       {plan.kind === 'enter' && plan.target === 'container' ? (
         <MotionDiv
           {...enterProps(plan)}
@@ -207,7 +242,7 @@ function SectionFrameView({
           className={containerClass}
           style={panelProps?.style}
         >
-          {content}
+          {withMark(content)}
         </MotionDiv>
       ) : plan.kind === 'enter' ? (
         <MotionDiv
@@ -216,15 +251,17 @@ function SectionFrameView({
           className={containerClass}
           style={panelProps?.style}
         >
-          {Children.map(
-            [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
-            (child) =>
-              child ? <MotionDiv {...revealChild(plan.childVariants)}>{child}</MotionDiv> : null,
+          {withMark(
+            Children.map(
+              [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
+              (child) =>
+                child ? <MotionDiv {...revealChild(plan.childVariants)}>{child}</MotionDiv> : null,
+            ),
           )}
         </MotionDiv>
       ) : (
         <div className={containerClass} style={panelProps?.style} {...panelAttributes}>
-          {content}
+          {withMark(content)}
         </div>
       )}
     </section>

@@ -4,6 +4,12 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+  itemDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -21,6 +27,27 @@ const LIMITS = {
   title: 70,
   // text-lead in max-w-measure-narrow: about four lines.
   intro: 200,
+  // text-small under the plan's name, in a card a quarter of the content width.
+  description: 140,
+  meta: 40,
+  // The pill beside the plan's name.
+  badge: 20,
+} as const
+
+/** The text roles a plan card draws (pricing-table-capabilities.ts), and what each is drawn in. */
+export const PLAN_ROLES = [
+  { role: 'title' },
+  { role: 'price' },
+  { role: 'body' },
+  { role: 'label' },
+  { role: 'description' },
+] as const
+export const PLAN_ROLE_COLOURS = {
+  title: 'ink',
+  price: 'ink',
+  body: 'muted',
+  label: 'muted',
+  description: 'muted',
 } as const
 
 export const pricingTable = defineType({
@@ -33,6 +60,7 @@ export const pricingTable = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -84,6 +112,20 @@ export const pricingTable = defineType({
                 description: 'Leave empty to use the product name from Stripe.',
               }),
               defineField({
+                name: 'description',
+                type: 'text',
+                rows: 2,
+                description: 'A line or two under the name. Optional.',
+                validation: (rule) => lengthWarning(rule, LIMITS.description, 'Plan description'),
+              }),
+              defineField({
+                name: 'meta',
+                title: 'Detail line',
+                type: 'string',
+                description: 'A short line under the price, for example “90 minutes”. Optional.',
+                validation: (rule) => rule.max(LIMITS.meta).warning(),
+              }),
+              defineField({
                 name: 'features',
                 type: 'array',
                 of: [defineArrayMember({ type: 'string' })],
@@ -99,10 +141,24 @@ export const pricingTable = defineType({
                 validation: (rule) => rule.required(),
               }),
               defineField({
+                name: 'badgeText',
+                title: 'Badge text',
+                type: 'string',
+                description: 'What the highlighted plan’s badge says. Defaults to “Most popular”.',
+                hidden: ({ parent }) => (parent as PlanValue | undefined)?.highlighted !== true,
+                validation: (rule) => rule.max(LIMITS.badge).warning(),
+              }),
+              defineField({
                 name: 'ctaLabel',
                 title: 'Button text',
                 type: 'string',
                 description: 'Defaults to “Get started”.',
+              }),
+              itemDesignField({
+                noun: 'plan',
+                roles: PLAN_ROLES,
+                defaults: PLAN_ROLE_COLOURS,
+                itemArray: 'plans',
               }),
             ],
             preview: {
@@ -145,6 +201,14 @@ export const pricingTable = defineType({
             },
           }),
         ],
+      }),
+      headerDesignField(),
+      cardDesignField({
+        description:
+          'Shared background, border, text and mark for every plan. Inherit uses the default plan card. Customise one plan in Content → Appearance.',
+        roles: PLAN_ROLES,
+        defaults: PLAN_ROLE_COLOURS,
+        inherits: 'the default plan card',
       }),
       accessField,
     ],

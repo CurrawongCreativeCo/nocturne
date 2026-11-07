@@ -33,6 +33,14 @@ export const TEXT_ROLES = [
 ] as const
 export type TextRole = (typeof TEXT_ROLES)[number]
 
+/**
+ * The attribute every text role's element carries, so evidence can name the one element a role styles.
+ * A role's evidence must target this selector: a broader one (a whole card) would pass when the wrong
+ * element changes, which is how crossed wiring went unnoticed (`evidenceProblems`).
+ */
+export const TEXT_ROLE_ATTRIBUTE = 'data-text-role'
+export const textRoleTarget = (role: TextRole) => `[${TEXT_ROLE_ATTRIBUTE}="${role}"]`
+
 /** A build plan task, by number. */
 export type TaskNumber = number
 
@@ -264,11 +272,14 @@ export type ContentSourceId = (typeof CONTENT_SOURCES)[number]['id']
 export const SHARED_BUILDERS = {
   sectionStyle: 'src/lib/sanity/schema/section-style.ts',
   surfaceFields: 'src/lib/sanity/schema/surface-design.ts',
-  textStyleField: 'src/lib/sanity/schema/surface-design.ts',
+  textRoleField: 'src/lib/sanity/schema/surface-design.ts',
   iconDesignFields: 'src/lib/sanity/schema/surface-design.ts',
+  itemAppearanceField: 'src/lib/sanity/schema/item-appearance.ts',
+  itemStyleField: 'src/lib/sanity/schema/item-appearance.ts',
   badgeIconField: 'src/lib/sanity/schema/badge-icon-field.ts',
   framing: 'src/lib/sanity/schema/image-framing-option.ts',
   decorativeDivider: 'src/lib/sanity/schema/decorative-divider.ts',
+  decorativeMark: 'src/lib/sanity/schema/decorative-mark.ts',
   slotField: 'src/features/pages/slots/slot-field.ts',
   imageDesign: 'src/lib/sanity/schema/image-design.ts',
   avatarDesignField: 'src/lib/sanity/schema/avatar-design.ts',
@@ -305,7 +316,12 @@ export const FUTURE_COVERAGE = [
   { part: 'Site header', needs: ['glass'], tasks: [159] },
   { part: 'Mobile drawer', needs: ['glass'], tasks: [7], note: 'Optional quick actions' },
   { part: 'Footer', needs: ['icon', 'divider'], tasks: [158, 151] },
-  { part: 'Buttons (CtaLink)', needs: ['surface', 'depth', 'action'], tasks: [148, 137] },
+  {
+    part: 'Buttons (CtaLink)',
+    needs: ['surface', 'depth', 'action'],
+    tasks: [148, 137],
+    note: 'Task 148 also adopts the search form’s hand-styled button',
+  },
   {
     part: 'Booking facade',
     needs: ['surface', 'depth'],
@@ -314,26 +330,8 @@ export const FUTURE_COVERAGE = [
   },
   { part: 'Team member pages', needs: ['icon', 'framing', 'divider'], tasks: [158, 177, 151] },
   { part: 'Event pages', needs: ['framing', 'divider'], tasks: [177, 151] },
-  {
-    part: 'Event details card (events/components/event-view.tsx)',
-    needs: ['surface'],
-    tasks: [],
-    declaredBy: 156,
-  },
   { part: 'Blog post page', needs: ['framing'], tasks: [177] },
   { part: 'Location pages', needs: ['surface', 'text'], tasks: [278] },
-  {
-    part: 'Service page (services/components/service-view.tsx)',
-    needs: [],
-    tasks: [],
-    declaredBy: 156,
-  },
-  {
-    part: 'Search results (search/components/search-view.tsx)',
-    needs: [],
-    tasks: [],
-    declaredBy: 156,
-  },
 ] as const satisfies readonly FutureCoverage[]
 
 /** The reason a generated declaration starts with. The checks reject it, so a person must review. */

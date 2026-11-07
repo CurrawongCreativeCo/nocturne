@@ -6,6 +6,7 @@ import { CogIcon } from '@sanity/icons/Cog'
 import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { ComposeIcon } from '@sanity/icons/Compose'
 import { ControlsIcon } from '@sanity/icons/Controls'
+import { DocumentIcon } from '@sanity/icons/Document'
 import { DocumentsIcon } from '@sanity/icons/Documents'
 import { DownloadIcon } from '@sanity/icons/Download'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
@@ -265,6 +266,7 @@ const buildStructure = (
   ]
 
   const items: Item[] = [
+    singletonItem(S, 'blogSettings', DocumentIcon),
     // new-singleton:list
     ...(audience === 'agency' ? [waitingForReview(S, context), S.divider()] : []),
     pagesTree(S, context),

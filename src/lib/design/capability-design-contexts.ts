@@ -18,4 +18,12 @@ export interface DesignContext {
   reviewed: string
 }
 
-export const DESIGN_CONTEXTS: readonly DesignContext[] = []
+export const DESIGN_CONTEXTS: readonly DesignContext[] = [
+  {
+    component: 'blogPostCards',
+    path: 'settings',
+    why: 'A listing has no section to hold its design: the post cards’ controls live in Blog settings, a document.',
+    reviewer: 'owner',
+    reviewed: '2026-11-07',
+  },
+]

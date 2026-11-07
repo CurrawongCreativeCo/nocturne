@@ -9,18 +9,21 @@ import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { siteLanguage } from '@/config/env'
 import { BLOG_PATH, categoryPath, postPath } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
+import { formatDate } from '@/lib/format-date'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { articleId } from '@/lib/structured-data/ids'
 
 import { ArticleJsonLd } from './article-json-ld'
 import { PostCard } from './post-card'
-import { getPost } from '../api/get-posts'
+import { getBlogCardDesign, getPost } from '../api/get-posts'
 import type { PostData } from '../types'
 import { authorName } from '../utils/author'
-import { formatDate } from '../utils/format-date'
 
 export async function PostView({ slug, ...mode }: { slug: string } & FetchMode) {
-  const post = await getPost({ slug, ...mode })
+  const [post, cardDesign] = await Promise.all([
+    getPost({ slug, ...mode }),
+    getBlogCardDesign(mode),
+  ])
   if (!post) notFound()
 
   const name = authorName(post.author)
@@ -81,7 +84,7 @@ export async function PostView({ slug, ...mode }: { slug: string } & FetchMode) 
             <ul className="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
               {post.related.map((related) => (
                 <li key={related._id}>
-                  <PostCard post={related} headingLevel="h3" />
+                  <PostCard post={related} headingLevel="h3" cardDesign={cardDesign} tone="alt" />
                 </li>
               ))}
             </ul>

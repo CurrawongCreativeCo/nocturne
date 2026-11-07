@@ -1,4 +1,10 @@
-import type { CapabilityId, ContentSourceId, Scope, TextRole } from './capabilities'
+import {
+  textRoleTarget,
+  type CapabilityId,
+  type ContentSourceId,
+  type Scope,
+  type TextRole,
+} from './capabilities'
 
 /**
  * Evidence (task 275; README, "Design capability contract"): each registered adoption of a design
@@ -102,9 +108,24 @@ const CROPPED = { _type: 'sanity.imageCrop', top: 0.2, bottom: 0.2, left: 0.2, r
 
 const SECTION_CONTAINER = 'section > :last-child'
 
-type FrameCapability = 'overlay' | 'glass' | 'edge' | 'motion'
+type FrameCapability = 'overlay' | 'glass' | 'edge' | 'motion' | 'mark'
 
 const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component' | 'layouts'>> = {
+  // A mark draws nothing until it is chosen, so the claim is that the probe draws it, from SectionFrame, on
+  // every section whose policy allows one (the unit test of the schema, renderer and policy agreeing is in
+  // src/app/design-capabilities.test.ts). Words stand for the kinds; the Testimonials entries cover each.
+  mark: {
+    capability: 'mark',
+    scope: 'section',
+    field: 'style.mark',
+    resolvers: [
+      { module: '@/lib/sanity/decorative-mark-options', export: 'resolveDecorativeMark' },
+    ],
+    render: 'src/components/ui/section-frame.tsx',
+    target: '[data-decorative-mark="section"]',
+    change: 'appears',
+    probe: { 'style.mark.kind': 'text', 'style.mark.text': 'Thanks' },
+  },
   overlay: {
     capability: 'overlay',
     scope: 'section',
@@ -168,6 +189,135 @@ function frameEvidence(
       ...FRAME[capability],
     }),
   )
+}
+
+// ---------------------------------------------------------------------------------------------------
+// A card family's shared design (task 156): surface, text roles, section header and marks
+
+interface CardFamilyEvidence {
+  component: string
+  layouts?: readonly string[]
+  /** The file that draws the cards, checked to exist. */
+  render: string
+  /** One card's element, which the surface and the card mark are found on. */
+  cardTarget: string
+  /** The stored content every case starts from: it must draw every role and the header. */
+  base: Patch
+  /** The text roles the cards draw, each proven on its own element. */
+  roles: readonly TextRole[]
+  /** The header roles, drawn by SectionHeader. */
+  headerRoles?: readonly TextRole[]
+  /** The file that draws them, when a section composes them itself (Image + text's intro is its body). */
+  headerRender?: string
+  /** The array whose members have their own Appearance, and which member the probes set. */
+  item?: { array: string; index?: number }
+  /** The Cards box's name on the section. */
+  box?: string
+  /** Where the family has no card of its own at a layout, the layouts it does (surface and marks). */
+  cardLayouts?: readonly string[]
+  /** The layouts its text roles draw on, when not all of them. */
+  roleLayouts?: readonly string[]
+  /**
+   * A look that is a setting, not a layout (FAQ's Divided list and Cards): names these entries, so each look
+   * has independent evidence for what it draws. `base` sets the look.
+   */
+  look?: string
+  /** What this call proves. Default: everything. A look that draws no card proves only its text. */
+  parts?: readonly ('surface' | 'text' | 'header' | 'mark')[]
+}
+
+/**
+ * The evidence of a card family's shared design: the same cases for every family, so a role, a part and a
+ * scope are each proven on their own. A role's target is that role's own element (data-text-role), the
+ * surface's the card, a mark's the mark's own box, and the item scope sets the item's Appearance first.
+ */
+function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
+  const {
+    component,
+    layouts,
+    render,
+    cardTarget,
+    base,
+    roles,
+    item,
+    cardLayouts,
+    roleLayouts,
+    look,
+  } = config
+  const box = config.box ?? 'cardDesign'
+  const proves = (part: 'surface' | 'text' | 'header' | 'mark') =>
+    !config.parts || config.parts.includes(part)
+  const named = look ? `.${look}` : ''
+  const index = item?.index ?? 0
+  const scopes = item ? (['card', 'item'] as const) : (['card'] as const)
+  const pathOf = (scope: 'card' | 'item', field: string) =>
+    scope === 'card' ? `${box}.${field}` : `${item?.array}[].design.${field}`
+  const probeOf = (scope: 'card' | 'item', field: string) =>
+    scope === 'card' ? `${box}.${field}` : `${item?.array}.${String(index)}.design.${field}`
+  const baseOf = (scope: 'card' | 'item' | 'section'): Patch =>
+    scope !== 'item'
+      ? base
+      : { ...base, [`${item?.array}.${String(index)}.design.appearance`]: 'custom' }
+  const common = (scope: 'card' | 'item' | 'section', covers: readonly string[] | undefined) => ({
+    component,
+    ...(covers ? { layouts: covers } : {}),
+    scope,
+    render,
+    base: baseOf(scope),
+  })
+  return [
+    ...(proves('surface') ? scopes : []).map((scope): CapabilityEvidence => ({
+      id: `${component}.surface.${scope}${named}`,
+      ...common(scope, cardLayouts ?? layouts),
+      capability: 'surface',
+      field: pathOf(scope, 'border'),
+      resolvers: [{ module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' }],
+      target: cardTarget,
+      change: 'attributes',
+      probe: { [probeOf(scope, 'border')]: 'thick' },
+    })),
+    ...(proves('text') ? scopes : []).flatMap((scope) =>
+      roles.map((role): CapabilityEvidence => ({
+        id: `${component}.text.${scope}${named}.${role}`,
+        ...common(scope, roleLayouts ?? layouts),
+        capability: 'text',
+        role,
+        field: pathOf(scope, role),
+        resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+        target: textRoleTarget(role),
+        change: 'attributes',
+        probe: { [probeOf(scope, `${role}.size`)]: 'large' },
+      })),
+    ),
+    ...(proves('header') ? (config.headerRoles ?? []) : []).map((role): CapabilityEvidence => ({
+      id: `${component}.header.section.${role}`,
+      ...common('section', layouts),
+      capability: 'header',
+      role,
+      field: `headerDesign.${role}`,
+      resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+      render: config.headerRender ?? 'src/components/ui/section-header.tsx',
+      target: textRoleTarget(role),
+      change: 'attributes',
+      probe: { [`headerDesign.${role}.size`]: 'large' },
+    })),
+    ...(proves('mark') ? scopes : []).map((scope): CapabilityEvidence => ({
+      id: `${component}.mark.${scope}${named}`,
+      ...common(scope, cardLayouts ?? layouts),
+      capability: 'mark',
+      field: pathOf(scope, 'mark'),
+      resolvers: [
+        { module: '@/lib/sanity/decorative-mark-options', export: 'resolveDecorativeMark' },
+      ],
+      render: 'src/components/ui/decorative-mark.tsx',
+      target: `[data-decorative-mark="${scope}"]`,
+      change: 'appears',
+      probe: {
+        [probeOf(scope, 'mark.kind')]: 'text',
+        [probeOf(scope, 'mark.text')]: 'Thanks',
+      },
+    })),
+  ]
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -250,6 +400,32 @@ const linkListContent = (thumbnails: boolean): Patch => ({
 })
 const CUSTOMISED = { 'links.0.design.appearance': 'custom' }
 
+const TESTIMONIALS = 'src/features/pages/components/sections/testimonials'
+const TESTIMONIAL_LAYOUTS = ['grid', 'slider']
+/** One quote drawing every text role, under a header drawing every header role. */
+const TESTIMONIAL_CONTENT: Patch = {
+  title: 'Fixture title',
+  eyebrow: 'Eyebrow',
+  intro: 'A short intro.',
+  items: [
+    {
+      _key: 'q1',
+      _type: 'testimonial',
+      quote: 'Kind words.',
+      name: 'Fixture Person',
+      role: 'Owner',
+      attribution: 'Client since 2019',
+      source: 'client-feedback',
+      date: '2026-03-12',
+    },
+  ],
+}
+
+const MARK_MEASURED = {
+  section: 'a section mark sits behind its content, clipped to its section, with no layout shift',
+  card: 'a card mark sits behind its text, clipped to its card, with no layout shift',
+} as const
+
 const WITH_CARDS = ['stacked', 'cards', 'compact']
 /** The text roles each layout draws: Compact shows the label only. */
 const TEXT_ROLES_DRAWN = [
@@ -306,8 +482,8 @@ const linkListEvidence: CapabilityEvidence[] = [
       field: scope === 'card' ? `cardDesign.${role}` : `links[].design.${role}`,
       resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
       render: LINK_LIST,
-      target: LINK_ITEMS,
-      change: 'content',
+      target: textRoleTarget(role),
+      change: 'attributes',
       base: scope === 'card' ? linkListContent(true) : { ...linkListContent(true), ...CUSTOMISED },
       probe: {
         [scope === 'card' ? `cardDesign.${role}.size` : `links.0.design.${role}.size`]: 'large',
@@ -605,7 +781,18 @@ const locationSources: SourceEvidence[] = [
 // The registry
 
 export const EVIDENCE: readonly Evidence[] = [
+  // A listing's design lives in Blog settings, so its controls are `settings.cardDesign.*` in the listing's
+  // schema (design-components.ts) and its drawer draws the real PostCard from them.
+  ...cardFamilyEvidence({
+    component: 'blogPostCards',
+    box: 'settings.cardDesign',
+    render: 'src/features/blog/components/post-card.tsx',
+    cardTarget: 'article',
+    base: {},
+    roles: ['meta', 'title', 'body'],
+  }),
   ...frameEvidence('hero', {
+    mark: ['overlay', 'split', 'editorial', 'full-bleed'],
     glass: ['overlay', 'split', 'editorial'],
     edge: ['overlay', 'split', 'editorial', 'full-bleed'],
     motion: ['overlay', 'split', 'editorial', 'full-bleed'],
@@ -628,7 +815,19 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { supporting: null },
     probe: { supporting: STATS_BAR },
   },
+  ...cardFamilyEvidence({
+    component: 'mediaText',
+    layouts: ['side', 'stacked', 'overlay'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Our story' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerRender: 'src/features/pages/components/sections/media-text.tsx',
+  }),
   ...frameEvidence('mediaText', {
+    mark: ['side', 'stacked', 'overlay'],
     overlay: ['side', 'stacked'],
     glass: ['side', 'stacked', 'overlay'],
     edge: ['side', 'stacked', 'overlay'],
@@ -729,6 +928,84 @@ export const EVIDENCE: readonly Evidence[] = [
     motion: ['grid', 'slider'],
   }),
   {
+    id: 'testimonials.surface.card',
+    component: 'testimonials',
+    capability: 'surface',
+    scope: 'card',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'cardDesign.border',
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' }],
+    render: TESTIMONIALS,
+    target: 'figure',
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { 'cardDesign.border': 'thick' },
+  },
+  ...(['quote', 'attribution', 'label'] as const).map((role): CapabilityEvidence => ({
+    id: `testimonials.text.card.${role}`,
+    component: 'testimonials',
+    capability: 'text',
+    scope: 'card',
+    role,
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: `cardDesign.${role}`,
+    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+    render: TESTIMONIALS,
+    target: textRoleTarget(role),
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { [`cardDesign.${role}.size`]: 'large' },
+  })),
+  ...(['eyebrow', 'heading', 'intro'] as const).map((role): CapabilityEvidence => ({
+    id: `testimonials.header.section.${role}`,
+    component: 'testimonials',
+    capability: 'header',
+    scope: 'section',
+    role,
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: `headerDesign.${role}`,
+    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+    render: 'src/components/ui/section-header.tsx',
+    target: textRoleTarget(role),
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { [`headerDesign.${role}.size`]: 'large' },
+  })),
+  // A mark draws nothing until it is chosen, so its claim is that the probe draws it. Each kind has its own
+  // entry: a picture's is drawn from an approved frame document the fixtures hold, resolved through the
+  // page query, and its mask is measured in a browser (a mask loads with CORS: card-design.spec.ts).
+  ...(['section', 'card'] as const).flatMap((scope) =>
+    (['text', 'icon', 'picture'] as const).map((kind): CapabilityEvidence => {
+      const path = scope === 'section' ? 'style.mark' : 'cardDesign.mark'
+      return {
+        id: `testimonials.mark.${scope}.${kind}`,
+        component: 'testimonials',
+        capability: 'mark',
+        scope,
+        layouts: TESTIMONIAL_LAYOUTS,
+        field: path,
+        resolvers: [
+          { module: '@/lib/sanity/decorative-mark-options', export: 'resolveDecorativeMark' },
+        ],
+        render: 'src/components/ui/decorative-mark.tsx',
+        target: `[data-decorative-mark="${scope}"][data-mark-kind="${kind}"]`,
+        change: 'appears',
+        base: TESTIMONIAL_CONTENT,
+        probe:
+          kind === 'text'
+            ? { [`${path}.kind`]: 'text', [`${path}.text`]: 'Thanks' }
+            : kind === 'icon'
+              ? { [`${path}.kind`]: 'icon', [`${path}.icon`]: 'heart' }
+              : // An approved frame, resolved to its CDN artwork by the page query like a real one.
+                {
+                  [`${path}.kind`]: 'picture',
+                  [`${path}.picture`]: { _type: 'reference', _ref: 'frame-picture' },
+                },
+        measured: [{ file: 'tests/e2e/card-design.spec.ts', cases: [MARK_MEASURED[scope]] }],
+      }
+    }),
+  ),
+  {
     id: 'testimonials.manual',
     component: 'testimonials',
     source: 'testimonials.manual',
@@ -751,45 +1028,245 @@ export const EVIDENCE: readonly Evidence[] = [
         cases: [
           'draws each stored quote, name and role in its own card',
           'draws only what was stored',
-          'draws no source label, rating or review markup',
+          'draws no source label or rating unless stored',
+          'draws a stored source, date, rating and attribution as plain words, with no review markup',
+          'never draws the permission confirmation',
           'draws no cards without items',
           'draws nothing of its own once the quote card is disconnected',
         ],
       },
     ],
   },
-  ...frameEvidence('richText', { overlay: true, glass: true, edge: true, motion: true }),
-  ...frameEvidence('featuresGrid', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('richText', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'featuresGrid',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Why us', intro: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...frameEvidence('featuresGrid', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'logoCloud',
+    layouts: ['grid', 'marquee'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Trusted by', intro: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('logoCloud', {
+    mark: ['grid', 'marquee'],
     overlay: ['grid', 'marquee'],
     glass: ['grid', 'marquee'],
     edge: ['grid', 'marquee'],
     motion: ['grid', 'marquee'],
   }),
-  ...frameEvidence('faq', { overlay: true, glass: true, edge: true, motion: true }),
+  // The Divided list is the default and draws no card; Cards is a setting. Each look proves its own text, and
+  // only Cards proves a fill, a border and a mark. Unset is Divided, so its base stores nothing.
+  ...cardFamilyEvidence({
+    component: 'faq',
+    look: 'divided',
+    parts: ['text', 'header'],
+    render: 'src/features/pages/components/sections/faq.tsx',
+    cardTarget: 'details',
+    base: { eyebrow: 'Questions', intro: 'An intro.' },
+    roles: ['title', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'faq',
+    look: 'cards',
+    parts: ['surface', 'text', 'mark'],
+    render: 'src/features/pages/components/sections/faq.tsx',
+    cardTarget: 'div.relative.rounded-card',
+    base: { 'cardDesign.itemStyle': 'cards' },
+    roles: ['title', 'body'],
+  }),
+  ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
   // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
-  ...frameEvidence('ctaBanner', { overlay: true, edge: true, motion: true }),
-  ...frameEvidence('formSection', { overlay: true, glass: true, edge: true, motion: true }),
-  ...frameEvidence('pricingTable', { overlay: true, glass: true, edge: true, motion: true }),
-  ...frameEvidence('newsletterSignup', { overlay: true, glass: true, edge: true, motion: true }),
+  ...cardFamilyEvidence({
+    component: 'ctaBanner',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Ready?', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...frameEvidence('ctaBanner', { mark: true, overlay: true, edge: true, motion: true }),
+  ...cardFamilyEvidence({
+    component: 'formSection',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Contact', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...frameEvidence('formSection', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'pricingTable',
+    render: 'src/features/pages/components/sections/pricing-table.tsx',
+    cardTarget: 'ul.grid > li',
+    // Every role needs content to draw: the description and detail line are optional, the rest always draw.
+    base: {
+      eyebrow: 'Plans',
+      plans: [
+        {
+          _key: 'probe-plan-1',
+          _type: 'plan',
+          price: { _type: 'reference', _ref: 'stripePrice-price_Starter1' },
+          description: 'A line about this plan.',
+          meta: '90 minutes',
+          features: ['One project', 'Email support'],
+        },
+        {
+          _key: 'probe-plan-2',
+          _type: 'plan',
+          price: { _type: 'reference', _ref: 'stripePrice-price_Pro1' },
+          features: ['Unlimited projects'],
+          highlighted: true,
+        },
+      ],
+    },
+    roles: ['title', 'price', 'body', 'label', 'description'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+    item: { array: 'plans' },
+  }),
+  ...frameEvidence('pricingTable', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'newsletterSignup',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Updates', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...frameEvidence('newsletterSignup', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'stats',
+    layouts: ['inline', 'cards'],
+    // Only the Cards layout draws a card, and 156 item 6 gives only its figures and labels text roles.
+    cardLayouts: ['cards'],
+    roleLayouts: ['cards'],
+    render: 'src/features/pages/components/sections/stats/cards.tsx',
+    cardTarget: 'ul.grid > li',
+    base: { eyebrow: 'In numbers', intro: 'An intro.' },
+    roles: ['number', 'label'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('stats', {
+    mark: ['inline', 'cards'],
     overlay: ['inline', 'cards'],
     glass: ['inline', 'cards'],
     edge: ['inline', 'cards'],
     motion: ['inline', 'cards'],
   }),
+  ...cardFamilyEvidence({
+    component: 'gallery',
+    layouts: ['grid', 'masonry', 'slider'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Our work', intro: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('gallery', {
+    mark: ['grid', 'masonry', 'slider'],
     overlay: ['grid', 'masonry', 'slider'],
     glass: ['grid', 'masonry', 'slider'],
     edge: ['grid', 'masonry', 'slider'],
     motion: ['grid', 'masonry', 'slider'],
   }),
-  ...frameEvidence('location', { overlay: true, glass: true, edge: true, motion: true }),
+  // Without a map image the details are cards, the look that proves a fill, a border and a mark. Beside one
+  // they stack on the section, so that look proves only its text. Each look proves its own.
+  ...cardFamilyEvidence({
+    component: 'location',
+    look: 'cards',
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    cardTarget: 'div.rounded-card.p-8',
+    base: { eyebrow: 'Find us', intro: 'An intro.', mapImage: null },
+    roles: ['title', 'body', 'meta'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'location',
+    look: 'picture',
+    parts: ['text'],
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    cardTarget: 'div.rounded-card.p-8',
+    base: { mapImage: PICTURE },
+    roles: ['title', 'body', 'meta'],
+  }),
+  ...frameEvidence('location', {
+    mark: true,
+    overlay: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'team',
+    layouts: ['grid', 'slider', 'list'],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    // A card (grid, slider) and a row (list) are both the one element with these classes.
+    cardTarget: 'div.relative.rounded-card',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    roles: ['title', 'meta', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('team', {
+    mark: ['grid', 'slider', 'list'],
     overlay: ['grid', 'slider', 'list'],
     glass: ['grid', 'slider', 'list'],
     edge: ['grid', 'slider', 'list'],
     motion: ['grid', 'slider', 'list'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'video',
+    layouts: ['embed', 'ambient'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Watch', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
   ...frameEvidence('video', {
     overlay: ['embed', 'ambient'],
@@ -797,21 +1274,105 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['embed', 'ambient'],
     motion: ['embed', 'ambient'],
   }),
+  ...cardFamilyEvidence({
+    component: 'process',
+    layouts: ['vertical', 'alternating'],
+    parts: ['text', 'header'],
+    render: 'src/features/pages/components/sections/process/process-step.tsx',
+    cardTarget: '',
+    base: {
+      eyebrow: 'How it works',
+      intro: 'An intro.',
+      steps: [
+        { _key: 'probe-step-1', _type: 'step', label: 'Step one', title: 'Meet', text: 'We talk.' },
+        {
+          _key: 'probe-step-2',
+          _type: 'step',
+          label: 'Step two',
+          title: 'Build',
+          text: 'We make it.',
+        },
+      ],
+    },
+    roles: ['label', 'title', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('process', {
+    mark: ['vertical', 'alternating'],
     overlay: ['vertical', 'alternating'],
     glass: ['vertical', 'alternating'],
     edge: ['vertical', 'alternating'],
     motion: ['vertical', 'alternating'],
   }),
+  ...cardFamilyEvidence({
+    component: 'embed',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Book', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('embed', { overlay: true, glass: true, edge: true, motion: true }),
+  ...cardFamilyEvidence({
+    component: 'events',
+    layouts: ['list', 'agenda', 'featured'],
+    // Only the Featured layout draws a card: the rows of the others get text roles alone.
+    cardLayouts: ['featured'],
+    render: 'src/features/pages/components/sections/events/events-parts.tsx',
+    cardTarget: 'article.relative.rounded-card',
+    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    roles: ['title', 'meta', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('events', {
+    mark: ['list', 'agenda', 'featured'],
     overlay: ['list', 'agenda', 'featured'],
     glass: ['list', 'agenda', 'featured'],
     edge: ['list', 'agenda', 'featured'],
     motion: ['list', 'agenda', 'featured'],
   }),
   ...locationSources,
+  ...cardFamilyEvidence({
+    component: 'linkList',
+    layouts: ALL_LINK_LIST,
+    parts: ['header'],
+    render: 'src/features/pages/components/sections/link-list/link-list-heading.tsx',
+    headerRender: 'src/features/pages/components/sections/link-list/link-list-heading.tsx',
+    cardTarget: '',
+    base: {
+      eyebrow: 'Find me',
+      intro: 'An intro.',
+      title: 'Fixture heading',
+      headingDisplay: 'text',
+    },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  // A mark at card and at item scope, each its own claim, on every layout and on a Glass row.
+  ...cardFamilyEvidence({
+    component: 'linkList',
+    layouts: ALL_LINK_LIST,
+    parts: ['mark'],
+    render: `${LINK_LIST}/link-design.tsx`,
+    cardTarget: '',
+    base: linkListContent(true),
+    roles: [],
+    item: { array: 'links' },
+  }),
+  ...cardFamilyEvidence({
+    component: 'linkList',
+    look: 'glass',
+    layouts: ['stacked'],
+    parts: ['mark'],
+    render: `${LINK_LIST}/glass-row.tsx`,
+    cardTarget: '',
+    base: { ...linkListContent(true), rowStyle: 'glass' },
+    roles: [],
+    item: { array: 'links' },
+  }),
   ...frameEvidence('linkList', {
+    mark: ['stacked', 'cards', 'editorial', 'compact'],
     overlay: ALL_LINK_LIST,
     edge: ALL_LINK_LIST,
     motion: ALL_LINK_LIST,

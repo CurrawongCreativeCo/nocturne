@@ -4,6 +4,11 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
@@ -22,6 +27,10 @@ const LIMITS = {
   // text-h2, balanced over max-w-measure-narrow.
   title: 60,
 } as const
+
+/** The text roles a member's card and row draw (team-capabilities.ts), and what each is drawn in. */
+export const TEAM_ROLES = [{ role: 'title' }, { role: 'meta' }, { role: 'body' }] as const
+export const TEAM_ROLE_COLOURS = { title: 'ink', meta: 'muted', body: 'muted' } as const
 
 /** The most members "Everyone" shows; the fragment slices to it (teamFragment in api/sections.ts). */
 export const TEAM_ALL_LIMIT = 60
@@ -62,6 +71,7 @@ export const team = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -119,6 +129,14 @@ export const team = defineType({
         hidden: ({ parent }) =>
           !teamPortraitControls((parent ?? {}) as Parameters<typeof teamPortraitControls>[0])
             .portrait,
+      }),
+      headerDesignField(),
+      cardDesignField({
+        description:
+          'Shared background, border, text and mark for every member card, and for the list’s rows. Inherit uses the default card.',
+        roles: TEAM_ROLES,
+        defaults: TEAM_ROLE_COLOURS,
+        inherits: 'the default card',
       }),
       accessField,
       // Shown first in the Content tab.

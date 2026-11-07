@@ -11,6 +11,7 @@ import {
 } from '@/config/embed-providers'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField } from '@/lib/sanity/schema/preset-field'
@@ -46,6 +47,7 @@ export const embed = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Title',
@@ -125,6 +127,7 @@ export const embed = defineType({
         ],
         hidden: ({ parent }) => !(parent as Parent)?.provider,
       }),
+      headerDesignField(),
       accessField,
     ],
     // How this section starts when added. Keep it equal to DEFAULTS in the component.

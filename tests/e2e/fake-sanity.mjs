@@ -17,6 +17,7 @@ import {
   documents,
   experimentRunning,
   footerSocialOn,
+  blogSettingsDesigned,
   markerUnset,
   navigationNested,
   releaseVersions,
@@ -53,8 +54,14 @@ let experimentPatch = null
 /** Whether the footer's social icons are on; switched by POST /__fixture/footer-social/<on|off>. */
 let footerSocialPatch = null
 
+/** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|off>. */
+let blogSettingsPatch = null
+
 /** Whether the header menu has dropdowns; switched by POST /__fixture/navigation/<flat|nested>. */
 let navigationPatch = null
+
+/** How many queries the lake has served, for GET /__fixture/query-count. */
+let queryCount = 0
 
 /** Writes the site made (the Stripe webhook syncing prices), served back by GET /__fixture/mutations. */
 const mutations = []
@@ -84,6 +91,7 @@ function datasetFor(perspective, variant) {
     .map((doc) =>
       experimentPatch && doc._type === 'experiment' ? { ...doc, ...experimentPatch } : doc,
     )
+  if (blogSettingsPatch) published.push(blogSettingsPatch)
   // Content variants replace the base documents with the same id, like the real Content Lake.
   const variantDocs = variant ? (variantDocuments[variant] ?? []) : []
   const swapped = new Set(variantDocs.map((doc) => doc._id))
@@ -129,6 +137,12 @@ createServer(async (req, res) => {
   const footerSocial = /^\/__fixture\/footer-social\/(on|off)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && footerSocial) {
     footerSocialPatch = footerSocial === 'on' ? footerSocialOn : null
+    res.writeHead(204).end()
+    return
+  }
+  const blogSettings = /^\/__fixture\/blog-settings\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && blogSettings) {
+    blogSettingsPatch = blogSettings === 'on' ? blogSettingsDesigned : null
     res.writeHead(204).end()
     return
   }
@@ -183,6 +197,13 @@ createServer(async (req, res) => {
     res.end(JSON.stringify({ transactionId: 'fixture', results: [] }))
     return
   }
+  // Every query served so far, so a spec can hold a page to the request budget (README, "Request budget").
+  if (req.method === 'GET' && url.pathname === '/__fixture/query-count') {
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify({ count: queryCount }))
+    return
+  }
+
   if (!url.pathname.includes('/data/query/')) {
     res.writeHead(404).end()
     return
@@ -195,6 +216,7 @@ createServer(async (req, res) => {
     return
   }
 
+  queryCount += 1
   let query = url.searchParams.get('query') ?? ''
   let params = {}
   let perspective = url.searchParams.get('perspective') ?? 'published'

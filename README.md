@@ -1021,6 +1021,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **`/api/site-info`** adds none: it is prerendered and reads only environment variables.
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
+- **Blog settings** adds one query, `BLOG_SETTINGS_QUERY`: the blog's post cards read their design from it (`getBlogCardDesign`), cached under its own tag, `blogSettings`, so a change to it refreshes the blog pages and nothing else. It is one cached entry for the whole site, so it costs one request per build and one per publish of that document, and a page view causes none.
 - **Link list** adds none: its links, profile and social icons are resolved inside `PAGE_QUERY` (the social icons come from the settings entry the footer already fetched), and which links are due is decided at request time from that cached data. The page option is one more field in `PAGE_QUERY`.
 - **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
 - **Events** add none to a page view: an Events section's events are resolved inside `PAGE_QUERY` (an `event` or `eventCategory` change expires the pages, tagged `event` and `eventCategory`; the business time zone comes from the same query). An event page adds `EVENT_QUERY`, one per event, and `EVENTS_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/events/…` URLs cost nothing. The calendar feed adds `EVENTS_FEED_QUERY`, one cached entry for the whole site; an event's `.ics` file reads the event's own entry. Which events are upcoming is decided per request from that cached data, so no visitor causes a Sanity request.
@@ -1065,7 +1066,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "place", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "blogSettings", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "place", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1202,6 +1203,8 @@ private dataset, which is what the privacy check looks for.
 ### Pricing table
 
 `src/features/pricing` plus the `pricingTable` section. Stripe is the source of truth for prices; Sanity holds a read-only copy (`stripePrice` documents) so editors can pick prices by reference and pages stay cached. There is no Stripe SDK: the few REST calls use `fetch`, as the forms do for Resend.
+
+**Plan cards** (task 156). Each plan can also carry a _Description_ (a line or two under the name), a _Detail line_ under the price (for example "90 minutes") and, on the highlighted plan, _Badge text_ (default "Most popular"). All are optional and draw nothing while empty. The agency-only _Design_ tab has a _Section header_ box (eyebrow, title and intro), a _Cards_ box (fill, border, the five text roles: title, price, body, label and description, and a decorative mark) and, on each plan, an _Appearance_ switch: "Use the section's card design" or "Customise this card", which changes only the properties chosen there. A customised plan's own mark replaces the card mark on that plan (None removes it). The highlighted plan's ring is the ink colour and twice as thick until a border is chosen. Every one is empty by default, and an empty design draws what the table always drew. The label role is the billing period and the detail line; the price steps from the nearest type-scale step because its default size sits off the scale. A brand-gradient border for the highlighted plan is deferred to the shared surface looks, proposed under task 159.
 
 **Environment** (all server-side; `.env.example` lists them; none has a `NEXT_PUBLIC_` prefix, and a secret must never get one):
 
@@ -2473,37 +2476,40 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
-| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R…   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
-| Rich text (`richText`)                   | –       | –    | –      | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
-| Features grid (`featuresGrid`)           | C…      | R…   | R…     | R…   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Testimonials (`testimonials`), 2 layouts | R…      | R…   | R…     | R…   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| FAQ (`faq`)                              | R…      | R…   | R…     | R…   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Call to action banner (`ctaBanner`)      | R…      | –    | R…     | R…   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
-| Form (`formSection`)                     | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Pricing table (`pricingTable`)           | R…      | R…   | R…     | R…   | R…    | C…   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Newsletter signup (`newsletterSignup`)   | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Stats (`stats`), 2 layouts               | R…*     | R…*  | R…     | R…*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R…     | R…   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Location (`location`)                    | R…      | R…   | R…     | R…   | R…    | R…   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R…      | R…   | R…     | R…   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Video (`video`), 2 layouts               | –       | –    | R…     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Process (`process`), 2 layouts           | –       | R…   | R…     | R…   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Embed (`embed`)                          | R…      | –    | R…     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R…   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R…*     | R…   | R…     | R…*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
+| Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
+| Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
+| Form (`formSection`)                     | R…      | –    | R✓     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R…    | C…   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Newsletter signup (`newsletterSignup`)   | R…      | –    | R✓     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R…    | R…   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Embed (`embed`)                          | R…      | –    | R✓     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R◐   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Launch date (`launchDate`)               | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R…      | –          | –       | –     | –       | –    | –      | –     |
 | Video (`slotVideo`)                      | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
-| Blog post cards (`blogPostCards`)        | R…      | R…   | –      | R…   | R…    | –    | R…     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
+| Event details card (`eventDetailsCard`)  | R…      | R…   | –      | R…   | R…    | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
+| Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R…    | –    | R…     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 101      | 0               | 189     |
+| Required                                                 | 225      | 0               | 84      |
 | Conditional                                              | 4        | 0               | 40      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2511,19 +2517,19 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
 | 137          | 3                | 4                   |
-| 146          | 8                | 3                   |
+| 146          | 9                | 3                   |
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
-| 151          | 19               | 0                   |
-| 156          | 124              | 1                   |
+| 151          | 20               | 0                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
-| 177          | 7                | 20                  |
+| 177          | 8                | 20                  |
 | 213          | 7                | 0                   |
-| 276          | 2                | 0                   |
+| 276          | 2                | 1                   |
+| 280          | 16               | 0                   |
 
-**Evidence.** 106 capability entries, 236 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 241 capability entries, 471 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -2562,41 +2568,37 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 
 **Reviewed exceptions.** Fields in a Design group that no shared builder made. An exception records how a field was built; it is never evidence that a capability works.
 
-| Component   | Fields                                                                                                                                                                              | Class     | Nature        | Reviewer | Removal task | Why it stays                                                                                                                                                                                                                                             |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- | -------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `hero`      | `eyebrowDesign`                                                                                                                                                                     | temporary | design        | owner    | 213          | Separator and colours for the eyebrow label list. Colour and type overlap the eyebrow text role.                                                                                                                                                         |
-| `hero`      | `proportion`                                                                                                                                                                        | permanent | layout        | owner    | –            | How Split shares the width between text and picture. A layout choice no capability covers.                                                                                                                                                               |
-| `hero`      | `imageShape`                                                                                                                                                                        | temporary | legacy        | owner    | 213          | Hidden and superseded by Image design, kept so stored choices still draw. Removing it needs a dry-run migration.                                                                                                                                         |
-| `logoCloud` | `logoColour`                                                                                                                                                                        | permanent | design        | owner    | –            | How logos are tinted. Specific to logos, and no capability covers it.                                                                                                                                                                                    |
-| `gallery`   | `columns`                                                                                                                                                                           | permanent | layout        | owner    | –            | Pictures across on a wide screen. A layout count.                                                                                                                                                                                                        |
-| `location`  | `interactiveMap`                                                                                                                                                                    | permanent | contentSource | owner    | –            | Switches the click-to-load map on: a content-source setting that sits in Advanced. The source needs its own evidence.                                                                                                                                    |
-| `embed`     | `customHeight`                                                                                                                                                                      | permanent | layout        | owner    | –            | The exact height of a third-party frame, under Advanced.                                                                                                                                                                                                 |
-| `events`    | `category`                                                                                                                                                                          | permanent | query         | owner    | –            | A query filter that sits in Advanced. Not a look.                                                                                                                                                                                                        |
-| `events`    | `count`                                                                                                                                                                             | permanent | query         | owner    | –            | A query limit that sits in Advanced. Not a look.                                                                                                                                                                                                         |
-| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 156          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.                                                                                                                                              |
-| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 156          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                                                                                                                                                          |
-| `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 158          | The social icon container and colour, overlapping the icon capability.                                                                                                                                                                                   |
-| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.                                                                                                                                                 |
-| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                                                                                                                                                         |
-| `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                                                                                                                                                               |
-| `linkList`  | `links[].design.appearance`                                                                                                                                                         | temporary | design        | owner    | 156          | The switch in a link’s own Appearance between “Use the Link list design” and “Customise this card”: it decides inheritance, not layout. Task 156 replaces this private implementation with a shared mechanism that keeps the saved values and behaviour. |
+| Component   | Fields                                                                                                                                                                              | Class     | Nature        | Reviewer | Removal task | Why it stays                                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `hero`      | `eyebrowDesign`                                                                                                                                                                     | temporary | design        | owner    | 213          | Separator and colours for the eyebrow label list. Colour and type overlap the eyebrow text role.                      |
+| `hero`      | `proportion`                                                                                                                                                                        | permanent | layout        | owner    | –            | How Split shares the width between text and picture. A layout choice no capability covers.                            |
+| `hero`      | `imageShape`                                                                                                                                                                        | temporary | legacy        | owner    | 213          | Hidden and superseded by Image design, kept so stored choices still draw. Removing it needs a dry-run migration.      |
+| `logoCloud` | `logoColour`                                                                                                                                                                        | permanent | design        | owner    | –            | How logos are tinted. Specific to logos, and no capability covers it.                                                 |
+| `gallery`   | `columns`                                                                                                                                                                           | permanent | layout        | owner    | –            | Pictures across on a wide screen. A layout count.                                                                     |
+| `location`  | `interactiveMap`                                                                                                                                                                    | permanent | contentSource | owner    | –            | Switches the click-to-load map on: a content-source setting that sits in Advanced. The source needs its own evidence. |
+| `embed`     | `customHeight`                                                                                                                                                                      | permanent | layout        | owner    | –            | The exact height of a third-party frame, under Advanced.                                                              |
+| `events`    | `category`                                                                                                                                                                          | permanent | query         | owner    | –            | A query filter that sits in Advanced. Not a look.                                                                     |
+| `events`    | `count`                                                                                                                                                                             | permanent | query         | owner    | –            | A query limit that sits in Advanced. Not a look.                                                                      |
+| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 281          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.           |
+| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 281          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                       |
+| `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 158          | The social icon container and colour, overlapping the icon capability.                                                |
+| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.              |
+| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                      |
+| `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                            |
 
-**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. 3 have no capability task yet: the task in `Declared by` brings them into the contract, which is not ownership of their design capabilities. Each capability's own closing task is set when the part is declared.
+**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Each has the tasks that will add its capabilities.
 
-| Not covered by the contract                           | Capabilities it will need | Capability tasks           | Declared by          |
-| ----------------------------------------------------- | ------------------------- | -------------------------- | -------------------- |
-| Site header                                           | Glass                     | 159                        | Its capability tasks |
-| Mobile drawer                                         | Glass                     | 7 (Optional quick actions) | Its capability tasks |
-| Footer                                                | Icon, Divider             | 158, 151                   | Its capability tasks |
-| Buttons (CtaLink)                                     | Surface, Depth, Action    | 148, 137                   | Its capability tasks |
-| Booking facade                                        | Surface, Depth            | 148 (Once task 95 exists)  | Its capability tasks |
-| Team member pages                                     | Icon, Framing, Divider    | 158, 177, 151              | Its capability tasks |
-| Event pages                                           | Framing, Divider          | 177, 151                   | Its capability tasks |
-| Event details card (events/components/event-view.tsx) | Surface                   | Set when declared          | Task 156             |
-| Blog post page                                        | Framing                   | 177                        | Its capability tasks |
-| Location pages                                        | Surface, Text             | 278                        | Its capability tasks |
-| Service page (services/components/service-view.tsx)   | Not assessed              | Set when declared          | Task 156             |
-| Search results (search/components/search-view.tsx)    | Not assessed              | Set when declared          | Task 156             |
+| Not covered by the contract | Capabilities it will need | Capability tasks                                                     | Declared by          |
+| --------------------------- | ------------------------- | -------------------------------------------------------------------- | -------------------- |
+| Site header                 | Glass                     | 159                                                                  | Its capability tasks |
+| Mobile drawer               | Glass                     | 7 (Optional quick actions)                                           | Its capability tasks |
+| Footer                      | Icon, Divider             | 158, 151                                                             | Its capability tasks |
+| Buttons (CtaLink)           | Surface, Depth, Action    | 148, 137 (Task 148 also adopts the search form’s hand-styled button) | Its capability tasks |
+| Booking facade              | Surface, Depth            | 148 (Once task 95 exists)                                            | Its capability tasks |
+| Team member pages           | Icon, Framing, Divider    | 158, 177, 151                                                        | Its capability tasks |
+| Event pages                 | Framing, Divider          | 177, 151                                                             | Its capability tasks |
+| Blog post page              | Framing                   | 177                                                                  | Its capability tasks |
+| Location pages              | Surface, Text             | 278                                                                  | Its capability tasks |
 
 <!-- design-capabilities:end -->
 
@@ -2621,7 +2623,9 @@ resolver, a component), then, for each component its contract lists as Required:
 **Recording Not applicable.** A component implements only the capabilities that suit its anatomy, and Not applicable is
 a reviewed, legitimate answer: write the reason a reader would accept ("No card surface", "Draws no icon"), naming the layout
 or the part when only some do not apply. `Not reviewed yet`, the reason `npm run new:section` starts with, is rejected by
-the checks, so a new section can't merge until each capability is reviewed. If a capability a component needs is missing
+the checks, so a new section can't merge until each capability is reviewed. It also starts without a section-level
+decorative mark (its type is listed in `NO_SECTION_MARK`, `src/lib/design/section-surfaces.ts`): to offer one, declare `mark`
+Required, add its evidence and delete that line. If a capability a component needs is missing
 from the contract, stop and propose it for the template: never write a private surface, text, header, mark, depth, icon,
 arrow, framing, overlay, glass or divider control.
 
@@ -3437,6 +3441,7 @@ and draws through the shared shape geometry (`src/lib/sanity/image-frame-geometr
 to the layout. Both are agency only, in the Design tab, and empty means the picture looks as it always did.
 
 - **Testimonials → Design → Avatar:** Medium circle (48 px) with no ring by default.
+- **Testimonials → Design → Cards and Section header:** the title is `heading` when it has words, otherwise the old `title`, never both. Below it: the default card with nothing set; presets Quiet, Outlined, Tinted and Statement write theme colour names into the box. Each quote can carry highlighted words (exact phrases, the stored quote stays plain), a source (plain words only, never a badge; Other is an internal classification and is never shown, so the date stands alone), a date, a rating for that quote alone, an attribution line and a permission confirmation (Studio warns until confirmed, never drawn). No review structured data: live Google reviews are task 277's.
 - **Team (List layout only) → Design → Portrait:** the list's small portraits are drawn by `ProfileImage` (a rounded square, the card's corners), Medium with no ring by default, which is the same size and corners the list always had. A list whose **Image design still changes how its portraits look** keeps drawing with it (`FramedImage`), and Studio shows Image design, with a note above Image shape on how to reach Portrait, instead of Portrait, so one picture never has both. Set **Image shape to Standard and Picture motion to None** and Portrait appears (and Image design goes). Nothing saved is deleted or moved: the rest of the Image design stays stored and is ignored. What counts as "changes how it looks": Rounded, Square corners, Circle or Arch; Framed with a frame; Subtle or Medium parallax. Standard, Framed with no frame, and motion None draw what the list draws anyway, and a frame, its colour or inset on anything but Framed, or Custom, travel, direction or scale on a picture that is not moving, are inactive leftovers (including `custom: false`, which Studio writes on every Image design). Grid and Slider show Image design only. The one rule is `hasImageDesign` in `src/lib/sanity/team-portrait.ts`, used by Studio's controls, its note and the site's drawing.
 
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and
@@ -3685,7 +3690,8 @@ the [Location](#location) section and team profile pages.
 ### Team
 
 Team members are documents (`teamMember`, in `src/features/team`), shown by the **Team** section and, when the site has
-profile pages, on their own page at `/team/<slug>`.
+
+- **Design (task 156, agency only).** A _Section header_ box (eyebrow, title and intro) and a _Cards_ box: fill, border, three text roles (title is the name, meta the role line, body the short bio) and a decorative mark, for the grid and slider cards and the list's rows alike, which draw the same surface. A section decorative mark sits in the section's own Design tab. Everything is empty by default and an empty design draws what the section always drew.profile pages, on their own page at `/team/<slug>`.
 
 - **A member.** _Name_ (required), _Role_, _Portrait_ (required, square, 800 px or wider; alt text is required and the usual
   image guidance warns about size and shape), _Short bio_ (up to 300 characters; the cards and the page's search
@@ -3893,10 +3899,11 @@ mode make sure the filter above includes `place`. Switching it off removes the r
 ### Events
 
 A content calendar: what is on, when and where. Events are documents (`event`, in `src/features/events`), shown by the
-**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
-to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
-calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
-list and an agenda, which is what most clients need.
+
+- **Design (task 156, agency only).** A _Section header_ box and a _Cards_ box. The text roles (title, meta for the date, time and place, body for the summary) apply to every layout. Only **Featured** draws a card, so its fill, border and decorative mark are offered there alone: List and Agenda rows are text only, and Studio hides those controls on them. A section decorative mark works on every layout. Empty by default, and an empty design draws what the section always drew.**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
+  to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
+  calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
+  list and an agenda, which is what most clients need.
 
 **Default, presets, advanced.**
 
@@ -4371,6 +4378,41 @@ server rendering) and runs axe over the gallery entries `features-grid-gradient-
 overlay, plus the unset defaults on a light and a dark tone). The fixture's `designSettings` holds two gradients and no
 colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
 the real guard for pictures is the Studio warning and the overlay values above.
+
+### Card design
+
+Every card family composes the same shared parts (task 156), so a family states which text roles it draws and writes no design control of its own: `cardDesignField`, `headerDesignField`, `eyebrowField`, `itemDesignField` (`src/lib/sanity/schema/card-design-fields.ts`), `CardSurface`, `SectionHeader` and `DecorativeMark`. All are agency only, and with nothing set a family draws what it always drew.
+
+| Family          | Text roles                             | Where the fill, border and card mark apply                                                                                                                  |
+| --------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Testimonials    | quote, attribution, label              | every layout                                                                                                                                                |
+| Pricing table   | title, price, body, label, description | every plan, and a customised plan's own Appearance                                                                                                          |
+| Team            | title, meta, body                      | grid and slider cards, and the list's rows                                                                                                                  |
+| Events          | title, meta, body                      | Featured only; List and Agenda are text only                                                                                                                |
+| FAQ             | title, body                            | the **Cards** item style only; **Divided list**, the default, is text only                                                                                  |
+| Stats           | number, label                          | the **Cards** layout only; Inline offers no Cards box                                                                                                       |
+| Location        | title, body, meta                      | the details' panels, without a map image; beside one they are text only                                                                                     |
+| Process         | label, title, body (each step)         | none: a step draws no card                                                                                                                                  |
+| Link list       | eyebrow, label, description            | every link, and a customised link's own Appearance; Editorial's ruled rows draw no fill or border, and take only the mark                                   |
+| Blog post cards | meta, title, body                      | every card, from the **Blog settings** document; a chosen fill or border also brings the card's corners and padding, since a card has no surface by default |
+
+**Section header.** Every section with a heading has an optional _Eyebrow_ and a _Section header_ box (eyebrow, heading and intro roles), agency only: Features grid, Logo cloud, Image + text (its intro is the body), CTA banner, Form, Newsletter, Gallery, Video, Embed, Process, Link list, and the families above. Logo cloud and Link list gain an optional _Intro_. Each section keeps its header's element, spacing and classes (`SectionHeader` takes them as props), and a heading shown as a Link list wordmark picture has no text role to style, so Studio hides it there. The parity tests compare output without the letters of React's generated ids, which depend on where a component sits in the tree: which element each id points at is still compared (`stableOutput`).
+
+A control is offered only where it does something: `src/app/design-control-effects.test.tsx` reads each family's real schema and fails if any control offered on a layout or look leaves the output unchanged. A look that is a setting rather than a layout (FAQ's item style, Location's map image) has its own evidence for what it draws. An item style is the first field of its Cards box (`itemStyleField`), and unset is the first value.
+
+### Decorative marks
+
+A faint word, picture or icon behind a section, card or item (task 156): the shared `decorativeMark` type (`src/lib/sanity/schema/decorative-mark.ts`), drawn by one server component, `DecorativeMark` (`src/components/ui/decorative-mark.tsx`), with no JavaScript. Empty or None draws nothing, and adds nothing to the page's markup. A section's sits in `style.mark`, on every section except Embed and Video (`takesSectionMark`, held to each section's capability declaration by a test); a card family's sits in its Cards box as `cardDesign.mark`. Testimonials offer both. Pricing plans and Link list links also offer one at item scope, on a customised item only: it replaces the card's, None removes it, and unset keeps the card's (`cardMarkChoice`).
+
+- **Content:** up to 24 characters of words, an icon from the shared set, or a picture. Pictures are approved frames (_Design > Image frames_), resized by the image CDN like every frame (`frameMaskUrl`, never the original) and drawn as a CSS mask so they take a tint, or in their own colours. Whether the CDN sends a CORS header makes no difference in Chromium, which `tests/e2e/card-design.spec.ts` measures as painted pixels; WebKit was checked by hand and Firefox not at all. A mask that failed to load would draw nothing and change nothing else on the page. Words are drawn from an attribute, so they are never read, copied or indexed as content.
+- **Bounds:** size relative to the container, Same, Smaller or Hidden on phones, nine anchors, offset ±25%, rotation ±30° in 5° steps, opacity 2–20% for words and icons and up to 40% for pictures. `resolveDecorativeMark` applies them again when drawing, so a stored value can't draw outside them.
+- **Layers:** picture, then overlay, then the mark, then the panel, then the content. On a section with a panel the mark sits inside the panel by default, over its fill; _Behind the panel_ puts it under. On a card it sits over the card's fill and under its text.
+- **Decorative only:** `aria-hidden`, no pointer events, never focusable, clipped to its own box, absolutely placed, so it can't cause a horizontal scroll, reach a neighbour or shift layout.
+- **Contrast:** `markOpacityAt` (`src/lib/color/mark-contrast.ts`) measures the text against its surface with the mark composited over it. A combination that fails lowers the opacity when drawn, or drops the mark if no opacity is safe; Studio's Opacity field warns with the same decision, and it is never an error. A picture in its own colours counts as anything from black to white, and so does what sits behind the text on a section with a picture or gradient. A panel without one is a known colour.
+- **Size:** relative to the container's width, and no taller than the container, so a short, wide card shows a whole mark.
+- **Position:** unset is the top centre, where a mark stays visible above cards that stack full width on a phone. A middle-anchored section mark sits behind opaque cards, so it is mostly hidden there: use the top, or a card mark. The Layer control only appears on a section that has a panel.
+
+Card contrast is one lookup for any family (`src/lib/color/card-contrast.ts`): each role in its chosen colour across the section, card and item levels, else the colour the family draws it in (`RoleDefaultColours`). `withCardTextContrast` adds the Background colour warning from it; a family can narrow it to the roles it measures and word it itself (`contrast`), as the Link list does for its label on a card or a Glass row.
 
 ### Decorative dividers
 
@@ -4974,6 +5016,7 @@ _None_ arrows and _No container_ icons are real values and are never mistaken fo
 **Inherit** button first, so going back is one click; switching a card back to _Use the Link list design_ keeps its
 choices but the page ignores them (and the query never sends them).
 
+- **A decorative mark** follows the same rule as a whole choice, not property by property: the list's _Cards_ puts one on every link, a customised link's own replaces it, and its _None_ removes it from that link. See [Decorative marks](#decorative-marks).
 - **Glass stays glass.** On Glass rows a colour **tints** the glass at the glass strength (or the chosen strength) through
   CSS variables `.glass-row` reads (`--glass-tint`, `--glass-border-width`, `--glass-border-colour`), so the blur, the
   glass's shadow and the nearly solid fallback (no blur support, reduced transparency) all stay. Only _Solid_ makes it
@@ -5451,13 +5494,13 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
-| Kind            | Files                                                                                                  | Shown for                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts)                          |
-| Hero presets    | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                                                 |
-| Animations      | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, subtle, fade, slide, staggered, float, parallax (three strengths) |
-| Tones           | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                                           |
-| Insert menu     | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                                                |
+| Kind                          | Files                                                                                                  | Shown for                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Section layouts, card presets | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts)                          |
+| Hero presets                  | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                                                 |
+| Animations                    | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, subtle, fade, slide, staggered, float, parallax (three strengths) |
+| Tones                         | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                                           |
+| Insert menu                   | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                                                |
 
 `registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 

@@ -8,6 +8,7 @@ import {
   imageDesignFields,
   imageFields,
   linkFields,
+  decorativeMarkFields,
   portableTextFields,
   sectionStyleFields,
   splitMediaFields,
@@ -25,6 +26,30 @@ import {
  * unless the query's `$members` parameter is true, so the cached public result never holds their
  * content. Only code that has already checked the visitor's session passes `$members: true`.
  */
+
+/** One text element's look (lib/sanity/text-style-options.ts). */
+const textStyleProjection = /* groq */ `size, weight, colour { colour, hex }, textCase, tracking, leading`
+
+/** A card's fill and border, and its icon's container (lib/sanity/surface-options.ts). */
+const surfaceProjection = /* groq */ `
+  background { colour, hex },
+  backgroundStrength,
+  border,
+  borderColour { colour, hex }
+`
+
+/** A role's text style, with the italic only a quote offers (lib/sanity/text-role.ts). */
+const roleStyleProjection = /* groq */ `${textStyleProjection}, fontStyle`
+
+/** The section header's eyebrow field and its three roles (components/ui/section-header.tsx). */
+const headerDesignProjection = /* groq */ `
+  eyebrow,
+  headerDesign {
+    eyebrow { ${roleStyleProjection} },
+    heading { ${roleStyleProjection} },
+    intro { ${roleStyleProjection} }
+  }
+`
 
 export const heroFragment = /* groq */ `
   _type == "hero" && (access != "members" || $members) => {
@@ -77,6 +102,11 @@ export const mediaTextFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    headerDesign {
+      eyebrow { ${roleStyleProjection} },
+      heading { ${roleStyleProjection} },
+      intro { ${roleStyleProjection} }
+    },
     body[] { ${portableTextFields} },
     ctas[] { ${ctaFields} },
     image { ${imageFields} },
@@ -95,6 +125,7 @@ export const featuresGridFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
     columns,
     items[] {
       _key,
@@ -113,6 +144,8 @@ export const logoCloudFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    intro,
+    ${headerDesignProjection},
     logos[] {
       _key,
       name,
@@ -120,6 +153,29 @@ export const logoCloudFragment = /* groq */ `
       image { ${imageFields} }
     }
   }
+`
+
+/**
+ * The title, meta and body roles, a fill and a mark: the Team's box for its cards and rows, and the Events
+ * section's (whose Featured layout draws the one card).
+ */
+const teamCardDesignProjection = /* groq */ `
+  ${surfaceProjection},
+  title { ${roleStyleProjection} },
+  meta { ${roleStyleProjection} },
+  body { ${roleStyleProjection} },
+  mark { ${decorativeMarkFields} }
+`
+
+/** Pricing's card design at section level and, behind the plan's Appearance switch, at item level. */
+const pricingCardDesignProjection = /* groq */ `
+  ${surfaceProjection},
+  title { ${roleStyleProjection} },
+  price { ${roleStyleProjection} },
+  body { ${roleStyleProjection} },
+  label { ${roleStyleProjection} },
+  description { ${roleStyleProjection} },
+  mark { ${decorativeMarkFields} }
 `
 
 /** A testimonial avatar's or team list portrait's size and ring (schema: lib/sanity/schema/avatar-design.ts). */
@@ -136,12 +192,30 @@ export const testimonialsFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    intro,
+    ${headerDesignProjection},
+    cardDesign {
+      ${surfaceProjection},
+      quote {
+        ${textStyleProjection},
+        fontStyle,
+        highlight { colour { colour, hex }, weight, fontStyle }
+      },
+      attribution { ${textStyleProjection} },
+      label { ${textStyleProjection} },
+      mark { ${decorativeMarkFields} }
+    },
     avatarDesign { ${avatarDesignFields} },
     items[] {
       _key,
       quote,
+      highlights,
       name,
       role,
+      attribution,
+      source,
+      date,
+      rating,
       avatar { ${imageFields} }
     }
   }
@@ -154,6 +228,14 @@ export const faqFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign {
+      itemStyle,
+      ${surfaceProjection},
+      title { ${roleStyleProjection} },
+      body { ${roleStyleProjection} },
+      mark { ${decorativeMarkFields} }
+    },
     items[] {
       _key,
       question,
@@ -168,6 +250,7 @@ export const ctaBannerFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     ctas[] { ${ctaFields} },
     tone
@@ -180,6 +263,7 @@ export const formSectionFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     form-> { _id, ${formFields} }
   }
@@ -192,13 +276,19 @@ export const pricingTableFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign { ${pricingCardDesignProjection} },
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
     plans[defined(price->priceId) && price->active == true] {
       _key,
       name,
+      description,
+      meta,
+      badgeText,
       features,
       highlighted,
       ctaLabel,
+      design { appearance, ${pricingCardDesignProjection} },
       price-> { ${stripePriceFields} }
     }
   }
@@ -210,6 +300,7 @@ export const newsletterSignupFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     submitLabel,
     successMessage
@@ -224,6 +315,13 @@ export const statsFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign {
+      ${surfaceProjection},
+      number { ${roleStyleProjection} },
+      label { ${roleStyleProjection} },
+      mark { ${decorativeMarkFields} }
+    },
     items[] { ${statItemFields} }
   }
 `
@@ -236,6 +334,7 @@ export const galleryFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
     columns,
     imageDesign { ${imageDesignFields} },
     images[] { _key, caption, ${imageFields} }
@@ -249,6 +348,14 @@ export const locationFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign {
+      ${surfaceProjection},
+      title { ${roleStyleProjection} },
+      body { ${roleStyleProjection} },
+      meta { ${roleStyleProjection} },
+      mark { ${decorativeMarkFields} }
+    },
     mapImage { ${imageFields} },
     showHours,
     showOpenNow,
@@ -286,6 +393,8 @@ export const teamFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     text,
+    ${headerDesignProjection},
+    cardDesign { ${teamCardDesignProjection} },
     imageDesign { ${imageDesignFields} },
     portraitDesign { ${avatarDesignFields} },
     "members": select(
@@ -302,6 +411,7 @@ export const videoFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     source,
     url,
@@ -320,6 +430,12 @@ export const processFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign {
+      label { ${roleStyleProjection} },
+      title { ${roleStyleProjection} },
+      body { ${roleStyleProjection} }
+    },
     steps[] {
       _key,
       label,
@@ -336,6 +452,7 @@ export const embedFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     provider,
     url,
@@ -344,16 +461,6 @@ export const embedFragment = /* groq */ `
   }
 `
 
-/** One text element's look (lib/sanity/text-style-options.ts). */
-const textStyleProjection = /* groq */ `size, weight, colour { colour, hex }, textCase, tracking, leading`
-
-/** A card's fill and border, and its icon's container (lib/sanity/surface-options.ts). */
-const surfaceProjection = /* groq */ `
-  background { colour, hex },
-  backgroundStrength,
-  border,
-  borderColour { colour, hex }
-`
 const iconDesignProjection = /* groq */ `
   iconShape,
   iconColour { colour, hex },
@@ -374,6 +481,8 @@ export const linkListFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    intro,
+    ${headerDesignProjection},
     headingDisplay,
     headingImage { size, ${imageFields} },
     profile {
@@ -413,7 +522,8 @@ export const linkListFragment = /* groq */ `
       ${surfaceProjection},
       eyebrow { ${textStyleProjection} },
       label { ${textStyleProjection} },
-      description { ${textStyleProjection} }
+      description { ${textStyleProjection} },
+      mark { ${decorativeMarkFields} }
     },
     linkDesign {
       arrowStyle,
@@ -469,6 +579,7 @@ export const linkListFragment = /* groq */ `
         eyebrow { ${textStyleProjection} },
         label { ${textStyleProjection} },
         description { ${textStyleProjection} },
+        mark { ${decorativeMarkFields} },
         ${iconDesignProjection},
         arrowStyle,
         arrowColour { colour, hex }
@@ -492,6 +603,8 @@ export const eventsFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     text,
+    ${headerDesignProjection},
+    cardDesign { ${teamCardDesignProjection} },
     count,
     "hasCategoryFilter": defined(category),
     seeAllLabel,
@@ -551,7 +664,8 @@ export const pageBuilderFragment = /* groq */ `
  * The panels a page's buttons and links open, as ids, read from the page's own sections and from
  * the shared sections it uses (members-only ones only once `$members` is true, so the cached public
  * result never carries a panel that only a members-only section opens). A link can sit in a
- * section's `ctas`, in rich text (`body`, or a FAQ `answer`); a section type that gets links
+ * section's `ctas`, in rich text (`body`, or a FAQ `answer`), in a Link list's `links` (those the
+ * list can show) or in a link field of its own (Events' `seeAllLink`); a section type that gets links
  * anywhere else must add its path here: sections.test.ts fails until it does. Used inside
  * PAGE_QUERY as `_id in (${panelRefsFragment})`, where `^` is the page. It lists paths because
  * GROQ's recursive descent (`..`) isn't available in the fake Content Lake the tests run on.
@@ -561,9 +675,13 @@ const sharedSections = `^.pageBuilder[_type == "reference"]->section[access != "
 
 export const panelRefsFragment = /* groq */ `
   coalesce(${pageSections}.ctas[].link.panel._ref, [])
+  + coalesce(${pageSections}.links[visibility != "hide"].link.panel._ref, [])
+  + coalesce(${pageSections}.seeAllLink.panel._ref, [])
   + coalesce(${pageSections}.body[].markDefs[].panel._ref, [])
   + coalesce(${pageSections}.items[].answer[].markDefs[].panel._ref, [])
   + coalesce(${sharedSections}.ctas[].link.panel._ref, [])
+  + coalesce(${sharedSections}.links[visibility != "hide"].link.panel._ref, [])
+  + coalesce(${sharedSections}.seeAllLink.panel._ref, [])
   + coalesce(${sharedSections}.body[].markDefs[].panel._ref, [])
   + coalesce(${sharedSections}.items[].answer[].markDefs[].panel._ref, [])
 `

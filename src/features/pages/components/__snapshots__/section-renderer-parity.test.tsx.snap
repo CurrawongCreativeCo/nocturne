@@ -24,19 +24,19 @@ exports[`SectionRenderer output parity > ctaBanner keeps its output for every la
 exports[`SectionRenderer output parity > embed keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "0081b427e72644c1",
+    "hash": "7adbe637ed0ba6e9",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "2eaf11acf07e9524",
+    "hash": "e9bb81abd6c6a244",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "8f9a7b92c01990d7",
+    "hash": "e5d4977ffe7564c8",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "2eaf11acf07e9524",
+    "hash": "e9bb81abd6c6a244",
     "panel": null,
   },
 }
@@ -45,51 +45,51 @@ exports[`SectionRenderer output parity > embed keeps its output for every layout
 exports[`SectionRenderer output parity > events keeps its output for every layout and stored panel choice 1`] = `
 {
   "agenda · panel glass": {
-    "hash": "149fc5998d4c072f",
+    "hash": "25ca04a58d80fb42",
     "panel": "tinted",
   },
   "agenda · panel none": {
-    "hash": "6f55163c8e2fbfb7",
+    "hash": "fb8975afd16d86ff",
     "panel": null,
   },
   "agenda · panel solid": {
-    "hash": "6186f86b7188e46c",
+    "hash": "eb986a3824fdd106",
     "panel": "solid",
   },
   "agenda · panel unset": {
-    "hash": "6f55163c8e2fbfb7",
+    "hash": "fb8975afd16d86ff",
     "panel": null,
   },
   "featured · panel glass": {
-    "hash": "3fa0005fc0ba9087",
+    "hash": "f1fedaab0b3c87d9",
     "panel": "tinted",
   },
   "featured · panel none": {
-    "hash": "5db2acf5089f4e8d",
+    "hash": "3967f3d9372798f4",
     "panel": null,
   },
   "featured · panel solid": {
-    "hash": "8d7f52393b5f263f",
+    "hash": "daed030ff39e3f02",
     "panel": "solid",
   },
   "featured · panel unset": {
-    "hash": "5db2acf5089f4e8d",
+    "hash": "3967f3d9372798f4",
     "panel": null,
   },
   "list · panel glass": {
-    "hash": "3f84e7f827076f9b",
+    "hash": "74e7f1e5842450ac",
     "panel": "tinted",
   },
   "list · panel none": {
-    "hash": "5ac92521d554f93d",
+    "hash": "6cf50b08bdf36bbc",
     "panel": null,
   },
   "list · panel solid": {
-    "hash": "700242c5e839cc0a",
+    "hash": "47b4bbaba5fde43c",
     "panel": "solid",
   },
   "list · panel unset": {
-    "hash": "5ac92521d554f93d",
+    "hash": "6cf50b08bdf36bbc",
     "panel": null,
   },
 }
@@ -140,19 +140,19 @@ exports[`SectionRenderer output parity > featuresGrid keeps its output for every
 exports[`SectionRenderer output parity > formSection keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "ee66d033e1d9e7be",
+    "hash": "9d11722db1bb237c",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "29bee1d7b6c60a3b",
+    "hash": "14fc3e6647873d4d",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "4a091ae49eed4d66",
+    "hash": "8c32e5e79790d4c7",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "29bee1d7b6c60a3b",
+    "hash": "14fc3e6647873d4d",
     "panel": null,
   },
 }
@@ -529,19 +529,19 @@ exports[`SectionRenderer output parity > mediaText keeps its output for every la
 exports[`SectionRenderer output parity > newsletterSignup keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "732c416bdb9ca127",
+    "hash": "3856acc795fc9263",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "e7da6fa2301d0f55",
+    "hash": "86ecbd01c32c82ca",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "ce948f90beaa110b",
+    "hash": "94fb4545c5d992fc",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "e7da6fa2301d0f55",
+    "hash": "86ecbd01c32c82ca",
     "panel": null,
   },
 }
@@ -550,19 +550,19 @@ exports[`SectionRenderer output parity > newsletterSignup keeps its output for e
 exports[`SectionRenderer output parity > pricingTable keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "e00f33c52cbbff8b",
+    "hash": "22a7c5fb2435de18",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "4622a3eb14b27976",
+    "hash": "23fa38d36c6cc0a7",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "c674641445314a87",
+    "hash": "65f8a3204a48022b",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "4622a3eb14b27976",
+    "hash": "23fa38d36c6cc0a7",
     "panel": null,
   },
 }
@@ -666,19 +666,19 @@ exports[`SectionRenderer output parity > stats keeps its output for every layout
 exports[`SectionRenderer output parity > team keeps its output for every layout and stored panel choice 1`] = `
 {
   "grid · panel glass": {
-    "hash": "e87e761007e3d052",
+    "hash": "d6974c044e31298c",
     "panel": "tinted",
   },
   "grid · panel none": {
-    "hash": "7c7a99be36101769",
+    "hash": "619c4352cd9ea3cd",
     "panel": null,
   },
   "grid · panel solid": {
-    "hash": "5e915998bf97dc35",
+    "hash": "d17d6c2832909683",
     "panel": "solid",
   },
   "grid · panel unset": {
-    "hash": "7c7a99be36101769",
+    "hash": "619c4352cd9ea3cd",
     "panel": null,
   },
   "list · panel glass": {
@@ -772,19 +772,19 @@ exports[`SectionRenderer output parity > video keeps its output for every layout
     "panel": null,
   },
   "embed · panel glass": {
-    "hash": "4c20d99c91fc7224",
+    "hash": "507dba3c7824061b",
     "panel": "tinted",
   },
   "embed · panel none": {
-    "hash": "8bc415f764c08a0d",
+    "hash": "ddf0f8e1738f75fc",
     "panel": null,
   },
   "embed · panel solid": {
-    "hash": "1ef86365c4f1b16a",
+    "hash": "0dd561ffbc340c92",
     "panel": "solid",
   },
   "embed · panel unset": {
-    "hash": "8bc415f764c08a0d",
+    "hash": "ddf0f8e1738f75fc",
     "panel": null,
   },
 }

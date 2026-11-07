@@ -7,6 +7,7 @@ import { SPLIT_LAYOUTS } from '@/features/pages/utils/split-layout'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { isClientView } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -232,6 +233,7 @@ export const mediaText = defineType({
         hidden: notSide,
         validation: (rule) => rule.required(),
       }),
+      headerDesignField(),
       accessField,
       // Set by the presets above the form; the stored value is the layout the section renders. Hidden
       // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.
