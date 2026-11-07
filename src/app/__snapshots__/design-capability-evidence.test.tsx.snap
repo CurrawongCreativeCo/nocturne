@@ -41,6 +41,24 @@ exports[`design capability evidence > ctaBanner.edge.section: the probe changes 
 ]
 `;
 
+exports[`design capability evidence > ctaBanner.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > ctaBanner.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > ctaBanner.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted mx-auto" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > ctaBanner.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > ctaBanner.motion.section: the probe changes the registered target 1`] = `
@@ -67,9 +85,27 @@ exports[`design capability evidence > embed.glass.section: the probe changes the
 ]
 `;
 
+exports[`design capability evidence > embed.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > embed.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > embed.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > embed.motion.section: the probe changes the registered target 1`] = `
 [
-  "61459d75ccdc7f79 (1141 characters)",
+  "08d19df0a8b76dbf (1137 characters)",
 ]
 `;
 
@@ -394,6 +430,24 @@ exports[`design capability evidence > featuresGrid.glass.section: the probe chan
 ]
 `;
 
+exports[`design capability evidence > featuresGrid.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > featuresGrid.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > featuresGrid.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > featuresGrid.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > featuresGrid.motion.section: the probe changes the registered target 1`] = `
@@ -420,11 +474,29 @@ exports[`design capability evidence > formSection.glass.section: the probe chang
 ]
 `;
 
+exports[`design capability evidence > formSection.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > formSection.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading" id="_R_5_">",
+]
+`;
+
+exports[`design capability evidence > formSection.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > formSection.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > formSection.motion.section: the probe changes the registered target 1`] = `
 [
-  "e2db196244253adb (350 characters)",
+  "b21b14f6541a730a (350 characters)",
 ]
 `;
 
@@ -469,6 +541,60 @@ exports[`design capability evidence > gallery.glass.section@slider: the probe ch
 [
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
   "<p aria-atomic="true" aria-live="polite" class="sr-only">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.eyebrow@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.eyebrow@masonry: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.eyebrow@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.heading@grid: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.heading@masonry: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.heading@slider: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.intro@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.intro@masonry: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > gallery.header.section.intro@slider: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
@@ -764,6 +890,78 @@ exports[`design capability evidence > linkList.framing.thumbnail@stacked: the pr
 [
   "376ea83169d0a2e5 (1252 characters)",
   "71fe2c96ebb168ea (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.eyebrow@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.eyebrow@compact: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.eyebrow@editori…: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.eyebrow@stacked: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@cards: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@compact: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@editori…: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.heading@stacked: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-balance text-h4 font-semibold" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@compact: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@editorial: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > linkList.header.section.intro@stacked: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
 
@@ -1244,6 +1442,42 @@ exports[`design capability evidence > logoCloud.glass.section@marquee: the probe
 ]
 `;
 
+exports[`design capability evidence > logoCloud.header.section.eyebrow@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted text-center" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.eyebrow@marquee: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted text-center" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.heading@grid: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-small font-semibold text-ink-muted text-center" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.heading@marquee: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-small font-semibold text-ink-muted text-center" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.intro@grid: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted text-center" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > logoCloud.header.section.intro@marquee: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted text-center" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > logoCloud.mark.section@grid: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > logoCloud.mark.section@marquee: the probe changes the registered target 1`] = `[]`;
@@ -1305,6 +1539,60 @@ exports[`design capability evidence > mediaText.glass.section@side: the probe ch
 exports[`design capability evidence > mediaText.glass.section@stacked: the probe changes the registered target 1`] = `
 [
   "<div class="mx-auto w-full max-w-measure flex flex-col gap-12 lg:gap-16 [&>:last-child]:order-first" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.eyebrow@overlay: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.eyebrow@side: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.eyebrow@stacked: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.heading@overlay: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.heading@side: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.heading@stacked: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.intro@overlay: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-4 text-lead text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.intro@side: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-4 text-lead text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > mediaText.header.section.intro@stacked: the probe changes the registered target 1`] = `
+[
+  "<div class="mt-4 text-lead text-ink-muted" data-text-role="intro">",
 ]
 `;
 
@@ -1374,11 +1662,29 @@ exports[`design capability evidence > newsletterSignup.glass.section: the probe 
 ]
 `;
 
+exports[`design capability evidence > newsletterSignup.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > newsletterSignup.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading" id="_R_5_">",
+]
+`;
+
+exports[`design capability evidence > newsletterSignup.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > newsletterSignup.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > newsletterSignup.motion.section: the probe changes the registered target 1`] = `
 [
-  "fcd180c46c9784c9 (356 characters)",
+  "45e1f6020ed503f1 (356 characters)",
 ]
 `;
 
@@ -1426,7 +1732,7 @@ exports[`design capability evidence > pricingTable.mark.section: the probe chang
 
 exports[`design capability evidence > pricingTable.motion.section: the probe changes the registered target 1`] = `
 [
-  "96bb407fc4c73f80 (4073 characters)",
+  "3e0f9de8503f93c4 (4073 characters)",
 ]
 `;
 
@@ -1544,6 +1850,42 @@ exports[`design capability evidence > process.glass.section@vertical: the probe 
 ]
 `;
 
+exports[`design capability evidence > process.header.section.eyebrow@alternat…: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.eyebrow@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.heading@alternat…: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.heading@vertical: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.intro@alternating: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > process.header.section.intro@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > process.mark.section@alternating: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > process.mark.section@vertical: the probe changes the registered target 1`] = `[]`;
@@ -1569,6 +1911,48 @@ exports[`design capability evidence > process.overlay.section@alternating: the p
 exports[`design capability evidence > process.overlay.section@vertical: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > process.text.card.body@alternating: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.body@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+  "<p class="mt-2 max-w-measure-narrow text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.label@alternating: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.label@vertical: the probe changes the registered target 1`] = `
+[
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+  "<p class="text-small font-semibold tracking-wide text-accent-text uppercase" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.title@alternating: the probe changes the registered target 1`] = `
+[
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > process.text.card.title@vertical: the probe changes the registered target 1`] = `
+[
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
+  "<h3 class="mt-1 text-lead font-semibold" data-text-role="title">",
 ]
 `;
 
@@ -2143,6 +2527,42 @@ exports[`design capability evidence > video.glass.section@embed: the probe chang
 ]
 `;
 
+exports[`design capability evidence > video.header.section.eyebrow@ambient: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.eyebrow@embed: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.heading@ambient: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.heading@embed: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.intro@ambient: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > video.header.section.intro@embed: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
 exports[`design capability evidence > video.motion.section@ambient: the probe changes the registered target 1`] = `
 [
   "02f39caa0f569dd7 (276 characters)",
@@ -2151,7 +2571,7 @@ exports[`design capability evidence > video.motion.section@ambient: the probe ch
 
 exports[`design capability evidence > video.motion.section@embed: the probe changes the registered target 1`] = `
 [
-  "29fdbae2171e0f56 (1616 characters)",
+  "b4031d5650277a5f (1612 characters)",
 ]
 `;
 

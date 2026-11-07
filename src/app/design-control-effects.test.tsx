@@ -63,6 +63,8 @@ vi.mock('@/lib/sanity/site-design', () => ({
   getSiteDesign: () => Promise.resolve({ colours: undefined, gradients: [] }),
 }))
 
+const HEADER = { field: 'headerDesign', at: 'headerDesign' } as const
+
 interface Family {
   component: string
   /** One layout only: a box offered nowhere else would have nothing to try on the others. */
@@ -95,6 +97,40 @@ const PLAN_BASE: Patch = {
 }
 
 const FAMILIES: readonly Family[] = [
+  {
+    component: 'linkList',
+    base: {
+      eyebrow: 'Find me',
+      intro: 'An intro.',
+      title: 'Fixture heading',
+      headingDisplay: 'text',
+    },
+    boxes: [HEADER],
+  },
+  { component: 'featuresGrid', base: { eyebrow: 'Why us', intro: 'An intro.' }, boxes: [HEADER] },
+  { component: 'logoCloud', base: { eyebrow: 'Trusted by', intro: 'An intro.' }, boxes: [HEADER] },
+  { component: 'ctaBanner', base: { eyebrow: 'Ready?', text: 'An intro.' }, boxes: [HEADER] },
+  { component: 'formSection', base: { eyebrow: 'Contact', text: 'An intro.' }, boxes: [HEADER] },
+  {
+    component: 'newsletterSignup',
+    base: { eyebrow: 'Updates', text: 'An intro.' },
+    boxes: [HEADER],
+  },
+  { component: 'embed', base: { eyebrow: 'Book', text: 'An intro.' }, boxes: [HEADER] },
+  { component: 'video', base: { eyebrow: 'Watch', text: 'An intro.' }, boxes: [HEADER] },
+  { component: 'gallery', base: { eyebrow: 'Our work', intro: 'An intro.' }, boxes: [HEADER] },
+  { component: 'mediaText', base: { eyebrow: 'Our story' }, boxes: [HEADER] },
+  {
+    component: 'process',
+    base: {
+      eyebrow: 'How it works',
+      intro: 'An intro.',
+      steps: [
+        { _key: 'probe-step-1', _type: 'step', label: 'Step one', title: 'Meet', text: 'We talk.' },
+      ],
+    },
+    boxes: [HEADER, { field: 'cardDesign', at: 'cardDesign' }],
+  },
   {
     component: 'location',
     base: { eyebrow: 'Find us', intro: 'An intro.', mapImage: null },

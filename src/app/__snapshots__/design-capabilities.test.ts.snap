@@ -30,7 +30,7 @@ exports[`the design capability contract > ctaBanner: reports what it offers toda
 {
   "capabilities": [
     "surface required card: pending (159)",
-    "header required section: pending (156)",
+    "header required section: verified",
     "mark required section: verified",
     "depth required card: pending (146)",
     "action conditional item: pending (137)",
@@ -49,7 +49,7 @@ exports[`the design capability contract > embed: reports what it offers today 1`
 {
   "capabilities": [
     "surface required card: pending (148)",
-    "header required section: pending (156)",
+    "header required section: verified",
     "depth required card: pending (148)",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
@@ -130,7 +130,7 @@ exports[`the design capability contract > featuresGrid: reports what it offers t
   "capabilities": [
     "surface conditional card: pending (156)",
     "text required card: pending (276)",
-    "header required section: pending (156)",
+    "header required section: verified",
     "mark required section: verified",
     "depth conditional card: pending (146)",
     "icon required card: pending (158)",
@@ -151,7 +151,7 @@ exports[`the design capability contract > formSection: reports what it offers to
 {
   "capabilities": [
     "surface required card: pending (148)",
-    "header required section: pending (156)",
+    "header required section: verified",
     "mark required section: verified",
     "depth required card: pending (148)",
     "framing conditional section/background: pending (177)",
@@ -168,9 +168,9 @@ exports[`the design capability contract > formSection: reports what it offers to
 exports[`the design capability contract > gallery: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @grid: pending (156)",
-    "header required section @masonry: pending (156)",
-    "header required section @slider: pending (156)",
+    "header required section @grid: verified",
+    "header required section @masonry: verified",
+    "header required section @slider: verified",
     "mark required section @grid: verified",
     "mark required section @masonry: verified",
     "mark required section @slider: verified",
@@ -280,10 +280,10 @@ exports[`the design capability contract > linkList: reports what it offers today
     "text required item @cards: verified",
     "text required item @editorial: verified",
     "text required item @compact: verified",
-    "header required section @stacked: pending (156)",
-    "header required section @cards: pending (156)",
-    "header required section @editorial: pending (156)",
-    "header required section @compact: pending (156)",
+    "header required section @stacked: verified",
+    "header required section @cards: verified",
+    "header required section @editorial: verified",
+    "header required section @compact: verified",
     "mark required section @stacked: verified",
     "mark required section @cards: verified",
     "mark required section @editorial: verified",
@@ -400,8 +400,8 @@ exports[`the design capability contract > location: reports what it offers today
 exports[`the design capability contract > logoCloud: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @grid: pending (156)",
-    "header required section @marquee: pending (156)",
+    "header required section @grid: verified",
+    "header required section @marquee: verified",
     "mark required section @grid: verified",
     "mark required section @marquee: verified",
     "framing conditional section/background @grid: pending (177)",
@@ -431,9 +431,9 @@ exports[`the design capability contract > logoRow: reports what it offers today 
 exports[`the design capability contract > mediaText: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @side: pending (156)",
-    "header required section @stacked: pending (156)",
-    "header required section @overlay: pending (156)",
+    "header required section @side: verified",
+    "header required section @stacked: verified",
+    "header required section @overlay: verified",
     "mark required section @side: verified",
     "mark required section @stacked: verified",
     "mark required section @overlay: verified",
@@ -476,7 +476,7 @@ exports[`the design capability contract > newsletterSignup: reports what it offe
 {
   "capabilities": [
     "surface required card: pending (148)",
-    "header required section: pending (156)",
+    "header required section: verified",
     "mark required section: verified",
     "depth required card: pending (148)",
     "framing conditional section/background: pending (177)",
@@ -519,10 +519,10 @@ exports[`the design capability contract > pricingTable: reports what it offers t
 exports[`the design capability contract > process: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "text required card @vertical: pending (156)",
-    "text required card @alternating: pending (156)",
-    "header required section @vertical: pending (156)",
-    "header required section @alternating: pending (156)",
+    "text required card @vertical: verified",
+    "text required card @alternating: verified",
+    "header required section @vertical: verified",
+    "header required section @alternating: verified",
     "mark required section @vertical: verified",
     "mark required section @alternating: verified",
     "icon required card @vertical: pending (158)",
@@ -713,8 +713,8 @@ exports[`the design capability contract > testimonials: reports what it offers t
 exports[`the design capability contract > video: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "header required section @embed: pending (156)",
-    "header required section @ambient: pending (156)",
+    "header required section @embed: verified",
+    "header required section @ambient: verified",
     "framing conditional section/background @embed: pending (177)",
     "framing conditional section/background @ambient: pending (177)",
     "overlay required section @embed: verified",

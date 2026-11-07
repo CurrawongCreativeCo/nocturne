@@ -3,6 +3,7 @@ import { defineField, defineType, type PreviewValue } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
@@ -70,6 +71,7 @@ export const video = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Title',
@@ -179,6 +181,7 @@ export const video = defineType({
           direction: 'horizontal',
         },
       }),
+      headerDesignField(),
       accessField,
       // Shown first in the Content tab.
       variantField(VIDEO_VARIANTS),

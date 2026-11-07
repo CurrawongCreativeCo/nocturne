@@ -317,6 +317,14 @@
       "title": "Call to action banner",
       "fields": [
         {
+          "name": "eyebrow",
+          "title": "Eyebrow",
+          "kind": "Short text",
+          "required": false,
+          "description": "A short line above the title. Optional.",
+          "length": "Up to 40 characters"
+        },
+        {
           "name": "heading",
           "title": "Title",
           "kind": "Formatted text",

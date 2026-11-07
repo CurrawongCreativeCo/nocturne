@@ -12,7 +12,7 @@ import {
   gallerySeed,
   projectSections,
   renderSections,
-  withoutTextRoles,
+  stableOutput,
   type RawSection,
 } from '@/features/pages/components/section-renderer.fixtures'
 import type { TextRole } from '@/lib/design/capabilities'
@@ -403,7 +403,7 @@ describe('design capability evidence', () => {
       entry.change === 'attributes'
         ? result.unset
         : result.unset.map(
-            (html) => `${fingerprint(html)} (${String(withoutTextRoles(html).length)} characters)`,
+            (html) => `${fingerprint(html)} (${String(stableOutput(html).length)} characters)`,
           ),
     ).toMatchSnapshot()
   })

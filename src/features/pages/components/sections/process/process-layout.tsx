@@ -1,12 +1,14 @@
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionMotion, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import { ProcessStep } from './process-step'
 import { LazyProcessTimeline } from './process-timeline-lazy'
 import type { SectionProps } from '../../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = {
@@ -32,19 +34,15 @@ export function ProcessLayout({ data, isFirst, lineClassName, sideOf }: Props) {
 
   return (
     <SectionFrame style={{ ...data.style, motion: 'none' }} defaults={DEFAULTS} isFirst={isFirst}>
-      {(title || intro) && (
-        <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
-          {title && (
-            <RichHeading
-              as="h2"
-              blocks={heading}
-              fallback={title}
-              className="text-h2 font-semibold text-balance"
-            />
-          )}
-          <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
-        </header>
-      )}
+      <SectionHeader
+        eyebrow={data.eyebrow}
+        title={title}
+        heading={heading}
+        intro={intro}
+        design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        block={block}
+        text={text}
+      />
       <LazyProcessTimeline lineClassName={lineClassName}>
         <ol>
           {steps.map((step, index) => (
@@ -54,6 +52,7 @@ export function ProcessLayout({ data, isFirst, lineClassName, sideOf }: Props) {
               index={index}
               side={sideOf(index)}
               plan={plan}
+              cardDesign={data.cardDesign}
             />
           ))}
         </ol>

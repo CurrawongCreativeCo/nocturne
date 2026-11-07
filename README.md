@@ -2477,23 +2477,23 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
 | Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C…     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
 | Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R✓   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
-| Features grid (`featuresGrid`)           | C…      | R…   | R…     | R✓   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
+| Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Call to action banner (`ctaBanner`)      | R…      | –    | R…     | R✓   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
-| Form (`formSection`)                     | R…      | –    | R…     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
+| Form (`formSection`)                     | R…      | –    | R✓     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R…    | C…   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Newsletter signup (`newsletterSignup`)   | R…      | –    | R…     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Newsletter signup (`newsletterSignup`)   | R…      | –    | R✓     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R…     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R…    | R…   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Video (`video`), 2 layouts               | –       | –    | R…     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Process (`process`), 2 layouts           | –       | R…   | R…     | R✓   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Embed (`embed`)                          | R…      | –    | R…     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R◐   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
+| Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Embed (`embed`)                          | R…      | –    | R✓     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R◐   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
 | Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R◐   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2505,7 +2505,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 187      | 0               | 103     |
+| Required                                                 | 223      | 0               | 67      |
 | Conditional                                              | 4        | 0               | 40      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2517,7 +2517,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
 | 151          | 19               | 0                   |
-| 156          | 38               | 1                   |
+| 156          | 2                | 1                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
@@ -2525,7 +2525,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 213          | 7                | 0                   |
 | 276          | 2                | 0                   |
 
-**Evidence.** 201 capability entries, 392 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 237 capability entries, 461 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -4390,7 +4390,10 @@ Every card family composes the same shared parts (task 156), so a family states 
 | FAQ             | title, body                            | the **Cards** item style only; **Divided list**, the default, is text only                                                                                  |
 | Stats           | number, label                          | the **Cards** layout only; Inline offers no Cards box                                                                                                       |
 | Location        | title, body, meta                      | the details' panels, without a map image; beside one they are text only                                                                                     |
+| Process         | label, title, body (each step)         | none: a step draws no card                                                                                                                                  |
 | Blog post cards | meta, title, body                      | every card, from the **Blog settings** document; a chosen fill or border also brings the card's corners and padding, since a card has no surface by default |
+
+**Section header.** Every section with a heading has an optional _Eyebrow_ and a _Section header_ box (eyebrow, heading and intro roles), agency only: Features grid, Logo cloud, Image + text (its intro is the body), CTA banner, Form, Newsletter, Gallery, Video, Embed, Process, Link list, and the families above. Logo cloud and Link list gain an optional _Intro_. Each section keeps its header's element, spacing and classes (`SectionHeader` takes them as props), and a heading shown as a Link list wordmark picture has no text role to style, so Studio hides it there. The parity tests compare output without the letters of React's generated ids, which depend on where a component sits in the tree: which element each id points at is still compared (`stableOutput`).
 
 A control is offered only where it does something: `src/app/design-control-effects.test.tsx` reads each family's real schema and fails if any control offered on a layout or look leaves the output unchanged. A look that is a setting rather than a layout (FAQ's item style, Location's map image) has its own evidence for what it draws. An item style is the first field of its Cards box (`itemStyleField`), and unset is the first value.
 

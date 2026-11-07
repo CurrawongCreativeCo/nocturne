@@ -1,8 +1,14 @@
 import { ArrowRightIcon } from '@sanity/icons/ArrowRight'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { scopedGroupTitle } from '@/lib/sanity/design-summary'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
@@ -75,6 +81,9 @@ const EXAMPLE_STEPS = [
   },
 ]
 
+/** The text roles every step draws (process-capabilities.ts). A step has no fill, so no contrast to warn about. */
+export const PROCESS_ROLES = [{ role: 'label' }, { role: 'title' }, { role: 'body' }] as const
+
 export const process = defineType({
   name: 'process',
   title: 'Process',
@@ -85,6 +94,7 @@ export const process = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -144,6 +154,16 @@ export const process = defineType({
             preview: { select: { title: 'title', subtitle: 'label', media: 'icon' } },
           }),
         ],
+      }),
+      headerDesignField(),
+      cardDesignField({
+        title: scopedGroupTitle('Steps', 'card'),
+        description:
+          'Text for every step: the small label, the title and the description. A step draws no card, so there is no fill, border or mark here.',
+        roles: PROCESS_ROLES,
+        inherits: 'the layout’s own',
+        surface: false,
+        mark: false,
       }),
       accessField,
       // Shown first in the Content tab.

@@ -96,30 +96,6 @@
     },
     {
       "component": "mediaText",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["side", "stacked", "overlay"],
-      "closingTask": 156
-    },
-    {
-      "component": "mediaText",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["side", "stacked", "overlay"],
-      "closingTask": 156
-    },
-    {
-      "component": "mediaText",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["side", "stacked", "overlay"],
-      "closingTask": 156
-    },
-    {
-      "component": "mediaText",
       "capability": "pictureDepth",
       "scope": "section",
       "layouts": ["side", "stacked"],
@@ -150,30 +126,6 @@
     },
     {
       "component": "featuresGrid",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "featuresGrid",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "featuresGrid",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "featuresGrid",
       "capability": "icon",
       "scope": "card",
       "layouts": [null],
@@ -185,30 +137,6 @@
       "scope": "section",
       "layouts": [null],
       "closingTask": 151
-    },
-    {
-      "component": "logoCloud",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["grid", "marquee"],
-      "closingTask": 156
-    },
-    {
-      "component": "logoCloud",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["grid", "marquee"],
-      "closingTask": 156
-    },
-    {
-      "component": "logoCloud",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["grid", "marquee"],
-      "closingTask": 156
     },
     {
       "component": "logoCloud",
@@ -262,30 +190,6 @@
     },
     {
       "component": "ctaBanner",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "ctaBanner",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "ctaBanner",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "ctaBanner",
       "capability": "depth",
       "scope": "card",
       "layouts": [null],
@@ -311,30 +215,6 @@
       "scope": "card",
       "layouts": [null],
       "closingTask": 148
-    },
-    {
-      "component": "formSection",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "formSection",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "formSection",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": [null],
-      "closingTask": 156
     },
     {
       "component": "formSection",
@@ -380,30 +260,6 @@
     },
     {
       "component": "newsletterSignup",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "newsletterSignup",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "newsletterSignup",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "newsletterSignup",
       "capability": "depth",
       "scope": "card",
       "layouts": [null],
@@ -422,30 +278,6 @@
       "scope": "section",
       "layouts": ["inline", "cards"],
       "closingTask": 151
-    },
-    {
-      "component": "gallery",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["grid", "masonry", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "gallery",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["grid", "masonry", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "gallery",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["grid", "masonry", "slider"],
-      "closingTask": 156
     },
     {
       "component": "gallery",
@@ -528,82 +360,10 @@
     },
     {
       "component": "video",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["embed", "ambient"],
-      "closingTask": 156
-    },
-    {
-      "component": "video",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["embed", "ambient"],
-      "closingTask": 156
-    },
-    {
-      "component": "video",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["embed", "ambient"],
-      "closingTask": 156
-    },
-    {
-      "component": "video",
       "capability": "divider",
       "scope": "section",
       "layouts": ["embed", "ambient"],
       "closingTask": 151
-    },
-    {
-      "component": "process",
-      "capability": "text",
-      "scope": "card",
-      "role": "label",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 156
-    },
-    {
-      "component": "process",
-      "capability": "text",
-      "scope": "card",
-      "role": "title",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 156
-    },
-    {
-      "component": "process",
-      "capability": "text",
-      "scope": "card",
-      "role": "body",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 156
-    },
-    {
-      "component": "process",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 156
-    },
-    {
-      "component": "process",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 156
-    },
-    {
-      "component": "process",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 156
     },
     {
       "component": "process",
@@ -628,30 +388,6 @@
     },
     {
       "component": "embed",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "embed",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "embed",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "embed",
       "capability": "depth",
       "scope": "card",
       "layouts": [null],
@@ -663,30 +399,6 @@
       "scope": "section",
       "layouts": [null],
       "closingTask": 151
-    },
-    {
-      "component": "linkList",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["stacked", "cards", "editorial", "compact"],
-      "closingTask": 156
-    },
-    {
-      "component": "linkList",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["stacked", "cards", "editorial", "compact"],
-      "closingTask": 156
-    },
-    {
-      "component": "linkList",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["stacked", "cards", "editorial", "compact"],
-      "closingTask": 156
     },
     {
       "component": "linkList",

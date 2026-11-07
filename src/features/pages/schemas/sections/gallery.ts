@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -84,6 +85,7 @@ export const gallery = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -110,6 +112,7 @@ export const gallery = defineType({
       imageDesignField({
         hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant === 'masonry',
       }),
+      headerDesignField(),
       accessField,
       // Shown first in the Content tab.
       variantField(GALLERY_VARIANTS),

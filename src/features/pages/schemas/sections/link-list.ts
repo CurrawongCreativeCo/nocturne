@@ -29,6 +29,7 @@ import { accessField } from '@/lib/sanity/schema/access-field'
 import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
 import { markFields } from '@/lib/sanity/schema/capability-marker'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
 import { framing } from '@/lib/sanity/schema/image-framing-option'
@@ -36,6 +37,7 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle, variantField } from '@/lib/sanity/schema/section-variant'
 import {
@@ -54,6 +56,7 @@ import {
   LinkListMinimalThumbnail,
 } from '@/lib/sanity/schema/thumbnails/link-list-thumbnails'
 import { textOrImageFields } from '@/lib/sanity/schema/wordmark'
+import { showsWordmark } from '@/lib/sanity/wordmark-options'
 import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
 
 import { linkListCapabilities } from './link-list-capabilities'
@@ -674,6 +677,13 @@ const linkItem = defineArrayMember({
   },
 })
 
+/** The heading role styles text. Drawn as a wordmark picture the heading has no text to style. */
+const wordmarkHeading: ConditionalPropertyCallback = ({ document, path }) => {
+  const section = sectionAtStylePath(document, path) as
+    { headingDisplay?: string; headingImage?: { asset?: unknown } } | undefined
+  return showsWordmark(section?.headingDisplay, section?.headingImage)
+}
+
 export const linkList = defineType({
   name: 'linkList',
   title: 'Link list',
@@ -686,6 +696,7 @@ export const linkList = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Heading',
@@ -695,6 +706,12 @@ export const linkList = defineType({
         requiredUnless: 'title',
       }),
       legacyTitleField(LIMITS.title),
+      defineField({
+        name: 'intro',
+        type: 'text',
+        rows: 2,
+        description: 'A sentence under the heading. Optional, and empty draws nothing.',
+      }),
       ...textOrImageFields({
         prefix: 'heading',
         what: 'the heading',
@@ -902,6 +919,7 @@ export const linkList = defineType({
         hidden: true,
       }),
       ...linkListDesignFields,
+      headerDesignField({ heading: wordmarkHeading }),
       accessField,
       // Set by the presets above the form; the stored value is the layout the section renders. Hidden
       // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.

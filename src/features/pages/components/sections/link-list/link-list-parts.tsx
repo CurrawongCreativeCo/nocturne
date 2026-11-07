@@ -2,7 +2,6 @@ import { stegaClean } from 'next-sanity'
 import { Fragment, Suspense, useId } from 'react'
 
 import { DecorativeDivider } from '@/components/ui/decorative-divider'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits } from '@/components/ui/section-style'
 import { SocialLinks } from '@/components/ui/social-links'
@@ -26,9 +25,10 @@ import { themeColourCss } from '@/lib/sanity/theme-colour'
 import { showsWordmark } from '@/lib/sanity/wordmark-options'
 
 import { LinkGroupHeading } from './link-group-heading'
+import { LinkListHeading } from './link-list-heading'
 import type { LinkContext, LinkListLayout, ListLink, StoredLink } from './link-list-types'
 import { Profile, hasProfile } from './profile'
-import { WordmarkHeading, type WordmarkImage } from './wordmark-heading'
+import type { WordmarkImage } from './wordmark-heading'
 import type { SectionProps } from '../../../types'
 import {
   cardOverrides,
@@ -158,7 +158,7 @@ export function LinkListView({
   const dividers = resolveLinkListDividers(data.dividerDesign)
   const parts = linkListParts({
     profile: hasProfile(data),
-    heading: Boolean(headingWordmark ?? title),
+    heading: Boolean(headingWordmark ?? title) || Boolean(data.eyebrow) || Boolean(data.intro),
     social: socials.some((profile) => profile.url),
     socialsBelow,
     dividers: LINK_LIST_DIVIDER_PLACEMENTS.filter((placement) => dividers[placement]),
@@ -216,22 +216,19 @@ export function LinkListView({
               />
             )
           case 'heading':
-            return headingWordmark ? (
-              <WordmarkHeading
+            return (
+              <LinkListHeading
                 key="heading"
-                as={title ? Title : 'div'}
-                alt={title}
-                image={headingWordmark}
+                eyebrow={data.eyebrow}
+                intro={data.intro}
+                title={title}
+                heading={data.heading}
+                wordmark={headingWordmark}
+                level={Title}
+                beside={besideDivider('heading', 1)}
+                hasName={hasName}
                 preload={Boolean(isFirst) && !hasName}
-                className={besideDivider('heading', 1) ? '' : 'mb-8'}
-              />
-            ) : (
-              <RichHeading
-                key="heading"
-                as={Title}
-                blocks={data.heading}
-                fallback={title}
-                className={`${besideDivider('heading', 1) ? '' : 'mb-8'} text-balance ${hasName ? 'text-h4 font-semibold' : 'text-h2 font-semibold'}`}
+                design={data.headerDesign}
               />
             )
           case 'social':

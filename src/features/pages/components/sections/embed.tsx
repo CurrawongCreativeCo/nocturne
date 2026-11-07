@@ -1,14 +1,16 @@
 import { stegaClean } from 'next-sanity'
 
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { embedHeight, embedNotes, resolveEmbed } from '@/config/embed-providers'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import { LazyFacade } from './lazy-facade'
 import type { SectionProps } from '../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
@@ -34,18 +36,15 @@ export function Embed({ data, isFirst }: SectionProps<'embed'>) {
       isFirst={isFirst}
       containerClassName={textAlign}
     >
-      <RichHeading
-        as="h2"
-        blocks={heading}
-        fallback={title}
-        className="text-h2 font-semibold text-balance"
+      <SectionHeader
+        as={null}
+        eyebrow={data.eyebrow}
+        title={title}
+        heading={heading}
+        intro={text}
+        design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        introClass="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted"
       />
-      {text && (
-        <PlainText
-          text={text}
-          className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted"
-        />
-      )}
       <div className="mt-8 text-center">
         <LazyFacade
           embed={{

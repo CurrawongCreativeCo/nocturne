@@ -27,6 +27,30 @@ import {
  * content. Only code that has already checked the visitor's session passes `$members: true`.
  */
 
+/** One text element's look (lib/sanity/text-style-options.ts). */
+const textStyleProjection = /* groq */ `size, weight, colour { colour, hex }, textCase, tracking, leading`
+
+/** A card's fill and border, and its icon's container (lib/sanity/surface-options.ts). */
+const surfaceProjection = /* groq */ `
+  background { colour, hex },
+  backgroundStrength,
+  border,
+  borderColour { colour, hex }
+`
+
+/** A role's text style, with the italic only a quote offers (lib/sanity/text-role.ts). */
+const roleStyleProjection = /* groq */ `${textStyleProjection}, fontStyle`
+
+/** The section header's eyebrow field and its three roles (components/ui/section-header.tsx). */
+const headerDesignProjection = /* groq */ `
+  eyebrow,
+  headerDesign {
+    eyebrow { ${roleStyleProjection} },
+    heading { ${roleStyleProjection} },
+    intro { ${roleStyleProjection} }
+  }
+`
+
 export const heroFragment = /* groq */ `
   _type == "hero" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -78,6 +102,11 @@ export const mediaTextFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    headerDesign {
+      eyebrow { ${roleStyleProjection} },
+      heading { ${roleStyleProjection} },
+      intro { ${roleStyleProjection} }
+    },
     body[] { ${portableTextFields} },
     ctas[] { ${ctaFields} },
     image { ${imageFields} },
@@ -96,6 +125,7 @@ export const featuresGridFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
     columns,
     items[] {
       _key,
@@ -114,36 +144,14 @@ export const logoCloudFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    intro,
+    ${headerDesignProjection},
     logos[] {
       _key,
       name,
       url,
       image { ${imageFields} }
     }
-  }
-`
-
-/** One text element's look (lib/sanity/text-style-options.ts). */
-const textStyleProjection = /* groq */ `size, weight, colour { colour, hex }, textCase, tracking, leading`
-
-/** A card's fill and border, and its icon's container (lib/sanity/surface-options.ts). */
-const surfaceProjection = /* groq */ `
-  background { colour, hex },
-  backgroundStrength,
-  border,
-  borderColour { colour, hex }
-`
-
-/** A role's text style, with the italic only a quote offers (lib/sanity/text-role.ts). */
-const roleStyleProjection = /* groq */ `${textStyleProjection}, fontStyle`
-
-/** The section header's eyebrow field and its three roles (components/ui/section-header.tsx). */
-const headerDesignProjection = /* groq */ `
-  eyebrow,
-  headerDesign {
-    eyebrow { ${roleStyleProjection} },
-    heading { ${roleStyleProjection} },
-    intro { ${roleStyleProjection} }
   }
 `
 
@@ -242,6 +250,7 @@ export const ctaBannerFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     ctas[] { ${ctaFields} },
     tone
@@ -254,6 +263,7 @@ export const formSectionFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     form-> { _id, ${formFields} }
   }
@@ -290,6 +300,7 @@ export const newsletterSignupFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     submitLabel,
     successMessage
@@ -323,6 +334,7 @@ export const galleryFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
     columns,
     imageDesign { ${imageDesignFields} },
     images[] { _key, caption, ${imageFields} }
@@ -399,6 +411,7 @@ export const videoFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     source,
     url,
@@ -417,6 +430,12 @@ export const processFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign {
+      label { ${roleStyleProjection} },
+      title { ${roleStyleProjection} },
+      body { ${roleStyleProjection} }
+    },
     steps[] {
       _key,
       label,
@@ -433,6 +452,7 @@ export const embedFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    ${headerDesignProjection},
     text,
     provider,
     url,
@@ -461,6 +481,8 @@ export const linkListFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    intro,
+    ${headerDesignProjection},
     headingDisplay,
     headingImage { size, ${imageFields} },
     profile {

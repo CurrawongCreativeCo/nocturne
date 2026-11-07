@@ -1,14 +1,16 @@
 import { stegaClean } from 'next-sanity'
 
 import { FramedImage } from '@/components/ui/framed-image'
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import { OpenImageButton } from './lightbox-provider'
 import type { SectionProps } from '../../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 export const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
@@ -38,20 +40,17 @@ export function GalleryHeader({ data }: { data: GalleryData }) {
   const { heading, intro } = data
   const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
-  if (!title && !intro) return null
-
   return (
-    <header className={`mb-12 max-w-measure-narrow ${block} ${text}`}>
-      {title && (
-        <RichHeading
-          as="h2"
-          blocks={heading}
-          fallback={title}
-          className="text-h2 font-semibold text-balance"
-        />
-      )}
-      <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
-    </header>
+    <SectionHeader
+      eyebrow={data.eyebrow}
+      title={title}
+      heading={heading}
+      intro={intro}
+      design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      spacing="mb-12 max-w-measure-narrow"
+      block={block}
+      text={text}
+    />
   )
 }
 

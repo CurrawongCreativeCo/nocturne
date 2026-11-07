@@ -3222,6 +3222,359 @@
           "clientEditable": true
         },
         {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -3353,32 +3706,79 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
               "availability": {
-                "side": "pending",
-                "stacked": "pending",
-                "overlay": "pending"
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
               },
               "roleAvailability": {
                 "eyebrow": {
-                  "side": "pending",
-                  "stacked": "pending",
-                  "overlay": "pending"
+                  "side": "verified",
+                  "stacked": "verified",
+                  "overlay": "verified"
                 },
                 "heading": {
-                  "side": "pending",
-                  "stacked": "pending",
-                  "overlay": "pending"
+                  "side": "verified",
+                  "stacked": "verified",
+                  "overlay": "verified"
                 },
                 "intro": {
-                  "side": "pending",
-                  "stacked": "pending",
-                  "overlay": "pending"
+                  "side": "verified",
+                  "stacked": "verified",
+                  "overlay": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "mediaText.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "mediaText.header.section.eyebrow@side",
+                "mediaText.header.section.eyebrow@stacked",
+                "mediaText.header.section.eyebrow@overlay"
+              ]
+            },
+            {
+              "id": "mediaText.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "mediaText.header.section.heading@side",
+                "mediaText.header.section.heading@stacked",
+                "mediaText.header.section.heading@overlay"
+              ]
+            },
+            {
+              "id": "mediaText.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "mediaText.header.section.intro@side",
+                "mediaText.header.section.intro@stacked",
+                "mediaText.header.section.intro@overlay"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -3763,6 +4163,13 @@
       "title": "Features grid",
       "fields": [
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -3836,6 +4243,359 @@
           "kind": "text",
           "required": false,
           "clientEditable": true
+        },
+        {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
         },
         {
           "path": "access",
@@ -3919,16 +4679,57 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending",
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
+              "availability": "verified",
               "roleAvailability": {
-                "eyebrow": "pending",
-                "heading": "pending",
-                "intro": "pending"
+                "eyebrow": "verified",
+                "heading": "verified",
+                "intro": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "featuresGrid.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "featuresGrid.header.section.eyebrow"
+              ]
+            },
+            {
+              "id": "featuresGrid.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "featuresGrid.header.section.heading"
+              ]
+            },
+            {
+              "id": "featuresGrid.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "featuresGrid.header.section.intro"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -4183,6 +4984,13 @@
           "clientEditable": false
         },
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -4194,6 +5002,12 @@
           "kind": "string",
           "required": null,
           "max": null,
+          "clientEditable": true
+        },
+        {
+          "path": "intro",
+          "kind": "text",
+          "required": false,
           "clientEditable": true
         },
         {
@@ -4228,6 +5042,359 @@
           "kind": "url",
           "required": false,
           "clientEditable": true
+        },
+        {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
         },
         {
           "path": "access",
@@ -4323,28 +5490,72 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
               "availability": {
-                "grid": "pending",
-                "marquee": "pending"
+                "grid": "verified",
+                "marquee": "verified"
               },
               "roleAvailability": {
                 "eyebrow": {
-                  "grid": "pending",
-                  "marquee": "pending"
+                  "grid": "verified",
+                  "marquee": "verified"
                 },
                 "heading": {
-                  "grid": "pending",
-                  "marquee": "pending"
+                  "grid": "verified",
+                  "marquee": "verified"
                 },
                 "intro": {
-                  "grid": "pending",
-                  "marquee": "pending"
+                  "grid": "verified",
+                  "marquee": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "logoCloud.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "logoCloud.header.section.eyebrow@grid",
+                "logoCloud.header.section.eyebrow@marquee"
+              ]
+            },
+            {
+              "id": "logoCloud.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "logoCloud.header.section.heading@grid",
+                "logoCloud.header.section.heading@marquee"
+              ]
+            },
+            {
+              "id": "logoCloud.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "logoCloud.header.section.intro@grid",
+                "logoCloud.header.section.intro@marquee"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -7697,6 +8908,13 @@
       "title": "Call to action banner",
       "fields": [
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -7852,6 +9070,359 @@
           "clientEditable": true
         },
         {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -7912,16 +9483,57 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending",
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
+              "availability": "verified",
               "roleAvailability": {
-                "eyebrow": "pending",
-                "heading": "pending",
-                "intro": "pending"
+                "eyebrow": "verified",
+                "heading": "verified",
+                "intro": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "ctaBanner.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "ctaBanner.header.section.eyebrow"
+              ]
+            },
+            {
+              "id": "ctaBanner.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "ctaBanner.header.section.heading"
+              ]
+            },
+            {
+              "id": "ctaBanner.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "ctaBanner.header.section.intro"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -8122,6 +9734,13 @@
       "title": "Form",
       "fields": [
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -8147,6 +9766,359 @@
           "kind": "reference",
           "required": true,
           "clientEditable": true
+        },
+        {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
         },
         {
           "path": "access",
@@ -8209,16 +10181,57 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending",
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
+              "availability": "verified",
               "roleAvailability": {
-                "eyebrow": "pending",
-                "heading": "pending",
-                "intro": "pending"
+                "eyebrow": "verified",
+                "heading": "verified",
+                "intro": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "formSection.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "formSection.header.section.eyebrow"
+              ]
+            },
+            {
+              "id": "formSection.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "formSection.header.section.heading"
+              ]
+            },
+            {
+              "id": "formSection.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "formSection.header.section.intro"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -10976,6 +12989,13 @@
       "title": "Newsletter signup",
       "fields": [
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -11009,6 +13029,359 @@
           "required": true,
           "max": null,
           "clientEditable": true
+        },
+        {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
         },
         {
           "path": "access",
@@ -11071,16 +13444,57 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending",
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
+              "availability": "verified",
               "roleAvailability": {
-                "eyebrow": "pending",
-                "heading": "pending",
-                "intro": "pending"
+                "eyebrow": "verified",
+                "heading": "verified",
+                "intro": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "newsletterSignup.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "newsletterSignup.header.section.eyebrow"
+              ]
+            },
+            {
+              "id": "newsletterSignup.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "newsletterSignup.header.section.heading"
+              ]
+            },
+            {
+              "id": "newsletterSignup.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "newsletterSignup.header.section.intro"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -12648,6 +15062,13 @@
           "clientEditable": false
         },
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -12862,6 +15283,359 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -12972,32 +15746,79 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
               "availability": {
-                "grid": "pending",
-                "masonry": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
               },
               "roleAvailability": {
                 "eyebrow": {
-                  "grid": "pending",
-                  "masonry": "pending",
-                  "slider": "pending"
+                  "grid": "verified",
+                  "masonry": "verified",
+                  "slider": "verified"
                 },
                 "heading": {
-                  "grid": "pending",
-                  "masonry": "pending",
-                  "slider": "pending"
+                  "grid": "verified",
+                  "masonry": "verified",
+                  "slider": "verified"
                 },
                 "intro": {
-                  "grid": "pending",
-                  "masonry": "pending",
-                  "slider": "pending"
+                  "grid": "verified",
+                  "masonry": "verified",
+                  "slider": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "gallery.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "gallery.header.section.eyebrow@grid",
+                "gallery.header.section.eyebrow@masonry",
+                "gallery.header.section.eyebrow@slider"
+              ]
+            },
+            {
+              "id": "gallery.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "gallery.header.section.heading@grid",
+                "gallery.header.section.heading@masonry",
+                "gallery.header.section.heading@slider"
+              ]
+            },
+            {
+              "id": "gallery.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "gallery.header.section.intro@grid",
+                "gallery.header.section.intro@masonry",
+                "gallery.header.section.intro@slider"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -16503,6 +19324,13 @@
           "clientEditable": false
         },
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -16601,6 +19429,359 @@
           "clientEditable": true
         },
         {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -16678,28 +19859,72 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
               "availability": {
-                "embed": "pending",
-                "ambient": "pending"
+                "embed": "verified",
+                "ambient": "verified"
               },
               "roleAvailability": {
                 "eyebrow": {
-                  "embed": "pending",
-                  "ambient": "pending"
+                  "embed": "verified",
+                  "ambient": "verified"
                 },
                 "heading": {
-                  "embed": "pending",
-                  "ambient": "pending"
+                  "embed": "verified",
+                  "ambient": "verified"
                 },
                 "intro": {
-                  "embed": "pending",
-                  "ambient": "pending"
+                  "embed": "verified",
+                  "ambient": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "video.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "video.header.section.eyebrow@embed",
+                "video.header.section.eyebrow@ambient"
+              ]
+            },
+            {
+              "id": "video.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "video.header.section.heading@embed",
+                "video.header.section.heading@ambient"
+              ]
+            },
+            {
+              "id": "video.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "video.header.section.intro@embed",
+                "video.header.section.intro@ambient"
+              ]
+            }
+          ]
         },
         "mark": {
           "notApplicable": "A functional element: no marks on embeds or video players (156 part A5)"
@@ -16906,6 +20131,13 @@
           "clientEditable": false
         },
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -16966,6 +20198,712 @@
           "required": null,
           "max": null,
           "clientEditable": true
+        },
+        {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "label",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.title",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "title",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.title.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.title.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.title.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.title.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.title.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.body",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "body",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.body.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.body.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.body.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.body.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.body.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.body.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
         },
         {
           "path": "access",
@@ -17042,28 +20980,72 @@
                 "body"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "cardDesign.label",
+                "cardDesign.title",
+                "cardDesign.body"
+              ],
               "availability": {
-                "vertical": "pending",
-                "alternating": "pending"
+                "vertical": "verified",
+                "alternating": "verified"
               },
               "roleAvailability": {
                 "label": {
-                  "vertical": "pending",
-                  "alternating": "pending"
+                  "vertical": "verified",
+                  "alternating": "verified"
                 },
                 "title": {
-                  "vertical": "pending",
-                  "alternating": "pending"
+                  "vertical": "verified",
+                  "alternating": "verified"
                 },
                 "body": {
-                  "vertical": "pending",
-                  "alternating": "pending"
+                  "vertical": "verified",
+                  "alternating": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "process.text.card.label",
+              "field": "cardDesign.label",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/process/process-step.tsx",
+              "target": "[data-text-role=\"label\"]",
+              "cases": [
+                "process.text.card.label@vertical",
+                "process.text.card.label@alternating"
+              ]
+            },
+            {
+              "id": "process.text.card.title",
+              "field": "cardDesign.title",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/process/process-step.tsx",
+              "target": "[data-text-role=\"title\"]",
+              "cases": [
+                "process.text.card.title@vertical",
+                "process.text.card.title@alternating"
+              ]
+            },
+            {
+              "id": "process.text.card.body",
+              "field": "cardDesign.body",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/process/process-step.tsx",
+              "target": "[data-text-role=\"body\"]",
+              "cases": [
+                "process.text.card.body@vertical",
+                "process.text.card.body@alternating"
+              ]
+            }
+          ]
         },
         "header": {
           "policies": [
@@ -17076,28 +21058,72 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
               "availability": {
-                "vertical": "pending",
-                "alternating": "pending"
+                "vertical": "verified",
+                "alternating": "verified"
               },
               "roleAvailability": {
                 "eyebrow": {
-                  "vertical": "pending",
-                  "alternating": "pending"
+                  "vertical": "verified",
+                  "alternating": "verified"
                 },
                 "heading": {
-                  "vertical": "pending",
-                  "alternating": "pending"
+                  "vertical": "verified",
+                  "alternating": "verified"
                 },
                 "intro": {
-                  "vertical": "pending",
-                  "alternating": "pending"
+                  "vertical": "verified",
+                  "alternating": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "process.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "process.header.section.eyebrow@vertical",
+                "process.header.section.eyebrow@alternating"
+              ]
+            },
+            {
+              "id": "process.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "process.header.section.heading@vertical",
+                "process.header.section.heading@alternating"
+              ]
+            },
+            {
+              "id": "process.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "process.header.section.intro@vertical",
+                "process.header.section.intro@alternating"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -17327,6 +21353,13 @@
       "title": "Embed",
       "fields": [
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -17396,6 +21429,359 @@
           "clientEditable": true
         },
         {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -17463,16 +21849,57 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
-              "availability": "pending",
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
+              "availability": "verified",
               "roleAvailability": {
-                "eyebrow": "pending",
-                "heading": "pending",
-                "intro": "pending"
+                "eyebrow": "verified",
+                "heading": "verified",
+                "intro": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "embed.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "embed.header.section.eyebrow"
+              ]
+            },
+            {
+              "id": "embed.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "embed.header.section.heading"
+              ]
+            },
+            {
+              "id": "embed.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "embed.header.section.intro"
+              ]
+            }
+          ]
         },
         "mark": {
           "notApplicable": "A functional element: no marks on embeds or video players (156 part A5)"
@@ -17674,6 +22101,13 @@
           "clientEditable": true
         },
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -17685,6 +22119,12 @@
           "kind": "string",
           "required": null,
           "max": null,
+          "clientEditable": true
+        },
+        {
+          "path": "intro",
+          "kind": "text",
+          "required": false,
           "clientEditable": true
         },
         {
@@ -22541,6 +26981,359 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -22961,36 +27754,86 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
               "availability": {
-                "stacked": "pending",
-                "cards": "pending",
-                "editorial": "pending",
-                "compact": "pending"
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
               },
               "roleAvailability": {
                 "eyebrow": {
-                  "stacked": "pending",
-                  "cards": "pending",
-                  "editorial": "pending",
-                  "compact": "pending"
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": "verified"
                 },
                 "heading": {
-                  "stacked": "pending",
-                  "cards": "pending",
-                  "editorial": "pending",
-                  "compact": "pending"
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": "verified"
                 },
                 "intro": {
-                  "stacked": "pending",
-                  "cards": "pending",
-                  "editorial": "pending",
-                  "compact": "pending"
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "linkList.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list/link-list-heading.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "linkList.header.section.eyebrow@stacked",
+                "linkList.header.section.eyebrow@cards",
+                "linkList.header.section.eyebrow@editorial",
+                "linkList.header.section.eyebrow@compact"
+              ]
+            },
+            {
+              "id": "linkList.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list/link-list-heading.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "linkList.header.section.heading@stacked",
+                "linkList.header.section.heading@cards",
+                "linkList.header.section.heading@editorial",
+                "linkList.header.section.heading@compact"
+              ]
+            },
+            {
+              "id": "linkList.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list/link-list-heading.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "linkList.header.section.intro@stacked",
+                "linkList.header.section.intro@cards",
+                "linkList.header.section.intro@editorial",
+                "linkList.header.section.intro@compact"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [

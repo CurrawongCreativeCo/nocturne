@@ -207,6 +207,8 @@ interface CardFamilyEvidence {
   roles: readonly TextRole[]
   /** The header roles, drawn by SectionHeader. */
   headerRoles?: readonly TextRole[]
+  /** The file that draws them, when a section composes them itself (Image + text's intro is its body). */
+  headerRender?: string
   /** The array whose members have their own Appearance, and which member the probes set. */
   item?: { array: string; index?: number }
   /** The Cards box's name on the section. */
@@ -294,7 +296,7 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
       role,
       field: `headerDesign.${role}`,
       resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
-      render: 'src/components/ui/section-header.tsx',
+      render: config.headerRender ?? 'src/components/ui/section-header.tsx',
       target: textRoleTarget(role),
       change: 'attributes',
       probe: { [`headerDesign.${role}.size`]: 'large' },
@@ -813,6 +815,17 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { supporting: null },
     probe: { supporting: STATS_BAR },
   },
+  ...cardFamilyEvidence({
+    component: 'mediaText',
+    layouts: ['side', 'stacked', 'overlay'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Our story' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerRender: 'src/features/pages/components/sections/media-text.tsx',
+  }),
   ...frameEvidence('mediaText', {
     mark: ['side', 'stacked', 'overlay'],
     overlay: ['side', 'stacked'],
@@ -1031,12 +1044,31 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: true,
     motion: true,
   }),
+  ...cardFamilyEvidence({
+    component: 'featuresGrid',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Why us', intro: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('featuresGrid', {
     mark: true,
     overlay: true,
     glass: true,
     edge: true,
     motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'logoCloud',
+    layouts: ['grid', 'marquee'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Trusted by', intro: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
   ...frameEvidence('logoCloud', {
     mark: ['grid', 'marquee'],
@@ -1068,7 +1100,25 @@ export const EVIDENCE: readonly Evidence[] = [
   }),
   ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
   // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
+  ...cardFamilyEvidence({
+    component: 'ctaBanner',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Ready?', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('ctaBanner', { mark: true, overlay: true, edge: true, motion: true }),
+  ...cardFamilyEvidence({
+    component: 'formSection',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Contact', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('formSection', {
     mark: true,
     overlay: true,
@@ -1112,6 +1162,15 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: true,
     motion: true,
   }),
+  ...cardFamilyEvidence({
+    component: 'newsletterSignup',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Updates', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('newsletterSignup', {
     mark: true,
     overlay: true,
@@ -1137,6 +1196,16 @@ export const EVIDENCE: readonly Evidence[] = [
     glass: ['inline', 'cards'],
     edge: ['inline', 'cards'],
     motion: ['inline', 'cards'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'gallery',
+    layouts: ['grid', 'masonry', 'slider'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Our work', intro: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
   ...frameEvidence('gallery', {
     mark: ['grid', 'masonry', 'slider'],
@@ -1189,11 +1258,44 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['grid', 'slider', 'list'],
     motion: ['grid', 'slider', 'list'],
   }),
+  ...cardFamilyEvidence({
+    component: 'video',
+    layouts: ['embed', 'ambient'],
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Watch', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('video', {
     overlay: ['embed', 'ambient'],
     glass: ['embed', 'ambient'],
     edge: ['embed', 'ambient'],
     motion: ['embed', 'ambient'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'process',
+    layouts: ['vertical', 'alternating'],
+    parts: ['text', 'header'],
+    render: 'src/features/pages/components/sections/process/process-step.tsx',
+    cardTarget: '',
+    base: {
+      eyebrow: 'How it works',
+      intro: 'An intro.',
+      steps: [
+        { _key: 'probe-step-1', _type: 'step', label: 'Step one', title: 'Meet', text: 'We talk.' },
+        {
+          _key: 'probe-step-2',
+          _type: 'step',
+          label: 'Step two',
+          title: 'Build',
+          text: 'We make it.',
+        },
+      ],
+    },
+    roles: ['label', 'title', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
   ...frameEvidence('process', {
     mark: ['vertical', 'alternating'],
@@ -1201,6 +1303,15 @@ export const EVIDENCE: readonly Evidence[] = [
     glass: ['vertical', 'alternating'],
     edge: ['vertical', 'alternating'],
     motion: ['vertical', 'alternating'],
+  }),
+  ...cardFamilyEvidence({
+    component: 'embed',
+    parts: ['header'],
+    render: 'src/components/ui/section-header.tsx',
+    cardTarget: '',
+    base: { eyebrow: 'Book', text: 'An intro.' },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
   ...frameEvidence('embed', { overlay: true, glass: true, edge: true, motion: true }),
   ...cardFamilyEvidence({
@@ -1222,6 +1333,22 @@ export const EVIDENCE: readonly Evidence[] = [
     motion: ['list', 'agenda', 'featured'],
   }),
   ...locationSources,
+  ...cardFamilyEvidence({
+    component: 'linkList',
+    layouts: ALL_LINK_LIST,
+    parts: ['header'],
+    render: 'src/features/pages/components/sections/link-list/link-list-heading.tsx',
+    headerRender: 'src/features/pages/components/sections/link-list/link-list-heading.tsx',
+    cardTarget: '',
+    base: {
+      eyebrow: 'Find me',
+      intro: 'An intro.',
+      title: 'Fixture heading',
+      headingDisplay: 'text',
+    },
+    roles: [],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('linkList', {
     mark: ['stacked', 'cards', 'editorial', 'compact'],
     overlay: ALL_LINK_LIST,
