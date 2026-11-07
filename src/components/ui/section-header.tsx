@@ -32,6 +32,7 @@ export function SectionHeader({
   block,
   text,
   bare = false,
+  headingId,
 }: {
   eyebrow?: string | null
   /** The plain title, drawn when `heading` has no words. */
@@ -45,6 +46,8 @@ export function SectionHeader({
   block: string
   text: string
   bare?: boolean
+  /** The heading's id, for a section labelled by it (`aria-labelledby`). */
+  headingId?: string
 }) {
   if (!title && !eyebrow && !intro) return null
   const headingBase = 'text-h2 font-semibold text-balance'
@@ -52,6 +55,7 @@ export function SectionHeader({
     return (
       <RichHeading
         as="h2"
+        id={headingId}
         blocks={heading}
         fallback={title}
         {...headingProps(`${spacing} ${headingBase} ${block} ${text}`, design.heading)}
@@ -81,6 +85,7 @@ export function SectionHeader({
       {title && (
         <RichHeading
           as="h2"
+          id={headingId}
           blocks={heading}
           fallback={title}
           {...headingProps(headingBase, design.heading)}

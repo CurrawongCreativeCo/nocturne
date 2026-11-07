@@ -248,8 +248,8 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     agencyOnly: ['access', 'style'],
   },
   pricingTable: {
-    editable: ['heading', 'title', 'intro', 'plans'],
-    agencyOnly: ['access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'plans'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
   },
   newsletterSignup: {
     editable: ['heading', 'title', 'text', 'submitLabel', 'successMessage'],

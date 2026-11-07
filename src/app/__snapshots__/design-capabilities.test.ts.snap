@@ -493,14 +493,14 @@ exports[`the design capability contract > newsletterSignup: reports what it offe
 exports[`the design capability contract > pricingTable: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "surface required item: pending (156)",
-    "text required card: pending (156)",
-    "text required item: pending (156)",
-    "header required section: pending (156)",
+    "surface required card: verified",
+    "surface required item: verified",
+    "text required card: verified",
+    "text required item: verified",
+    "header required section: verified",
     "mark required section: verified",
-    "mark required card: pending (156)",
-    "mark required item: pending (156)",
+    "mark required card: verified",
+    "mark required item: verified",
     "depth required card: pending (146)",
     "depth required item: pending (146)",
     "icon conditional card: pending (158)",

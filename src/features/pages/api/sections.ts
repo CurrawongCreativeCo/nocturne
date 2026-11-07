@@ -134,6 +134,30 @@ const surfaceProjection = /* groq */ `
   borderColour { colour, hex }
 `
 
+/** A role's text style, with the italic only a quote offers (lib/sanity/text-role.ts). */
+const roleStyleProjection = /* groq */ `${textStyleProjection}, fontStyle`
+
+/** The section header's eyebrow field and its three roles (components/ui/section-header.tsx). */
+const headerDesignProjection = /* groq */ `
+  eyebrow,
+  headerDesign {
+    eyebrow { ${roleStyleProjection} },
+    heading { ${roleStyleProjection} },
+    intro { ${roleStyleProjection} }
+  }
+`
+
+/** Pricing's card design at section level and, behind the plan's Appearance switch, at item level. */
+const pricingCardDesignProjection = /* groq */ `
+  ${surfaceProjection},
+  title { ${roleStyleProjection} },
+  price { ${roleStyleProjection} },
+  body { ${roleStyleProjection} },
+  label { ${roleStyleProjection} },
+  description { ${roleStyleProjection} },
+  mark { ${decorativeMarkFields} }
+`
+
 /** A testimonial avatar's or team list portrait's size and ring (schema: lib/sanity/schema/avatar-design.ts). */
 const avatarDesignFields = /* groq */ `
   size,
@@ -148,13 +172,8 @@ export const testimonialsFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
-    eyebrow,
     intro,
-    headerDesign {
-      eyebrow { ${textStyleProjection} },
-      heading { ${textStyleProjection} },
-      intro { ${textStyleProjection} }
-    },
+    ${headerDesignProjection},
     cardDesign {
       ${surfaceProjection},
       quote {
@@ -227,13 +246,19 @@ export const pricingTableFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign { ${pricingCardDesignProjection} },
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
     plans[defined(price->priceId) && price->active == true] {
       _key,
       name,
+      description,
+      meta,
+      badgeText,
       features,
       highlighted,
       ctaLabel,
+      design { appearance, ${pricingCardDesignProjection} },
       price-> { ${stripePriceFields} }
     }
   }

@@ -192,6 +192,110 @@ function frameEvidence(
 }
 
 // ---------------------------------------------------------------------------------------------------
+// A card family's shared design (task 156): surface, text roles, section header and marks
+
+interface CardFamilyEvidence {
+  component: string
+  layouts?: readonly string[]
+  /** The file that draws the cards, checked to exist. */
+  render: string
+  /** One card's element, which the surface and the card mark are found on. */
+  cardTarget: string
+  /** The stored content every case starts from: it must draw every role and the header. */
+  base: Patch
+  /** The text roles the cards draw, each proven on its own element. */
+  roles: readonly TextRole[]
+  /** The header roles, drawn by SectionHeader. */
+  headerRoles?: readonly TextRole[]
+  /** The array whose members have their own Appearance, and which member the probes set. */
+  item?: { array: string; index?: number }
+  /** The Cards box's name on the section. */
+  box?: string
+  /** Where the family has no card of its own at a layout, the layouts it does (surface and marks). */
+  cardLayouts?: readonly string[]
+}
+
+/**
+ * The evidence of a card family's shared design: the same cases for every family, so a role, a part and a
+ * scope are each proven on their own. A role's target is that role's own element (data-text-role), the
+ * surface's the card, a mark's the mark's own box, and the item scope sets the item's Appearance first.
+ */
+function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
+  const { component, layouts, render, cardTarget, base, roles, item, cardLayouts } = config
+  const box = config.box ?? 'cardDesign'
+  const index = item?.index ?? 0
+  const scopes = item ? (['card', 'item'] as const) : (['card'] as const)
+  const pathOf = (scope: 'card' | 'item', field: string) =>
+    scope === 'card' ? `${box}.${field}` : `${item?.array}[].design.${field}`
+  const probeOf = (scope: 'card' | 'item', field: string) =>
+    scope === 'card' ? `${box}.${field}` : `${item?.array}.${String(index)}.design.${field}`
+  const baseOf = (scope: 'card' | 'item' | 'section'): Patch =>
+    scope !== 'item'
+      ? base
+      : { ...base, [`${item?.array}.${String(index)}.design.appearance`]: 'custom' }
+  const common = (scope: 'card' | 'item' | 'section', covers: readonly string[] | undefined) => ({
+    component,
+    ...(covers ? { layouts: covers } : {}),
+    scope,
+    render,
+    base: baseOf(scope),
+  })
+  return [
+    ...scopes.map((scope): CapabilityEvidence => ({
+      id: `${component}.surface.${scope}`,
+      ...common(scope, cardLayouts ?? layouts),
+      capability: 'surface',
+      field: pathOf(scope, 'border'),
+      resolvers: [{ module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' }],
+      target: cardTarget,
+      change: 'attributes',
+      probe: { [probeOf(scope, 'border')]: 'thick' },
+    })),
+    ...scopes.flatMap((scope) =>
+      roles.map((role): CapabilityEvidence => ({
+        id: `${component}.text.${scope}.${role}`,
+        ...common(scope, layouts),
+        capability: 'text',
+        role,
+        field: pathOf(scope, role),
+        resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+        target: textRoleTarget(role),
+        change: 'attributes',
+        probe: { [probeOf(scope, `${role}.size`)]: 'large' },
+      })),
+    ),
+    ...(config.headerRoles ?? []).map((role): CapabilityEvidence => ({
+      id: `${component}.header.section.${role}`,
+      ...common('section', layouts),
+      capability: 'header',
+      role,
+      field: `headerDesign.${role}`,
+      resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+      render: 'src/components/ui/section-header.tsx',
+      target: textRoleTarget(role),
+      change: 'attributes',
+      probe: { [`headerDesign.${role}.size`]: 'large' },
+    })),
+    ...scopes.map((scope): CapabilityEvidence => ({
+      id: `${component}.mark.${scope}`,
+      ...common(scope, cardLayouts ?? layouts),
+      capability: 'mark',
+      field: pathOf(scope, 'mark'),
+      resolvers: [
+        { module: '@/lib/sanity/decorative-mark-options', export: 'resolveDecorativeMark' },
+      ],
+      render: 'src/components/ui/decorative-mark.tsx',
+      target: `[data-decorative-mark="${scope}"]`,
+      change: 'appears',
+      probe: {
+        [probeOf(scope, 'mark.kind')]: 'text',
+        [probeOf(scope, 'mark.text')]: 'Thanks',
+      },
+    })),
+  ]
+}
+
+// ---------------------------------------------------------------------------------------------------
 // Slots
 
 const STATS_BAR = [
@@ -917,6 +1021,35 @@ export const EVIDENCE: readonly Evidence[] = [
     glass: true,
     edge: true,
     motion: true,
+  }),
+  ...cardFamilyEvidence({
+    component: 'pricingTable',
+    render: 'src/features/pages/components/sections/pricing-table.tsx',
+    cardTarget: 'ul.grid > li',
+    // Every role needs content to draw: the description and detail line are optional, the rest always draw.
+    base: {
+      eyebrow: 'Plans',
+      plans: [
+        {
+          _key: 'probe-plan-1',
+          _type: 'plan',
+          price: { _type: 'reference', _ref: 'stripePrice-price_Starter1' },
+          description: 'A line about this plan.',
+          meta: '90 minutes',
+          features: ['One project', 'Email support'],
+        },
+        {
+          _key: 'probe-plan-2',
+          _type: 'plan',
+          price: { _type: 'reference', _ref: 'stripePrice-price_Pro1' },
+          features: ['Unlimited projects'],
+          highlighted: true,
+        },
+      ],
+    },
+    roles: ['title', 'price', 'body', 'label', 'description'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+    item: { array: 'plans' },
   }),
   ...frameEvidence('pricingTable', {
     mark: true,

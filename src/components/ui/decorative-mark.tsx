@@ -11,6 +11,7 @@ import {
   type MarkInput,
   type ResolvedMark,
 } from '@/lib/sanity/decorative-mark-options'
+import type { SiteDesign } from '@/lib/sanity/site-design'
 
 export type MarkScope = 'section' | 'card' | 'item'
 
@@ -112,6 +113,14 @@ export function DecorativeMark(props: DecorativeMarkProps) {
   return mark ? <LoadedMark {...props} mark={mark} /> : null
 }
 
+/**
+ * The site's colours, loaded here and not at the top so a page without a mark never loads the Sanity
+ * client for this. One import is shared by every mark on the page: several cards each draw a mark at
+ * once, and two first-time imports of one module racing is how a test's mock of it was bypassed.
+ */
+let loadedSiteDesign: Promise<{ getSiteDesign: () => Promise<SiteDesign | undefined> }> | undefined
+const siteDesign = () => (loadedSiteDesign ??= import('@/lib/sanity/site-design'))
+
 async function LoadedMark({
   mark,
   scope,
@@ -121,8 +130,7 @@ async function LoadedMark({
   glass,
   nested = false,
 }: DecorativeMarkProps & { mark: ResolvedMark }) {
-  const { getSiteDesign } = await import('@/lib/sanity/site-design')
-  const design = await getSiteDesign()
+  const design = await (await siteDesign()).getSiteDesign()
   const opacity = markOpacityAt({
     opacity: mark.opacity,
     colour: mark.storedColour,

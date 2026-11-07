@@ -390,7 +390,10 @@ const cases = CAPABILITY_EVIDENCE.flatMap((entry) =>
 describe('design capability evidence', () => {
   it.each(cases)('$id: the probe changes the registered target', async ({ entry, layout }) => {
     const result = await runCase(entry, layout)
-    expect(result.status).toBe('changed')
+    expect(
+      result.status,
+      `${entry.id}: the unset target was ${JSON.stringify(result.unset).slice(0, 400)}`,
+    ).toBe('changed')
     expect(result.leaked, 'other text roles the probe also changed').toEqual([])
     expect(
       entry.change === 'attributes'

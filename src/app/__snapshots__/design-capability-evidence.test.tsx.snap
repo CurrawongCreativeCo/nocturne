@@ -17,8 +17,6 @@ exports[`design capability evidence > ctaBanner.edge.section: the probe changes 
 
 exports[`design capability evidence > ctaBanner.mark.section: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > ctaBanner.mark.section@None: the probe changes the registered target 1`] = `[]`;
-
 exports[`design capability evidence > ctaBanner.motion.section: the probe changes the registered target 1`] = `
 [
   "03267cdce461a78e (1594 characters)",
@@ -147,8 +145,6 @@ exports[`design capability evidence > faq.glass.section: the probe changes the r
 
 exports[`design capability evidence > faq.mark.section: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > faq.mark.section@None: the probe changes the registered target 1`] = `[]`;
-
 exports[`design capability evidence > faq.motion.section: the probe changes the registered target 1`] = `
 [
   "b69a7d6d457deb28 (1502 characters)",
@@ -175,8 +171,6 @@ exports[`design capability evidence > featuresGrid.glass.section: the probe chan
 
 exports[`design capability evidence > featuresGrid.mark.section: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > featuresGrid.mark.section@None: the probe changes the registered target 1`] = `[]`;
-
 exports[`design capability evidence > featuresGrid.motion.section: the probe changes the registered target 1`] = `
 [
   "17f182518ccb208b (1700 characters)",
@@ -202,8 +196,6 @@ exports[`design capability evidence > formSection.glass.section: the probe chang
 `;
 
 exports[`design capability evidence > formSection.mark.section: the probe changes the registered target 1`] = `[]`;
-
-exports[`design capability evidence > formSection.mark.section@None: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > formSection.motion.section: the probe changes the registered target 1`] = `
 [
@@ -921,8 +913,6 @@ exports[`design capability evidence > location.glass.section: the probe changes 
 
 exports[`design capability evidence > location.mark.section: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > location.mark.section@None: the probe changes the registered target 1`] = `[]`;
-
 exports[`design capability evidence > location.motion.section: the probe changes the registered target 1`] = `
 [
   "591c19c5778c869a (2889 characters)",
@@ -1091,8 +1081,6 @@ exports[`design capability evidence > newsletterSignup.glass.section: the probe 
 
 exports[`design capability evidence > newsletterSignup.mark.section: the probe changes the registered target 1`] = `[]`;
 
-exports[`design capability evidence > newsletterSignup.mark.section@None: the probe changes the registered target 1`] = `[]`;
-
 exports[`design capability evidence > newsletterSignup.motion.section: the probe changes the registered target 1`] = `
 [
   "fcd180c46c9784c9 (356 characters)",
@@ -1117,9 +1105,29 @@ exports[`design capability evidence > pricingTable.glass.section: the probe chan
 ]
 `;
 
-exports[`design capability evidence > pricingTable.mark.section: the probe changes the registered target 1`] = `[]`;
+exports[`design capability evidence > pricingTable.header.section.eyebrow: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
 
-exports[`design capability evidence > pricingTable.mark.section@None: the probe changes the registered target 1`] = `[]`;
+exports[`design capability evidence > pricingTable.header.section.heading: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading" id="_R_5_">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.header.section.intro: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.mark.card: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > pricingTable.mark.item: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > pricingTable.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > pricingTable.motion.section: the probe changes the registered target 1`] = `
 [
@@ -1130,6 +1138,90 @@ exports[`design capability evidence > pricingTable.motion.section: the probe cha
 exports[`design capability evidence > pricingTable.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > pricingTable.surface.card: the probe changes the registered target 1`] = `
+[
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-1 ring-line ring-inset">",
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-2 ring-ink ring-inset">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.surface.item: the probe changes the registered target 1`] = `
+[
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-1 ring-line ring-inset">",
+  "<li class="flex flex-col rounded-card bg-surface p-8 ring-2 ring-ink ring-inset">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.body: the probe changes the registered target 1`] = `
+[
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.description: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 text-small text-ink-muted" data-text-role="description">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.label: the probe changes the registered target 1`] = `
+[
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-small text-ink-muted" data-text-role="label">",
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.price: the probe changes the registered target 1`] = `
+[
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.card.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.body: the probe changes the registered target 1`] = `
+[
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+  "<ul class="mt-8 flex-1 space-y-3 text-small text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.description: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-3 text-small text-ink-muted" data-text-role="description">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.label: the probe changes the registered target 1`] = `
+[
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-small text-ink-muted" data-text-role="label">",
+  "<span class="text-small text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.price: the probe changes the registered target 1`] = `
+[
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+  "<span class="text-4xl font-semibold tracking-tight" data-text-role="price">",
+]
+`;
+
+exports[`design capability evidence > pricingTable.text.item.title: the probe changes the registered target 1`] = `
+[
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
+  "<h3 class="text-lead font-semibold" data-text-role="title">",
 ]
 `;
 
@@ -1198,8 +1290,6 @@ exports[`design capability evidence > richText.glass.section: the probe changes 
 `;
 
 exports[`design capability evidence > richText.mark.section: the probe changes the registered target 1`] = `[]`;
-
-exports[`design capability evidence > richText.mark.section@None: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > richText.motion.section: the probe changes the registered target 1`] = `
 [
