@@ -66,6 +66,9 @@ const { COMPONENT_SCHEMAS, lookupType } = await jiti.import(
 const { CAPABILITY_EXCEPTIONS } = await jiti.import(
   join(root, 'src/lib/design/capability-exceptions.ts'),
 )
+const { DESIGN_CONTEXTS } = await jiti.import(
+  join(root, 'src/lib/design/capability-design-contexts.ts'),
+)
 const { contractProblems, formatProblem } = await jiti.import(
   join(root, 'src/lib/design/contract-checks.ts'),
 )
@@ -146,6 +149,7 @@ const problems = contractProblems({
   schemas: COMPONENT_SCHEMAS,
   lookup: lookupType,
   exceptions: CAPABILITY_EXCEPTIONS,
+  contexts: DESIGN_CONTEXTS,
   baseline: committed,
   changes: BASELINE_CHANGES,
   readSource: (path) =>

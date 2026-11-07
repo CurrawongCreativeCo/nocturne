@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { builtBy, builtOptions } from '@/lib/sanity/schema/capability-marker'
 
+import type { DesignContext } from './capability-design-contexts'
 import type { CapabilityException } from './capability-exceptions'
 import {
   agencyOnlyField,
@@ -134,6 +135,134 @@ describe('privateFields', () => {
     expect(
       privateFields(section(), lookup, [exception({ nature: 'query', marked: undefined })]),
     ).toEqual([{ path: 'items[].design.shadow', capability: 'depth', problem: 'markedNonDesign' }])
+  })
+})
+
+describe('privateFields: where design controls live (I6)', () => {
+  const none: CapabilityException[] = []
+  const paths = (extra: SchemaField[], contexts: DesignContext[] = []) =>
+    privateFields(section(extra), lookup, [exception()], contexts).map((found) => found.path)
+  const summary = (fields: SchemaField[]): SchemaField => ({
+    name: 'plans',
+    type: 'array',
+    group: 'content',
+    of: [
+      {
+        name: 'plan',
+        type: 'object',
+        fields: [
+          { name: 'name', type: 'string' },
+          {
+            name: 'design',
+            type: 'object',
+            options: { designSummary: { groups: [] } },
+            fields,
+          },
+        ],
+      },
+    ],
+  })
+
+  it('flags any field in an object that is a design summary, whatever its kind or name', () => {
+    expect(
+      paths([
+        summary([
+          { name: 'mode', type: 'string', options: { list: ['a', 'b'] } },
+          { name: 'emphasis', type: 'boolean' },
+          { name: 'amount', type: 'number' },
+          { name: 'caption', type: 'string' },
+          builtBy('surfaceFields', { name: 'border', type: 'string' }, 'surface'),
+        ]),
+      ]),
+    ).toEqual([
+      'plans[].design.mode',
+      'plans[].design.emphasis',
+      'plans[].design.amount',
+      'plans[].design.caption',
+    ])
+  })
+
+  it('flags a control inside a nested object in the Design group, at any depth', () => {
+    const nested: SchemaField = {
+      name: 'looks',
+      type: 'object',
+      group: 'design',
+      fields: [
+        {
+          name: 'inner',
+          type: 'object',
+          fields: [{ name: 'sheen', type: 'string', options: { list: ['a'] } }],
+        },
+      ],
+    }
+    expect(paths([nested])).toEqual(['looks.inner.sheen'])
+  })
+
+  it('flags a control in a registered context, and only there', () => {
+    const settings: SchemaField = {
+      name: 'settings',
+      type: 'object',
+      group: 'content',
+      fields: [{ name: 'cardLook', type: 'string', options: { list: ['a', 'b'] } }],
+    }
+    const context: DesignContext = {
+      component: 'fixtureSection',
+      path: 'settings',
+      why: 'The listing’s settings hold its design.',
+      reviewer: 'owner',
+      reviewed: '2026-11-07',
+    }
+    expect(paths([settings])).toEqual([])
+    expect(paths([settings], [context])).toEqual(['settings.cardLook'])
+    expect(paths([settings], [{ ...context, component: 'other' }])).toEqual([])
+  })
+
+  it('does not call an ordinary choice, switch or number a design control by being one', () => {
+    expect(
+      paths([
+        { name: 'mode', type: 'string', group: 'content', options: { list: ['a', 'b'] } },
+        { name: 'showMore', type: 'boolean', group: 'content' },
+        { name: 'count', type: 'number', group: 'content' },
+        { name: 'loose', type: 'boolean' },
+        { name: 'limit', type: 'number' },
+      ]),
+    ).toEqual([])
+  })
+
+  it('judges nothing by a name: text called shadow outside a design context is not flagged', () => {
+    expect(
+      paths([
+        { name: 'shadow', type: 'string', group: 'content' },
+        { name: 'glow', type: 'string' },
+      ]),
+    ).toEqual([])
+  })
+
+  it('accepts a flagged field once a reviewed exception covers it', () => {
+    const covered = exception({
+      fields: ['items[].design.shadow', 'plans[].design.emphasis'],
+      marked: { 'items[].design.shadow': 'depth' },
+      nature: 'design',
+    })
+    const found = privateFields(
+      section([summary([{ name: 'emphasis', type: 'boolean' }])]),
+      lookup,
+      [covered],
+    )
+    expect(found).toEqual([])
+    expect(
+      privateFields(section([summary([{ name: 'emphasis', type: 'boolean' }])]), lookup, none),
+    ).toContainEqual({ path: 'plans[].design.emphasis', problem: 'unbuilt' })
+  })
+
+  it('keeps the forgery check: another field’s stamp in a design summary is still flagged', () => {
+    const stolen = { ...border, name: 'outline' }
+    const found = privateFields(section([summary([stolen])]), lookup, [exception()])
+    expect(found).toContainEqual({
+      path: 'plans[].design.outline',
+      capability: 'surface',
+      problem: 'forgedProvenance',
+    })
   })
 })
 

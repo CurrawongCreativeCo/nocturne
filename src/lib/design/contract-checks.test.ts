@@ -237,6 +237,29 @@ describe('the reviewed baseline changes', () => {
   })
 })
 
+describe('registered design-control contexts', () => {
+  const context = {
+    component: 'fixtureSection',
+    path: 'title',
+    why: 'Holds design.',
+    reviewer: 'owner',
+    reviewed: '2026-11-07',
+  }
+
+  it('accepts a complete row for a field that exists', () => {
+    expect(messages(inputs({ contexts: [context] }))).toEqual([])
+  })
+
+  it('fails a row for something that doesn’t exist, and an incomplete one', () => {
+    expect(messages(inputs({ contexts: [{ ...context, path: 'nowhere' }] }))).toEqual([
+      "fixtureSection: nowhere is registered as a design-control context, but doesn't exist.",
+    ])
+    expect(messages(inputs({ contexts: [{ ...context, reviewer: '' }] }))).toEqual([
+      'fixtureSection: title is a registered design-control context with no reason, reviewer or review date.',
+    ])
+  })
+})
+
 describe('futureCoverageProblems', () => {
   it('accepts a part with a declaring task, or with capability tasks', () => {
     expect(

@@ -12,6 +12,7 @@ import {
   type CapabilityBaseline,
 } from '@/lib/design/capability-availability'
 import { BASELINE_CHANGES } from '@/lib/design/capability-baseline-changes'
+import { DESIGN_CONTEXTS } from '@/lib/design/capability-design-contexts'
 import { EVIDENCE } from '@/lib/design/capability-evidence'
 import { CAPABILITY_EXCEPTIONS } from '@/lib/design/capability-exceptions'
 import { declarationProblems, type ContractProblem } from '@/lib/design/capability-policy'
@@ -50,6 +51,7 @@ describe('the design capability contract', () => {
         schemas: COMPONENT_SCHEMAS,
         lookup: lookupType,
         exceptions: CAPABILITY_EXCEPTIONS,
+        contexts: DESIGN_CONTEXTS,
         baseline: committed,
         changes: BASELINE_CHANGES,
         readSource: (path) => {
@@ -83,7 +85,7 @@ describe('the design capability contract', () => {
 
   it('has no private design controls outside the reviewed exceptions', () => {
     const found = [...COMPONENT_SCHEMAS.values()].flatMap((type) =>
-      privateFields(type, lookupType, CAPABILITY_EXCEPTIONS).map(
+      privateFields(type, lookupType, CAPABILITY_EXCEPTIONS, DESIGN_CONTEXTS).map(
         ({ path, problem, capability }) =>
           `${type.name}: ${path} (${problem}${capability ? `, ${capability}` : ''})`,
       ),
@@ -111,7 +113,7 @@ describe('the design capability contract', () => {
         { name: 'halo', type: 'string', group: 'design', options: avatar.options },
       ],
     }
-    expect(privateFields(mutated, lookupType, CAPABILITY_EXCEPTIONS)).toEqual([
+    expect(privateFields(mutated, lookupType, CAPABILITY_EXCEPTIONS, DESIGN_CONTEXTS)).toEqual([
       { path: 'sparkle', capability: 'surface', problem: 'unreviewedMarker' },
       { path: 'sparkle', problem: 'unbuilt' },
       { path: 'halo', problem: 'forgedProvenance' },

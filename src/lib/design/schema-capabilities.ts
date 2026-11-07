@@ -1,5 +1,6 @@
 import { provenanceOf } from './builder-provenance'
 import type { CapabilityId, SharedBuilder, TextRole } from './capabilities'
+import type { DesignContext } from './capability-design-contexts'
 import type { CapabilityException } from './capability-exceptions'
 
 /**
@@ -87,6 +88,8 @@ export interface WalkedField {
   marker: Marker
   /** The top-level field it sits under. */
   top: SchemaField
+  /** Every field it sits inside, outermost first (an array field, then an object inside its members). */
+  ancestors: readonly SchemaField[]
 }
 
 /**
@@ -103,6 +106,7 @@ export function walkFields(
     prefix: string,
     top: SchemaField | undefined,
     stack: readonly string[],
+    ancestors: readonly SchemaField[],
   ) => {
     if (!fields || stack.length > MAX_DEPTH) return
     // Only named types can recur (a type that holds itself); inline objects are all type `object`.
@@ -111,21 +115,24 @@ export function walkFields(
     for (const field of fields) {
       const path = `${prefix}${field.name}`
       const root = top ?? field
-      if (visit({ path, field, marker: markerOf(field, lookup), top: root }) === false) continue
+      if (visit({ path, field, marker: markerOf(field, lookup), top: root, ancestors }) === false) {
+        continue
+      }
+      const inside = [...ancestors, field]
       if (field.type === 'array') {
         for (const { member, path: memberPath } of membersOf(field, path)) {
           const memberFields = member.fields ?? lookup(member.type)?.fields
           if (memberFields && !recurs(member.type)) {
-            walk(memberFields, `${memberPath}.`, root, enter(member.type))
+            walk(memberFields, `${memberPath}.`, root, enter(member.type), inside)
           }
         }
         continue
       }
       if (recurs(field.type)) continue
-      walk(fieldsOf(field, lookup), `${path}.`, root, enter(field.type))
+      walk(fieldsOf(field, lookup), `${path}.`, root, enter(field.type), inside)
     }
   }
-  walk(type.fields, '', undefined, [type.name])
+  walk(type.fields, '', undefined, [type.name], [])
 }
 
 const inDesignGroup = (field: SchemaField) =>
@@ -168,9 +175,10 @@ export function privateFields(
   type: SchemaField,
   lookup: TypeLookup,
   exceptions: readonly CapabilityException[],
+  contexts: readonly DesignContext[] = [],
 ): PrivateField[] {
   const found: PrivateField[] = []
-  walkFields(type, lookup, ({ path, field, marker, top }) => {
+  walkFields(type, lookup, ({ path, field, marker, top, ancestors }) => {
     const exception = exceptionFor(exceptions, type.name, path)
     if (marker.forged) {
       found.push({
@@ -189,7 +197,7 @@ export function privateFields(
       }
     }
     if (marker.designBuilder) return false
-    if (!inDesignGroup(top)) return true
+    if (!inDesignContext({ component: type.name, path, top, ancestors, contexts })) return true
     if (exception) return false
     const hasInside =
       field.type === 'array' ? (field.of ?? []).length > 0 : Boolean(fieldsOf(field, lookup))
@@ -203,6 +211,39 @@ export function privateFields(
     return true
   })
   return found
+}
+
+/**
+ * Whether a field sits where design controls live, judged by where it is and never by what it is
+ * called: the Design group, an object that group holds at any depth, an object whose options say it
+ * is a design summary (a link's own Appearance), or a context the register names
+ * (capability-design-contexts.ts). An ordinary choice, switch or number elsewhere is not a design
+ * control by being one: those stay with review, and a known one is recorded in the exception register.
+ */
+function inDesignContext({
+  component,
+  path,
+  top,
+  ancestors,
+  contexts,
+}: {
+  component: string
+  path: string
+  top: SchemaField
+  ancestors: readonly SchemaField[]
+  contexts: readonly DesignContext[]
+}): boolean {
+  return (
+    inDesignGroup(top) ||
+    ancestors.some(
+      (ancestor) => inDesignGroup(ancestor) || Boolean(ancestor.options?.designSummary),
+    ) ||
+    contexts.some(
+      (context) =>
+        context.component === component &&
+        (path.startsWith(`${context.path}.`) || path.startsWith(`${context.path}[`)),
+    )
+  )
 }
 
 function arrayMembersBuilt(field: SchemaField, lookup: TypeLookup): boolean {
