@@ -42,6 +42,10 @@ import { framing } from '@/lib/sanity/schema/image-framing-option'
  * Availability can only be verified for a layout whose case passes here.
  */
 
+// Each case renders a whole section twice or more through the page query: under a loaded machine (the
+// full suite, CI) the default five seconds is not always enough, and a timeout is not a failed claim.
+vi.setConfig({ testTimeout: 30_000 })
+
 vi.hoisted(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(new Date('2026-11-06T09:00:00+11:00'))

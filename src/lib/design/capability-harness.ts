@@ -54,6 +54,24 @@ function describe(element: Element, change: 'attributes' | 'content'): string {
   return `<${element.tagName.toLowerCase()}${attributes ? ` ${attributes}` : ''}>`
 }
 
+/**
+ * One window for every comparison, its body replaced for each read. A jsdom window costs about a megabyte and
+ * a half that is never freed, even closed, so a harness that parsed a window per read (a thousand renders,
+ * several reads each) ran its worker out of memory: killed with SIGABRT, the tests after it silently not
+ * run. The callback must finish with the document before returning: the next read replaces it.
+ */
+let shared: Document | undefined
+function inDocument<T>(html: string, read: (document: Document) => T): T {
+  const JSDOM = jsdom()
+  shared ??= new JSDOM('<!doctype html><html><body></body></html>').window.document
+  shared.body.innerHTML = html
+  try {
+    return read(shared)
+  } finally {
+    shared.body.innerHTML = ''
+  }
+}
+
 /** Some server-rendered HTML as a document, for tests that read what a component drew. */
 export function parseHtml(html: string): Document {
   const JSDOM = jsdom()
@@ -61,7 +79,9 @@ export function parseHtml(html: string): Document {
 }
 
 function select(html: string, target: string, change: 'attributes' | 'content'): string[] {
-  return [...parseHtml(html).querySelectorAll(target)].map((element) => describe(element, change))
+  return inDocument(html, (document) =>
+    [...document.querySelectorAll(target)].map((element) => describe(element, change)),
+  )
 }
 
 /**
@@ -94,14 +114,15 @@ export function compareTarget(
  * here even when each role's own target happens to change.
  */
 export function leakedTextRoles(unsetHtml: string, probeHtml: string, role: TextRole): TextRole[] {
-  const byRole = (html: string) => {
-    const found = new Map<string, string[]>()
-    for (const element of parseHtml(html).querySelectorAll(`[${TEXT_ROLE_ATTRIBUTE}]`)) {
-      const name = element.getAttribute(TEXT_ROLE_ATTRIBUTE) ?? ''
-      found.set(name, [...(found.get(name) ?? []), element.outerHTML])
-    }
-    return found
-  }
+  const byRole = (html: string) =>
+    inDocument(html, (document) => {
+      const found = new Map<string, string[]>()
+      for (const element of document.querySelectorAll(`[${TEXT_ROLE_ATTRIBUTE}]`)) {
+        const name = element.getAttribute(TEXT_ROLE_ATTRIBUTE) ?? ''
+        found.set(name, [...(found.get(name) ?? []), element.outerHTML])
+      }
+      return found
+    })
   const before = byRole(unsetHtml)
   const after = byRole(probeHtml)
   return TEXT_ROLES.filter(
