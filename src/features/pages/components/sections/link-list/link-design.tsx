@@ -3,13 +3,14 @@ import type { CSSProperties, ReactNode } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
 import { DecorativeMark } from '@/components/ui/decorative-mark'
+import { IconContainer } from '@/components/ui/icon-container'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { trackAttributes } from '@/lib/analytics/track-script'
 import type { MarkFill } from '@/lib/color/mark-contrast'
 import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
 import { OWN_SHADOW } from '@/lib/sanity/depth-options'
 import type { ThumbnailServed } from '@/lib/sanity/link-thumbnail-framing'
-import { iconLook, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
+import type { IconDesign, OwnIcon } from '@/lib/sanity/surface-options'
 import { textLook, type OwnText } from '@/lib/sanity/text-style-options'
 import type { SanityImageData } from '@/types/sanity'
 
@@ -201,25 +202,10 @@ export function LinkIcon({
   keepBox?: boolean
 }) {
   if (!link.item.icon) return null
-  const look = iconLook(design, own)
-  const icon = <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
-  if (look.shape === 'plain' && !keepBox) {
-    return look.className || look.style ? (
-      <span className={`contents ${look.className}`} style={look.style}>
-        {icon}
-      </span>
-    ) : (
-      icon
-    )
-  }
   return (
-    <span
-      className={`grid shrink-0 place-items-center ${box} ${look.className}`}
-      style={look.style}
-      data-icon-shape={look.shape}
-    >
-      {icon}
-    </span>
+    <IconContainer design={design} own={own} size={box} keepBox={keepBox}>
+      <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
+    </IconContainer>
   )
 }
 
