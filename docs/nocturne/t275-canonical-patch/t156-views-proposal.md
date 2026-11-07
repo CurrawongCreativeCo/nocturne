@@ -1,158 +1,156 @@
-# Task 156: the three views, proposed declarations (for the owner's review)
+# Task 156: the three views, proposed declarations (revision 2, for the owner's review)
 
-Status: **proposed, not applied.** Nothing here is in the code. The declarations and rows were dry-run
-against the real contract on 7 November 2026 at commit 68451ce and then removed. With the three rows below
-the contract holds at 30 components, 68 required and 40 conditional pairs. Without them, exactly those
-three pairs fail as "pending and isn't in the baseline".
+Status: **proposed, not applied.** Nothing here is in the code. Revision 2 applies the owner's 7 November
+decisions on revision 1: D1 surface Required, with a dedicated closing task and no new settings document in 156;
+D2 text roles reassessed; D3 depth closes in 146; D4 framing closes in 177. It also covers the exception
+owner and the Features grid move.
 
-The closing tasks shown are each capability's registry owner (`CAPABILITIES[].owner`), which is the
-contract's default. They are **not approved**: task 146's and task 177's plan text doesn't name these
-views, and task 156's doesn't say where an event card's design would be stored. Decisions D1 to D4 settle
-them.
+The full state below was dry-run against the real contract on 7 November 2026 at commit c40df08, then
+removed. The contract holds with 30 components declared, 85 required and 40 conditional pairs in the baseline
+(65 required today). The only tests that change are the contract snapshot and capability-docs.test.ts's "keeps
+the three views that are not covered yet visible", which is removed.
 
-## Decisions needed
+Task numbers were checked against the live build plan: it has 279 tasks, 277 to 279 are the newest, and
+nothing reserves 280 or 281. Tasks 136, 139, 140 and 152 (the Link list's earlier design tasks) are done, so
+none of them can own the exception removal.
 
-| #   | Question                                                                                                                                                                                                               | Options                                                                                                                                                | Recommendation                                                                                                                                 |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Who closes the event card's **surface**, and where is it stored? The approved coverage record says `needs: ['surface']`, but events have no settings document, and a per-event box would let each event's card differ. | (a) Task 156 builds it now: a Cards box in a new agency-only settings document, like Blog settings. (b) Admit it as a gap, closing in a task you name. | (a) only if you accept a new document type in task 156. Otherwise (b): the row then stays in the baseline and needs its closing task from you. |
-| D2  | The views draw real **text** (the card's heading and details, the service page's headings and price, each result's title, path and snippet), and the coverage record lists no text need.                               | (a) Not applicable, as drafted. (b) Required by role, each role with its own admit row and closing task.                                               | (a): it matches the approved record and adds no gap.                                                                                           |
-| D3  | The event card draws `shadow-card`, so **depth** can't honestly be "no surface". The record doesn't list it.                                                                                                           | (a) Required, closing in 146, with the row below and an amendment to 146. (b) Not applicable, reason "a fixed shadow, with no design control".         | (a): every other card with a shadow is Required at card scope.                                                                                 |
-| D4  | The service page draws a cropped picture (`aspect-video`), like Event pages and the Blog post page, which both name task 177. The record says `needs: []`.                                                             | (a) Required, closing in 177, with the row below and an amendment to 177. (b) Not applicable, reason "fixed crop, with no design control".             | (a): same anatomy, same owner.                                                                                                                 |
+## Still to decide
 
-If you choose (b) for D3 and D4 and (a) for D1, no admit row is needed once task 156's surface is verified.
+| #   | Question                                                                                                                                                                                                                                | Proposed                                                                                                           |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| D5  | The event card is a card, and every other card family has a card mark. Once task 280 gives it a Cards box (`cardDesignField`), the mark comes with that box.                                                                            | Required, closing 280. The alternative is Not applicable, with a reason you give.                                  |
+| D6  | The service page's groups are separated by `mt-12 border-t border-line pt-8`, the same rule as the Team member page, and the approved record gives Team member pages' dividers to task 151. The service page's record says `needs: []`. | Required, closing 151 (its owner). The alternative is Not applicable: "A structural rule, not a divider position". |
+| D7  | Role names where the vocabulary has no exact match: the service page's FAQ question and answer (the FAQ section calls them title and body, but the page's `title` is its group headings), and the search status line.                   | FAQ question `label`, FAQ answer `description`, search status line `body`.                                         |
 
-## Declarations
+## Capability matrix
 
-Each is `kind: 'view'`, `layouts: []`, in the feature that draws it: `src/features/events/schemas/`,
-`src/features/services/schemas/` and `src/features/search/` (the search feature has no schemas folder yet),
-registered in `DESIGN_COMPONENTS` (`src/app/design-components.ts`).
+R is Required, NA is Not applicable. Every view is `kind: 'view'` with `layouts: []`. A closing task is left
+out of the declaration when it is the capability's registry owner, as the contract requires.
 
-```ts
-const NOT_A_SECTION = notApplicable('Not a section, so it has no edge')
-const NO_FRAME_TO_ANIMATE = notApplicable('Has no section frame to animate')
-const PAGE_H1 = notApplicable('The page’s own h1 heads it')
-const NO_PICTURE_OVERLAY = notApplicable('No picture with a wash over it')
+### Event details card (`eventDetailsCard`, events/components/event-view.tsx)
 
-// id: 'eventDetailsCard', title: 'Event details card'
-export const eventDetailsCardCapabilities = declareCapabilities({
-  surface: { policy: 'required', scope: 'card' }, // D1
-  text: notApplicable(
-    'Page typography: the card’s text takes no design setting (future coverage: surface only)',
-  ), // D2
-  header: notApplicable('The page’s own h1 heads the page; “Details” is the card’s fixed label'),
-  mark: notApplicable(
-    'A card of dates and places, with no decoration (future coverage: surface only)',
-  ),
-  depth: { policy: 'required', scope: 'card' }, // D3
-  icon: NOT_APPLICABLE.noIcon,
-  action: NOT_APPLICABLE.noWholeCardLink,
-  framing: notApplicable(
-    'The card holds no picture. The event’s picture is the page’s (Event pages, task 177)',
-  ),
-  pictureDepth: notApplicable('The card holds no picture'),
-  overlay: NO_PICTURE_OVERLAY,
-  glass: notApplicable(
-    'Sits on the page’s plain background, so a glass panel has nothing to show through',
-  ),
-  divider: notApplicable(
-    'The card has no divider position. Dividers on the page are Event pages, task 151',
-  ),
-  edge: NOT_A_SECTION,
-  motion: NO_FRAME_TO_ANIMATE,
-  slots: NOT_APPLICABLE.notASlotFamily,
-})
+| Capability   | Policy | Scope | Roles                    | Closing | Reason or anatomy                                                                                                                                                                  |
+| ------------ | ------ | ----- | ------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| surface      | R      | card  |                          | 280     | `<aside>`: `rounded-card bg-surface ring-1 ring-line`                                                                                                                              |
+| text         | R      | card  | title, label, body, meta | 280     | title: h2 "Event details". label: each `dt`, the series' "Next dates" and the "Add to calendar" h3. body: each `dd`. meta: the muted secondary lines (time zone and span, address) |
+| header       | NA     |       |                          |         | Not a section: the card's heading is its title role, with no eyebrow or intro                                                                                                      |
+| mark         | R      | card  |                          | 280     | D5                                                                                                                                                                                 |
+| depth        | R      | card  |                          | 146     | `shadow-card` (D3)                                                                                                                                                                 |
+| icon         | NA     |       |                          |         | Draws no icon from the set                                                                                                                                                         |
+| action       | NA     |       |                          |         | No link covers a whole card                                                                                                                                                        |
+| framing      | NA     |       |                          |         | The card holds no picture. The event's picture is the page's (Event pages, task 177)                                                                                               |
+| pictureDepth | NA     |       |                          |         | The card holds no picture                                                                                                                                                          |
+| overlay      | NA     |       |                          |         | No picture with a wash over it                                                                                                                                                     |
+| glass        | NA     |       |                          |         | Sits on the page's plain background, so a glass panel has nothing to show through                                                                                                  |
+| divider      | NA     |       |                          |         | The rule above Add to calendar is the group's border, not a divider position                                                                                                       |
+| edge         | NA     |       |                          |         | Not a section, so it has no edge                                                                                                                                                   |
+| motion       | NA     |       |                          |         | Has no section frame to animate                                                                                                                                                    |
+| slots        | NA     |       |                          |         | Not a slot family (DE-2)                                                                                                                                                           |
 
-// id: 'servicePage', title: 'Service page'
-export const servicePageCapabilities = declareCapabilities({
-  surface: notApplicable('Draws no card: its groups are separated by a rule'),
-  text: notApplicable('Page typography: its text takes no design setting (future coverage: none)'), // D2
-  header: PAGE_H1,
-  mark: notApplicable('Draws no card or section to carry one'),
-  depth: NOT_APPLICABLE.noShadowSurface,
-  icon: NOT_APPLICABLE.noIcon,
-  action: notApplicable(
-    'No link covers a whole card. Its enquiry button is Buttons (CtaLink), tasks 148 and 137',
-  ),
-  framing: { policy: 'required', scope: 'section' }, // D4
-  pictureDepth: notApplicable('Draws no shadow or glow on its picture'),
-  overlay: NO_PICTURE_OVERLAY,
-  glass: NOT_APPLICABLE.noCardSurface,
-  divider: notApplicable(
-    'Its rules separate groups of content and are not decorative: no divider position',
-  ),
-  edge: NOT_A_SECTION,
-  motion: NO_FRAME_TO_ANIMATE,
-  slots: NOT_APPLICABLE.notASlotFamily,
-})
+Not a text role: the Sold out and Cancelled notices. Their colours are the status's meaning, held to fixed,
+checked pairs (`bg-highlight`/`text-highlight-ink`, `bg-danger-surface`/`text-danger-ink`). Inline links keep
+the body's link style. The registration button is Buttons (CtaLink), tasks 148 and 137.
 
-// id: 'searchResults', title: 'Search results'
-export const searchResultsCapabilities = declareCapabilities({
-  surface: notApplicable('Results are rows, with no card'),
-  text: notApplicable('Page typography: its text takes no design setting (future coverage: none)'), // D2
-  header: PAGE_H1,
-  mark: notApplicable('Results are rows, with no card to carry one'),
-  depth: NOT_APPLICABLE.noShadowSurface,
-  icon: NOT_APPLICABLE.noIcon,
-  action: NOT_APPLICABLE.noWholeCardLink,
-  framing: NOT_APPLICABLE.noFramedPicture,
-  pictureDepth: NOT_APPLICABLE.noFramedPicture,
-  overlay: notApplicable('Draws no picture'),
-  glass: NOT_APPLICABLE.noCardSurface,
-  divider: notApplicable('Results are rows, with no divider position'),
-  edge: NOT_A_SECTION,
-  motion: NO_FRAME_TO_ANIMATE,
-  slots: NOT_APPLICABLE.notASlotFamily,
-})
-```
+### Service page (`servicePage`, services/components/service-view.tsx)
 
-## Baseline admission rows
+| Capability   | Policy | Scope   | Roles                                                  | Closing | Reason or anatomy                                                                                                                                                                 |
+| ------------ | ------ | ------- | ------------------------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| surface      | NA     |         |                                                        |         | Draws no card: its groups are separated by a rule                                                                                                                                 |
+| text         | R      | section | heading, intro, price, title, body, label, description | 280     | heading: h1 name. intro: summary. price. title: each group's h2. body: the rich-text body, Who it's for and the linked lists. label and description: FAQ question and answer (D7) |
+| header       | NA     |         |                                                        |         | A page, not a section: its h1 and summary are the heading and intro text roles                                                                                                    |
+| mark         | NA     |         |                                                        |         | A page, not a section, and it draws no card                                                                                                                                       |
+| depth        | NA     |         |                                                        |         | No surface for a shadow to sit on (146)                                                                                                                                           |
+| icon         | NA     |         |                                                        |         | Draws no icon from the set                                                                                                                                                        |
+| action       | NA     |         |                                                        |         | No link covers a whole card. Its enquiry button is Buttons (CtaLink), tasks 148 and 137                                                                                           |
+| framing      | R      | section |                                                        | 177     | `SanityImage`, `aspect-video rounded-card` (D4)                                                                                                                                   |
+| pictureDepth | NA     |         |                                                        |         | Draws no shadow or glow on its picture                                                                                                                                            |
+| overlay      | NA     |         |                                                        |         | No picture with a wash over it                                                                                                                                                    |
+| glass        | NA     |         |                                                        |         | No card surface (156 item 10)                                                                                                                                                     |
+| divider      | R      | section |                                                        | 151     | D6                                                                                                                                                                                |
+| edge         | NA     |         |                                                        |         | Not a section, so it has no edge                                                                                                                                                  |
+| motion       | NA     |         |                                                        |         | Has no section frame to animate                                                                                                                                                   |
+| slots        | NA     |         |                                                        |         | Not a slot family (DE-2)                                                                                                                                                          |
 
-Added to `BASELINE_CHANGES` only for the decisions that need them. `reviewer` and `reviewed` are yours to
-give.
+### Search results (`searchResults`, search/components/search-view.tsx)
+
+| Capability   | Policy | Scope   | Roles                          | Closing | Reason or anatomy                                                                                  |
+| ------------ | ------ | ------- | ------------------------------ | ------- | -------------------------------------------------------------------------------------------------- |
+| surface      | NA     |         |                                |         | Results are rows, with no card                                                                     |
+| text         | R      | section | title, meta, description, body | 280     | title: each result's h2 link. meta: its path. description: its snippet. body: the status line (D7) |
+| header       | NA     |         |                                |         | The page's h1 is drawn by the route (app/(site)/search/page.tsx), outside this view                |
+| mark         | NA     |         |                                |         | Results are rows, with no card to carry one                                                        |
+| depth        | NA     |         |                                |         | No surface for a shadow to sit on (146)                                                            |
+| icon         | NA     |         |                                |         | Draws no icon from the set                                                                         |
+| action       | NA     |         |                                |         | No link covers a whole card                                                                        |
+| framing      | NA     |         |                                |         | Has no framed picture                                                                              |
+| pictureDepth | NA     |         |                                |         | Has no framed picture                                                                              |
+| overlay      | NA     |         |                                |         | Draws no picture                                                                                   |
+| glass        | NA     |         |                                |         | No card surface (156 item 10)                                                                      |
+| divider      | NA     |         |                                |         | Results are spaced rows, with no rule or divider position                                          |
+| edge         | NA     |         |                                |         | Not a section, so it has no edge                                                                   |
+| motion       | NA     |         |                                |         | Has no section frame to animate                                                                    |
+| slots        | NA     |         |                                |         | Not a slot family (DE-2)                                                                           |
+
+Not a text role: the search form. Its input and its hand-styled `bg-cta` button are form controls; see plan
+amendment A8.
+
+## Baseline admission rows (20)
+
+One row per pair. `reviewer` and `reviewed` are yours to fill in. With D5 or D6 declined, drop that row and
+use the Not applicable reason instead.
 
 ```ts
-{
-  kind: 'admit',
-  component: 'eventDetailsCard',
-  capability: 'surface',
-  scope: 'card',
-  layouts: [null],
-  reason: 'The card’s fill, border and corners are fixed today, and no document holds a design for it yet.',
-  reviewer: '<owner>',
-  reviewed: '<date>',
-  closingTask: 156, // D1(b): replace with the task you name. D1(a): no row.
-},
-{
-  kind: 'admit',
-  component: 'eventDetailsCard',
-  capability: 'depth',
-  scope: 'card',
-  layouts: [null],
-  reason: 'The card draws a fixed shadow, with no depth control yet.',
-  reviewer: '<owner>',
-  reviewed: '<date>',
-  closingTask: 146, // D3(a), with an amendment to task 146.
-},
-{
-  kind: 'admit',
-  component: 'servicePage',
-  capability: 'framing',
-  scope: 'section',
-  layouts: [null],
-  reason: 'The page’s picture has a fixed crop, with no Adjust picture yet.',
-  reviewer: '<owner>',
-  reviewed: '<date>',
-  closingTask: 177, // D4(a), with an amendment to task 177.
-},
+const VIEW_ADMITTED = { reviewer: '<owner>', reviewed: '<date>', layouts: [null] } as const
+
+// Event details card
+{ kind: 'admit', component: 'eventDetailsCard', capability: 'surface', scope: 'card', closingTask: 280, ...VIEW_ADMITTED,
+  reason: 'The card’s fill, border and corners are fixed. Task 280 gives the view a design to store them in.' },
+...(['title', 'label', 'body', 'meta'] as const).map((role) => (
+{ kind: 'admit', component: 'eventDetailsCard', capability: 'text', scope: 'card', role, closingTask: 280, ...VIEW_ADMITTED,
+  reason: 'The card’s text is styled in the component. Task 280 gives the view text roles.' })),
+{ kind: 'admit', component: 'eventDetailsCard', capability: 'mark', scope: 'card', closingTask: 280, ...VIEW_ADMITTED,
+  reason: 'A card with no mark yet. It comes with the Cards box task 280 adds (D5).' },
+{ kind: 'admit', component: 'eventDetailsCard', capability: 'depth', scope: 'card', closingTask: 146, ...VIEW_ADMITTED,
+  reason: 'The card draws a fixed shadow, with no depth control yet.' },
+
+// Service page
+...(['heading', 'intro', 'price', 'title', 'body', 'label', 'description'] as const).map((role) => (
+{ kind: 'admit', component: 'servicePage', capability: 'text', scope: 'section', role, closingTask: 280, ...VIEW_ADMITTED,
+  reason: 'The page’s text is styled in the component. Task 280 gives the view text roles.' })),
+{ kind: 'admit', component: 'servicePage', capability: 'framing', scope: 'section', closingTask: 177, ...VIEW_ADMITTED,
+  reason: 'The page’s picture has a fixed 16:9 crop, with no Adjust picture yet.' },
+{ kind: 'admit', component: 'servicePage', capability: 'divider', scope: 'section', closingTask: 151, ...VIEW_ADMITTED,
+  reason: 'The rules between the page’s groups are plain borders, with no decorative divider yet (D6).' },
+
+// Search results
+...(['title', 'meta', 'description', 'body'] as const).map((role) => (
+{ kind: 'admit', component: 'searchResults', capability: 'text', scope: 'section', role, closingTask: 280, ...VIEW_ADMITTED,
+  reason: 'The results’ text is styled in the component. Task 280 gives the view text roles.' })),
 ```
 
-## What applying it also changes
+## Other code in the same change
 
-- Remove the three `declaredBy: 156` rows from `FUTURE_COVERAGE`. The other rows stay, including Event
-  pages (177, 151) and Buttons (148, 137).
-- `capability-docs.ts:224`: `withoutTasks` no longer type-checks once no row is without tasks (the constant
-  list narrows to a literal), and the docs sentence it drives needs rewording.
-- `capability-docs.test.ts`, "keeps the three views that are not covered yet visible", goes, replaced by
-  each view's row in the generated table.
-- A view gets a `VIEW_SCHEMAS` entry and a `VIEW_DRAWERS` drawer only when it has evidence, so only
-  D1(a) needs them now.
+- **Features grid surface:** `closingTask: 276` on its conditional card surface, with the baseline updated
+  in the same commit (`--update-baseline`). That is the reviewed path for reassigning a gap, and it needs no
+  admit row.
+- **The two exception rows:** `profileDesign` and `categoryDesign` keep `status: 'temporary'`, with
+  `removalTask: 281`. No stored data changes.
+- **Coverage record:** remove the three `declaredBy: 156` rows from `FUTURE_COVERAGE`. Event pages (177, 151),
+  Team member pages and Buttons stay.
+- **`capability-docs.ts:224`:** no longer type-checks once no row is without tasks, and its sentence needs
+  rewording. The capability-docs test for the three views goes.
+- **No drawers yet:** a view needs a `VIEW_SCHEMAS` entry and a `VIEW_DRAWERS` drawer only once it has
+  evidence, which comes with tasks 280, 146, 177 and 151.
+
+## Canonical-plan amendments needed
+
+| #   | Task          | Amendment                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | 156           | Apply the 7 November ADDITION (README.md in this folder): 156 declares the three views. It is not in the live plan yet.                                                                                                                                                                                                                                                                                                                                                            |
+| A2  | **280 (new)** | "Design settings for page views: the event details card, the service page and search results." Decide where a view's design is stored: per document type or one settings document, agency only, as Blog settings does for post cards. Build the event card's Cards box (surface, text roles, mark) with `cardDesignField`, and text roles for the service page and search results, using the shared builders only. Closes the 17 admitted pairs above. Template, Later, after 156. |
+| A3  | **281 (new)** | "Link list profile and service categories onto the shared builders." Removes the `profileDesign` and `categoryDesign` exceptions. Their stored paths are flat, so this needs a stored-data migration and the owner's separate approval before it starts. Template, Later.                                                                                                                                                                                                          |
+| A4  | 146           | Add the event details card (`shadow-card`) to the cards that adopt Depth and glow. Its list names event cards (list and featured) only.                                                                                                                                                                                                                                                                                                                                            |
+| A5  | 177           | Add the service page's picture (16:9) to the candidates. Its list names "Events: the event image (cards and the event page)" but no service page.                                                                                                                                                                                                                                                                                                                                  |
+| A6  | 276           | Record that the Features grid's conditional card surface closes in 276. The task 275 patch says so, but 276's live text doesn't.                                                                                                                                                                                                                                                                                                                                                   |
+| A7  | 151           | Only if D6 is Required: add the service page's group rules, as for team and event pages.                                                                                                                                                                                                                                                                                                                                                                                           |
+| A8  | 148           | Finding, no gap admitted: the search form's button is hand-styled (`bg-cta`) rather than `CtaLink`, so the Buttons (CtaLink) record doesn't reach it. Decide whether 148 adopts it.                                                                                                                                                                                                                                                                                                |
