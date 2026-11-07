@@ -2623,7 +2623,9 @@ resolver, a component), then, for each component its contract lists as Required:
 **Recording Not applicable.** A component implements only the capabilities that suit its anatomy, and Not applicable is
 a reviewed, legitimate answer: write the reason a reader would accept ("No card surface", "Draws no icon"), naming the layout
 or the part when only some do not apply. `Not reviewed yet`, the reason `npm run new:section` starts with, is rejected by
-the checks, so a new section can't merge until each capability is reviewed. If a capability a component needs is missing
+the checks, so a new section can't merge until each capability is reviewed. It also starts without a section-level
+decorative mark (its type is listed in `NO_SECTION_MARK`, `src/lib/design/section-surfaces.ts`): to offer one, declare `mark`
+Required, add its evidence and delete that line. If a capability a component needs is missing
 from the contract, stop and propose it for the template: never write a private surface, text, header, mark, depth, icon,
 arrow, framing, overlay, glass or divider control.
 

@@ -56,6 +56,7 @@ const paths = {
   placeholder: join(root, 'public/section-previews/_placeholder.svg'),
   fixtures: join(root, 'tests/e2e/fixtures/dataset.mjs'),
   clientEditable: join(root, 'src/lib/sanity/client-editable.ts'),
+  sectionSurfaces: join(root, 'src/lib/design/section-surfaces.ts'),
 }
 
 if (
@@ -81,6 +82,12 @@ const edits = [
   [paths.renderer, '  // new-section:register', `  ${typeName}: ${Component},\n`],
   [paths.fixtures, '  // new-section:gallery', galleryTemplate(names, variants)],
   [paths.clientEditable, '  // new-type:agency-only', `  '${typeName}',\n`],
+  // Until its mark capability is reviewed the section offers no section mark, as its declaration says.
+  [
+    paths.sectionSurfaces,
+    '  // new-section:no-mark',
+    `  '${typeName}', // mark not reviewed yet\n`,
+  ],
 ]
 for (const [file, marker] of edits) {
   if (!readFileSync(file, 'utf8').includes(marker)) {
@@ -124,7 +131,13 @@ for (const file of [
   paths.preview,
 ])
   console.log(`  + ${rel(file)}`)
-for (const file of [paths.registry, paths.fragments, paths.renderer, paths.fixtures])
+for (const file of [
+  paths.registry,
+  paths.fragments,
+  paths.renderer,
+  paths.fixtures,
+  paths.sectionSurfaces,
+])
   console.log(`  ~ ${rel(file)}`)
 
 // Match the project's lint and formatting even when the pre-commit hook is off
@@ -137,6 +150,7 @@ const touched = [
   ...componentFiles.map(([file]) => file),
   paths.renderer,
   paths.fixtures,
+  paths.sectionSurfaces,
 ]
 const npx = (args) =>
   spawnSync('npx', args, { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' })
@@ -168,7 +182,9 @@ Next:
   3. Build the UI in ${variants.length ? `${rel(paths.component)}/ (one file per variant)` : rel(paths.component)}
   4. Review each design capability in ${rel(paths.capabilities)}: it starts Not applicable with the reason
      "Not reviewed yet", and \`npm run check\` fails until every one is Required, Conditional (with a
-     trigger) or Not applicable (with a reason). README, "Design capability contract".
+     trigger) or Not applicable (with a reason). README, "Design capability contract". The section
+     takes no decorative mark until its mark is reviewed: to offer one, declare \`mark\` Required, add its
+     evidence and delete the "${typeName}" line in ${rel(paths.sectionSurfaces)}.
   5. Optional: replace the thumbnail at ${rel(paths.preview)}
   6. Give the "${kebab}" entry in the section gallery real content (${rel(paths.fixtures)}), then
      add its screenshot baseline: \`npm run test:e2e:update\` on Linux or in Docker (see the
