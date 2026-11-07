@@ -1,4 +1,4 @@
-import type { CapabilityId, ContentSourceId, Scope } from './capabilities'
+import type { CapabilityId, ContentSourceId, Scope, TextRole } from './capabilities'
 
 /**
  * Evidence (task 275; README, "Design capability contract"): each registered adoption of a design
@@ -43,6 +43,12 @@ export interface CapabilityEvidence extends EvidenceBase {
   capability: CapabilityId
   scope: Scope
   part?: string
+  /**
+   * The text role it proves, for a policy that names roles (text, header): one role per entry, and the
+   * probed field must be the one the builder stamped for that role. A role is verified only by its own
+   * entry, so a passing sibling never verifies it.
+   */
+  role?: TextRole
   /** A CSS selector into the component's output: the element the capability renders on. */
   target: string
   /**
@@ -189,10 +195,29 @@ const SLOT_VIDEO = [
 ]
 const SLOT_IMAGE = [{ _key: 'probe-image', _type: 'slotImage', image: PICTURE }]
 
+// Slot blocks are proven inside every host the registry allows them in (ContractComponent.hosts): the
+// block is built from `base` and `probe`, which are relative to the block, and placed in the host's slot.
+const slotBlockEvidence: CapabilityEvidence[] = [
+  {
+    id: 'badgeRow.icon.item',
+    component: 'badgeRow',
+    capability: 'icon',
+    scope: 'item',
+    field: 'badges[].icon',
+    resolvers: [{ module: '@/components/ui/badge-icon', export: 'BadgeIcon' }],
+    render: 'src/components/ui/badge-row.tsx',
+    target: '[data-badge-row] li',
+    change: 'content',
+    base: { badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned' }] },
+    probe: { 'badges.0.icon': 'star' },
+  },
+]
+
 // ---------------------------------------------------------------------------------------------------
 // The Link list
 
 const LINK_LIST = 'src/features/pages/components/sections/link-list'
+const LINK_DESIGN = '@/features/pages/components/sections/link-list/link-design'
 // Every link item (the list's other <ul>s hold categories and social icons).
 const LINK_ITEMS = 'li[data-track-event="link_click"]'
 
@@ -206,6 +231,8 @@ const link = (key: string, thumbnail: boolean) => ({
   link: { _type: 'link', linkType: 'external', url: `https://example.com/${key}` },
   ...(thumbnail ? { thumbnail: PICTURE } : {}),
 })
+
+const withoutIcon = ({ icon: _icon, ...rest }: ReturnType<typeof link>) => rest
 
 /** A profile, social links and two links, with thumbnails (or without, so icons show). */
 const linkListContent = (thumbnails: boolean): Patch => ({
@@ -224,8 +251,15 @@ const linkListContent = (thumbnails: boolean): Patch => ({
 const CUSTOMISED = { 'links.0.design.appearance': 'custom' }
 
 const WITH_CARDS = ['stacked', 'cards', 'compact']
+/** The text roles each layout draws: Compact shows the label only. */
+const TEXT_ROLES_DRAWN = [
+  { role: 'eyebrow', layouts: ['stacked', 'cards', 'editorial'] },
+  { role: 'label', layouts: ['stacked', 'cards', 'editorial', 'compact'] },
+  { role: 'description', layouts: ['stacked', 'cards', 'editorial'] },
+] as const
 const WITH_ARROWS = ['stacked', 'cards', 'editorial']
 const ALL_LINK_LIST = ['stacked', 'cards', 'editorial', 'compact']
+const DIVIDER_POSITIONS = ['afterCategories', 'afterProfile', 'aboveSocial', 'belowSocial'] as const
 
 // Glass rows draw today (glass-row.tsx), but `rowStyle` is set inline rather than by a shared glass
 // builder, so it carries no glass marker and its evidence would be refused: the pair stays pending
@@ -259,39 +293,33 @@ const linkListEvidence: CapabilityEvidence[] = [
     base: { ...linkListContent(true), ...CUSTOMISED },
     probe: { 'links.0.design.border': 'thick' },
   },
-  {
-    id: 'linkList.text.card',
-    component: 'linkList',
-    capability: 'text',
-    scope: 'card',
-    layouts: ALL_LINK_LIST,
-    field: 'cardDesign.label',
-    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
-    render: LINK_LIST,
-    target: LINK_ITEMS,
-    change: 'content',
-    base: linkListContent(true),
-    probe: { 'cardDesign.label.size': 'large' },
-  },
-  {
-    id: 'linkList.text.item',
-    component: 'linkList',
-    capability: 'text',
-    scope: 'item',
-    layouts: ALL_LINK_LIST,
-    field: 'links[].design.label',
-    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
-    render: LINK_LIST,
-    target: LINK_ITEMS,
-    change: 'content',
-    base: { ...linkListContent(true), ...CUSTOMISED },
-    probe: { 'links.0.design.label.size': 'large' },
-  },
+  // Each text role is proven on its own, on the layouts that draw it (Compact draws the label only), by
+  // probing the field the text style builder made for that role: one passing role never verifies another.
+  ...TEXT_ROLES_DRAWN.flatMap(({ role, layouts }) =>
+    (['card', 'item'] as const).map((scope): CapabilityEvidence => ({
+      id: `linkList.text.${scope}.${role}`,
+      component: 'linkList',
+      capability: 'text',
+      scope,
+      role,
+      layouts,
+      field: scope === 'card' ? `cardDesign.${role}` : `links[].design.${role}`,
+      resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+      render: LINK_LIST,
+      target: LINK_ITEMS,
+      change: 'content',
+      base: scope === 'card' ? linkListContent(true) : { ...linkListContent(true), ...CUSTOMISED },
+      probe: {
+        [scope === 'card' ? `cardDesign.${role}.size` : `links.0.design.${role}.size`]: 'large',
+      },
+    })),
+  ),
   {
     id: 'linkList.icon.card',
     component: 'linkList',
     capability: 'icon',
     scope: 'card',
+    part: 'container',
     layouts: WITH_CARDS,
     field: 'linkDesign.iconShape',
     resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
@@ -306,6 +334,7 @@ const linkListEvidence: CapabilityEvidence[] = [
     component: 'linkList',
     capability: 'icon',
     scope: 'item',
+    part: 'container',
     layouts: WITH_CARDS,
     field: 'links[].design.iconShape',
     resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
@@ -438,6 +467,56 @@ const linkListEvidence: CapabilityEvidence[] = [
     base: linkListContent(true),
     probe: { 'dividerDesign.afterProfile': { _type: 'decorativeDivider', style: 'line' } },
   },
+  // Which icon a link shows (its container is the entries above): the stored name decides the drawing.
+  {
+    id: 'linkList.icon.identity',
+    component: 'linkList',
+    capability: 'icon',
+    scope: 'item',
+    part: 'identity',
+    layouts: WITH_CARDS,
+    field: 'links[].icon',
+    // The icon's container is drawn whenever the link has an icon (Cards keeps its box), so the claim is
+    // the whole path: the link's icon part, and the icon it draws.
+    resolvers: [
+      { module: LINK_DESIGN, export: 'LinkIcon' },
+      { module: '@/components/ui/badge-icon', export: 'BadgeIcon' },
+    ],
+    render: LINK_LIST,
+    target: LINK_ITEMS,
+    change: 'content',
+    // No link has an icon with the field unset, so the probe's is the only one drawn: what each resolver
+    // returned unset can then be replayed one for one.
+    base: {
+      ...linkListContent(false),
+      links: [link('l1', false), link('l2', false)].map(withoutIcon),
+    },
+    probe: { 'links.0.icon': 'star' },
+  },
+  // A divider's centre icon, in each position the Link list draws a divider.
+  ...DIVIDER_POSITIONS.map((position): CapabilityEvidence => ({
+    id: `linkList.icon.divider.${position}`,
+    component: 'linkList',
+    capability: 'icon',
+    scope: 'section',
+    part: `divider.${position}`,
+    layouts: ALL_LINK_LIST,
+    field: `dividerDesign.${position}.icon`,
+    resolvers: [{ module: '@/components/ui/badge-icon', export: 'BadgeIcon' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    // The icon is the only drawing inside the divider (its row says it has an icon centre).
+    target: '[data-decorative-divider] svg',
+    change: 'appears',
+    base: {
+      ...linkListContent(true),
+      // No link draws an icon, so the divider's is the only one: what each resolver returned unset can
+      // then be replayed one for one (Compact shows link icons whatever else is there).
+      links: [link('l1', true), link('l2', true)].map(withoutIcon),
+      [`dividerDesign.${position}.style`]: 'line',
+      [`dividerDesign.${position}.centre`]: 'icon',
+    },
+    probe: { [`dividerDesign.${position}.icon`]: 'star' },
+  })),
 ]
 
 // ---------------------------------------------------------------------------------------------------
@@ -560,7 +639,7 @@ export const EVIDENCE: readonly Evidence[] = [
     component: 'mediaText',
     capability: 'slots',
     scope: 'section',
-    part: 'block',
+    part: 'block.media',
     layouts: ['side', 'stacked', 'overlay'],
     field: 'media',
     // The media slot's picture is chosen here and drawn as the section's picture, or its background.
@@ -577,7 +656,7 @@ export const EVIDENCE: readonly Evidence[] = [
     component: 'mediaText',
     capability: 'slots',
     scope: 'section',
-    part: 'block',
+    part: 'block.supporting',
     layouts: ['side', 'stacked', 'overlay'],
     field: 'supporting',
     resolvers: [{ module: '@/features/pages/slots/render-slot', export: 'renderSlot' }],
@@ -738,4 +817,5 @@ export const EVIDENCE: readonly Evidence[] = [
     motion: ALL_LINK_LIST,
   }),
   ...linkListEvidence,
+  ...slotBlockEvidence,
 ]

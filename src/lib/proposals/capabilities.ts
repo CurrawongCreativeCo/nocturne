@@ -1,4 +1,10 @@
-import type { ManifestField, ManifestSection, ManifestStatus } from './types'
+import type {
+  DesignManifest,
+  ManifestField,
+  ManifestSection,
+  ManifestSlotBlock,
+  ManifestStatus,
+} from './types'
 
 /**
  * Whether a change proposal may set a value the design capability contract governs (task 275;
@@ -30,10 +36,14 @@ export function layoutOfSection(section: ManifestSection, stored: unknown): stri
 /**
  * Whether a policy governs a marked field: its evidence probes that field (or a field it contains), or
  * one in the same object (`cardDesign.border` stands for `cardDesign.background`: the same builder, at
- * the same scope). A top-level field has no object to share, so only the exact field counts.
+ * the same scope). A top-level field has no object to share, so only the exact field counts. A field
+ * built for a text role (`byRole`) never takes a sibling's evidence: `cardDesign.label` proves nothing
+ * about `cardDesign.eyebrow`.
  */
-const governs = (probed: string, path: string) => {
+const governs = (probed: string, path: string, byRole = false) => {
   if (path === probed || path.startsWith(`${probed}.`) || path.startsWith(`${probed}[`)) return true
+  // A role's field is judged by that role's own evidence, never by the one beside it in the object.
+  if (byRole) return false
   const object = (value: string) =>
     value.includes('.') ? value.slice(0, value.lastIndexOf('.')) : ''
   return object(probed) !== '' && object(probed) === object(path)
@@ -71,6 +81,7 @@ function capabilityVerdict(
   layout: string | null,
   path: string,
   capability: string,
+  role?: string,
 ): CapabilityVerdict | undefined {
   const reject = (message: string): CapabilityVerdict => ({
     code: 'capability-not-verified',
@@ -93,10 +104,13 @@ function capabilityVerdict(
     )
   }
   const named = entry.policies.filter((policy) =>
-    policy.fields.some((field) => governs(field, path)),
+    policy.fields.some((field) => governs(field, path, role !== undefined)),
   )
+  // A role's field is judged by its own role's status in the policy, not the policy's as a whole.
   const statusOfPolicy = (policy: (typeof entry.policies)[number]) =>
-    statusAt(policy.availability, layout)
+    role !== undefined && policy.roleAvailability
+      ? statusAt(policy.roleAvailability[role] ?? 'pending', layout)
+      : statusAt(policy.availability, layout)
   // A policy the layout opts out of doesn't count against a field another of its policies governs.
   const applicable = (named.length > 0 ? named : entry.policies).filter(
     (policy) => typeof statusOfPolicy(policy) === 'string',
@@ -123,16 +137,71 @@ function capabilityVerdict(
   )
 }
 
-/** What is wrong with setting the marked fields on a section in this layout, if anything. */
+/**
+ * The slot block a marked row sits in, with its path inside the block: `supporting[badgeRow].badges[].icon`
+ * is the badge row's `badges[].icon`, and `supporting[].…` names the only block the slot allows. A row
+ * inside a block is the block's own field: the host section doesn't draw it, so the host's declaration
+ * can't judge it.
+ */
+function slotBlockOf(
+  section: ManifestSection,
+  slots: DesignManifest['slots'] | undefined,
+  path: string,
+): { type: string | undefined; relative: string } | undefined {
+  for (const slot of section.slots ?? []) {
+    const prefix = `${slot.path}[`
+    if (!path.startsWith(prefix)) continue
+    const close = path.indexOf(']', prefix.length)
+    if (close === -1 || path[close + 1] !== '.') return undefined
+    const named = path.slice(prefix.length, close)
+    const allowed = slots?.find((entry) => entry.slot === slot.slot)?.blocks ?? []
+    return {
+      type: named !== '' ? named : allowed.length === 1 ? allowed[0]?.type : undefined,
+      relative: path.slice(close + 2),
+    }
+  }
+  return undefined
+}
+
+/**
+ * What is wrong with setting the marked fields on a section in this layout, if anything. A field inside a
+ * slot block is judged by that block's contract (`slotBlocks`, the manifest's `designCapabilities`), on the
+ * path inside the block, with no layout: a block is proven in every host it is allowed in. A block with no
+ * contract in the manifest can't be judged, so the value is rejected.
+ */
 export function capabilityVerdicts(
   section: ManifestSection,
   layout: string | null,
   marked: readonly MarkedField[],
+  context: { slots?: DesignManifest['slots']; slotBlocks?: readonly ManifestSlotBlock[] } = {},
 ): CapabilityVerdict[] {
   const verdicts: CapabilityVerdict[] = []
   const seen = new Set<string>()
   const ownsSurfaces = section.rules.find((rule) => rule.variant === layout)?.ownsSurfaces === true
   for (const { path, row } of marked) {
+    const block = row.capability ? slotBlockOf(section, context.slots, path) : undefined
+    if (block && row.capability) {
+      const key = `block|${path}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      const contract = context.slotBlocks?.find((entry) => entry.type === block.type)
+      if (!contract?.capabilities) {
+        verdicts.push({
+          code: 'capability-not-verified',
+          message: `${path} is a ${row.capability} setting inside ${block.type ?? 'a slot block'}, which the manifest has no design contract for, so it can't be judged.`,
+        })
+        continue
+      }
+      const verdict = capabilityVerdict(
+        { type: contract.type, fields: [], rules: [], capabilities: contract.capabilities },
+        null,
+        block.relative,
+        row.capability,
+        row.role,
+      )
+      if (verdict) verdicts.push(verdict)
+      continue
+    }
     if (row.capability === 'glass' && PANEL_FIELD.test(path) && ownsSurfaces) {
       verdicts.push({
         code: 'capability-not-verified',
@@ -144,7 +213,7 @@ export function capabilityVerdicts(
       const key = `capability|${path}`
       if (!seen.has(key)) {
         seen.add(key)
-        const verdict = capabilityVerdict(section, layout, path, row.capability)
+        const verdict = capabilityVerdict(section, layout, path, row.capability, row.role)
         if (verdict) verdicts.push(verdict)
       }
     }

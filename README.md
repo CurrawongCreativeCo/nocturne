@@ -2396,8 +2396,8 @@ field's list, nothing under `src/app` imports the manifest).
 
 The shared design abilities (surface and border, text roles, section header, decorative mark, depth and glow, icon, action
 indicator, picture framing, picture depth, overlay, glass, divider, section edge, motion and slots) are described once, in
-`src/lib/design/`, and every **section, slot block and listing** (the blog's post cards) declares what it should offer of
-each. It is a contract and its checks, not a feature: no component adopts a capability by being declared, and the
+`src/lib/design/`, and every **section, slot block, listing** (the blog's post cards) **and view** (a page that isn't a
+section, such as the footer, declared by the task that brings it in) declares what it should offer of each. It is a contract and its checks, not a feature: no component adopts a capability by being declared, and the
 owning tasks (156, 158, 137, 146 and the rest) adopt them one at a time. Three things are kept apart:
 
 - **Policy** is what a component _should_ offer. It is written by hand with `declareCapabilities`, in a `<name>-capabilities.ts`
@@ -2405,15 +2405,25 @@ owning tasks (156, 158, 137, 146 and the rest) adopt them one at a time. Three t
   one entry: **Required**, **Conditional** with a typed trigger (the component's anatomy, a layout or a stored setting, never
   a task's progress), or **Not applicable** with a reason. A policy can name its `scope` (site, section, card or item; a list
   when it applies at several), its `layouts` (every layout accounted for, by name), a `part` (when two policies share a scope)
-  and a `closingTask` (when another task than the capability's owner implements it here).
+  and a `closingTask` (when another task than the capability's owner implements it here). A policy for text (or the section
+  header) names its `roles`, and a layout that draws only some of them says so: `{ roles: ['label'], reason }` (the others are
+  Not applicable there). **Each independently editable control is its own `part`**: a link's icon container and which icon it
+  shows, each divider position's centre icon, each slot of Image + text. One that works never verifies one that doesn't.
 - **Availability** is what it offers today, and is never written down. A layout is **verified** only when the schema offers
   the marked field there (the Studio's own `hidden` rules, evaluated as an agency user, or a preset that sets it), the
   policy applies to that layout, an evidence entry registers a render target for it and its probe case passes. Anything
-  else is **pending**. An exception, a declaration or a scratch probe never counts.
+  else is **pending**. Text is verified **role by role**: an entry names one role (`role`), must probe the field the text style
+  builder stamped for that role, and verifies only that role; a role a layout doesn't draw is Not applicable there, never
+  a passing sibling. An exception, a declaration or a scratch probe never counts.
 - **Evidence** (`src/lib/design/capability-evidence.ts`) is one entry per adoption: the component, the schema field its
   probe sets, the resolvers the renderer reaches the target through, the file that draws it, a CSS selector for the
   element it renders on, and the layouts it covers. `src/app/design-capability-evidence.test.tsx` renders each case
-  through `SectionRenderer` (the section gallery's fixtures) with the field unset and then probed, and requires the target
+  with the field unset and then probed: a section through `SectionRenderer` (the section gallery's fixtures); a **slot
+  block inside every host the slot registry allows it in**, each host layout, all of which must pass; a **listing or view
+  through its own drawer** (`VIEW_DRAWERS` in `src/app/design-capability-views.tsx`, which draws the real component from the
+  data the site gives it, and fails saying so when it has none). A listing or view has a schema made from its real document
+  types (the blog's cards: `post`), so evidence reads the fields the Studio shows. The probe must set the field the entry
+  names or one inside it, and entries for different fields can't share one cell (give each control its own `part`), and requires the target
   to exist both times, to keep its snapshot while unset and to change with the probe. It then disconnects the claimed
   resolvers, replaying what they returned with the field unset, and requires the probe to stop changing the target, so a
   named export that exists but isn't called fails. A target that is missing or ignored fails the check. A claim covers only what
@@ -2432,6 +2442,27 @@ marks the fields it makes with a provenance stamp that can't be typed by hand (`
 `options.capability` says which capability). A field in a component's Design group that no shared builder made needs a row
 in the reviewed exceptions (`src/lib/design/capability-exceptions.ts`): its field, justification, reviewer, whether it is
 permanent or temporary, and the task that removes it. Query and content-source settings are never design capabilities.
+
+The scan for private controls looks where design controls live, never at a name or a type: the Design group and any object
+inside it, any object whose options set `designSummary` (a link's or plan's own Appearance), and any context registered in
+`src/lib/design/capability-design-contexts.ts` (a listing's settings, say). Every field inside one needs a shared builder
+or a reviewed exception. An ordinary choice, switch or number elsewhere is not called a design control for being one, and
+free text outside those places isn't detected: review covers them, and the audit inventory is kept in
+`docs/nocturne/t275-canonical-patch/`. The exception register holds only what an enforced rule would otherwise reject.
+
+**The baseline** (`capability-baseline.json`, version 2: one entry per text role) lists the gaps a component hasn't closed yet,
+with the task that closes each, and it only shrinks. A gap closes by evidence. It changes any other way only through a
+reviewed row in `src/lib/design/capability-baseline-changes.ts`: an **`admit`** row (a new component or layout adopts every
+capability that applies; a gap it can't close in its own task is admitted with the reason, the reviewer, the date and the
+task that closes it, then `npm run design-capabilities -- --update-baseline` writes only admitted gaps) or a **`downgrade`**
+row (a pair that is now Not applicable, with why it never applied). A stale or incomplete row fails. CI checks the base commit
+out and runs `npm run design-capabilities -- --against-file .ci-base/capability-baseline.json`; locally use `-- --against-ref
+origin/main`. A missing base baseline fails in the template. Only an older client repository, made before the baseline
+existed, may pass `--allow-missing-base`, once, on the pull request that brings it in (the template refuses the flag).
+
+A change proposal is judged against what will actually be written. The accepted changes are re-checked until nothing new is
+rejected: a part with any rejection writes nothing, so a layout change in a rejected design part never lands, and what
+needed it is judged without it. A field inside a slot block is judged by that block's own contract.
 
 The tables below are generated from the declarations and the evidence by `npm run design-capability-docs` (also run by
 `npm run typegen`; CI fails when the committed README differs).
@@ -2463,19 +2494,19 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R…   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
 | Events (`events`), 3 layouts             | R…*     | R…   | R…     | R…*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
-| Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R…   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R◐   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Launch date (`launchDate`)               | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R…      | –          | –       | –     | –       | –    | –      | –     |
 | Video (`slotVideo`)                      | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Blog post cards (`blogPostCards`)        | R…      | R…   | –      | R…   | R…    | –    | R…     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
 
-| Pairs (component, capability, scope and part) | Verified | Partly verified | Pending |
-| --------------------------------------------- | -------- | --------------- | ------- |
-| Required                                      | 94       | 0               | 126     |
-| Conditional                                   | 0        | 0               | 40      |
+| Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
+| -------------------------------------------------------- | -------- | --------------- | ------- |
+| Required                                                 | 101      | 0               | 189     |
+| Conditional                                              | 4        | 0               | 40      |
 
-Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
+A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
@@ -2484,15 +2515,15 @@ Every Required or Conditional pair that is not verified is in `capability-baseli
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
 | 151          | 19               | 0                   |
-| 156          | 66               | 1                   |
+| 156          | 124              | 1                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
 | 177          | 7                | 20                  |
-| 213          | 3                | 0                   |
-| 276          | 1                | 0                   |
+| 213          | 7                | 0                   |
+| 276          | 2                | 0                   |
 
-**Evidence.** 96 capability entries, 204 cases (an entry's layouts are one case each). Each case renders the component through `SectionRenderer` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 106 capability entries, 236 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -2531,23 +2562,24 @@ Every Required or Conditional pair that is not verified is in `capability-baseli
 
 **Reviewed exceptions.** Fields in a Design group that no shared builder made. An exception records how a field was built; it is never evidence that a capability works.
 
-| Component   | Fields                                                                                                                                                                              | Class     | Nature        | Reviewer | Removal task | Why it stays                                                                                                          |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `hero`      | `eyebrowDesign`                                                                                                                                                                     | temporary | design        | owner    | 213          | Separator and colours for the eyebrow label list. Colour and type overlap the eyebrow text role.                      |
-| `hero`      | `proportion`                                                                                                                                                                        | permanent | layout        | owner    | –            | How Split shares the width between text and picture. A layout choice no capability covers.                            |
-| `hero`      | `imageShape`                                                                                                                                                                        | temporary | legacy        | owner    | 213          | Hidden and superseded by Image design, kept so stored choices still draw. Removing it needs a dry-run migration.      |
-| `logoCloud` | `logoColour`                                                                                                                                                                        | permanent | design        | owner    | –            | How logos are tinted. Specific to logos, and no capability covers it.                                                 |
-| `gallery`   | `columns`                                                                                                                                                                           | permanent | layout        | owner    | –            | Pictures across on a wide screen. A layout count.                                                                     |
-| `location`  | `interactiveMap`                                                                                                                                                                    | permanent | contentSource | owner    | –            | Switches the click-to-load map on: a content-source setting that sits in Advanced. The source needs its own evidence. |
-| `embed`     | `customHeight`                                                                                                                                                                      | permanent | layout        | owner    | –            | The exact height of a third-party frame, under Advanced.                                                              |
-| `events`    | `category`                                                                                                                                                                          | permanent | query         | owner    | –            | A query filter that sits in Advanced. Not a look.                                                                     |
-| `events`    | `count`                                                                                                                                                                             | permanent | query         | owner    | –            | A query limit that sits in Advanced. Not a look.                                                                      |
-| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 156          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.           |
-| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 156          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                       |
-| `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 158          | The social icon container and colour, overlapping the icon capability.                                                |
-| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.              |
-| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                      |
-| `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                            |
+| Component   | Fields                                                                                                                                                                              | Class     | Nature        | Reviewer | Removal task | Why it stays                                                                                                                                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- | -------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hero`      | `eyebrowDesign`                                                                                                                                                                     | temporary | design        | owner    | 213          | Separator and colours for the eyebrow label list. Colour and type overlap the eyebrow text role.                                                                                                                                                         |
+| `hero`      | `proportion`                                                                                                                                                                        | permanent | layout        | owner    | –            | How Split shares the width between text and picture. A layout choice no capability covers.                                                                                                                                                               |
+| `hero`      | `imageShape`                                                                                                                                                                        | temporary | legacy        | owner    | 213          | Hidden and superseded by Image design, kept so stored choices still draw. Removing it needs a dry-run migration.                                                                                                                                         |
+| `logoCloud` | `logoColour`                                                                                                                                                                        | permanent | design        | owner    | –            | How logos are tinted. Specific to logos, and no capability covers it.                                                                                                                                                                                    |
+| `gallery`   | `columns`                                                                                                                                                                           | permanent | layout        | owner    | –            | Pictures across on a wide screen. A layout count.                                                                                                                                                                                                        |
+| `location`  | `interactiveMap`                                                                                                                                                                    | permanent | contentSource | owner    | –            | Switches the click-to-load map on: a content-source setting that sits in Advanced. The source needs its own evidence.                                                                                                                                    |
+| `embed`     | `customHeight`                                                                                                                                                                      | permanent | layout        | owner    | –            | The exact height of a third-party frame, under Advanced.                                                                                                                                                                                                 |
+| `events`    | `category`                                                                                                                                                                          | permanent | query         | owner    | –            | A query filter that sits in Advanced. Not a look.                                                                                                                                                                                                        |
+| `events`    | `count`                                                                                                                                                                             | permanent | query         | owner    | –            | A query limit that sits in Advanced. Not a look.                                                                                                                                                                                                         |
+| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 156          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.                                                                                                                                              |
+| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 156          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                                                                                                                                                          |
+| `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 158          | The social icon container and colour, overlapping the icon capability.                                                                                                                                                                                   |
+| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.                                                                                                                                                 |
+| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                                                                                                                                                         |
+| `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                                                                                                                                                               |
+| `linkList`  | `links[].design.appearance`                                                                                                                                                         | temporary | design        | owner    | 156          | The switch in a link’s own Appearance between “Use the Link list design” and “Customise this card”: it decides inheritance, not layout. Task 156 replaces this private implementation with a shared mechanism that keeps the saved values and behaviour. |
 
 **Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. 3 have no capability task yet: the task in `Declared by` brings them into the contract, which is not ownership of their design capabilities. Each capability's own closing task is set when the part is declared.
 

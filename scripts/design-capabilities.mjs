@@ -9,10 +9,21 @@
  *                                                     (also run by npm run check and CI)
  *   npm run design-capabilities -- --update-baseline  removes closed gaps; refuses to add new ones
  *   npm run design-capabilities -- --init-baseline    writes the first baseline; refuses if one exists
+ *   npm run design-capabilities -- --against-ref <ref>   also compares the baseline with the one on
+ *                                                     `git merge-base <ref> HEAD`
+ *   npm run design-capabilities -- --against-file <file> the same, against a baseline file you give it
+ *                                                     (CI checks the base commit out and passes this)
+ *
+ * The comparison fails a gap added, or removed without being verified, unless a reviewed row in
+ * src/lib/design/capability-baseline-changes.ts explains it. It also fails when the base has no
+ * baseline: the template always has one. Only an older client repository, made before the baseline
+ * existed, may pass `--allow-missing-base` (once, on the pull request that brings the baseline in); the
+ * template refuses the flag. A git command that fails always fails the check.
  *
  * Availability comes from the declarations, the schema markers and the registered evidence. Evidence
  * counts as passing here because the harness tests in `npm test` fail otherwise.
  */
+import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,10 +31,17 @@ import { fileURLToPath } from 'node:url'
 import { createJiti } from 'jiti'
 import { format, resolveConfig } from 'prettier'
 
+import { missingBaseOutcome } from './capability-base-utils.mjs'
+import { isTemplateRepo } from './is-template.mjs'
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 // `--baseline <file>` reads and writes another file; the tests use it.
 const fileArg = process.argv.indexOf('--baseline')
 const file = fileArg > -1 ? process.argv[fileArg + 1] : join(root, 'capability-baseline.json')
+// The schemas import the site's config, which insists on a project; this check never talks to one.
+process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||= 'design-contract-check'
+process.env.NEXT_PUBLIC_SANITY_DATASET ||= 'production'
+
 const jiti = createJiti(import.meta.url, {
   alias: { '@': join(root, 'src') },
   interopDefault: true,
@@ -32,14 +50,24 @@ const jiti = createJiti(import.meta.url, {
 
 const { DESIGN_COMPONENTS, gate } = await jiti.import(join(root, 'src/app/design-components.ts'))
 const { EVIDENCE } = await jiti.import(join(root, 'src/lib/design/capability-evidence.ts'))
-const { currentBaseline, ratchetProblems } = await jiti.import(
-  join(root, 'src/lib/design/capability-availability.ts'),
+const {
+  addedGaps,
+  baselineIntegrityProblems,
+  capabilityAvailability,
+  currentBaseline,
+  expandLegacyBaseline,
+} = await jiti.import(join(root, 'src/lib/design/capability-availability.ts'))
+const { BASELINE_CHANGES } = await jiti.import(
+  join(root, 'src/lib/design/capability-baseline-changes.ts'),
 )
 const { COMPONENT_SCHEMAS, lookupType } = await jiti.import(
   join(root, 'src/app/design-components.ts'),
 )
 const { CAPABILITY_EXCEPTIONS } = await jiti.import(
   join(root, 'src/lib/design/capability-exceptions.ts'),
+)
+const { DESIGN_CONTEXTS } = await jiti.import(
+  join(root, 'src/lib/design/capability-design-contexts.ts'),
 )
 const { contractProblems, formatProblem } = await jiti.import(
   join(root, 'src/lib/design/contract-checks.ts'),
@@ -54,7 +82,7 @@ const ids = DESIGN_COMPONENTS.map((component) => component.id)
 const write = async (baseline) =>
   writeFileSync(
     file,
-    await format(JSON.stringify({ $comment: COMMENT, ...baseline }), {
+    await format(JSON.stringify({ $comment: COMMENT, version: 2, ...baseline }), {
       ...(await resolveConfig(file)),
       filepath: file,
     }),
@@ -78,14 +106,35 @@ if (!existsSync(file)) {
   console.error('capability-baseline.json is missing. Write it once with --init-baseline.')
   process.exit(1)
 }
-const committed = JSON.parse(readFileSync(file, 'utf8'))
-const ratchet = ratchetProblems(current, committed, ids)
-const added = ratchet.filter((problem) => problem.message.includes("isn't in the baseline"))
+const committedFile = JSON.parse(readFileSync(file, 'utf8'))
+// A file written before text roles were listed one by one reads as the role entries it stands for.
+const committed = expandLegacyBaseline(committedFile, DESIGN_COMPONENTS)
+
+const admitted = (pair, layout) =>
+  BASELINE_CHANGES.some(
+    (row) =>
+      row.kind === 'admit' &&
+      row.component === pair.component &&
+      row.capability === pair.capability &&
+      row.scope === pair.scope &&
+      (row.part ?? '') === (pair.part ?? '') &&
+      row.layouts.includes(layout),
+  )
 
 if (process.argv.includes('--update-baseline')) {
-  if (added.length > 0) {
-    for (const problem of added) console.error(formatProblem(problem))
-    console.error('The baseline only shrinks, so nothing was written.')
+  // Closed gaps leave; a new gap is written only where a reviewed admit row covers it.
+  const refused = addedGaps(current, committed).filter(
+    ({ pair, layout }) => !admitted(pair, layout),
+  )
+  if (refused.length > 0) {
+    for (const { pair, layout } of refused) {
+      console.error(
+        `✗ ${pair.component}: ${pair.capability} (${pair.scope}${pair.part ? `, ${pair.part}` : ''}) is pending${layout === null ? '' : ` on ${layout}`} and isn't in the baseline.\n  Fix: add evidence, or a reviewed admit row in src/lib/design/capability-baseline-changes.ts.`,
+      )
+    }
+    console.error(
+      'A gap is added to the baseline only with a reviewed admit row, so nothing was written.',
+    )
     process.exit(1)
   }
   await write(current)
@@ -100,10 +149,72 @@ const problems = contractProblems({
   schemas: COMPONENT_SCHEMAS,
   lookup: lookupType,
   exceptions: CAPABILITY_EXCEPTIONS,
+  contexts: DESIGN_CONTEXTS,
   baseline: committed,
+  changes: BASELINE_CHANGES,
   readSource: (path) =>
     existsSync(join(root, path)) ? readFileSync(join(root, path), 'utf8') : undefined,
 })
+
+/** The baseline on the base commit, or why there isn't one. `{ missing }` is not an error by itself. */
+function readBase() {
+  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
+  const fileArgument = process.argv.indexOf('--against-file')
+  const refArgument = process.argv.indexOf('--against-ref')
+  try {
+    if (fileArgument > -1) {
+      const path = process.argv[fileArgument + 1]
+      if (!path) throw new Error('--against-file needs a path.')
+      return existsSync(path)
+        ? { baseline: JSON.parse(readFileSync(path, 'utf8')) }
+        : { missing: `${path} doesn't exist` }
+    }
+    const ref = process.argv[refArgument + 1]
+    if (!ref) throw new Error('--against-ref needs a ref.')
+    const base = git('merge-base', ref, 'HEAD')
+    const listed = git('ls-tree', '--name-only', base, '--', 'capability-baseline.json')
+    return listed
+      ? { baseline: JSON.parse(git('show', `${base}:capability-baseline.json`)) }
+      : {
+          missing: `capability-baseline.json isn't in ${base.slice(0, 10)}, the merge base with ${ref}`,
+        }
+  } catch (error) {
+    console.error(
+      `✗ The base baseline couldn't be read: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}\n  Fix: the comparison needs the base commit. Check it out (CI does) or fetch the ref.`,
+    )
+    process.exit(1)
+  }
+}
+
+if (process.argv.includes('--against-file') || process.argv.includes('--against-ref')) {
+  const base = readBase()
+  if ('missing' in base) {
+    const outcome = missingBaseOutcome({
+      missing: base.missing,
+      allowed: process.argv.includes('--allow-missing-base'),
+      template: isTemplateRepo(root),
+    })
+    if (outcome.problem) problems.push(outcome.problem)
+    if (outcome.notice) console.log(outcome.notice)
+  } else {
+    problems.push(
+      ...baselineIntegrityProblems({
+        // An older base lists text pairs whole; read it as the roles it stands for.
+        base: expandLegacyBaseline(base.baseline, DESIGN_COMPONENTS),
+        head: committed,
+        components: ids,
+        availability: new Map(
+          DESIGN_COMPONENTS.map((component) => [
+            component.id,
+            capabilityAvailability(component, EVIDENCE, gate),
+          ]),
+        ),
+        changes: BASELINE_CHANGES,
+      }),
+    )
+  }
+}
+
 if (problems.length > 0) {
   for (const problem of problems) console.error(formatProblem(problem))
   console.error(

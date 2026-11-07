@@ -27,6 +27,48 @@ const sections = [
     variant: 'editorial',
     links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
   },
+  {
+    _key: 'listCards',
+    _type: 'linkList',
+    variant: 'cards',
+    links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
+  },
+  {
+    _key: 'listCompact',
+    _type: 'linkList',
+    variant: 'compact',
+    links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
+  },
+  {
+    _key: 'heroOverlay',
+    _type: 'hero',
+    variant: 'overlay',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'heroEditorial',
+    _type: 'hero',
+    variant: 'editorial',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'heroSplitS',
+    _type: 'hero',
+    variant: 'split',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'heroFullS',
+    _type: 'hero',
+    variant: 'full-bleed',
+    supporting: [{ _key: 's0', _type: 'logoRow' }],
+  },
+  {
+    _key: 'sideMedia',
+    _type: 'mediaText',
+    variant: 'side',
+    media: [{ _key: 'm0', _type: 'slotImage' }],
+  },
   { _key: 'cta', _type: 'ctaBanner' },
   { _key: 'place', _type: 'location' },
   { _key: 'plain', _type: 'richText' },
@@ -396,9 +438,565 @@ describe('a marked field is judged by its own policy (B2)', () => {
   })
 
   it('rejects a marked field no policy of its capability names, even beside Verified ones', () => {
-    // `links[].icon` is an icon field; the icon policies probe the link design's icon fields, not it.
-    const found = rejections([{ set: { [at('listStack', 'links[_key=="a"].icon')]: 'star' } }])
+    // The hero's motion is Verified (`style.motion`), but no motion policy names its part motion.
+    const found = rejections([{ set: { [at('heroSplit', 'partMotion')]: { enabled: true } } }])
     expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
-    expect(found[0]?.[1]).toContain('no icon policy names it')
+    expect(found[0]?.[1]).toContain('no motion policy names it')
+  })
+})
+
+describe('nested paths can’t bypass validation (AT3)', () => {
+  const clone = () => JSON.parse(JSON.stringify(manifest)) as DesignManifest
+  type Policy = NonNullable<
+    Extract<
+      NonNullable<DesignManifest['sections'][number]['capabilities']>[string],
+      { policies: unknown }
+    >['policies'][number]
+  >
+  /** A copy of the manifest with every policy of a capability that `match`es set to one status. */
+  const withStatus = (
+    type: string,
+    capability: string,
+    status: string | { notApplicable: string },
+    match: (policy: Policy) => boolean = () => true,
+  ) => {
+    const changed = clone()
+    const entry = changed.sections.find((section) => section.type === type)?.capabilities?.[
+      capability
+    ]
+    if (!entry || !('policies' in entry)) throw new Error(`No ${capability} policies on ${type}.`)
+    for (const policy of entry.policies.filter(match)) policy.availability = status
+    return deps({ manifest: changed })
+  }
+  const codes = (
+    patches: ChangeProposal['changes'][number]['patches'],
+    given: ValidateDeps = deps(),
+  ) => rejections(patches, given).map(([code]) => code)
+
+  it('has a manifest row for every field a policy names', () => {
+    const missing: string[] = []
+    for (const section of manifest.sections) {
+      const rows = new Set(section.fields.map((row) => row.path))
+      for (const row of section.fields.filter((entry) => entry.kind === 'sectionStyle')) {
+        for (const style of manifest.sectionStyle.fields) rows.add(`${row.path}.${style.path}`)
+      }
+      for (const [capability, entry] of Object.entries(section.capabilities ?? {})) {
+        if (!entry || !('policies' in entry)) continue
+        for (const policy of entry.policies) {
+          for (const field of policy.fields) {
+            if (!rows.has(field))
+              missing.push(`${section.type}: ${capability} policy names ${field}`)
+          }
+        }
+      }
+    }
+    expect(missing).toEqual([])
+  })
+
+  it('walks inline objects inside inline objects: a link’s own design has rows', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    const paths = new Set(list?.fields.map((row) => row.path))
+    for (const path of [
+      'links[].design.iconShape',
+      'links[].design.label',
+      'links[].design.border',
+    ]) {
+      expect(paths.has(path), path).toBe(true)
+    }
+  })
+
+  it('treats a link’s own design as design, and agency-only, however deep the path', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    const rows = list?.fields.filter((row) => row.path.startsWith('links[].design')) ?? []
+    expect(rows.length).toBeGreaterThan(20)
+    for (const row of rows) {
+      expect(row.clientEditable, row.path).toBe(false)
+      expect(row.design, row.path).toBe(true)
+    }
+    const change = [{ set: { [at('listStack', 'links[_key=="a"].design.iconShape')]: 'circle' } }]
+    const result = validateProposal(proposal(change), deps())
+    expect(result.rejected).toEqual([])
+    expect(result.design.accepted).toHaveLength(1)
+    expect(result.content.accepted).toHaveLength(0)
+    expect(result.needsAgencyReview).toBe(true)
+    // A client-level run can't write it.
+    expect(codes(change, deps({ agencyPermitted: false }))).toEqual(['agency-permission-required'])
+  })
+
+  it('keeps the text of a link client-editable', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    expect(list?.fields.find((row) => row.path === 'links[].label')?.clientEditable).toBe(true)
+    expect(accepted([{ set: { [at('listStack', 'links[_key=="a"].label')]: 'Two' } }])).toBe(true)
+    expect(
+      codes(
+        [{ set: { [at('listStack', 'links[_key=="a"].label')]: 'Two' } }],
+        deps({ agencyPermitted: false }),
+      ),
+    ).toEqual([])
+  })
+
+  it('rejects a child of a Pending marked object as it rejects the object', () => {
+    const pending = withStatus('linkList', 'divider', 'pending')
+    const parent = codes(
+      [{ set: { [at('listStack', 'dividerDesign.afterProfile')]: { style: 'line' } } }],
+      pending,
+    )
+    expect(parent).toEqual(['capability-not-verified'])
+    expect(
+      codes([{ set: { [at('listStack', 'dividerDesign.afterProfile.style')]: 'line' } }], pending),
+    ).toEqual(parent)
+    // Verified, the same child is accepted.
+    expect(
+      accepted([{ set: { [at('listStack', 'dividerDesign.afterProfile.style')]: 'line' } }]),
+    ).toBe(true)
+  })
+
+  it('rejects a child of a Not applicable marked object as it rejects the object', () => {
+    // Editorial draws no card: cardDesign.border is Not applicable there, and so is what is inside it.
+    const child = rejections([
+      { set: { [at('listEd', 'cardDesign.background.colour')]: 'accent' } },
+    ])
+    expect(child.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(child[0]?.[1]).toContain("doesn't offer: Draws no card")
+  })
+
+  it('rejects a child of a marked object no policy names (partMotion.enabled)', () => {
+    const parent = codes([{ set: { [at('heroSplit', 'partMotion')]: { enabled: true } } }])
+    expect(parent).toEqual(['capability-not-verified'])
+    expect(codes([{ set: { [at('heroSplit', 'partMotion.enabled')]: true } }])).toEqual(parent)
+  })
+
+  it('judges an insert into a marked array, and the blocks inside it', () => {
+    const block = {
+      _key: 'b1',
+      _type: 'badgeRow',
+      badges: [{ _key: 'x', label: 'One' }],
+    }
+    const insert = [{ insert: { replace: at('heroSplit', 'supporting[0]'), items: [block] } }]
+    const heroWith = { ...documents['page-home'], pageBuilder: sections }
+    const withSupporting = {
+      ...deps(),
+      documents: {
+        'page-home': {
+          ...heroWith,
+          pageBuilder: sections.map((section) =>
+            section._key === 'heroSplit'
+              ? { ...section, supporting: [{ _key: 's0', _type: 'logoRow' }] }
+              : section,
+          ),
+        },
+      },
+    }
+    // The block policy is Verified: the insert is accepted.
+    expect(rejections(insert, withSupporting)).toEqual([])
+    // Pending, the same insert is rejected: before this check it skipped the slots verdict.
+    const pending = withStatus('hero', 'slots', 'pending', (policy) => policy.part === 'block')
+    const found = rejections(insert, { ...withSupporting, manifest: pending.manifest })
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('supporting')
+  })
+
+  it('leaves unsetting a nested path allowed', () => {
+    expect(accepted([{ unset: [at('listEd', 'cardDesign.background.colour')] }])).toBe(true)
+  })
+})
+
+describe('a text role is judged by its own status (AT2)', () => {
+  const clone = () => JSON.parse(JSON.stringify(manifest)) as DesignManifest
+  const sectionsWithCompact = [
+    ...sections,
+    {
+      _key: 'listCompact',
+      _type: 'linkList',
+      variant: 'compact',
+      links: [{ _key: 'a', _type: 'linkListItem', label: 'One' }],
+    },
+  ]
+  const withCompact = (changed: DesignManifest = manifest) => ({
+    manifest: changed,
+    documents: {
+      'page-home': {
+        _id: 'page-home',
+        _type: 'page',
+        _rev: 'rev-1',
+        pageBuilder: sectionsWithCompact,
+      },
+    },
+  })
+
+  it('accepts the label on compact and rejects the eyebrow and description there, saying why', () => {
+    expect(
+      accepted([{ set: { [at('listCompact', 'cardDesign.label.size')]: 'large' } }], withCompact()),
+    ).toBe(true)
+    for (const role of ['eyebrow', 'description']) {
+      const found = rejections(
+        [{ set: { [at('listCompact', `cardDesign.${role}.size`)]: 'large' } }],
+        withCompact(),
+      )
+      expect(
+        found.map(([code]) => code),
+        role,
+      ).toEqual(['capability-not-verified'])
+      expect(found[0]?.[1], role).toContain('Compact draws the label role only')
+    }
+  })
+
+  it('accepts all three roles on a layout that draws them', () => {
+    for (const role of ['eyebrow', 'label', 'description']) {
+      expect(
+        accepted([{ set: { [at('listStack', `cardDesign.${role}.size`)]: 'large' } }]),
+        role,
+      ).toBe(true)
+    }
+  })
+
+  it('never lets a Verified role authorise a Pending one beside it (no sibling inference)', () => {
+    const changed = clone()
+    const policy = (
+      changed.sections.find((section) => section.type === 'linkList')?.capabilities?.text as {
+        policies: { scope: string; roleAvailability?: Record<string, unknown> }[]
+      }
+    ).policies.find((entry) => entry.scope === 'card')
+    if (!policy?.roleAvailability)
+      throw new Error('No per-role availability on the Link list text.')
+    // The label stays Verified; the eyebrow is Pending.
+    policy.roleAvailability.eyebrow = 'pending'
+    const given = withCompact(changed)
+    expect(
+      accepted([{ set: { [at('listStack', 'cardDesign.label.size')]: 'large' } }], given),
+    ).toBe(true)
+    const found = rejections(
+      [{ set: { [at('listStack', 'cardDesign.eyebrow.size')]: 'large' } }],
+      given,
+    )
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain("isn't verified")
+    // Judging the object whole, as one value, is judged by each role inside it.
+    expect(
+      rejections(
+        [
+          {
+            set: {
+              [at('listStack', 'cardDesign')]: {
+                label: { size: 'large' },
+                eyebrow: { size: 'large' },
+              },
+            },
+          },
+        ],
+        given,
+      ).map(([code]) => code),
+    ).toEqual(['capability-not-verified'])
+  })
+
+  it('lists each role’s status in the manifest, and a row’s role', () => {
+    const list = manifest.sections.find((section) => section.type === 'linkList')
+    expect(list?.fields.find((row) => row.path === 'cardDesign.eyebrow')?.role).toBe('eyebrow')
+    expect(list?.fields.find((row) => row.path === 'links[].design.label')?.role).toBe('label')
+    const text = list?.capabilities?.text as {
+      policies: { roleAvailability?: Record<string, unknown> }[]
+    }
+    const card = text.policies[0]?.roleAvailability
+    expect(card?.label).toEqual({
+      stacked: 'verified',
+      cards: 'verified',
+      editorial: 'verified',
+      compact: 'verified',
+    })
+    expect(card?.eyebrow).toEqual({
+      stacked: 'verified',
+      cards: 'verified',
+      editorial: 'verified',
+      compact: { notApplicable: 'Compact draws the label role only' },
+    })
+  })
+})
+
+describe('supported icon changes are accepted, and unsupported ones are not (AT7)', () => {
+  const clone = () => JSON.parse(JSON.stringify(manifest)) as DesignManifest
+  const codes = (
+    patches: ChangeProposal['changes'][number]['patches'],
+    given: ValidateDeps = deps(),
+  ) => rejections(patches, given).map(([code]) => code)
+  const linkIcon = (key: string, value: unknown = 'star') => [
+    { set: { [at(key, 'links[_key=="a"].icon')]: value } },
+  ]
+
+  it('accepts a link’s icon on every layout that draws one', () => {
+    for (const key of ['listStack', 'listCards', 'listCompact']) {
+      expect(rejections(linkIcon(key)), key).toEqual([])
+    }
+  })
+
+  it('accepts a new link with an icon', () => {
+    const item = {
+      _key: 'b',
+      _type: 'linkListItem',
+      label: 'Two',
+      icon: 'phone',
+    }
+    expect(
+      rejections([{ insert: { after: at('listStack', 'links[-1]'), items: [item] } }]),
+    ).toEqual([])
+  })
+
+  it('accepts a divider’s centre icon in each position', () => {
+    for (const position of ['afterCategories', 'afterProfile', 'aboveSocial', 'belowSocial']) {
+      expect(
+        rejections([{ set: { [at('listStack', `dividerDesign.${position}.icon`)]: 'star' } }]),
+        position,
+      ).toEqual([])
+    }
+  })
+
+  it('judges each divider position by its own evidence: one failing position never rides on the others', () => {
+    const changed = clone()
+    const icon = changed.sections.find((section) => section.type === 'linkList')?.capabilities?.icon
+    if (!icon || !('policies' in icon)) throw new Error('No icon policies on the Link list.')
+    const parts = icon.policies.filter((policy) => policy.part?.startsWith('divider.'))
+    expect(parts.map((policy) => policy.part)).toHaveLength(4)
+    const failing = parts.find((policy) => policy.part === 'divider.aboveSocial')
+    if (!failing) throw new Error('No aboveSocial divider part.')
+    failing.availability = Object.fromEntries(
+      Object.keys(failing.availability as Record<string, unknown>).map((layout) => [
+        layout,
+        'pending',
+      ]),
+    )
+    const given = deps({ manifest: changed })
+    const at4 = (position: string) => [
+      { set: { [at('listStack', `dividerDesign.${position}.icon`)]: 'star' } },
+    ]
+    for (const position of ['afterCategories', 'afterProfile', 'belowSocial']) {
+      expect(rejections(at4(position), given), position).toEqual([])
+    }
+    const found = rejections(at4('aboveSocial'), given)
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain("isn't verified")
+  })
+
+  it('accepts a badge row with an icon in all four hero layouts', () => {
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned', icon: 'star' }],
+    }
+    for (const key of ['heroOverlay', 'heroSplitS', 'heroEditorial', 'heroFullS']) {
+      expect(
+        rejections([{ insert: { replace: at(key, 'supporting[0]'), items: [row] } }]),
+        key,
+      ).toEqual([])
+    }
+    // And setting the icon of a badge already there is the same field.
+    expect(
+      rejections([
+        { set: { [at('heroSplitS', 'supporting[_key=="s0"].badges[0].icon')]: 'star' } },
+      ]).map(([code]) => code),
+    ).not.toContain('capability-not-verified')
+  })
+
+  it('rejects a link’s icon on the layout that draws none, saying why', () => {
+    const found = rejections(linkIcon('listEd'))
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('Draws no icon')
+    expect(
+      codes([{ set: { [at('listEd', 'links[_key=="a"].design.iconShape')]: 'circle' } }]),
+    ).toEqual(['capability-not-verified'])
+  })
+
+  it('rejects an icon that isn’t in the shared set', () => {
+    expect(codes(linkIcon('listStack', 'rocket'))).toEqual(['value-not-allowed'])
+    expect(
+      codes([{ set: { [at('listStack', 'dividerDesign.afterProfile.icon')]: 'rocket' } }]),
+    ).toEqual(['value-not-allowed'])
+  })
+
+  it('rejects a badge row in a slot that doesn’t allow it', () => {
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'x' }],
+    }
+    expect(codes([{ insert: { replace: at('sideMedia', 'media[0]'), items: [row] } }])).toEqual([
+      'slot-block-not-allowed',
+    ])
+  })
+
+  it('rejects a block’s icon when its evidence is removed, saying so', () => {
+    const changed = clone()
+    const block = changed.designCapabilities?.slotBlocks?.find((entry) => entry.type === 'badgeRow')
+    const icon = block?.capabilities?.icon
+    if (!icon || !('policies' in icon)) throw new Error('No icon policies on the badge row.')
+    for (const policy of icon.policies.filter((entry) => entry.scope === 'item')) {
+      policy.availability = 'pending'
+    }
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'x', icon: 'star' }],
+    }
+    const found = rejections(
+      [{ insert: { replace: at('heroSplitS', 'supporting[0]'), items: [row] } }],
+      deps({ manifest: changed }),
+    )
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('badges[].icon')
+    expect(found[0]?.[1]).toContain("isn't verified")
+  })
+
+  it('rejects a block field when the manifest has no contract for the block', () => {
+    const changed = clone()
+    if (changed.designCapabilities?.slotBlocks) {
+      changed.designCapabilities.slotBlocks = changed.designCapabilities.slotBlocks.filter(
+        (entry) => entry.type !== 'badgeRow',
+      )
+    }
+    const row = {
+      _key: 'br',
+      _type: 'badgeRow',
+      badges: [{ _key: 'b1', _type: 'badge', label: 'x', icon: 'star' }],
+    }
+    const found = rejections(
+      [{ insert: { replace: at('heroSplitS', 'supporting[0]'), items: [row] } }],
+      deps({ manifest: changed }),
+    )
+    expect(found.map(([code]) => code)).toEqual(['capability-not-verified'])
+    expect(found[0]?.[1]).toContain('which the manifest has no design contract for')
+  })
+})
+
+describe('the layout that survives (AT4)', () => {
+  type Patches = ChangeProposal['changes'][number]['patches']
+  const thumb = { _type: 'image', asset: { _type: 'reference', _ref: 'image-abc-100x100-png' } }
+  const validate = (patches: Patches, given: ValidateDeps = deps()) =>
+    validateProposal(proposal(patches), given)
+  const reasonsAt = (result: ReturnType<typeof validate>, path: string) =>
+    result.rejected.find((patch) => patch.path === path)?.reasons.map((reason) => reason.code)
+
+  const compact = at('listCompact', 'links[_key=="a"].thumbnail')
+  const variant = at('listCompact', 'variant')
+  const badTone = at('listCompact', 'style.tone')
+
+  it('judges content in the layout that will be written when a design part is rejected', () => {
+    // Stored Compact; the proposal moves to Cards (where a thumbnail is drawn), adds one, and sets a bad
+    // tone. The design part has a rejection, so it writes nothing, and the thumbnail would land on Compact.
+    const result = validate([
+      { set: { [variant]: 'cards', [compact]: thumb, [badTone]: 'enormous' } },
+    ])
+    expect(reasonsAt(result, badTone)).toEqual(['value-not-allowed'])
+    expect(reasonsAt(result, compact)).toEqual(['capability-not-verified'])
+    expect(result.design.applies).toBe(false)
+    expect(result.content.applies).toBe(false)
+    expect(result.applicable).toEqual([])
+    const found = result.rejected.find((patch) => patch.path === compact)?.reasons[0]?.message
+    expect(found).toContain('Draws no thumbnails')
+  })
+
+  it('does the same when part of the design is rejected for want of an agency token', () => {
+    // A client may move a Link list to Cards, but the section style is the agency's. The style change is
+    // rejected, so the design part writes nothing and the layout stays Compact.
+    const result = validate(
+      [{ set: { [variant]: 'cards', [compact]: thumb, [at('listCompact', 'style.tone')]: 'alt' } }],
+      deps({ agencyPermitted: false }),
+    )
+    expect(reasonsAt(result, at('listCompact', 'style.tone'))).toEqual([
+      'agency-permission-required',
+    ])
+    expect(reasonsAt(result, compact)).toEqual(['capability-not-verified'])
+    expect(result.applicable).toEqual([])
+    // With the token, nothing is rejected and both parts are written.
+    const permitted = validate(
+      [{ set: { [variant]: 'cards', [compact]: thumb, [at('listCompact', 'style.tone')]: 'alt' } }],
+      deps({ agencyPermitted: true }),
+    )
+    expect(permitted.rejected).toEqual([])
+  })
+
+  it('does not accept the layout change itself when it is the agency-only one (mediaText)', () => {
+    const result = validate(
+      [{ set: { [at('sideMedia', 'variant')]: 'stacked' } }],
+      deps({ agencyPermitted: false }),
+    )
+    expect(reasonsAt(result, at('sideMedia', 'variant'))).toEqual(['agency-permission-required'])
+    expect(result.applicable).toEqual([])
+  })
+
+  it('applies both when the layout and what depends on it are fine', () => {
+    const result = validate([{ set: { [variant]: 'cards', [compact]: thumb } }])
+    expect(result.rejected).toEqual([])
+    expect(result.design.applies).toBe(true)
+    expect(result.content.applies).toBe(true)
+    expect(result.applicable).toHaveLength(2)
+  })
+
+  it('judges design in the document that will be written when a content part is rejected', () => {
+    // The other direction. The proposal removes a section (content) and styles it (design), and a content
+    // value elsewhere is invalid, so the content part writes nothing: the section stays, and its panel
+    // is judged on the section that will be there, not on one that is gone.
+    const style = at('heroSplit', 'style.panel')
+    const result = validate([
+      { unset: ['pageBuilder[_key=="heroSplit"]'] },
+      { set: { [at('plain', 'bogus')]: 'x', [style]: 'glass' } },
+    ])
+    expect(reasonsAt(result, at('plain', 'bogus'))).toEqual(['unknown-path'])
+    expect(reasonsAt(result, style)).toBeUndefined()
+    expect(result.content.applies).toBe(false)
+    expect(result.design.applies).toBe(true)
+    expect(result.applicable.map((patch) => patch.path)).toEqual([style])
+  })
+
+  it('still rejects design on a section the same proposal removes, when the removal will be written', () => {
+    const style = at('heroSplit', 'style.panel')
+    const result = validate([
+      { unset: ['pageBuilder[_key=="heroSplit"]'] },
+      { set: { [style]: 'glass' } },
+    ])
+    expect(reasonsAt(result, style)).toEqual(['invalid-path'])
+    expect(result.content.applies).toBe(true)
+    expect(result.design.applies).toBe(false)
+  })
+
+  it('rejects a design change to a section the same proposal inserts, whether or not the insert lands', () => {
+    const inserted = { _key: 'fresh', _type: 'richText' }
+    const path = at('fresh', 'style.tone')
+    for (const bad of [false, true]) {
+      const result = validate([
+        {
+          insert: { after: 'pageBuilder[-1]', items: [bad ? { ...inserted, bogus: 1 } : inserted] },
+        },
+        { set: { [path]: 'alt' } },
+      ])
+      expect(reasonsAt(result, path), String(bad)).toEqual(['unknown-path'])
+      expect(result.design.applies).toBe(false)
+    }
+  })
+
+  it('does not let a rejection in one part block a valid, layout-independent unit in the other', () => {
+    const label = at('listCompact', 'links[_key=="a"].label')
+    const result = validate([{ set: { [badTone]: 'enormous', [label]: 'Renamed' } }])
+    expect(reasonsAt(result, badTone)).toEqual(['value-not-allowed'])
+    expect(reasonsAt(result, label)).toBeUndefined()
+    expect(result.content.applies).toBe(true)
+    expect(result.design.applies).toBe(false)
+    expect(result.applicable.map((patch) => patch.path)).toEqual([label])
+  })
+
+  it('settles in a few rounds, and fails closed when it is not allowed enough', () => {
+    const patches: Patches = [
+      { set: { [variant]: 'cards', [compact]: thumb, [badTone]: 'enormous' } },
+    ]
+    // Allowed to settle, it does, and says why each unit was rejected.
+    expect(
+      validate(patches)
+        .rejected.map((patch) => patch.path)
+        .sort(),
+    ).toEqual([compact, badTone].sort())
+    // One round is not enough to see the thumbnail's problem settle: nothing that is left is accepted.
+    const capped = validate(patches, deps({ maxRounds: 1 }))
+    expect(capped.applicable).toEqual([])
+    expect(reasonsAt(capped, variant)).toEqual(['proposal-unstable'])
+    expect(
+      capped.rejected.flatMap((patch) => patch.reasons.map((reason) => reason.code)),
+    ).toContain('proposal-unstable')
   })
 })

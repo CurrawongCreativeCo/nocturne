@@ -43,11 +43,19 @@ export const mediaTextCapabilities = declareCapabilities<SplitLayout>({
   edge: { policy: 'required', scope: 'section' },
   motion: { policy: 'required', scope: 'section' },
   slots: [
+    // The two slots are independent controls, so each is its own part: the media slot working never
+    // verifies the extra block's.
     {
       policy: 'required',
       scope: 'section',
-      part: 'block',
-      note: 'The slots draw their approved blocks',
+      part: 'block.media',
+      note: 'The media slot draws its approved block',
+    },
+    {
+      policy: 'required',
+      scope: 'section',
+      part: 'block.supporting',
+      note: 'The extra-block slot draws its approved block',
     },
     {
       policy: 'required',

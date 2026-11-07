@@ -74,10 +74,19 @@ function pairs(
   for (const component of components) {
     for (const entry of capabilityAvailability(component, evidence, gate)) {
       if (entry.policy === 'notApplicable' || entry.scope === null) continue
-      const key = `${component.id}|${entry.capability}|${entry.scope}|${entry.part ?? ''}|${entry.policy}`
-      const existing = found.get(key)
-      if (existing) existing.statuses.push(entry.status)
-      else found.set(key, { policy: entry.policy, statuses: [entry.status] })
+      // A text role is a pair of its own: it is verified or pending apart from the others.
+      const parts: [string, string][] = entry.roles?.length
+        ? entry.roles.map((role) => [
+            role,
+            entry.verifiedRoles?.includes(role) ? 'verified' : 'pending',
+          ])
+        : [['', entry.status]]
+      for (const [role, status] of parts) {
+        const key = `${component.id}|${entry.capability}|${entry.scope}|${entry.part ?? ''}|${role}|${entry.policy}`
+        const existing = found.get(key)
+        if (existing) existing.statuses.push(status)
+        else found.set(key, { policy: entry.policy, statuses: [status] })
+      }
     }
   }
   return [...found.values()].map(({ policy, statuses }) => ({
@@ -157,7 +166,12 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
   const count = (policy: 'required' | 'conditional', status: PairStatus) =>
     counted.filter((entry) => entry.policy === policy && entry.status === status).length
   const totals = table(
-    ['Pairs (component, capability, scope and part)', 'Verified', 'Partly verified', 'Pending'],
+    [
+      'Pairs (component, capability, scope, part and text role)',
+      'Verified',
+      'Partly verified',
+      'Pending',
+    ],
     (['required', 'conditional'] as const).map((policy) => [
       policy === 'required' ? 'Required' : 'Conditional',
       String(count(policy, 'verified')),
@@ -213,9 +227,9 @@ export function capabilityDocs({ components, evidence, gate, exceptions }: DocsI
     '**Components by capabilities.** `R` is Required and `C` Conditional. `✓` means every applicable layout and scope is verified, `…` none is yet, `◐` some are. `*` means some layouts or scopes opt out, with a reason in the declaration. `–` is Not applicable. The design manifest (`design-manifest.generated.json`) has the same by layout, with each policy, trigger, closing task and the evidence behind it.',
     matrix,
     totals,
-    `Every Required or Conditional pair that is not verified is in \`capability-baseline.json\`, with the task that closes it. It only shrinks.`,
+    `A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in \`capability-baseline.json\`, with the task that closes it. It only shrinks.`,
     closing,
-    `**Evidence.** ${String(capabilityEvidence.length)} capability entries, ${String(cases)} cases (an entry's layouts are one case each). Each case renders the component through \`SectionRenderer\` with the field unset and then probed, and must change (or draw) the registered target, also with the claimed resolvers disconnected. The ${String(sourceEvidence.length)} content source entries are verified by tests written for each source, which the check requires to exist.`,
+    `**Evidence.** ${String(capabilityEvidence.length)} capability entries, ${String(cases)} cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through \`SectionRenderer\`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, \`VIEW_DRAWERS\`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The ${String(sourceEvidence.length)} content source entries are verified by tests written for each source, which the check requires to exist.`,
     '**Capabilities and their owners**',
     owners,
     '**Content sources** are recorded apart from design capabilities and never stand in for them. Generic tabs are deliberately not a capability.',

@@ -8,7 +8,8 @@ import {
   type TextRole,
   type Trigger,
 } from './capabilities'
-import { isCapabilityEvidence, type Evidence } from './capability-evidence'
+import type { BaselineChange } from './capability-baseline-changes'
+import { isCapabilityEvidence, type CapabilityEvidence, type Evidence } from './capability-evidence'
 import { applyPatch } from './capability-patch'
 import {
   policyCells,
@@ -32,6 +33,17 @@ export type CaseResults = ReadonlyMap<string, 'changed' | 'ignored' | 'missing'>
 export const caseId = (entry: Evidence, layout: string | null) =>
   layout === null ? entry.id : `${entry.id}@${layout}`
 
+/**
+ * A patch key (`links.0.design.label.size`) as the manifest's path (`links[].design.label.size`): an
+ * index after a field names an array member.
+ */
+export function manifestPathOfPatchKey(key: string): string {
+  return key.split('.').reduce((path, part) => {
+    if (/^\d+$/.test(part)) return `${path}[]`
+    return path === '' ? part : `${path}.${part}`
+  }, '')
+}
+
 /** The layouts an entry covers, as cases: `null` for a component with one layout. */
 export const casesOf = (entry: Evidence): (string | null)[] =>
   entry.layouts ? [...entry.layouts] : [null]
@@ -49,7 +61,13 @@ export interface AvailabilityCell {
   trigger?: Trigger
   /** For a conditional trigger with a stored path: whether that field exists today. */
   reachable?: boolean
+  /** The text roles this cell is for (a layout that draws fewer says so in `rolesNotApplicable`). */
   roles?: readonly TextRole[]
+  /** Roles the layout doesn't draw, with its reason: never pending, never verified. */
+  rolesNotApplicable?: { roles: readonly TextRole[]; reason: string }
+  /** For a cell with roles: the roles an evidence entry of their own verifies, and those still pending. */
+  verifiedRoles?: readonly TextRole[]
+  pendingRoles?: readonly TextRole[]
   closingTask?: number
   /** The harness cases that verify it. */
   evidence?: readonly string[]
@@ -83,6 +101,10 @@ function shortfall(
   if (capability && field.marker.capability !== capability) {
     return `${entry.field} isn't marked as ${capability}`
   }
+  const role = isCapabilityEvidence(entry) ? entry.role : undefined
+  if (role && field.marker.role !== role) {
+    return `${entry.field} isn't stamped for the ${role} role${field.marker.role ? ` (it is ${field.marker.role})` : ''}`
+  }
   const offered = gate.offered(entry.component, layout, entry.field, stateOf(entry))
   if (!offered.offered) return offered.reason
   const result = results?.get(caseId(entry, layout))
@@ -112,7 +134,7 @@ export function capabilityAvailability(
         continue
       }
       const matching = evidence.filter(
-        (candidate) =>
+        (candidate): candidate is CapabilityEvidence =>
           isCapabilityEvidence(candidate) &&
           candidate.component === component.id &&
           candidate.capability === capability &&
@@ -122,21 +144,37 @@ export function capabilityAvailability(
       )
       const reasons = matching.map((candidate) => ({
         id: caseId(candidate, cell.layout),
+        role: candidate.role,
         why: shortfall(candidate, cell.layout, gate, results, capability),
       }))
-      const passing = reasons.filter((reason) => reason.why === undefined).map(({ id }) => id)
+      const passing = reasons.filter((reason) => reason.why === undefined)
+      // A cell with roles is verified role by role: a role only by an entry that names it, so one that
+      // passes never verifies another.
+      const roles = cell.roles ?? []
+      const verifiedRoles = roles.filter((role) => passing.some((reason) => reason.role === role))
+      const pendingRoles = roles.filter((role) => !verifiedRoles.includes(role))
+      const verified = roles.length > 0 ? pendingRoles.length === 0 : passing.length > 0
+      const explanation = [
+        ...reasons
+          .filter((reason) => reason.why !== undefined)
+          .map(({ id, why }) => `${id}: ${why ?? ''}`),
+        ...(pendingRoles.length > 0
+          ? [
+              `no passing evidence names the ${pendingRoles.join(', ')} role${pendingRoles.length > 1 ? 's' : ''}`,
+            ]
+          : []),
+      ]
       const reachable =
         cell.trigger?.path === undefined || !gate.hasSchema(component.id)
           ? undefined
           : !('missing' in gate.field(component.id, cell.trigger.path))
       cells.push({
         ...cell,
-        status: passing.length > 0 ? 'verified' : 'pending',
+        status: verified ? 'verified' : 'pending',
+        ...(roles.length > 0 ? { verifiedRoles, pendingRoles } : {}),
         ...(reachable === undefined ? {} : { reachable }),
-        ...(passing.length > 0 ? { evidence: passing } : {}),
-        ...(passing.length === 0 && reasons.length > 0
-          ? { unverified: reasons.map(({ id, why }) => `${id}: ${why ?? ''}`).join('; ') }
-          : {}),
+        ...(passing.length > 0 ? { evidence: passing.map(({ id }) => id) } : {}),
+        ...(!verified && explanation.length > 0 ? { unverified: explanation.join('; ') } : {}),
       })
     }
   }
@@ -270,6 +308,14 @@ export function evidenceProblems(
       )
       continue
     }
+    // A slot block is proven inside its hosts: with none, there is nowhere to draw it.
+    if (component.kind === 'slotBlock' && (component.hosts ?? []).length === 0) {
+      problem(
+        `${entry.component} is a slot block that no slot lists, so there is no host to prove it in.`,
+        'Add the block to a slot in the registry (features/pages/slots/registry.ts), or remove the evidence.',
+      )
+      continue
+    }
     if (component.layouts.length > 0 && !entry.layouts?.length) {
       problem(
         `${entry.component} has layouts, and the entry names none.`,
@@ -293,6 +339,21 @@ export function evidenceProblems(
       )
       continue
     }
+    // The probe must set the field the entry names (or one inside it), or the harness would prove one
+    // field while the contract marks another.
+    for (const key of Object.keys(entry.probe)) {
+      const probed = manifestPathOfPatchKey(key)
+      if (
+        probed !== entry.field &&
+        !probed.startsWith(`${entry.field}.`) &&
+        !probed.startsWith(`${entry.field}[`)
+      ) {
+        problem(
+          `its probe sets ${probed}, which isn't ${entry.field} or inside it.`,
+          'Probe the field the entry names, or name the field the probe sets.',
+        )
+      }
+    }
     if (isCapabilityEvidence(entry)) {
       if (field.marker.capability !== entry.capability) {
         problem(
@@ -315,7 +376,24 @@ export function evidenceProblems(
             `the declaration has no policy for ${entry.capability} at scope ${entry.scope}${entry.part ? `, part ${entry.part}` : ''}${layout ? ` on ${layout}` : ''}.`,
             'Evidence verifies declared policy only: fix the declaration or the entry.',
           )
+        } else if ((cell.roles?.length ?? 0) > 0 && !entry.role) {
+          problem(
+            `${entry.capability} names text roles (${cell.roles?.join(', ') ?? ''}), and the entry names none.`,
+            'Each role is verified by an entry of its own: add `role`.',
+          )
+        } else if (entry.role && !(cell.roles ?? []).includes(entry.role)) {
+          problem(
+            `the ${entry.role} role doesn't apply to ${entry.capability} at scope ${entry.scope}${layout ? ` on ${layout}` : ''}${cell.rolesNotApplicable?.roles.includes(entry.role) ? ` (${cell.rolesNotApplicable.reason})` : ''}.`,
+            'Name a role the policy draws on that layout, or drop the layout from the entry.',
+          )
         }
+      }
+      if (entry.role && field.marker.role !== entry.role) {
+        problem(
+          `${entry.field} isn't stamped for the ${entry.role} role${field.marker.role ? ` (it is ${field.marker.role})` : ''}.`,
+          'Probe the field the text style builder made for that role.',
+        )
+        continue
       }
     } else if (!component.declaration.contentSources.includes(entry.source)) {
       problem(
@@ -334,6 +412,34 @@ export function evidenceProblems(
       }
     }
   }
+  // Independent controls are separate parts. Two entries that prove different fields in the same cell
+  // (capability, scope, part, role and layout) would let one that works verify the one that doesn't, so
+  // each such field needs its own part. Entries that prove the same field are alternative paths to it.
+  const owners = new Map<string, Map<string, string[]>>()
+  for (const entry of evidence) {
+    if (!isCapabilityEvidence(entry)) continue
+    for (const layout of casesOf(entry)) {
+      const key = `${entry.component}|${entry.capability}|${entry.scope}|${entry.part ?? ''}|${entry.role ?? ''}|${layout ?? ''}`
+      const fields = owners.get(key) ?? new Map<string, string[]>()
+      fields.set(entry.field, [...(fields.get(entry.field) ?? []), entry.id])
+      owners.set(key, fields)
+    }
+  }
+  const reported = new Set<string>()
+  for (const [key, fields] of owners) {
+    if (fields.size < 2) continue
+    const [component = '', capability = '', scope = '', part = ''] = key.split('|')
+    const ids = [...new Set([...fields.values()].flat())]
+    const signature = `${component}|${capability}|${scope}|${part}|${[...fields.keys()].join(',')}`
+    if (reported.has(signature)) continue
+    reported.add(signature)
+    problems.push({
+      component,
+      capability: capability as CapabilityId,
+      message: `${component}: ${capability} (${scope}${part ? `, ${part}` : ''}) is proven by entries for different fields (${[...fields.keys()].join(', ')}), so one that passes would verify one that doesn't (${ids.join(', ')}).`,
+      fix: 'Give each independently editable control its own policy part in the declaration, with its evidence on that part. Several entries for the same field are fine.',
+    })
+  }
   return problems
 }
 
@@ -346,18 +452,23 @@ export interface BaselineEntry {
   capability: CapabilityId
   scope: Scope
   part?: string
+  /** A text role: version 2 lists a role's gap on its own, so one role can close while another waits. */
+  role?: TextRole
   layouts: (string | null)[]
   closingTask: number
 }
 
 /** The committed legacy gaps: Required ones, and Conditional ones tracked explicitly. */
 export interface CapabilityBaseline {
+  /** 2 lists text roles one by one. A file with no version is legacy: `expandLegacyBaseline` reads it. */
+  version?: number
   required: BaselineEntry[]
   conditional: BaselineEntry[]
 }
 
-const pairKey = (entry: Pick<BaselineEntry, 'component' | 'capability' | 'scope' | 'part'>) =>
-  `${entry.component}|${entry.capability}|${entry.scope}|${entry.part ?? ''}`
+const pairKey = (
+  entry: Pick<BaselineEntry, 'component' | 'capability' | 'scope' | 'part' | 'role'>,
+) => `${entry.component}|${entry.capability}|${entry.scope}|${entry.part ?? ''}|${entry.role ?? ''}`
 
 /** The pending pairs in some components' availability, grouped as the baseline lists them. */
 export function pendingBaseline(
@@ -371,25 +482,95 @@ export function pendingBaseline(
     for (const cell of cells) {
       if (cell.status !== 'pending' || cell.scope === null) continue
       const policy = cell.policy === 'required' ? 'required' : 'conditional'
-      const pair = {
-        component,
-        capability: cell.capability,
-        scope: cell.scope,
-        ...(cell.part ? { part: cell.part } : {}),
+      // A cell with text roles is one gap per role that is still pending.
+      const roles: (TextRole | undefined)[] = cell.pendingRoles?.length
+        ? [...cell.pendingRoles]
+        : [undefined]
+      for (const role of roles) {
+        const pair = {
+          component,
+          capability: cell.capability,
+          scope: cell.scope,
+          ...(cell.part ? { part: cell.part } : {}),
+          ...(role ? { role } : {}),
+        }
+        const existing = groups[policy].get(pairKey(pair))
+        if (existing) existing.layouts.push(cell.layout)
+        else
+          groups[policy].set(pairKey(pair), {
+            ...pair,
+            layouts: [cell.layout],
+            closingTask: cell.closingTask ?? capabilityById(cell.capability).owner,
+          })
       }
-      const existing = groups[policy].get(pairKey(pair))
-      if (existing) existing.layouts.push(cell.layout)
-      else
-        groups[policy].set(pairKey(pair), {
-          ...pair,
-          layouts: [cell.layout],
-          closingTask: cell.closingTask ?? capabilityById(cell.capability).owner,
-        })
     }
   }
   return {
     required: [...groups.required.values()],
     conditional: [...groups.conditional.values()],
+  }
+}
+
+/**
+ * A baseline written before text roles were listed one by one (no `version`), as version 2 reads it: an
+ * entry for a pair whose policy names roles becomes one entry per role the policy draws on each listed
+ * layout. Used to compare an older base commit with this one without calling the expansion new gaps.
+ * An entry for a component this site doesn't have, or a pair with no roles, is kept as it was.
+ */
+export function expandLegacyBaseline(
+  baseline: CapabilityBaseline,
+  components: readonly ContractComponent[],
+): CapabilityBaseline {
+  if ((baseline.version ?? 1) >= 2) return baseline
+  const expand = (entries: readonly BaselineEntry[]): BaselineEntry[] => {
+    const out = new Map<string, BaselineEntry>()
+    for (const entry of entries) {
+      const component = components.find((candidate) => candidate.id === entry.component)
+      const declaration = component?.declaration?.capabilities[entry.capability]
+      if (!component || !declaration) {
+        out.set(pairKey(entry), entry)
+        continue
+      }
+      const cells = policyCells(entry.capability, declaration, component.layouts)
+      let any = false
+      for (const layout of entry.layouts) {
+        const cell = cells.find(
+          (candidate) =>
+            candidate.scope === entry.scope &&
+            (candidate.part ?? '') === (entry.part ?? '') &&
+            candidate.layout === layout,
+        )
+        const roles: (TextRole | undefined)[] = cell?.roles?.length ? [...cell.roles] : [undefined]
+        if (roles[0] === undefined) continue
+        any = true
+        for (const role of roles) {
+          const expanded = { ...entry, ...(role ? { role } : {}), layouts: [layout] }
+          const existing = out.get(pairKey(expanded))
+          if (existing) existing.layouts.push(layout)
+          else out.set(pairKey(expanded), expanded)
+        }
+      }
+      if (!any) out.set(pairKey(entry), entry)
+      else {
+        // Layouts of this entry whose cell has no roles stay as a plain entry.
+        const plain = entry.layouts.filter((layout) => {
+          const cell = cells.find(
+            (candidate) =>
+              candidate.scope === entry.scope &&
+              (candidate.part ?? '') === (entry.part ?? '') &&
+              candidate.layout === layout,
+          )
+          return !cell?.roles?.length
+        })
+        if (plain.length > 0) out.set(pairKey(entry), { ...entry, layouts: plain })
+      }
+    }
+    return [...out.values()]
+  }
+  return {
+    version: 2,
+    required: expand(baseline.required),
+    conditional: expand(baseline.conditional),
   }
 }
 
@@ -407,6 +588,12 @@ export function currentBaseline(
       ]),
     ),
   )
+}
+
+/** The gaps pending now that the committed baseline doesn't list: what `--update-baseline` may add. */
+export function addedGaps(current: CapabilityBaseline, committed: CapabilityBaseline) {
+  const listed = listedCells(committed)
+  return [...listedCells(current)].filter(([key]) => !listed.has(key)).map(([, cell]) => cell)
 }
 
 /**
@@ -429,8 +616,19 @@ export function ratchetProblems(
         problems.push({
           component: entry.component,
           capability: entry.capability,
-          message: `${entry.component}: ${entry.capability} (${policy}, ${entry.scope}${entry.part ? `, ${entry.part}` : ''}) is pending${added[0] === null ? '' : ` on ${added.join(', ')}`} and isn't in the baseline.`,
+          message: `${entry.component}: ${entry.capability} (${policy}, ${entry.scope}${entry.part ? `, ${entry.part}` : ''}${entry.role ? `, ${entry.role}` : ''}) is pending${added[0] === null ? '' : ` on ${added.join(', ')}`} and isn't in the baseline.`,
           fix: `A new component or layout adopts every capability that applies. Add evidence, or review the policy; the baseline (capability-baseline.json) only shrinks.`,
+        })
+      }
+    }
+    for (const [key, entry] of pending) {
+      const known = listed.get(key)
+      if (known && known.closingTask !== entry.closingTask) {
+        problems.push({
+          component: entry.component,
+          capability: entry.capability,
+          message: `${entry.component}: ${entry.capability} (${policy}, ${entry.scope}${entry.part ? `, ${entry.part}` : ''}${entry.role ? `, ${entry.role}` : ''}) closes with task ${entry.closingTask}, but the baseline says task ${known.closingTask}.`,
+          fix: 'Reassigning a gap is a reviewed change: update the baseline (npm run design-capabilities -- --update-baseline) in the same commit as the declaration, and say why in the pull request.',
         })
       }
     }
@@ -442,11 +640,224 @@ export function ratchetProblems(
         problems.push({
           component: entry.component,
           capability: entry.capability,
-          message: `${entry.component}: ${entry.capability} (${policy}, ${entry.scope}${entry.part ? `, ${entry.part}` : ''}) is no longer pending${closed[0] === null ? '' : ` on ${closed.join(', ')}`}, but the baseline still lists it.`,
+          message: `${entry.component}: ${entry.capability} (${policy}, ${entry.scope}${entry.part ? `, ${entry.part}` : ''}${entry.role ? `, ${entry.role}` : ''}) is no longer pending${closed[0] === null ? '' : ` on ${closed.join(', ')}`}, but the baseline still lists it.`,
           fix: 'Remove it from capability-baseline.json (npm run design-capabilities -- --update-baseline), so the baseline shrinks.',
         })
       }
     }
+  }
+  return problems
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Baseline integrity: the baseline against the one on the base commit
+
+const rowCovers = (
+  row: Pick<BaselineChange, 'component' | 'capability' | 'scope' | 'part' | 'role' | 'layouts'>,
+  pair: Pick<BaselineEntry, 'component' | 'capability' | 'scope' | 'part' | 'role'>,
+  layout: string | null,
+) =>
+  row.component === pair.component &&
+  row.capability === pair.capability &&
+  row.scope === pair.scope &&
+  (row.part ?? '') === (pair.part ?? '') &&
+  (row.role ?? '') === (pair.role ?? '') &&
+  row.layouts.includes(layout)
+
+const describePair = (pair: BaselineEntry, layout: string | null, policy: string) =>
+  `${pair.component}: ${pair.capability} (${policy}, ${pair.scope}${pair.part ? `, ${pair.part}` : ''}${pair.role ? `, ${pair.role}` : ''})${layout === null ? '' : ` on ${layout}`}`
+
+/** Every (pair, layout) a baseline lists, keyed, with the policy list it is in. */
+function listedCells(baseline: CapabilityBaseline) {
+  const cells = new Map<string, { pair: BaselineEntry; layout: string | null; policy: string }>()
+  for (const policy of ['required', 'conditional'] as const) {
+    for (const pair of baseline[policy]) {
+      for (const layout of pair.layouts) {
+        cells.set(`${policy}|${pairKey(pair)}|${layout ?? ''}`, { pair, layout, policy })
+      }
+    }
+  }
+  return cells
+}
+
+/** Rows that are incomplete: no reason, reviewer or review date, or no layouts. */
+export function changeRowProblems(changes: readonly BaselineChange[]): ContractProblem[] {
+  const problems: ContractProblem[] = []
+  for (const row of changes) {
+    const where = `${row.component}: ${row.capability} (${row.scope}${row.part ? `, ${row.part}` : ''}${row.role ? `, ${row.role}` : ''})`
+    const problem = (message: string, fix: string) =>
+      problems.push({ component: row.component, capability: row.capability, message, fix })
+    if (!row.reason.trim()) {
+      problem(`${where}: its baseline change (${row.kind}) has no reason.`, 'Say why.')
+    }
+    if (!row.reviewer.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(row.reviewed)) {
+      problem(
+        `${where}: its baseline change (${row.kind}) has no reviewer and review date.`,
+        'Record who reviewed it, and when (capability-baseline-changes.ts).',
+      )
+    }
+    if (row.layouts.length === 0) {
+      problem(
+        `${where}: its baseline change (${row.kind}) names no layouts.`,
+        'Name the layouts it covers.',
+      )
+    }
+    if (row.kind === 'downgrade' && row.closingTask !== undefined) {
+      problem(
+        `${where}: a downgrade names a closing task.`,
+        'A downgrade closes nothing: drop the task.',
+      )
+    }
+  }
+  return problems
+}
+
+/**
+ * What the baseline's reviewed register and the current availability say about the committed baseline
+ * (`head`) alone: an admit row must cover a pair that is pending now and listed, with the task the
+ * baseline gives it; a downgrade row must cover a cell the policy now says is Not applicable. Anything
+ * else is stale and fails, so a row can't outlive the thing it explained.
+ */
+export function staleChangeProblems(
+  head: CapabilityBaseline,
+  availability: ReadonlyMap<string, readonly AvailabilityCell[]>,
+  changes: readonly BaselineChange[],
+): ContractProblem[] {
+  const problems: ContractProblem[] = []
+  const listed = listedCells(head)
+  for (const row of changes) {
+    const where = `${row.component}: ${row.capability} (${row.scope}${row.part ? `, ${row.part}` : ''}${row.role ? `, ${row.role}` : ''})`
+    const stale = (message: string, fix: string) =>
+      problems.push({ component: row.component, capability: row.capability, message, fix })
+    for (const layout of row.layouts) {
+      const on = layout === null ? '' : ` on ${layout}`
+      if (row.kind === 'admit') {
+        const hit = [...listed.values()].find(
+          ({ pair, layout: listedLayout }) =>
+            listedLayout === layout && rowCovers(row, pair, layout),
+        )
+        if (!hit) {
+          stale(
+            `${where}${on}: an admit row covers a gap the baseline doesn't list (it is closed, or never pending).`,
+            'Delete the row from capability-baseline-changes.ts.',
+          )
+        } else if (row.closingTask !== undefined && row.closingTask !== hit.pair.closingTask) {
+          stale(
+            `${where}${on}: the admit row says task ${row.closingTask}, the baseline says task ${hit.pair.closingTask}.`,
+            'Make them agree.',
+          )
+        }
+      } else {
+        const cells = availability.get(row.component) ?? []
+        const matching = cells.filter(
+          (cell) =>
+            cell.capability === row.capability &&
+            cell.layout === layout &&
+            (cell.scope === null || cell.scope === row.scope) &&
+            (cell.part ?? '') === (row.part ?? ''),
+        )
+        // A role the layout doesn't draw is Not applicable though the cell is there.
+        const roleDropped = (cell: AvailabilityCell) =>
+          row.role !== undefined && cell.rolesNotApplicable?.roles.includes(row.role) === true
+        const notApplicable =
+          matching.length > 0 &&
+          matching.every((cell) => cell.status === 'notApplicable' || roleDropped(cell))
+        const declared = cells.some(
+          (cell) =>
+            cell.capability === row.capability &&
+            cell.layout === layout &&
+            cell.scope === row.scope &&
+            (cell.part ?? '') === (row.part ?? '') &&
+            cell.status !== 'notApplicable' &&
+            !roleDropped(cell),
+        )
+        if (!notApplicable || declared) {
+          stale(
+            `${where}${on}: a downgrade row covers a cell the policy doesn't say is Not applicable.`,
+            'Delete the row, or make the policy Not applicable with its reason.',
+          )
+        }
+      }
+    }
+  }
+  return problems
+}
+
+export interface BaselineIntegrityInputs {
+  /** The baseline on the base commit (the merge base, or the base branch). */
+  base: CapabilityBaseline
+  /** The baseline in this checkout. */
+  head: CapabilityBaseline
+  /** The components this site has: entries for others (a section a client removed) are ignored. */
+  components: readonly string[]
+  /** Every component's availability today: what a removed gap is judged against. */
+  availability: ReadonlyMap<string, readonly AvailabilityCell[]>
+  changes: readonly BaselineChange[]
+}
+
+/**
+ * The baseline against its base commit. A pair or layout that was added needs an admit row. One that was
+ * removed must be verified now (evidence closed it), or Not applicable with a downgrade row: a pair that
+ * is still pending, or that was only deleted by hand, fails. The static ratchet already makes the
+ * baseline equal what is pending today, so these two checks together mean the file can only change by
+ * evidence or by a reviewed row.
+ */
+export function baselineIntegrityProblems({
+  base,
+  head,
+  components,
+  availability,
+  changes,
+}: BaselineIntegrityInputs): ContractProblem[] {
+  const problems: ContractProblem[] = []
+  const before = listedCells(base)
+  const after = listedCells(head)
+  for (const [key, { pair, layout, policy }] of after) {
+    if (before.has(key) || !components.includes(pair.component)) continue
+    if (changes.some((row) => row.kind === 'admit' && rowCovers(row, pair, layout))) continue
+    problems.push({
+      component: pair.component,
+      capability: pair.capability,
+      message: `${describePair(pair, layout, policy)} is in the baseline now and wasn't on the base commit, and no admit row covers it.`,
+      fix: 'A gap is never added by hand. Add evidence for it, or, if it genuinely cannot close in this task, add a reviewed admit row (src/lib/design/capability-baseline-changes.ts) with the reason and the task that closes it.',
+    })
+  }
+  for (const [key, { pair, layout, policy }] of before) {
+    if (after.has(key) || !components.includes(pair.component)) continue
+    const cells = (availability.get(pair.component) ?? []).filter(
+      (cell) =>
+        cell.capability === pair.capability &&
+        cell.layout === layout &&
+        cell.scope === pair.scope &&
+        (cell.part ?? '') === (pair.part ?? ''),
+    )
+    // For a role's gap, only that role counts: a sibling that passes verifies nothing.
+    const roleStatus = (cell: AvailabilityCell) =>
+      pair.role === undefined
+        ? cell.status
+        : cell.verifiedRoles?.includes(pair.role)
+          ? 'verified'
+          : cell.pendingRoles?.includes(pair.role)
+            ? 'pending'
+            : 'notApplicable'
+    if (cells.length > 0 && cells.every((cell) => roleStatus(cell) === 'verified')) continue
+    const pending = cells.some((cell) => roleStatus(cell) === 'pending')
+    if (
+      !pending &&
+      changes.some((row) => row.kind === 'downgrade' && rowCovers(row, pair, layout))
+    ) {
+      continue
+    }
+    problems.push({
+      component: pair.component,
+      capability: pair.capability,
+      message: pending
+        ? `${describePair(pair, layout, policy)} was on the base commit's baseline, is gone from it now, and is still pending.`
+        : `${describePair(pair, layout, policy)} was on the base commit's baseline and is gone from it, but it isn't verified: its policy changed to Not applicable (or it was removed) and no downgrade row says why.`,
+      fix: pending
+        ? 'Only evidence closes a gap. Restore the entry, or add the evidence that verifies it.'
+        : 'Add a reviewed downgrade row (src/lib/design/capability-baseline-changes.ts) with the reason the component never needed it, or restore the policy.',
+    })
   }
   return problems
 }

@@ -129,11 +129,12 @@ describe('contractSummary', () => {
       gate,
     )
     expect(summary.coverage).toEqual({
-      declares: ['section', 'slotBlock', 'listing'],
+      declares: ['section', 'slotBlock', 'listing', 'view'],
       declared: ['fixtureCards'],
       notDeclaredYet: ['plainBlock'],
       notCovered: FUTURE_COVERAGE,
     })
     expect(summary.slotBlocks).toEqual([{ type: 'plainBlock', title: 'Plain' }])
+    expect(summary.views).toEqual([])
   })
 })

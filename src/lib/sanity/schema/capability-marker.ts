@@ -3,6 +3,7 @@ import type {
   CapabilityId,
   DesignCapabilityDeclaration,
   SharedBuilder,
+  TextRole,
 } from '@/lib/design/capabilities'
 
 declare module 'sanity' {
@@ -12,6 +13,11 @@ declare module 'sanity' {
      * made the field, or by `markCapability` on a field the exception register lists.
      */
     capability?: CapabilityId
+    /**
+     * The text role a text style field is for. Set by the builder with its stamp: a role typed by hand,
+     * or one that differs from the stamp, makes the field forged.
+     */
+    textRole?: TextRole
     /** On a section, slot block or listing type: what it should offer (task 275). */
     designCapabilities?: DesignCapabilityDeclaration
   }
@@ -36,15 +42,17 @@ export function builtBy<T extends WithOptions>(
   builder: SharedBuilder,
   field: T,
   capability?: CapabilityId,
+  role?: TextRole,
 ): T & { options: Record<string, unknown> } {
   const options = (field.options ?? {}) as Record<string, unknown>
   return {
     ...field,
     options: stampProvenance(
-      { ...options, ...(capability ? { capability } : {}) },
+      { ...options, ...(capability ? { capability } : {}), ...(role ? { textRole: role } : {}) },
       {
         builder,
         ...(capability ? { capability } : {}),
+        ...(role ? { role } : {}),
         ...(field.name ? { name: field.name } : {}),
       },
     ),

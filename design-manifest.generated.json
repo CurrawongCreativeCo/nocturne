@@ -650,9 +650,95 @@
           "clientEditable": false
         },
         {
+          "path": "eyebrowDesign.textColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "eyebrowDesign.textColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "eyebrowDesign.separatorColour",
           "kind": "object",
           "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "eyebrowDesign.separatorColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "eyebrowDesign.separatorColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -1923,6 +2009,26 @@
                 "split": "pending",
                 "editorial": "pending",
                 "full-bleed": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "heading": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "intro": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                }
               }
             }
           ],
@@ -1945,6 +2051,26 @@
                 "split": "pending",
                 "editorial": "pending",
                 "full-bleed": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "heading": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                },
+                "intro": {
+                  "overlay": "pending",
+                  "split": "pending",
+                  "editorial": "pending",
+                  "full-bleed": "pending"
+                }
               }
             }
           ],
@@ -2766,7 +2892,7 @@
               "title": "Cinema (21:9)"
             }
           ],
-          "clientEditable": true
+          "clientEditable": false
         },
         {
           "path": "supporting",
@@ -3199,6 +3325,23 @@
                 "side": "pending",
                 "stacked": "pending",
                 "overlay": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "side": "pending",
+                  "stacked": "pending",
+                  "overlay": "pending"
+                },
+                "heading": {
+                  "side": "pending",
+                  "stacked": "pending",
+                  "overlay": "pending"
+                },
+                "intro": {
+                  "side": "pending",
+                  "stacked": "pending",
+                  "overlay": "pending"
+                }
               }
             }
           ],
@@ -3446,10 +3589,23 @@
             {
               "policy": "required",
               "scope": "section",
-              "part": "block",
+              "part": "block.media",
               "closingTask": 219,
               "fields": [
-                "media",
+                "media"
+              ],
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "section",
+              "part": "block.supporting",
+              "closingTask": 219,
+              "fields": [
                 "supporting"
               ],
               "availability": {
@@ -3693,7 +3849,11 @@
               ],
               "closingTask": 276,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "body": "pending"
+              }
             }
           ],
           "evidence": []
@@ -3710,7 +3870,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -4097,6 +4262,20 @@
               "availability": {
                 "grid": "pending",
                 "marquee": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "marquee": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "marquee": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "marquee": "pending"
+                }
               }
             }
           ],
@@ -4426,6 +4605,45 @@
           "clientEditable": false
         },
         {
+          "path": "avatarDesign.ringColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "avatarDesign.ringColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -4516,6 +4734,20 @@
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
+              },
+              "roleAvailability": {
+                "quote": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "attribution": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "label": {
+                  "grid": "pending",
+                  "slider": "pending"
+                }
               }
             }
           ],
@@ -4536,6 +4768,20 @@
               "availability": {
                 "grid": "pending",
                 "slider": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "slider": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "slider": "pending"
+                }
               }
             }
           ],
@@ -4936,7 +5182,11 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "body": "pending"
+              }
             }
           ],
           "evidence": []
@@ -4953,7 +5203,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -5369,7 +5624,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -5646,7 +5906,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -5966,7 +6231,14 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "price": "pending",
+                "body": "pending",
+                "label": "pending",
+                "description": "pending"
+              }
             },
             {
               "policy": "required",
@@ -5980,7 +6252,14 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "price": "pending",
+                "body": "pending",
+                "label": "pending",
+                "description": "pending"
+              }
             }
           ],
           "evidence": []
@@ -5997,7 +6276,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -6329,7 +6613,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -6691,6 +6980,20 @@
                   "notApplicable": "156 item 6 names the cards layout only"
                 },
                 "cards": "pending"
+              },
+              "roleAvailability": {
+                "number": {
+                  "inline": {
+                    "notApplicable": "156 item 6 names the cards layout only"
+                  },
+                  "cards": "pending"
+                },
+                "label": {
+                  "inline": {
+                    "notApplicable": "156 item 6 names the cards layout only"
+                  },
+                  "cards": "pending"
+                }
               }
             }
           ],
@@ -6711,6 +7014,20 @@
               "availability": {
                 "inline": "pending",
                 "cards": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "inline": "pending",
+                  "cards": "pending"
+                },
+                "heading": {
+                  "inline": "pending",
+                  "cards": "pending"
+                },
+                "intro": {
+                  "inline": "pending",
+                  "cards": "pending"
+                }
               }
             }
           ],
@@ -7312,6 +7629,23 @@
                 "grid": "pending",
                 "masonry": "pending",
                 "slider": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "masonry": "pending",
+                  "slider": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "masonry": "pending",
+                  "slider": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "masonry": "pending",
+                  "slider": "pending"
+                }
               }
             }
           ],
@@ -7685,7 +8019,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "title": "pending",
+                "body": "pending",
+                "meta": "pending"
+              }
             }
           ],
           "evidence": []
@@ -7702,7 +8041,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -8304,6 +8648,45 @@
           "clientEditable": false
         },
         {
+          "path": "portraitDesign.ringColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "portraitDesign.ringColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -8408,6 +8791,23 @@
                 "grid": "pending",
                 "slider": "pending",
                 "list": "pending"
+              },
+              "roleAvailability": {
+                "title": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "meta": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "body": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                }
               }
             }
           ],
@@ -8429,6 +8829,23 @@
                 "grid": "pending",
                 "slider": "pending",
                 "list": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "heading": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                },
+                "intro": {
+                  "grid": "pending",
+                  "slider": "pending",
+                  "list": "pending"
+                }
               }
             }
           ],
@@ -8918,6 +9335,20 @@
               "availability": {
                 "embed": "pending",
                 "ambient": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "embed": "pending",
+                  "ambient": "pending"
+                },
+                "heading": {
+                  "embed": "pending",
+                  "ambient": "pending"
+                },
+                "intro": {
+                  "embed": "pending",
+                  "ambient": "pending"
+                }
               }
             }
           ],
@@ -9268,6 +9699,20 @@
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
+              },
+              "roleAvailability": {
+                "label": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "title": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "body": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                }
               }
             }
           ],
@@ -9288,6 +9733,20 @@
               "availability": {
                 "vertical": "pending",
                 "alternating": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "heading": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                },
+                "intro": {
+                  "vertical": "pending",
+                  "alternating": "pending"
+                }
               }
             }
           ],
@@ -9642,7 +10101,12 @@
               ],
               "closingTask": 156,
               "fields": [],
-              "availability": "pending"
+              "availability": "pending",
+              "roleAvailability": {
+                "eyebrow": "pending",
+                "heading": "pending",
+                "intro": "pending"
+              }
             }
           ],
           "evidence": []
@@ -10397,7 +10861,890 @@
           "path": "links[].design",
           "kind": "object",
           "required": false,
-          "clientEditable": true
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.appearance",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "custom",
+              "title": "Customise this card"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.background",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "capability": "surface",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.background.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.background.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.backgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "surface",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.border",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "surface",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.borderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "surface",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.borderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.borderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "eyebrow",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.label",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "label",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.label.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.label.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.label.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.label.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.label.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.description",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "description",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.description.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.description.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.description.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.description.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.description.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.description.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconShape",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "plain",
+              "title": "No container"
+            },
+            {
+              "value": "circle",
+              "title": "Circle"
+            },
+            {
+              "value": "rounded",
+              "title": "Rounded square"
+            },
+            {
+              "value": "square",
+              "title": "Square"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBackground",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBackground.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBackground.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBackgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBorder",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBorderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBorderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.iconBorderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.arrowStyle",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "chevron",
+              "title": "Chevron"
+            },
+            {
+              "value": "arrow",
+              "title": "Arrow"
+            },
+            {
+              "value": "external",
+              "title": "External link"
+            },
+            {
+              "value": "none",
+              "title": "None"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.arrowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "action",
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.arrowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false,
+          "design": true
+        },
+        {
+          "path": "links[].design.arrowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false,
+          "design": true
         },
         {
           "path": "thumbnailSize",
@@ -10580,6 +11927,46 @@
           "clientEditable": false
         },
         {
+          "path": "profileDesign.borderColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "profileDesign.borderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "profileDesign.nameColour",
           "kind": "object",
           "required": null,
@@ -10587,8 +11974,96 @@
           "clientEditable": false
         },
         {
+          "path": "profileDesign.nameColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "profileDesign.nameColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "profileDesign.bioColour",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "profileDesign.bioColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "profileDesign.bioColour.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -10755,8 +12230,96 @@
           "clientEditable": false
         },
         {
+          "path": "categoryDesign.textColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "categoryDesign.textColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "categoryDesign.separatorColour",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "categoryDesign.separatorColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "categoryDesign.separatorColour.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -10774,6 +12337,50 @@
           "required": null,
           "max": null,
           "capability": "surface",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.background.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.background.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -10837,11 +12444,187 @@
           "clientEditable": false
         },
         {
+          "path": "cardDesign.borderColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.borderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "cardDesign.eyebrow",
           "kind": "object",
           "required": null,
           "max": null,
           "capability": "text",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.eyebrow.size",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.eyebrow.weight",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.eyebrow.colour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
           "clientEditable": false
         },
         {
@@ -10850,6 +12633,100 @@
           "required": null,
           "max": null,
           "capability": "text",
+          "role": "label",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.size",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.weight",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -10858,6 +12735,121 @@
           "required": null,
           "max": null,
           "capability": "text",
+          "role": "description",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.description.size",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.description.weight",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.description.colour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.description.colour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.description.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.description.leading",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
           "clientEditable": false
         },
         {
@@ -10902,6 +12894,50 @@
           "clientEditable": false
         },
         {
+          "path": "linkDesign.arrowColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "linkDesign.arrowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "linkDesign.iconShape",
           "kind": "string",
           "required": null,
@@ -10936,11 +12972,99 @@
           "clientEditable": false
         },
         {
+          "path": "linkDesign.iconColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "linkDesign.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "linkDesign.iconBackground",
           "kind": "object",
           "required": null,
           "max": null,
           "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "linkDesign.iconBackground.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "linkDesign.iconBackground.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -11004,6 +13128,50 @@
           "clientEditable": false
         },
         {
+          "path": "linkDesign.iconBorderColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "linkDesign.iconBorderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "socialDesign",
           "kind": "object",
           "required": null,
@@ -11060,8 +13228,96 @@
           "clientEditable": false
         },
         {
+          "path": "socialDesign.iconColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "socialDesign.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "socialDesign.background",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "socialDesign.background.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "socialDesign.background.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -11119,6 +13375,50 @@
         {
           "path": "socialDesign.borderColour",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "socialDesign.borderColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "socialDesign.borderColour.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -11403,8 +13703,96 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign.afterCategories.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.afterCategories.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "dividerDesign.afterCategories.centreColour",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.afterCategories.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.afterCategories.centreColour.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -11682,8 +14070,96 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign.afterProfile.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.afterProfile.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "dividerDesign.afterProfile.centreColour",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.afterProfile.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.afterProfile.centreColour.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -11961,8 +14437,96 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign.aboveSocial.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.aboveSocial.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "dividerDesign.aboveSocial.centreColour",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.aboveSocial.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.aboveSocial.centreColour.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -12240,8 +14804,96 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign.belowSocial.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.belowSocial.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "dividerDesign.belowSocial.centreColour",
           "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.belowSocial.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.belowSocial.centreColour.hex",
+          "kind": "string",
           "required": null,
           "max": null,
           "clientEditable": false
@@ -12387,6 +15039,46 @@
           "required": null,
           "max": null,
           "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "depthDesign.glowColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "depthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -12629,13 +15321,39 @@
               ],
               "closingTask": 156,
               "fields": [
-                "cardDesign.label"
+                "cardDesign.eyebrow",
+                "cardDesign.label",
+                "cardDesign.description"
               ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
                 "editorial": "verified",
                 "compact": "verified"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                },
+                "label": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": "verified"
+                },
+                "description": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                }
               }
             },
             {
@@ -12648,19 +15366,73 @@
               ],
               "closingTask": 156,
               "fields": [
-                "links[].design.label"
+                "links[].design.eyebrow",
+                "links[].design.label",
+                "links[].design.description"
               ],
               "availability": {
                 "stacked": "verified",
                 "cards": "verified",
                 "editorial": "verified",
                 "compact": "verified"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                },
+                "label": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": "verified"
+                },
+                "description": {
+                  "stacked": "verified",
+                  "cards": "verified",
+                  "editorial": "verified",
+                  "compact": {
+                    "notApplicable": "Compact draws the label role only"
+                  }
+                }
               }
             }
           ],
           "evidence": [
             {
-              "id": "linkList.text.card",
+              "id": "linkList.text.card.eyebrow",
+              "field": "cardDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.card.eyebrow@stacked",
+                "linkList.text.card.eyebrow@cards",
+                "linkList.text.card.eyebrow@editorial"
+              ]
+            },
+            {
+              "id": "linkList.text.item.eyebrow",
+              "field": "links[].design.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.item.eyebrow@stacked",
+                "linkList.text.item.eyebrow@cards",
+                "linkList.text.item.eyebrow@editorial"
+              ]
+            },
+            {
+              "id": "linkList.text.card.label",
               "field": "cardDesign.label",
               "resolvers": [
                 "@/lib/sanity/text-style-options#textLook"
@@ -12668,14 +15440,14 @@
               "render": "src/features/pages/components/sections/link-list",
               "target": "li[data-track-event=\"link_click\"]",
               "cases": [
-                "linkList.text.card@stacked",
-                "linkList.text.card@cards",
-                "linkList.text.card@editorial",
-                "linkList.text.card@compact"
+                "linkList.text.card.label@stacked",
+                "linkList.text.card.label@cards",
+                "linkList.text.card.label@editorial",
+                "linkList.text.card.label@compact"
               ]
             },
             {
-              "id": "linkList.text.item",
+              "id": "linkList.text.item.label",
               "field": "links[].design.label",
               "resolvers": [
                 "@/lib/sanity/text-style-options#textLook"
@@ -12683,10 +15455,38 @@
               "render": "src/features/pages/components/sections/link-list",
               "target": "li[data-track-event=\"link_click\"]",
               "cases": [
-                "linkList.text.item@stacked",
-                "linkList.text.item@cards",
-                "linkList.text.item@editorial",
-                "linkList.text.item@compact"
+                "linkList.text.item.label@stacked",
+                "linkList.text.item.label@cards",
+                "linkList.text.item.label@editorial",
+                "linkList.text.item.label@compact"
+              ]
+            },
+            {
+              "id": "linkList.text.card.description",
+              "field": "cardDesign.description",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.card.description@stacked",
+                "linkList.text.card.description@cards",
+                "linkList.text.card.description@editorial"
+              ]
+            },
+            {
+              "id": "linkList.text.item.description",
+              "field": "links[].design.description",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.text.item.description@stacked",
+                "linkList.text.item.description@cards",
+                "linkList.text.item.description@editorial"
               ]
             }
           ]
@@ -12708,6 +15508,26 @@
                 "cards": "pending",
                 "editorial": "pending",
                 "compact": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "stacked": "pending",
+                  "cards": "pending",
+                  "editorial": "pending",
+                  "compact": "pending"
+                },
+                "heading": {
+                  "stacked": "pending",
+                  "cards": "pending",
+                  "editorial": "pending",
+                  "compact": "pending"
+                },
+                "intro": {
+                  "stacked": "pending",
+                  "cards": "pending",
+                  "editorial": "pending",
+                  "compact": "pending"
+                }
               }
             }
           ],
@@ -12825,6 +15645,7 @@
             {
               "policy": "required",
               "scope": "card",
+              "part": "container",
               "closingTask": 158,
               "fields": [
                 "linkDesign.iconShape"
@@ -12841,6 +15662,7 @@
             {
               "policy": "required",
               "scope": "item",
+              "part": "container",
               "closingTask": 158,
               "fields": [
                 "links[].design.iconShape"
@@ -12851,6 +15673,107 @@
                 "editorial": {
                   "notApplicable": "Draws no icon"
                 },
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "required",
+              "scope": "item",
+              "part": "identity",
+              "closingTask": 158,
+              "fields": [
+                "links[].icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": {
+                  "notApplicable": "Draws no icon"
+                },
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider.afterCategories",
+              "trigger": {
+                "kind": "setting",
+                "when": "The after-categories divider’s centre is an icon",
+                "path": "dividerDesign.afterCategories.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
+                "dividerDesign.afterCategories.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider.afterProfile",
+              "trigger": {
+                "kind": "setting",
+                "when": "The after-profile divider’s centre is an icon",
+                "path": "dividerDesign.afterProfile.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
+                "dividerDesign.afterProfile.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider.aboveSocial",
+              "trigger": {
+                "kind": "setting",
+                "when": "The above-social divider’s centre is an icon",
+                "path": "dividerDesign.aboveSocial.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
+                "dividerDesign.aboveSocial.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
+              }
+            },
+            {
+              "policy": "conditional",
+              "scope": "section",
+              "part": "divider.belowSocial",
+              "trigger": {
+                "kind": "setting",
+                "when": "The below-social divider’s centre is an icon",
+                "path": "dividerDesign.belowSocial.centre",
+                "reachable": true
+              },
+              "closingTask": 158,
+              "fields": [
+                "dividerDesign.belowSocial.icon"
+              ],
+              "availability": {
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
                 "compact": "verified"
               }
             }
@@ -12882,6 +15805,81 @@
                 "linkList.icon.item@stacked",
                 "linkList.icon.item@cards",
                 "linkList.icon.item@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.identity",
+              "field": "links[].icon",
+              "resolvers": [
+                "@/features/pages/components/sections/link-list/link-design#LinkIcon",
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/features/pages/components/sections/link-list",
+              "target": "li[data-track-event=\"link_click\"]",
+              "cases": [
+                "linkList.icon.identity@stacked",
+                "linkList.icon.identity@cards",
+                "linkList.icon.identity@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.afterCategories",
+              "field": "dividerDesign.afterCategories.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.afterCategories@stacked",
+                "linkList.icon.divider.afterCategories@cards",
+                "linkList.icon.divider.afterCategories@editorial",
+                "linkList.icon.divider.afterCategories@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.afterProfile",
+              "field": "dividerDesign.afterProfile.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.afterProfile@stacked",
+                "linkList.icon.divider.afterProfile@cards",
+                "linkList.icon.divider.afterProfile@editorial",
+                "linkList.icon.divider.afterProfile@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.aboveSocial",
+              "field": "dividerDesign.aboveSocial.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.aboveSocial@stacked",
+                "linkList.icon.divider.aboveSocial@cards",
+                "linkList.icon.divider.aboveSocial@editorial",
+                "linkList.icon.divider.aboveSocial@compact"
+              ]
+            },
+            {
+              "id": "linkList.icon.divider.belowSocial",
+              "field": "dividerDesign.belowSocial.icon",
+              "resolvers": [
+                "@/components/ui/badge-icon#BadgeIcon"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider] svg",
+              "cases": [
+                "linkList.icon.divider.belowSocial@stacked",
+                "linkList.icon.divider.belowSocial@cards",
+                "linkList.icon.divider.belowSocial@editorial",
+                "linkList.icon.divider.belowSocial@compact"
               ]
             }
           ]
@@ -13501,6 +16499,23 @@
                 "list": "pending",
                 "agenda": "pending",
                 "featured": "pending"
+              },
+              "roleAvailability": {
+                "title": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "meta": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "body": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                }
               }
             }
           ],
@@ -13522,6 +16537,23 @@
                 "list": "pending",
                 "agenda": "pending",
                 "featured": "pending"
+              },
+              "roleAvailability": {
+                "eyebrow": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "heading": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                },
+                "intro": {
+                  "list": "pending",
+                  "agenda": "pending",
+                  "featured": "pending"
+                }
               }
             }
           ],
@@ -15280,11 +18312,33 @@
                 "policy": "required",
                 "scope": "item",
                 "closingTask": 158,
+                "fields": [
+                  "badges[].icon"
+                ],
+                "availability": "verified"
+              },
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 158,
                 "fields": [],
                 "availability": "pending"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "badgeRow.icon.item",
+                "field": "badges[].icon",
+                "resolvers": [
+                  "@/components/ui/badge-icon#BadgeIcon"
+                ],
+                "render": "src/components/ui/badge-row.tsx",
+                "target": "[data-badge-row] li",
+                "cases": [
+                  "badgeRow.icon.item"
+                ]
+              }
+            ]
           },
           "action": {
             "notApplicable": "No link covers a whole card"
@@ -15563,7 +18617,12 @@
                 ],
                 "closingTask": 156,
                 "fields": [],
-                "availability": "pending"
+                "availability": "pending",
+                "roleAvailability": {
+                  "meta": "pending",
+                  "title": "pending",
+                  "body": "pending"
+                }
               }
             ],
             "evidence": []
@@ -15630,7 +18689,8 @@
                 "trigger": {
                   "kind": "setting",
                   "when": "The post has a main image",
-                  "path": "mainImage"
+                  "path": "post.mainImage",
+                  "reachable": true
                 },
                 "closingTask": 147,
                 "fields": [],
@@ -15674,11 +18734,13 @@
         "contentSources": {}
       }
     ],
+    "views": [],
     "coverage": {
       "declares": [
         "section",
         "slotBlock",
-        "listing"
+        "listing",
+        "view"
       ],
       "declared": [
         "hero",

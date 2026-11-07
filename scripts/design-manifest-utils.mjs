@@ -100,6 +100,11 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
   const named = context.types.get(field.type)
   // The shared design capability the field is, when a shared builder marked it (lib/design).
   const capability = field.options?.capability ?? named?.options?.capability
+  // The text role a text style field was built for (the checks refuse a role its stamp doesn't back).
+  const role = field.options?.textRole ?? named?.options?.textRole
+  // Agency-only and design-ness are inherited: a field inside one is the same (lib/design/schema-capabilities).
+  const agencyOnly = context.agencyOnly === true || context.agencyOnlyField?.(field) === true
+  const design = context.design === true || Boolean(field.options?.designSummary)
   const row = {
     path,
     kind: field.type,
@@ -109,15 +114,26 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
     }),
     ...(listOf(field) ? { list: listOf(field) } : {}),
     ...(capability ? { capability } : {}),
-    clientEditable: context.editable(context.rootType, topField),
+    ...(role ? { role } : {}),
+    clientEditable: context.editable(context.rootType, topField) && !agencyOnly,
+    ...(design ? { design: true } : {}),
   }
   const rows = [row]
   if (depth >= MAX_DEPTH) return rows
 
-  const child = (fields, prefix, attributes, extraStack) =>
+  const child = (fields, prefix, attributes, extraStack, own = {}) =>
     walkFields(
       fields,
-      { ...context, topField, prefix, attributes, stack: [...context.stack, ...extraStack] },
+      {
+        ...context,
+        topField,
+        prefix,
+        attributes,
+        stack: [...context.stack, ...extraStack],
+        agencyOnly,
+        design,
+        ...own,
+      },
       depth + 1,
     )
 
@@ -130,9 +146,13 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
       const node = memberNode(schemaValue, typeName)
       const memberNamed = context.types.get(typeName)
       const memberFields = member.fields ?? memberNamed?.fields
-      if (memberFields && !context.stack.includes(typeName)) {
+      // Only a named type can hold itself; inline objects are all `object`, so they never stop a walk.
+      if (memberFields && !(memberNamed && context.stack.includes(typeName))) {
         const attributes = attributesOf(node, context.namedAttributes)
-        rows.push(...child(memberFields, `${memberPath}.`, attributes, [typeName]))
+        const own = context.agencyOnlyField?.(member) === true ? { agencyOnly: true } : {}
+        rows.push(
+          ...child(memberFields, `${memberPath}.`, attributes, memberNamed ? [typeName] : [], own),
+        )
       } else if (!memberFields) {
         rows.push({
           path: memberPath,
@@ -140,6 +160,7 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
           ...constraints(member, { requiredBySchema: false }),
           ...(listOf(member) ? { list: listOf(member) } : {}),
           clientEditable: row.clientEditable,
+          ...(design ? { design: true } : {}),
         })
       }
     }
@@ -148,9 +169,9 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
 
   const ownFields =
     field.fields ?? (named && named.name !== 'sectionStyle' ? named.fields : undefined)
-  if (ownFields && !context.stack.includes(field.type)) {
+  if (ownFields && !(named && context.stack.includes(field.type))) {
     const attributes = attributesOf(schemaValue, context.namedAttributes)
-    rows.push(...child(ownFields, `${path}.`, attributes, [field.type]))
+    rows.push(...child(ownFields, `${path}.`, attributes, named ? [field.type] : []))
   }
   return rows
 }
@@ -163,6 +184,7 @@ export function describeFields(type, deps, { limits } = {}) {
     attributes: deps.namedAttributes(type.name),
     namedAttributes: deps.namedAttributes,
     editable: deps.isClientEditable,
+    agencyOnlyField: deps.agencyOnlyField,
     prefix: '',
     stack: [type.name],
     limits,
@@ -284,6 +306,8 @@ function describeSlots(deps) {
  * @param deps.schemaJson       schema.json from `sanity schema extract` (which fields are required)
  * @param deps.rulesFor         (type) => registered section rules
  * @param deps.isClientEditable (type, field) => boolean
+ * @param deps.agencyOnlyField  (field definition) => whether the Studio hides it from clients; a row
+ *                              under one is never client-editable (lib/design/schema-capabilities)
  * @param deps.slots           { SLOTS, SLOT_BLOCKS, SLOT_FAMILIES } from the shared slot registry
  * @param deps.limitsFor        (type) => the section's exported LIMITS, if any
  * @param deps.capabilitiesFor  (type) => the section's `capabilities` and `contentSources`, if declared

@@ -212,4 +212,15 @@ export const CAPABILITY_EXCEPTIONS: readonly CapabilityException[] = [
     nature: 'design',
     marked: { partMotion: 'motion' },
   },
+  {
+    component: 'linkList',
+    fields: ['links[].design.appearance'],
+    justification:
+      'The switch in a link’s own Appearance between “Use the Link list design” and “Customise this card”: it decides inheritance, not layout. Task 156 replaces this private implementation with a shared mechanism that keeps the saved values and behaviour.',
+    reviewer: OWNER,
+    reviewed: '2026-11-07',
+    status: 'temporary',
+    removalTask: 156,
+    nature: 'design',
+  },
 ]

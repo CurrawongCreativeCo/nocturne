@@ -46,8 +46,16 @@ export interface ManifestPolicy {
    * marked field belongs to. A field no evidence names is judged by the capability's policies together.
    */
   fields: readonly string[]
-  /** One status, or one per layout for a component with layouts. */
+  /** One status, or one per layout for a component with layouts. Verified only when every role is. */
   availability: LayoutStatus | Readonly<Record<string, LayoutStatus>>
+  /**
+   * For a policy that names text roles: each role's own availability, shaped as `availability` is. A
+   * role a layout doesn't draw is Not applicable there, with the layout's reason; a role is verified only
+   * by an entry that names it. A change proposal judges a role's field by this, never by a sibling's.
+   */
+  roleAvailability?: Partial<
+    Record<TextRole, LayoutStatus | Readonly<Record<string, LayoutStatus>>>
+  >
 }
 
 export interface ManifestEvidence {
@@ -102,6 +110,35 @@ function evidenceFor(
       ...(entry.measured ? { measured: entry.measured } : {}),
     }))
     .filter((entry) => entry.cases.length > 0)
+}
+
+/** Each role's availability over a policy's layouts, as the manifest's policy gives it. */
+function roleAvailabilityOf(
+  group: readonly AvailabilityCell[],
+  component: ContractComponent,
+): NonNullable<ManifestPolicy['roleAvailability']> {
+  const roles = [
+    ...new Set(
+      group.flatMap((cell) => [...(cell.roles ?? []), ...(cell.rolesNotApplicable?.roles ?? [])]),
+    ),
+  ]
+  const statusFor = (cell: AvailabilityCell, role: TextRole): LayoutStatus =>
+    cell.status === 'notApplicable'
+      ? { notApplicable: cell.reason ?? '' }
+      : cell.rolesNotApplicable?.roles.includes(role)
+        ? { notApplicable: cell.rolesNotApplicable.reason }
+        : cell.verifiedRoles?.includes(role)
+          ? 'verified'
+          : 'pending'
+  const [only] = group
+  return Object.fromEntries(
+    roles.map((role) => [
+      role,
+      component.layouts.length === 0 && only
+        ? statusFor(only, role)
+        : Object.fromEntries(group.map((cell) => [cell.layout ?? '', statusFor(cell, role)])),
+    ]),
+  )
 }
 
 /** What one component declares and offers, for its manifest entry. Undefined until it declares. */
@@ -160,6 +197,7 @@ export function componentContract(
           component.layouts.length === 0
             ? statusOf(applicable)
             : Object.fromEntries(group.map((cell) => [cell.layout ?? '', statusOf(cell)])),
+        ...(applicable.roles ? { roleAvailability: roleAvailabilityOf(group, component) } : {}),
       })
     }
     const cases = own.flatMap((cell) => cell.evidence ?? [])
@@ -225,8 +263,9 @@ export function contractSummary(components: readonly ContractComponent[], gate: 
     },
     slotBlocks: outside('slotBlock'),
     listings: outside('listing'),
+    views: outside('view'),
     coverage: {
-      declares: ['section', 'slotBlock', 'listing'],
+      declares: ['section', 'slotBlock', 'listing', 'view'],
       declared: components.filter((component) => component.declaration).map(({ id }) => id),
       notDeclaredYet: components.filter((component) => !component.declaration).map(({ id }) => id),
       // Not sections, slot blocks or listings: nothing here says anything about these.

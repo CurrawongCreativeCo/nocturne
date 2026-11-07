@@ -1,5 +1,6 @@
 import { provenanceOf } from './builder-provenance'
-import type { CapabilityId, SharedBuilder } from './capabilities'
+import type { CapabilityId, SharedBuilder, TextRole } from './capabilities'
+import type { DesignContext } from './capability-design-contexts'
 import type { CapabilityException } from './capability-exceptions'
 
 /**
@@ -28,6 +29,8 @@ export interface Marker {
   capability?: CapabilityId
   /** The shared builder that stamped it: never read from a typed-in option. */
   designBuilder?: SharedBuilder
+  /** The text role the builder stamped the field for: never read from a typed-in option. */
+  role?: TextRole
   /** Why the stamp can't be trusted here (made for another field, or its capability changed). */
   forged?: string
 }
@@ -43,6 +46,7 @@ export function markerOf(field: SchemaField, lookup: TypeLookup): Marker {
   const stamp = ownStamp ?? provenanceOf(named?.options)
   const capability = (field.options?.capability ?? named?.options?.capability) as
     CapabilityId | undefined
+  const textRole = (field.options?.textRole ?? named?.options?.textRole) as TextRole | undefined
   const madeFor = ownStamp ? field.name : named?.name
   const forged = !stamp
     ? undefined
@@ -50,10 +54,14 @@ export function markerOf(field: SchemaField, lookup: TypeLookup): Marker {
       ? `stamped for ${stamp.name}, not ${madeFor ?? field.name}`
       : (stamp.capability ?? undefined) !== capability
         ? `its capability says ${capability ?? 'none'}, but ${stamp.builder} made it as ${stamp.capability ?? 'none'}`
-        : undefined
+        : (stamp.role ?? undefined) !== textRole
+          ? `its text role says ${textRole ?? 'none'}, but ${stamp.builder} made it for ${stamp.role ?? 'none'}`
+          : undefined
   return {
     ...(capability ? { capability } : {}),
     ...(stamp && !forged ? { designBuilder: stamp.builder } : {}),
+    // The role is the stamp's, and only while the stamp is whole.
+    ...(stamp?.role && !forged ? { role: stamp.role } : {}),
     ...(forged ? { forged } : {}),
   }
 }
@@ -80,6 +88,8 @@ export interface WalkedField {
   marker: Marker
   /** The top-level field it sits under. */
   top: SchemaField
+  /** Every field it sits inside, outermost first (an array field, then an object inside its members). */
+  ancestors: readonly SchemaField[]
 }
 
 /**
@@ -96,6 +106,7 @@ export function walkFields(
     prefix: string,
     top: SchemaField | undefined,
     stack: readonly string[],
+    ancestors: readonly SchemaField[],
   ) => {
     if (!fields || stack.length > MAX_DEPTH) return
     // Only named types can recur (a type that holds itself); inline objects are all type `object`.
@@ -104,21 +115,24 @@ export function walkFields(
     for (const field of fields) {
       const path = `${prefix}${field.name}`
       const root = top ?? field
-      if (visit({ path, field, marker: markerOf(field, lookup), top: root }) === false) continue
+      if (visit({ path, field, marker: markerOf(field, lookup), top: root, ancestors }) === false) {
+        continue
+      }
+      const inside = [...ancestors, field]
       if (field.type === 'array') {
         for (const { member, path: memberPath } of membersOf(field, path)) {
           const memberFields = member.fields ?? lookup(member.type)?.fields
           if (memberFields && !recurs(member.type)) {
-            walk(memberFields, `${memberPath}.`, root, enter(member.type))
+            walk(memberFields, `${memberPath}.`, root, enter(member.type), inside)
           }
         }
         continue
       }
       if (recurs(field.type)) continue
-      walk(fieldsOf(field, lookup), `${path}.`, root, enter(field.type))
+      walk(fieldsOf(field, lookup), `${path}.`, root, enter(field.type), inside)
     }
   }
-  walk(type.fields, '', undefined, [type.name])
+  walk(type.fields, '', undefined, [type.name], [])
 }
 
 const inDesignGroup = (field: SchemaField) =>
@@ -161,9 +175,10 @@ export function privateFields(
   type: SchemaField,
   lookup: TypeLookup,
   exceptions: readonly CapabilityException[],
+  contexts: readonly DesignContext[] = [],
 ): PrivateField[] {
   const found: PrivateField[] = []
-  walkFields(type, lookup, ({ path, field, marker, top }) => {
+  walkFields(type, lookup, ({ path, field, marker, top, ancestors }) => {
     const exception = exceptionFor(exceptions, type.name, path)
     if (marker.forged) {
       found.push({
@@ -182,7 +197,8 @@ export function privateFields(
       }
     }
     if (marker.designBuilder) return false
-    if (!inDesignGroup(top)) return true
+    if (!inDesignContext({ component: type.name, path, field, top, ancestors, contexts }))
+      return true
     if (exception) return false
     const hasInside =
       field.type === 'array' ? (field.of ?? []).length > 0 : Boolean(fieldsOf(field, lookup))
@@ -196,6 +212,42 @@ export function privateFields(
     return true
   })
   return found
+}
+
+/**
+ * Whether a field sits where design controls live, judged by where it is and never by what it is
+ * called: the Design group, an object that group holds at any depth, an object whose options say it
+ * is a design summary (a link's own Appearance), or a context the register names
+ * (capability-design-contexts.ts). An ordinary choice, switch or number elsewhere is not a design
+ * control by being one: those stay with review, and a known one is recorded in the exception register.
+ */
+function inDesignContext({
+  component,
+  path,
+  field,
+  top,
+  ancestors,
+  contexts,
+}: {
+  component: string
+  path: string
+  field: SchemaField
+  top: SchemaField
+  ancestors: readonly SchemaField[]
+  contexts: readonly DesignContext[]
+}): boolean {
+  return (
+    inDesignGroup(top) ||
+    inDesignGroup(field) ||
+    ancestors.some(
+      (ancestor) => inDesignGroup(ancestor) || Boolean(ancestor.options?.designSummary),
+    ) ||
+    contexts.some(
+      (context) =>
+        context.component === component &&
+        (path.startsWith(`${context.path}.`) || path.startsWith(`${context.path}[`)),
+    )
+  )
 }
 
 function arrayMembersBuilt(field: SchemaField, lookup: TypeLookup): boolean {
@@ -409,6 +461,52 @@ export function fieldOffered({
     }
   }
   return { offered: true }
+}
+
+/** A client's view of the Studio: an Editor, who sees none of the agency-only fields. */
+const CLIENT = {
+  id: 'capability-check-client',
+  roles: [{ name: 'editor', title: 'Editor' }],
+}
+
+/** What a rule may depend on: the field's own value, and its parent's. A rule hidden in all of them depends on neither. */
+const PROBE_STATES: readonly { value: unknown; parent: Record<string, unknown> }[] = [
+  { value: undefined, parent: {} },
+  { value: [{ _key: 'probe' }], parent: { variant: 'probe' } },
+  { value: { _key: 'probe' }, parent: { appearance: 'custom' } },
+  { value: 'probe', parent: { variant: 'probe', appearance: 'custom' } },
+]
+
+/** Calls a field's `hidden` rule as `user` in each probe state; a rule that can't be evaluated is undefined. */
+function hiddenIn(field: SchemaField, user: typeof AGENCY | typeof CLIENT): boolean[] | undefined {
+  if (typeof field.hidden !== 'function') return PROBE_STATES.map(() => field.hidden === true)
+  try {
+    return PROBE_STATES.map(({ value, parent }) =>
+      Boolean(
+        (field.hidden as (context: unknown) => unknown)({
+          document: {},
+          parent,
+          value,
+          currentUser: user,
+          path: [field.name],
+        }),
+      ),
+    )
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Whether the Studio keeps a field to the agency: its own `hidden` rule hides it from a client in
+ * every state it was asked about (a field that is hidden only while empty, as a slot is, is not), and
+ * shows it to the agency in at least one. A rule that can't be evaluated is not agency-only. The change
+ * proposal manifest marks every row under an agency-only field as agency-only too.
+ */
+export function agencyOnlyField(field: SchemaField): boolean {
+  const client = hiddenIn(field, CLIENT)
+  const agency = hiddenIn(field, AGENCY)
+  return Boolean(client?.every(Boolean) && agency?.some((hidden) => !hidden))
 }
 
 /** What the availability checks ask of the schema (capability-availability.ts). */

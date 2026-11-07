@@ -1,10 +1,11 @@
+import { post } from '@/features/blog/schemas/post'
 import { postCardCapabilities } from '@/features/blog/schemas/post-card-capabilities'
 import { sectionTypes } from '@/features/pages/schemas/sections'
 import { slotImage } from '@/features/pages/schemas/slot-image'
 import { slotVideo } from '@/features/pages/schemas/slot-video'
-import { SLOT_BLOCKS } from '@/features/pages/slots/registry'
+import { SLOT_BLOCKS, SLOT_FAMILIES } from '@/features/pages/slots/registry'
 import type { DesignCapabilityDeclaration } from '@/lib/design/capabilities'
-import type { ContractComponent } from '@/lib/design/capability-policy'
+import type { ContractComponent, SlotHost } from '@/lib/design/capability-policy'
 import { schemaGate, type SchemaField } from '@/lib/design/schema-capabilities'
 import * as badgeRow from '@/lib/sanity/schema/badge-row'
 import * as blockContent from '@/lib/sanity/schema/block-content'
@@ -30,6 +31,8 @@ const named = [
   sectionStyle,
   slotImage,
   slotVideo,
+  // The document a listing's cards show: the blog's cards are drawn from a post.
+  post,
   ...[
     badgeRow,
     blockContent,
@@ -64,6 +67,23 @@ const layoutsOf = (type: SchemaField): string[] => {
   return (list ?? []).map((entry) => (typeof entry === 'string' ? entry : (entry.value ?? '')))
 }
 
+/**
+ * Every host a slot block is allowed in, from the registry: each slot (`<family>.<field>`) that lists the
+ * block, on the section the family maps to, in all of that section's layouts. The block's evidence
+ * must hold in every one of them.
+ */
+function hostsOf(allowedIn: readonly string[]): SlotHost[] {
+  return allowedIn.flatMap((slot) => {
+    const [family = '', field = ''] = slot.split('.')
+    const section = sections.find(
+      (type) =>
+        type.name === ((SLOT_FAMILIES as Record<string, string>)[family] ?? family) &&
+        type.fields?.some((candidate) => candidate.name === field),
+    )
+    return section ? [{ section: section.name, slot: field, layouts: layoutsOf(section) }] : []
+  })
+}
+
 const declarationOf = (type: SchemaField) =>
   type.options?.designCapabilities as DesignCapabilityDeclaration | undefined
 
@@ -87,6 +107,7 @@ export const DESIGN_COMPONENTS: readonly ContractComponent[] = [
       kind: 'slotBlock',
       title: type.title ?? type.name,
       layouts: [],
+      hosts: hostsOf(block.allowedIn),
       declaration: declarationOf(type),
     }
   }),
@@ -99,12 +120,26 @@ export const DESIGN_COMPONENTS: readonly ContractComponent[] = [
   },
 ]
 
-/** The schema each component is edited through (a listing has none). */
-export const COMPONENT_SCHEMAS: ReadonlyMap<string, SchemaField> = new Map(
-  DESIGN_COMPONENTS.flatMap((component) => {
+/**
+ * The schema of a listing or a view: made from the real document types it draws, so evidence reads the
+ * same fields the Studio shows. Blog post cards draw a post. Task 156 adds Blog settings (`settings`) as
+ * a second field, once that document exists; nothing here invents one.
+ */
+const VIEW_SCHEMAS: readonly SchemaField[] = [
+  {
+    name: 'blogPostCards',
+    type: 'object',
+    fields: [{ name: 'post', type: 'post', group: 'content' }],
+  },
+]
+
+/** The schema each component is edited through: a section's or block's own type, or a view's. */
+export const COMPONENT_SCHEMAS: ReadonlyMap<string, SchemaField> = new Map([
+  ...DESIGN_COMPONENTS.flatMap((component) => {
     const type = SCHEMA_TYPES.get(component.id)
     return type ? [[component.id, type] as const] : []
   }),
-)
+  ...VIEW_SCHEMAS.map((type) => [type.name, type] as const),
+])
 
 export const gate = schemaGate(COMPONENT_SCHEMAS, lookupType)

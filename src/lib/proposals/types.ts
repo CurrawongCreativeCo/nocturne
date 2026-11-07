@@ -58,6 +58,7 @@ export type RejectionCode =
   | 'capability-not-verified'
   | 'content-source-not-verified'
   | 'agency-permission-required'
+  | 'proposal-unstable'
 
 export interface Rejection {
   code: RejectionCode
@@ -129,9 +130,13 @@ export interface ManifestField {
   list?: { value: string | number; title: string }[]
   /** The shared design capability this field is, when a shared design builder made it. */
   capability?: string
+  /** The text role this field styles, when a text style builder made it. */
+  role?: string
   /** The content source this field feeds, when a source's evidence names it. */
   contentSource?: string
   clientEditable: boolean
+  /** The field is, or sits inside, a design object (options.designSummary): a change to it is design. */
+  design?: boolean
 }
 
 /** What a policy or source offers in one layout: `verified`, `pending` or `{ notApplicable: reason }`. */
@@ -148,6 +153,8 @@ export interface ManifestCapabilityPolicy {
   fields: string[]
   /** One status, or one per layout. `verified` is the only one that lets a proposal set the value. */
   availability: ManifestStatus | Record<string, ManifestStatus>
+  /** For a policy that names text roles: each role's own availability, shaped as `availability` is. */
+  roleAvailability?: Partial<Record<string, ManifestStatus | Record<string, ManifestStatus>>>
 }
 
 export type ManifestCapability =
@@ -178,9 +185,17 @@ export interface ManifestSlot {
   blocks: { type: string; clientEditable: boolean }[]
 }
 
+/** A slot block's own contract: what it offers wherever a slot hosts it (the manifest's `designCapabilities`). */
+export interface ManifestSlotBlock {
+  type: string
+  capabilities?: Partial<Record<string, ManifestCapability>>
+}
+
 /** The slice of the generated manifest the validator reads. */
 export interface DesignManifest {
   manifestVersion: string
+  /** The contract beyond the sections: the slot blocks, judged apart from the section that hosts them. */
+  designCapabilities?: { slotBlocks?: ManifestSlotBlock[] }
   slots: ManifestSlot[]
   sections: ManifestSection[]
   sectionStyle: { fields: ManifestField[] }

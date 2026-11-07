@@ -1,11 +1,17 @@
 import { FUTURE_COVERAGE, type FutureCoverage } from './capabilities'
 import {
+  capabilityAvailability,
+  changeRowProblems,
   currentBaseline,
   evidenceProblems,
+  expandLegacyBaseline,
   ratchetProblems,
   sourceTestProblems,
+  staleChangeProblems,
   type CapabilityBaseline,
 } from './capability-availability'
+import type { BaselineChange } from './capability-baseline-changes'
+import type { DesignContext } from './capability-design-contexts'
 import type { Evidence } from './capability-evidence'
 import type { CapabilityException } from './capability-exceptions'
 import {
@@ -16,6 +22,7 @@ import {
 import {
   exceptionProblems,
   privateFields,
+  resolveFieldPath,
   type PrivateField,
   type SchemaField,
   type SchemaGate,
@@ -59,8 +66,12 @@ export interface ContractInputs {
   schemas: ReadonlyMap<string, SchemaField>
   lookup: TypeLookup
   exceptions: readonly CapabilityException[]
+  /** Registered design-control contexts (capability-design-contexts.ts). */
+  contexts?: readonly DesignContext[]
   /** The committed capability-baseline.json. */
   baseline: CapabilityBaseline
+  /** The reviewed baseline changes (capability-baseline-changes.ts). */
+  changes: readonly BaselineChange[]
   /** The text of a file by its path from the repository root, for the content sources' test files. */
   readSource: (path: string) => string | undefined
 }
@@ -81,7 +92,18 @@ export function futureCoverageProblems(parts: readonly FutureCoverage[]): Contra
 }
 
 export function contractProblems(inputs: ContractInputs): ContractProblem[] {
-  const { components, evidence, gate, schemas, lookup, exceptions, baseline, readSource } = inputs
+  const {
+    components,
+    evidence,
+    gate,
+    schemas,
+    lookup,
+    exceptions,
+    contexts = [],
+    baseline,
+    changes,
+    readSource,
+  } = inputs
   const problems: ContractProblem[] = []
 
   for (const component of components) problems.push(...declarationProblems(component))
@@ -90,7 +112,7 @@ export function contractProblems(inputs: ContractInputs): ContractProblem[] {
   problems.push(...futureCoverageProblems(FUTURE_COVERAGE))
 
   for (const [name, type] of schemas) {
-    for (const found of privateFields(type, lookup, exceptions)) {
+    for (const found of privateFields(type, lookup, exceptions, contexts)) {
       problems.push({
         component: name,
         ...(found.capability ? { capability: found.capability } : {}),
@@ -102,6 +124,29 @@ export function contractProblems(inputs: ContractInputs): ContractProblem[] {
   for (const problem of exceptionProblems(exceptions, schemas, lookup)) {
     problems.push({ component: problem.component, message: problem.message, fix: problem.fix })
   }
+  for (const context of contexts) {
+    const where = `${context.component}: ${context.path}`
+    const type = schemas.get(context.component)
+    const found = type ? resolveFieldPath(type, context.path, lookup) : undefined
+    if (!type || (found && 'missing' in found)) {
+      problems.push({
+        component: context.component,
+        message: `${where} is registered as a design-control context, but doesn't exist.`,
+        fix: 'Remove the row from capability-design-contexts.ts.',
+      })
+    }
+    if (
+      !context.why.trim() ||
+      !context.reviewer.trim() ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(context.reviewed)
+    ) {
+      problems.push({
+        component: context.component,
+        message: `${where} is a registered design-control context with no reason, reviewer or review date.`,
+        fix: 'Record why it holds design controls, who reviewed it, and when.',
+      })
+    }
+  }
 
   // The baseline is only judged once every component declares: a gap in a component that doesn't is
   // already reported above, with a better fix.
@@ -109,8 +154,22 @@ export function contractProblems(inputs: ContractInputs): ContractProblem[] {
     problems.push(
       ...ratchetProblems(
         currentBaseline(components, evidence, gate),
-        baseline,
+        expandLegacyBaseline(baseline, components),
         components.map(({ id }) => id),
+      ),
+    )
+    // The reviewed register: complete rows, and none that outlived what it explained.
+    problems.push(...changeRowProblems(changes))
+    problems.push(
+      ...staleChangeProblems(
+        expandLegacyBaseline(baseline, components),
+        new Map(
+          components.map((component) => [
+            component.id,
+            capabilityAvailability(component, evidence, gate),
+          ]),
+        ),
+        changes,
       ),
     )
   }
