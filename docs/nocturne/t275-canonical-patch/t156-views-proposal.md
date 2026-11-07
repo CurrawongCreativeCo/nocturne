@@ -1,12 +1,14 @@
 # Task 156: the three views, proposed declarations (revision 2, for the owner's review)
 
-Status: **proposed, not applied.** Nothing here is in the code. Revision 2 applies the owner's 7 November
-decisions on revision 1: D1 surface Required, with a dedicated closing task and no new settings document in 156;
-D2 text roles reassessed; D3 depth closes in 146; D4 framing closes in 177. It also covers the exception
-owner and the Features grid move.
+Status: **approved by the owner on 7 November 2026 (D5 to D7) and applied in code.** The three views are
+declared, their gaps are admitted in `BASELINE_CHANGES`, and the contract holds with 30 components declared,
+84 required and 40 conditional pairs (65 required before). This file is the record of the reasoning. The
+two differences from revision 2 are below. The plan amendments are drafted in `t156-plan-amendments.md`
+and not applied. Tasks 280 and 281 are proposed and not yet in the canonical plan, so their numbers are
+provisional.
 
 The full state below was dry-run against the real contract on 7 November 2026 at commit c40df08, then
-removed. The contract holds with 30 components declared, 85 required and 40 conditional pairs in the baseline
+removed. The contract holds with 30 components declared, 84 required and 40 conditional pairs in the baseline
 (65 required today). The only tests that change are the contract snapshot and capability-docs.test.ts's "keeps
 the three views that are not covered yet visible", which is removed.
 
@@ -73,28 +75,30 @@ the body's link style. The registration button is Buttons (CtaLink), tasks 148 a
 
 ### Search results (`searchResults`, search/components/search-view.tsx)
 
-| Capability   | Policy | Scope   | Roles                          | Closing | Reason or anatomy                                                                                  |
-| ------------ | ------ | ------- | ------------------------------ | ------- | -------------------------------------------------------------------------------------------------- |
-| surface      | NA     |         |                                |         | Results are rows, with no card                                                                     |
-| text         | R      | section | title, meta, description, body | 280     | title: each result's h2 link. meta: its path. description: its snippet. body: the status line (D7) |
-| header       | NA     |         |                                |         | The page's h1 is drawn by the route (app/(site)/search/page.tsx), outside this view                |
-| mark         | NA     |         |                                |         | Results are rows, with no card to carry one                                                        |
-| depth        | NA     |         |                                |         | No surface for a shadow to sit on (146)                                                            |
-| icon         | NA     |         |                                |         | Draws no icon from the set                                                                         |
-| action       | NA     |         |                                |         | No link covers a whole card                                                                        |
-| framing      | NA     |         |                                |         | Has no framed picture                                                                              |
-| pictureDepth | NA     |         |                                |         | Has no framed picture                                                                              |
-| overlay      | NA     |         |                                |         | Draws no picture                                                                                   |
-| glass        | NA     |         |                                |         | No card surface (156 item 10)                                                                      |
-| divider      | NA     |         |                                |         | Results are spaced rows, with no rule or divider position                                          |
-| edge         | NA     |         |                                |         | Not a section, so it has no edge                                                                   |
-| motion       | NA     |         |                                |         | Has no section frame to animate                                                                    |
-| slots        | NA     |         |                                |         | Not a slot family (DE-2)                                                                           |
+| Capability   | Policy | Scope   | Roles             | Closing | Reason or anatomy                                                                                                                            |
+| ------------ | ------ | ------- | ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| surface      | NA     |         |                   |         | Results are rows, with no card                                                                                                               |
+| text         | R      | section | title, meta, body | 280     | title: each result's h2 link. meta: its path and the count or status line. body: its snippet (D7: status is meta, explanatory prose is body) |
+| header       | NA     |         |                   |         | The page's h1 is drawn by the route (app/(site)/search/page.tsx), outside this view                                                          |
+| mark         | NA     |         |                   |         | Results are rows, with no card to carry one                                                                                                  |
+| depth        | NA     |         |                   |         | No surface for a shadow to sit on (146)                                                                                                      |
+| icon         | NA     |         |                   |         | Draws no icon from the set                                                                                                                   |
+| action       | NA     |         |                   |         | No link covers a whole card                                                                                                                  |
+| framing      | NA     |         |                   |         | Has no framed picture                                                                                                                        |
+| pictureDepth | NA     |         |                   |         | Has no framed picture                                                                                                                        |
+| overlay      | NA     |         |                   |         | Draws no picture                                                                                                                             |
+| glass        | NA     |         |                   |         | No card surface (156 item 10)                                                                                                                |
+| divider      | NA     |         |                   |         | Results are spaced rows, with no rule or divider position                                                                                    |
+| edge         | NA     |         |                   |         | Not a section, so it has no edge                                                                                                             |
+| motion       | NA     |         |                   |         | Has no section frame to animate                                                                                                              |
+| slots        | NA     |         |                   |         | Not a slot family (DE-2)                                                                                                                     |
 
 Not a text role: the search form. Its input and its hand-styled `bg-cta` button are form controls; see plan
 amendment A8.
 
-## Baseline admission rows (20)
+## Baseline admission rows (19, as applied)
+
+D7 maps the search status line to `meta` and its snippet to `body`, so search results need three text rows, not four: 19 rows in all, and 16 close in task 280. The exact rows are in `src/lib/design/capability-baseline-changes.ts`.
 
 One row per pair. `reviewer` and `reviewed` are yours to fill in. With D5 or D6 declined, drop that row and
 use the Not applicable reason instead.
@@ -123,7 +127,7 @@ const VIEW_ADMITTED = { reviewer: '<owner>', reviewed: '<date>', layouts: [null]
   reason: 'The rules between the page’s groups are plain borders, with no decorative divider yet (D6).' },
 
 // Search results
-...(['title', 'meta', 'description', 'body'] as const).map((role) => (
+...(['title', 'meta', 'body'] as const).map((role) => (
 { kind: 'admit', component: 'searchResults', capability: 'text', scope: 'section', role, closingTask: 280, ...VIEW_ADMITTED,
   reason: 'The results’ text is styled in the component. Task 280 gives the view text roles.' })),
 ```
