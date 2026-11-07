@@ -197,7 +197,8 @@ export function privateFields(
       }
     }
     if (marker.designBuilder) return false
-    if (!inDesignContext({ component: type.name, path, top, ancestors, contexts })) return true
+    if (!inDesignContext({ component: type.name, path, field, top, ancestors, contexts }))
+      return true
     if (exception) return false
     const hasInside =
       field.type === 'array' ? (field.of ?? []).length > 0 : Boolean(fieldsOf(field, lookup))
@@ -223,18 +224,21 @@ export function privateFields(
 function inDesignContext({
   component,
   path,
+  field,
   top,
   ancestors,
   contexts,
 }: {
   component: string
   path: string
+  field: SchemaField
   top: SchemaField
   ancestors: readonly SchemaField[]
   contexts: readonly DesignContext[]
 }): boolean {
   return (
     inDesignGroup(top) ||
+    inDesignGroup(field) ||
     ancestors.some(
       (ancestor) => inDesignGroup(ancestor) || Boolean(ancestor.options?.designSummary),
     ) ||

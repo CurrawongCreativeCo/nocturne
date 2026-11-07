@@ -537,7 +537,12 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
   if (unit.operation === 'set') {
     // The value's own markers (checkValue) and those of the objects it sits inside: all must pass.
     check.marked.push(...markedAncestors(scope, relative))
-    checkValue(check, path, unit.value)
+    // Replacing one member of a slot is judged as inserting it is: only the blocks the slot allows.
+    const last = relative[relative.length - 1]
+    const arrayPath = last?.kind === 'field' ? null : manifestPath(scope, relative.slice(0, -1))
+    const slotTypes = arrayPath === null ? undefined : slotBlocks(scope, arrayPath)
+    if (arrayPath !== null && slotTypes) checkMembers(check, arrayPath, [unit.value], slotTypes)
+    else checkValue(check, path, unit.value)
   } else if (unit.operation === 'unset') {
     const row = scope.rows.get(path)
     if (row) check.touched.push(row)

@@ -198,6 +198,21 @@ describe('privateFields: where design controls live (I6)', () => {
     expect(paths([nested])).toEqual(['looks.inner.sheen'])
   })
 
+  it('flags a Design-group field nested under a content field, and not a content one', () => {
+    const post: SchemaField = {
+      name: 'post',
+      type: 'object',
+      group: 'content',
+      fields: [
+        { name: 'cardTint', type: 'string', group: 'design', options: { list: ['a', 'b'] } },
+        { name: 'title', type: 'string', group: 'content' },
+        { name: 'featured', type: 'boolean', group: 'content' },
+        { name: 'byline', type: 'string' },
+      ],
+    }
+    expect(paths([post])).toEqual(['post.cardTint'])
+  })
+
   it('flags a control in a registered context, and only there', () => {
     const settings: SchemaField = {
       name: 'settings',
