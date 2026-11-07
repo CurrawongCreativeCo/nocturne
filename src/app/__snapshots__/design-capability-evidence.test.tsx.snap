@@ -9,6 +9,32 @@ exports[`design capability evidence > badgeRow.icon.item: the probe changes the 
 ]
 `;
 
+exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `
+[
+  "<article class="group relative flex h-full flex-col">",
+]
+`;
+
+exports[`design capability evidence > blogPostCards.text.card.body: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 text-ink-muted" data-text-role="body">",
+]
+`;
+
+exports[`design capability evidence > blogPostCards.text.card.meta: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-small text-ink-muted" data-text-role="meta">",
+]
+`;
+
+exports[`design capability evidence > blogPostCards.text.card.title: the probe changes the registered target 1`] = `
+[
+  "<h2 class="mt-2 text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
 exports[`design capability evidence > ctaBanner.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",

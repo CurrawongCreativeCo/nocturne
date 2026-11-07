@@ -1,3 +1,4 @@
+import { blogSettings } from '@/features/blog/schemas/blog-settings'
 import { post } from '@/features/blog/schemas/post'
 import { postCardCapabilities } from '@/features/blog/schemas/post-card-capabilities'
 import { sectionTypes } from '@/features/pages/schemas/sections'
@@ -34,6 +35,7 @@ const named = [
   slotVideo,
   // The document a listing's cards show: the blog's cards are drawn from a post.
   post,
+  blogSettings,
   ...[
     badgeRow,
     blockContent,
@@ -124,14 +126,16 @@ export const DESIGN_COMPONENTS: readonly ContractComponent[] = [
 
 /**
  * The schema of a listing or a view: made from the real document types it draws, so evidence reads the
- * same fields the Studio shows. Blog post cards draw a post. Task 156 adds Blog settings (`settings`) as
- * a second field, once that document exists; nothing here invents one.
+ * same fields the Studio shows. Blog post cards draw a post, in the design Blog settings holds.
  */
 const VIEW_SCHEMAS: readonly SchemaField[] = [
   {
     name: 'blogPostCards',
     type: 'object',
-    fields: [{ name: 'post', type: 'post', group: 'content' }],
+    fields: [
+      { name: 'post', type: 'post', group: 'content' },
+      { name: 'settings', type: 'blogSettings', group: 'design' },
+    ],
   },
 ]
 

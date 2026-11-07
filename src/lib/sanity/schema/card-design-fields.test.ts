@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { textRoleParts } from '@/lib/sanity/schema/surface-design'
 
-import { cardDesignField, itemDesignField } from './card-design-fields'
+import { cardDesignField, itemDesignField } from '@/lib/sanity/schema/card-design-fields'
 
 interface Field {
   name: string

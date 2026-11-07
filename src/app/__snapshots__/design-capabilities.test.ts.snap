@@ -13,9 +13,9 @@ exports[`the design capability contract > badgeRow: reports what it offers today
 exports[`the design capability contract > blogPostCards: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card: pending (156)",
-    "text required card: pending (156)",
-    "mark required card: pending (156)",
+    "surface required card: verified",
+    "text required card: verified",
+    "mark required card: verified",
     "depth required card: pending (146)",
     "action required card: pending (137)",
     "framing required card: pending (177)",

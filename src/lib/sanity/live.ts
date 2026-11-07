@@ -99,6 +99,7 @@ export const TAGS = {
   panel: 'panel',
   service: 'service',
   place: 'place',
+  blogSettings: 'blogSettings',
   // new-document:tag
 } as const
 

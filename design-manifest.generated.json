@@ -27060,11 +27060,26 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 156,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.cardDesign.border"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "blogPostCards.surface.card",
+                "field": "settings.cardDesign.border",
+                "resolvers": [
+                  "@/lib/sanity/surface-options#ringSurfaceLook"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "article",
+                "cases": [
+                  "blogPostCards.surface.card"
+                ]
+              }
+            ]
           },
           "text": {
             "policies": [
@@ -27077,16 +27092,57 @@
                   "body"
                 ],
                 "closingTask": 156,
-                "fields": [],
-                "availability": "pending",
+                "fields": [
+                  "settings.cardDesign.meta",
+                  "settings.cardDesign.title",
+                  "settings.cardDesign.body"
+                ],
+                "availability": "verified",
                 "roleAvailability": {
-                  "meta": "pending",
-                  "title": "pending",
-                  "body": "pending"
+                  "meta": "verified",
+                  "title": "verified",
+                  "body": "verified"
                 }
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "blogPostCards.text.card.meta",
+                "field": "settings.cardDesign.meta",
+                "resolvers": [
+                  "@/lib/sanity/text-style-options#textLook"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "[data-text-role=\"meta\"]",
+                "cases": [
+                  "blogPostCards.text.card.meta"
+                ]
+              },
+              {
+                "id": "blogPostCards.text.card.title",
+                "field": "settings.cardDesign.title",
+                "resolvers": [
+                  "@/lib/sanity/text-style-options#textLook"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "[data-text-role=\"title\"]",
+                "cases": [
+                  "blogPostCards.text.card.title"
+                ]
+              },
+              {
+                "id": "blogPostCards.text.card.body",
+                "field": "settings.cardDesign.body",
+                "resolvers": [
+                  "@/lib/sanity/text-style-options#textLook"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "[data-text-role=\"body\"]",
+                "cases": [
+                  "blogPostCards.text.card.body"
+                ]
+              }
+            ]
           },
           "header": {
             "notApplicable": "The page’s own h1 heads the list"
@@ -27097,11 +27153,26 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 156,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.cardDesign.mark"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "blogPostCards.mark.card",
+                "field": "settings.cardDesign.mark",
+                "resolvers": [
+                  "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+                ],
+                "render": "src/components/ui/decorative-mark.tsx",
+                "target": "[data-decorative-mark=\"card\"]",
+                "cases": [
+                  "blogPostCards.mark.card"
+                ]
+              }
+            ]
           },
           "depth": {
             "policies": [

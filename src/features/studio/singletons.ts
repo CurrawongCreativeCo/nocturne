@@ -11,6 +11,7 @@ export const SINGLETON_TYPES = new Set([
   'cookieBanner',
   'designSettings',
   'businessInfo',
+  'blogSettings',
   // new-singleton:register
 ])
 

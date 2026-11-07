@@ -35,12 +35,30 @@
       "probe": "members",
       "why": "A reusable section marked members-only."
     },
-    "post": { "class": "published", "why": "Shown on the website." },
-    "author": { "class": "published", "why": "Shown on the website." },
-    "category": { "class": "published", "why": "Shown on the website." },
-    "event": { "class": "published", "why": "Shown on the website." },
-    "eventCategory": { "class": "published", "why": "Shown on the website." },
-    "service": { "class": "published", "why": "Shown on the website." },
+    "post": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "author": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "category": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "event": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "eventCategory": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "service": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
     "place": {
       "class": "published",
       "why": "Shown on the website, including a branch's address, phone and opening hours."
@@ -53,18 +71,42 @@
       "class": "published",
       "why": "Shown on the website: trading details, public email, phone and address."
     },
-    "siteIdentity": { "class": "published", "why": "Shown on the website." },
-    "siteNavigation": { "class": "published", "why": "Shown on the website." },
-    "announcement": { "class": "published", "why": "Shown on the website." },
-    "cookieBanner": { "class": "published", "why": "Shown on the website." },
-    "designSettings": { "class": "published", "why": "Shapes the website's look." },
-    "panel": { "class": "published", "why": "Shown on the website." },
-    "frame": { "class": "published", "why": "Shown on the website." },
+    "siteIdentity": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "siteNavigation": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "announcement": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "cookieBanner": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "designSettings": {
+      "class": "published",
+      "why": "Shapes the website's look."
+    },
+    "panel": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
+    "frame": {
+      "class": "published",
+      "why": "Shown on the website."
+    },
     "redirect": {
       "class": "published",
       "why": "Every redirect is visible to anyone who follows it."
     },
-    "stripePrice": { "class": "published", "why": "Prices are shown on the website." },
+    "stripePrice": {
+      "class": "published",
+      "why": "Prices are shown on the website."
+    },
     "experiment": {
       "class": "internal",
       "why": "Test configuration; no personal data. Visible if the dataset is public."
@@ -80,6 +122,10 @@
     "sanity.imageAsset": {
       "class": "system",
       "why": "Uploaded images and their original filenames. Image URLs are public on Sanity's CDN whatever the dataset's setting."
+    },
+    "blogSettings": {
+      "class": "published",
+      "why": "Added by a generator and assumed to be shown on the website. REVIEW: if it can hold personal or secret data, add a probe in scripts/dataset-exposure.json and mark it probed."
     }
   },
   "publicFields": {

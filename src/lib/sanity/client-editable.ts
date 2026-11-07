@@ -38,6 +38,7 @@ export const AGENCY_ONLY_TYPES: ReadonlySet<string> = new Set([
   'imageDesign',
   'decorativeDivider',
   'decorativeMark',
+  'blogSettings',
   // new-type:agency-only
 ])
 

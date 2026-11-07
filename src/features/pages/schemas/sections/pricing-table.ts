@@ -14,7 +14,7 @@ import {
   eyebrowField,
   headerDesignField,
   itemDesignField,
-} from '../card-design-fields'
+} from '@/lib/sanity/schema/card-design-fields'
 import { pricingTableCapabilities } from './pricing-table-capabilities'
 
 interface PlanValue {

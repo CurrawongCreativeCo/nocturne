@@ -1,6 +1,10 @@
 import type { StegaBranded } from 'next-sanity'
 
-import type { POST_QUERY_RESULT, POSTS_QUERY_RESULT } from '@/types/sanity.types'
+import type {
+  BLOG_SETTINGS_QUERY_RESULT,
+  POST_QUERY_RESULT,
+  POSTS_QUERY_RESULT,
+} from '@/types/sanity.types'
 
 /**
  * Frontend-facing types derived from TypeGen output. Never hand-write a shape
@@ -12,3 +16,6 @@ export type PostListData = StegaBranded<POSTS_QUERY_RESULT>
 export type PostCardData = PostListData['posts'][number]
 
 export type PostData = StegaBranded<NonNullable<POST_QUERY_RESULT>>
+
+/** The post cards' design, from Blog settings. */
+export type BlogCardDesign = StegaBranded<NonNullable<BLOG_SETTINGS_QUERY_RESULT>>['cardDesign']

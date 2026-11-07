@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { enclosingOfArray, valueAtPath } from './schema-path'
+import { enclosingOfArray, valueAtPath } from '@/lib/sanity/schema/schema-path'
 
 const document = {
   pageBuilder: [

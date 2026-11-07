@@ -86,7 +86,7 @@ import {
 } from '@/lib/sanity/surface-options'
 
 import { defaultLinkArrow, ownIconShape, usesArrow } from '../../utils/link-list'
-import { enclosingOfArray, memberOfArray } from '../../utils/schema-path'
+import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 
 /**
  * The Link list's own Design options (agency only, like the rest of Design), in four boxes above the

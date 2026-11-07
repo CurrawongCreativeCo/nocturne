@@ -1,6 +1,7 @@
 import { createElement, type ComponentType } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { VIEW_DRAWERS } from '@/app/design-capability-views'
 import { COMPONENT_SCHEMAS, DESIGN_COMPONENTS, gate, lookupType } from '@/app/design-components'
 import {
   fixturePictureId,
@@ -219,6 +220,31 @@ const drawn = async (component: string, layout: string | null, state: Patch, pic
   const raw = withPicture<RawSection>(applyPatch(seed, state), picture)
   return renderSections(await projectSections([raw]), { belowHeading: true })
 }
+
+describe('every control of Blog settings has an effect', () => {
+  const box = lookupType('blogSettings')?.fields?.find(({ name }) => name === 'cardDesign')
+  const controls = controlsOf(box?.fields)
+  const drawer = VIEW_DRAWERS.blogPostCards
+  const draw = async (cardDesign: Patch) => {
+    if (!drawer) throw new Error('blogPostCards has no drawer.')
+    return drawer.draw({
+      ...(await drawer.seed()),
+      settings: { cardDesign: applyPatch({}, cardDesign) },
+    })
+  }
+
+  it('offers controls', () => {
+    expect(controls.length).toBeGreaterThan(10)
+  })
+
+  it.each(controls)('$path changes what is drawn', async ({ path, values }) => {
+    const before = await draw({})
+    const outcomes = await Promise.all(
+      values.map(async (value) => (await draw({ [path]: value })) !== before),
+    )
+    expect(outcomes.some(Boolean), `no value of ${path} changed the output`).toBe(true)
+  })
+})
 
 describe.each(FAMILIES)('every control of $component has an effect', (family) => {
   const layouts = family.layout

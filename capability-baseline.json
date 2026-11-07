@@ -754,44 +754,6 @@
     },
     {
       "component": "blogPostCards",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "blogPostCards",
-      "capability": "text",
-      "scope": "card",
-      "role": "meta",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "blogPostCards",
-      "capability": "text",
-      "scope": "card",
-      "role": "title",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "blogPostCards",
-      "capability": "text",
-      "scope": "card",
-      "role": "body",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "blogPostCards",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 156
-    },
-    {
-      "component": "blogPostCards",
       "capability": "depth",
       "scope": "card",
       "layouts": [null],

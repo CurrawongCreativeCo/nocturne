@@ -64,7 +64,7 @@ import {
   ownIconShape,
   usesArrow,
 } from '../../utils/link-list'
-import { enclosingOfArray, memberOfArray } from '../../utils/schema-path'
+import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {

@@ -6,7 +6,13 @@ import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
-import { BLOG_INDEX_QUERY, POST_QUERY, POST_SITEMAP_QUERY, POSTS_QUERY } from './queries'
+import {
+  BLOG_INDEX_QUERY,
+  BLOG_SETTINGS_QUERY,
+  POST_QUERY,
+  POST_SITEMAP_QUERY,
+  POSTS_QUERY,
+} from './queries'
 import { authorName } from '../utils/author'
 import type { FeedItem } from '../utils/feed'
 import { pagePath, pageRange } from '../utils/pagination'
@@ -17,6 +23,16 @@ import { pagePath, pageRange } from '../utils/pagination'
  */
 const BLOG_TAGS = [TAGS.post, TAGS.author, TAGS.teamMember, TAGS.category]
 const POST_TAGS = [...BLOG_TAGS, TAGS.page]
+
+/** The post cards' design (Blog settings). Empty, or no document yet, is what the blog always drew. */
+export async function getBlogCardDesign(mode: FetchMode = PUBLISHED) {
+  const { data } = await cachedSanityFetch({
+    query: BLOG_SETTINGS_QUERY,
+    ...mode,
+    tags: [TAGS.blogSettings],
+  })
+  return data?.cardDesign ?? undefined
+}
 
 /** `generateStaticParams` can't be empty under Cache Components; this slug is never a post (404). */
 const PLACEHOLDER_SLUG = '_'

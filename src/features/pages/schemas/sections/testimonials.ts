@@ -19,7 +19,7 @@ import {
 import { permissionWarning, sourceDateWarning, TESTIMONIAL_SOURCES } from '@/lib/testimonial-source'
 import { missingHighlights } from '@/lib/text-highlights'
 
-import { cardDesignField, eyebrowField, headerDesignField } from '../card-design-fields'
+import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { testimonialsCapabilities } from './testimonials-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */

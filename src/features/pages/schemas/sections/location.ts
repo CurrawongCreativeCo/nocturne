@@ -15,7 +15,7 @@ import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
-import { cardDesignField, eyebrowField, headerDesignField } from '../card-design-fields'
+import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { locationCapabilities } from './location-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */

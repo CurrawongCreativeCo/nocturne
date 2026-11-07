@@ -16,12 +16,12 @@ import { cardFamilySummary } from '@/lib/sanity/card-design-summary'
 import { scopedGroupTitle } from '@/lib/sanity/design-summary'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
+import { itemAppearanceField, notCustomised } from '@/lib/sanity/schema/item-appearance'
 import { presetsOption, type PresetDefinition } from '@/lib/sanity/schema/preset-field'
+import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { surfaceFields, textRoleField, textRoleParts } from '@/lib/sanity/schema/surface-design'
 
-import { itemAppearanceField, notCustomised } from './item-appearance'
-import { enclosingOfArray, memberOfArray } from '../utils/schema-path'
 
 /**
  * The shared forms of a card family's design (task 156): the section header's eyebrow and Design box, the

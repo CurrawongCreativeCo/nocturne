@@ -779,6 +779,16 @@ const locationSources: SourceEvidence[] = [
 // The registry
 
 export const EVIDENCE: readonly Evidence[] = [
+  // A listing's design lives in Blog settings, so its controls are `settings.cardDesign.*` in the listing's
+  // schema (design-components.ts) and its drawer draws the real PostCard from them.
+  ...cardFamilyEvidence({
+    component: 'blogPostCards',
+    box: 'settings.cardDesign',
+    render: 'src/features/blog/components/post-card.tsx',
+    cardTarget: 'article',
+    base: {},
+    roles: ['meta', 'title', 'body'],
+  }),
   ...frameEvidence('hero', {
     mark: ['overlay', 'split', 'editorial', 'full-bleed'],
     glass: ['overlay', 'split', 'editorial'],

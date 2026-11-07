@@ -15,7 +15,7 @@ import {
 } from '@/lib/sanity/schema/thumbnails/team-thumbnails'
 import { teamPortraitControls } from '@/lib/sanity/team-portrait'
 
-import { cardDesignField, eyebrowField, headerDesignField } from '../card-design-fields'
+import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { teamCapabilities } from './team-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */

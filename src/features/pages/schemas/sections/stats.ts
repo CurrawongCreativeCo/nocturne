@@ -18,7 +18,7 @@ import {
   StatsInlineThumbnail,
 } from '@/lib/sanity/schema/thumbnails/stats-thumbnails'
 
-import { cardDesignField, eyebrowField, headerDesignField } from '../card-design-fields'
+import { cardDesignField, eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { statsCapabilities } from './stats-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
