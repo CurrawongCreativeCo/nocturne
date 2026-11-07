@@ -1109,6 +1109,18 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: true,
     motion: true,
   }),
+  ...cardFamilyEvidence({
+    component: 'stats',
+    layouts: ['inline', 'cards'],
+    // Only the Cards layout draws a card, and 156 item 6 gives only its figures and labels text roles.
+    cardLayouts: ['cards'],
+    roleLayouts: ['cards'],
+    render: 'src/features/pages/components/sections/stats/cards.tsx',
+    cardTarget: 'ul.grid > li',
+    base: { eyebrow: 'In numbers', intro: 'An intro.' },
+    roles: ['number', 'label'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('stats', {
     mark: ['inline', 'cards'],
     overlay: ['inline', 'cards'],

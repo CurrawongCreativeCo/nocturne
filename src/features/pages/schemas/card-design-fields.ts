@@ -194,7 +194,7 @@ export function cardDesignField({
   title?: string
   description?: string
   presets?: readonly PresetDefinition[]
-  /** Hides the whole box where the layout draws nothing it could change. */
+  /** Hides the whole box where the layout draws nothing it could change. Its `parent` is the section. */
   boxHidden?: ConditionalPropertyCallback
 }) {
   return defineField({

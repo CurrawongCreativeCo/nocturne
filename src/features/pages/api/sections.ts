@@ -304,6 +304,13 @@ export const statsFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
+    ${headerDesignProjection},
+    cardDesign {
+      ${surfaceProjection},
+      number { ${roleStyleProjection} },
+      label { ${roleStyleProjection} },
+      mark { ${decorativeMarkFields} }
+    },
     items[] { ${statItemFields} }
   }
 `

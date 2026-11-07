@@ -64,6 +64,8 @@ vi.mock('@/lib/sanity/site-design', () => ({
 
 interface Family {
   component: string
+  /** One layout only: a box offered nowhere else would have nothing to try on the others. */
+  layout?: string
   /** Stored content that makes every role draw. */
   base: Patch
   /** The boxes whose controls are tried: a field name on the section, or an item's Appearance. */
@@ -92,6 +94,17 @@ const PLAN_BASE: Patch = {
 }
 
 const FAMILIES: readonly Family[] = [
+  {
+    component: 'stats',
+    base: { eyebrow: 'In numbers', intro: 'An intro.' },
+    boxes: [{ field: 'headerDesign', at: 'headerDesign' }],
+  },
+  {
+    component: 'stats',
+    layout: 'cards',
+    base: { eyebrow: 'In numbers', intro: 'An intro.' },
+    boxes: [{ field: 'cardDesign', at: 'cardDesign' }],
+  },
   {
     component: 'faq',
     base: { eyebrow: 'Questions', intro: 'An intro.' },
@@ -200,7 +213,9 @@ const drawn = async (component: string, layout: string | null, state: Patch, pic
 }
 
 describe.each(FAMILIES)('every control of $component has an effect', (family) => {
-  const layouts = DESIGN_COMPONENTS.find(({ id }) => id === family.component)?.layouts ?? []
+  const layouts = family.layout
+    ? [family.layout]
+    : (DESIGN_COMPONENTS.find(({ id }) => id === family.component)?.layouts ?? [])
   describe.each(layouts.length > 0 ? layouts : [null])('on %s', (layout) => {
     for (const { field, at, switchOn } of family.boxes) {
       const controls = controlsOf(box(family.component, field).fields)

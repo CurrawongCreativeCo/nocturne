@@ -11298,6 +11298,13 @@
           "clientEditable": false
         },
         {
+          "path": "eyebrow",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": true
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -11359,6 +11366,756 @@
           "required": null,
           "max": null,
           "clientEditable": true
+        },
+        {
+          "path": "headerDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "eyebrow",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.eyebrow.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "heading",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.heading.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro",
+          "kind": "object",
+          "required": false,
+          "capability": "header",
+          "role": "intro",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.intro.leading",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "tight",
+              "title": "Tight"
+            },
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "relaxed",
+              "title": "Relaxed"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.background",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "capability": "surface",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.background.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.background.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.backgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "surface",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.border",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "surface",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.borderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "surface",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.borderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.borderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.number",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "number",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.number.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.number.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.number.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.number.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.number.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label",
+          "kind": "object",
+          "required": false,
+          "capability": "text",
+          "role": "label",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.size",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.weight",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "regular",
+              "title": "Regular"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "semibold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.colour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.textCase",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.label.tracking",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "wider",
+              "title": "Wider"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.mark",
+          "kind": "decorativeMark",
+          "required": false,
+          "clientEditable": false
         },
         {
           "path": "access",
@@ -11427,16 +12184,31 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "cardDesign.border"
+              ],
               "availability": {
                 "inline": {
                   "notApplicable": "Draws no card"
                 },
-                "cards": "pending"
+                "cards": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "stats.surface.card",
+              "field": "cardDesign.border",
+              "resolvers": [
+                "@/lib/sanity/surface-options#ringSurfaceLook"
+              ],
+              "render": "src/features/pages/components/sections/stats/cards.tsx",
+              "target": "ul.grid > li",
+              "cases": [
+                "stats.surface.card@cards"
+              ]
+            }
+          ]
         },
         "text": {
           "policies": [
@@ -11448,30 +12220,58 @@
                 "label"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "cardDesign.number",
+                "cardDesign.label"
+              ],
               "availability": {
                 "inline": {
                   "notApplicable": "156 item 6 names the cards layout only"
                 },
-                "cards": "pending"
+                "cards": "verified"
               },
               "roleAvailability": {
                 "number": {
                   "inline": {
                     "notApplicable": "156 item 6 names the cards layout only"
                   },
-                  "cards": "pending"
+                  "cards": "verified"
                 },
                 "label": {
                   "inline": {
                     "notApplicable": "156 item 6 names the cards layout only"
                   },
-                  "cards": "pending"
+                  "cards": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "stats.text.card.number",
+              "field": "cardDesign.number",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/stats/cards.tsx",
+              "target": "[data-text-role=\"number\"]",
+              "cases": [
+                "stats.text.card.number@cards"
+              ]
+            },
+            {
+              "id": "stats.text.card.label",
+              "field": "cardDesign.label",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/features/pages/components/sections/stats/cards.tsx",
+              "target": "[data-text-role=\"label\"]",
+              "cases": [
+                "stats.text.card.label@cards"
+              ]
+            }
+          ]
         },
         "header": {
           "policies": [
@@ -11484,28 +12284,72 @@
                 "intro"
               ],
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "headerDesign.eyebrow",
+                "headerDesign.heading",
+                "headerDesign.intro"
+              ],
               "availability": {
-                "inline": "pending",
-                "cards": "pending"
+                "inline": "verified",
+                "cards": "verified"
               },
               "roleAvailability": {
                 "eyebrow": {
-                  "inline": "pending",
-                  "cards": "pending"
+                  "inline": "verified",
+                  "cards": "verified"
                 },
                 "heading": {
-                  "inline": "pending",
-                  "cards": "pending"
+                  "inline": "verified",
+                  "cards": "verified"
                 },
                 "intro": {
-                  "inline": "pending",
-                  "cards": "pending"
+                  "inline": "verified",
+                  "cards": "verified"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "stats.header.section.eyebrow",
+              "field": "headerDesign.eyebrow",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"eyebrow\"]",
+              "cases": [
+                "stats.header.section.eyebrow@inline",
+                "stats.header.section.eyebrow@cards"
+              ]
+            },
+            {
+              "id": "stats.header.section.heading",
+              "field": "headerDesign.heading",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"heading\"]",
+              "cases": [
+                "stats.header.section.heading@inline",
+                "stats.header.section.heading@cards"
+              ]
+            },
+            {
+              "id": "stats.header.section.intro",
+              "field": "headerDesign.intro",
+              "resolvers": [
+                "@/lib/sanity/text-style-options#textLook"
+              ],
+              "render": "src/components/ui/section-header.tsx",
+              "target": "[data-text-role=\"intro\"]",
+              "cases": [
+                "stats.header.section.intro@inline",
+                "stats.header.section.intro@cards"
+              ]
+            }
+          ]
         },
         "mark": {
           "policies": [
@@ -11525,16 +12369,30 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "cardDesign.mark"
+              ],
               "availability": {
                 "inline": {
                   "notApplicable": "Draws no card"
                 },
-                "cards": "pending"
+                "cards": "verified"
               }
             }
           ],
           "evidence": [
+            {
+              "id": "stats.mark.card",
+              "field": "cardDesign.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"card\"]",
+              "cases": [
+                "stats.mark.card@cards"
+              ]
+            },
             {
               "id": "stats.mark.section",
               "field": "style.mark",

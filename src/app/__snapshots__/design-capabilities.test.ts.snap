@@ -578,13 +578,13 @@ exports[`the design capability contract > slotVideo: reports what it offers toda
 exports[`the design capability contract > stats: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card @cards: pending (156)",
-    "text required card @cards: pending (156)",
-    "header required section @inline: pending (156)",
-    "header required section @cards: pending (156)",
+    "surface required card @cards: verified",
+    "text required card @cards: verified",
+    "header required section @inline: verified",
+    "header required section @cards: verified",
     "mark required section @inline: verified",
     "mark required section @cards: verified",
-    "mark required card @cards: pending (156)",
+    "mark required card @cards: verified",
     "depth conditional card @cards: pending (146)",
     "framing conditional section/background @inline: pending (177)",
     "framing conditional section/background @cards: pending (177)",

@@ -1526,6 +1526,44 @@ exports[`design capability evidence > stats.glass.section@inline: the probe chan
 ]
 `;
 
+exports[`design capability evidence > stats.header.section.eyebrow@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.eyebrow@inline: the probe changes the registered target 1`] = `
+[
+  "<p class="mb-3 text-small font-medium uppercase tracking-[0.08em] text-ink-muted" data-text-role="eyebrow">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.heading@cards: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.heading@inline: the probe changes the registered target 1`] = `
+[
+  "<h2 class="text-h2 font-semibold text-balance" data-text-role="heading">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.intro@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > stats.header.section.intro@inline: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
+]
+`;
+
+exports[`design capability evidence > stats.mark.card@cards: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > stats.mark.section@cards: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > stats.mark.section@inline: the probe changes the registered target 1`] = `[]`;
@@ -1551,6 +1589,33 @@ exports[`design capability evidence > stats.overlay.section@cards: the probe cha
 exports[`design capability evidence > stats.overlay.section@inline: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > stats.surface.card@cards: the probe changes the registered target 1`] = `
+[
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+]
+`;
+
+exports[`design capability evidence > stats.text.card.label@cards: the probe changes the registered target 1`] = `
+[
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+  "<p class="mt-2 text-lead text-ink-muted" data-text-role="label">",
+]
+`;
+
+exports[`design capability evidence > stats.text.card.number@cards: the probe changes the registered target 1`] = `
+[
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:7ch">",
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:5ch">",
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:5ch">",
+  "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:2ch">",
 ]
 `;
 

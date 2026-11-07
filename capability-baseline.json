@@ -418,60 +418,6 @@
     },
     {
       "component": "stats",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": ["cards"],
-      "closingTask": 156
-    },
-    {
-      "component": "stats",
-      "capability": "text",
-      "scope": "card",
-      "role": "number",
-      "layouts": ["cards"],
-      "closingTask": 156
-    },
-    {
-      "component": "stats",
-      "capability": "text",
-      "scope": "card",
-      "role": "label",
-      "layouts": ["cards"],
-      "closingTask": 156
-    },
-    {
-      "component": "stats",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["inline", "cards"],
-      "closingTask": 156
-    },
-    {
-      "component": "stats",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["inline", "cards"],
-      "closingTask": 156
-    },
-    {
-      "component": "stats",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["inline", "cards"],
-      "closingTask": 156
-    },
-    {
-      "component": "stats",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": ["cards"],
-      "closingTask": 156
-    },
-    {
-      "component": "stats",
       "capability": "divider",
       "scope": "section",
       "layouts": ["inline", "cards"],

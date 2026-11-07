@@ -256,8 +256,8 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     agencyOnly: ['access', 'style'],
   },
   stats: {
-    editable: ['heading', 'title', 'intro', 'items'],
-    agencyOnly: ['variant', 'access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
+    agencyOnly: ['variant', 'headerDesign', 'cardDesign', 'access', 'style'],
   },
   gallery: {
     editable: ['heading', 'title', 'intro', 'images'],
