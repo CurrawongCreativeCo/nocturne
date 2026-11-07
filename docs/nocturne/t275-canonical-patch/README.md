@@ -162,3 +162,135 @@ task 213 as its closing task (see task 213 above).
 - Nothing is unassigned: the three views have task 156 as their declaration owner (task 156 above).
   Whether task 156's size or priority changes because of them is for the plan's owner to say when the
   amendments are applied.
+
+---
+
+# Corrective PR: plan amendments (7 November 2026, proposed, NOT applied)
+
+**Status:** from the independent post-merge audit of task 275 and the owner's decisions D1 to D5 and the review of
+PR #157. Nothing here is applied: the published plan and every task status stay as they are until the owner separately
+approves. The correction is recorded under task 275 with no new task number (D5). Task 156 waits until the corrective PR
+has merged and these blocks are published.
+
+**Owner decisions reflected here:** D1 `BASELINE_CHANGES` register (approved). D2 private-field rows are not pre-approved: the
+one row recorded is A1, and the audit inventory stays documentation (`i6-private-control-audit.md`). D3 badge row icon
+split (approved; the single admit row, closing task 158). D4 footer and team views belong to task 158, and nothing in
+this PR implements them. D5 recorded as an addition to task 275.
+
+Each block is appended to the end of the named task's prompt.
+
+## Task 275
+
+```text
+ADDITION (7 November 2026, architecture correction after the post-merge audit)
+A corrective PR completes this task's contract, and task 156 doesn't start until it has merged:
+- Evidence covers sections, slot blocks, listings and declared views. A slot block is proven in every
+  host it is allowed in. A listing or view owns a schema made from its real document types and a
+  drawer that draws the real component.
+- Text roles and the section header are verified role by role and layout by layout. One passing role
+  never verifies another. Independently editable controls (icon container and identity, each divider
+  position, each slot) are separate policy parts, and evidence for different fields can't share a cell.
+- Baseline growth, or a removal that isn't now verified, needs a reviewed row in BASELINE_CHANGES and is
+  compared in CI with the base commit. A missing base baseline fails in the template.
+- The private-control check reads design contexts: the Design group at any depth, design-summary
+  objects and registered contexts. It judges by where a field is, never by its name or type. An ordinary
+  choice, switch or number elsewhere isn't called a design control, and free text outside a design
+  context isn't detected: review covers them. The exception register holds only what an enforced rule
+  would otherwise reject.
+- A change proposal is judged against what will actually be written, re-checked until nothing new is
+  rejected.
+Task statuses are unchanged.
+```
+
+## Task 156
+
+```text
+ADDITION (7 November 2026, from task 275's architecture correction)
+- Starts only after task 275's corrective PR has merged.
+- textRoleField passes its role to the builder stamp. Each role on each layout needs its own evidence
+  entry (`role`), and that includes the section header's eyebrow, heading and intro. A role a layout
+  doesn't draw is recorded with a layout rule ({ roles, reason }), never left as a passing sibling.
+- Blog post cards: Blog settings is a new singleton, `blogSettings`. Add it to the blogPostCards schema
+  in src/app/design-components.ts as `settings`, in the design group, register it as a design context
+  (src/lib/design/capability-design-contexts.ts), and add its drawer inputs in
+  src/app/design-capability-views.tsx.
+- Item design objects, such as `plans[].design`, set options.designSummary, so the scan treats them as
+  design.
+- links[].design.appearance (the inheritance switch in a link's own Appearance) is a temporary design
+  exception removed by this task: replace the private implementation with a shared mechanism that keeps
+  the saved values and behaviour. headingDisplay, profile.nameDisplay, links[].groupDisplay and their image
+  size controls move to the shared implementation too, provided it covers their actual behaviour.
+- The three views are declared with kind `view`, each with a schema made from its document type and a
+  drawer. Pairs they can't close in this task need a reviewed `admit` row in BASELINE_CHANGES.
+```
+
+## Task 158
+
+```text
+ADDITION (7 November 2026, from task 275's architecture correction)
+- Badge rows: choosing an icon is verified at item scope. The container is Required at section scope,
+  closing with this task, and is listed in BASELINE_CHANGES until adopted. Evidence runs in every host
+  the block is allowed in.
+- Divider centre icons are a Conditional policy part per divider position in the Link list and are
+  verified. Other sections adopt them with task 151.
+- Social icons in the footer and on team pages count toward DONE WHEN once this task declares each as a
+  `view` with a drawer (owner decision D4).
+```
+
+## Task 137
+
+```text
+ADDITION (7 November 2026, from task 275's architecture correction)
+Blog post cards close through the listing adapter: the action field lives in Blog settings
+(`settings.*` in the blogPostCards schema) and its evidence draws the real PostCard. Task 156 adds that
+schema first. linkList showArrows (hidden, kept for stored values) is a known legacy control that this
+task replaces.
+```
+
+## Task 146
+
+```text
+ADDITION (7 November 2026, from task 275's architecture correction)
+Blog post cards close through the listing adapter (`settings.*`), after task 156 adds the schema. The
+site-wide Card depth is proven by this task's unit and e2e tests. It is not a contract pair unless a
+component declares `site` scope, which has no evidence path yet: propose one before declaring it.
+```
+
+## Task 159
+
+```text
+ADDITION (7 November 2026, from task 275's architecture correction)
+ctaBanner tone, and the Link list's rowStyle and glassStrength, are known legacy design controls that
+this task replaces with the single glass system.
+```
+
+## Task 213
+
+```text
+ADDITION (7 November 2026, from task 275's architecture correction)
+The hero's text roles and section header close role by role, with one evidence entry per role and
+layout.
+```
+
+## Task 276
+
+```text
+ADDITION (7 November 2026, from task 275's architecture correction)
+- Each look needs independent evidence, whether it is implemented through a `variant`, a preset or
+  another reviewed dimension. The contract reads layouts from `variant`, so a look that isn't one is
+  proven through its own reviewed dimension and evidence entry; it doesn't have to become a `variant`.
+- Before merging, solve content-source marking: a field feeding several sources needs a marker per value,
+  and a pending source's field must be rejected by proposals (audit finding L1).
+```
+
+## Page text
+
+```text
+OLD: 275, then 216 where 146 and 148 need it, then 156, 158, 137 and 146, one after another
+NEW: 275, its corrective PR (7 November 2026), then 216 where 146 and 148 need it, then 156, 158, 137 and 146, one after another
+
+OLD (template context): every new section, slot block or listing declares
+NEW (template context): every new section, slot block, listing or view declares
+
+FOOTER, new first paragraph: Amended on 7 November 2026, owner-approved, after the independent post-merge audit of task 275. Task 275 gains a corrective PR (evidence for slot blocks, listings and views; verification per text role; baseline integrity against the base commit; design-context private-control checks), and task 156 waits for it. Tasks 137, 146, 156, 158, 159, 213 and 276 gained additions, and task 275's proposed amendments of 6 and 7 November were applied. Task numbers, statuses, notes and progress are unchanged.
+```
