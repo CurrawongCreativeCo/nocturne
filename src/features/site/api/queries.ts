@@ -1,6 +1,13 @@
 import { defineQuery } from 'next-sanity'
 
-import { ctaFields, imageFields, linkFields } from '@/lib/sanity/fragments'
+import { ctaFields, iconDesignFields, imageFields, linkFields } from '@/lib/sanity/fragments'
+
+/** The footer's social icons: whether, in which style, and the Icons box that changes it. */
+export const footerSocialFields = /* groq */ `
+  footerShowSocial,
+  footerSocialStyle,
+  footerIconDesign { ${iconDesignFields} }
+`
 
 const navItemFields = /* groq */ `
   _key,
@@ -46,8 +53,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       headerCta { ${ctaFields} },
       footerNav[] { ${navItemFields} },
       footerText,
-      footerShowSocial,
-      footerSocialStyle
+      ${footerSocialFields}
     },
     "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {
       message,
@@ -109,6 +115,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "footerText": navigation.footerText,
     "footerShowSocial": navigation.footerShowSocial == true,
     "footerSocialStyle": navigation.footerSocialStyle,
+    "footerIconDesign": navigation.footerIconDesign,
     "consent": consent,
     "design": design,
     "business": business,

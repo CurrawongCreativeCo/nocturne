@@ -570,6 +570,27 @@
       "closingTask": 280
     },
     {
+      "component": "siteFooter",
+      "capability": "divider",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 151
+    },
+    {
+      "component": "teamMemberPage",
+      "capability": "framing",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 177
+    },
+    {
+      "component": "teamMemberPage",
+      "capability": "divider",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 151
+    },
+    {
       "component": "blogPostCards",
       "capability": "depth",
       "scope": "card",

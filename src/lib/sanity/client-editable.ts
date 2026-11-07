@@ -39,6 +39,7 @@ export const AGENCY_ONLY_TYPES: ReadonlySet<string> = new Set([
   'decorativeDivider',
   'decorativeMark',
   'blogSettings',
+  'teamPageSettings',
   // new-type:agency-only
 ])
 
@@ -82,7 +83,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   siteNavigation: {
     editable: ['headerNav', 'headerCta', 'footerNav', 'footerText'],
-    agencyOnly: ['footerShowSocial', 'footerSocialStyle'],
+    agencyOnly: ['footerShowSocial', 'footerSocialStyle', 'footerIconDesign'],
   },
   announcement: {
     editable: ['message', 'link', 'startsAt', 'endsAt', 'dismissible'],

@@ -100,6 +100,7 @@ export const TAGS = {
   service: 'service',
   place: 'place',
   blogSettings: 'blogSettings',
+  teamPageSettings: 'teamPageSettings',
   // new-document:tag
 } as const
 

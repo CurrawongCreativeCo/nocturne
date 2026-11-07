@@ -240,6 +240,8 @@ function iconContainerEvidence(config: {
   target?: string
   /** `appears` where nothing is drawn around the icon until a container is chosen. */
   change?: 'attributes' | 'appears'
+  /** The shape the probe picks, when the content already draws a circle. */
+  shape?: string
 }): CapabilityEvidence {
   const box = config.box ?? 'iconDesign'
   return {
@@ -254,7 +256,7 @@ function iconContainerEvidence(config: {
     base: config.base,
     target: config.target ?? '[data-icon-shape]',
     change: config.change ?? 'attributes',
-    probe: { [`${box}.iconShape`]: 'circle' },
+    probe: { [`${box}.iconShape`]: config.shape ?? 'circle' },
   }
 }
 
@@ -831,6 +833,27 @@ const locationSources: SourceEvidence[] = [
 export const EVIDENCE: readonly Evidence[] = [
   // A listing's design lives in Blog settings, so its controls are `settings.cardDesign.*` in the listing's
   // schema (design-components.ts) and its drawer draws the real PostCard from them.
+  // The footer and a team member's page are views, drawn by their own drawers (design-capability-views.tsx).
+  // Each has an Icons box that changes its social icons' container, so the probe picks a different shape.
+  iconContainerEvidence({
+    component: 'siteFooter',
+    scope: 'section',
+    box: 'navigation.footerIconDesign',
+    render: 'src/features/site/components/footer-view.tsx',
+    target: '[data-social-style] a',
+    // The footer's icon controls are offered once its social row is on, and it draws circles until one is chosen.
+    base: { 'navigation.footerShowSocial': true, 'navigation.footerSocialStyle': 'circle' },
+    shape: 'square',
+  }),
+  iconContainerEvidence({
+    component: 'teamMemberPage',
+    scope: 'section',
+    box: 'settings.iconDesign',
+    render: 'src/features/team/components/team-member-page.tsx',
+    target: '[data-social-style] a',
+    base: {},
+    shape: 'square',
+  }),
   ...cardFamilyEvidence({
     component: 'blogPostCards',
     box: 'settings.cardDesign',

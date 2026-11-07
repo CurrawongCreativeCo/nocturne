@@ -126,17 +126,20 @@ export const statsBarFields = /* groq */ `
   caption
 `
 
+/** An Icons box (`iconsDesignField`): the container and colour of the icons a section, block or page draws. */
+export const iconDesignFields = /* groq */ `
+  iconShape,
+  iconColour { colour, hex },
+  iconBackground { colour, hex },
+  iconBackgroundStrength,
+  iconBorder,
+  iconBorderColour { colour, hex }
+`
+
 /** A `badgeRow` (schema: lib/sanity/schema/badge-row.ts): project it as `badgeRow { ${badgeRowFields} }`. */
 export const badgeRowFields = /* groq */ `
   badges[] { _key, label, icon },
-  iconDesign {
-    iconShape,
-    iconColour { colour, hex },
-    iconBackground { colour, hex },
-    iconBackgroundStrength,
-    iconBorder,
-    iconBorderColour { colour, hex }
-  }
+  iconDesign { ${iconDesignFields} }
 `
 
 /** A `logoRow` (schema: lib/sanity/schema/logo-row.ts): project it as `logoRow { ${logoRowFields} }`. */

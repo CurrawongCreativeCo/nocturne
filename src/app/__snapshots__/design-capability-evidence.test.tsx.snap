@@ -2028,6 +2028,12 @@ exports[`design capability evidence > richText.overlay.section: the probe change
 ]
 `;
 
+exports[`design capability evidence > siteFooter.icon.section: the probe changes the registered target 1`] = `
+[
+  "<a aria-label="Facebook" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.facebook.com/testco" rel="me">",
+]
+`;
+
 exports[`design capability evidence > stats.edge.section@cards: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -2383,6 +2389,13 @@ exports[`design capability evidence > team.text.card.title@slider: the probe cha
 [
   "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
   "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > teamMemberPage.icon.section: the probe changes the registered target 1`] = `
+[
+  "<a aria-label="Ann Lee on LinkedIn" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.linkedin.com/in/ann-lee-example" rel="noopener">",
+  "<a aria-label="Ann Lee on Instagram" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.instagram.com/ann-lee-example" rel="noopener">",
 ]
 `;
 

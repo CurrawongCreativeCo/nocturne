@@ -591,6 +591,16 @@ exports[`the design capability contract > servicePage: reports what it offers to
 }
 `;
 
+exports[`the design capability contract > siteFooter: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "icon required section: verified",
+    "divider required section: pending (151)",
+  ],
+  "sources": [],
+}
+`;
+
 exports[`the design capability contract > slotImage: reports what it offers today 1`] = `
 {
   "capabilities": [
@@ -694,6 +704,17 @@ exports[`the design capability contract > team: reports what it offers today 1`]
     "motion required section @grid: verified",
     "motion required section @slider: verified",
     "motion required section @list: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > teamMemberPage: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "icon required section: verified",
+    "framing required section: pending (177)",
+    "divider required section: pending (151)",
   ],
   "sources": [],
 }

@@ -1066,7 +1066,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "blogSettings", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "place", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "blogSettings", "teamPageSettings", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "place", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -2505,11 +2505,13 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Event details card (`eventDetailsCard`)  | R…      | R…   | –      | R…   | R…    | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
 | Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R…      | –    | –      | –     |
+| Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
 | Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R…    | –    | R…     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 229      | 0               | 80      |
+| Required                                                 | 231      | 0               | 83      |
 | Conditional                                              | 5        | 0               | 39      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2520,15 +2522,15 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 146          | 9                | 3                   |
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
-| 151          | 20               | 0                   |
+| 151          | 22               | 0                   |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 8                | 20                  |
+| 177          | 9                | 20                  |
 | 213          | 7                | 0                   |
 | 276          | 2                | 1                   |
 | 280          | 16               | 0                   |
 
-**Evidence.** 246 capability entries, 477 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 248 capability entries, 479 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -2591,10 +2593,8 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | --------------------------- | ------------------------- | -------------------------------------------------------------------- | -------------------- |
 | Site header                 | Glass                     | 159                                                                  | Its capability tasks |
 | Mobile drawer               | Glass                     | 7 (Optional quick actions)                                           | Its capability tasks |
-| Footer                      | Icon, Divider             | 158, 151                                                             | Its capability tasks |
 | Buttons (CtaLink)           | Surface, Depth, Action    | 148, 137 (Task 148 also adopts the search form’s hand-styled button) | Its capability tasks |
 | Booking facade              | Surface, Depth            | 148 (Once task 95 exists)                                            | Its capability tasks |
-| Team member pages           | Icon, Framing, Divider    | 158, 177, 151                                                        | Its capability tasks |
 | Event pages                 | Framing, Divider          | 177, 151                                                             | Its capability tasks |
 | Blog post page              | Framing                   | 177                                                                  | Its capability tasks |
 | Location pages              | Surface, Text             | 278                                                                  | Its capability tasks |

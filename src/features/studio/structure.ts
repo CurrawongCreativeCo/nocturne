@@ -267,6 +267,7 @@ const buildStructure = (
 
   const items: Item[] = [
     singletonItem(S, 'blogSettings', DocumentIcon),
+    singletonItem(S, 'teamPageSettings', DocumentIcon),
     // new-singleton:list
     ...(audience === 'agency' ? [waitingForReview(S, context), S.divider()] : []),
     pagesTree(S, context),

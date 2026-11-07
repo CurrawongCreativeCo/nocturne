@@ -34096,6 +34096,185 @@
           }
         },
         "contentSources": {}
+      },
+      {
+        "type": "siteFooter",
+        "title": "Site footer",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "The footer’s fill and border are the site’s tone (Brand colours), not a card"
+          },
+          "text": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "header": {
+            "notApplicable": "The footer has no section header"
+          },
+          "mark": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "depth": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "icon": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 158,
+                "fields": [
+                  "navigation.footerIconDesign.iconShape"
+                ],
+                "availability": "verified"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "siteFooter.icon.section",
+                "field": "navigation.footerIconDesign.iconShape",
+                "resolvers": [
+                  "@/lib/sanity/surface-options#iconLook"
+                ],
+                "render": "src/features/site/components/footer-view.tsx",
+                "target": "[data-social-style] a",
+                "cases": [
+                  "siteFooter.icon.section"
+                ]
+              }
+            ]
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "The footer holds no picture"
+          },
+          "pictureDepth": {
+            "notApplicable": "Has no framed picture"
+          },
+          "overlay": {
+            "notApplicable": "No picture with a wash over it"
+          },
+          "glass": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "divider": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 151,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
+      },
+      {
+        "type": "teamMemberPage",
+        "title": "Team member page",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "The page draws no card"
+          },
+          "text": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "header": {
+            "notApplicable": "The page’s own h1 heads it"
+          },
+          "mark": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "depth": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "icon": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 158,
+                "fields": [
+                  "settings.iconDesign.iconShape"
+                ],
+                "availability": "verified"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "teamMemberPage.icon.section",
+                "field": "settings.iconDesign.iconShape",
+                "resolvers": [
+                  "@/lib/sanity/surface-options#iconLook"
+                ],
+                "render": "src/features/team/components/team-member-page.tsx",
+                "target": "[data-social-style] a",
+                "cases": [
+                  "teamMemberPage.icon.section"
+                ]
+              }
+            ]
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 177,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "pictureDepth": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "overlay": {
+            "notApplicable": "No picture with a wash over it"
+          },
+          "glass": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "divider": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 151,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
       }
     ],
     "coverage": {
@@ -34135,6 +34314,8 @@
         "eventDetailsCard",
         "servicePage",
         "searchResults",
+        "siteFooter",
+        "teamMemberPage",
         "blogPostCards"
       ],
       "notDeclaredYet": [],
@@ -34159,17 +34340,6 @@
           "note": "Optional quick actions"
         },
         {
-          "part": "Footer",
-          "needs": [
-            "icon",
-            "divider"
-          ],
-          "tasks": [
-            158,
-            151
-          ]
-        },
-        {
           "part": "Buttons (CtaLink)",
           "needs": [
             "surface",
@@ -34192,19 +34362,6 @@
             148
           ],
           "note": "Once task 95 exists"
-        },
-        {
-          "part": "Team member pages",
-          "needs": [
-            "icon",
-            "framing",
-            "divider"
-          ],
-          "tasks": [
-            158,
-            177,
-            151
-          ]
         },
         {
           "part": "Event pages",

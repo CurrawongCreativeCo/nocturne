@@ -96,15 +96,20 @@ export const iconsDesignField = ({
   inherits = 'the default (no container)',
   scope = 'card',
   group = 'design',
+  name = 'iconDesign',
+  shapeOf,
 }: {
   hidden?: ConditionalPropertyCallback
   inherits?: string
   scope?: 'card' | 'section'
   /** The field group; none for a block with no groups. */
   group?: string | null
+  name?: string
+  /** The shape that applies with none chosen, so fill and border are offered only with a container. */
+  shapeOf?: (context: Parameters<ConditionalPropertyCallback>[0]) => string
 } = {}) =>
   defineField({
-    name: 'iconDesign',
+    name,
     title: scopedGroupTitle('Icons', scope),
     type: 'object',
     ...(group ? { group } : {}),
@@ -114,8 +119,9 @@ export const iconsDesignField = ({
     options: { collapsible: true, collapsed: true },
     fields: iconDesignFields({
       inherits,
-      shapeOf: (context) =>
-        (context.parent as { iconShape?: string } | undefined)?.iconShape ?? 'plain',
+      shapeOf:
+        shapeOf ??
+        ((context) => (context.parent as { iconShape?: string } | undefined)?.iconShape ?? 'plain'),
     }),
   })
 
