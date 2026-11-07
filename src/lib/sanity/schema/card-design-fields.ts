@@ -94,12 +94,20 @@ export const headerDesignField = (
 export const iconsDesignField = ({
   hidden,
   inherits = 'the default (no container)',
-}: { hidden?: ConditionalPropertyCallback; inherits?: string } = {}) =>
+  scope = 'card',
+  group = 'design',
+}: {
+  hidden?: ConditionalPropertyCallback
+  inherits?: string
+  scope?: 'card' | 'section'
+  /** The field group; none for a block with no groups. */
+  group?: string | null
+} = {}) =>
   defineField({
     name: 'iconDesign',
-    title: scopedGroupTitle('Icons', 'card'),
+    title: scopedGroupTitle('Icons', scope),
     type: 'object',
-    group: 'design',
+    ...(group ? { group } : {}),
     description:
       'The container and colour of the icons chosen from the set. Uploaded icons and images are always drawn whole.',
     hidden: both(hiddenFromClients, hidden),

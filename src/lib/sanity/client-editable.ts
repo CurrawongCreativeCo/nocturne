@@ -250,7 +250,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   pricingTable: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'plans'],
-    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'access', 'style'],
   },
   newsletterSignup: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'submitLabel', 'successMessage'],
@@ -277,7 +277,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'showSocial',
       'directionsLabel',
     ],
-    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
   },
   team: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'selection', 'members'],
@@ -396,7 +396,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   badgeRow: {
     editable: ['badges'],
-    agencyOnly: [],
+    agencyOnly: ['iconDesign'],
   },
   logoRow: {
     editable: ['logos', 'greyscale'],

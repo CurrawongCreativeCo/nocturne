@@ -288,6 +288,7 @@ export const pricingTableFragment = /* groq */ `
     "headingPlain": pt::text(heading),
     intro,
     ${headerDesignProjection},
+    iconDesign { ${iconDesignProjection} },
     cardDesign { ${pricingCardDesignProjection} },
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
     plans[defined(price->priceId) && price->active == true] {
@@ -367,6 +368,7 @@ export const locationFragment = /* groq */ `
       meta { ${roleStyleProjection} },
       mark { ${decorativeMarkFields} }
     },
+    iconDesign { ${iconDesignProjection} },
     mapImage { ${imageFields} },
     showHours,
     showOpenNow,

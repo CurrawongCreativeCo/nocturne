@@ -65,18 +65,6 @@ const viewText = (
 
 export const BASELINE_CHANGES: readonly BaselineChange[] = [
   {
-    kind: 'admit',
-    component: 'badgeRow',
-    capability: 'icon',
-    scope: 'section',
-    layouts: [null],
-    reason:
-      'Choosing a badge’s icon is verified at item scope. The container around the icon (shape, colour) has no controls on a block yet, so it is Required here and closes when task 158 adds them. Owner decision D3, 7 November 2026: the policy is split, subject to passing evidence.',
-    reviewer: 'owner',
-    reviewed: '2026-11-07',
-    closingTask: 158,
-  },
-  {
     ...VIEW_ROW,
     component: 'eventDetailsCard',
     capability: 'surface',

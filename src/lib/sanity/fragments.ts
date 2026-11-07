@@ -128,7 +128,15 @@ export const statsBarFields = /* groq */ `
 
 /** A `badgeRow` (schema: lib/sanity/schema/badge-row.ts): project it as `badgeRow { ${badgeRowFields} }`. */
 export const badgeRowFields = /* groq */ `
-  badges[] { _key, label, icon }
+  badges[] { _key, label, icon },
+  iconDesign {
+    iconShape,
+    iconColour { colour, hex },
+    iconBackground { colour, hex },
+    iconBackgroundStrength,
+    iconBorder,
+    iconBorderColour { colour, hex }
+  }
 `
 
 /** A `logoRow` (schema: lib/sanity/schema/logo-row.ts): project it as `logoRow { ${logoRowFields} }`. */

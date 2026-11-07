@@ -238,6 +238,8 @@ function iconContainerEvidence(config: {
   scope?: 'card' | 'section'
   box?: string
   target?: string
+  /** `appears` where nothing is drawn around the icon until a container is chosen. */
+  change?: 'attributes' | 'appears'
 }): CapabilityEvidence {
   const box = config.box ?? 'iconDesign'
   return {
@@ -251,7 +253,7 @@ function iconContainerEvidence(config: {
     render: config.render,
     base: config.base,
     target: config.target ?? '[data-icon-shape]',
-    change: 'attributes',
+    change: config.change ?? 'attributes',
     probe: { [`${box}.iconShape`]: 'circle' },
   }
 }
@@ -390,6 +392,22 @@ const slotBlockEvidence: CapabilityEvidence[] = [
     change: 'content',
     base: { badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned' }] },
     probe: { 'badges.0.icon': 'star' },
+  },
+  {
+    // The container around the icon: absent until the block's Icons box chooses a shape.
+    id: 'badgeRow.icon.section',
+    component: 'badgeRow',
+    capability: 'icon',
+    scope: 'section',
+    field: 'iconDesign.iconShape',
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
+    render: 'src/components/ui/badge-row.tsx',
+    target: '[data-badge-row] [data-icon-shape]',
+    change: 'appears',
+    base: {
+      badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned', icon: 'star' }],
+    },
+    probe: { 'iconDesign.iconShape': 'circle' },
   },
 ]
 
@@ -1192,6 +1210,21 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     item: { array: 'plans' },
   }),
+  iconContainerEvidence({
+    component: 'pricingTable',
+    render: 'src/components/ui/icon-container.tsx',
+    base: {
+      plans: [
+        {
+          _key: 'probe-plan-1',
+          _type: 'plan',
+          price: { _type: 'reference', _ref: 'stripePrice-price_Starter1' },
+          features: ['One project'],
+        },
+      ],
+    },
+    change: 'appears',
+  }),
   ...frameEvidence('pricingTable', {
     mark: true,
     overlay: true,
@@ -1270,6 +1303,13 @@ export const EVIDENCE: readonly Evidence[] = [
     cardTarget: 'div.rounded-card.p-8',
     base: { mapImage: PICTURE },
     roles: ['title', 'body', 'meta'],
+  }),
+  iconContainerEvidence({
+    component: 'location',
+    scope: 'section',
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    base: { mapImage: null },
+    change: 'appears',
   }),
   ...frameEvidence('location', {
     mark: true,

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import { CardSurface } from '@/components/ui/card-surface'
 import { ctaClassName } from '@/components/ui/cta-link'
+import { IconContainer } from '@/components/ui/icon-container'
 import { OpenNowBadge } from '@/components/ui/open-now-badge'
 import { OpeningHours } from '@/components/ui/opening-hours'
 import { SanityImage } from '@/components/ui/sanity-image'
@@ -14,6 +15,7 @@ import { addressLines, directionsUrl, embedUrl } from '@/lib/location-links'
 import { groupOpeningHours } from '@/lib/opening-hours'
 import { resolveCardDesign, type CardDesign } from '@/lib/sanity/card-design'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveIconDesign, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 import type { LocationBusiness } from '@/types/business'
 
@@ -64,6 +66,7 @@ const linkClass = (look: Look) =>
 export function Location({ data, isFirst, business }: SectionProps<'location'>) {
   const { heading, intro, mapImage, directionsLabel } = data
   const look = resolveCardDesign(data.cardDesign, ROLES)
+  const icon = resolveIconDesign(data.iconDesign)
   const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
   const { tone } = sectionTraits(data.style, DEFAULTS)
@@ -93,6 +96,7 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
       label={directionsLabel}
       surface={ctaSurfaceFor(tone)}
       look={look}
+      icon={icon}
     />
   )
   const contact = hasContact && (
@@ -101,6 +105,7 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
       showDetails={hasPhoneOrEmail}
       showSocial={hasSocial}
       look={look}
+      icon={icon}
     />
   )
   const hours = hasHours && (
@@ -197,6 +202,7 @@ function AddressBlock({
   label,
   surface,
   look,
+  icon,
 }: {
   business: LocationBusiness
   lines: string[]
@@ -204,6 +210,7 @@ function AddressBlock({
   label: string
   surface: 'dark' | 'light'
   look: Look
+  icon: IconDesign
 }) {
   return (
     <div className="flex flex-col items-start gap-4 text-start">
@@ -216,7 +223,9 @@ function AddressBlock({
             look.text.title,
           )}
         >
-          <PinIcon />
+          <IconContainer design={icon} own={PIN_OWN} size="size-9">
+            <PinIcon className={icon.colour ? '' : 'text-accent-text'} />
+          </IconContainer>
           Address
         </h3>
         <address {...textRoleProps('body', 'mt-3 text-lead not-italic', OWN_BODY, look.text.body)}>
@@ -245,11 +254,13 @@ function ContactBlock({
   showDetails,
   showSocial,
   look,
+  icon,
 }: {
   business: LocationBusiness
   showDetails: boolean
   showSocial: boolean
   look: Look
+  icon: IconDesign
 }) {
   const link = linkClass(look)
   const { phone, phoneHref, publicEmail } = business
@@ -285,7 +296,9 @@ function ContactBlock({
       {showSocial && (
         <SocialLinks
           profiles={business.socialLinks ?? []}
-          shape="circle"
+          shape={icon.shape ?? 'circle'}
+          colour={icon.colour}
+          design={icon}
           className="mt-2"
           label="Social profiles"
         />
@@ -325,13 +338,20 @@ function HoursBlock({
   )
 }
 
-function PinIcon() {
+/** The address pin with nothing chosen: no container, in the accent (set on the pin itself). */
+const PIN_OWN: OwnIcon = {
+  shape: 'plain',
+  background: 'bg-surface-alt',
+  border: 'ring-1 ring-inset ring-line',
+}
+
+function PinIcon({ className }: { className: string }) {
   return (
     <svg
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 24 24"
-      className="size-5 shrink-0 text-accent-text"
+      className={`size-5 shrink-0 ${className}`.trim()}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"

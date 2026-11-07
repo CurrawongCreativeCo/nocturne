@@ -4,7 +4,7 @@ exports[`the design capability contract > badgeRow: reports what it offers today
 {
   "capabilities": [
     "icon required item: verified",
-    "icon required section: pending (158)",
+    "icon required section: verified",
   ],
   "sources": [],
 }
@@ -390,7 +390,7 @@ exports[`the design capability contract > location: reports what it offers today
     "mark required section: verified",
     "mark required card: verified",
     "depth required card: pending (146)",
-    "icon required section: pending (158)",
+    "icon required section: verified",
     "framing conditional section/background: pending (177)",
     "pictureDepth conditional section: pending (147)",
     "overlay required section: verified",
@@ -515,7 +515,7 @@ exports[`the design capability contract > pricingTable: reports what it offers t
     "mark required item: verified",
     "depth required card: pending (146)",
     "depth required item: pending (146)",
-    "icon conditional card: pending (158)",
+    "icon conditional card: verified",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
     "glass required section: verified",

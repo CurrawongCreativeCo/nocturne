@@ -12,6 +12,7 @@ import {
   cardDesignField,
   eyebrowField,
   headerDesignField,
+  iconsDesignField,
 } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -120,6 +121,7 @@ export const location = defineType({
         ],
       }),
       headerDesignField(),
+      iconsDesignField(),
       cardDesignField({
         description:
           'Text for the address, contact and hours. They sit on cards only without a map image, so a card’s fill, border and mark are shown then.',

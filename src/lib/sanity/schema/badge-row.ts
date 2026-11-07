@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { badgeIconField } from './badge-icon-field'
 import { badgeRowCapabilities } from './badge-row-capabilities'
+import { iconsDesignField } from './card-design-fields'
 import { lengthWarning } from './length-guidance'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -49,6 +50,7 @@ export const badgeRow = defineType({
       ],
       validation: (rule) => rule.required().min(BADGE_ROW_ITEMS.min).max(BADGE_ROW_ITEMS.max),
     }),
+    iconsDesignField({ scope: 'section', group: null }),
   ],
   preview: {
     select: { badges: 'badges' },

@@ -303,13 +303,6 @@
     },
     {
       "component": "location",
-      "capability": "icon",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 158
-    },
-    {
-      "component": "location",
       "capability": "divider",
       "scope": "section",
       "layouts": [null],
@@ -421,13 +414,6 @@
       "scope": "section",
       "layouts": ["list", "agenda", "featured"],
       "closingTask": 151
-    },
-    {
-      "component": "badgeRow",
-      "capability": "icon",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 158
     },
     {
       "component": "slotImage",
@@ -740,13 +726,6 @@
       "part": "background",
       "layouts": [null],
       "closingTask": 177
-    },
-    {
-      "component": "pricingTable",
-      "capability": "icon",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 158
     },
     {
       "component": "pricingTable",

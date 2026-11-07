@@ -8,6 +8,7 @@ import {
   cardDesignField,
   eyebrowField,
   headerDesignField,
+  iconsDesignField,
   itemDesignField,
 } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
@@ -203,6 +204,7 @@ export const pricingTable = defineType({
         ],
       }),
       headerDesignField(),
+      iconsDesignField(),
       cardDesignField({
         description:
           'Shared background, border, text and mark for every plan. Inherit uses the default plan card. Customise one plan in Content → Appearance.',

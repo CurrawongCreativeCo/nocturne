@@ -9,6 +9,8 @@ exports[`design capability evidence > badgeRow.icon.item: the probe changes the 
 ]
 `;
 
+exports[`design capability evidence > badgeRow.icon.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `
@@ -1378,6 +1380,8 @@ exports[`design capability evidence > location.header.section.intro: the probe c
 ]
 `;
 
+exports[`design capability evidence > location.icon.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > location.mark.card.cards: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > location.mark.section: the probe changes the registered target 1`] = `[]`;
@@ -1749,6 +1753,8 @@ exports[`design capability evidence > pricingTable.header.section.intro: the pro
   "<p class="mt-4 text-lead text-pretty text-ink-muted" data-text-role="intro">",
 ]
 `;
+
+exports[`design capability evidence > pricingTable.icon.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > pricingTable.mark.card: the probe changes the registered target 1`] = `[]`;
 
