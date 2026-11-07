@@ -1,10 +1,11 @@
 import { CalendarIcon } from '@sanity/icons/Calendar'
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType, type ConditionalPropertyCallback } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import {
@@ -13,6 +14,7 @@ import {
   EventsListThumbnail,
 } from '@/lib/sanity/schema/thumbnails/events-thumbnails'
 
+import { cardDesignField, eyebrowField, headerDesignField } from '../card-design-fields'
 import { eventsCapabilities } from './events-capabilities'
 import { EVENTS_MAX_COUNT } from '../../utils/events'
 
@@ -48,6 +50,14 @@ export const EVENTS_VARIANTS = [
   },
 ] as const
 
+/** The text roles every layout draws (events-capabilities.ts), and what each is drawn in. */
+export const EVENTS_ROLES = [{ role: 'title' }, { role: 'meta' }, { role: 'body' }] as const
+export const EVENTS_ROLE_COLOURS = { title: 'ink', meta: 'muted', body: 'muted' } as const
+
+/** Only the Featured layout draws a card, so only it has a fill, a border and a mark to set. */
+const notFeatured: ConditionalPropertyCallback = ({ document, path }) =>
+  (sectionAtStylePath(document, path)?.variant ?? 'list') !== 'featured'
+
 export const events = defineType({
   name: 'events',
   title: 'Events',
@@ -59,6 +69,7 @@ export const events = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -84,6 +95,16 @@ export const events = defineType({
         initialValue: 'See all events',
         hidden: ({ parent }) => !(parent as { seeAllLink?: unknown } | undefined)?.seeAllLink,
         validation: (rule) => lengthWarning(rule, LIMITS.label, 'Link text'),
+      }),
+      headerDesignField(),
+      cardDesignField({
+        description:
+          'Text for every layout. Only Featured draws a card, so its fill, border and mark are shown there.',
+        roles: EVENTS_ROLES,
+        defaults: EVENTS_ROLE_COLOURS,
+        inherits: 'the layout’s own',
+        surface: { hidden: notFeatured },
+        markHidden: notFeatured,
       }),
       accessField,
       // Shown first in the Content tab.

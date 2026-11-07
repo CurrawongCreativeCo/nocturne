@@ -2489,12 +2489,12 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Stats (`stats`), 2 layouts               | R…*     | R…*  | R…     | R◐*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Gallery (`gallery`), 3 layouts           | –       | –    | R…     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Location (`location`)                    | R…      | R…   | R…     | R◐   | R…    | R…   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R…      | R…   | R…     | R◐   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R…     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Process (`process`), 2 layouts           | –       | R…   | R…     | R✓   | –     | R…   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Embed (`embed`)                          | R…      | –    | R…     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R…     | R◐   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R…*     | R…   | R…     | R◐*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R◐   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2505,7 +2505,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 144      | 0               | 146     |
+| Required                                                 | 160      | 0               | 130     |
 | Conditional                                              | 4        | 0               | 40      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2517,7 +2517,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
 | 151          | 19               | 0                   |
-| 156          | 81               | 1                   |
+| 156          | 65               | 1                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
@@ -2525,7 +2525,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 213          | 7                | 0                   |
 | 276          | 2                | 0                   |
 
-**Evidence.** 153 capability entries, 313 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 169 capability entries, 357 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -3688,7 +3688,8 @@ the [Location](#location) section and team profile pages.
 ### Team
 
 Team members are documents (`teamMember`, in `src/features/team`), shown by the **Team** section and, when the site has
-profile pages, on their own page at `/team/<slug>`.
+
+- **Design (task 156, agency only).** A _Section header_ box (eyebrow, title and intro) and a _Cards_ box: fill, border, three text roles (title is the name, meta the role line, body the short bio) and a decorative mark, for the grid and slider cards and the list's rows alike, which draw the same surface. A section decorative mark sits in the section's own Design tab. Everything is empty by default and an empty design draws what the section always drew. The intro still has no margin or size under a title, exactly as it has always been drawn: that looks like a typo (`mt-4text-lead`) and fixing it is a visible change for review.profile pages, on their own page at `/team/<slug>`.
 
 - **A member.** _Name_ (required), _Role_, _Portrait_ (required, square, 800 px or wider; alt text is required and the usual
   image guidance warns about size and shape), _Short bio_ (up to 300 characters; the cards and the page's search
@@ -3896,10 +3897,11 @@ mode make sure the filter above includes `place`. Switching it off removes the r
 ### Events
 
 A content calendar: what is on, when and where. Events are documents (`event`, in `src/features/events`), shown by the
-**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
-to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
-calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
-list and an agenda, which is what most clients need.
+
+- **Design (task 156, agency only).** A _Section header_ box and a _Cards_ box. The text roles (title, meta for the date, time and place, body for the summary) apply to every layout. Only **Featured** draws a card, so its fill, border and decorative mark are offered there alone: List and Agenda rows are text only, and Studio hides those controls on them. A section decorative mark works on every layout. Empty by default, and an empty design draws what the section always drew (its intro is drawn as Team's is, see above).**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
+  to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
+  calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
+  list and an agenda, which is what most clients need.
 
 **Default, presets, advanced.**
 

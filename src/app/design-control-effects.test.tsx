@@ -22,6 +22,10 @@ import type { SchemaField } from '@/lib/design/schema-capabilities'
  * src/components/ui/decorative-mark-controls.test.tsx.
  */
 
+// Each case renders a whole section twice or more through the page query: under a loaded machine (the
+// full suite, CI) the default five seconds is not always enough, and a timeout is not a failed claim.
+vi.setConfig({ testTimeout: 30_000 })
+
 vi.hoisted(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(new Date('2026-11-06T09:00:00+11:00'))
@@ -88,6 +92,22 @@ const PLAN_BASE: Patch = {
 }
 
 const FAMILIES: readonly Family[] = [
+  {
+    component: 'events',
+    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    boxes: [
+      { field: 'headerDesign', at: 'headerDesign' },
+      { field: 'cardDesign', at: 'cardDesign' },
+    ],
+  },
+  {
+    component: 'team',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    boxes: [
+      { field: 'headerDesign', at: 'headerDesign' },
+      { field: 'cardDesign', at: 'cardDesign' },
+    ],
+  },
   {
     component: 'pricingTable',
     base: { ...PLAN_BASE, intro: 'An intro.' },

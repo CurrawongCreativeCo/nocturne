@@ -147,6 +147,18 @@ const headerDesignProjection = /* groq */ `
   }
 `
 
+/**
+ * The title, meta and body roles, a fill and a mark: the Team's box for its cards and rows, and the Events
+ * section's (whose Featured layout draws the one card).
+ */
+const teamCardDesignProjection = /* groq */ `
+  ${surfaceProjection},
+  title { ${roleStyleProjection} },
+  meta { ${roleStyleProjection} },
+  body { ${roleStyleProjection} },
+  mark { ${decorativeMarkFields} }
+`
+
 /** Pricing's card design at section level and, behind the plan's Appearance switch, at item level. */
 const pricingCardDesignProjection = /* groq */ `
   ${surfaceProjection},
@@ -346,6 +358,8 @@ export const teamFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     text,
+    ${headerDesignProjection},
+    cardDesign { ${teamCardDesignProjection} },
     imageDesign { ${imageDesignFields} },
     portraitDesign { ${avatarDesignFields} },
     "members": select(
@@ -542,6 +556,8 @@ export const eventsFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     text,
+    ${headerDesignProjection},
+    cardDesign { ${teamCardDesignProjection} },
     count,
     "hasCategoryFilter": defined(category),
     seeAllLabel,

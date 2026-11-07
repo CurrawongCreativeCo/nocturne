@@ -1086,6 +1086,16 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: true,
     motion: true,
   }),
+  ...cardFamilyEvidence({
+    component: 'team',
+    layouts: ['grid', 'slider', 'list'],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    // A card (grid, slider) and a row (list) are both the one element with these classes.
+    cardTarget: 'div.relative.rounded-card',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    roles: ['title', 'meta', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('team', {
     mark: ['grid', 'slider', 'list'],
     overlay: ['grid', 'slider', 'list'],
@@ -1107,6 +1117,17 @@ export const EVIDENCE: readonly Evidence[] = [
     motion: ['vertical', 'alternating'],
   }),
   ...frameEvidence('embed', { overlay: true, glass: true, edge: true, motion: true }),
+  ...cardFamilyEvidence({
+    component: 'events',
+    layouts: ['list', 'agenda', 'featured'],
+    // Only the Featured layout draws a card: the rows of the others get text roles alone.
+    cardLayouts: ['featured'],
+    render: 'src/features/pages/components/sections/events/events-parts.tsx',
+    cardTarget: 'article.relative.rounded-card',
+    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    roles: ['title', 'meta', 'body'],
+    headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
   ...frameEvidence('events', {
     mark: ['list', 'agenda', 'featured'],
     overlay: ['list', 'agenda', 'featured'],

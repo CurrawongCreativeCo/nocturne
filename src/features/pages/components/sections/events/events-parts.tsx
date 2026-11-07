@@ -5,16 +5,19 @@ import { Suspense, type ReactNode } from 'react'
 import { ctaClassName } from '@/components/ui/cta-link'
 import { PlainText } from '@/components/ui/plain-text'
 import { resolveLink } from '@/components/ui/resolve-link'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { EVENTS_FEED_PATH, eventPath } from '@/config/event-paths'
 import { hasEvents } from '@/config/profile'
 import { dayBadge, formatWhen, timeAttribute } from '@/lib/events/format'
 import { repeatLabel } from '@/lib/events/recurrence'
 import { requestTime } from '@/lib/request-time'
+import { type resolveCardDesign } from '@/lib/sanity/card-design'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
+import type { OwnText } from '@/lib/sanity/text-style-options'
 
 import type { SectionProps } from '../../../types'
 import { eventsLimit, upcomingEntries, type UpcomingEntry } from '../../../utils/events'
@@ -22,6 +25,8 @@ import { eventsLimit, upcomingEntries, type UpcomingEntry } from '../../../utils
 export type EventsData = SectionProps<'events'>['data']
 export type EventCard = NonNullable<EventsData['events']>[number]
 export type Entry = UpcomingEntry<EventCard>
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 /** How a layout looks and what it draws for the entries that are still to come. */
 export interface EventsLayout {
@@ -34,7 +39,22 @@ export interface EventsLayout {
 export interface EventsContext {
   /** The heading level of the events themselves (or of the days, in the agenda). */
   level: 'h2' | 'h3'
+  /** The section's Cards box: the text roles for every layout, and the Featured card's fill and mark. */
+  cardDesign?: EventsData['cardDesign']
+  /** The section's tone, which the Featured card's mark is measured against. */
+  tone?: string
 }
+
+/** The text roles every layout draws (events-capabilities.ts). */
+export const EVENT_ROLES = ['title', 'meta', 'body'] as const
+export type EventLook = ReturnType<typeof resolveCardDesign<(typeof EVENT_ROLES)[number]>>
+
+/** What each role draws with nothing chosen: its size and weight, so the steps move from them. */
+export const OWN_META = { size: 'text-small', weight: 'regular', colour: 'text-ink-muted' } as const
+export const OWN_META_MEDIUM = { ...OWN_META, weight: 'medium' } as const
+export const OWN_BODY = { size: 'text-body', weight: 'regular', colour: 'text-ink-muted' } as const
+
+export const OWN_TITLE_H4 = { size: 'text-h4', weight: 'semibold' } as const
 
 const linkClass = 'font-medium text-ink underline underline-offset-4 hover:text-accent'
 
@@ -102,12 +122,12 @@ export function DateBadge({ entry, className = 'size-16' }: { entry: Entry; clas
 }
 
 /** "Sat 14 Mar, 10:00 am – 12:00 pm" in a `<time>` for machines, then the venue. */
-export function WhenAndWhere({ entry }: { entry: Entry }) {
+export function WhenAndWhere({ entry, look }: { entry: Entry; look: EventLook }) {
   const { event, timing, occurrence } = entry
   const where = whereOf(event)
   const occurrenceTiming = { ...occurrence, allDay: timing.allDay, timeZone: timing.timeZone }
   return (
-    <p className="text-small text-ink-muted">
+    <p {...textRoleProps('meta', 'text-small text-ink-muted', OWN_META, look.text.meta)}>
       <time dateTime={timeAttribute(occurrence.start, timing.allDay, timing.timeZone)}>
         {formatWhen(occurrenceTiming)}
       </time>
@@ -116,19 +136,45 @@ export function WhenAndWhere({ entry }: { entry: Entry }) {
   )
 }
 
+/** The event's summary, in the body role. `className` is what the layout draws with nothing chosen. */
+export function EventSummary({
+  entry,
+  className,
+  look,
+}: {
+  entry: Entry
+  className: string
+  look: EventLook
+}) {
+  const body = textRoleProps('body', className, OWN_BODY, look.text.body)
+  return (
+    <PlainText
+      text={entry.event.summary}
+      className={body.className}
+      style={body.style}
+      textRole="body"
+    />
+  )
+}
+
 /** The event's title as a heading with the link stretched over its whole card or row. */
 export function EventTitle({
   entry,
   level: Heading,
   className = 'text-h4 font-semibold text-balance',
+  own = OWN_TITLE_H4,
+  look,
 }: {
   entry: Entry
   level: 'h2' | 'h3' | 'h4'
+  /** The classes with nothing chosen, and the `own` size and weight they hold. */
   className?: string
+  own?: OwnText
+  look: EventLook
 }) {
   const slug = stegaClean(entry.event.slug)
   return (
-    <Heading className={className}>
+    <Heading {...textRoleProps('title', className, own, look.text.title)}>
       {slug && hasEvents() ? (
         <Link href={eventPath(slug)} className="after:absolute after:inset-0">
           {entry.event.title}
@@ -140,27 +186,22 @@ export function EventTitle({
   )
 }
 
-function Header({ data, classes }: { data: EventsData; classes: string }) {
-  const { heading, text } = data
+function Header({ data, block, text }: { data: EventsData; block: string; text: string }) {
   const title = sectionTitle(data)
-  if (!title && !text) return null
   return (
-    <div className={`mb-12 max-w-measure-narrow ${classes}`}>
-      {title && (
-        <RichHeading
-          as="h2"
-          blocks={heading}
-          fallback={title}
-          className="text-h2 font-semibold text-balance"
-        />
-      )}
-      {text && (
-        <PlainText
-          text={text}
-          className={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
-        />
-      )}
-    </div>
+    <SectionHeader
+      as="div"
+      spacing="mb-12 max-w-measure-narrow"
+      eyebrow={data.eyebrow}
+      title={title}
+      heading={data.heading}
+      intro={data.text}
+      // Kept exactly as it has always been drawn (see Team's header): with a title the intro names no margin.
+      introClass={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
+      design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      block={block}
+      text={text}
+    />
   )
 }
 
@@ -242,11 +283,15 @@ export function EventsView({
   layout,
 }: SectionProps<'events'> & { layout: EventsLayout }) {
   const { block, text, justify, tone } = sectionTraits(data.style, layout.defaults)
-  const context: EventsContext = { level: sectionTitle(data) ? 'h3' : 'h2' }
+  const context: EventsContext = {
+    level: sectionTitle(data) ? 'h3' : 'h2',
+    cardDesign: data.cardDesign,
+    tone,
+  }
 
   return (
     <SectionFrame style={data.style} defaults={layout.defaults} isFirst={isFirst}>
-      <Header data={data} classes={`${block} ${text}`} />
+      <Header data={data} block={block} text={text} />
       <Suspense fallback={<Placeholder className={layout.placeholderClassName} />}>
         <Upcoming data={data} layout={layout} context={context} />
       </Suspense>

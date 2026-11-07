@@ -1,11 +1,16 @@
-import { PlainText } from '@/components/ui/plain-text'
 import type { SectionDefaults } from '@/components/ui/section-style'
 import { formatDayOf, formatTimeRange } from '@/lib/events/format'
+import { resolveCardDesign } from '@/lib/sanity/card-design'
+import { textRoleProps } from '@/lib/sanity/text-role'
 
 import {
+  EVENT_ROLES,
   EventPills,
   EventsView,
+  EventSummary,
   EventTitle,
+  OWN_META,
+  OWN_META_MEDIUM,
   whereOf,
   type Entry,
   type EventsLayout,
@@ -37,7 +42,8 @@ function groupByDay(entries: Entry[]): Day[] {
 const layout: EventsLayout = {
   defaults: DEFAULTS,
   placeholderClassName: 'min-h-72 rounded-card bg-surface-alt motion-safe:animate-pulse',
-  render: (entries, { level }) => {
+  render: (entries, { level, cardDesign }) => {
+    const look = resolveCardDesign(cardDesign, EVENT_ROLES)
     const Day = level
     const entryLevel = level === 'h2' ? 'h3' : 'h4'
     return (
@@ -55,15 +61,34 @@ const layout: EventsLayout = {
                     key={`${entry.event._id}-${entry.occurrence.start}`}
                     className="relative grid gap-1 px-2 py-5 transition-colors hover:bg-surface-alt sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8 sm:px-4"
                   >
-                    <p className="text-small font-medium text-ink-muted sm:pt-1">
+                    <p
+                      {...textRoleProps(
+                        'meta',
+                        'text-small font-medium text-ink-muted sm:pt-1',
+                        OWN_META_MEDIUM,
+                        look.text.meta,
+                      )}
+                    >
                       {formatTimeRange({ ...entry.occurrence, ...entry.timing })}
                     </p>
                     <div className="min-w-0">
-                      <EventTitle entry={entry} level={entryLevel} />
-                      {where && <p className="mt-1 text-small text-ink-muted">{where}</p>}
-                      <PlainText
-                        text={entry.event.summary}
+                      <EventTitle entry={entry} level={entryLevel} look={look} />
+                      {where && (
+                        <p
+                          {...textRoleProps(
+                            'meta',
+                            'mt-1 text-small text-ink-muted',
+                            OWN_META,
+                            look.text.meta,
+                          )}
+                        >
+                          {where}
+                        </p>
+                      )}
+                      <EventSummary
+                        entry={entry}
                         className="mt-2 max-w-measure text-pretty text-ink-muted"
+                        look={look}
                       />
                       <EventPills entry={entry} />
                     </div>

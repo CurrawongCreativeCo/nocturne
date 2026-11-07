@@ -15,6 +15,8 @@ const OWN_EYEBROW = {
 const OWN_HEADING = { size: 'text-h2', weight: 'semibold' } as const
 const OWN_INTRO = { size: 'text-lead', weight: 'regular', colour: 'text-ink-muted' } as const
 
+const DEFAULT_INTRO_CLASS = 'mt-4 text-lead text-pretty text-ink-muted'
+
 export type SectionHeaderRoles = Record<'eyebrow' | 'heading' | 'intro', TextStyle>
 
 /**
@@ -33,6 +35,8 @@ export function SectionHeader({
   text,
   bare = false,
   headingId,
+  as: Wrapper = 'header',
+  introClass = DEFAULT_INTRO_CLASS,
 }: {
   eyebrow?: string | null
   /** The plain title, drawn when `heading` has no words. */
@@ -48,6 +52,13 @@ export function SectionHeader({
   bare?: boolean
   /** The heading's id, for a section labelled by it (`aria-labelledby`). */
   headingId?: string
+  /** The element around the header, for a section that has always drawn a `div`. */
+  as?: 'header' | 'div'
+  /**
+   * The intro's own classes, for a section whose intro has always been drawn with different ones
+   * (Team's, which names no margin without a title). Its text role's own look is still `OWN_INTRO`.
+   */
+  introClass?: string
 }) {
   if (!title && !eyebrow && !intro) return null
   const headingBase = 'text-h2 font-semibold text-balance'
@@ -62,14 +73,9 @@ export function SectionHeader({
       />
     )
   }
-  const intros = textRoleProps(
-    'intro',
-    'mt-4 text-lead text-pretty text-ink-muted',
-    OWN_INTRO,
-    design.intro,
-  )
+  const intros = textRoleProps('intro', introClass, OWN_INTRO, design.intro)
   return (
-    <header className={`${spacing} ${block} ${text}`}>
+    <Wrapper className={`${spacing} ${block} ${text}`}>
       {eyebrow && (
         <p
           {...textRoleProps(
@@ -92,7 +98,7 @@ export function SectionHeader({
         />
       )}
       <PlainText text={intro} className={intros.className} style={intros.style} textRole="intro" />
-    </header>
+    </Wrapper>
   )
 }
 

@@ -80,6 +80,8 @@ interface CardFieldsConfig {
   surface?: { hidden?: ConditionalPropertyCallback } | false
   /** A decorative mark at this level. */
   mark?: boolean
+  /** Hides the mark where the layout draws no card to hold it. */
+  markHidden?: ConditionalPropertyCallback
   /** What each role is drawn in until one is chosen, for the background's contrast warning. */
   defaults: RoleDefaultColours
   /** The array an item's design sits in, for the item-level contrast warning. */
@@ -140,7 +142,7 @@ function withTextContrast<T extends FieldDefinition>(
 
 /** The fields of a card's design: fill and border, one object per role, a mark. */
 export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
-  const { inherits, inItem, roles, surface = {}, mark = true, hidden } = config
+  const { inherits, inItem, roles, surface = {}, mark = true, markHidden, hidden } = config
   return [
     ...(surface === false
       ? []
@@ -168,7 +170,7 @@ export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
             description: inItem
               ? 'One faint mark behind this card’s text, instead of the section’s card mark.'
               : 'One faint mark behind each card’s text.',
-            hidden,
+            hidden: both(hidden, markHidden),
           }),
         ]
       : []),

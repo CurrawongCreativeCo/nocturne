@@ -662,68 +662,6 @@
     },
     {
       "component": "team",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
-      "capability": "text",
-      "scope": "card",
-      "role": "title",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
-      "capability": "text",
-      "scope": "card",
-      "role": "meta",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
-      "capability": "text",
-      "scope": "card",
-      "role": "body",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 156
-    },
-    {
-      "component": "team",
       "capability": "depth",
       "scope": "card",
       "layouts": ["grid", "slider", "list"],
@@ -940,68 +878,6 @@
       "scope": "card",
       "layouts": ["stacked"],
       "closingTask": 159
-    },
-    {
-      "component": "events",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": ["featured"],
-      "closingTask": 156
-    },
-    {
-      "component": "events",
-      "capability": "text",
-      "scope": "card",
-      "role": "title",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 156
-    },
-    {
-      "component": "events",
-      "capability": "text",
-      "scope": "card",
-      "role": "meta",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 156
-    },
-    {
-      "component": "events",
-      "capability": "text",
-      "scope": "card",
-      "role": "body",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 156
-    },
-    {
-      "component": "events",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 156
-    },
-    {
-      "component": "events",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 156
-    },
-    {
-      "component": "events",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 156
-    },
-    {
-      "component": "events",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": ["featured"],
-      "closingTask": 156
     },
     {
       "component": "events",

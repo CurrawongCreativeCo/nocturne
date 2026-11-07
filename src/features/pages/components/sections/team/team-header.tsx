@@ -1,39 +1,38 @@
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 /** The section's title and intro. Without a title the intro stands alone; without either, nothing. */
 export function TeamHeader({
   data,
-  classes,
+  block,
+  text,
 }: {
   data: SectionProps<'team'>['data']
   /** Block and text alignment classes from `sectionTraits`. */
-  classes: string
+  block: string
+  text: string
 }) {
-  const { heading, text } = data
   const title = sectionTitle(data)
-  if (!title && !text) return null
-
   return (
-    <div className={`mb-12 max-w-measure-narrow ${classes}`}>
-      {title && (
-        <RichHeading
-          as="h2"
-          blocks={heading}
-          fallback={title}
-          className="text-h2 font-semibold text-balance"
-        />
-      )}
-      {text && (
-        <PlainText
-          text={text}
-          className={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
-        />
-      )}
-    </div>
+    <SectionHeader
+      as="div"
+      spacing="mb-12 max-w-measure-narrow"
+      eyebrow={data.eyebrow}
+      title={title}
+      heading={data.heading}
+      intro={data.text}
+      // Kept exactly as it has always been drawn: with a title there is no space between "mt-4" and
+      // "text-lead", so the intro under a title names neither. Fixing it is a visible change, for review.
+      introClass={`${title ? 'mt-4' : ''}text-lead text-pretty text-ink-muted`}
+      design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      block={block}
+      text={text}
+    />
   )
 }
 

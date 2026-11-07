@@ -278,8 +278,16 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     agencyOnly: ['access', 'style', 'interactiveMap'],
   },
   team: {
-    editable: ['heading', 'title', 'text', 'selection', 'members'],
-    agencyOnly: ['variant', 'imageDesign', 'portraitDesign', 'access', 'style'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'selection', 'members'],
+    agencyOnly: [
+      'variant',
+      'headerDesign',
+      'cardDesign',
+      'imageDesign',
+      'portraitDesign',
+      'access',
+      'style',
+    ],
   },
   video: {
     editable: [
@@ -332,8 +340,8 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     ],
   },
   events: {
-    editable: ['heading', 'title', 'text', 'seeAllLink', 'seeAllLabel'],
-    agencyOnly: ['variant', 'access', 'style', 'category', 'count'],
+    editable: ['eyebrow', 'heading', 'title', 'text', 'seeAllLink', 'seeAllLabel'],
+    agencyOnly: ['variant', 'headerDesign', 'cardDesign', 'access', 'style', 'category', 'count'],
   },
   navItem: {
     editable: ['label', 'link', 'children'],

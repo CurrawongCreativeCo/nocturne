@@ -1,11 +1,14 @@
-import { PlainText } from '@/components/ui/plain-text'
+import { CardSurface } from '@/components/ui/card-surface'
 import { SanityImage } from '@/components/ui/sanity-image'
 import type { SectionDefaults } from '@/components/ui/section-style'
+import { resolveCardDesign } from '@/lib/sanity/card-design'
 
 import {
   DateBadge,
+  EVENT_ROLES,
   EventPills,
   EventsView,
+  EventSummary,
   EventTitle,
   WhenAndWhere,
   type EventsLayout,
@@ -15,15 +18,26 @@ import type { SectionProps } from '../../../types'
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = { tone: 'surface', container: 'max-w-content', align: 'start' }
 
+/** The card's own surface: the whole card links, so a chosen fill has no hover shade. */
+const OWN_SURFACE = { background: 'bg-surface', border: 'ring-1 ring-line', still: true }
+
 const layout: EventsLayout = {
   defaults: DEFAULTS,
   placeholderClassName: 'min-h-96 rounded-card bg-surface-alt motion-safe:animate-pulse',
-  render: ([first, ...rest], { level }) => {
+  render: ([first, ...rest], { level, cardDesign, tone }) => {
     if (!first) return null
+    const look = resolveCardDesign(cardDesign, EVENT_ROLES)
     const hasPicture = Boolean(first.event.image?.asset)
     return (
       <div className={rest.length > 0 ? 'grid items-start gap-8 lg:grid-cols-[3fr_2fr]' : ''}>
-        <article className="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-card ring-1 ring-line">
+        <CardSurface
+          as="article"
+          className="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-card ring-1 ring-line"
+          own={OWN_SURFACE}
+          shadow="shadow-card"
+          design={look.surface}
+          mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
+        >
           {hasPicture ? (
             <SanityImage
               image={first.event.image}
@@ -38,19 +52,22 @@ const layout: EventsLayout = {
             </div>
           )}
           <div className="p-6 sm:p-8">
-            <WhenAndWhere entry={first} />
+            <WhenAndWhere entry={first} look={look} />
             <EventTitle
               entry={first}
               level={level}
               className="mt-2 text-h3 font-semibold text-balance"
+              own={{ size: 'text-h3', weight: 'semibold' }}
+              look={look}
             />
-            <PlainText
-              text={first.event.summary}
+            <EventSummary
+              entry={first}
               className="mt-3 max-w-measure text-pretty text-ink-muted"
+              look={look}
             />
             <EventPills entry={first} />
           </div>
-        </article>
+        </CardSurface>
         {rest.length > 0 && (
           <ul className="divide-y divide-line border-y border-line">
             {rest.map((entry) => (
@@ -60,11 +77,13 @@ const layout: EventsLayout = {
               >
                 <DateBadge entry={entry} className="size-14" />
                 <div className="min-w-0 flex-1">
-                  <WhenAndWhere entry={entry} />
+                  <WhenAndWhere entry={entry} look={look} />
                   <EventTitle
                     entry={entry}
                     level={level}
                     className="mt-1 text-lead font-semibold text-balance"
+                    own={{ size: 'text-lead', weight: 'semibold' }}
+                    look={look}
                   />
                   <EventPills entry={entry} />
                 </div>
