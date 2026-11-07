@@ -213,6 +213,15 @@ interface CardFamilyEvidence {
   box?: string
   /** Where the family has no card of its own at a layout, the layouts it does (surface and marks). */
   cardLayouts?: readonly string[]
+  /** The layouts its text roles draw on, when not all of them. */
+  roleLayouts?: readonly string[]
+  /**
+   * A look that is a setting, not a layout (FAQ's Divided list and Cards): names these entries, so each look
+   * has independent evidence for what it draws. `base` sets the look.
+   */
+  look?: string
+  /** What this call proves. Default: everything. A look that draws no card proves only its text. */
+  parts?: readonly ('surface' | 'text' | 'header' | 'mark')[]
 }
 
 /**
@@ -221,8 +230,22 @@ interface CardFamilyEvidence {
  * surface's the card, a mark's the mark's own box, and the item scope sets the item's Appearance first.
  */
 function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
-  const { component, layouts, render, cardTarget, base, roles, item, cardLayouts } = config
+  const {
+    component,
+    layouts,
+    render,
+    cardTarget,
+    base,
+    roles,
+    item,
+    cardLayouts,
+    roleLayouts,
+    look,
+  } = config
   const box = config.box ?? 'cardDesign'
+  const proves = (part: 'surface' | 'text' | 'header' | 'mark') =>
+    !config.parts || config.parts.includes(part)
+  const named = look ? `.${look}` : ''
   const index = item?.index ?? 0
   const scopes = item ? (['card', 'item'] as const) : (['card'] as const)
   const pathOf = (scope: 'card' | 'item', field: string) =>
@@ -241,8 +264,8 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
     base: baseOf(scope),
   })
   return [
-    ...scopes.map((scope): CapabilityEvidence => ({
-      id: `${component}.surface.${scope}`,
+    ...(proves('surface') ? scopes : []).map((scope): CapabilityEvidence => ({
+      id: `${component}.surface.${scope}${named}`,
       ...common(scope, cardLayouts ?? layouts),
       capability: 'surface',
       field: pathOf(scope, 'border'),
@@ -251,10 +274,10 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
       change: 'attributes',
       probe: { [probeOf(scope, 'border')]: 'thick' },
     })),
-    ...scopes.flatMap((scope) =>
+    ...(proves('text') ? scopes : []).flatMap((scope) =>
       roles.map((role): CapabilityEvidence => ({
-        id: `${component}.text.${scope}.${role}`,
-        ...common(scope, layouts),
+        id: `${component}.text.${scope}${named}.${role}`,
+        ...common(scope, roleLayouts ?? layouts),
         capability: 'text',
         role,
         field: pathOf(scope, role),
@@ -264,7 +287,7 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
         probe: { [probeOf(scope, `${role}.size`)]: 'large' },
       })),
     ),
-    ...(config.headerRoles ?? []).map((role): CapabilityEvidence => ({
+    ...(proves('header') ? (config.headerRoles ?? []) : []).map((role): CapabilityEvidence => ({
       id: `${component}.header.section.${role}`,
       ...common('section', layouts),
       capability: 'header',
@@ -276,8 +299,8 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
       change: 'attributes',
       probe: { [`headerDesign.${role}.size`]: 'large' },
     })),
-    ...scopes.map((scope): CapabilityEvidence => ({
-      id: `${component}.mark.${scope}`,
+    ...(proves('mark') ? scopes : []).map((scope): CapabilityEvidence => ({
+      id: `${component}.mark.${scope}${named}`,
       ...common(scope, cardLayouts ?? layouts),
       capability: 'mark',
       field: pathOf(scope, 'mark'),

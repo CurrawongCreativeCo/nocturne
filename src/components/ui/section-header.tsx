@@ -31,12 +31,13 @@ export function SectionHeader({
   intro,
   design,
   spacing = 'mb-16 max-w-measure-narrow',
-  block,
-  text,
+  block = '',
+  text = '',
   bare = false,
   headingId,
   as: Wrapper = 'header',
   introClass = DEFAULT_INTRO_CLASS,
+  className,
 }: {
   eyebrow?: string | null
   /** The plain title, drawn when `heading` has no words. */
@@ -47,8 +48,8 @@ export function SectionHeader({
   /** The header's own space and measure. */
   spacing?: string
   /** The section's alignment classes (sectionTraits). */
-  block: string
-  text: string
+  block?: string
+  text?: string
   bare?: boolean
   /** The heading's id, for a section labelled by it (`aria-labelledby`). */
   headingId?: string
@@ -59,6 +60,8 @@ export function SectionHeader({
    * no title sits above it). Its text role's own look is still `OWN_INTRO`.
    */
   introClass?: string
+  /** The wrapper's whole class, for a section whose header isn't `spacing`, block and text (FAQ's). */
+  className?: string
 }) {
   if (!title && !eyebrow && !intro) return null
   const headingBase = 'text-h2 font-semibold text-balance'
@@ -75,7 +78,7 @@ export function SectionHeader({
   }
   const intros = textRoleProps('intro', introClass, OWN_INTRO, design.intro)
   return (
-    <Wrapper className={`${spacing} ${block} ${text}`}>
+    <Wrapper className={className ?? `${spacing} ${block} ${text}`}>
       {eyebrow && (
         <p
           {...textRoleProps(

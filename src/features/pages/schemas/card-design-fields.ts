@@ -188,11 +188,14 @@ export function cardDesignField({
   title = scopedGroupTitle('Cards', 'card'),
   description = 'Shared background, border, text and mark for every card. Inherit uses the default card.',
   presets,
+  boxHidden,
   ...config
 }: Omit<CardFieldsConfig, 'inItem' | 'hidden'> & {
   title?: string
   description?: string
   presets?: readonly PresetDefinition[]
+  /** Hides the whole box where the layout draws nothing it could change. */
+  boxHidden?: ConditionalPropertyCallback
 }) {
   return defineField({
     name: 'cardDesign',
@@ -200,7 +203,7 @@ export function cardDesignField({
     type: 'object',
     group: 'design',
     description,
-    hidden: hiddenFromClients,
+    hidden: both(hiddenFromClients, boxHidden),
     options: {
       collapsible: true,
       collapsed: false,

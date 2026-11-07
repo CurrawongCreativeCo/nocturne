@@ -20,6 +20,7 @@ export function CardSurface({
   className,
   own,
   shadow = '',
+  drawnClass,
   design,
   mark,
   children,
@@ -30,6 +31,8 @@ export function CardSurface({
   /** Which of those classes are the surface's. */
   own: OwnRingSurface
   shadow?: string
+  /** Added once a fill or border is chosen, for a family with no surface of its own (a post card's corners and padding). */
+  drawnClass?: string
   design: SurfaceDesign
   /** The family's mark at this level (DecorativeMark), drawn behind its content, over its fill. */
   mark?: Omit<DecorativeMarkProps, 'nested'>
@@ -43,7 +46,7 @@ export function CardSurface({
     look.style ? look.className : `${own.background} ${own.border}`,
   )
   const props = {
-    className: `${design.background === 'transparent' ? swapClasses(swapped, shadow, '') : swapped}${hasMark ? ' relative isolate' : ''}`,
+    className: `${design.background === 'transparent' ? swapClasses(swapped, shadow, '') : swapped}${look.style && drawnClass ? ` ${drawnClass}` : ''}${hasMark ? ' relative isolate' : ''}`,
     style: look.style,
   }
   // Only present with a mark: an empty slot would shift every useId inside the card.

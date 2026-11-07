@@ -283,6 +283,23 @@ ADDITION (7 November 2026, from task 275's architecture correction)
   and a pending source's field must be rejected by proposals (audit finding L1).
 ```
 
+## Proposed shared-surface enhancement (owner decision, 7 November 2026)
+
+Task 156 item 9 lists "a brand-gradient border choice for a highlighted card". The owner deferred it: a
+Pricing-only gradient would be a private control. It belongs in the shared surface looks, where every card
+family could offer it. Proposed owner: task 159, whose one CSS contract already covers each surface's fill,
+opacity, border, blur and shadow. Not applied, and not implemented.
+
+Append to task 159's prompt:
+
+```text
+ADDITION (7 November 2026, deferred from task 156 item 9)
+- A gradient border as a shared surface look, from the brand gradients, available to every card family through
+  surfaceFields and CardSurface, not to one section. A ring can't draw a gradient, so choose the technique
+  (border-image loses the card's radius; a masked layer or background-clip keeps it) and check contrast and
+  forced-colours. Pricing's highlighted plan is the first use. Task 156's DONE WHEN doesn't wait for this.
+```
+
 ## Page text
 
 ```text
