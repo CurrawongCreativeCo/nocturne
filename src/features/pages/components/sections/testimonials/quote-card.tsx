@@ -42,10 +42,13 @@ export function QuoteCard({
   item,
   avatarDesign,
   cardDesign,
+  tone,
 }: {
   item: Item
   avatarDesign?: Data['avatarDesign']
   cardDesign?: Data['cardDesign']
+  /** The section's tone, which the card's mark is measured against. */
+  tone?: string
 }) {
   const design = resolveCardDesign(cardDesign, ROLES)
   const quote = plainTextParagraphs(item.quote)
@@ -62,6 +65,7 @@ export function QuoteCard({
       own={OWN_SURFACE}
       shadow="shadow-card"
       design={design.surface}
+      mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >
       {rating && <TestimonialRating rating={rating} />}
       <blockquote

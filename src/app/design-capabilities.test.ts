@@ -15,9 +15,14 @@ import { BASELINE_CHANGES } from '@/lib/design/capability-baseline-changes'
 import { DESIGN_CONTEXTS } from '@/lib/design/capability-design-contexts'
 import { EVIDENCE } from '@/lib/design/capability-evidence'
 import { CAPABILITY_EXCEPTIONS } from '@/lib/design/capability-exceptions'
-import { declarationProblems, type ContractProblem } from '@/lib/design/capability-policy'
+import {
+  declarationProblems,
+  policyCells,
+  type ContractProblem,
+} from '@/lib/design/capability-policy'
 import { contractProblems, formatProblem } from '@/lib/design/contract-checks'
 import { exceptionProblems, privateFields } from '@/lib/design/schema-capabilities'
+import { takesSectionMark } from '@/lib/design/section-surfaces'
 
 import { COMPONENT_SCHEMAS, DESIGN_COMPONENTS, gate, lookupType } from './design-components'
 
@@ -162,4 +167,18 @@ describe('the design capability contract', () => {
       }).toMatchSnapshot()
     },
   )
+})
+
+describe('where a section-level decorative mark is offered', () => {
+  it('matches every section’s declaration: the schema, the renderer and the policy agree', () => {
+    for (const component of DESIGN_COMPONENTS) {
+      if (component.kind !== 'section' || !component.declaration) continue
+      const cells = policyCells(
+        'mark',
+        component.declaration.capabilities.mark,
+        component.layouts,
+      ).filter((cell) => cell.scope === 'section' && cell.policy !== 'notApplicable')
+      expect(takesSectionMark(component.id), component.id).toBe(cells.length > 0)
+    }
+  })
 })

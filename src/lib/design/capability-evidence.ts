@@ -277,6 +277,11 @@ const TESTIMONIAL_CONTENT: Patch = {
   ],
 }
 
+const MARK_MEASURED = {
+  section: 'a section mark sits behind its content, clipped to its section, with no layout shift',
+  card: 'a card mark sits behind its text, clipped to its card, with no layout shift',
+} as const
+
 const WITH_CARDS = ['stacked', 'cards', 'compact']
 /** The text roles each layout draws: Compact shows the label only. */
 const TEXT_ROLES_DRAWN = [
@@ -799,6 +804,33 @@ export const EVIDENCE: readonly Evidence[] = [
     base: TESTIMONIAL_CONTENT,
     probe: { [`headerDesign.${role}.size`]: 'large' },
   })),
+  // A mark draws nothing until it is chosen, so its claim is that the probe draws it. Words and an icon
+  // here; a picture needs a frame document, which the browser checks measure with everything else.
+  ...(['section', 'card'] as const).flatMap((scope) =>
+    (['text', 'icon'] as const).map((kind): CapabilityEvidence => {
+      const path = scope === 'section' ? 'style.mark' : 'cardDesign.mark'
+      return {
+        id: `testimonials.mark.${scope}.${kind}`,
+        component: 'testimonials',
+        capability: 'mark',
+        scope,
+        layouts: TESTIMONIAL_LAYOUTS,
+        field: path,
+        resolvers: [
+          { module: '@/lib/sanity/decorative-mark-options', export: 'resolveDecorativeMark' },
+        ],
+        render: 'src/components/ui/decorative-mark.tsx',
+        target: `[data-decorative-mark="${scope}"][data-mark-kind="${kind}"]`,
+        change: 'appears',
+        base: TESTIMONIAL_CONTENT,
+        probe:
+          kind === 'text'
+            ? { [`${path}.kind`]: 'text', [`${path}.text`]: 'Thanks' }
+            : { [`${path}.kind`]: 'icon', [`${path}.icon`]: 'heart' },
+        measured: [{ file: 'tests/e2e/card-design.spec.ts', cases: [MARK_MEASURED[scope]] }],
+      }
+    }),
+  ),
   {
     id: 'testimonials.manual',
     component: 'testimonials',

@@ -277,6 +277,7 @@ export const SHARED_BUILDERS = {
   badgeIconField: 'src/lib/sanity/schema/badge-icon-field.ts',
   framing: 'src/lib/sanity/schema/image-framing-option.ts',
   decorativeDivider: 'src/lib/sanity/schema/decorative-divider.ts',
+  decorativeMark: 'src/lib/sanity/schema/decorative-mark.ts',
   slotField: 'src/features/pages/slots/slot-field.ts',
   imageDesign: 'src/lib/sanity/schema/image-design.ts',
   avatarDesignField: 'src/lib/sanity/schema/avatar-design.ts',

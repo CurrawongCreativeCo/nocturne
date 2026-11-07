@@ -5015,7 +5015,8 @@
         {
           "path": "cardDesign.background",
           "kind": "object",
-          "required": false,
+          "required": null,
+          "max": null,
           "capability": "surface",
           "clientEditable": false
         },
@@ -5617,6 +5618,12 @@
           "clientEditable": false
         },
         {
+          "path": "cardDesign.mark",
+          "kind": "decorativeMark",
+          "required": false,
+          "clientEditable": false
+        },
+        {
           "path": "avatarDesign",
           "kind": "object",
           "required": false,
@@ -5961,24 +5968,113 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "style.mark"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             },
             {
               "policy": "required",
               "scope": "card",
               "closingTask": 156,
-              "fields": [],
+              "fields": [
+                "cardDesign.mark"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "testimonials.mark.section.text",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"section\"][data-mark-kind=\"text\"]",
+              "cases": [
+                "testimonials.mark.section.text@grid",
+                "testimonials.mark.section.text@slider"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/card-design.spec.ts",
+                  "cases": [
+                    "a section mark sits behind its content, clipped to its section, with no layout shift"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "testimonials.mark.section.icon",
+              "field": "style.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"section\"][data-mark-kind=\"icon\"]",
+              "cases": [
+                "testimonials.mark.section.icon@grid",
+                "testimonials.mark.section.icon@slider"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/card-design.spec.ts",
+                  "cases": [
+                    "a section mark sits behind its content, clipped to its section, with no layout shift"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "testimonials.mark.card.text",
+              "field": "cardDesign.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"card\"][data-mark-kind=\"text\"]",
+              "cases": [
+                "testimonials.mark.card.text@grid",
+                "testimonials.mark.card.text@slider"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/card-design.spec.ts",
+                  "cases": [
+                    "a card mark sits behind its text, clipped to its card, with no layout shift"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "testimonials.mark.card.icon",
+              "field": "cardDesign.mark",
+              "resolvers": [
+                "@/lib/sanity/decorative-mark-options#resolveDecorativeMark"
+              ],
+              "render": "src/components/ui/decorative-mark.tsx",
+              "target": "[data-decorative-mark=\"card\"][data-mark-kind=\"icon\"]",
+              "cases": [
+                "testimonials.mark.card.icon@grid",
+                "testimonials.mark.card.icon@slider"
+              ],
+              "measured": [
+                {
+                  "file": "tests/e2e/card-design.spec.ts",
+                  "cases": [
+                    "a card mark sits behind its text, clipped to its card, with no layout shift"
+                  ]
+                }
+              ]
+            }
+          ]
         },
         "depth": {
           "policies": [
@@ -18536,6 +18632,12 @@
       {
         "path": "imageFixed",
         "kind": "boolean",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "mark",
+        "kind": "decorativeMark",
         "required": false,
         "clientEditable": false
       },

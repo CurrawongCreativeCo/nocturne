@@ -1,5 +1,7 @@
 import { createElement, type ElementType, type ReactNode } from 'react'
 
+import { DecorativeMark, type DecorativeMarkProps } from '@/components/ui/decorative-mark'
+import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
 import {
   ringSurfaceLook,
   type OwnRingSurface,
@@ -19,6 +21,7 @@ export function CardSurface({
   own,
   shadow = '',
   design,
+  mark,
   children,
 }: {
   as: ElementType
@@ -28,20 +31,23 @@ export function CardSurface({
   own: OwnRingSurface
   shadow?: string
   design: SurfaceDesign
+  /** The family's mark at this level (DecorativeMark), drawn behind its content, over its fill. */
+  mark?: Omit<DecorativeMarkProps, 'nested'>
   children: ReactNode
 }) {
   const look = ringSurfaceLook(design, own)
+  const hasMark = resolveDecorativeMark(mark?.input) !== null
   const swapped = swapClasses(
     className,
     `${own.background} ${own.border}`,
     look.style ? look.className : `${own.background} ${own.border}`,
   )
-  return createElement(
-    as,
-    {
-      className: design.background === 'transparent' ? swapClasses(swapped, shadow, '') : swapped,
-      style: look.style,
-    },
-    children,
-  )
+  const props = {
+    className: `${design.background === 'transparent' ? swapClasses(swapped, shadow, '') : swapped}${hasMark ? ' relative isolate' : ''}`,
+    style: look.style,
+  }
+  // Only present with a mark: an empty slot would shift every useId inside the card.
+  return mark && hasMark
+    ? createElement(as, props, <DecorativeMark {...mark} nested />, children)
+    : createElement(as, props, children)
 }

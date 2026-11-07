@@ -1,4 +1,5 @@
 import { SectionFrame } from '@/components/ui/section-frame'
+import { sectionTraits } from '@/components/ui/section-style'
 import { LazySlider } from '@/components/ui/slider-lazy'
 
 import { DEFAULTS } from './defaults'
@@ -7,6 +8,7 @@ import { QuoteCard } from './quote-card'
 import type { SectionProps } from '../../../types'
 
 export function TestimonialsSlider({ data, isFirst }: SectionProps<'testimonials'>) {
+  const { tone } = sectionTraits(data.style, DEFAULTS)
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       <TestimonialsHeader data={data} />
@@ -17,6 +19,7 @@ export function TestimonialsSlider({ data, isFirst }: SectionProps<'testimonials
             item={item}
             avatarDesign={data.avatarDesign}
             cardDesign={data.cardDesign}
+            tone={tone}
           />
         ))}
       </LazySlider>

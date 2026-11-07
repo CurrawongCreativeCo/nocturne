@@ -8,6 +8,7 @@ import {
   imageDesignFields,
   imageFields,
   linkFields,
+  decorativeMarkFields,
   portableTextFields,
   sectionStyleFields,
   splitMediaFields,
@@ -162,7 +163,8 @@ export const testimonialsFragment = /* groq */ `
         highlight { colour { colour, hex }, weight, fontStyle }
       },
       attribution { ${textStyleProjection} },
-      label { ${textStyleProjection} }
+      label { ${textStyleProjection} },
+      mark { ${decorativeMarkFields} }
     },
     avatarDesign { ${avatarDesignFields} },
     items[] {

@@ -1324,6 +1324,22 @@ exports[`design capability evidence > testimonials.header.section.intro@slider: 
 ]
 `;
 
+exports[`design capability evidence > testimonials.mark.card.icon@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.icon@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.text@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.card.text@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.icon@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.icon@slider: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.text@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > testimonials.mark.section.text@slider: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > testimonials.motion.section@grid: the probe changes the registered target 1`] = `
 [
   "fc6f356efe668789 (1678 characters)",

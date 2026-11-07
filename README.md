@@ -2478,7 +2478,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R…     | R…   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R…   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | FAQ (`faq`)                              | R…      | R…   | R…     | R…   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Call to action banner (`ctaBanner`)      | R…      | –    | R…     | R…   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
 | Form (`formSection`)                     | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
@@ -2503,7 +2503,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 108      | 0               | 182     |
+| Required                                                 | 110      | 0               | 180     |
 | Conditional                                              | 4        | 0               | 40      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2515,7 +2515,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
 | 151          | 19               | 0                   |
-| 156          | 117              | 1                   |
+| 156          | 115              | 1                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
@@ -2523,7 +2523,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 213          | 7                | 0                   |
 | 276          | 2                | 0                   |
 
-**Evidence.** 113 capability entries, 250 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 117 capability entries, 258 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -4373,6 +4373,19 @@ overlay, plus the unset defaults on a light and a dark tone). The fixture's `des
 colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
 the real guard for pictures is the Studio warning and the overlay values above.
 
+### Decorative marks
+
+A faint word, picture or icon behind a section, card or item (task 156): the shared `decorativeMark` type (`src/lib/sanity/schema/decorative-mark.ts`), drawn by one server component, `DecorativeMark` (`src/components/ui/decorative-mark.tsx`), with no JavaScript. Empty or None draws nothing, and adds nothing to the page's markup. A section's sits in `style.mark`, on every section except Embed and Video (`takesSectionMark`, held to each section's capability declaration by a test); a card family's sits in its Cards box as `cardDesign.mark`. Testimonials offer both. No component offers the item scope yet: Pricing plans adopt it first.
+
+- **Content:** up to 24 characters of words, an icon from the shared set, or a picture. Pictures are approved frames (_Design > Image frames_), drawn as a CSS mask so they take a tint, or in their own colours. Words are drawn from an attribute, so they are never read, copied or indexed as content.
+- **Bounds:** size relative to the container, Same, Smaller or Hidden on phones, nine anchors, offset ±25%, rotation ±30° in 5° steps, opacity 2–20% for words and icons and up to 40% for pictures. `resolveDecorativeMark` applies them again when drawing, so a stored value can't draw outside them.
+- **Layers:** picture, then overlay, then the mark, then the panel, then the content. On a section with a panel the mark sits inside the panel by default, over its fill; _Behind the panel_ puts it under. On a card it sits over the card's fill and under its text.
+- **Decorative only:** `aria-hidden`, no pointer events, never focusable, clipped to its own box, absolutely placed, so it can't cause a horizontal scroll, reach a neighbour or shift layout.
+- **Contrast:** `markOpacityAt` (`src/lib/color/mark-contrast.ts`) measures the text against its surface with the mark composited over it. A combination that fails lowers the opacity when drawn, or drops the mark if no opacity is safe; Studio's Opacity field warns with the same decision, and it is never an error. A picture in its own colours counts as anything from black to white, and so does what sits behind the text on a section with a picture, gradient or panel.
+- **Keep in mind:** a section mark sits behind opaque cards too, so on a phone, where cards fill the width, a middle-anchored one is mostly hidden. Anchor it to the top, or use a card mark.
+
+Card contrast is one lookup for any family (`src/lib/color/card-contrast.ts`): each role in its chosen colour across the section, card and item levels, else the colour the family draws it in (`RoleDefaultColours`). `withCardTextContrast` adds the Background colour warning from it. The Link list's own warning moves to it when the Link list adopts the shared builders.
+
 ### Decorative dividers
 
 A decorative divider is a small rule _inside_ a section, between two parts of its content: a line, a fading line or three
@@ -5452,13 +5465,13 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
-| Kind            | Files                                                                                                  | Shown for                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts)                          |
-| Hero presets    | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                                                 |
-| Animations      | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, subtle, fade, slide, staggered, float, parallax (three strengths) |
-| Tones           | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                                           |
-| Insert menu     | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                                                |
+| Kind                          | Files                                                                                                  | Shown for                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Section layouts, card presets | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts)                          |
+| Hero presets                  | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                                                 |
+| Animations                    | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, subtle, fade, slide, staggered, float, parallax (three strengths) |
+| Tones                         | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                                           |
+| Insert menu                   | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                                                |
 
 `registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 

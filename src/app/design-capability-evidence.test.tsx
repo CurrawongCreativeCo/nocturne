@@ -128,6 +128,9 @@ vi.mock('@/lib/sanity/image', async (load) => resolvers.wrap('@/lib/sanity/image
 vi.mock('@/lib/sanity/card-design', async (load) =>
   resolvers.wrap('@/lib/sanity/card-design', await load()),
 )
+vi.mock('@/lib/sanity/decorative-mark-options', async (load) =>
+  resolvers.wrap('@/lib/sanity/decorative-mark-options', await load()),
+)
 vi.mock('@/lib/sanity/depth-options', async (load) =>
   resolvers.wrap('@/lib/sanity/depth-options', await load()),
 )

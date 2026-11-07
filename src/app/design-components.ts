@@ -11,6 +11,7 @@ import * as badgeRow from '@/lib/sanity/schema/badge-row'
 import * as blockContent from '@/lib/sanity/schema/block-content'
 import * as cta from '@/lib/sanity/schema/cta'
 import * as decorativeDivider from '@/lib/sanity/schema/decorative-divider'
+import * as decorativeMark from '@/lib/sanity/schema/decorative-mark'
 import * as headingText from '@/lib/sanity/schema/heading-text'
 import * as imageDesign from '@/lib/sanity/schema/image-design'
 import * as launchDate from '@/lib/sanity/schema/launch-date'
@@ -38,6 +39,7 @@ const named = [
     blockContent,
     cta,
     decorativeDivider,
+    decorativeMark,
     headingText,
     imageDesign,
     launchDate,

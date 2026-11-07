@@ -6,13 +6,17 @@ import { headingPlainText } from '@/lib/sanity/heading-text'
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
+import { withCardTextContrast } from '@/lib/sanity/schema/card-contrast-warning'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { presetsOption } from '@/lib/sanity/schema/preset-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import { surfaceFields, textRoleField } from '@/lib/sanity/schema/surface-design'
-import { TESTIMONIAL_CARD_PRESETS } from '@/lib/sanity/schema/testimonial-card-presets'
+import {
+  TESTIMONIAL_CARD_PRESETS,
+  TESTIMONIAL_ROLE_COLOURS,
+} from '@/lib/sanity/schema/testimonial-card-presets'
 import {
   TestimonialsGridThumbnail,
   TestimonialsSliderThumbnail,
@@ -215,7 +219,9 @@ export const testimonials = defineType({
           },
         ],
         fields: [
-          ...surfaceFields({ inherits: 'the default card' }),
+          ...surfaceFields({ inherits: 'the default card' }).map((field) =>
+            withCardTextContrast(field, TESTIMONIAL_ROLE_COLOURS),
+          ),
           textRoleField({
             role: 'quote',
             inherits: 'the default card',
@@ -224,6 +230,12 @@ export const testimonials = defineType({
           }),
           textRoleField({ role: 'attribution', inherits: 'the default card', fieldset: 'text' }),
           textRoleField({ role: 'label', inherits: 'the default card', fieldset: 'text' }),
+          defineField({
+            name: 'mark',
+            title: 'Decorative mark',
+            type: 'decorativeMark',
+            description: 'One faint mark behind each card’s text.',
+          }),
         ],
       }),
       avatarDesignField({

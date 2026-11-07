@@ -2822,6 +2822,145 @@ documents.push({
 })
 
 /**
+ * A real page of the shared card design (task 156, tests/e2e/card-design.spec.ts): each card family's
+ * tint, border, text change, highlight and decorative mark at each scope. Not indexed, and not in the
+ * section gallery, so it adds no visual baseline.
+ */
+const cardDesignQuotes = (id, extra = {}) =>
+  ['Sam Sample', 'Alex Example', 'Robin Rowe'].map((name, index) => ({
+    _key: `${id}-${String(index)}`,
+    _type: 'testimonial',
+    quote: 'They changed how we work, and every week since has been calmer and clearer.',
+    name,
+    role: 'Owner, Example Co',
+    ...extra,
+  }))
+const cardDesignSection = (id, title, extra = {}) => ({
+  _key: id,
+  _type: 'testimonials',
+  title,
+  items: cardDesignQuotes(id),
+  ...extra,
+})
+const markStyle = (extra) => ({ _type: 'decorativeMark', ...extra })
+const framePicture = { _type: 'reference', _ref: 'frame-picture' }
+documents.push({
+  _id: 'page-card-design',
+  _type: 'page',
+  title: 'Card design',
+  slug: { _type: 'slug', current: 'card-design' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    cardDesignSection('plain', 'No mark'),
+    cardDesignSection('marked-section', 'Section mark', {
+      style: { mark: markStyle({ kind: 'text', text: 'Thanks', size: 'large', opacity: 10 }) },
+    }),
+    cardDesignSection('marked-card', 'Card mark', {
+      cardDesign: {
+        mark: markStyle({ kind: 'icon', icon: 'heart', anchor: 'bottom-right', opacity: 12 }),
+      },
+    }),
+    cardDesignSection('tinted', 'A tint and a highlight', {
+      cardDesign: {
+        background: { colour: 'accent' },
+        backgroundStrength: 'light',
+        border: 'none',
+        quote: { size: 'large', fontStyle: 'italic' },
+        attribution: { colour: { colour: 'ink' } },
+        label: { colour: { colour: 'ink' } },
+      },
+      items: cardDesignQuotes('tinted', {
+        highlights: ['changed how we work'],
+        source: 'client-feedback',
+        date: '2026-03-12',
+        rating: 5,
+      }),
+    }),
+    cardDesignSection('outlined', 'A border and a text change', {
+      cardDesign: {
+        background: { colour: 'transparent' },
+        backgroundStrength: 'solid',
+        border: 'medium',
+        borderColour: { colour: 'accent' },
+        attribution: { weight: 'medium', colour: { colour: 'accent' } },
+        label: { textCase: 'uppercase', size: 'small' },
+      },
+      eyebrow: 'What people say',
+      intro: 'A sentence or two about the people we have worked with.',
+    }),
+    cardDesignSection('picture-tinted', 'A picture in the theme colour', {
+      style: {
+        mark: markStyle({
+          kind: 'picture',
+          picture: framePicture,
+          anchor: 'top-right',
+          size: 'large',
+          offsetX: 20,
+          rotation: 15,
+          colour: { colour: 'accent' },
+          opacity: 30,
+        }),
+      },
+    }),
+    cardDesignSection('picture-own', 'A picture in its own colours', {
+      cardDesign: {
+        mark: markStyle({
+          kind: 'picture',
+          picture: framePicture,
+          keepColours: true,
+          anchor: 'top-left',
+          offsetX: -25,
+          offsetY: -25,
+          size: 'large',
+          opacity: 30,
+        }),
+      },
+    }),
+    cardDesignSection('panel-content', 'A mark on a panel', {
+      style: {
+        panel: 'solid',
+        mark: markStyle({ kind: 'text', text: 'Thanks', size: 'large', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('panel-behind', 'A mark behind a panel', {
+      style: {
+        panel: 'solid',
+        mark: markStyle({
+          kind: 'text',
+          text: 'Thanks',
+          size: 'large',
+          layer: 'panel',
+          opacity: 10,
+        }),
+      },
+    }),
+    cardDesignSection('phone-hidden', 'A mark hidden on phones', {
+      style: {
+        mark: markStyle({ kind: 'icon', icon: 'star', phoneScale: 'hidden', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('slider', 'A slider with card marks', {
+      variant: 'slider',
+      cardDesign: {
+        mark: markStyle({ kind: 'text', text: 'Thanks', anchor: 'top-right', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('heavy', 'A mark too strong for its text', {
+      style: {
+        tone: 'default',
+        mark: markStyle({
+          kind: 'icon',
+          icon: 'heart',
+          size: 'large',
+          opacity: 40,
+          colour: { colour: 'ink' },
+        }),
+      },
+    }),
+  ],
+})
+
+/**
  * A real page with Image + text's supporting video in each layout, with the picture, and with no
  * picture (tests/e2e/media-text-placement.spec.ts): where each layout places the media and the extra
  * block at phone, tablet and desktop widths. Not indexed, and not in the section gallery, so it adds

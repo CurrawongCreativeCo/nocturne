@@ -254,20 +254,6 @@
     },
     {
       "component": "testimonials",
-      "capability": "mark",
-      "scope": "section",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
-      "capability": "mark",
-      "scope": "card",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
       "capability": "depth",
       "scope": "card",
       "layouts": ["grid", "slider"],
