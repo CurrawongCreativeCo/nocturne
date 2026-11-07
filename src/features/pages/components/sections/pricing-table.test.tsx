@@ -144,6 +144,26 @@ describe('Pricing: the card design and a plan’s own', () => {
     expect(on?.className).toContain('ring-3')
   })
 
+  it('customising one plan leaves the other plans drawn as they were', async () => {
+    const own = {
+      appearance: 'custom',
+      border: 'thick',
+      title: { size: 'small' },
+      mark: { kind: 'icon', icon: 'heart' },
+    }
+    const plans = (design: Record<number, unknown>) =>
+      ['a', 'b', 'c'].map((key, index) =>
+        plan(key, index in design ? { design: design[index] } : {}),
+      )
+    const html = async (design: Record<number, unknown>) =>
+      cards(await draw(plans(design))).map((card) => card.outerHTML)
+    const [plain, first, last] = await Promise.all([html({}), html({ 0: own }), html({ 2: own })])
+    expect(first[0]).not.toBe(plain[0])
+    expect(first.slice(1)).toEqual(plain.slice(1))
+    expect(last[2]).not.toBe(plain[2])
+    expect(last.slice(0, 2)).toEqual(plain.slice(0, 2))
+  })
+
   it('keeps the highlighted plan’s width when only its border colour changes, and its colour when only the width does', async () => {
     const highlighted = (design: Record<string, unknown>) =>
       draw([plan('a', { highlighted: true })], { cardDesign: design }).then(

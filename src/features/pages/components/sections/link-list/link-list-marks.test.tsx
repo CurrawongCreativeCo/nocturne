@@ -248,6 +248,30 @@ describe('inheritance from the section to the card to the item', () => {
   })
 })
 
+describe('one customised link leaves the others alone', () => {
+  // Border, text size and a mark together, so a leak of any of them shows. Compared with the same list
+  // with nothing customised, so what the second link drew before is exactly what it draws after.
+  const OWN = { border: 'thick', label: { size: 'large' }, mark: ITEM_MARK }
+  const at = (index: number) => ({
+    [`links.${String(index)}.design`]: { appearance: 'custom', ...OWN },
+  })
+
+  it.each(LOOKS)(
+    '$name: customising either link changes that link only',
+    async ({ layout, look }) => {
+      const [plain, first, second] = await Promise.all([
+        links(layout, look),
+        links(layout, { ...look, ...at(0) }),
+        links(layout, { ...look, ...at(1) }),
+      ])
+      expect(first[0]?.html).not.toBe(plain[0]?.html)
+      expect(first[1]?.html).toBe(plain[1]?.html)
+      expect(second[1]?.html).not.toBe(plain[1]?.html)
+      expect(second[0]?.html).toBe(plain[0]?.html)
+    },
+  )
+})
+
 describe('a ruled Editorial row', () => {
   it('measures its mark on the section, whatever fill a box has stored', async () => {
     const mark = { kind: 'text', text: 'Card', opacity: 30 }
