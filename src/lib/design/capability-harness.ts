@@ -3,6 +3,8 @@ import { createRequire } from 'node:module'
 import type { ReactElement } from 'react'
 import { renderToReadableStream } from 'react-dom/server'
 
+import { TEXT_ROLE_ATTRIBUTE, TEXT_ROLES, type TextRole } from './capabilities'
+
 // jsdom (a dev dependency the Studio tests already use) ships no types: type the one call made. It is
 // loaded on first use, so a test that only renders (the section fixtures) doesn't pay for it.
 const load = createRequire(import.meta.url)
@@ -84,4 +86,26 @@ export function compareTarget(
   if (unset.length === 0 || probed.length === 0) return { status: 'missing', unset }
   const same = unset.length === probed.length && unset.every((value, i) => value === probed[i])
   return { status: same ? 'ignored' : 'changed', unset }
+}
+
+/**
+ * The text roles other than `role` whose elements the probe also changed. A probe for one role must
+ * reach that role's element and no other: a role that leaks, or wiring crossed between two roles, shows
+ * here even when each role's own target happens to change.
+ */
+export function leakedTextRoles(unsetHtml: string, probeHtml: string, role: TextRole): TextRole[] {
+  const byRole = (html: string) => {
+    const found = new Map<string, string[]>()
+    for (const element of parseHtml(html).querySelectorAll(`[${TEXT_ROLE_ATTRIBUTE}]`)) {
+      const name = element.getAttribute(TEXT_ROLE_ATTRIBUTE) ?? ''
+      found.set(name, [...(found.get(name) ?? []), element.outerHTML])
+    }
+    return found
+  }
+  const before = byRole(unsetHtml)
+  const after = byRole(probeHtml)
+  return TEXT_ROLES.filter(
+    (other) =>
+      other !== role && (before.get(other) ?? []).join() !== (after.get(other) ?? []).join(),
+  )
 }

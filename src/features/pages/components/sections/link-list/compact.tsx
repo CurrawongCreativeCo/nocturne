@@ -41,6 +41,7 @@ const layout: LinkListLayout = {
         <SanityLink
           link={link.link}
           className={`${PILL} ${label.className} ${look.className} ${depth.className}`}
+          textRole="label"
         >
           <LinkIcon
             link={link}

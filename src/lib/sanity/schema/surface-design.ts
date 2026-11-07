@@ -1,5 +1,7 @@
 import { defineField, type ConditionalProperty, type ConditionalPropertyCallback } from 'sanity'
 
+import type { TextRole } from '@/lib/design/capabilities'
+
 import type { DesignSummaryConfig } from '../design-summary'
 import {
   INLINE_CASE_TITLES,
@@ -20,6 +22,8 @@ import {
 import {
   TEXT_CASES,
   TEXT_COLOUR_CHOICES,
+  TEXT_FONT_STYLES,
+  TEXT_FONT_STYLE_TITLES,
   TEXT_LEADINGS,
   TEXT_LEADING_TITLES,
   TEXT_SIZES,
@@ -164,28 +168,56 @@ export function surfaceFields({
   ].map((field) => builtBy('surfaceFields', field, 'surface'))
 }
 
-type TextElement = 'eyebrow' | 'label' | 'description'
+const MEDIUM_IS_OWN = 'Medium is the layout’s own size.'
 
-const TEXT_ELEMENT = {
+/** Every registered role's wording and the extra controls it adds beyond size, weight and colour. */
+const TEXT_ROLE_FIELDS: Record<
+  TextRole,
+  { title: string; description: string; letters?: boolean; leading?: boolean; italic?: boolean }
+> = {
   eyebrow: {
     title: 'Eyebrow',
     description: 'The small line above the label. Empty is small spaced capitals.',
+    letters: true,
   },
-  label: { title: 'Label', description: 'Medium is the layout’s own size.' },
-  description: { title: 'Description', description: 'Medium is the layout’s own size.' },
-} as const
+  heading: { title: 'Heading', description: MEDIUM_IS_OWN },
+  intro: { title: 'Intro', description: MEDIUM_IS_OWN, leading: true },
+  title: { title: 'Title', description: MEDIUM_IS_OWN },
+  body: { title: 'Body', description: MEDIUM_IS_OWN, leading: true },
+  meta: { title: 'Meta', description: MEDIUM_IS_OWN },
+  quote: { title: 'Quote', description: MEDIUM_IS_OWN, leading: true, italic: true },
+  attribution: { title: 'Attribution', description: MEDIUM_IS_OWN },
+  price: { title: 'Price', description: MEDIUM_IS_OWN },
+  number: { title: 'Number', description: MEDIUM_IS_OWN },
+  label: { title: 'Label', description: MEDIUM_IS_OWN, letters: true },
+  description: { title: 'Description', description: MEDIUM_IS_OWN, leading: true },
+}
 
-/** One text element's look: size, weight and colour, plus capitals and spacing (eyebrow) or line height (description). */
-export function textStyleField({
-  element,
+/**
+ * One text role's look: size, weight and colour for every role, plus capitals and spacing (eyebrow,
+ * label), line height (intro, body, quote, description) and italic (quote). `highlight` adds how the
+ * role draws its safe highlights (lib/text-highlights.ts). The field is named after the role, so
+ * stored values and their layers keep one shape at every level. `capability` says which capability
+ * the field adopts: a section header's roles are `header`, everything else `text`.
+ */
+export function textRoleField({
+  role,
   inherits,
   inItem,
   fieldset,
   hidden,
-}: Level & { element: TextElement; fieldset?: string; hidden?: ConditionalProperty }) {
-  const { title, description } = TEXT_ELEMENT[element]
+  capability = 'text',
+  highlight = false,
+}: Level & {
+  role: TextRole
+  fieldset?: string
+  hidden?: ConditionalProperty
+  capability?: 'text' | 'header'
+  highlight?: boolean
+}) {
+  const { title, description, letters, leading, italic } = TEXT_ROLE_FIELDS[role]
   const field = defineField({
-    name: element,
+    name: role,
     title,
     type: 'object',
     description,
@@ -216,7 +248,7 @@ export function textStyleField({
         inItem,
         inherits,
       }),
-      ...(element === 'eyebrow'
+      ...(letters
         ? [
             choiceField({
               name: 'textCase',
@@ -235,7 +267,7 @@ export function textStyleField({
             }),
           ]
         : []),
-      ...(element === 'description'
+      ...(leading
         ? [
             choiceField({
               name: 'leading',
@@ -246,9 +278,57 @@ export function textStyleField({
             }),
           ]
         : []),
+      ...(italic
+        ? [
+            choiceField({
+              name: 'fontStyle',
+              title: 'Style',
+              values: TEXT_FONT_STYLES,
+              titles: TEXT_FONT_STYLE_TITLES,
+              inherits,
+            }),
+          ]
+        : []),
+      ...(highlight
+        ? [
+            defineField({
+              name: 'highlight',
+              title: 'Highlighted words',
+              type: 'object',
+              description:
+                'How the words chosen for highlighting look. Semibold unless you choose.',
+              options: { collapsible: true, collapsed: true },
+              fields: [
+                themeColourField({
+                  name: 'colour',
+                  title: 'Colour',
+                  usage: 'text',
+                  choices: TEXT_COLOUR_CHOICES,
+                  onCard: 'text',
+                  inItem,
+                  inherits: 'the text around them',
+                }),
+                choiceField({
+                  name: 'weight',
+                  title: 'Weight',
+                  values: TEXT_WEIGHTS,
+                  titles: INLINE_WEIGHT_TITLES,
+                  inherits: 'Semibold',
+                }),
+                choiceField({
+                  name: 'fontStyle',
+                  title: 'Style',
+                  values: TEXT_FONT_STYLES,
+                  titles: TEXT_FONT_STYLE_TITLES,
+                  inherits: 'the text around them',
+                }),
+              ],
+            }),
+          ]
+        : []),
     ],
   })
-  return builtBy('textStyleField', field, 'text', element)
+  return builtBy('textRoleField', field, capability, role)
 }
 
 /**

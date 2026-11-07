@@ -254,61 +254,6 @@
     },
     {
       "component": "testimonials",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
-      "capability": "text",
-      "scope": "card",
-      "role": "quote",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
-      "capability": "text",
-      "scope": "card",
-      "role": "attribution",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
-      "capability": "text",
-      "scope": "card",
-      "role": "label",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
-      "capability": "header",
-      "scope": "section",
-      "role": "eyebrow",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
-      "capability": "header",
-      "scope": "section",
-      "role": "heading",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
-      "capability": "header",
-      "scope": "section",
-      "role": "intro",
-      "layouts": ["grid", "slider"],
-      "closingTask": 156
-    },
-    {
-      "component": "testimonials",
       "capability": "mark",
       "scope": "section",
       "layouts": ["grid", "slider"],

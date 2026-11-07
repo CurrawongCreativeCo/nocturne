@@ -4,10 +4,10 @@ import { stegaClean } from 'next-sanity'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { siteLanguage } from '@/config/env'
 import { postPath } from '@/config/paths'
+import { formatDate } from '@/lib/format-date'
 
 import type { PostCardData } from '../types'
 import { authorName } from '../utils/author'
-import { formatDate } from '../utils/format-date'
 
 interface Props {
   post: PostCardData

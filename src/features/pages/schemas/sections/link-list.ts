@@ -41,7 +41,7 @@ import {
   choiceField,
   iconDesignFields,
   surfaceFields,
-  textStyleField,
+  textRoleField,
 } from '@/lib/sanity/schema/surface-design'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
@@ -412,8 +412,8 @@ const linkAppearanceField = defineField({
       fieldset: 'card',
       hidden: notCustomisedOr((context) => looksOfLink(context).layout === 'editorial'),
     }),
-    textStyleField({
-      element: 'eyebrow',
+    textRoleField({
+      role: 'eyebrow',
       inherits: CARD_INHERITS,
       inItem: true,
       fieldset: 'text',
@@ -421,15 +421,15 @@ const linkAppearanceField = defineField({
         (context) => !usesEyebrow(looksOfLink(context).layout) || !linkContext(context).link,
       ),
     }),
-    textStyleField({
-      element: 'label',
+    textRoleField({
+      role: 'label',
       inherits: CARD_INHERITS,
       inItem: true,
       fieldset: 'text',
       hidden: notCustomised,
     }),
-    textStyleField({
-      element: 'description',
+    textRoleField({
+      role: 'description',
       inherits: CARD_INHERITS,
       inItem: true,
       fieldset: 'text',

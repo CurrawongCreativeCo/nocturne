@@ -75,7 +75,7 @@ export const LINK_DESIGN_PROPERTIES: readonly LinkDesignProperty[] = [
   { group: 'card', key: 'borderColour', label: 'border colour' },
   { group: 'card', key: 'shadow', label: 'shadow' },
   ...textProperties('eyebrow', ['size', 'weight', 'colour', 'textCase', 'tracking']),
-  ...textProperties('label', ['size', 'weight', 'colour']),
+  ...textProperties('label', ['size', 'weight', 'colour', 'textCase', 'tracking']),
   ...textProperties('description', ['size', 'weight', 'colour', 'leading']),
   { group: 'icon', key: 'iconShape', label: 'icon container' },
   { group: 'icon', key: 'iconColour', label: 'icon colour' },

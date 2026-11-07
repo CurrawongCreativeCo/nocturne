@@ -9,6 +9,7 @@ import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { siteLanguage } from '@/config/env'
 import { BLOG_PATH, categoryPath, postPath } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
+import { formatDate } from '@/lib/format-date'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { articleId } from '@/lib/structured-data/ids'
 
@@ -17,7 +18,6 @@ import { PostCard } from './post-card'
 import { getPost } from '../api/get-posts'
 import type { PostData } from '../types'
 import { authorName } from '../utils/author'
-import { formatDate } from '../utils/format-date'
 
 export async function PostView({ slug, ...mode }: { slug: string } & FetchMode) {
   const post = await getPost({ slug, ...mode })

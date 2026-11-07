@@ -33,6 +33,14 @@ export const TEXT_ROLES = [
 ] as const
 export type TextRole = (typeof TEXT_ROLES)[number]
 
+/**
+ * The attribute every text role's element carries, so evidence can name the one element a role styles.
+ * A role's evidence must target this selector: a broader one (a whole card) would pass when the wrong
+ * element changes, which is how crossed wiring went unnoticed (`evidenceProblems`).
+ */
+export const TEXT_ROLE_ATTRIBUTE = 'data-text-role'
+export const textRoleTarget = (role: TextRole) => `[${TEXT_ROLE_ATTRIBUTE}="${role}"]`
+
 /** A build plan task, by number. */
 export type TaskNumber = number
 
@@ -264,7 +272,7 @@ export type ContentSourceId = (typeof CONTENT_SOURCES)[number]['id']
 export const SHARED_BUILDERS = {
   sectionStyle: 'src/lib/sanity/schema/section-style.ts',
   surfaceFields: 'src/lib/sanity/schema/surface-design.ts',
-  textStyleField: 'src/lib/sanity/schema/surface-design.ts',
+  textRoleField: 'src/lib/sanity/schema/surface-design.ts',
   iconDesignFields: 'src/lib/sanity/schema/surface-design.ts',
   badgeIconField: 'src/lib/sanity/schema/badge-icon-field.ts',
   framing: 'src/lib/sanity/schema/image-framing-option.ts',

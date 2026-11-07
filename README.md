@@ -2478,7 +2478,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Image + text (`mediaText`), 3 layouts    | –       | –    | R…     | R…   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R…     | R…   | C…    | R…   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R…     | R…   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Testimonials (`testimonials`), 2 layouts | R…      | R…   | R…     | R…   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R…   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | FAQ (`faq`)                              | R…      | R…   | R…     | R…   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Call to action banner (`ctaBanner`)      | R…      | –    | R…     | R…   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
 | Form (`formSection`)                     | R…      | –    | R…     | R…   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
@@ -2503,7 +2503,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 101      | 0               | 189     |
+| Required                                                 | 108      | 0               | 182     |
 | Conditional                                              | 4        | 0               | 40      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2515,7 +2515,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 147          | 5                | 3                   |
 | 148          | 6                | 0                   |
 | 151          | 19               | 0                   |
-| 156          | 124              | 1                   |
+| 156          | 117              | 1                   |
 | 157          | 1                | 0                   |
 | 158          | 4                | 1                   |
 | 159          | 3                | 8                   |
@@ -2523,7 +2523,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 213          | 7                | 0                   |
 | 276          | 2                | 0                   |
 
-**Evidence.** 106 capability entries, 236 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 113 capability entries, 250 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -3437,6 +3437,7 @@ and draws through the shared shape geometry (`src/lib/sanity/image-frame-geometr
 to the layout. Both are agency only, in the Design tab, and empty means the picture looks as it always did.
 
 - **Testimonials → Design → Avatar:** Medium circle (48 px) with no ring by default.
+- **Testimonials → Design → Cards and Section header:** the title is `heading` when it has words, otherwise the old `title`, never both. Below it: the default card with nothing set; presets Quiet, Outlined, Tinted and Statement write theme colour names into the box. Each quote can carry highlighted words (exact phrases, the stored quote stays plain), a source (plain words only, never a badge; Other is an internal classification and is never shown, so the date stands alone), a date, a rating for that quote alone, an attribution line and a permission confirmation (Studio warns until confirmed, never drawn). No review structured data: live Google reviews are task 277's.
 - **Team (List layout only) → Design → Portrait:** the list's small portraits are drawn by `ProfileImage` (a rounded square, the card's corners), Medium with no ring by default, which is the same size and corners the list always had. A list whose **Image design still changes how its portraits look** keeps drawing with it (`FramedImage`), and Studio shows Image design, with a note above Image shape on how to reach Portrait, instead of Portrait, so one picture never has both. Set **Image shape to Standard and Picture motion to None** and Portrait appears (and Image design goes). Nothing saved is deleted or moved: the rest of the Image design stays stored and is ignored. What counts as "changes how it looks": Rounded, Square corners, Circle or Arch; Framed with a frame; Subtle or Medium parallax. Standard, Framed with no frame, and motion None draw what the list draws anyway, and a frame, its colour or inset on anything but Framed, or Custom, travel, direction or scale on a picture that is not moving, are inactive leftovers (including `custom: false`, which Studio writes on every Image design). Grid and Slider show Image design only. The one rule is `hasImageDesign` in `src/lib/sanity/team-portrait.ts`, used by Studio's controls, its note and the site's drawing.
 
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and

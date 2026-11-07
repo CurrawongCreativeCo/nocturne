@@ -670,12 +670,12 @@ exports[`the design capability contract > team: reports what it offers today 1`]
 exports[`the design capability contract > testimonials: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "surface required card @grid: pending (156)",
-    "surface required card @slider: pending (156)",
-    "text required card @grid: pending (156)",
-    "text required card @slider: pending (156)",
-    "header required section @grid: pending (156)",
-    "header required section @slider: pending (156)",
+    "surface required card @grid: verified",
+    "surface required card @slider: verified",
+    "text required card @grid: verified",
+    "text required card @slider: verified",
+    "header required section @grid: verified",
+    "header required section @slider: verified",
     "mark required section @grid: pending (156)",
     "mark required section @slider: pending (156)",
     "mark required card @grid: pending (156)",

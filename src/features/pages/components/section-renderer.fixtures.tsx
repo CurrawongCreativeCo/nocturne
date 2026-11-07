@@ -163,6 +163,12 @@ export async function renderSections(
   )
 }
 
-/** A short, stable fingerprint of some output, for snapshots that must not change. */
+/**
+ * A short, stable fingerprint of some output, for snapshots that must not change. The text role marker
+ * (`data-text-role`) is left out: it styles nothing, so adding it to an element is not a change in output,
+ * and these snapshots prove every class and every other attribute stayed the same.
+ */
+export const withoutTextRoles = (html: string) => html.replace(/ data-text-role="[a-z]+"/g, '')
+
 export const fingerprint = (html: string) =>
-  createHash('sha256').update(html).digest('hex').slice(0, 16)
+  createHash('sha256').update(withoutTextRoles(html)).digest('hex').slice(0, 16)

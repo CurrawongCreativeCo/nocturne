@@ -78,7 +78,7 @@ export function LinkDescription({
 }) {
   if (!text) return null
   return (
-    <span className={className} style={style}>
+    <span className={className} style={style} data-text-role="description">
       <span className="sr-only">. </span>
       {text}
     </span>
@@ -131,12 +131,21 @@ export function LinkText({
   return (
     <span className={`flex min-w-0 flex-col ${className}`.trim()}>
       {eyebrowText && (
-        <span className={`mb-0.5 ${eyebrow.className}`} style={eyebrow.style} data-link-eyebrow="">
+        <span
+          className={`mb-0.5 ${eyebrow.className}`}
+          style={eyebrow.style}
+          data-link-eyebrow=""
+          data-text-role="eyebrow"
+        >
           {link.item.eyebrow}
           <span className="sr-only">. </span>
         </span>
       )}
-      <span className={`${label.className} ${own.labelClass ?? ''}`.trim()} style={label.style}>
+      <span
+        className={`${label.className} ${own.labelClass ?? ''}`.trim()}
+        style={label.style}
+        data-text-role="label"
+      >
         {link.label}
       </span>
       <LinkDescription

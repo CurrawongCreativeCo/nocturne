@@ -122,6 +122,17 @@ export const logoCloudFragment = /* groq */ `
   }
 `
 
+/** One text element's look (lib/sanity/text-style-options.ts). */
+const textStyleProjection = /* groq */ `size, weight, colour { colour, hex }, textCase, tracking, leading`
+
+/** A card's fill and border, and its icon's container (lib/sanity/surface-options.ts). */
+const surfaceProjection = /* groq */ `
+  background { colour, hex },
+  backgroundStrength,
+  border,
+  borderColour { colour, hex }
+`
+
 /** A testimonial avatar's or team list portrait's size and ring (schema: lib/sanity/schema/avatar-design.ts). */
 const avatarDesignFields = /* groq */ `
   size,
@@ -136,12 +147,34 @@ export const testimonialsFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
+    eyebrow,
+    intro,
+    headerDesign {
+      eyebrow { ${textStyleProjection} },
+      heading { ${textStyleProjection} },
+      intro { ${textStyleProjection} }
+    },
+    cardDesign {
+      ${surfaceProjection},
+      quote {
+        ${textStyleProjection},
+        fontStyle,
+        highlight { colour { colour, hex }, weight, fontStyle }
+      },
+      attribution { ${textStyleProjection} },
+      label { ${textStyleProjection} }
+    },
     avatarDesign { ${avatarDesignFields} },
     items[] {
       _key,
       quote,
+      highlights,
       name,
       role,
+      attribution,
+      source,
+      date,
+      rating,
       avatar { ${imageFields} }
     }
   }
@@ -344,16 +377,6 @@ export const embedFragment = /* groq */ `
   }
 `
 
-/** One text element's look (lib/sanity/text-style-options.ts). */
-const textStyleProjection = /* groq */ `size, weight, colour { colour, hex }, textCase, tracking, leading`
-
-/** A card's fill and border, and its icon's container (lib/sanity/surface-options.ts). */
-const surfaceProjection = /* groq */ `
-  background { colour, hex },
-  backgroundStrength,
-  border,
-  borderColour { colour, hex }
-`
 const iconDesignProjection = /* groq */ `
   iconShape,
   iconColour { colour, hex },

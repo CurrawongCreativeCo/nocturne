@@ -1,4 +1,10 @@
-import type { CapabilityId, ContentSourceId, Scope, TextRole } from './capabilities'
+import {
+  textRoleTarget,
+  type CapabilityId,
+  type ContentSourceId,
+  type Scope,
+  type TextRole,
+} from './capabilities'
 
 /**
  * Evidence (task 275; README, "Design capability contract"): each registered adoption of a design
@@ -250,6 +256,27 @@ const linkListContent = (thumbnails: boolean): Patch => ({
 })
 const CUSTOMISED = { 'links.0.design.appearance': 'custom' }
 
+const TESTIMONIALS = 'src/features/pages/components/sections/testimonials'
+const TESTIMONIAL_LAYOUTS = ['grid', 'slider']
+/** One quote drawing every text role, under a header drawing every header role. */
+const TESTIMONIAL_CONTENT: Patch = {
+  title: 'Fixture title',
+  eyebrow: 'Eyebrow',
+  intro: 'A short intro.',
+  items: [
+    {
+      _key: 'q1',
+      _type: 'testimonial',
+      quote: 'Kind words.',
+      name: 'Fixture Person',
+      role: 'Owner',
+      attribution: 'Client since 2019',
+      source: 'client-feedback',
+      date: '2026-03-12',
+    },
+  ],
+}
+
 const WITH_CARDS = ['stacked', 'cards', 'compact']
 /** The text roles each layout draws: Compact shows the label only. */
 const TEXT_ROLES_DRAWN = [
@@ -306,8 +333,8 @@ const linkListEvidence: CapabilityEvidence[] = [
       field: scope === 'card' ? `cardDesign.${role}` : `links[].design.${role}`,
       resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
       render: LINK_LIST,
-      target: LINK_ITEMS,
-      change: 'content',
+      target: textRoleTarget(role),
+      change: 'attributes',
       base: scope === 'card' ? linkListContent(true) : { ...linkListContent(true), ...CUSTOMISED },
       probe: {
         [scope === 'card' ? `cardDesign.${role}.size` : `links.0.design.${role}.size`]: 'large',
@@ -729,6 +756,50 @@ export const EVIDENCE: readonly Evidence[] = [
     motion: ['grid', 'slider'],
   }),
   {
+    id: 'testimonials.surface.card',
+    component: 'testimonials',
+    capability: 'surface',
+    scope: 'card',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'cardDesign.border',
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' }],
+    render: TESTIMONIALS,
+    target: 'figure',
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { 'cardDesign.border': 'thick' },
+  },
+  ...(['quote', 'attribution', 'label'] as const).map((role): CapabilityEvidence => ({
+    id: `testimonials.text.card.${role}`,
+    component: 'testimonials',
+    capability: 'text',
+    scope: 'card',
+    role,
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: `cardDesign.${role}`,
+    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+    render: TESTIMONIALS,
+    target: textRoleTarget(role),
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { [`cardDesign.${role}.size`]: 'large' },
+  })),
+  ...(['eyebrow', 'heading', 'intro'] as const).map((role): CapabilityEvidence => ({
+    id: `testimonials.header.section.${role}`,
+    component: 'testimonials',
+    capability: 'header',
+    scope: 'section',
+    role,
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: `headerDesign.${role}`,
+    resolvers: [{ module: '@/lib/sanity/text-style-options', export: 'textLook' }],
+    render: 'src/components/ui/section-header.tsx',
+    target: textRoleTarget(role),
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { [`headerDesign.${role}.size`]: 'large' },
+  })),
+  {
     id: 'testimonials.manual',
     component: 'testimonials',
     source: 'testimonials.manual',
@@ -751,7 +822,9 @@ export const EVIDENCE: readonly Evidence[] = [
         cases: [
           'draws each stored quote, name and role in its own card',
           'draws only what was stored',
-          'draws no source label, rating or review markup',
+          'draws no source label or rating unless stored',
+          'draws a stored source, date, rating and attribution as plain words, with no review markup',
+          'never draws the permission confirmation',
           'draws no cards without items',
           'draws nothing of its own once the quote card is disconnected',
         ],

@@ -135,6 +135,8 @@ export interface OwnRingSurface {
   borderWidth?: SurfaceBorder
   /** The colour a width alone is drawn in. */
   borderColour?: string
+  /** The surface isn't a link or a button, so a chosen fill keeps no hover shade. */
+  still?: boolean
 }
 
 /** What glass draws while a property is unchanged. */
@@ -164,8 +166,9 @@ export function ringSurfaceLook(design: SurfaceDesign, own: OwnRingSurface): Loo
       SURFACE_STRENGTH_FRACTION[design.strength ?? 'solid'],
     )
     // A hover a shade towards the text colour, which reads on any fill (and on none).
-    background =
-      'bg-(--surface-bg) hover:bg-[color-mix(in_oklch,var(--surface-bg),var(--color-ink)_7%)]'
+    background = own.still
+      ? 'bg-(--surface-bg)'
+      : 'bg-(--surface-bg) hover:bg-[color-mix(in_oklch,var(--surface-bg),var(--color-ink)_7%)]'
   }
   let border = own.border
   if (design.border !== undefined || design.borderColour !== undefined) {

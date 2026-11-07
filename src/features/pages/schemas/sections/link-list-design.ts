@@ -61,7 +61,7 @@ import {
   choiceField,
   iconDesignFields,
   surfaceFields,
-  textStyleField,
+  textRoleField,
 } from '@/lib/sanity/schema/surface-design'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
@@ -421,15 +421,15 @@ export const linkListDesignFields = [
       ...surfaceFields({ inherits: 'the layout’s own', hidden: isEditorial }).map((field) =>
         withCardContrast(field),
       ),
-      textStyleField({
-        element: 'eyebrow',
+      textRoleField({
+        role: 'eyebrow',
         inherits: 'the layout’s own',
         fieldset: 'text',
         hidden: isCompact,
       }),
-      textStyleField({ element: 'label', inherits: 'the layout’s own', fieldset: 'text' }),
-      textStyleField({
-        element: 'description',
+      textRoleField({ role: 'label', inherits: 'the layout’s own', fieldset: 'text' }),
+      textRoleField({
+        role: 'description',
         inherits: 'the layout’s own',
         fieldset: 'text',
         hidden: isCompact,

@@ -455,7 +455,7 @@ describe('agencyOnlyField', () => {
 
 describe('a text role is the stamp’s, never a typed-in option', () => {
   const style: SchemaField = builtBy(
-    'textStyleField',
+    'textRoleField',
     { name: 'label', type: 'string' },
     'text',
     'label',
@@ -465,7 +465,7 @@ describe('a text role is the stamp’s, never a typed-in option', () => {
     expect(markerOf(style, () => undefined)).toMatchObject({
       capability: 'text',
       role: 'label',
-      designBuilder: 'textStyleField',
+      designBuilder: 'textRoleField',
     })
     expect(style.options?.textRole).toBe('label')
   })
@@ -473,7 +473,7 @@ describe('a text role is the stamp’s, never a typed-in option', () => {
   it('reports a role changed after the builder set it as forged, and trusts none of it', () => {
     const changed: SchemaField = { ...style, options: { ...style.options, textRole: 'eyebrow' } }
     const marker = markerOf(changed, () => undefined)
-    expect(marker.forged).toBe('its text role says eyebrow, but textStyleField made it for label')
+    expect(marker.forged).toBe('its text role says eyebrow, but textRoleField made it for label')
     expect(marker.role).toBeUndefined()
     expect(marker.designBuilder).toBeUndefined()
   })
