@@ -77,7 +77,7 @@ you start a release.
 
 ### Fixed
 
-- **A Link list link that opens a panel now opens it (task 156).** `panelRefsFragment` didn't read a Link list's `links`, so the panel never reached the page unless something else there opened it, and the button did nothing. It still comes in the same `PAGE_QUERY`, so this adds no Sanity request, and a panel only a hidden link opens stays off the page.
+- **A Link list link, or an Events “See all” link, that opens a panel now opens it (task 156).** `panelRefsFragment` didn't read a Link list's `links` or an Events section's `seeAllLink`, so the panel never reached the page unless something else there opened it, and the button did nothing. A test now fails for any link field a section projects that the fragment doesn't read. It still comes in the same `PAGE_QUERY`, so this adds no Sanity request, and a panel only a hidden link opens stays off the page.
 - The template's tests no longer fail on a client site. Checks of what the template ships (a bare `studio-brand.json`, the
   commented-out launch example, a profile with no service features) run only in the template (`scripts/is-template.mjs`:
   the package is named `nocturne`) and are skipped on a client, which customises those files on purpose. The proxy tests

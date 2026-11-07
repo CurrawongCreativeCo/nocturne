@@ -33,6 +33,17 @@ describe('panelRefsFragment', () => {
     for (const field of fields) expect(panelRefsFragment).toContain(`.${field}[].link.panel._ref`)
   })
 
+  it('finds the panel in every link field a section projects with the shared link fields', () => {
+    const fields = [...source.matchAll(/(\w+) \{ \$\{linkFields\} \}/g)].map(
+      (match) => match[1] ?? '',
+    )
+    expect(fields).toContain('seeAllLink')
+    // A link inside an array (`links[].link`, `ctas[].link`) is covered by the cases for those arrays.
+    for (const field of fields.filter((name) => name !== 'link')) {
+      expect(panelRefsFragment).toContain(`.${field}.panel._ref`)
+    }
+  })
+
   it('finds the panel in every place a section keeps rich text', () => {
     const fields = fieldsUsing('portableTextFields')
     expect(fields.length).toBeGreaterThan(0)
@@ -95,6 +106,56 @@ describe('panelRefsFragment', () => {
     it('adds nothing to a page whose links open no panel', async () => {
       const link = { _key: 'web', link: { linkType: 'external', url: 'https://example.com' } }
       expect(await panelsOn([list([link])])).toEqual([])
+    })
+  })
+
+  describe('the Events section’s “See all” link', () => {
+    const events = (seeAllLink: unknown, extra: Record<string, unknown> = {}) => ({
+      _key: 'events',
+      _type: 'events',
+      seeAllLink,
+      ...extra,
+    })
+    const open = (panel: string) => ({
+      linkType: 'panel',
+      panel: { _type: 'reference', _ref: panel },
+    })
+    const panelsOn = async (pageBuilder: unknown[], members = false, more: object[] = []) => {
+      const tree = parse(
+        `*[_id == "page"][0]{ "panels": *[_type == "panel" && _id in (${panelRefsFragment})]._id }`,
+        { params: { members } },
+      )
+      const result = await evaluate(tree, {
+        dataset: [
+          { _id: 'page', _type: 'page', pageBuilder },
+          { _id: 'hours', _type: 'panel' },
+          { _id: 'story', _type: 'panel' },
+          ...more,
+        ],
+        params: { members },
+      })
+      return ((await result.get()) as { panels: string[] }).panels
+    }
+
+    it('brings the panel it opens onto the page', async () => {
+      expect(await panelsOn([events(open('hours'))])).toEqual(['hours'])
+    })
+
+    it('brings it from a shared section too', async () => {
+      const shared = { _id: 'shared', _type: 'sharedSection', section: [events(open('story'))] }
+      const reference = { _key: 'ref', _type: 'reference', _ref: 'shared' }
+      expect(await panelsOn([reference], false, [shared])).toEqual(['story'])
+    })
+
+    it('leaves out a members-only section’s panel until the visitor is a member', async () => {
+      const section = events(open('hours'), { access: 'members' })
+      expect(await panelsOn([section])).toEqual([])
+      expect(await panelsOn([section], true)).toEqual(['hours'])
+    })
+
+    it('adds nothing when the link goes to a website, or is not set', async () => {
+      const web = { linkType: 'external', url: 'https://example.com' }
+      expect(await panelsOn([events(web), events(undefined, { _key: 'other' })])).toEqual([])
     })
   })
 

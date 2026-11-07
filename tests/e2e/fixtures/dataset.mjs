@@ -3095,6 +3095,9 @@ documents.push({
     }),
     familySection('events', 'Events list family', {
       text: 'An intro.',
+      // Opens a panel no other button on this page opens, so it only works if its link brings the panel.
+      seeAllLink: panel('panel-hours', '/about'),
+      seeAllLabel: 'Open the hours',
       cardDesign: { ...familyDesign, title: { weight: 'medium' } },
     }),
     familySection('faq', 'FAQ default family', {

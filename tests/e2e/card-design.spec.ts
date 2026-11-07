@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, type Locator, type Page } from '@playwright/test'
+import { expect, type APIRequestContext, type Locator, type Page } from '@playwright/test'
 
 import { FAKE_SANITY_PORT } from './constants'
 import { test } from './fixtures/test'
@@ -37,6 +37,14 @@ const section = (page: Page, heading: string) =>
 async function open(page: Page) {
   await page.goto(PAGE)
   await page.waitForLoadState('networkidle')
+}
+
+/** How many queries the fake Content Lake has served (README, "Request budget"). */
+async function queriesServed(request: APIRequestContext) {
+  const response = await request.get(
+    `http://localhost:${String(FAKE_SANITY_PORT)}/__fixture/query-count`,
+  )
+  return ((await response.json()) as { count: number }).count
 }
 
 const heightOf = (locator: Locator) =>
@@ -283,12 +291,7 @@ for (const viewport of WIDTHS) {
       page,
       request,
     }) => {
-      const served = async () =>
-        (
-          (await (
-            await request.get(`http://localhost:${String(FAKE_SANITY_PORT)}/__fixture/query-count`)
-          ).json()) as { count: number }
-        ).count
+      const served = () => queriesServed(request)
       // The first visit may fill a cache; the budget is for the visitors after it.
       await open(page)
       const before = await served()
@@ -302,6 +305,22 @@ for (const viewport of WIDTHS) {
       await page.keyboard.press('Enter')
       await expect(page.getByRole('dialog')).toBeVisible()
       expect(await served()).toBe(before)
+    })
+
+    test('the Events “See all” link alone brings its panel to the page, at no Sanity request', async ({
+      page,
+      request,
+    }) => {
+      await open(page)
+      const before = await queriesServed(request)
+      await open(page)
+      const button = section(page, 'Events list family').getByRole('button', {
+        name: 'Open the hours',
+      })
+      await button.focus()
+      await page.keyboard.press('Enter')
+      await expect(page.getByRole('dialog', { name: 'Opening hours' })).toBeVisible()
+      expect(await queriesServed(request)).toBe(before)
     })
 
     test('a customised plan draws its own mark, and the others the card’s', async ({ page }) => {
