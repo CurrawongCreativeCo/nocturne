@@ -1508,6 +1508,32 @@ export const navigationNested = {
   ],
 }
 
+/**
+ * Blog settings with a designed post card (tests/e2e/blog-card-design.spec.ts). Not in the fixtures: the
+ * fake Content Lake adds it only while a test asks, so no other blog test or baseline sees a designed card.
+ */
+export const blogSettingsDesigned = {
+  _id: 'blogSettings',
+  _type: 'blogSettings',
+  cardDesign: {
+    background: { colour: 'accent' },
+    backgroundStrength: 'wash',
+    border: 'thin',
+    borderColour: { colour: 'accent' },
+    meta: { weight: 'semibold' },
+    title: { size: 'small', weight: 'medium' },
+    body: { size: 'small' },
+    mark: {
+      _type: 'decorativeMark',
+      kind: 'icon',
+      icon: 'heart',
+      anchor: 'bottom-right',
+      size: 'small',
+      opacity: 12,
+    },
+  },
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 
@@ -2857,6 +2883,23 @@ const familyDesign = {
     opacity: 10,
   }),
 }
+/**
+ * A gallery section of this type with a header design (task 156): its own title, an eyebrow, an intro, and the
+ * heading a step smaller. `intro` names the field that section's intro is in.
+ */
+const headerFamily = (type, title, intro, extra = {}) => {
+  const seed = gallerySections.find((section) => section._type === type)
+  return {
+    ...structuredClone(seed),
+    _key: `header-${type}`,
+    title,
+    heading: undefined,
+    eyebrow: 'Eyebrow',
+    ...intro,
+    headerDesign: { heading: { size: 'small' } },
+    ...extra,
+  }
+}
 const familySection = (type, title, extra) => ({
   _key: `family-${type}-${title.replace(/\W+/g, '-').toLowerCase()}`,
   _type: type,
@@ -3039,6 +3082,17 @@ documents.push({
         { _key: 's1', _type: 'statItem', value: 250, decimals: 0, suffix: '+', label: 'Projects' },
         { _key: 's2', _type: 'statItem', value: 12, decimals: 0, label: 'Years' },
       ],
+    }),
+    headerFamily('featuresGrid', 'Features header', { intro: 'An intro.' }),
+    headerFamily('logoCloud', 'Logos header', { intro: 'An intro.' }),
+    headerFamily('ctaBanner', 'CTA header', { text: 'An intro.' }),
+    headerFamily('process', 'Process header', { intro: 'An intro.' }),
+    headerFamily('gallery', 'Gallery header', { intro: 'An intro.' }),
+    headerFamily('newsletterSignup', 'Newsletter header', { text: 'An intro.' }),
+    familySection('process', 'Process steps', {
+      variant: 'vertical',
+      cardDesign: { label: { size: 'large' }, title: { size: 'small' }, body: { size: 'small' } },
+      steps: [{ _key: 'ps1', _type: 'step', label: 'One', title: 'Meet', text: 'We talk.' }],
     }),
     familySection('location', 'Location family', {
       intro: 'An intro.',
