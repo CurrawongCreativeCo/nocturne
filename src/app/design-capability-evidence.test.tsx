@@ -110,8 +110,8 @@ vi.mock('@/components/ui/badge-icon', async (load) =>
 vi.mock('@/features/pages/components/sections/link-list/link-design', async (load) =>
   resolvers.wrap('@/features/pages/components/sections/link-list/link-design', await load()),
 )
-vi.mock('@/components/ui/link-arrow', async (load) =>
-  resolvers.wrap('@/components/ui/link-arrow', await load()),
+vi.mock('@/components/ui/action-indicator', async (load) =>
+  resolvers.wrap('@/components/ui/action-indicator', await load()),
 )
 vi.mock('@/components/ui/section-style', async (load) =>
   resolvers.wrap('@/components/ui/section-style', await load()),

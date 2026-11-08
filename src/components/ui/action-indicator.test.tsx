@@ -5,7 +5,6 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { ActionIndicator } from './action-indicator'
-import { LinkArrow } from './link-arrow'
 
 const SVG =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" data-link-arrow="GLYPH" class="size-6 shrink-0 CLASS"><path d="PATH"></path></svg>'
@@ -31,9 +30,14 @@ describe('ActionIndicator defaults', () => {
     )
   })
 
-  it('keeps className and style on the svg, and LinkArrow delegates unchanged', () => {
+  it('keeps className and style on the svg', () => {
     const html = renderToStaticMarkup(
-      <LinkArrow arrow="chevron" external={false} className="size-5" style={{ color: 'red' }} />,
+      <ActionIndicator
+        glyph="chevron"
+        external={false}
+        className="size-5"
+        style={{ color: 'red' }}
+      />,
     )
     expect(html).toBe(
       legacy('chevron', 'm10 7 5 5-5 5', 'size-5').replace('"><path', '" style="color:red"><path'),

@@ -578,9 +578,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     layouts: WITH_ARROWS,
     field: 'linkDesign.arrowStyle',
     resolvers: [
-      // Whether there is an arrow, and which, is the card design; LinkArrow draws it.
+      // Whether there is an arrow, and which, is the card design; ActionIndicator draws it.
       { module: '@/features/pages/utils/link-card-design', export: 'resolveLinkCardDesign' },
-      { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
     ],
     render: LINK_LIST,
     target: LINK_ITEMS,
@@ -596,9 +596,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     layouts: WITH_ARROWS,
     field: 'links[].design.arrowStyle',
     resolvers: [
-      // Whether there is an arrow, and which, is the card design; LinkArrow draws it.
+      // Whether there is an arrow, and which, is the card design; ActionIndicator draws it.
       { module: '@/features/pages/utils/link-card-design', export: 'resolveLinkCardDesign' },
-      { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
     ],
     render: LINK_LIST,
     target: LINK_ITEMS,

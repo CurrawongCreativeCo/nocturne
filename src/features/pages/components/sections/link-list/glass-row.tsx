@@ -1,8 +1,8 @@
 import { stegaClean } from 'next-sanity'
 import type { CSSProperties } from 'react'
 
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { buttonFeedback } from '@/components/ui/cta-link'
-import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
@@ -132,10 +132,12 @@ export function GlassRow({
         <LinkText link={link} design={design} own={text(link.large)} className="flex-1" />
         {arrow !== 'none' && (
           <span className={BADGE} style={arrowStyle}>
-            <LinkArrow
-              arrow={arrow}
+            <ActionIndicator
+              glyph={arrow}
               external={link.kind === 'external'}
-              className="size-4! motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+              motion="nudge"
+              distance="legacy-small"
+              className="size-4!"
             />
           </span>
         )}

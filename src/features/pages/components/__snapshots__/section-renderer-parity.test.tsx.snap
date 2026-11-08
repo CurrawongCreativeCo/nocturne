@@ -381,19 +381,19 @@ exports[`SectionRenderer output parity > linkList keeps its output for every lay
     "panel": null,
   },
   "editorial · panel glass": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "c629dde4c9248496",
     "panel": null,
   },
   "editorial · panel none": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "c629dde4c9248496",
     "panel": null,
   },
   "editorial · panel solid": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "c629dde4c9248496",
     "panel": null,
   },
   "editorial · panel unset": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "c629dde4c9248496",
     "panel": null,
   },
   "stacked · panel glass": {

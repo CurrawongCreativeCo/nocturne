@@ -740,8 +740,8 @@ exports[`design capability evidence > linkList.action.card@cards: the probe chan
 
 exports[`design capability evidence > linkList.action.card@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "42641bc23fb24a2e (1316 characters)",
+  "304194abc22a2182 (1316 characters)",
 ]
 `;
 
@@ -761,8 +761,8 @@ exports[`design capability evidence > linkList.action.item@cards: the probe chan
 
 exports[`design capability evidence > linkList.action.item@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "42641bc23fb24a2e (1316 characters)",
+  "304194abc22a2182 (1316 characters)",
 ]
 `;
 
@@ -829,7 +829,7 @@ exports[`design capability evidence > linkList.divider.section@compact: the prob
 
 exports[`design capability evidence > linkList.divider.section@editorial: the probe changes the registered target 1`] = `
 [
-  "bee329c9f9f718d6 (4574 characters)",
+  "a21309a042f186ca (4620 characters)",
 ]
 `;
 
@@ -1110,7 +1110,7 @@ exports[`design capability evidence > linkList.motion.section@compact: the probe
 
 exports[`design capability evidence > linkList.motion.section@editorial: the probe changes the registered target 1`] = `
 [
-  "d828dba020ef4fc0 (6572 characters)",
+  "e94ccbbf8d4698ca (6687 characters)",
 ]
 `;
 

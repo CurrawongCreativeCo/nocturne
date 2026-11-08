@@ -1,5 +1,5 @@
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { buttonFeedback, ctaColours } from '@/components/ui/cta-link'
-import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { servedThumbnail } from '@/lib/sanity/link-thumbnail-framing'
 import { glassSurfaceLook, ringSurfaceLook } from '@/lib/sanity/surface-options'
@@ -128,10 +128,12 @@ const layout: LinkListLayout = {
               className="absolute right-4 flex items-center opacity-70 group-hover:opacity-100"
               style={arrowStyle}
             >
-              <LinkArrow
-                arrow={arrow}
+              <ActionIndicator
+                glyph={arrow}
                 external={link.kind === 'external'}
-                className="size-5 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+                motion="nudge"
+                distance="legacy-small"
+                className="size-5"
               />
             </span>
           )}
