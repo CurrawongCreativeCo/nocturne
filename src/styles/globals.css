@@ -623,7 +623,7 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
  */
 @layer components {
   /* Right-to-left: the chevron and arrow face the other way; the diagonal 'out' arrow keeps its path. */
-  :where([dir='rtl']) [data-link-arrow] path:not([d='M8 16 16 8m-6 0h6v6']) {
+  :where([dir='rtl']) [data-action-glyph]:not([data-action-glyph='out']) path {
     transform-box: view-box;
     transform-origin: 50% 50%;
     transform: scaleX(-1);
@@ -663,7 +663,9 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
       --action-on: 1;
     }
   }
-  :where(.group):focus-visible [data-action-motion] {
+  /* The link itself (the group) or a link inside it, as in a card whose title link is stretched over it. */
+  :where(.group):focus-visible [data-action-motion],
+  :where(.group):has(a:focus-visible) [data-action-motion] {
     --action-on: 1;
   }
   :where(.group):active [data-action-motion] {
@@ -690,7 +692,8 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
         animation: action-draw calc(var(--duration-fast) * 2) ease-out;
       }
     }
-    :where(.group):focus-visible [data-action-motion='draw'] path {
+    :where(.group):focus-visible [data-action-motion='draw'] path,
+    :where(.group):has(a:focus-visible) [data-action-motion='draw'] path {
       animation: action-draw calc(var(--duration-fast) * 2) ease-out;
     }
   }

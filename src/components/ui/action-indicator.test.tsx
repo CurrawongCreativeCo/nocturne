@@ -7,9 +7,13 @@ import { describe, expect, it } from 'vitest'
 import { ActionIndicator } from './action-indicator'
 
 const SVG =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" data-link-arrow="GLYPH" class="size-6 shrink-0 CLASS"><path d="PATH"></path></svg>'
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" data-link-arrow="GLYPH" data-action-glyph="SHAPE" class="size-6 shrink-0 CLASS"><path d="PATH"></path></svg>'
+const SHAPES: Record<string, string> = { m10: 'chevron', 'M8 ': 'out', 'M5 ': 'arrow' }
 const legacy = (glyph: string, path: string, cls = '') =>
-  SVG.replace('GLYPH', glyph).replace('PATH', path).replace('CLASS', cls)
+  SVG.replace('GLYPH', glyph)
+    .replace('SHAPE', SHAPES[path.slice(0, 3)] ?? SHAPES[path.slice(0, 2)] ?? '')
+    .replace('PATH', path)
+    .replace('CLASS', cls)
 
 const own = { shape: 'plain', background: 'bg-surface-alt', border: 'ring-1 ring-line' } as const
 const css = readFileSync(join(process.cwd(), 'src/styles/globals.css'), 'utf8')
@@ -74,7 +78,7 @@ describe('ActionIndicator options', () => {
       renderToStaticMarkup(<ActionIndicator glyph="arrow" external={false} motion="lift" />),
     ).toContain('data-action-direction="inline"')
     expect(renderToStaticMarkup(<ActionIndicator glyph="arrow" external={false} />)).not.toContain(
-      'data-action',
+      'data-action-motion',
     )
   })
 
@@ -131,7 +135,7 @@ describe('ActionIndicator states (globals.css)', () => {
   it('gives hover and keyboard focus the same state, and pressed its own', () => {
     expect(block).toMatch(/:where\(\.group\):hover \[data-action-motion\] \{\s*--action-on: 1/)
     expect(block).toMatch(
-      /:where\(\.group\):focus-visible \[data-action-motion\] \{\s*--action-on: 1/,
+      /:where\(\.group\):focus-visible \[data-action-motion\],\s*:where\(\.group\):has\(a:focus-visible\) \[data-action-motion\] \{\s*--action-on: 1/,
     )
     expect(block).toMatch(/:where\(\.group\):active \[data-action-motion\] \{\s*--action-press/)
   })
@@ -153,7 +157,11 @@ describe('ActionIndicator states (globals.css)', () => {
     expect(block).toMatch(/legacy-small'\] \{\s*--action-move: 2px/)
     expect(block).toMatch(/legacy-large'\] \{\s*--action-move: 4px/)
     expect(block).toMatch(/--action-move: 3px/)
-    expect(block).toMatch(/\[dir='rtl'\]\) \[data-link-arrow\] path/)
+    expect(block).toMatch(
+      /\[dir='rtl'\]\) \[data-action-glyph\]:not\(\[data-action-glyph='out'\]\) path/,
+    )
+    // The mirror is chosen by the glyph's meaning, never by matching its drawing.
+    expect(block).not.toMatch(/\[d[=^$*]/)
     expect(block).toMatch(/\[dir='rtl'\]\) \[data-action-motion='nudge'\]/)
   })
 })

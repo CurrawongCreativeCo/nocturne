@@ -5,7 +5,6 @@ import type { LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import type { IconDesign, OwnIcon } from '@/lib/sanity/surface-options'
 import { themeColourStyle, type ThemeColourInput } from '@/lib/sanity/theme-colour'
 
-/** The 'out' path is also what globals.css leaves unmirrored in right-to-left text. */
 const PATHS = {
   chevron: 'm10 7 5 5-5 5',
   arrow: 'M5 12h14m-5-5 5 5-5 5',
@@ -85,6 +84,7 @@ export function ActionIndicator({
       aria-hidden="true"
       focusable="false"
       data-link-arrow={glyph}
+      data-action-glyph={glyph === 'chevron' ? 'chevron' : out ? 'out' : 'arrow'}
       className={`size-6 shrink-0 ${container ? '' : className}`}
       style={container ? undefined : merged}
       {...(container ? {} : motionProps)}
