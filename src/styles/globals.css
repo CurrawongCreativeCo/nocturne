@@ -614,3 +614,93 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
       linear-gradient(#000 0 0);
   }
 }
+
+/*
+ * ActionIndicator (components/ui/action-indicator.tsx, task 137): the arrow at the end of a linked
+ * card. No JavaScript. The nearest `.group` ancestor (the link) puts it in its hover, focus or
+ * pressed state, so keyboard focus gives what hover gives. Motion plays only for visitors who haven't
+ * asked for less, and nothing loops: a state change moves it once.
+ */
+@layer components {
+  /* Right-to-left: the chevron and arrow face the other way; the diagonal 'out' arrow keeps its path. */
+  :where([dir='rtl']) [data-link-arrow] path:not([d='M8 16 16 8m-6 0h6v6']) {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    transform: scaleX(-1);
+  }
+
+  [data-action-motion] {
+    --action-on: 0;
+    --action-press: 1;
+    --action-move: 3px;
+    --action-x: 1;
+    --action-y: 0;
+  }
+  [data-action-motion][data-action-distance='legacy-small'] {
+    --action-move: 2px;
+  }
+  [data-action-motion][data-action-distance='legacy-large'] {
+    --action-move: 4px;
+  }
+  /* Nudge follows the glyph: a diagonal arrow moves up and across. */
+  [data-action-motion='nudge'][data-action-direction='out'] {
+    --action-y: -1;
+  }
+  [data-action-motion='lift'] {
+    --action-x: 0;
+    --action-y: -1;
+  }
+  :where([dir='rtl']) [data-action-motion='nudge'][data-action-direction='inline'] {
+    --action-x: -1;
+  }
+  /* The distances the Link list always moved were across only, whatever the glyph. */
+  [data-action-motion][data-action-distance^='legacy'] {
+    --action-y: 0;
+  }
+
+  @media (hover: hover) {
+    :where(.group):hover [data-action-motion] {
+      --action-on: 1;
+    }
+  }
+  :where(.group):focus-visible [data-action-motion] {
+    --action-on: 1;
+  }
+  :where(.group):active [data-action-motion] {
+    --action-press: 0.92;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [data-action-motion] {
+      scale: var(--action-press);
+      transition:
+        translate var(--duration-fast),
+        scale var(--duration-fast);
+    }
+    [data-action-motion='nudge'],
+    [data-action-motion='lift'] {
+      translate: calc(var(--action-x) * var(--action-on) * var(--action-move))
+        calc(var(--action-y) * var(--action-on) * var(--action-move));
+    }
+    [data-action-motion='draw'] path {
+      stroke-dasharray: 1;
+    }
+    @media (hover: hover) {
+      :where(.group):hover [data-action-motion='draw'] path {
+        animation: action-draw calc(var(--duration-fast) * 2) ease-out;
+      }
+    }
+    :where(.group):focus-visible [data-action-motion='draw'] path {
+      animation: action-draw calc(var(--duration-fast) * 2) ease-out;
+    }
+  }
+}
+
+@keyframes action-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
