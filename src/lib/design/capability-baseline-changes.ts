@@ -64,17 +64,43 @@ const viewText = (
   }))
 
 export const BASELINE_CHANGES: readonly BaselineChange[] = [
+  // Task 158 declares the site footer and the team member page as views. Each gap below is a capability
+  // another task owns, admitted when the view enters the contract. Owner decision, 8 November 2026.
   {
     kind: 'admit',
-    component: 'badgeRow',
-    capability: 'icon',
+    component: 'siteFooter',
+    capability: 'divider',
     scope: 'section',
     layouts: [null],
     reason:
-      'Choosing a badge’s icon is verified at item scope. The container around the icon (shape, colour) has no controls on a block yet, so it is Required here and closes when task 158 adds them. Owner decision D3, 7 November 2026: the policy is split, subject to passing evidence.',
+      'The footer’s parts are separated by fixed borders. Dividers between its parts are task 151’s, which gives the footer a design to store them in.',
     reviewer: 'owner',
-    reviewed: '2026-11-07',
-    closingTask: 158,
+    reviewed: '2026-11-08',
+    closingTask: 151,
+  },
+  {
+    kind: 'admit',
+    component: 'teamMemberPage',
+    capability: 'divider',
+    scope: 'section',
+    layouts: [null],
+    reason:
+      'The page’s contact section is set off by a fixed border. Dividers are task 151’s, which gives the page a design to store them in.',
+    reviewer: 'owner',
+    reviewed: '2026-11-08',
+    closingTask: 151,
+  },
+  {
+    kind: 'admit',
+    component: 'teamMemberPage',
+    capability: 'framing',
+    scope: 'section',
+    layouts: [null],
+    reason:
+      'The portrait is cropped to a fixed square. Framing it is task 177’s, which gives the page a design to store the frame in.',
+    reviewer: 'owner',
+    reviewed: '2026-11-08',
+    closingTask: 177,
   },
   {
     ...VIEW_ROW,

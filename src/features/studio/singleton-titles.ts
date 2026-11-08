@@ -12,5 +12,6 @@ export const SINGLETON_TITLES: Readonly<Record<string, string>> = {
   motionPresets: 'Motion presets',
   businessInfo: 'Business info',
   blogSettings: 'Blog settings',
+  teamPageSettings: 'Team page settings',
   // new-singleton:title
 }

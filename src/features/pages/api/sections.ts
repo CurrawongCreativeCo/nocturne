@@ -9,6 +9,7 @@ import {
   imageFields,
   linkFields,
   decorativeMarkFields,
+  iconDesignFields,
   portableTextFields,
   sectionStyleFields,
   splitMediaFields,
@@ -127,10 +128,12 @@ export const featuresGridFragment = /* groq */ `
     intro,
     ${headerDesignProjection},
     columns,
+    iconDesign { ${iconDesignFields} },
     items[] {
       _key,
       title,
       text,
+      iconName,
       icon { ${imageFields} }
     }
   }
@@ -277,6 +280,7 @@ export const pricingTableFragment = /* groq */ `
     "headingPlain": pt::text(heading),
     intro,
     ${headerDesignProjection},
+    iconDesign { ${iconDesignFields} },
     cardDesign { ${pricingCardDesignProjection} },
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
     plans[defined(price->priceId) && price->active == true] {
@@ -356,6 +360,7 @@ export const locationFragment = /* groq */ `
       meta { ${roleStyleProjection} },
       mark { ${decorativeMarkFields} }
     },
+    iconDesign { ${iconDesignFields} },
     mapImage { ${imageFields} },
     showHours,
     showOpenNow,
@@ -436,11 +441,13 @@ export const processFragment = /* groq */ `
       title { ${roleStyleProjection} },
       body { ${roleStyleProjection} }
     },
+    iconDesign { ${iconDesignFields} },
     steps[] {
       _key,
       label,
       title,
       text,
+      iconName,
       icon { ${imageFields} }
     }
   }
@@ -459,15 +466,6 @@ export const embedFragment = /* groq */ `
     height,
     customHeight
   }
-`
-
-const iconDesignProjection = /* groq */ `
-  iconShape,
-  iconColour { colour, hex },
-  iconBackground { colour, hex },
-  iconBackgroundStrength,
-  iconBorder,
-  iconBorderColour { colour, hex }
 `
 
 export const linkListFragment = /* groq */ `
@@ -528,7 +526,7 @@ export const linkListFragment = /* groq */ `
     linkDesign {
       arrowStyle,
       arrowColour { colour, hex },
-      ${iconDesignProjection}
+      ${iconDesignFields}
     },
     socialDesign {
       style,
@@ -580,7 +578,7 @@ export const linkListFragment = /* groq */ `
         label { ${textStyleProjection} },
         description { ${textStyleProjection} },
         mark { ${decorativeMarkFields} },
-        ${iconDesignProjection},
+        ${iconDesignFields},
         arrowStyle,
         arrowColour { colour, hex }
       })

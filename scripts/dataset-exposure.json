@@ -69,6 +69,10 @@
       "class": "published",
       "why": "Holds only the look of the blog's post cards, which every blog page shows. No personal or secret data."
     },
+    "teamPageSettings": {
+      "class": "published",
+      "why": "Holds only the look of the Team page's icons, which every member's page shows. No personal or secret data."
+    },
     "experiment": {
       "class": "internal",
       "why": "Test configuration; no personal data. Visible if the dataset is public."

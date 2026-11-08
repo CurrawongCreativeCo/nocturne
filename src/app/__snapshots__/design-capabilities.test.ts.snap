@@ -4,7 +4,7 @@ exports[`the design capability contract > badgeRow: reports what it offers today
 {
   "capabilities": [
     "icon required item: verified",
-    "icon required section: pending (158)",
+    "icon required section: verified",
   ],
   "sources": [],
 }
@@ -145,7 +145,7 @@ exports[`the design capability contract > featuresGrid: reports what it offers t
     "header required section: verified",
     "mark required section: verified",
     "depth conditional card: pending (146)",
-    "icon required card: pending (158)",
+    "icon required card: verified",
     "action conditional card: pending (137)",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
@@ -390,7 +390,7 @@ exports[`the design capability contract > location: reports what it offers today
     "mark required section: verified",
     "mark required card: verified",
     "depth required card: pending (146)",
-    "icon required section: pending (158)",
+    "icon required section: verified",
     "framing conditional section/background: pending (177)",
     "pictureDepth conditional section: pending (147)",
     "overlay required section: verified",
@@ -515,7 +515,7 @@ exports[`the design capability contract > pricingTable: reports what it offers t
     "mark required item: verified",
     "depth required card: pending (146)",
     "depth required item: pending (146)",
-    "icon conditional card: pending (158)",
+    "icon conditional card: verified",
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
     "glass required section: verified",
@@ -537,8 +537,8 @@ exports[`the design capability contract > process: reports what it offers today 
     "header required section @alternating: verified",
     "mark required section @vertical: verified",
     "mark required section @alternating: verified",
-    "icon required card @vertical: pending (158)",
-    "icon required card @alternating: pending (158)",
+    "icon required card @vertical: verified",
+    "icon required card @alternating: verified",
     "framing conditional section/background @vertical: pending (177)",
     "framing conditional section/background @alternating: pending (177)",
     "overlay required section @vertical: verified",
@@ -585,6 +585,16 @@ exports[`the design capability contract > servicePage: reports what it offers to
   "capabilities": [
     "text required section: pending (280)",
     "framing required section: pending (177)",
+    "divider required section: pending (151)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > siteFooter: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "icon required section: verified",
     "divider required section: pending (151)",
   ],
   "sources": [],
@@ -694,6 +704,17 @@ exports[`the design capability contract > team: reports what it offers today 1`]
     "motion required section @grid: verified",
     "motion required section @slider: verified",
     "motion required section @list: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > teamMemberPage: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "icon required section: verified",
+    "framing required section: pending (177)",
+    "divider required section: pending (151)",
   ],
   "sources": [],
 }

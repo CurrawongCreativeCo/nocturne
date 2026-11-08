@@ -227,6 +227,40 @@ interface CardFamilyEvidence {
 }
 
 /**
+ * The icon container's evidence (task 158): a set icon is drawn in `data-icon-shape`, which the section's
+ * Icons box changes. `base` gives the content a set icon to draw; the probe picks a container shape.
+ */
+function iconContainerEvidence(config: {
+  component: string
+  layouts?: readonly string[]
+  render: string
+  base: Patch
+  scope?: 'card' | 'section'
+  box?: string
+  target?: string
+  /** `appears` where nothing is drawn around the icon until a container is chosen. */
+  change?: 'attributes' | 'appears'
+  /** The shape the probe picks, when the content already draws a circle. */
+  shape?: string
+}): CapabilityEvidence {
+  const box = config.box ?? 'iconDesign'
+  return {
+    id: `${config.component}.icon.${config.scope ?? 'card'}`,
+    component: config.component,
+    ...(config.layouts ? { layouts: config.layouts } : {}),
+    capability: 'icon',
+    scope: config.scope ?? 'card',
+    field: `${box}.iconShape`,
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
+    render: config.render,
+    base: config.base,
+    target: config.target ?? '[data-icon-shape]',
+    change: config.change ?? 'attributes',
+    probe: { [`${box}.iconShape`]: config.shape ?? 'circle' },
+  }
+}
+
+/**
  * The evidence of a card family's shared design: the same cases for every family, so a role, a part and a
  * scope are each proven on their own. A role's target is that role's own element (data-text-role), the
  * surface's the card, a mark's the mark's own box, and the item scope sets the item's Appearance first.
@@ -360,6 +394,22 @@ const slotBlockEvidence: CapabilityEvidence[] = [
     change: 'content',
     base: { badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned' }] },
     probe: { 'badges.0.icon': 'star' },
+  },
+  {
+    // The container around the icon: absent until the block's Icons box chooses a shape.
+    id: 'badgeRow.icon.section',
+    component: 'badgeRow',
+    capability: 'icon',
+    scope: 'section',
+    field: 'iconDesign.iconShape',
+    resolvers: [{ module: '@/lib/sanity/surface-options', export: 'iconLook' }],
+    render: 'src/components/ui/badge-row.tsx',
+    target: '[data-badge-row] [data-icon-shape]',
+    change: 'appears',
+    base: {
+      badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned', icon: 'star' }],
+    },
+    probe: { 'iconDesign.iconShape': 'circle' },
   },
 ]
 
@@ -783,6 +833,27 @@ const locationSources: SourceEvidence[] = [
 export const EVIDENCE: readonly Evidence[] = [
   // A listing's design lives in Blog settings, so its controls are `settings.cardDesign.*` in the listing's
   // schema (design-components.ts) and its drawer draws the real PostCard from them.
+  // The footer and a team member's page are views, drawn by their own drawers (design-capability-views.tsx).
+  // Each has an Icons box that changes its social icons' container, so the probe picks a different shape.
+  iconContainerEvidence({
+    component: 'siteFooter',
+    scope: 'section',
+    box: 'navigation.footerIconDesign',
+    render: 'src/features/site/components/footer-view.tsx',
+    target: '[data-social-style] a',
+    // The footer's icon controls are offered once its social row is on, and it draws circles until one is chosen.
+    base: { 'navigation.footerShowSocial': true, 'navigation.footerSocialStyle': 'circle' },
+    shape: 'square',
+  }),
+  iconContainerEvidence({
+    component: 'teamMemberPage',
+    scope: 'section',
+    box: 'settings.iconDesign',
+    render: 'src/features/team/components/team-member-page.tsx',
+    target: '[data-social-style] a',
+    base: {},
+    shape: 'square',
+  }),
   ...cardFamilyEvidence({
     component: 'blogPostCards',
     box: 'settings.cardDesign',
@@ -1053,6 +1124,13 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  iconContainerEvidence({
+    component: 'featuresGrid',
+    render: 'src/components/ui/item-icon.tsx',
+    base: {
+      items: [{ _key: 'probe-feature', _type: 'featureItem', title: 'Fast', iconName: 'star' }],
+    },
+  }),
   ...frameEvidence('featuresGrid', {
     mark: true,
     overlay: true,
@@ -1155,6 +1233,21 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     item: { array: 'plans' },
   }),
+  iconContainerEvidence({
+    component: 'pricingTable',
+    render: 'src/components/ui/icon-container.tsx',
+    base: {
+      plans: [
+        {
+          _key: 'probe-plan-1',
+          _type: 'plan',
+          price: { _type: 'reference', _ref: 'stripePrice-price_Starter1' },
+          features: ['One project'],
+        },
+      ],
+    },
+    change: 'appears',
+  }),
   ...frameEvidence('pricingTable', {
     mark: true,
     overlay: true,
@@ -1234,6 +1327,13 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { mapImage: PICTURE },
     roles: ['title', 'body', 'meta'],
   }),
+  iconContainerEvidence({
+    component: 'location',
+    scope: 'section',
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    base: { mapImage: null },
+    change: 'appears',
+  }),
   ...frameEvidence('location', {
     mark: true,
     overlay: true,
@@ -1296,6 +1396,17 @@ export const EVIDENCE: readonly Evidence[] = [
     },
     roles: ['label', 'title', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  iconContainerEvidence({
+    component: 'process',
+    layouts: ['vertical', 'alternating'],
+    render: 'src/components/ui/item-icon.tsx',
+    base: {
+      steps: [
+        { _key: 'probe-step-1', _type: 'step', title: 'Meet', iconName: 'star' },
+        { _key: 'probe-step-2', _type: 'step', title: 'Build', iconName: 'heart' },
+      ],
+    },
   }),
   ...frameEvidence('process', {
     mark: ['vertical', 'alternating'],

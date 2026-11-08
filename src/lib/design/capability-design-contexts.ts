@@ -26,4 +26,11 @@ export const DESIGN_CONTEXTS: readonly DesignContext[] = [
     reviewer: 'owner',
     reviewed: '2026-11-07',
   },
+  {
+    component: 'siteFooter',
+    path: 'navigation.footerIconDesign',
+    why: 'The footer has no section to hold its design: its icon controls live in Navigation, a document, as an agency-only Icons box.',
+    reviewer: 'owner',
+    reviewed: '2026-11-08',
+  },
 ]

@@ -8,6 +8,11 @@ import { slotVideo } from '@/features/pages/schemas/slot-video'
 import { SLOT_BLOCKS, SLOT_FAMILIES } from '@/features/pages/slots/registry'
 import { searchResultsCapabilities } from '@/features/search/schemas/search-results-capabilities'
 import { servicePageCapabilities } from '@/features/services/schemas/service-page-capabilities'
+import { siteFooterCapabilities } from '@/features/site/schemas/site-footer-capabilities'
+import { siteNavigation } from '@/features/site/schemas/site-navigation'
+import { teamMember } from '@/features/team/schemas/team-member'
+import { teamMemberPageCapabilities } from '@/features/team/schemas/team-member-page-capabilities'
+import { teamPageSettings } from '@/features/team/schemas/team-page-settings'
 import type { DesignCapabilityDeclaration } from '@/lib/design/capabilities'
 import type { ContractComponent, SlotHost } from '@/lib/design/capability-policy'
 import { schemaGate, type SchemaField } from '@/lib/design/schema-capabilities'
@@ -39,6 +44,10 @@ const named = [
   // The document a listing's cards show: the blog's cards are drawn from a post.
   post,
   blogSettings,
+  // The documents the footer and a team member's page are drawn from.
+  siteNavigation,
+  teamMember,
+  teamPageSettings,
   ...[
     badgeRow,
     blockContent,
@@ -140,6 +149,20 @@ export const DESIGN_COMPONENTS: readonly ContractComponent[] = [
     declaration: searchResultsCapabilities,
   },
   {
+    id: 'siteFooter',
+    kind: 'view',
+    title: 'Site footer',
+    layouts: [],
+    declaration: siteFooterCapabilities,
+  },
+  {
+    id: 'teamMemberPage',
+    kind: 'view',
+    title: 'Team member page',
+    layouts: [],
+    declaration: teamMemberPageCapabilities,
+  },
+  {
     id: 'blogPostCards',
     kind: 'listing',
     title: 'Blog post cards',
@@ -159,6 +182,21 @@ const VIEW_SCHEMAS: readonly SchemaField[] = [
     fields: [
       { name: 'post', type: 'post', group: 'content' },
       { name: 'settings', type: 'blogSettings', group: 'design' },
+    ],
+  },
+  {
+    // The footer's social icons are controlled from Navigation (footerIconDesign).
+    name: 'siteFooter',
+    type: 'object',
+    fields: [{ name: 'navigation', type: 'siteNavigation' }],
+  },
+  {
+    // A member's page: the member, in the design Team page settings holds for every member.
+    name: 'teamMemberPage',
+    type: 'object',
+    fields: [
+      { name: 'member', type: 'teamMember', group: 'content' },
+      { name: 'settings', type: 'teamPageSettings' },
     ],
   },
 ]

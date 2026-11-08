@@ -39,6 +39,7 @@ export const AGENCY_ONLY_TYPES: ReadonlySet<string> = new Set([
   'decorativeDivider',
   'decorativeMark',
   'blogSettings',
+  'teamPageSettings',
   // new-type:agency-only
 ])
 
@@ -82,7 +83,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   siteNavigation: {
     editable: ['headerNav', 'headerCta', 'footerNav', 'footerText'],
-    agencyOnly: ['footerShowSocial', 'footerSocialStyle'],
+    agencyOnly: ['footerShowSocial', 'footerSocialStyle', 'footerIconDesign'],
   },
   announcement: {
     editable: ['message', 'link', 'startsAt', 'endsAt', 'dismissible'],
@@ -226,7 +227,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   featuresGrid: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'columns', 'items'],
-    agencyOnly: ['headerDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'access', 'style'],
   },
   logoCloud: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'logos'],
@@ -250,7 +251,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   pricingTable: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'plans'],
-    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'access', 'style'],
   },
   newsletterSignup: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'submitLabel', 'successMessage'],
@@ -277,7 +278,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'showSocial',
       'directionsLabel',
     ],
-    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
   },
   team: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'selection', 'members'],
@@ -308,7 +309,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   process: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'steps'],
-    agencyOnly: ['headerDesign', 'cardDesign', 'variant', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'variant', 'access', 'style'],
   },
   embed: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'provider', 'url', 'height'],
@@ -396,7 +397,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   badgeRow: {
     editable: ['badges'],
-    agencyOnly: [],
+    agencyOnly: ['iconDesign'],
   },
   logoRow: {
     editable: ['logos', 'greyscale'],

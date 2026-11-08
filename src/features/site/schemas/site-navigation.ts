@@ -2,6 +2,7 @@ import { MenuIcon } from '@sanity/icons/Menu'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { hiddenFromClients } from '@/lib/sanity/roles'
+import { iconsDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import { socialStyleThumbnails } from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
 import { SOCIAL_STYLES, SOCIAL_STYLE_TITLES } from '@/lib/sanity/social-style-options'
@@ -80,6 +81,20 @@ export const siteNavigation = defineType({
       hidden: (context) =>
         hiddenFromClients(context) ||
         !(context.document as { footerShowSocial?: boolean } | undefined)?.footerShowSocial,
+    }),
+    // Agency only. Each choice inherits the style above, so empty draws what the footer always drew.
+    iconsDesignField({
+      name: 'footerIconDesign',
+      scope: 'section',
+      group: 'footer',
+      inherits: 'the social icon style above',
+      // Read from the parent, which is this document, so the capability check can evaluate it too.
+      hidden: (context) =>
+        !(context.parent as { footerShowSocial?: boolean } | undefined)?.footerShowSocial,
+      shapeOf: (context) =>
+        (context.parent as { iconShape?: string } | undefined)?.iconShape ??
+        (context.document as { footerSocialStyle?: string } | undefined)?.footerSocialStyle ??
+        'plain',
     }),
   ],
   preview: { prepare: () => ({ title: 'Navigation' }) },

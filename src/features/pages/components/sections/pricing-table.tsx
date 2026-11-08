@@ -2,6 +2,7 @@ import { stegaClean } from 'next-sanity'
 import { useId } from 'react'
 
 import { CardSurface } from '@/components/ui/card-surface'
+import { IconContainer } from '@/components/ui/icon-container'
 import { PlainText } from '@/components/ui/plain-text'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -10,6 +11,7 @@ import { siteLanguage } from '@/config/env'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { cardMarkChoice, isCustomised, resolveItemCardDesign } from '@/lib/sanity/card-design'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveIconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../types'
@@ -47,6 +49,13 @@ const columnClasses = {
   4: 'max-w-content sm:grid-cols-2 lg:grid-cols-4',
 } as const
 
+/** The feature checkmark: a fixed icon, bare unless the Icons box gives it a container. */
+const CHECK_OWN: OwnIcon = {
+  shape: 'plain',
+  background: 'bg-surface-alt',
+  border: 'ring-1 ring-inset ring-line',
+}
+
 /**
  * Plans from Stripe prices. Amounts are formatted with Intl for the site's language. The checkout
  * button comes from the route (`renderCheckout`), since payments are a feature of their own.
@@ -56,6 +65,12 @@ export function PricingTable({ data, isFirst, renderCheckout }: SectionProps<'pr
   const title = sectionTitle(data)
   const headingId = useId()
   const { block, text, tone } = sectionTraits(data.style, DEFAULTS)
+  const icon = resolveIconDesign(data.iconDesign)
+  const boxed = icon.shape !== undefined && icon.shape !== 'plain'
+  // Bare, the checkmark is what it always was; a container centres it, so it drops its nudge.
+  const checkClass = [boxed ? '' : 'mt-0.5', 'size-4 shrink-0', icon.colour ? '' : 'text-ink']
+    .filter(Boolean)
+    .join(' ')
 
   if (plans.length === 0) return null
   const count = Math.min(plans.length, 4) as keyof typeof columnClasses
@@ -181,18 +196,20 @@ export function PricingTable({ data, isFirst, renderCheckout }: SectionProps<'pr
                     // Plain strings have no key of their own; the list is fixed per render.
                     // eslint-disable-next-line react/no-array-index-key
                     <li key={`${index}-${feature}`} className="flex gap-3">
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        className="mt-0.5 size-4 shrink-0 text-ink"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <IconContainer design={icon} own={CHECK_OWN} size="mt-0.5 size-6">
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className={checkClass}
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </IconContainer>
                       <span>{feature}</span>
                     </li>
                   ))}

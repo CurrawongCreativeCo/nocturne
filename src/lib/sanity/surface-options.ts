@@ -269,6 +269,8 @@ export interface OwnIcon {
   border: string
   /** The icon's colour class while no colour is chosen. */
   colour?: string
+  /** The colour a chosen strength washes (CSS), when no container colour is chosen. */
+  fill?: string
 }
 
 /** The fill and border a shaped container starts from in a layout that draws its icons plain. */
@@ -298,7 +300,7 @@ export function iconLook(design: IconDesign, own: OwnIcon): IconLook {
   const surface = ringSurfaceLook(design, {
     background: fromPlain ? DEFAULT_ICON_CONTAINER.background : own.background,
     border: fromPlain ? DEFAULT_ICON_CONTAINER.border : own.border,
-    fill: 'var(--color-surface-alt)',
+    fill: own.fill ?? 'var(--color-surface-alt)',
   })
   return {
     shape,

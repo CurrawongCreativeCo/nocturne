@@ -9,6 +9,8 @@ exports[`design capability evidence > badgeRow.icon.item: the probe changes the 
 ]
 `;
 
+exports[`design capability evidence > badgeRow.icon.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `
@@ -448,6 +450,12 @@ exports[`design capability evidence > featuresGrid.header.section.intro: the pro
 ]
 `;
 
+exports[`design capability evidence > featuresGrid.icon.card: the probe changes the registered target 1`] = `
+[
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+]
+`;
+
 exports[`design capability evidence > featuresGrid.mark.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > featuresGrid.motion.section: the probe changes the registered target 1`] = `
@@ -809,25 +817,25 @@ exports[`design capability evidence > linkList.depth.item@stacked: the probe cha
 
 exports[`design capability evidence > linkList.divider.section@cards: the probe changes the registered target 1`] = `
 [
-  "eed824fdd0874428 (4921 characters)",
+  "1fe0ba24bc5c2cfb (4921 characters)",
 ]
 `;
 
 exports[`design capability evidence > linkList.divider.section@compact: the probe changes the registered target 1`] = `
 [
-  "721fd9ca12847c5a (3847 characters)",
+  "4fc08ef5345583ae (3847 characters)",
 ]
 `;
 
 exports[`design capability evidence > linkList.divider.section@editorial: the probe changes the registered target 1`] = `
 [
-  "b4469d78ce0fbbd4 (4574 characters)",
+  "bee329c9f9f718d6 (4574 characters)",
 ]
 `;
 
 exports[`design capability evidence > linkList.divider.section@stacked: the probe changes the registered target 1`] = `
 [
-  "3ce2e2be8eb6bf47 (4537 characters)",
+  "445a82f545f44c8a (4537 characters)",
 ]
 `;
 
@@ -1372,6 +1380,8 @@ exports[`design capability evidence > location.header.section.intro: the probe c
 ]
 `;
 
+exports[`design capability evidence > location.icon.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > location.mark.card.cards: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > location.mark.section: the probe changes the registered target 1`] = `[]`;
@@ -1744,6 +1754,8 @@ exports[`design capability evidence > pricingTable.header.section.intro: the pro
 ]
 `;
 
+exports[`design capability evidence > pricingTable.icon.card: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > pricingTable.mark.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > pricingTable.mark.item: the probe changes the registered target 1`] = `[]`;
@@ -1906,6 +1918,20 @@ exports[`design capability evidence > process.header.section.intro@vertical: the
 ]
 `;
 
+exports[`design capability evidence > process.icon.card@alternating: the probe changes the registered target 1`] = `
+[
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+]
+`;
+
+exports[`design capability evidence > process.icon.card@vertical: the probe changes the registered target 1`] = `
+[
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+  "<span class="grid shrink-0 place-items-center mb-4 size-12 text-accent-text" data-icon-shape="plain">",
+]
+`;
+
 exports[`design capability evidence > process.mark.section@alternating: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > process.mark.section@vertical: the probe changes the registered target 1`] = `[]`;
@@ -1999,6 +2025,12 @@ exports[`design capability evidence > richText.motion.section: the probe changes
 exports[`design capability evidence > richText.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > siteFooter.icon.section: the probe changes the registered target 1`] = `
+[
+  "<a aria-label="Facebook" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.facebook.com/testco" rel="me">",
 ]
 `;
 
@@ -2357,6 +2389,13 @@ exports[`design capability evidence > team.text.card.title@slider: the probe cha
 [
   "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
   "<h3 class="text-h4 font-semibold text-balance" data-text-role="title">",
+]
+`;
+
+exports[`design capability evidence > teamMemberPage.icon.section: the probe changes the registered target 1`] = `
+[
+  "<a aria-label="Ann Lee on LinkedIn" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.linkedin.com/in/ann-lee-example" rel="noopener">",
+  "<a aria-label="Ann Lee on Instagram" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.instagram.com/ann-lee-example" rel="noopener">",
 ]
 `;
 

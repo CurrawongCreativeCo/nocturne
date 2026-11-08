@@ -161,6 +161,241 @@
               ],
               "capability": "icon",
               "clientEditable": true
+            },
+            {
+              "path": "iconDesign",
+              "kind": "object",
+              "required": false,
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconShape",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "plain",
+                  "title": "No container"
+                },
+                {
+                  "value": "circle",
+                  "title": "Circle"
+                },
+                {
+                  "value": "rounded",
+                  "title": "Rounded square"
+                },
+                {
+                  "value": "square",
+                  "title": "Square"
+                }
+              ],
+              "capability": "icon",
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconColour",
+              "kind": "object",
+              "required": false,
+              "capability": "icon",
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconColour.colour",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "inherit",
+                  "title": "Inherit"
+                },
+                {
+                  "value": "ink",
+                  "title": "Text"
+                },
+                {
+                  "value": "muted",
+                  "title": "Muted text"
+                },
+                {
+                  "value": "accent",
+                  "title": "Primary"
+                },
+                {
+                  "value": "accent-2",
+                  "title": "Secondary"
+                },
+                {
+                  "value": "highlight",
+                  "title": "Highlight"
+                },
+                {
+                  "value": "custom",
+                  "title": "Custom"
+                }
+              ],
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconColour.hex",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBackground",
+              "kind": "object",
+              "required": false,
+              "capability": "icon",
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBackground.colour",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "inherit",
+                  "title": "Inherit"
+                },
+                {
+                  "value": "ink",
+                  "title": "Text"
+                },
+                {
+                  "value": "accent",
+                  "title": "Primary"
+                },
+                {
+                  "value": "accent-2",
+                  "title": "Secondary"
+                },
+                {
+                  "value": "highlight",
+                  "title": "Highlight"
+                },
+                {
+                  "value": "transparent",
+                  "title": "Transparent"
+                },
+                {
+                  "value": "custom",
+                  "title": "Custom"
+                }
+              ],
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBackground.hex",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBackgroundStrength",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "wash",
+                  "title": "Wash"
+                },
+                {
+                  "value": "light",
+                  "title": "Light"
+                },
+                {
+                  "value": "medium",
+                  "title": "Medium"
+                },
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "solid",
+                  "title": "Solid"
+                }
+              ],
+              "capability": "icon",
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBorder",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "none",
+                  "title": "None"
+                },
+                {
+                  "value": "thin",
+                  "title": "Thin"
+                },
+                {
+                  "value": "medium",
+                  "title": "Medium"
+                },
+                {
+                  "value": "thick",
+                  "title": "Thick"
+                }
+              ],
+              "capability": "icon",
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBorderColour",
+              "kind": "object",
+              "required": false,
+              "capability": "icon",
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBorderColour.colour",
+              "kind": "string",
+              "required": false,
+              "list": [
+                {
+                  "value": "inherit",
+                  "title": "Inherit"
+                },
+                {
+                  "value": "ink",
+                  "title": "Text"
+                },
+                {
+                  "value": "muted",
+                  "title": "Muted text"
+                },
+                {
+                  "value": "accent",
+                  "title": "Primary"
+                },
+                {
+                  "value": "accent-2",
+                  "title": "Secondary"
+                },
+                {
+                  "value": "highlight",
+                  "title": "Highlight"
+                },
+                {
+                  "value": "custom",
+                  "title": "Custom"
+                }
+              ],
+              "clientEditable": false
+            },
+            {
+              "path": "iconDesign.iconBorderColour.hex",
+              "kind": "string",
+              "required": null,
+              "max": null,
+              "clientEditable": false
             }
           ]
         },
@@ -1239,6 +1474,241 @@
             }
           ],
           "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconShape",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "plain",
+              "title": "No container"
+            },
+            {
+              "value": "circle",
+              "title": "Circle"
+            },
+            {
+              "value": "rounded",
+              "title": "Rounded square"
+            },
+            {
+              "value": "square",
+              "title": "Square"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBackground",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBackground.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBackground.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBackgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBorder",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBorderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBorderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "supporting[badgeRow].iconDesign.iconBorderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -4219,6 +4689,87 @@
           "clientEditable": true
         },
         {
+          "path": "items[].iconName",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": true
+        },
+        {
           "path": "items[].icon",
           "kind": "image",
           "required": false,
@@ -4598,6 +5149,241 @@
           "clientEditable": false
         },
         {
+          "path": "iconDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconShape",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "plain",
+              "title": "No container"
+            },
+            {
+              "value": "circle",
+              "title": "Circle"
+            },
+            {
+              "value": "rounded",
+              "title": "Rounded square"
+            },
+            {
+              "value": "square",
+              "title": "Square"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorder",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -4780,11 +5566,26 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 158,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "iconDesign.iconShape"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "featuresGrid.icon.card",
+              "field": "iconDesign.iconShape",
+              "resolvers": [
+                "@/lib/sanity/surface-options#iconLook"
+              ],
+              "render": "src/components/ui/item-icon.tsx",
+              "target": "[data-icon-shape]",
+              "cases": [
+                "featuresGrid.icon.card"
+              ]
+            }
+          ]
         },
         "action": {
           "policies": [
@@ -11662,6 +12463,241 @@
           "clientEditable": false
         },
         {
+          "path": "iconDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconShape",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "plain",
+              "title": "No container"
+            },
+            {
+              "value": "circle",
+              "title": "Circle"
+            },
+            {
+              "value": "rounded",
+              "title": "Rounded square"
+            },
+            {
+              "value": "square",
+              "title": "Square"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorder",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "cardDesign",
           "kind": "object",
           "required": false,
@@ -12815,11 +13851,26 @@
                 "reachable": true
               },
               "closingTask": 158,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "iconDesign.iconShape"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "pricingTable.icon.card",
+              "field": "iconDesign.iconShape",
+              "resolvers": [
+                "@/lib/sanity/surface-options#iconLook"
+              ],
+              "render": "src/components/ui/icon-container.tsx",
+              "target": "[data-icon-shape]",
+              "cases": [
+                "pricingTable.icon.card"
+              ]
+            }
+          ]
         },
         "action": {
           "notApplicable": "Has buttons, not a whole-card link (148)"
@@ -16500,6 +17551,241 @@
           "clientEditable": false
         },
         {
+          "path": "iconDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconShape",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "plain",
+              "title": "No container"
+            },
+            {
+              "value": "circle",
+              "title": "Circle"
+            },
+            {
+              "value": "rounded",
+              "title": "Rounded square"
+            },
+            {
+              "value": "square",
+              "title": "Square"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorder",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "cardDesign",
           "kind": "object",
           "required": false,
@@ -17274,11 +18560,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 158,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "iconDesign.iconShape"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "location.icon.section",
+              "field": "iconDesign.iconShape",
+              "resolvers": [
+                "@/lib/sanity/surface-options#iconLook"
+              ],
+              "render": "src/features/pages/components/sections/location/index.tsx",
+              "target": "[data-icon-shape]",
+              "cases": [
+                "location.icon.section"
+              ]
+            }
+          ]
         },
         "action": {
           "notApplicable": "No link covers a whole card"
@@ -20187,6 +21488,87 @@
           "clientEditable": true
         },
         {
+          "path": "steps[].iconName",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": true
+        },
+        {
           "path": "steps[].icon",
           "kind": "image",
           "required": false,
@@ -20550,6 +21932,241 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconShape",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "plain",
+              "title": "No container"
+            },
+            {
+              "value": "circle",
+              "title": "Circle"
+            },
+            {
+              "value": "rounded",
+              "title": "Rounded square"
+            },
+            {
+              "value": "square",
+              "title": "Square"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "transparent",
+              "title": "Transparent"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackground.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBackgroundStrength",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "wash",
+              "title": "Wash"
+            },
+            {
+              "value": "light",
+              "title": "Light"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "solid",
+              "title": "Solid"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorder",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "thick",
+              "title": "Thick"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour",
+          "kind": "object",
+          "required": false,
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "iconDesign.iconBorderColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -21165,14 +22782,30 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 158,
-              "fields": [],
+              "fields": [
+                "iconDesign.iconShape"
+              ],
               "availability": {
-                "vertical": "pending",
-                "alternating": "pending"
+                "vertical": "verified",
+                "alternating": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "process.icon.card",
+              "field": "iconDesign.iconShape",
+              "resolvers": [
+                "@/lib/sanity/surface-options#iconLook"
+              ],
+              "render": "src/components/ui/item-icon.tsx",
+              "target": "[data-icon-shape]",
+              "cases": [
+                "process.icon.card@vertical",
+                "process.icon.card@alternating"
+              ]
+            }
+          ]
         },
         "action": {
           "notApplicable": "No link covers a whole card"
@@ -31697,8 +33330,10 @@
                 "policy": "required",
                 "scope": "section",
                 "closingTask": 158,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "iconDesign.iconShape"
+                ],
+                "availability": "verified"
               }
             ],
             "evidence": [
@@ -31712,6 +33347,18 @@
                 "target": "[data-badge-row] li",
                 "cases": [
                   "badgeRow.icon.item"
+                ]
+              },
+              {
+                "id": "badgeRow.icon.section",
+                "field": "iconDesign.iconShape",
+                "resolvers": [
+                  "@/lib/sanity/surface-options#iconLook"
+                ],
+                "render": "src/components/ui/badge-row.tsx",
+                "target": "[data-badge-row] [data-icon-shape]",
+                "cases": [
+                  "badgeRow.icon.section"
                 ]
               }
             ]
@@ -32449,6 +34096,185 @@
           }
         },
         "contentSources": {}
+      },
+      {
+        "type": "siteFooter",
+        "title": "Site footer",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "The footer’s fill and border are the site’s tone (Brand colours), not a card"
+          },
+          "text": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "header": {
+            "notApplicable": "The footer has no section header"
+          },
+          "mark": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "depth": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "icon": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 158,
+                "fields": [
+                  "navigation.footerIconDesign.iconShape"
+                ],
+                "availability": "verified"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "siteFooter.icon.section",
+                "field": "navigation.footerIconDesign.iconShape",
+                "resolvers": [
+                  "@/lib/sanity/surface-options#iconLook"
+                ],
+                "render": "src/features/site/components/footer-view.tsx",
+                "target": "[data-social-style] a",
+                "cases": [
+                  "siteFooter.icon.section"
+                ]
+              }
+            ]
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "notApplicable": "The footer holds no picture"
+          },
+          "pictureDepth": {
+            "notApplicable": "Has no framed picture"
+          },
+          "overlay": {
+            "notApplicable": "No picture with a wash over it"
+          },
+          "glass": {
+            "notApplicable": "Not in the footer’s planned design, which is icons and dividers (build plan)"
+          },
+          "divider": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 151,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
+      },
+      {
+        "type": "teamMemberPage",
+        "title": "Team member page",
+        "capabilities": {
+          "surface": {
+            "notApplicable": "The page draws no card"
+          },
+          "text": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "header": {
+            "notApplicable": "The page’s own h1 heads it"
+          },
+          "mark": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "depth": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "icon": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 158,
+                "fields": [
+                  "settings.iconDesign.iconShape"
+                ],
+                "availability": "verified"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "teamMemberPage.icon.section",
+                "field": "settings.iconDesign.iconShape",
+                "resolvers": [
+                  "@/lib/sanity/surface-options#iconLook"
+                ],
+                "render": "src/features/team/components/team-member-page.tsx",
+                "target": "[data-social-style] a",
+                "cases": [
+                  "teamMemberPage.icon.section"
+                ]
+              }
+            ]
+          },
+          "action": {
+            "notApplicable": "No link covers a whole card"
+          },
+          "framing": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 177,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "pictureDepth": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "overlay": {
+            "notApplicable": "No picture with a wash over it"
+          },
+          "glass": {
+            "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"
+          },
+          "divider": {
+            "policies": [
+              {
+                "policy": "required",
+                "scope": "section",
+                "closingTask": 151,
+                "fields": [],
+                "availability": "pending"
+              }
+            ],
+            "evidence": []
+          },
+          "edge": {
+            "notApplicable": "Not a section, so it has no edge"
+          },
+          "motion": {
+            "notApplicable": "Has no section frame to animate"
+          },
+          "slots": {
+            "notApplicable": "Not a slot family (DE-2: slots only where two real designs need them)"
+          }
+        },
+        "contentSources": {}
       }
     ],
     "coverage": {
@@ -32488,6 +34314,8 @@
         "eventDetailsCard",
         "servicePage",
         "searchResults",
+        "siteFooter",
+        "teamMemberPage",
         "blogPostCards"
       ],
       "notDeclaredYet": [],
@@ -32512,17 +34340,6 @@
           "note": "Optional quick actions"
         },
         {
-          "part": "Footer",
-          "needs": [
-            "icon",
-            "divider"
-          ],
-          "tasks": [
-            158,
-            151
-          ]
-        },
-        {
           "part": "Buttons (CtaLink)",
           "needs": [
             "surface",
@@ -32545,19 +34362,6 @@
             148
           ],
           "note": "Once task 95 exists"
-        },
-        {
-          "part": "Team member pages",
-          "needs": [
-            "icon",
-            "framing",
-            "divider"
-          ],
-          "tasks": [
-            158,
-            177,
-            151
-          ]
         },
         {
           "part": "Event pages",

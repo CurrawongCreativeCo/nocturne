@@ -315,7 +315,6 @@ export interface FutureCoverage {
 export const FUTURE_COVERAGE = [
   { part: 'Site header', needs: ['glass'], tasks: [159] },
   { part: 'Mobile drawer', needs: ['glass'], tasks: [7], note: 'Optional quick actions' },
-  { part: 'Footer', needs: ['icon', 'divider'], tasks: [158, 151] },
   {
     part: 'Buttons (CtaLink)',
     needs: ['surface', 'depth', 'action'],
@@ -328,7 +327,6 @@ export const FUTURE_COVERAGE = [
     tasks: [148],
     note: 'Once task 95 exists',
   },
-  { part: 'Team member pages', needs: ['icon', 'framing', 'divider'], tasks: [158, 177, 151] },
   { part: 'Event pages', needs: ['framing', 'divider'], tasks: [177, 151] },
   { part: 'Blog post page', needs: ['framing'], tasks: [177] },
   { part: 'Location pages', needs: ['surface', 'text'], tasks: [278] },

@@ -126,13 +126,6 @@
     },
     {
       "component": "featuresGrid",
-      "capability": "icon",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 158
-    },
-    {
-      "component": "featuresGrid",
       "capability": "divider",
       "scope": "section",
       "layouts": [null],
@@ -310,13 +303,6 @@
     },
     {
       "component": "location",
-      "capability": "icon",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 158
-    },
-    {
-      "component": "location",
       "capability": "divider",
       "scope": "section",
       "layouts": [null],
@@ -364,13 +350,6 @@
       "scope": "section",
       "layouts": ["embed", "ambient"],
       "closingTask": 151
-    },
-    {
-      "component": "process",
-      "capability": "icon",
-      "scope": "card",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 158
     },
     {
       "component": "process",
@@ -435,13 +414,6 @@
       "scope": "section",
       "layouts": ["list", "agenda", "featured"],
       "closingTask": 151
-    },
-    {
-      "component": "badgeRow",
-      "capability": "icon",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 158
     },
     {
       "component": "slotImage",
@@ -596,6 +568,27 @@
       "role": "body",
       "layouts": [null],
       "closingTask": 280
+    },
+    {
+      "component": "siteFooter",
+      "capability": "divider",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 151
+    },
+    {
+      "component": "teamMemberPage",
+      "capability": "framing",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 177
+    },
+    {
+      "component": "teamMemberPage",
+      "capability": "divider",
+      "scope": "section",
+      "layouts": [null],
+      "closingTask": 151
     },
     {
       "component": "blogPostCards",
@@ -754,13 +747,6 @@
       "part": "background",
       "layouts": [null],
       "closingTask": 177
-    },
-    {
-      "component": "pricingTable",
-      "capability": "icon",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 158
     },
     {
       "component": "pricingTable",

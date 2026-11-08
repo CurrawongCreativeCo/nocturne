@@ -12,6 +12,7 @@ export const SINGLETON_TYPES = new Set([
   'designSettings',
   'businessInfo',
   'blogSettings',
+  'teamPageSettings',
   // new-singleton:register
 ])
 

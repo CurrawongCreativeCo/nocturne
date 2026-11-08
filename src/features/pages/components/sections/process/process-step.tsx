@@ -1,8 +1,9 @@
 import { MotionLi } from '@/components/motion/motion-elements'
 import { revealInView, revealOnLoad } from '@/components/motion/presets'
+import { ItemIcon } from '@/components/ui/item-icon'
 import { PlainText } from '@/components/ui/plain-text'
-import { SanityImage } from '@/components/ui/sanity-image'
 import type { sectionMotion } from '@/components/ui/section-style'
+import { resolveIconDesign } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../../types'
@@ -18,6 +19,8 @@ interface Props {
   plan: ReturnType<typeof sectionMotion>
   /** The section's step text: the label, title and description roles. */
   cardDesign?: SectionProps<'process'>['data']['cardDesign']
+  /** The section's Icons box. */
+  iconDesign?: SectionProps<'process'>['data']['iconDesign']
 }
 
 /** The text roles a step draws (process-capabilities.ts), and what each draws with nothing chosen. */
@@ -51,7 +54,7 @@ const SIDE_CLASSES = {
  * Later steps reveal with the section's animation (Stagger by default) as they scroll into view.
  * `data-reveal` keeps them visible without JavaScript and under reduced motion.
  */
-export function ProcessStep({ step, index, side, plan, cardDesign }: Props) {
+export function ProcessStep({ step, index, side, plan, cardDesign, iconDesign }: Props) {
   const classes = SIDE_CLASSES[side]
   const look = resolveTextRoles(cardDesign, ROLES)
   const body = textRoleProps(
@@ -81,13 +84,7 @@ export function ProcessStep({ step, index, side, plan, cardDesign }: Props) {
         {index + 1}
       </span>
       <div className={`flex flex-col items-start ${classes.body}`}>
-        <SanityImage
-          image={step.icon}
-          alt=""
-          width={48}
-          height={48}
-          className="mb-4 size-12 object-contain"
-        />
+        <ItemIcon name={step.iconName} image={step.icon} design={resolveIconDesign(iconDesign)} />
         {step.label && (
           <p
             {...textRoleProps(
