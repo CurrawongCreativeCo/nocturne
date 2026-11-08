@@ -48,14 +48,14 @@ test.describe('whole-card link', () => {
     expect(await shift(arrow(page))).toBe(0)
 
     await row(page).hover()
-    await expect.poll(() => shift(arrow(page))).toBeGreaterThan(0)
-    const hovered = await shift(arrow(page))
+    // Glass rows nudge 2 px; the value is polled to its settled end, past the transition.
+    await expect.poll(() => shift(arrow(page))).toBe(2)
 
     await page.mouse.move(0, 0)
     await expect.poll(() => shift(arrow(page))).toBe(0)
 
     await tabTo(page, row(page))
-    await expect.poll(() => shift(arrow(page))).toBe(hovered)
+    await expect.poll(() => shift(arrow(page))).toBe(2)
   })
 
   test('is decoration: aria-hidden, and the row is the one link', async ({ page }) => {
