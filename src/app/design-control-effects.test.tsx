@@ -207,7 +207,8 @@ const FAMILIES: readonly Family[] = [
   },
   {
     component: 'events',
-    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    // The Featured layout draws no indicator until one is chosen, which its motion and colour need.
+    base: { eyebrow: 'What’s on', text: 'An intro.', 'cardDesign.actionStyle': 'arrow' },
     boxes: [
       { field: 'headerDesign', at: 'headerDesign' },
       { field: 'cardDesign', at: 'cardDesign' },

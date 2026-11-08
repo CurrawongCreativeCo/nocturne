@@ -1,18 +1,17 @@
 import type { CSSProperties } from 'react'
 
 import { IconContainer } from '@/components/ui/icon-container'
-import type { LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
+import type { ActionMotion, LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import type { IconDesign, OwnIcon } from '@/lib/sanity/surface-options'
 import { themeColourStyle, type ThemeColourInput } from '@/lib/sanity/theme-colour'
 
 const PATHS = {
   chevron: 'm10 7 5 5-5 5',
+  /** The Events list's own chevron, kept as it was drawn before the shared indicator. */
+  eventsChevron: 'M9 6l6 6-6 6',
   arrow: 'M5 12h14m-5-5 5 5-5 5',
   out: 'M8 16 16 8m-6 0h6v6',
 } as const
-
-export const ACTION_MOTIONS = ['none', 'nudge', 'lift', 'draw'] as const
-export type ActionMotion = (typeof ACTION_MOTIONS)[number]
 
 /**
  * How far Nudge and Lift move. `standard` is the preset's own 3 px; the two legacy distances are what
@@ -44,6 +43,7 @@ export function ActionIndicator({
   external,
   motion = 'none',
   distance = 'standard',
+  legacyChevron = false,
   container,
   colour,
   className = '',
@@ -53,6 +53,8 @@ export function ActionIndicator({
   external: boolean
   motion?: ActionMotion
   distance?: ActionDistance
+  /** Draws the Events list's chevron rather than the standard one. Not offered in Studio. */
+  legacyChevron?: boolean
   container?: ActionContainer
   /** A theme colour; it sets `color`, which the glyph and a plain container follow. */
   colour?: ThemeColourInput | null
@@ -61,7 +63,14 @@ export function ActionIndicator({
 }) {
   if (glyph === 'none') return null
   const out = glyph === 'external' && external
-  const path = glyph === 'chevron' ? PATHS.chevron : out ? PATHS.out : PATHS.arrow
+  const path =
+    glyph === 'chevron'
+      ? legacyChevron
+        ? PATHS.eventsChevron
+        : PATHS.chevron
+      : out
+        ? PATHS.out
+        : PATHS.arrow
   const themed = themeColourStyle(colour)
   const merged = themed || style ? { ...themed, ...style } : undefined
   // Motion lives on the outermost box, so a container and its glyph move together.

@@ -1,12 +1,16 @@
 import { CardSurface } from '@/components/ui/card-surface'
 import { SanityImage } from '@/components/ui/sanity-image'
 import type { SectionDefaults } from '@/components/ui/section-style'
+import { resolveCardAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
 
 import {
   DateBadge,
   EVENT_ROLES,
+  EventIndicator,
   EventPills,
+  isEventLinked,
+  OWN_FEATURED_ACTION,
   EventsView,
   EventSummary,
   EventTitle,
@@ -28,11 +32,18 @@ const layout: EventsLayout = {
     if (!first) return null
     const look = resolveCardDesign(cardDesign, EVENT_ROLES)
     const hasPicture = Boolean(first.event.image?.asset)
+    // Nothing is drawn, and no group is needed, unless Cards › Indicator chooses one.
+    const indicated = resolveCardAction(cardDesign, OWN_FEATURED_ACTION).glyph !== 'none'
+    const group = (entry: typeof first) => (indicated && isEventLinked(entry) ? ' group' : '')
+    const indicator = (entry: typeof first, className: string) =>
+      indicated && isEventLinked(entry) ? (
+        <EventIndicator cardDesign={cardDesign} own={OWN_FEATURED_ACTION} className={className} />
+      ) : null
     return (
       <div className={rest.length > 0 ? 'grid items-start gap-8 lg:grid-cols-[3fr_2fr]' : ''}>
         <CardSurface
           as="article"
-          className="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-card ring-1 ring-line"
+          className={`relative flex flex-col overflow-hidden rounded-card bg-surface shadow-card ring-1 ring-line${group(first)}`}
           own={OWN_SURFACE}
           shadow="shadow-card"
           design={look.surface}
@@ -66,6 +77,7 @@ const layout: EventsLayout = {
               look={look}
             />
             <EventPills entry={first} />
+            {indicator(first, 'mt-4')}
           </div>
         </CardSurface>
         {rest.length > 0 && (
@@ -73,7 +85,7 @@ const layout: EventsLayout = {
             {rest.map((entry) => (
               <li
                 key={`${entry.event._id}-${entry.occurrence.start}`}
-                className="relative flex items-start gap-4 px-2 py-5 transition-colors hover:bg-surface-alt"
+                className={`relative flex items-start gap-4 px-2 py-5 transition-colors hover:bg-surface-alt${group(entry)}`}
               >
                 <DateBadge entry={entry} className="size-14" />
                 <div className="min-w-0 flex-1">
@@ -87,6 +99,7 @@ const layout: EventsLayout = {
                   />
                   <EventPills entry={entry} />
                 </div>
+                {indicator(entry, 'mt-4')}
               </li>
             ))}
           </ul>

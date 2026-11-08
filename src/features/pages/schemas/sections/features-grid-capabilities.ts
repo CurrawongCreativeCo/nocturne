@@ -18,6 +18,8 @@ export const featuresGridCapabilities = declareCapabilities({
     policy: 'conditional',
     scope: 'card',
     trigger: { kind: 'setting', when: 'An item has a link (the field doesn’t exist today)' },
+    // Linked cards belong to the cards family (owner-approved 8 November 2026).
+    closingTask: 276,
   },
   framing: backgroundFraming(),
   pictureDepth: notApplicable('Its icons and pictures are drawn whole, with no frame'),

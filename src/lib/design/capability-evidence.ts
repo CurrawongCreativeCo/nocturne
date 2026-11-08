@@ -1436,6 +1436,25 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // The glyph at the end of a linked card (task 137). The List draws a chevron with nothing chosen, so a
+  // choice changes it; Featured draws none, so a choice makes one appear.
+  ...(['list', 'featured'] as const).map((layout): CapabilityEvidence => ({
+    id: layout === 'list' ? 'events.action.card' : 'events.action.card.featured',
+    component: 'events',
+    capability: 'action',
+    scope: 'card',
+    layouts: [layout],
+    field: 'cardDesign.actionStyle',
+    resolvers: [
+      { module: '@/lib/sanity/card-action', export: 'resolveCardAction' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
+    ],
+    render: 'src/features/pages/components/sections/events/events-parts.tsx',
+    target: '[data-link-arrow]',
+    change: layout === 'list' ? 'attributes' : 'appears',
+    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    probe: { 'cardDesign.actionStyle': 'arrow' },
+  })),
   ...frameEvidence('events', {
     mark: ['list', 'agenda', 'featured'],
     overlay: ['list', 'agenda', 'featured'],

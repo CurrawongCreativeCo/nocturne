@@ -2598,7 +2598,7 @@
                 "path": "ctas",
                 "reachable": true
               },
-              "closingTask": 137,
+              "closingTask": 148,
               "fields": [],
               "availability": {
                 "overlay": "pending",
@@ -4300,7 +4300,7 @@
                 "path": "ctas",
                 "reachable": true
               },
-              "closingTask": 137,
+              "closingTask": 148,
               "fields": [],
               "availability": {
                 "side": "pending",
@@ -5596,7 +5596,7 @@
                 "kind": "setting",
                 "when": "An item has a link (the field doesn’t exist today)"
               },
-              "closingTask": 137,
+              "closingTask": 276,
               "fields": [],
               "availability": "pending"
             }
@@ -10389,7 +10389,7 @@
                 "path": "ctas",
                 "reachable": true
               },
-              "closingTask": 137,
+              "closingTask": 148,
               "fields": [],
               "availability": "pending"
             }
@@ -29950,7 +29950,7 @@
               "field": "linkDesign.arrowStyle",
               "resolvers": [
                 "@/features/pages/utils/link-card-design#resolveLinkCardDesign",
-                "@/components/ui/link-arrow#LinkArrow"
+                "@/components/ui/action-indicator#ActionIndicator"
               ],
               "render": "src/features/pages/components/sections/link-list",
               "target": "li[data-track-event=\"link_click\"]",
@@ -29965,7 +29965,7 @@
               "field": "links[].design.arrowStyle",
               "resolvers": [
                 "@/features/pages/utils/link-card-design#resolveLinkCardDesign",
-                "@/components/ui/link-arrow#LinkArrow"
+                "@/components/ui/action-indicator#ActionIndicator"
               ],
               "render": "src/features/pages/components/sections/link-list",
               "target": "li[data-track-event=\"link_click\"]",
@@ -31241,6 +31241,106 @@
           "clientEditable": false
         },
         {
+          "path": "cardDesign.actionStyle",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "chevron",
+              "title": "Chevron"
+            },
+            {
+              "value": "arrow",
+              "title": "Arrow"
+            },
+            {
+              "value": "external",
+              "title": "External link"
+            },
+            {
+              "value": "none",
+              "title": "None"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionMotion",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "nudge",
+              "title": "Nudge"
+            },
+            {
+              "value": "lift",
+              "title": "Lift"
+            },
+            {
+              "value": "draw",
+              "title": "Draw"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionColour",
+          "kind": "object",
+          "required": false,
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -31622,17 +31722,46 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 137,
-              "fields": [],
+              "fields": [
+                "cardDesign.actionStyle"
+              ],
               "availability": {
-                "list": "pending",
+                "list": "verified",
                 "agenda": {
                   "notApplicable": "137 item 4 names the list and the featured card only"
                 },
-                "featured": "pending"
+                "featured": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "events.action.card",
+              "field": "cardDesign.actionStyle",
+              "resolvers": [
+                "@/lib/sanity/card-action#resolveCardAction",
+                "@/components/ui/action-indicator#ActionIndicator"
+              ],
+              "render": "src/features/pages/components/sections/events/events-parts.tsx",
+              "target": "[data-link-arrow]",
+              "cases": [
+                "events.action.card@list"
+              ]
+            },
+            {
+              "id": "events.action.card.featured",
+              "field": "cardDesign.actionStyle",
+              "resolvers": [
+                "@/lib/sanity/card-action#resolveCardAction",
+                "@/components/ui/action-indicator#ActionIndicator"
+              ],
+              "render": "src/features/pages/components/sections/events/events-parts.tsx",
+              "target": "[data-link-arrow]",
+              "cases": [
+                "events.action.card.featured@featured"
+              ]
+            }
+          ]
         },
         "framing": {
           "policies": [

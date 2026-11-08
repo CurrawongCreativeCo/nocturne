@@ -65,6 +65,12 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
 - The Events agenda layout is Not applicable: item 4 names the list and the featured card.
 - Item 5's trailing indicator on CTA buttons is Conditional on the section having a call to action, on
   the hero, Image + text and the CTA banner.
+
+ADDITION (8 November 2026, owner-approved)
+The hero's, Image + text's and CTA banner's action pairs move to task 148 and the Features grid's to task
+276, so this task closes the Link list, Events (List and Featured), Team (Grid, Slider, List) and Blog
+post cards. The Link list's existing movement (2 px, Editorial 4 px) and the Events List's chevron and
+small-screen hiding are kept when nothing is chosen.
 ```
 
 ## Task 148
@@ -74,6 +80,11 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
 Task 275 records the form section's, newsletter's and embed facade's surface (owned by task 156) and
 depth (owned by task 146) with this task as their closing task. Closing them is part of this task's
 DONE WHEN.
+
+ADDITION (8 November 2026, owner-approved during task 137)
+The trailing indicator on the hero's, Image + text's and CTA banner's buttons closes here: task 275's
+Conditional action pairs for those three sections now name this task as their closing task, not 137.
+They stay Pending until it verifies them.
 ```
 
 ## Task 159
@@ -105,6 +116,9 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
 Until the cards family exists, task 275 records the Features grid's text roles as Required with this
 task as the closing task, and its surface, depth and action as Conditional on objective triggers: a
 layout or look that draws items on a card, and an item link.
+
+ADDITION (8 November 2026, owner-approved during task 137)
+The Features grid's Conditional action pair (an item link) closes here, not in task 137. It stays Pending.
 ```
 
 ## Task 177

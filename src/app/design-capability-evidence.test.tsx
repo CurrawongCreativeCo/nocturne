@@ -113,6 +113,9 @@ vi.mock('@/features/pages/components/sections/link-list/link-design', async (loa
 vi.mock('@/components/ui/action-indicator', async (load) =>
   resolvers.wrap('@/components/ui/action-indicator', await load()),
 )
+vi.mock('@/lib/sanity/card-action', async (load) =>
+  resolvers.wrap('@/lib/sanity/card-action', await load()),
+)
 vi.mock('@/components/ui/section-style', async (load) =>
   resolvers.wrap('@/components/ui/section-style', await load()),
 )

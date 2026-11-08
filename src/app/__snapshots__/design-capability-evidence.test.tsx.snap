@@ -117,6 +117,17 @@ exports[`design capability evidence > embed.overlay.section: the probe changes t
 ]
 `;
 
+exports[`design capability evidence > events.action.card.featured@featured: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > events.action.card@list: the probe changes the registered target 1`] = `
+[
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
+]
+`;
+
 exports[`design capability evidence > events.edge.section@agenda: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -229,7 +240,7 @@ exports[`design capability evidence > events.motion.section@featured: the probe 
 
 exports[`design capability evidence > events.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "668f9fe35c01a726 (7192 characters)",
+  "fc07ac391b2c35d3 (7368 characters)",
 ]
 `;
 

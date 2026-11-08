@@ -22,6 +22,7 @@ import { presetsOption, type PresetDefinition } from '@/lib/sanity/schema/preset
 import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import {
+  actionFields,
   iconDesignFields,
   surfaceFields,
   textRoleField,
@@ -146,6 +147,12 @@ interface CardFieldsConfig {
   mark?: boolean
   /** Hides the mark where the layout draws no card to hold it. */
   markHidden?: ConditionalPropertyCallback
+  /**
+   * The indicator at the end of a linked card (task 137, components/ui/action-indicator.tsx): glyph,
+   * motion and colour, one box for the family. Off for a family whose cards are not linked. `inherits`
+   * words what unset means ("the layout’s own").
+   */
+  action?: { hidden?: ConditionalPropertyCallback; inherits?: string } | false
   /** What each role is drawn in until one is chosen, for the background's contrast warning. */
   defaults?: RoleDefaultColours
   /** The array an item's design sits in, for the item-level contrast warning. */
@@ -216,7 +223,7 @@ export function withCardTextContrast<T extends FieldDefinition>(
 
 /** The fields of a card's design: fill and border, one object per role, a mark. */
 export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
-  const { inherits, inItem, roles, surface = {}, mark = true, markHidden, hidden } = config
+  const { inherits, inItem, roles, surface = {}, mark = true, markHidden, hidden, action } = config
   return [
     ...(surface === false
       ? []
@@ -248,7 +255,14 @@ export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
           }),
         ]
       : []),
+    ...(action ? actionFields({ ...action, hidden: both(hidden, action.hidden) }) : []),
   ]
+}
+
+const actionFieldset = {
+  name: 'action',
+  title: 'Indicator',
+  options: { collapsible: true, collapsed: true },
 }
 
 const textFieldset = (description?: string) => ({
@@ -290,7 +304,7 @@ export function cardDesignField({
       collapsed: false,
       ...(presets ? presetsOption(presets) : {}),
     },
-    fieldsets: [textFieldset(textDescription)],
+    fieldsets: [textFieldset(textDescription), ...(config.action ? [actionFieldset] : [])],
     fields: [...lead, ...cardDesignFields(config)],
   })
 }

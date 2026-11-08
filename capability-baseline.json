@@ -395,13 +395,6 @@
     },
     {
       "component": "events",
-      "capability": "action",
-      "scope": "card",
-      "layouts": ["list", "featured"],
-      "closingTask": 137
-    },
-    {
-      "component": "events",
       "capability": "framing",
       "scope": "card",
       "part": "picture",
@@ -618,7 +611,7 @@
       "capability": "action",
       "scope": "item",
       "layouts": ["overlay", "split", "editorial", "full-bleed"],
-      "closingTask": 137
+      "closingTask": 148
     },
     {
       "component": "hero",
@@ -641,7 +634,7 @@
       "capability": "action",
       "scope": "item",
       "layouts": ["side", "stacked", "overlay"],
-      "closingTask": 137
+      "closingTask": 148
     },
     {
       "component": "mediaText",
@@ -670,7 +663,7 @@
       "capability": "action",
       "scope": "card",
       "layouts": [null],
-      "closingTask": 137
+      "closingTask": 276
     },
     {
       "component": "featuresGrid",
@@ -730,7 +723,7 @@
       "capability": "action",
       "scope": "item",
       "layouts": [null],
-      "closingTask": 137
+      "closingTask": 148
     },
     {
       "component": "ctaBanner",

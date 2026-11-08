@@ -9,6 +9,12 @@ import {
   INLINE_WEIGHT_TITLES,
 } from '../inline-list-options'
 import {
+  ACTION_MOTION_TITLES,
+  ACTION_MOTIONS,
+  LINK_ARROW_TITLES,
+  LINK_ARROWS,
+} from '../link-arrow-options'
+import {
   BORDER_COLOUR_CHOICES,
   ICON_COLOUR_CHOICES,
   ICON_SHAPES,
@@ -434,4 +440,52 @@ export function iconDesignFields({
       ),
     }),
   ].map((field) => builtBy('iconDesignFields', field, 'icon'))
+}
+
+/** The glyph, motion and colour of a linked card's indicator (stored beside the card's other design). */
+export function actionFields({
+  hidden,
+  inherits = 'the layout’s own',
+}: {
+  hidden?: ConditionalPropertyCallback
+  inherits?: string
+}) {
+  const none: ConditionalPropertyCallback = (context) =>
+    (context.parent as { actionStyle?: string } | undefined)?.actionStyle === 'none'
+  const hiddenOr =
+    (own?: ConditionalPropertyCallback): ConditionalPropertyCallback =>
+    (context) =>
+      (hidden?.(context) ?? false) || (own?.(context) ?? false)
+  return [
+    choiceField({
+      name: 'actionStyle',
+      title: 'Indicator',
+      description: 'The mark at the end of a linked card. It is decoration: the card is one link.',
+      values: LINK_ARROWS,
+      titles: LINK_ARROW_TITLES,
+      inherits,
+      fieldset: 'action',
+      hidden: hiddenOr(),
+    }),
+    choiceField({
+      name: 'actionMotion',
+      title: 'Indicator motion',
+      description: 'On hover and keyboard focus. Visitors who ask for less motion see none.',
+      values: ACTION_MOTIONS,
+      titles: ACTION_MOTION_TITLES,
+      inherits,
+      fieldset: 'action',
+      hidden: hiddenOr(none),
+    }),
+    themeColourField({
+      name: 'actionColour',
+      title: 'Indicator colour',
+      usage: 'graphic',
+      onRows: true,
+      inherits: 'the card’s own colour',
+      choices: ['ink', 'muted', 'accent', 'accent-2', 'highlight'],
+      fieldset: 'action',
+      hidden: hiddenOr(none),
+    }),
+  ].map((field) => builtBy('actionFields', field, 'action'))
 }
