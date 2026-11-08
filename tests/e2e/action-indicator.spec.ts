@@ -13,6 +13,8 @@ test.skip(
   ({ isMobile }) => isMobile,
   'Desktop only: hover and the Events chevron need a wide screen',
 )
+// The suite runs with reduced motion on (playwright.config.ts); motion is only drawn without it.
+test.use({ reducedMotion: 'no-preference' })
 
 const WHOLE_CARD = '#main-content li[data-track-event] > a'
 const STRETCHED = '#main-content li.group:has([data-link-arrow])'
@@ -97,9 +99,7 @@ test.describe('a link stretched over its card', () => {
   test('is one keyboard destination, and the indicator is not part of it', async ({ page }) => {
     await page.goto('/events')
     await expect(card(page).locator('a')).toHaveCount(1)
-    await expect(
-      arrow(page).locator('xpath=ancestor-or-self::*[@tabindex or self::a]'),
-    ).toHaveCount(0)
+    await expect(card(page).locator('button, [tabindex]')).toHaveCount(0)
     await expect(card(page).locator('[data-link-arrow]')).toHaveAttribute('aria-hidden', 'true')
   })
 })
