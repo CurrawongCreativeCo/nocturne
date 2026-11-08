@@ -53,4 +53,20 @@ describe('IconContainer', () => {
     expect(html).toContain('glass-row')
     expect(html).toContain('glass-row-strong')
   })
+
+  it('sizes the box it is given, for a shaped container and for a link alike', () => {
+    const shaped = renderToStaticMarkup(
+      <IconContainer own={own} design={{ shape: 'circle' }} size="size-14">
+        x
+      </IconContainer>,
+    )
+    expect(shaped).toContain('size-14')
+    const link = renderToStaticMarkup(
+      <IconContainer as="a" href="/x" own={own} design={{ shape: 'square' }} size="size-11">
+        x
+      </IconContainer>,
+    )
+    expect(link).toContain('size-11')
+    expect(link).toContain('rounded-sm')
+  })
 })
