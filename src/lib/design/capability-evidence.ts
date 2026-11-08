@@ -1351,6 +1351,24 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // The glyph at the end of a card or row that links to a member's page (task 137): none until chosen.
+  {
+    id: 'team.action.card',
+    component: 'team',
+    capability: 'action',
+    scope: 'card',
+    layouts: ['grid', 'slider', 'list'],
+    field: 'cardDesign.actionStyle',
+    resolvers: [
+      { module: '@/lib/sanity/card-action', export: 'resolveCardAction' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
+    ],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    target: '[data-link-arrow]',
+    change: 'appears',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    probe: { 'cardDesign.actionStyle': 'arrow' },
+  },
   ...frameEvidence('team', {
     mark: ['grid', 'slider', 'list'],
     overlay: ['grid', 'slider', 'list'],

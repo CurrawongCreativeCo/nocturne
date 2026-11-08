@@ -20012,6 +20012,106 @@
           "clientEditable": false
         },
         {
+          "path": "cardDesign.actionStyle",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "chevron",
+              "title": "Chevron"
+            },
+            {
+              "value": "arrow",
+              "title": "Arrow"
+            },
+            {
+              "value": "external",
+              "title": "External link"
+            },
+            {
+              "value": "none",
+              "title": "None"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionMotion",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "nudge",
+              "title": "Nudge"
+            },
+            {
+              "value": "lift",
+              "title": "Lift"
+            },
+            {
+              "value": "draw",
+              "title": "Draw"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionColour",
+          "kind": "object",
+          "required": false,
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.actionColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -20372,15 +20472,33 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 137,
-              "fields": [],
+              "fields": [
+                "cardDesign.actionStyle"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending",
-                "list": "pending"
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "team.action.card",
+              "field": "cardDesign.actionStyle",
+              "resolvers": [
+                "@/lib/sanity/card-action#resolveCardAction",
+                "@/components/ui/action-indicator#ActionIndicator"
+              ],
+              "render": "src/features/pages/components/sections/team/team-card.tsx",
+              "target": "[data-link-arrow]",
+              "cases": [
+                "team.action.card@grid",
+                "team.action.card@slider",
+                "team.action.card@list"
+              ]
+            }
+          ]
         },
         "framing": {
           "policies": [

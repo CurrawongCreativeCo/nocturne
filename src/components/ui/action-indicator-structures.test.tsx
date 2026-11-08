@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { ActionIndicator } from './action-indicator'
+import { FOCUS, FOCUS_RULE, HOVER_RULE } from './action-indicator-css.test-utils'
 
 /**
  * The indicator's CSS states must reach it in both structures cards use: the link is the whole card
@@ -13,20 +11,6 @@ import { ActionIndicator } from './action-indicator'
  * The real selectors are read from globals.css and matched against real markup, with one card focused
  * and its neighbour not; a browser run in CI proves the painted result.
  */
-const css = readFileSync(join(process.cwd(), 'src/styles/globals.css'), 'utf8')
-const block = css.slice(css.indexOf('ActionIndicator (components'))
-// The two rules that set `--action-on: 1`: hover (inside its media query), then focus.
-const rules = [
-  ...block.matchAll(
-    /\n\s*((?:[^{}\n]*\[data-action-motion\],\s*)?[^{}\n]*\[data-action-motion\])\s*\{\s*--action-on: 1/g,
-  ),
-]
-const HOVER = rules[0]?.[1]?.trim() ?? ''
-const FOCUS_RULE = rules[1]?.[1]?.trim() ?? ''
-// jsdom has no keyboard modality, so it never reports :focus-visible; :focus stands in for it. The
-// structure of the selector, which is what these tests prove, is untouched.
-const FOCUS = FOCUS_RULE.replaceAll(':focus-visible', ':focus')
-
 const indicator = renderToStaticMarkup(
   <ActionIndicator glyph="chevron" external={false} motion="nudge" />,
 )
@@ -52,7 +36,7 @@ afterEach(() => {
 
 describe('ActionIndicator states in both card structures', () => {
   it('finds the hover and focus rules', () => {
-    expect(HOVER).toContain(':hover')
+    expect(HOVER_RULE).toContain(':hover')
     expect(FOCUS_RULE).toContain(':focus-visible')
     expect(FOCUS_RULE).toContain(':has(a:focus-visible)')
   })
@@ -79,7 +63,7 @@ describe('ActionIndicator states in both card structures', () => {
   ])('hover on %s uses the same group, so it reaches the indicator', (_name, build) => {
     document.body.innerHTML = build('a')
     // jsdom has no pointer; the hover rule names the same group and indicator as the focus rules.
-    expect(HOVER).toBe(':where(.group):hover [data-action-motion]')
+    expect(HOVER_RULE).toBe(':where(.group):hover [data-action-motion]')
     expect(indicatorOf('a').matches('.group [data-action-motion]')).toBe(true)
   })
 

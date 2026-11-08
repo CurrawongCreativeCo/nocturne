@@ -137,6 +137,8 @@ export const team = defineType({
         roles: TEAM_ROLES,
         defaults: TEAM_ROLE_COLOURS,
         inherits: 'the default card',
+        // Draws only on a card or row that links to a member's page.
+        action: { inherits: 'no indicator' },
       }),
       accessField,
       // Shown first in the Content tab.

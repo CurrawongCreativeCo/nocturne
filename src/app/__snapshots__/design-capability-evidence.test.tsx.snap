@@ -2162,6 +2162,12 @@ exports[`design capability evidence > stats.text.card.number@cards: the probe ch
 ]
 `;
 
+exports[`design capability evidence > team.action.card@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.action.card@list: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.action.card@slider: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > team.edge.section@grid: the probe changes the registered target 1`] = `
 [
   "<body>",

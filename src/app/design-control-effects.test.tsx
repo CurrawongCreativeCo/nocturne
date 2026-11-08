@@ -216,7 +216,8 @@ const FAMILIES: readonly Family[] = [
   },
   {
     component: 'team',
-    base: { eyebrow: 'Our people', text: 'An intro.' },
+    // A card draws no indicator until one is chosen, which its motion and colour need.
+    base: { eyebrow: 'Our people', text: 'An intro.', 'cardDesign.actionStyle': 'arrow' },
     boxes: [
       { field: 'headerDesign', at: 'headerDesign' },
       { field: 'cardDesign', at: 'cardDesign' },

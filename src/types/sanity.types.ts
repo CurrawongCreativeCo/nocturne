@@ -263,6 +263,9 @@ export type TeamCardDesign = {
   meta?: CardDesignMeta
   body?: TeamCardDesignBody
   mark?: DecorativeMark
+  actionStyle?: 'chevron' | 'arrow' | 'external' | 'none'
+  actionMotion?: 'none' | 'nudge' | 'lift' | 'draw'
+  actionColour?: ActionColour
 }
 
 export type VideoHeaderDesign = {
@@ -421,7 +424,7 @@ export type EventsCardDesign = {
   mark?: DecorativeMark
   actionStyle?: 'chevron' | 'arrow' | 'external' | 'none'
   actionMotion?: 'none' | 'nudge' | 'lift' | 'draw'
-  actionColour?: ActionColour
+  actionColour?: CardDesignActionColour
 }
 
 export type TextColour = {
@@ -1381,6 +1384,11 @@ export type TeamCardDesignBodyColour = {
   hex?: string
 }
 
+export type ActionColour = {
+  colour?: 'inherit' | 'ink' | 'muted' | 'accent' | 'accent-2' | 'highlight' | 'custom'
+  hex?: string
+}
+
 export type VideoHeaderDesignEyebrow = {
   size?: 'small' | 'medium' | 'large'
   weight?: 'regular' | 'medium' | 'semibold'
@@ -1903,7 +1911,7 @@ export type EventsCardDesignBodyColour = {
   hex?: string
 }
 
-export type ActionColour = {
+export type CardDesignActionColour = {
   colour?: 'inherit' | 'ink' | 'muted' | 'accent' | 'accent-2' | 'highlight' | 'custom'
   hex?: string
 }
@@ -4298,6 +4306,7 @@ export type AllSanitySchemaTypes =
   | CardDesignMetaColour
   | TeamCardDesignBody
   | TeamCardDesignBodyColour
+  | ActionColour
   | VideoHeaderDesignEyebrow
   | VideoHeaderDesignEyebrowColour
   | VideoHeaderDesignHeading
@@ -4384,7 +4393,7 @@ export type AllSanitySchemaTypes =
   | EventsCardDesignMetaColour
   | EventsCardDesignBody
   | EventsCardDesignBodyColour
-  | ActionColour
+  | CardDesignActionColour
   | DecorativeMark
   | DecorativeDivider
   | ImageDesign
@@ -9098,9 +9107,13 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             rotation: number | null
             layer: 'content' | 'panel' | null
           } | null
-          actionStyle: null
-          actionMotion: null
-          actionColour: null
+          actionStyle: 'arrow' | 'chevron' | 'external' | 'none' | null
+          actionMotion: 'draw' | 'lift' | 'none' | 'nudge' | null
+          actionColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
         } | null
         imageDesign: {
           appearance: 'arch' | 'circle' | 'framed' | 'rounded' | 'square' | 'standard' | null
@@ -25054,9 +25067,20 @@ export type PAGE_QUERY_RESULT = {
                 rotation: number | null
                 layer: 'content' | 'panel' | null
               } | null
-              actionStyle: null
-              actionMotion: null
-              actionColour: null
+              actionStyle: 'arrow' | 'chevron' | 'external' | 'none' | null
+              actionMotion: 'draw' | 'lift' | 'none' | 'nudge' | null
+              actionColour: {
+                colour:
+                  | 'accent-2'
+                  | 'accent'
+                  | 'custom'
+                  | 'highlight'
+                  | 'inherit'
+                  | 'ink'
+                  | 'muted'
+                  | null
+                hex: string | null
+              } | null
             } | null
             imageDesign: {
               appearance: 'arch' | 'circle' | 'framed' | 'rounded' | 'square' | 'standard' | null
@@ -25495,9 +25519,20 @@ export type PAGE_QUERY_RESULT = {
                 rotation: number | null
                 layer: 'content' | 'panel' | null
               } | null
-              actionStyle: null
-              actionMotion: null
-              actionColour: null
+              actionStyle: 'arrow' | 'chevron' | 'external' | 'none' | null
+              actionMotion: 'draw' | 'lift' | 'none' | 'nudge' | null
+              actionColour: {
+                colour:
+                  | 'accent-2'
+                  | 'accent'
+                  | 'custom'
+                  | 'highlight'
+                  | 'inherit'
+                  | 'ink'
+                  | 'muted'
+                  | null
+                hex: string | null
+              } | null
             } | null
             imageDesign: {
               appearance: 'arch' | 'circle' | 'framed' | 'rounded' | 'square' | 'standard' | null

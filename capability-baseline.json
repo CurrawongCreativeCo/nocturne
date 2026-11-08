@@ -317,13 +317,6 @@
     },
     {
       "component": "team",
-      "capability": "action",
-      "scope": "card",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 137
-    },
-    {
-      "component": "team",
       "capability": "framing",
       "scope": "card",
       "part": "portrait",
