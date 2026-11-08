@@ -1023,7 +1023,7 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
 - **Blog settings** adds one query, `BLOG_SETTINGS_QUERY`: the blog's post cards read their design from it (`getBlogCardDesign`), cached under its own tag, `blogSettings`, so a change to it refreshes the blog pages and nothing else. It is one cached entry for the whole site, so it costs one request per build and one per publish of that document, and a page view causes none.
 - **Link list** adds none: its links, profile and social icons are resolved inside `PAGE_QUERY` (the social icons come from the settings entry the footer already fetched), and which links are due is decided at request time from that cached data. The page option is one more field in `PAGE_QUERY`.
-- **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
+- **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member (it also reads the Team page settings in the same request, tagged `teamPageSettings`), and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
 - **Events** add none to a page view: an Events section's events are resolved inside `PAGE_QUERY` (an `event` or `eventCategory` change expires the pages, tagged `event` and `eventCategory`; the business time zone comes from the same query). An event page adds `EVENT_QUERY`, one per event, and `EVENTS_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/events/…` URLs cost nothing. The calendar feed adds `EVENTS_FEED_QUERY`, one cached entry for the whole site; an event's `.ics` file reads the event's own entry. Which events are upcoming is decided per request from that cached data, so no visitor causes a Sanity request.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
   recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes. With
@@ -4399,6 +4399,21 @@ Every card family composes the same shared parts (task 156), so a family states 
 
 A control is offered only where it does something: `src/app/design-control-effects.test.tsx` reads each family's real schema and fails if any control offered on a layout or look leaves the output unchanged. A look that is a setting rather than a layout (FAQ's item style, Location's map image) has its own evidence for what it draws. An item style is the first field of its Cards box (`itemStyleField`), and unset is the first value.
 
+### Icons
+
+One component, `IconContainer` (`src/components/ui/icon-container.tsx`, task 158), draws the container around every icon: its shape (none, circle, rounded square or square), fill, strength, border, colour and size. It turns the choices into classes with `iconLook` and `SHAPE_RADIUS`, so a plain icon has no box, the shaped styles take the place's own fill and border one property at a time, and on glass rows the container is the same frosted glass. The Link list's icons, `SocialLinks` (the Link list, Location, the footer and a team member's page), a badge's icon, Pricing's checkmarks and the Features grid and Process icons all come through it, with nothing chosen drawing what they drew before.
+
+**Choosing the icon.** `badgeIconField` (`src/lib/sanity/schema/badge-icon-field.ts`) is the one field for an icon from the set, shown as the visual picker (`icon-picker-input.tsx`); the set has 18 icons, so the picker has no search (add one if it passes 40). Features grid items and Process steps keep their uploaded _Icon / image_ and gain an optional _Icon from the set_ (`iconName`). When both are stored, the set icon wins and the Studio says so; the uploaded icon stays stored and draws whole, as it always did, once the set icon is cleared. Pricing's checkmark stays a fixed icon, only wrapped by the container.
+
+**Icons box** (`iconsDesignField`, `src/lib/sanity/schema/card-design-fields.ts`, agency only, every control inheriting): the container, container colour, strength, border, border colour and icon colour of the section, block or page. It is on Features grid, Process, Location (the address pin and the social icons), Pricing (the checkmarks) and the Badges block (every badge, in every hero layout), and for two views that are not sections:
+
+- **Footer:** _Social icons_ in **Navigation** (`footerIconDesign`), offered once _Show social icons_ is on. It inherits _Social icon style_, so an empty box draws the footer exactly as before.
+- **Team member pages:** the **Team page settings** document (`teamPageSettings`, a singleton, agency only), one _Icons_ box for every member's page, which draws circles until one is chosen. A member never sets their own, so the pages stay consistent. The settings are read inside `TEAM_MEMBER_QUERY` (no extra request) under the `teamPageSettings` tag; add the type to the webhook filter (step 3 of _Live mode vs. webhook mode_).
+
+The Link list's own _Social icons_ box (`socialDesign`) keeps its stored paths (`style`, `iconColour`, `background`, `border`, which differ from the shared builder's) and stays a reviewed temporary exception until task 281, which replaces the field and gains this in its scope. It draws through `IconContainer`.
+
+`src/app/footer-team-icons.test.tsx` holds the footer's and a team page's six controls to the property each names (corners, colour, fill, strength, border, border colour), and `social-links.test.tsx` pins the social icons' classes.
+
 ### Decorative marks
 
 A faint word, picture or icon behind a section, card or item (task 156): the shared `decorativeMark` type (`src/lib/sanity/schema/decorative-mark.ts`), drawn by one server component, `DecorativeMark` (`src/components/ui/decorative-mark.tsx`), with no JavaScript. Empty or None draws nothing, and adds nothing to the page's markup. A section's sits in `style.mark`, on every section except Embed and Video (`takesSectionMark`, held to each section's capability declaration by a test); a card family's sits in its Cards box as `cardDesign.mark`. Testimonials offer both. Pricing plans and Link list links also offer one at item scope, on a customised item only: it replaces the card's, None removes it, and unset keeps the card's (`cardMarkChoice`).
@@ -5021,7 +5036,8 @@ choices but the page ignores them (and the query never sends them).
   glass's shadow and the nearly solid fallback (no blur support, reduced transparency) all stay. Only _Solid_ makes it
   opaque. Solid cards draw their border as an inset ring, so a thicker border never changes a card's size.
 - **Icon containers** (`iconLook`, `src/lib/sanity/surface-options.ts`) use the social icon shapes; the container keeps the
-  layout's size whatever the shape, so mixed shapes line up. Social buttons use the same surface primitives.
+  layout's size whatever the shape, so mixed shapes line up. Every icon container is drawn by one component,
+  `IconContainer` (`src/components/ui/icon-container.tsx`): see _Icons_ under Card design.
 - **Contrast.** A card background or text colour is measured on the card it draws on: Studio layers the list's and the
   card's choices (`src/lib/color/card-contrast.ts`), over the section's background, or for glass over the darkest and
   lightest photo. Transparent glass never passes on its own: its text sits on the photo. Warnings only.
