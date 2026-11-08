@@ -308,7 +308,8 @@ describe('every control of Blog settings has an effect', () => {
     if (!drawer) throw new Error('blogPostCards has no drawer.')
     return drawer.draw({
       ...(await drawer.seed()),
-      settings: { cardDesign: applyPatch({}, cardDesign) },
+      // The indicator's motion and colour have nothing to act on until a glyph is chosen.
+      settings: { cardDesign: applyPatch({}, { actionStyle: 'arrow', ...cardDesign }) },
     })
   }
 

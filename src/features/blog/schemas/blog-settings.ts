@@ -26,6 +26,8 @@ export const blogSettings = defineType({
       roles: POST_CARD_ROLES,
       defaults: POST_CARD_ROLE_COLOURS,
       inherits: 'the default card',
+      // The whole card links, so it can end in an indicator: none until one is chosen.
+      action: { inherits: 'no indicator' },
     }),
   ],
   preview: {

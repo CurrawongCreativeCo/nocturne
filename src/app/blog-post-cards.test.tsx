@@ -45,6 +45,33 @@ describe('a post card with nothing in Blog settings', () => {
       'mt-2 text-h4 font-semibold text-balance',
     )
     expect(document.querySelector('[data-text-role="body"]')?.className).toBe('mt-2 text-ink-muted')
+    // No indicator, and the title link's hover underline is still the card's own feedback.
+    expect(document.querySelector('[data-link-arrow]')).toBeNull()
+    expect(document.querySelector('article a')?.className).toBe(
+      'group-hover:underline after:absolute after:inset-0',
+    )
+  })
+})
+
+describe('a post card’s action indicator', () => {
+  it('is drawn when Blog settings chooses a glyph, inside the card’s group, with one link', async () => {
+    const document = await draw({ actionStyle: 'arrow', actionColour: { colour: 'accent' } })
+    const arrow = document.querySelector('article [data-link-arrow]')
+    expect(arrow?.getAttribute('data-link-arrow')).toBe('arrow')
+    expect(arrow?.getAttribute('aria-hidden')).toBe('true')
+    expect(arrow?.getAttribute('data-action-motion')).toBe('nudge')
+    expect(arrow?.getAttribute('data-action-distance')).toBe('standard')
+    expect(arrow?.getAttribute('style')).toContain('color')
+    expect(arrow?.closest('.group')?.tagName).toBe('ARTICLE')
+    expect(document.querySelectorAll('article a')).toHaveLength(1)
+    expect(document.querySelector('article a')?.className).toContain('after:inset-0')
+  })
+
+  it('takes a motion, and None keeps it still', async () => {
+    const lift = await draw({ actionStyle: 'chevron', actionMotion: 'lift' })
+    expect(lift.querySelector('[data-link-arrow]')?.getAttribute('data-action-motion')).toBe('lift')
+    const still = await draw({ actionStyle: 'chevron', actionMotion: 'none' })
+    expect(still.querySelector('[data-link-arrow]')?.hasAttribute('data-action-motion')).toBe(false)
   })
 })
 

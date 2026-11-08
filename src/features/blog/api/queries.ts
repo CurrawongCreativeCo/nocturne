@@ -47,7 +47,10 @@ export const blogSettingsFields = /* groq */ `
     meta { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
     title { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
     body { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
-    mark { ${decorativeMarkFields} }
+    mark { ${decorativeMarkFields} },
+    actionStyle,
+    actionMotion,
+    actionColour { colour, hex }
   }
 `
 

@@ -585,13 +585,6 @@
     },
     {
       "component": "blogPostCards",
-      "capability": "action",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 137
-    },
-    {
-      "component": "blogPostCards",
       "capability": "framing",
       "scope": "card",
       "layouts": [null],

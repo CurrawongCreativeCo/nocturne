@@ -17,7 +17,7 @@ exports[`the design capability contract > blogPostCards: reports what it offers 
     "text required card: verified",
     "mark required card: verified",
     "depth required card: pending (146)",
-    "action required card: pending (137)",
+    "action required card: verified",
     "framing required card: pending (177)",
     "pictureDepth conditional card: pending (147)",
     "glass conditional card: pending (159)",

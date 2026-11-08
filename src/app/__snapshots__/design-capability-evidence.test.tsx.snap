@@ -11,6 +11,8 @@ exports[`design capability evidence > badgeRow.icon.item: the probe changes the 
 
 exports[`design capability evidence > badgeRow.icon.section: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > blogPostCards.action.card: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `

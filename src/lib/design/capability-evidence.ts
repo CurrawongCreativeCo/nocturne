@@ -862,6 +862,23 @@ export const EVIDENCE: readonly Evidence[] = [
     base: {},
     roles: ['meta', 'title', 'body'],
   }),
+  // The glyph at the end of a post card (task 137): none until Blog settings chooses one.
+  {
+    id: 'blogPostCards.action.card',
+    component: 'blogPostCards',
+    capability: 'action',
+    scope: 'card',
+    field: 'settings.cardDesign.actionStyle',
+    resolvers: [
+      { module: '@/lib/sanity/card-action', export: 'resolveCardAction' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
+    ],
+    render: 'src/features/blog/components/post-card.tsx',
+    target: '[data-link-arrow]',
+    change: 'appears',
+    base: {},
+    probe: { 'settings.cardDesign.actionStyle': 'arrow' },
+  },
   ...frameEvidence('hero', {
     mark: ['overlay', 'split', 'editorial', 'full-bleed'],
     glass: ['overlay', 'split', 'editorial'],

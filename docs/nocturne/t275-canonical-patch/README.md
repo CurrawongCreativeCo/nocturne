@@ -71,6 +71,11 @@ The hero's, Image + text's and CTA banner's action pairs move to task 148 and th
 276, so this task closes the Link list, Events (List and Featured), Team (Grid, Slider, List) and Blog
 post cards. The Link list's existing movement (2 px, Editorial 4 px) and the Events List's chevron and
 small-screen hiding are kept when nothing is chosen.
+
+ADDITION (8 November 2026, owner-approved)
+The Link list's arrow style and colour fields (`linkDesign.arrowStyle`, `arrowColour` and the per-link
+equivalents) keep their stored names and are not moved onto the shared action fields here: task 281 owns
+that migration. The hidden `showArrows` is still read until then.
 ```
 
 ## Task 148
@@ -324,4 +329,13 @@ OLD (template context): every new section, slot block or listing declares
 NEW (template context): every new section, slot block, listing or view declares
 
 FOOTER, new first paragraph: Amended on 7 November 2026, owner-approved, after the independent post-merge audit of task 275. Task 275 gains a corrective PR (evidence for slot blocks, listings and views; verification per text role; baseline integrity against the base commit; design-context private-control checks), and task 156 waits for it. Tasks 137, 146, 156, 158, 159, 213 and 276 gained additions, and task 275's proposed amendments of 6 and 7 November were applied. Task numbers, statuses, notes and progress are unchanged.
+```
+
+## Task 281
+
+```text
+ADDITION (8 November 2026, owner-approved expansion)
+Also migrates the Link list's `linkDesign.arrowStyle` and `arrowColour` (and the per-link `arrowStyle` and
+`arrowColour`) onto the shared action fields from task 137, keeping every stored value and the hidden
+`showArrows` compatibility. Task 137 leaves them as a temporary exception with this removal task.
 ```

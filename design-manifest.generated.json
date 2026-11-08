@@ -34004,11 +34004,27 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 137,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.cardDesign.actionStyle"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "blogPostCards.action.card",
+                "field": "settings.cardDesign.actionStyle",
+                "resolvers": [
+                  "@/lib/sanity/card-action#resolveCardAction",
+                  "@/components/ui/action-indicator#ActionIndicator"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "[data-link-arrow]",
+                "cases": [
+                  "blogPostCards.action.card"
+                ]
+              }
+            ]
           },
           "framing": {
             "policies": [

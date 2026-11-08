@@ -191,11 +191,11 @@ export const CAPABILITY_EXCEPTIONS: readonly CapabilityException[] = [
       'links[].design.arrowColour',
     ],
     justification:
-      'Written inline, because actionFields does not exist yet. They carry the action indicator marker.',
+      'Written inline, under the stored names arrowStyle and arrowColour, which the shared actionFields (task 137) does not use. They carry the action indicator marker. Task 281 migrates them with the Link list’s other legacy design (owner-approved expansion of task 281, 8 November 2026); showArrows stays read until then.',
     reviewer: OWNER,
-    reviewed: APPROVED,
+    reviewed: '2026-11-08',
     status: 'temporary',
-    removalTask: 137,
+    removalTask: 281,
     nature: 'design',
     marked: {
       'linkDesign.arrowStyle': 'action',
