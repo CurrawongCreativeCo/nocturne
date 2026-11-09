@@ -22,16 +22,16 @@ describe('resolveDesignTokens with site decisions', () => {
     expect(resolveDesignTokens(undefined).css).toBe('')
     expect(resolveDesignTokens({}).css).toBe('')
     const colour = resolveDesignTokens({ primary: '#0b6e4f' })
-    expect(resolveDesignTokens({ primary: '#0b6e4f', density: null } as never)).toEqual(colour)
+    expect(resolveDesignTokens({ primary: '#0b6e4f', density: null })).toEqual(colour)
     expect(resolveDesignTokens({ primary: '#0b6e4f' }, undefined)).toEqual(colour)
   })
 
   it('emits nothing for the choice that equals today', () => {
-    expect(resolveDesignTokens({ density: 'standard', shape: 'soft' } as never).css).toBe('')
+    expect(resolveDesignTokens({ density: 'standard', shape: 'soft' }).css).toBe('')
   })
 
   it('emits the variables beside the colours, after them', () => {
-    const { vars, css } = resolveDesignTokens({ primary: '#0b6e4f', shape: 'round' } as never)
+    const { vars, css } = resolveDesignTokens({ primary: '#0b6e4f', shape: 'round' })
     expect(vars['--radius-card']).toBe('1.75rem')
     const names = Object.keys(vars)
     expect(names.indexOf('--radius-card')).toBeGreaterThan(names.indexOf('--color-accent'))
@@ -44,7 +44,7 @@ describe('resolveDesignTokens with site decisions', () => {
       appearance: 'dark',
       primary: '#0b6e4f',
       density: 'airy',
-    } as never)
+    })
     expect(decided.colours).toEqual(plain.colours)
     expect(decided.checks).toEqual(plain.checks)
     expect(decided.warnings).toEqual(plain.warnings)
@@ -53,7 +53,7 @@ describe('resolveDesignTokens with site decisions', () => {
   it('reads a choice from a draft-mode (stega) value', () => {
     const { vars } = resolveDesignTokens({
       shape: vercelStegaCombine('round', { origin: 'sanity' }),
-    } as never)
+    })
     expect(vars['--radius-card']).toBe('1.75rem')
   })
 })

@@ -34060,6 +34060,70 @@
         "clientEditable": false
       },
       {
+        "path": "density",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "compact",
+            "title": "Compact"
+          },
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "airy",
+            "title": "Airy"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "shape",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "sharp",
+            "title": "Sharp"
+          },
+          {
+            "value": "soft",
+            "title": "Soft"
+          },
+          {
+            "value": "round",
+            "title": "Round"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "headingStyle",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "editorial",
+            "title": "Editorial"
+          },
+          {
+            "value": "modern",
+            "title": "Modern"
+          },
+          {
+            "value": "classic",
+            "title": "Classic"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
         "path": "cardDepth",
         "kind": "string",
         "required": false,

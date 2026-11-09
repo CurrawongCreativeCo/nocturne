@@ -1591,8 +1591,70 @@ Studio access; see _Studio roles and permissions_).
   (`accent-text`: a darker or lighter shade of Primary when Primary alone fails 4.5:1 on the page, while buttons and
   backgrounds keep your exact colour), the button colours (`cta`, `cta-ink`), the tints and borders when only the
   background changes, and the inks after a Dark appearance or a new background. Hover shades follow the colour
-  (`hover:bg-cta/85`). Colours you choose yourself are never changed; if they fail, Studio validation shows a warning
-  naming the ratio.
+  (`hover:bg-cta/85`). Colours you choose yourself are never changed.
+- **Contrast policy** (task 216). Colours you choose are never changed by the site, and the checks say what to do:
+  - **An error, on Brand colours only:** _Text_ on a _Background_, or _Muted text_ on a _Background_ or an _Alternate
+    background_, when you chose **both** colours under Advanced and the pair is below 4.5:1. It blocks publishing this
+    document, names the pair and the ratio, and offers **Use suggested colour** (the nearest shade of the text colour
+    that reaches 4.5:1, same hue, with **Undo**). The error sits on the text colour.
+  - Existing Brand colours documents with an explicitly chosen text/background pair that fails contrast must be corrected before their next publish. Use Use suggested colour to apply an accessible value; Undo restores the previous choice.
+  - **A warning, never an error:** a chosen colour on a background you did not choose (the default or a derived one),
+    Primary as text, and gradient stops. Derived text (the inks after a new background or Appearance, text on Primary,
+    accent text) is adjusted to 4.5:1 at render, with near-black or white, so the site stays readable whatever is chosen.
+  - **Brand-coloured text** (links and eyebrows, `accent-text`) renders a lightness-adjusted shade of Primary's hue
+    whenever Primary alone would fall below 4.5:1 on the Background or the Alternate background. Studio says so, naming
+    the shade, and the button and backgrounds keep your exact colour. **Use suggested colour** on Primary saves that
+    accessible shade as Primary, after which nothing is adjusted. There is no "use as chosen" switch for text, because
+    that would let a failing pair render.
+  - **Page and section documents never get contrast errors**, only warnings and the render-time fallbacks, because an
+    error there would stop content being published (`resolve-design-tokens-contrast-policy.test.ts` checks that no
+    schema outside Brand colours turns a colour check into an error). Contrast over pictures is unchanged.
+- **Density, Shape and Heading style** (task 216, agency only, in the thumbnail picker). Each restyles the whole site
+  from one choice, server-side as `:root` variables (`src/lib/design/site-decisions.ts`), with no client script and no
+  new request. Leaving one empty, or choosing **Standard** or **Soft**, adds nothing: the site is exactly
+  `tokens.json`. **Unset inherits; a section's own choice wins.**
+  - **Density** (_Compact_, _Standard_, _Airy_) moves the **Default** section spacing (`--spacing-section`, 4.5rem,
+    6rem or 7.5rem) and the side margin (`--spacing-gutter`, 1.125rem, 1.5rem or 1.875rem). A section set to
+    **Compact** or **Spacious** keeps its own spacing whatever the density is; a section left on Default, or with
+    nothing chosen, follows it.
+  - **Shape** (_Sharp_, _Soft_, _Round_) moves the card, panel and control corners (`--radius-card` 0.25, 1 or
+    1.75rem; `--radius-panel` 0.5, 1.5 or 2.25rem; `--radius-control` 0.25, 0.5 or 0.75rem). Buttons and pills stay
+    fully round.
+  - **Heading style** (_Standard_, _Editorial_, _Modern_, _Classic_) sets the weight, letter spacing and size of h1, h2
+    and h3 together (`src/lib/design/heading-styles.ts`; h4 and smaller keep their own). The weight is
+    `--heading-weight`, read by one rule at the end of `globals.css` that falls back to each heading's own weight
+    while it is unset. The values are provisional until reviewed on real pages. Fonts never change: Editorial looks
+    best with a display font, so until Currawong adds one it uses the site's body font.
+
+    | Style     | Weight   | Letter spacing | Size (display, h1, h2, h3)     |
+    | --------- | -------- | -------------- | ------------------------------ |
+    | Standard  | as built | as built       | as built                       |
+    | Editorial | 500      | -0.04em        | ×1.1, ×1.1, ×1.1, ×1.05        |
+    | Modern    | 700      | -0.03em        | unchanged                      |
+    | Classic   | 600      | -0.01em        | ×0.95, ×0.95, ×0.95, unchanged |
+
+  - **In Studio**, a preview under the colour mock-up shows a heading, body text, a button and a card at the chosen
+    density, shape and heading style, and above the form a note counts the sections that set their own spacing (Compact
+    or Spacious, drafts included) with a link to each. It makes one narrow Studio-only query (`SPACING_USAGE_QUERY`: each
+    page's and shared section's title, and only the sections that chose Compact or Spacious); the public site makes no
+    request for it.
+  - **Keep site-wide design changes in their own release.** A release publishes all or nothing, so a density, shape or
+    heading change should not ride along with unrelated content.
+- **Font pairings** (`src/config/font-pairings.ts`) are vetted display and body pairs, as data only: nothing here loads
+  a font. To use one, import both families from `next/font/google` under the names below and point the `font` tokens at
+  them (task 13); the design manifest (task 215) will read the same list. A test checks every family and weight against
+  next/font's own list.
+
+  | Id                      | Display             | Body            | Mood                |
+  | ----------------------- | ------------------- | --------------- | ------------------- |
+  | `inter`                 | `Inter`             | `Inter`         | modern              |
+  | `playfair-inter`        | `Playfair_Display`  | `Inter`         | editorial, refined  |
+  | `dm-serif-dm-sans`      | `DM_Serif_Display`  | `DM_Sans`       | editorial, friendly |
+  | `fraunces-inter`        | `Fraunces`          | `Inter`         | friendly, editorial |
+  | `lora-source-sans`      | `Lora`              | `Source_Sans_3` | classic, friendly   |
+  | `baskerville-work-sans` | `Libre_Baskerville` | `Work_Sans`     | classic, refined    |
+  | `space-grotesk-inter`   | `Space_Grotesk`     | `Inter`         | modern, technical   |
+  | `jakarta-manrope`       | `Plus_Jakarta_Sans` | `Manrope`       | modern, friendly    |
 
 With nothing set, no CSS is added. Otherwise `SiteShell` renders one `<style>` with `:root{...}` containing only
 what differs from `tokens.json`, on the server, so there is no flash and no JavaScript. It comes from

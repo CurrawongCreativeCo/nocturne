@@ -1416,6 +1416,49 @@ export const designSettingsVariants = {
     cardDepth: 'floating',
     _updatedAt: UPDATED,
   },
+  // Site-wide Density, Shape and Heading style (tests/e2e/site-decisions.spec.ts).
+  'density-airy': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    density: 'airy',
+    _updatedAt: UPDATED,
+  },
+  'density-compact': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    density: 'compact',
+    _updatedAt: UPDATED,
+  },
+  'shape-round': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    shape: 'round',
+    _updatedAt: UPDATED,
+  },
+  'shape-sharp': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    shape: 'sharp',
+    _updatedAt: UPDATED,
+  },
+  'heading-editorial': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'editorial',
+    _updatedAt: UPDATED,
+  },
+  'heading-modern': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'modern',
+    _updatedAt: UPDATED,
+  },
+  'heading-classic': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'classic',
+    _updatedAt: UPDATED,
+  },
 }
 
 /**
@@ -4945,6 +4988,29 @@ documents.push(
         links: [linkItem('depth-p', 'Plain link', external('https://example.com/p'))],
       },
     ],
+  },
+  {
+    // Site-wide Density and Shape (tests/e2e/site-decisions.spec.ts): the same quote section with no
+    // spacing chosen, with Compact, with Default and with Spacious, so a density can be read against
+    // each. Each has a card whose corner radius follows Shape.
+    _id: 'page-site-decisions',
+    _type: 'page',
+    title: 'Site decisions',
+    slug: { _type: 'slug', current: 'site-decisions' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['unset', undefined],
+      ['compact', 'compact'],
+      ['default', 'default'],
+      ['spacious', 'spacious'],
+    ].map(([name, spacing]) => ({
+      _key: `sd-${name}`,
+      _type: 'testimonials',
+      title: `Spacing ${name}`,
+      ...(spacing ? { style: { _type: 'sectionStyle', spacing } } : {}),
+      items: [{ _key: key(), quote: 'Great.', name: 'Alex', role: 'CEO' }],
+    })),
   },
   {
     // Card depth (tests/e2e/design-settings.spec.ts): quote cards and pricing plans with nothing

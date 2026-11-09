@@ -24,6 +24,7 @@ import { PanelUsageInput } from '../panel-usage-input'
 import { PictureFramingInput } from '../picture-framing/picture-framing-input'
 import { SliderInput } from '../slider-input'
 import { SlotInput } from '../slot-input'
+import { SpacingUsageInput } from '../spacing-usage-note'
 
 /**
  * Wraps the Studio-wide input override (`form.components.input`): a string field with
@@ -80,6 +81,13 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
       (props.schemaType.options as { usedByButtons?: boolean } | undefined)?.usedByButtons === true
     ) {
       return <PanelUsageInput {...props} />
+    }
+    if (
+      isObjectInputProps(props) &&
+      props.path.length === 0 &&
+      (props.schemaType.options as { spacingUsage?: boolean } | undefined)?.spacingUsage === true
+    ) {
+      return <SpacingUsageInput {...props} />
     }
     if (
       isObjectInputProps(props) &&

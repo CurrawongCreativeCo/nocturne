@@ -3,17 +3,55 @@ import { defineField, defineType, type StringRule } from 'sanity'
 
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
+import {
+  EDITORIAL_FONT_NOTE,
+  HEADING_STYLE_DESCRIPTIONS,
+  HEADING_STYLE_OPTIONS,
+  HEADING_STYLE_TITLES,
+  DENSITIES,
+  DENSITY_DESCRIPTIONS,
+  DENSITY_TITLES,
+  SHAPES,
+  SHAPE_DESCRIPTIONS,
+  SHAPE_TITLES,
+} from '@/lib/design/site-decision-options'
 import { SHADOW_DESCRIPTIONS, SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { hiddenFromClients } from '@/lib/sanity/roles'
+import { presetField } from '@/lib/sanity/schema/preset-field'
+import {
+  HeadingClassicThumbnail,
+  HeadingEditorialThumbnail,
+  HeadingModernThumbnail,
+  HeadingStandardThumbnail,
+  DensityAiryThumbnail,
+  DensityCompactThumbnail,
+  DensityStandardThumbnail,
+  ShapeRoundThumbnail,
+  ShapeSharpThumbnail,
+  ShapeSoftThumbnail,
+} from '@/lib/sanity/schema/thumbnails/site-decision-thumbnails'
 
 import { ColourInput } from '../components/colour-input'
 import { DesignSettingsInput } from '../components/design-settings-input'
 
 const HEX_MESSAGE = 'Use a six-digit hex colour such as #3266e4'
 
-/** A hex error, plus a warning when the resolved design fails contrast for this field. */
+/**
+ * A hex error, an error when this colour and the background it sits on were both chosen under
+ * Advanced and fail text contrast (with "Use suggested colour" in the colour input), and a warning for
+ * every other contrast problem. Only this document gets contrast errors: a page or section that did
+ * would stop its content being published.
+ */
 const colourValidation = (field: string) => (rule: StringRule) => [
   rule.custom((value) => !value || HEX_PATTERN.test(value) || HEX_MESSAGE).error(),
+  rule
+    .custom((_value, { document }) => {
+      const failure = resolveDesignTokens(document as DesignOverrides | undefined).errors.find(
+        (item) => item.field === field,
+      )
+      return failure ? failure.message : true
+    })
+    .error(),
   rule
     .custom((_value, { document }) => {
       const warning = resolveDesignTokens(document as DesignOverrides | undefined).warnings.find(
@@ -48,6 +86,7 @@ export const designSettings = defineType({
   title: 'Brand colours',
   type: 'document',
   icon: ColorWheelIcon,
+  options: { spacingUsage: true },
   components: { input: DesignSettingsInput },
   fieldsets: [
     {
@@ -85,6 +124,66 @@ export const designSettings = defineType({
       'A supporting colour for highlights, tags and gradients.',
     ),
     colourField('highlight', 'Highlight', 'Optional. A bright accent for marking a word or badge.'),
+    presetField({
+      name: 'density',
+      title: 'Density',
+      description:
+        'How much room the site gives its sections and side margins. Sections left on Default follow it; a section that chooses Compact or Spacious keeps its own spacing. Leave it empty to keep the spacing the site has now.',
+      options: DENSITIES.map((value) => ({
+        value,
+        title: DENSITY_TITLES[value],
+        description: DENSITY_DESCRIPTIONS[value],
+        thumbnail: {
+          compact: DensityCompactThumbnail,
+          standard: DensityStandardThumbnail,
+          airy: DensityAiryThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'standard',
+      hidden: hiddenFromClients,
+    }),
+    presetField({
+      name: 'shape',
+      title: 'Shape',
+      description:
+        'How rounded cards, panels and form controls are, across the site. Buttons keep their shape. Leave it empty to keep the corners the site has now.',
+      options: SHAPES.map((value) => ({
+        value,
+        title: SHAPE_TITLES[value],
+        description: SHAPE_DESCRIPTIONS[value],
+        thumbnail: {
+          sharp: ShapeSharpThumbnail,
+          soft: ShapeSoftThumbnail,
+          round: ShapeRoundThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'soft',
+      hidden: hiddenFromClients,
+    }),
+    presetField({
+      name: 'headingStyle',
+      title: 'Heading style',
+      description: `The character of every heading: size, weight and letter spacing together. The fonts stay as built. ${EDITORIAL_FONT_NOTE} Leave it empty to keep the headings the site has now.`,
+      options: HEADING_STYLE_OPTIONS.map((value) => ({
+        value,
+        title: HEADING_STYLE_TITLES[value],
+        description: HEADING_STYLE_DESCRIPTIONS[value],
+        thumbnail: {
+          standard: HeadingStandardThumbnail,
+          editorial: HeadingEditorialThumbnail,
+          modern: HeadingModernThumbnail,
+          classic: HeadingClassicThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'standard',
+      hidden: hiddenFromClients,
+    }),
     defineField({
       name: 'cardDepth',
       title: 'Card depth',
