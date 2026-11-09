@@ -70,7 +70,7 @@ export const SITE_DECISIONS = { density, shape } as const
 export type SiteDecisionName = keyof typeof SITE_DECISIONS
 
 /** The choices stored on Brand colours, as the settings query returns them. */
-export type SiteDecisionInput = { [Name in SiteDecisionName]?: string | null }
+export type SiteDecisionInput = Partial<Record<SiteDecisionName, string | null>>
 
 /**
  * The variables for the chosen decisions, in registry order. A missing, empty or unrecognised choice
