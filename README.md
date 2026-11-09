@@ -1597,6 +1597,7 @@ Studio access; see _Studio roles and permissions_).
     background_, when you chose **both** colours under Advanced and the pair is below 4.5:1. It blocks publishing this
     document, names the pair and the ratio, and offers **Use suggested colour** (the nearest shade of the text colour
     that reaches 4.5:1, same hue, with **Undo**). The error sits on the text colour.
+  - Existing Brand colours documents with an explicitly chosen text/background pair that fails contrast must be corrected before their next publish. Use Use suggested colour to apply an accessible value; Undo restores the previous choice.
   - **A warning, never an error:** a chosen colour on a background you did not choose (the default or a derived one),
     Primary as text, and gradient stops. Derived text (the inks after a new background or Appearance, text on Primary,
     accent text) is adjusted to 4.5:1 at render, with near-black or white, so the site stays readable whatever is chosen.
