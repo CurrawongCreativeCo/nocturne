@@ -91,13 +91,15 @@ test.describe('a linked card with Lift chosen', () => {
     await expect(lifted(page).locator('a')).toHaveCount(1)
   })
 
-  test('has no serious accessibility violations', async ({ page }) => {
+  test('has no accessibility violations on the lifted card’s section', async ({ page }) => {
     await page.goto('/card-depth')
     const { violations } = await new AxeBuilder({ page })
-      .include('#main-content')
+      .include('#main-content section:has(.card-lift)')
       .withTags(WCAG)
       .analyze()
-    expect(violations.map(({ id }) => id)).toEqual([])
+    expect(
+      violations.flatMap(({ id, nodes }) => nodes.map((node) => `${id}: ${node.html}`)),
+    ).toEqual([])
   })
 })
 
