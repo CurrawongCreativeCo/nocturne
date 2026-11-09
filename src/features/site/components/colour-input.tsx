@@ -4,7 +4,7 @@ import { Badge, Button, Card, Flex, Stack, Text, TextInput } from '@sanity/ui'
 import { useState } from 'react'
 import { set, unset, useFormValue, type StringInputProps } from 'sanity'
 
-import { describeSuggestion, suggestColour } from '@/lib/color/contrast-remedy'
+import { describeSuggestion, suggestColourForAll } from '@/lib/color/contrast-remedy'
 import { stopContrast, type ColourSet } from '@/lib/color/heading-contrast'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import {
@@ -116,16 +116,28 @@ export function ColourInput(props: StringInputProps) {
     : field && !isElement
       ? resolveDesignTokens(document).checks.filter((check) => check.fields.includes(field))
       : []
-  const fixable = hex ? checks.find((check) => check.adjustable && !check.pass) : undefined
+  // The colour sits on every background it is checked against (Text: the Background and the Alternate
+  // background), so a suggestion has to pass them all, not just the first that fails.
+  const adjustable = hex ? checks.filter((check) => check.adjustable) : []
+  const failing = adjustable.filter((check) => !check.pass)
+  const required = Math.max(0, ...adjustable.map((check) => check.required))
   const suggestion =
-    hex && fixable ? suggestColour(hex, fixable.background, fixable.required) : null
+    hex && failing.length > 0
+      ? suggestColourForAll(
+          hex,
+          adjustable.map((check) => check.background),
+          required,
+        )
+      : null
+  const noSingleShade = hex !== null && failing.length > 0 && suggestion === null
+  const fixable = suggestion ? failing[0] : undefined
   const actions: ContrastFixAction[] =
     suggestion && fixable
       ? [
           {
             id: 'suggest',
             label: 'Use suggested colour',
-            detail: describeSuggestion(suggestion, fixable.required),
+            detail: describeSuggestion(suggestion, required),
             after: suggestion.hex,
             apply: () => {
               setDraft(null)
@@ -228,6 +240,12 @@ export function ColourInput(props: StringInputProps) {
             ))}
           </Stack>
         </Card>
+      )}
+      {noSingleShade && (
+        <Text size={1} muted>
+          No single shade of this colour reaches the target on every background it sits on. Change
+          one of the backgrounds, or this colour’s hue.
+        </Text>
       )}
       <ContrastFixPanel actions={actions} current={hex ?? ''} readOnly={readOnly} />
     </Stack>

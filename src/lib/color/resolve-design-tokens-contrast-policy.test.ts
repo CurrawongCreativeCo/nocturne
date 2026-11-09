@@ -4,7 +4,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { contrastRatio } from './contrast'
-import { suggestColour } from './contrast-remedy'
+import { suggestColour, suggestColourForAll } from './contrast-remedy'
 import { hexToOklch } from './oklch'
 import { resolveDesignTokens, TEXT_RATIO, type DesignOverrides } from './resolve-design-tokens'
 
@@ -78,6 +78,107 @@ describe('an explicitly chosen Advanced pair that fails', () => {
   it('is no error when the pair passes, and none for text the editor did not choose', () => {
     expect(resolveDesignTokens({ surface: '#ffffff', ink: '#222222' }).errors).toEqual([])
     expect(resolveDesignTokens({ surface: '#ffffff', inkMuted: '#555555' }).errors).toEqual([])
+  })
+})
+
+describe('Text on the Alternate background (Tinted sections and cards)', () => {
+  const pairs = (input: DesignOverrides) => resolveDesignTokens(input).checks.map((item) => item.id)
+
+  it('is checked whenever Text or a background is chosen, and not for a site with nothing set', () => {
+    expect(pairs({ ink: '#222222' })).toContain('ink-alt')
+    expect(pairs({ surfaceAlt: '#eeeeee' })).toContain('ink-alt')
+    expect(pairs({ surface: '#ffffff' })).toContain('ink-alt')
+    expect(pairs({})).not.toContain('ink-alt')
+  })
+
+  it('is an error when Text and the Alternate background were both chosen and fail', () => {
+    const result = resolveDesignTokens({
+      surface: '#ffffff',
+      surfaceAlt: '#999999',
+      ink: '#6b6b6b',
+    })
+    expect(result.checks.find((item) => item.id === 'ink-surface')?.pass).toBe(true)
+    expect(result.checks.find((item) => item.id === 'ink-alt')).toMatchObject({
+      pass: false,
+      explicit: true,
+      adjustable: true,
+    })
+    expect(result.errors.map((item) => item.field)).toEqual(['ink'])
+    expect(result.errors[0]?.message).toContain('Text on the alternate background')
+    expect(at(result.vars, '--color-ink')).toBe('#6b6b6b')
+  })
+
+  it('is only a warning when the Alternate background was not chosen', () => {
+    const result = resolveDesignTokens({ surface: '#ffffff', ink: '#999999' })
+    expect(result.errors.map((item) => item.field)).toEqual(['ink'])
+    // Chosen Text on a derived tint that fails but whose Background passes: warning only.
+    const tint = resolveDesignTokens({ ink: '#6b6b6b', surface: '#808080' })
+    expect(tint.checks.find((item) => item.id === 'ink-alt')?.explicit).toBe(false)
+    expect(tint.errors.filter((item) => item.message.includes('alternate'))).toEqual([])
+  })
+
+  it('does not warn about a field that already has an error: one suggestion covers every pair', () => {
+    const result = resolveDesignTokens({ surface: '#ffffff', ink: '#bbbbbb' })
+    expect(result.errors.map((item) => item.field)).toEqual(['ink'])
+    expect(result.warnings.map((item) => item.field)).not.toContain('ink')
+  })
+
+  it('offers one suggestion that clears every pair the colour sits in, never just the first', () => {
+    const surface = '#ffffff'
+    const surfaceAlt = '#c8c8c8'
+    const ink = '#6b6b6b'
+    const failing = resolveDesignTokens({ surface, surfaceAlt, ink })
+    // Passes the Background, fails the Alternate background: the old first-failing suggestion only
+    // looked at the pair that failed, which here is the Alternate background.
+    const suggestion = suggestColourForAll(ink, [surface, surfaceAlt], TEXT_RATIO)
+    expect(suggestion).not.toBeNull()
+    expect(contrastRatio(suggestion?.hex ?? '', surface)).toBeGreaterThanOrEqual(TEXT_RATIO)
+    expect(contrastRatio(suggestion?.hex ?? '', surfaceAlt)).toBeGreaterThanOrEqual(TEXT_RATIO)
+    expect(suggestion?.ratio).toBeGreaterThanOrEqual(TEXT_RATIO)
+    expect(failing.errors.length).toBeGreaterThan(0)
+    const fixed = resolveDesignTokens({ surface, surfaceAlt, ink: suggestion?.hex })
+    expect(fixed.errors).toEqual([])
+    expect(
+      fixed.checks.filter((item) => item.fields.includes('ink')).every((item) => item.pass),
+    ).toBe(true)
+  })
+
+  it('does the same for Muted text on both backgrounds', () => {
+    const surface = '#ffffff'
+    const surfaceAlt = '#bbbbbb'
+    const suggestion = suggestColourForAll('#999999', [surface, surfaceAlt], TEXT_RATIO)
+    expect(suggestion).not.toBeNull()
+    const fixed = resolveDesignTokens({ surface, surfaceAlt, inkMuted: suggestion?.hex })
+    expect(fixed.errors).toEqual([])
+  })
+
+  it('makes no claim when no shade passes every background, and the error stays', () => {
+    // Black on #707070 is 4.2:1 and white on #808080 is 3.9:1, so no ink can clear both.
+    const surface = '#808080'
+    const surfaceAlt = '#707070'
+    expect(suggestColourForAll('#888888', [surface, surfaceAlt], TEXT_RATIO)).toBeNull()
+    expect(suggestColourForAll('#000000', [surface, surfaceAlt], TEXT_RATIO)).toBeNull()
+    expect(
+      resolveDesignTokens({ surface, surfaceAlt, ink: '#888888' }).errors.length,
+    ).toBeGreaterThan(0)
+  })
+
+  it('suggests nothing for a colour that already passes every background', () => {
+    expect(suggestColourForAll('#222222', ['#ffffff', '#eeeeee'], TEXT_RATIO)).toBeNull()
+    expect(suggestColourForAll('#222222', [], TEXT_RATIO)).toBeNull()
+  })
+
+  it('leaves unset and derived sites with no failing pair', () => {
+    for (const input of [
+      {},
+      { appearance: 'dark' },
+      { surface: '#101010' },
+      { surface: '#fafafa' },
+    ]) {
+      const result = resolveDesignTokens(input)
+      expect(result.errors).toEqual([])
+      expect(result.checks.filter((item) => !item.pass)).toEqual([])
+    }
   })
 })
 

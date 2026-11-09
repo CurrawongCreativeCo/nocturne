@@ -322,6 +322,18 @@ export function resolveDesignTokens(
       Boolean(chosen.ink && chosen.surface),
     )
   }
+  // Tinted sections (`data-tone='alt'`) and cards draw the same Text on the Alternate background.
+  if (chosen.ink || chosen.surface || chosen.surfaceAlt || dark) {
+    pair(
+      'ink-alt',
+      ['ink', 'surfaceAlt'],
+      'Text on the alternate background',
+      colours.ink,
+      colours.surfaceAlt,
+      Boolean(chosen.ink),
+      Boolean(chosen.ink && chosen.surfaceAlt),
+    )
+  }
   if (chosen.inkMuted || chosen.surface || chosen.surfaceAlt) {
     pair(
       'ink-muted-surface',
@@ -376,7 +388,13 @@ export function resolveDesignTokens(
         field,
         message: `${check.label}: ${check.ratio.toFixed(1)}:1 on the colours you chose, below the ${check.required}:1 AA minimum for text. Change this colour or the background, or use the suggested colour.`,
       })
-    } else if (!check.pass && field) {
+    }
+  }
+  // A field that already has an error is not warned about as well: one suggestion covers every pair.
+  const blocked = new Set(errors.map((error) => error.field))
+  for (const check of checks) {
+    const [field] = check.fields
+    if (!check.pass && field && !check.explicit && !blocked.has(field)) {
       warnings.push({
         field,
         message:
