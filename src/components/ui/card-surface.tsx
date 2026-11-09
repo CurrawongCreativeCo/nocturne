@@ -1,8 +1,8 @@
 import { createElement, type ElementType, type ReactNode } from 'react'
 
 import { DecorativeMark, type DecorativeMarkProps } from '@/components/ui/decorative-mark'
-import type { ElementDepth } from '@/lib/sanity/depth-options'
 import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
+import type { ElementDepth } from '@/lib/sanity/depth-options'
 import {
   ringSurfaceLook,
   type OwnRingSurface,
