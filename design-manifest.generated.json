@@ -34148,6 +34148,85 @@
         "clientEditable": false
       },
       {
+        "path": "buttonFill",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "solid",
+            "title": "Solid"
+          },
+          {
+            "value": "gradient",
+            "title": "Brand gradient"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "buttonGradient",
+        "kind": "string",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "buttonDepth",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "flat",
+            "title": "Flat"
+          },
+          {
+            "value": "soft",
+            "title": "Soft"
+          },
+          {
+            "value": "raised",
+            "title": "Raised"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "buttonGlow",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "off",
+            "title": "Off"
+          },
+          {
+            "value": "soft",
+            "title": "Soft"
+          },
+          {
+            "value": "strong",
+            "title": "Strong"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "secondaryButton",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "outline",
+            "title": "Outline"
+          },
+          {
+            "value": "soft",
+            "title": "Soft fill"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
         "path": "surface",
         "kind": "string",
         "required": null,

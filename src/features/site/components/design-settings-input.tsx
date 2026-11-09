@@ -5,6 +5,7 @@ import { useFormValue, type ObjectInputProps } from 'sanity'
 
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
 
+import { buttonPreview } from './button-preview'
 import { SiteDecisionPreview } from './site-decision-preview'
 
 /**
@@ -18,6 +19,7 @@ export function DesignSettingsInput(props: ObjectInputProps) {
   const document = useFormValue([]) as DesignOverrides | undefined
   const { colours, vars } = resolveDesignTokens(document)
   const gradients = Object.entries(vars).filter(([name]) => name.startsWith('--gradient-'))
+  const buttons = buttonPreview(vars, colours)
 
   const band = (background: string, color: string, label: string, muted?: string) => (
     <div style={{ background, color, padding: '12px 16px' }}>
@@ -80,28 +82,11 @@ export function DesignSettingsInput(props: ObjectInputProps) {
                 </span>{' '}
                 tag.
               </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                <span
-                  style={{
-                    background: colours.cta,
-                    color: colours.ctaInk,
-                    borderRadius: 999,
-                    padding: '6px 16px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                  }}
-                >
+              <div style={{ display: 'flex', gap: 12, marginTop: 12, ...buttons.scope }}>
+                <span data-part="primary-button" style={buttons.primary}>
                   Primary button
                 </span>
-                <span
-                  style={{
-                    border: `1px solid ${colours.line}`,
-                    color: colours.ink,
-                    borderRadius: 999,
-                    padding: '6px 16px',
-                    fontSize: 13,
-                  }}
-                >
+                <span data-part="secondary-button" style={buttons.secondary}>
                   Secondary button
                 </span>
               </div>

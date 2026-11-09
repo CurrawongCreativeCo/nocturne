@@ -142,3 +142,115 @@ export const HeadingModernThumbnail = (_props: PresetThumbnailProps) => (
 export const HeadingClassicThumbnail = (_props: PresetThumbnailProps) => (
   <HeadingStyleThumbnail name="classic" />
 )
+
+/**
+ * A main and a secondary button on the page, each choice drawn as the site draws it: a gradient or
+ * solid fill, a shadow beneath, a halo around, a tint or an outline on the second button. The
+ * wireframe palette stays the site's own, so the picture is generic rather than the editor's colours.
+ */
+type ButtonThumbnailChoice =
+  | { fill: 'solid' | 'gradient' }
+  | { depth: 'flat' | 'soft' | 'raised' }
+  | { glow: 'off' | 'soft' | 'strong' }
+  | { secondary: 'outline' | 'soft' }
+
+function ButtonThumbnail({ choice }: { choice: ButtonThumbnailChoice }) {
+  const key = Object.entries(choice)[0]?.join('-') ?? ''
+  const id = `button-${key}`
+  const gradient = 'fill' in choice && choice.fill === 'gradient'
+  const depth = 'depth' in choice ? choice.depth : 'flat'
+  const glow = 'glow' in choice ? choice.glow : 'off'
+  const secondary = 'secondary' in choice ? choice.secondary : 'outline'
+  const showSecondary = 'secondary' in choice
+  const main = { x: showSecondary ? 20 : 40, y: 46, width: showSecondary ? 56 : 80, height: 22 }
+  return (
+    <svg
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+      width="100%"
+      height="100%"
+      aria-hidden="true"
+      focusable="false"
+      data-wireframe={`button-${key}`}
+      style={{ display: 'block' }}
+    >
+      <defs>
+        <linearGradient id={id} x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor={colorHex.accent} />
+          <stop offset="1" stopColor={colorHex.accent2} />
+        </linearGradient>
+        <filter id={`${id}-shadow`} x="-30%" y="-30%" width="160%" height="200%">
+          <feDropShadow
+            dx="0"
+            dy={depth === 'raised' ? 5 : 2}
+            stdDeviation={depth === 'raised' ? 3.5 : 1.5}
+            floodColor="#000000"
+            floodOpacity={depth === 'raised' ? 0.3 : 0.25}
+          />
+        </filter>
+        <filter id={`${id}-glow`} x="-50%" y="-80%" width="200%" height="260%">
+          <feDropShadow
+            dx="0"
+            dy="0"
+            stdDeviation={glow === 'strong' ? 7 : 4}
+            floodColor={colorHex.accent}
+            floodOpacity={glow === 'strong' ? 0.8 : 0.5}
+          />
+        </filter>
+      </defs>
+      <rect width={WIDTH} height={HEIGHT} fill={colorHex.surface} />
+      <rect x={20} y={22} width={72} height={5} rx={2} fill={colorHex.ink} />
+      <rect x={20} y={31} width={104} height={3} rx={1.5} fill={colorHex.inkMuted} />
+      <rect
+        {...main}
+        rx={11}
+        fill={gradient ? `url(#${id})` : colorHex.cta}
+        filter={
+          glow !== 'off' ? `url(#${id}-glow)` : depth !== 'flat' ? `url(#${id}-shadow)` : undefined
+        }
+      />
+      {showSecondary && (
+        <rect
+          x={88}
+          y={46}
+          width={52}
+          height={22}
+          rx={11}
+          fill={secondary === 'soft' ? colorHex.line : 'none'}
+          stroke={secondary === 'outline' ? colorHex.lineStrong : 'none'}
+          strokeWidth={1.5}
+        />
+      )}
+    </svg>
+  )
+}
+
+export const ButtonFillSolidThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ fill: 'solid' }} />
+)
+export const ButtonFillGradientThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ fill: 'gradient' }} />
+)
+export const ButtonDepthFlatThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ depth: 'flat' }} />
+)
+export const ButtonDepthSoftThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ depth: 'soft' }} />
+)
+export const ButtonDepthRaisedThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ depth: 'raised' }} />
+)
+export const ButtonGlowOffThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ glow: 'off' }} />
+)
+export const ButtonGlowSoftThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ glow: 'soft' }} />
+)
+export const ButtonGlowStrongThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ glow: 'strong' }} />
+)
+export const SecondaryOutlineThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ secondary: 'outline' }} />
+)
+export const SecondarySoftThumbnail = (_props: PresetThumbnailProps) => (
+  <ButtonThumbnail choice={{ secondary: 'soft' }} />
+)
