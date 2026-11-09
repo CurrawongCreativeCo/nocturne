@@ -36,9 +36,22 @@ import { DesignSettingsInput } from '../components/design-settings-input'
 
 const HEX_MESSAGE = 'Use a six-digit hex colour such as #3266e4'
 
-/** A hex error, plus a warning when the resolved design fails contrast for this field. */
+/**
+ * A hex error, an error when this colour and the background it sits on were both chosen under
+ * Advanced and fail text contrast (with "Use suggested colour" in the colour input), and a warning for
+ * every other contrast problem. Only this document gets contrast errors: a page or section that did
+ * would stop its content being published.
+ */
 const colourValidation = (field: string) => (rule: StringRule) => [
   rule.custom((value) => !value || HEX_PATTERN.test(value) || HEX_MESSAGE).error(),
+  rule
+    .custom((_value, { document }) => {
+      const failure = resolveDesignTokens(document as DesignOverrides | undefined).errors.find(
+        (item) => item.field === field,
+      )
+      return failure ? failure.message : true
+    })
+    .error(),
   rule
     .custom((_value, { document }) => {
       const warning = resolveDesignTokens(document as DesignOverrides | undefined).warnings.find(

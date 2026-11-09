@@ -43,6 +43,12 @@ export interface ContrastCheck {
   pass: boolean
   /** True when the foreground is the colour the editor chose, so a lighter or darker shade can fix it. */
   adjustable: boolean
+  /**
+   * True when both colours of the pair are ones the editor chose under Advanced. Only such a pair that
+   * fails is an error on Brand colours (`ResolvedDesign.errors`); anything inherited or derived is a
+   * warning, and the site adjusts derived text itself.
+   */
+  explicit?: boolean
 }
 
 export interface DesignWarning {
@@ -57,6 +63,12 @@ export interface ResolvedDesign {
   css: string
   checks: ContrastCheck[]
   warnings: DesignWarning[]
+  /**
+   * Text pairs the editor chose in full (Advanced: Text or Muted text on a Background they also chose)
+   * that fail AA. They block publishing Brand colours, and nothing else: page and section documents
+   * only ever get warnings, because an error there would stop content being published.
+   */
+  errors: DesignWarning[]
   /** Every colour after the overrides (tokens.json values where nothing is set), for Studio previews. */
   colours: BaseColours
   /** The accent pair, for code that cannot read CSS variables (the OG image). */
@@ -231,13 +243,20 @@ export function resolveDesignTokens(
     colours.accentText = text
     colours.cta = primary.hex
     colours.ctaInk = primary.ink
+    // Links and eyebrows sit on the Background and the Alternate background, so the harder of the two
+    // is measured: a shade that passes it (what "Use suggested colour" saves) passes both.
+    const harder = [colours.surface, colours.surfaceAlt].reduce((worst, background) =>
+      contrastRatio(primary.hex, background) < contrastRatio(primary.hex, worst)
+        ? background
+        : worst,
+    )
     checks.push({
       id: 'primary-text',
       fields: ['primary'],
       label: 'Primary as text on the background',
       foreground: primary.hex,
-      background: colours.surface,
-      ratio: contrastRatio(primary.hex, colours.surface),
+      background: harder,
+      ratio: contrastRatio(primary.hex, harder),
       required: TEXT_RATIO,
       pass: text === primary.hex,
       adjustable: true,
@@ -278,6 +297,7 @@ export function resolveDesignTokens(
     foreground: string,
     background: string,
     adjustable: boolean,
+    explicit = false,
   ) =>
     checks.push({
       id,
@@ -289,6 +309,7 @@ export function resolveDesignTokens(
       required: TEXT_RATIO,
       pass: contrastRatio(foreground, background) >= TEXT_RATIO,
       adjustable,
+      explicit,
     })
   if (chosen.ink || chosen.surface || dark) {
     pair(
@@ -298,6 +319,7 @@ export function resolveDesignTokens(
       colours.ink,
       colours.surface,
       Boolean(chosen.ink),
+      Boolean(chosen.ink && chosen.surface),
     )
   }
   if (chosen.inkMuted || chosen.surface || chosen.surfaceAlt) {
@@ -308,6 +330,7 @@ export function resolveDesignTokens(
       colours.inkMuted,
       colours.surface,
       Boolean(chosen.inkMuted),
+      Boolean(chosen.inkMuted && chosen.surface),
     )
     pair(
       'ink-muted-alt',
@@ -316,6 +339,7 @@ export function resolveDesignTokens(
       colours.inkMuted,
       colours.surfaceAlt,
       Boolean(chosen.inkMuted),
+      Boolean(chosen.inkMuted && chosen.surfaceAlt),
     )
   }
 
@@ -343,9 +367,16 @@ export function resolveDesignTokens(
   // output of a site that sets none is byte-for-byte what it was.
   Object.assign(vars, siteDecisionVars(input))
 
+  const errors: DesignWarning[] = []
   for (const check of checks) {
     const [field] = check.fields
-    if (!check.pass && field) {
+    if (!check.pass && field && check.explicit) {
+      // The editor chose both colours, so this is theirs to fix (Studio offers "Use suggested colour").
+      errors.push({
+        field,
+        message: `${check.label}: ${check.ratio.toFixed(1)}:1 on the colours you chose, below the ${check.required}:1 AA minimum for text. Change this colour or the background, or use the suggested colour.`,
+      })
+    } else if (!check.pass && field) {
       warnings.push({
         field,
         message:
@@ -364,6 +395,7 @@ export function resolveDesignTokens(
       : '',
     checks,
     warnings,
+    errors,
     colours,
     accent: { background: colours.accent, foreground: colours.accentInk },
   }
