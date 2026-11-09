@@ -58,7 +58,9 @@ const OFFERED: readonly ThemeColour[] = ['inherit', ...GLOW_COLOUR_CHOICES, 'cus
 const NO_SHADOW = '0 0 #0000'
 const BOX_SHADOW: Record<ShadowLevel, string> = {
   flat: NO_SHADOW,
-  soft: 'var(--shadow-card)',
+  // Its own token, so an explicit Soft stays Soft when a site's card shadow is something else. The
+  // fallback is for a tokens.json that predates `shadow.soft`.
+  soft: 'var(--shadow-soft, var(--shadow-card))',
   raised: 'var(--shadow-raised)',
   floating: 'var(--shadow-floating)',
 }
@@ -102,6 +104,21 @@ export const OWN_SHADOW = {
   none: NO_SHADOW,
   card: 'var(--shadow-card)',
   glass: 'var(--glass-shadow)',
+  /** A card family that draws `shadow-card`: the site's Card depth when one is chosen, else the same. */
+  siteCard: 'var(--card-depth, var(--shadow-card))',
+  /** A card family that draws no shadow: the site's Card depth when one is chosen, else none. */
+  siteCardFree: `var(--card-depth, ${NO_SHADOW})`,
+} as const
+
+/**
+ * The classes a card family draws in place of `shadow-card` (or, for a family with no shadow, in
+ * addition to its classes), so the site's Card depth reaches it. `--card-depth` is defined only when a
+ * site chooses one (lib/design/site-decisions.ts), so unset these compute exactly what the family drew.
+ * Nothing but cards reads the variable: `shadow-card` itself is untouched.
+ */
+export const CARD_SHADOW_CLASS = {
+  shadowed: 'shadow-(--card-depth,var(--shadow-card))',
+  free: 'shadow-(--card-depth,0_0_#0000)',
 } as const
 
 const pick = <T extends string>(allowed: readonly T[], value: string | null | undefined) => {
@@ -138,22 +155,51 @@ function glowFilter(level: Exclude<GlowLevel, 'off'>, colour: string): string {
   return `drop-shadow(0 0 ${blur} color-mix(in oklch, ${colour} var(--depth-glow-${level}-strength), transparent))`
 }
 
+/** What a box or picture is given: a shadow level, a glow and the glow's colour. All optional. */
+export interface DepthLookInput {
+  level?: ShadowLevel | undefined
+  glow?: GlowLevel | undefined
+  glowColour?: ThemeColourInput | null | undefined
+}
+
+const glowColourOf = (input: ThemeColourInput | null | undefined) =>
+  themeColourCss(input, OFFERED) ?? themeColourCss({ colour: 'accent' }) ?? 'currentColor'
+
 /**
- * A box element (a link row, a pill, a social button). The class replaces the element's own shadow
- * class (Tailwind's `shadow-(--…)` keeps rings, which the layouts use as borders); with only a glow
- * chosen, the element keeps its own shadow and the glow is added to it.
+ * A box element's depth (a card, a link row, a pill, a social button). The class replaces the element's
+ * own shadow class (Tailwind's `shadow-(--…)` keeps rings, which the layouts use as borders); with only
+ * a glow chosen, the element keeps `own`, the shadow it draws on its own (`OWN_SHADOW`), and the glow is
+ * added to it. Undefined keeps the element exactly as the layout draws it.
  */
-function boxDepth(
-  level: ShadowLevel | undefined,
-  glow: string | undefined,
-  own: string,
-): ElementDepth | undefined {
-  if (!level && !glow) return undefined
-  const shadow = level ? BOX_SHADOW[level] : own
+export function depthLook(input: DepthLookInput, own: string): ElementDepth | undefined {
+  const glow = input.glow && input.glow !== 'off' ? input.glow : undefined
+  if (!input.level && !glow) return undefined
+  const shadow = input.level ? BOX_SHADOW[input.level] : own
+  const halo = glow ? glowShadow(glow, glowColourOf(input.glowColour)) : undefined
   return {
     className: 'shadow-(--depth-shadow)',
-    style: { '--depth-shadow': glow ? `${shadow}, ${glow}` : shadow } as CSSProperties,
+    style: { '--depth-shadow': halo ? `${shadow}, ${halo}` : shadow } as CSSProperties,
   }
+}
+
+/**
+ * A picture's depth: the same level and glow as a filter, which follows the picture's outline (a round
+ * crop, a transparent logo) rather than its box. Undefined while neither is chosen.
+ */
+export function depthFilter(input: DepthLookInput): ElementDepth | undefined {
+  const glow = input.glow && input.glow !== 'off' ? input.glow : undefined
+  const filter = [
+    input.level ? PICTURE_SHADOW[input.level] : '',
+    glow ? glowFilter(glow, glowColourOf(input.glowColour)) : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+  return filter
+    ? {
+        className: '[filter:var(--depth-filter)]',
+        style: { '--depth-filter': filter } as CSSProperties,
+      }
+    : undefined
 }
 
 /**
@@ -163,27 +209,16 @@ function boxDepth(
 export function resolveDepth(input: DepthInput | null | undefined): ResolvedDepth {
   const glow = glowLevelOf(input?.glow)
   const targets = glowTargetsOf(input?.glowTargets)
-  const colour =
-    themeColourCss(input?.glowColour, OFFERED) ??
-    themeColourCss({ colour: 'accent' }) ??
-    'currentColor'
-  const boxGlow = (target: GlowTarget) =>
-    glow !== 'off' && targets.includes(target) ? glowShadow(glow, colour) : undefined
+  const glowColour = input?.glowColour
+  const glowFor = (target: GlowTarget): GlowLevel => (targets.includes(target) ? glow : 'off')
 
   const links = shadowLevelOf(input?.linkShadow)
   const social = shadowLevelOf(input?.socialShadow)
   const picture = shadowLevelOf(input?.pictureShadow)
-  const pictureGlow = glow !== 'off' && targets.includes('picture') ? glowFilter(glow, colour) : ''
-  const filter = [picture ? PICTURE_SHADOW[picture] : '', pictureGlow].filter(Boolean).join(' ')
 
   return {
-    links: (own) => boxDepth(links, boxGlow('links'), own),
-    social: (own) => boxDepth(social, boxGlow('social'), own),
-    picture: filter
-      ? {
-          className: '[filter:var(--depth-filter)]',
-          style: { '--depth-filter': filter } as CSSProperties,
-        }
-      : undefined,
+    links: (own) => depthLook({ level: links, glow: glowFor('links'), glowColour }, own),
+    social: (own) => depthLook({ level: social, glow: glowFor('social'), glowColour }, own),
+    picture: depthFilter({ level: picture, glow: glowFor('picture'), glowColour }),
   }
 }
