@@ -18,7 +18,7 @@ export const SCALED_ROLES = ['display', 'h1', 'h2', 'h3'] as const
 export type ScaledRole = (typeof SCALED_ROLES)[number]
 
 export interface HeadingStyle {
-  /** `--heading-weight`: every h1 to h4. */
+  /** `--heading-weight`: every h1, h2 and h3 (h4 and below keep their own). */
   readonly weight: number
   /** Letter spacing for the scaled roles, in em. */
   readonly tracking: string

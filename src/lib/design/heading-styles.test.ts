@@ -97,12 +97,33 @@ describe('heading styles (task 216b, provisional values)', () => {
     expect(styled.vars['--color-accent']).toBe(colourOnly.vars['--color-accent'])
   })
 
-  it('reads --heading-weight in one rule that falls back to each heading’s own weight', () => {
+  it('reads --heading-weight in one rule for h1, h2 and h3 that falls back to each heading’s own weight', () => {
     const css = readFileSync('src/styles/globals.css', 'utf8')
-    expect(css).toMatch(
-      /h1,\s*h2,\s*h3,\s*h4\s*\{\s*font-weight:\s*var\(--heading-weight,\s*revert-layer\);\s*\}/,
-    )
+    const rule =
+      /(^|\n)((?:h\d,\s*)*h\d)\s*\{\s*font-weight:\s*var\(--heading-weight,\s*revert-layer\);\s*\}/.exec(
+        css,
+      )
+    expect(rule).not.toBeNull()
+    // The same levels the styles resize, and not h4, which keeps its own weight and spacing.
+    expect(rule?.[2]?.split(',').map((selector) => selector.trim())).toEqual(['h1', 'h2', 'h3'])
     // Outside every layer, so it beats the components' own weights only when the variable is set.
     expect(css.lastIndexOf('revert-layer')).toBeGreaterThan(css.lastIndexOf('@layer'))
+  })
+
+  it('never reads --heading-weight anywhere else, so nothing else follows a style', () => {
+    const css = readFileSync('src/styles/globals.css', 'utf8')
+    expect(css.match(/var\(--heading-weight/g)).toHaveLength(1)
+    const code = css.replace(/\/\*[\s\S]*?\*\//g, '')
+    expect(code).not.toMatch(/\bh4\b[^{}]*\{[^{}]*--heading-weight/)
+  })
+
+  it('leaves unset exactly as today: no weight and no h4 variable in any style', () => {
+    expect(siteDecisionVars({ headingStyle: 'standard' })).not.toHaveProperty('--heading-weight')
+    expect(siteDecisionVars({ headingStyle: 'modern' })).toHaveProperty('--heading-weight', '700')
+    for (const style of HEADING_STYLE_NAMES) {
+      for (const name of Object.keys(siteDecisionVars({ headingStyle: style }))) {
+        expect(name).not.toMatch(/h4/)
+      }
+    }
   })
 })

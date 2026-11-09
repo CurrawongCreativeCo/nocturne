@@ -188,6 +188,43 @@ test.describe('Heading style', () => {
     expect(await family()).toBe(before)
   })
 
+  /** Adds one heading of each level without a weight of its own, and reads each computed weight. */
+  const levelWeights = (page: Page) =>
+    page.evaluate(() => {
+      const weights: Record<string, string> = {}
+      for (const level of ['h1', 'h2', 'h3', 'h4']) {
+        const element = document.createElement(level)
+        element.textContent = 'Probe'
+        document.querySelector('#main-content')?.append(element)
+        weights[level] = getComputedStyle(element).fontWeight
+        element.remove()
+      }
+      return weights
+    })
+
+  test('Modern changes h1, h2 and h3 and leaves h4 as it was; unset keeps every level’s own weight', async ({
+    page,
+    request,
+  }) => {
+    await usePalette(request, 'off')
+    await page.goto('/site-decisions')
+    const unset = await levelWeights(page)
+    await usePalette(request, 'heading-modern')
+    await expect.poll(lookIs(page, '700', 36, -0.03)).toBe(true)
+    const modern = await levelWeights(page)
+    expect([modern.h1, modern.h2, modern.h3]).toEqual(['700', '700', '700'])
+    expect(modern.h4).toBe(unset.h4)
+    expect(modern.h4).not.toBe('700')
+    // Back to unset, every level is what it was.
+    await usePalette(request, 'off')
+    await expect
+      .poll(async () => {
+        await page.goto('/site-decisions')
+        return JSON.stringify(await levelWeights(page))
+      })
+      .toBe(JSON.stringify(unset))
+  })
+
   test('the choice is in the first response: no client script or flash is needed', async ({
     request,
   }) => {

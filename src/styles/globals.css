@@ -757,10 +757,10 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
  * :root only when Brand colours has a Heading style other than Standard. This rule is outside every
  * layer so it beats the components' `font-semibold` and friends; while the variable is undefined,
  * `revert-layer` hands the weight back to those layers, so nothing changes until a style is chosen.
+ * h4 and below are not headings of a section, so they keep their own weight whatever the style.
  */
 h1,
 h2,
-h3,
-h4 {
+h3 {
   font-weight: var(--heading-weight, revert-layer);
 }
