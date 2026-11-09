@@ -274,6 +274,7 @@ export const SHARED_BUILDERS = {
   surfaceFields: 'src/lib/sanity/schema/surface-design.ts',
   textRoleField: 'src/lib/sanity/schema/surface-design.ts',
   iconDesignFields: 'src/lib/sanity/schema/surface-design.ts',
+  actionFields: 'src/lib/sanity/schema/surface-design.ts',
   itemAppearanceField: 'src/lib/sanity/schema/item-appearance.ts',
   itemStyleField: 'src/lib/sanity/schema/item-appearance.ts',
   badgeIconField: 'src/lib/sanity/schema/badge-icon-field.ts',

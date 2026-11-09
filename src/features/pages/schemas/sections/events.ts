@@ -62,6 +62,10 @@ export const EVENTS_ROLE_COLOURS = { title: 'ink', meta: 'muted', body: 'muted' 
 const notFeatured: ConditionalPropertyCallback = ({ document, path }) =>
   (sectionAtStylePath(document, path)?.variant ?? 'list') !== 'featured'
 
+/** The Agenda is not linked card by card (137 item 4), so it has no indicator to choose. */
+const isAgenda: ConditionalPropertyCallback = ({ document, path }) =>
+  (sectionAtStylePath(document, path)?.variant ?? 'list') === 'agenda'
+
 export const events = defineType({
   name: 'events',
   title: 'Events',
@@ -109,6 +113,8 @@ export const events = defineType({
         inherits: 'the layout’s own',
         surface: { hidden: notFeatured },
         markHidden: notFeatured,
+        // The List draws a chevron today, the Featured layout nothing: that is what unset means.
+        action: { hidden: isAgenda },
       }),
       accessField,
       // Shown first in the Content tab.

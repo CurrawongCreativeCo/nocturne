@@ -578,9 +578,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     layouts: WITH_ARROWS,
     field: 'linkDesign.arrowStyle',
     resolvers: [
-      // Whether there is an arrow, and which, is the card design; LinkArrow draws it.
+      // Whether there is an arrow, and which, is the card design; ActionIndicator draws it.
       { module: '@/features/pages/utils/link-card-design', export: 'resolveLinkCardDesign' },
-      { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
     ],
     render: LINK_LIST,
     target: LINK_ITEMS,
@@ -596,9 +596,9 @@ const linkListEvidence: CapabilityEvidence[] = [
     layouts: WITH_ARROWS,
     field: 'links[].design.arrowStyle',
     resolvers: [
-      // Whether there is an arrow, and which, is the card design; LinkArrow draws it.
+      // Whether there is an arrow, and which, is the card design; ActionIndicator draws it.
       { module: '@/features/pages/utils/link-card-design', export: 'resolveLinkCardDesign' },
-      { module: '@/components/ui/link-arrow', export: 'LinkArrow' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
     ],
     render: LINK_LIST,
     target: LINK_ITEMS,
@@ -862,6 +862,23 @@ export const EVIDENCE: readonly Evidence[] = [
     base: {},
     roles: ['meta', 'title', 'body'],
   }),
+  // The glyph at the end of a post card (task 137): none until Blog settings chooses one.
+  {
+    id: 'blogPostCards.action.card',
+    component: 'blogPostCards',
+    capability: 'action',
+    scope: 'card',
+    field: 'settings.cardDesign.actionStyle',
+    resolvers: [
+      { module: '@/lib/sanity/card-action', export: 'resolveCardAction' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
+    ],
+    render: 'src/features/blog/components/post-card.tsx',
+    target: '[data-link-arrow]',
+    change: 'appears',
+    base: {},
+    probe: { 'settings.cardDesign.actionStyle': 'arrow' },
+  },
   ...frameEvidence('hero', {
     mark: ['overlay', 'split', 'editorial', 'full-bleed'],
     glass: ['overlay', 'split', 'editorial'],
@@ -1351,6 +1368,24 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // The glyph at the end of a card or row that links to a member's page (task 137): none until chosen.
+  {
+    id: 'team.action.card',
+    component: 'team',
+    capability: 'action',
+    scope: 'card',
+    layouts: ['grid', 'slider', 'list'],
+    field: 'cardDesign.actionStyle',
+    resolvers: [
+      { module: '@/lib/sanity/card-action', export: 'resolveCardAction' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
+    ],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    target: '[data-link-arrow]',
+    change: 'appears',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    probe: { 'cardDesign.actionStyle': 'arrow' },
+  },
   ...frameEvidence('team', {
     mark: ['grid', 'slider', 'list'],
     overlay: ['grid', 'slider', 'list'],
@@ -1436,6 +1471,25 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // The glyph at the end of a linked card (task 137). The List draws a chevron with nothing chosen, so a
+  // choice changes it; Featured draws none, so a choice makes one appear.
+  ...(['list', 'featured'] as const).map((layout): CapabilityEvidence => ({
+    id: layout === 'list' ? 'events.action.card' : 'events.action.card.featured',
+    component: 'events',
+    capability: 'action',
+    scope: 'card',
+    layouts: [layout],
+    field: 'cardDesign.actionStyle',
+    resolvers: [
+      { module: '@/lib/sanity/card-action', export: 'resolveCardAction' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
+    ],
+    render: 'src/features/pages/components/sections/events/events-parts.tsx',
+    target: '[data-link-arrow]',
+    change: layout === 'list' ? 'attributes' : 'appears',
+    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    probe: { 'cardDesign.actionStyle': 'arrow' },
+  })),
   ...frameEvidence('events', {
     mark: ['list', 'agenda', 'featured'],
     overlay: ['list', 'agenda', 'featured'],

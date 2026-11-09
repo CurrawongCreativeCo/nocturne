@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { CardSurface } from '@/components/ui/card-surface'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { siteLanguage } from '@/config/env'
 import { postPath } from '@/config/paths'
 import { formatDate } from '@/lib/format-date'
+import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
 import { textRoleProps } from '@/lib/sanity/text-role'
 
@@ -17,6 +19,9 @@ const ROLES = ['meta', 'title', 'body'] as const
 const OWN_META = { size: 'text-small', weight: 'regular', colour: 'text-ink-muted' } as const
 const OWN_TITLE = { size: 'text-h4', weight: 'semibold' } as const
 const OWN_BODY = { size: 'text-body', weight: 'regular', colour: 'text-ink-muted' } as const
+
+/** No indicator until Blog settings › Post cards › Indicator chooses one. */
+const OWN_ACTION: OwnAction = { glyph: 'none', motion: 'nudge' }
 
 // A card draws no surface of its own, so a chosen one also brings its corners and the room inside it.
 const OWN_SURFACE = { background: '', border: '', still: true }
@@ -45,6 +50,7 @@ export function PostCard({
   const publishedAt = stegaClean(post.publishedAt)
   const author = authorName(post.author)
   const look = resolveCardDesign(cardDesign, ROLES)
+  const action = resolveCardAction(cardDesign, OWN_ACTION)
 
   return (
     <CardSurface
@@ -85,6 +91,15 @@ export function PostCard({
       <p {...textRoleProps('body', 'mt-2 text-ink-muted', OWN_BODY, look.text.body)}>
         {post.excerpt}
       </p>
+      {/* Decoration: the title link above is stretched over the card and stays its one destination. */}
+      <ActionIndicator
+        glyph={action.glyph}
+        external={false}
+        motion={action.motion}
+        distance={action.distance}
+        colour={action.colour}
+        className="mt-4"
+      />
     </CardSurface>
   )
 }

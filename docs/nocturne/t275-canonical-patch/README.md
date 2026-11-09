@@ -65,6 +65,17 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
 - The Events agenda layout is Not applicable: item 4 names the list and the featured card.
 - Item 5's trailing indicator on CTA buttons is Conditional on the section having a call to action, on
   the hero, Image + text and the CTA banner.
+
+ADDITION (8 November 2026, owner-approved)
+The hero's, Image + text's and CTA banner's action pairs move to task 148 and the Features grid's to task
+276, so this task closes the Link list, Events (List and Featured), Team (Grid, Slider, List) and Blog
+post cards. The Link list's existing movement (2 px, Editorial 4 px) and the Events List's chevron and
+small-screen hiding are kept when nothing is chosen.
+
+ADDITION (8 November 2026, owner-approved)
+The Link list's arrow style and colour fields (`linkDesign.arrowStyle`, `arrowColour` and the per-link
+equivalents) keep their stored names and are not moved onto the shared action fields here: task 281 owns
+that migration. The hidden `showArrows` is still read until then.
 ```
 
 ## Task 148
@@ -74,6 +85,11 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
 Task 275 records the form section's, newsletter's and embed facade's surface (owned by task 156) and
 depth (owned by task 146) with this task as their closing task. Closing them is part of this task's
 DONE WHEN.
+
+ADDITION (8 November 2026, owner-approved during task 137)
+The trailing indicator on the hero's, Image + text's and CTA banner's buttons closes here: task 275's
+Conditional action pairs for those three sections now name this task as their closing task, not 137.
+They stay Pending until it verifies them.
 ```
 
 ## Task 159
@@ -105,6 +121,9 @@ ADDITION (6 November 2026, from task 275's design capability contract; owner's d
 Until the cards family exists, task 275 records the Features grid's text roles as Required with this
 task as the closing task, and its surface, depth and action as Conditional on objective triggers: a
 layout or look that draws items on a card, and an item link.
+
+ADDITION (8 November 2026, owner-approved during task 137)
+The Features grid's Conditional action pair (an item link) closes here, not in task 137. It stays Pending.
 ```
 
 ## Task 177
@@ -310,4 +329,13 @@ OLD (template context): every new section, slot block or listing declares
 NEW (template context): every new section, slot block, listing or view declares
 
 FOOTER, new first paragraph: Amended on 7 November 2026, owner-approved, after the independent post-merge audit of task 275. Task 275 gains a corrective PR (evidence for slot blocks, listings and views; verification per text role; baseline integrity against the base commit; design-context private-control checks), and task 156 waits for it. Tasks 137, 146, 156, 158, 159, 213 and 276 gained additions, and task 275's proposed amendments of 6 and 7 November were applied. Task numbers, statuses, notes and progress are unchanged.
+```
+
+## Task 281
+
+```text
+ADDITION (8 November 2026, owner-approved expansion)
+Also migrates the Link list's `linkDesign.arrowStyle` and `arrowColour` (and the per-link `arrowStyle` and
+`arrowColour`) onto the shared action fields from task 137, keeping every stored value and the hidden
+`showArrows` compatibility. Task 137 leaves them as a temporary exception with this removal task.
 ```

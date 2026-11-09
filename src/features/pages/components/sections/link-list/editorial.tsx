@@ -1,5 +1,5 @@
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { buttonFeedback } from '@/components/ui/cta-link'
-import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 
 import { LinkItem, LinkMark, LinkText, ownEyebrow, withMark, type OwnLinkText } from './link-design'
@@ -37,10 +37,12 @@ const layout: LinkListLayout = {
       <SanityLink link={link.link} className={withMark(ROW, mark)}>
         <LinkMark mark={mark} />
         <LinkText link={link} design={design} own={text(link.large)} />
-        <LinkArrow
-          arrow={arrow}
+        <ActionIndicator
+          glyph={arrow}
           external={link.kind === 'external'}
-          className="text-ink-muted group-hover:text-ink motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
+          motion="nudge"
+          distance="legacy-large"
+          className="text-ink-muted group-hover:text-ink"
           style={arrowStyle}
         />
       </SanityLink>

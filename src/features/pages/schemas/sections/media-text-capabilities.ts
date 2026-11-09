@@ -11,7 +11,13 @@ export const mediaTextCapabilities = declareCapabilities<SplitLayout>({
   mark: { policy: 'required', scope: 'section' },
   depth: NOT_APPLICABLE.noShadowSurface,
   icon: NOT_APPLICABLE.noIcon,
-  action: { policy: 'conditional', scope: 'item', trigger: CALL_TO_ACTION },
+  action: {
+    policy: 'conditional',
+    scope: 'item',
+    trigger: CALL_TO_ACTION,
+    // The trailing indicator on the buttons is task 148's (owner-approved 8 November 2026).
+    closingTask: 148,
+  },
   framing: {
     ...backgroundFraming<SplitLayout>({
       side: 'applies',

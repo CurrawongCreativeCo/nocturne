@@ -145,3 +145,60 @@ describe('Events: the card only Featured draws', () => {
     expect(hiddenOn('list', 'title')).toBe(false)
   })
 })
+
+describe('Events’ action indicator', () => {
+  const arrows = (document: Document) => [...document.querySelectorAll('[data-link-arrow]')]
+
+  it('keeps the List’s own chevron, nudge and small-screen hiding when nothing is chosen', async () => {
+    const document = await draw('list')
+    const chevrons = arrows(document)
+    expect(chevrons.length).toBeGreaterThan(0)
+    for (const chevron of chevrons) {
+      expect(chevron.getAttribute('data-link-arrow')).toBe('chevron')
+      expect(chevron.querySelector('path')?.getAttribute('d')).toBe('M9 6l6 6-6 6')
+      expect(chevron.getAttribute('data-action-motion')).toBe('nudge')
+      expect(chevron.getAttribute('data-action-distance')).toBe('legacy-large')
+      const classes = chevron.getAttribute('class')?.split(' ') ?? []
+      expect(classes).toEqual(expect.arrayContaining(['hidden', 'sm:block', 'mt-5', 'size-6']))
+      expect(chevron.getAttribute('aria-hidden')).toBe('true')
+      // The row is the group the indicator moves with, and its one link is the stretched title link.
+      expect(chevron.closest('li')?.className).toContain('group')
+      expect(chevron.closest('li')?.querySelectorAll('a')).toHaveLength(1)
+    }
+  })
+
+  it('draws nothing on Featured or the Agenda when nothing is chosen', async () => {
+    expect(arrows(await draw('featured'))).toHaveLength(0)
+    expect(arrows(await draw('agenda'))).toHaveLength(0)
+    expect((await draw('featured')).querySelector('article')?.className).not.toContain('group')
+  })
+
+  it('draws the chosen glyph on every linked Featured card and row, in one group each', async () => {
+    const document = await draw('featured', {
+      cardDesign: { actionStyle: 'arrow', actionColour: { colour: 'accent' } },
+    })
+    const found = arrows(document)
+    expect(found.length).toBeGreaterThan(0)
+    for (const arrow of found) {
+      expect(arrow.getAttribute('data-link-arrow')).toBe('arrow')
+      expect(arrow.getAttribute('data-action-motion')).toBe('nudge')
+      expect(arrow.getAttribute('data-action-distance')).toBe('standard')
+      expect(arrow.getAttribute('style')).toContain('color')
+      const card = arrow.closest('.group')
+      expect(card?.querySelectorAll('a')).toHaveLength(1)
+    }
+  })
+
+  it('takes a motion choice, and None keeps it still', async () => {
+    const lift = await draw('list', { cardDesign: { actionMotion: 'lift' } })
+    expect(arrows(lift)[0]?.getAttribute('data-action-motion')).toBe('lift')
+    expect(arrows(lift)[0]?.getAttribute('data-action-distance')).toBe('standard')
+    const still = await draw('list', { cardDesign: { actionMotion: 'none' } })
+    expect(arrows(still)[0]?.hasAttribute('data-action-motion')).toBe(false)
+  })
+
+  it('lets the List drop its chevron with None, and never draws on the Agenda', async () => {
+    expect(arrows(await draw('list', { cardDesign: { actionStyle: 'none' } }))).toHaveLength(0)
+    expect(arrows(await draw('agenda', { cardDesign: { actionStyle: 'arrow' } }))).toHaveLength(0)
+  })
+})

@@ -167,7 +167,10 @@ const teamCardDesignProjection = /* groq */ `
   title { ${roleStyleProjection} },
   meta { ${roleStyleProjection} },
   body { ${roleStyleProjection} },
-  mark { ${decorativeMarkFields} }
+  mark { ${decorativeMarkFields} },
+  actionStyle,
+  actionMotion,
+  actionColour { colour, hex }
 `
 
 /** Pricing's card design at section level and, behind the plan's Appearance switch, at item level. */

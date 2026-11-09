@@ -207,7 +207,8 @@ const FAMILIES: readonly Family[] = [
   },
   {
     component: 'events',
-    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    // The Featured layout draws no indicator until one is chosen, which its motion and colour need.
+    base: { eyebrow: 'What’s on', text: 'An intro.', 'cardDesign.actionStyle': 'arrow' },
     boxes: [
       { field: 'headerDesign', at: 'headerDesign' },
       { field: 'cardDesign', at: 'cardDesign' },
@@ -215,7 +216,8 @@ const FAMILIES: readonly Family[] = [
   },
   {
     component: 'team',
-    base: { eyebrow: 'Our people', text: 'An intro.' },
+    // A card draws no indicator until one is chosen, which its motion and colour need.
+    base: { eyebrow: 'Our people', text: 'An intro.', 'cardDesign.actionStyle': 'arrow' },
     boxes: [
       { field: 'headerDesign', at: 'headerDesign' },
       { field: 'cardDesign', at: 'cardDesign' },
@@ -306,7 +308,8 @@ describe('every control of Blog settings has an effect', () => {
     if (!drawer) throw new Error('blogPostCards has no drawer.')
     return drawer.draw({
       ...(await drawer.seed()),
-      settings: { cardDesign: applyPatch({}, cardDesign) },
+      // The indicator's motion and colour have nothing to act on until a glyph is chosen.
+      settings: { cardDesign: applyPatch({}, { actionStyle: 'arrow', ...cardDesign }) },
     })
   }
 

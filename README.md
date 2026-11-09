@@ -2490,12 +2490,12 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R…    | R✓   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R…    | –    | R…     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R…    | –    | R✓     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Embed (`embed`)                          | R…      | –    | R✓     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R…*   | –    | R…*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R…*   | –    | R✓*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2507,30 +2507,29 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R…      | –    | –      | –     |
 | Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
-| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R…    | –    | R…     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
+| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R…    | –    | R✓     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 231      | 0               | 83      |
+| Required                                                 | 234      | 0               | 80      |
 | Conditional                                              | 5        | 0               | 39      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 137          | 3                | 4                   |
 | 146          | 9                | 3                   |
 | 147          | 5                | 3                   |
-| 148          | 6                | 0                   |
+| 148          | 6                | 3                   |
 | 151          | 22               | 0                   |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
 | 177          | 9                | 20                  |
 | 213          | 7                | 0                   |
-| 276          | 2                | 1                   |
+| 276          | 2                | 2                   |
 | 280          | 16               | 0                   |
 
-**Evidence.** 248 capability entries, 479 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 252 capability entries, 485 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -2584,7 +2583,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 281          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                                                                                                                                                                                                                                                                                                                                                                                         |
 | `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 281          | The social icon container and colour, overlapping the icon capability. Task 158 draws them through the shared IconContainer, but the stored paths (style, iconColour, background, backgroundStrength, border, borderColour) differ from the shared builder’s (iconShape, iconBackground, iconBorder …), so replacing the field would rename saved values. Owner decision, 8 November 2026: preserve the stored values and replace the field in task 281, which gains this in its scope. |
 | `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.                                                                                                                                                                                                                                                                                                                                                                                |
-| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 137          | Written inline, because actionFields does not exist yet. They carry the action indicator marker.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 281          | Written inline, under the stored names arrowStyle and arrowColour, which the shared actionFields (task 137) does not use. They carry the action indicator marker. Task 281 migrates them with the Link list’s other legacy design (owner-approved expansion of task 281, 8 November 2026); showArrows stays read until then.                                                                                                                                                            |
 | `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                                                                                                                                                                                                                                                                                                                                                                                              |
 
 **Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Each has the tasks that will add its capabilities.
@@ -4413,6 +4412,17 @@ One component, `IconContainer` (`src/components/ui/icon-container.tsx`, task 158
 The Link list's own _Social icons_ box (`socialDesign`) keeps its stored paths (`style`, `iconColour`, `background`, `border`, which differ from the shared builder's) and stays a reviewed temporary exception until task 281, which replaces the field and gains this in its scope. It draws through `IconContainer`.
 
 `src/app/footer-team-icons.test.tsx` holds the footer's and a team page's six controls to the property each names (corners, colour, fill, strength, border, border colour), and `social-links.test.tsx` pins the social icons' classes.
+
+### Action indicator
+
+The arrow at the end of a card that is one link (task 137). One component, `ActionIndicator` (`src/components/ui/action-indicator.tsx`), draws it: a glyph (Chevron, Arrow, External link or None), an optional `IconContainer`, a theme colour and a motion (None, Nudge, Lift or Draw). It replaces `LinkArrow` and the five handwritten hover nudges (Link list Stacked, Cards, Editorial and Glass rows, and the Events List chevron).
+
+- **Decoration.** It is `aria-hidden` and takes no focus: the card's one link is still its one keyboard destination. An External link glyph points diagonally for a link that leaves the site and across for a page on it, and the chevron and arrow mirror in right-to-left text (CSS, from `data-action-glyph`).
+- **CSS only, no client JavaScript** (`globals.css`, `[data-action-motion]`). The nearest `.group` puts the indicator in its hover, focus or pressed state. Focus counts both when the link is the card (`.group:focus-visible`) and when a link stretched inside a card that cannot take focus is focused (`.group:has(a:focus-visible)`), so hover and keyboard focus give the same feedback. Motion plays only under `prefers-reduced-motion: no-preference`, moves once per state change and never loops. Nudge and Lift move 3 px.
+- **Kept as they were.** With nothing chosen a place draws what it always drew: the Link list's Stacked, Cards and Glass rows nudge 2 px and Editorial 4 px; the Events List keeps its own chevron path, 4 px nudge and small-screen hiding (`legacy-small`, `legacy-large` and `legacyChevron` are internal, not Studio options). Choosing a motion moves a place to the preset's distance.
+- **Choosing it.** `actionFields` (`surface-design.ts`, a registered shared builder) adds _Indicator_, _Indicator motion_ and _Indicator colour_ (`actionStyle`, `actionMotion`, `actionColour`) to a family's Cards box, agency only, and `resolveCardAction` (`src/lib/sanity/card-action.ts`) turns them into what is drawn, over the place's own default. **Events** (List: a chevron; Featured: none; Agenda: not applicable), **Team** (Grid, Slider and List rows, on a card that links to a member's page) and **Blog post cards** (_Blog settings > Post cards_) default to none apart from the Events List. Accordion chevrons, sliders and the lightbox are not action indicators.
+- **Link list.** It keeps `linkDesign.arrowStyle`, `arrowColour` and the per-link equivalents under their stored names, with the hidden `showArrows` still read; they are a temporary exception until task 281 moves them onto the shared fields. CTA buttons (hero, Image + text, CTA banner) close with task 148 and Features grid cards with task 276.
+- **Tests.** `action-indicator*.test.tsx` hold the markup, the CSS rules and the focus selector against both structures (a link that is the whole card, a stretched link); each family has its own tests and evidence (`events.action.card`, `team.action.card`, `blogPostCards.action.card`). `tests/e2e/action-indicator.spec.ts` checks hover, keyboard focus, right-to-left and reduced motion in a browser (run by CI).
 
 ### Decorative marks
 

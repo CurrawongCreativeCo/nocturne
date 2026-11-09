@@ -2,12 +2,14 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 
 import { HoverLift } from '@/components/motion/hover-lift'
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { CardSurface } from '@/components/ui/card-surface'
 import { FramedImage } from '@/components/ui/framed-image'
 import { PlainText } from '@/components/ui/plain-text'
 import { ProfileImage, type ProfileImageScale } from '@/components/ui/profile-image'
 import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
+import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
 import { resolveImageDesign } from '@/lib/sanity/image-design-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
@@ -50,6 +52,39 @@ interface CardProps {
   tone?: string
 }
 
+/** Nothing is drawn at the end of a linked card until Cards › Indicator chooses a glyph. */
+const OWN_ACTION: OwnAction = { glyph: 'none', motion: 'nudge' }
+
+/** Whether the card is a link: the site has profile pages and the member has one. */
+const isLinked = (member: Member) => Boolean(stegaClean(member.slug)) && hasTeamProfiles()
+
+/** The classes that make the card the group its indicator moves with, only when one is drawn. */
+const groupOf = (member: Member, cardDesign: CardProps['cardDesign']) =>
+  isLinked(member) && resolveCardAction(cardDesign, OWN_ACTION).glyph !== 'none' ? ' group' : ''
+
+/**
+ * The indicator at the end of a linked card or row (components/ui/action-indicator.tsx). Decoration:
+ * the name's stretched link is the one keyboard destination.
+ */
+function MemberIndicator({
+  member,
+  cardDesign,
+  className,
+}: Pick<CardProps, 'member' | 'cardDesign'> & { className: string }) {
+  if (!isLinked(member)) return null
+  const action = resolveCardAction(cardDesign, OWN_ACTION)
+  return (
+    <ActionIndicator
+      glyph={action.glyph}
+      external={false}
+      motion={action.motion}
+      distance={action.distance}
+      colour={action.colour}
+      className={className}
+    />
+  )
+}
+
 /** The name, linked to the member's page when the site has profile pages and they have one. */
 function MemberName({
   member,
@@ -79,7 +114,7 @@ export function TeamCard({ member, design, headingLevel, eager, cardDesign, tone
   return (
     <CardSurface
       as={HoverLift}
-      className={`${surface} flex h-full w-full flex-col overflow-hidden`}
+      className={`${surface} flex h-full w-full flex-col overflow-hidden${groupOf(member, cardDesign)}`}
       own={OWN_SURFACE}
       shadow="shadow-card"
       design={look.surface}
@@ -100,6 +135,7 @@ export function TeamCard({ member, design, headingLevel, eager, cardDesign, tone
       <div className="flex flex-1 flex-col p-6">
         <MemberName member={member} headingLevel={headingLevel} style={look.text.title} />
         <MemberText member={member} look={look.text} bio="mt-3 text-pretty text-ink-muted" />
+        <MemberIndicator member={member} cardDesign={cardDesign} className="mt-auto self-start" />
       </div>
     </CardSurface>
   )
@@ -170,7 +206,7 @@ export function TeamRow({
   return (
     <CardSurface
       as={HoverLift}
-      className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6`}
+      className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6${groupOf(member, cardDesign)}`}
       own={OWN_SURFACE}
       shadow="shadow-card"
       design={look.surface}
@@ -208,6 +244,7 @@ export function TeamRow({
           bio="mt-3 max-w-measure text-pretty text-ink-muted"
         />
       </div>
+      <MemberIndicator member={member} cardDesign={cardDesign} className="ms-auto self-center" />
     </CardSurface>
   )
 }

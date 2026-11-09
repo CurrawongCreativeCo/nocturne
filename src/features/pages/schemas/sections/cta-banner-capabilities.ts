@@ -14,7 +14,13 @@ export const ctaBannerCapabilities = declareCapabilities({
   mark: { policy: 'required', scope: 'section' },
   depth: { policy: 'required', scope: 'card', note: 'It always draws a card, so depth applies' },
   icon: NOT_APPLICABLE.noIcon,
-  action: { policy: 'conditional', scope: 'item', trigger: CALL_TO_ACTION },
+  action: {
+    policy: 'conditional',
+    scope: 'item',
+    trigger: CALL_TO_ACTION,
+    // The trailing indicator on the buttons is task 148's (owner-approved 8 November 2026).
+    closingTask: 148,
+  },
   framing: backgroundFraming(),
   pictureDepth: NOT_APPLICABLE.noFramedPicture,
   overlay: { policy: 'required', scope: 'section' },

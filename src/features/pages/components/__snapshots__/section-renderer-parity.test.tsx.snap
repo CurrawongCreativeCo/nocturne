@@ -77,19 +77,19 @@ exports[`SectionRenderer output parity > events keeps its output for every layou
     "panel": null,
   },
   "list · panel glass": {
-    "hash": "74e7f1e5842450ac",
+    "hash": "b5dc17c9e419700a",
     "panel": "tinted",
   },
   "list · panel none": {
-    "hash": "6cf50b08bdf36bbc",
+    "hash": "b10c3f3c226b291a",
     "panel": null,
   },
   "list · panel solid": {
-    "hash": "47b4bbaba5fde43c",
+    "hash": "0d67e492ef3ff22e",
     "panel": "solid",
   },
   "list · panel unset": {
-    "hash": "6cf50b08bdf36bbc",
+    "hash": "b10c3f3c226b291a",
     "panel": null,
   },
 }
@@ -381,19 +381,19 @@ exports[`SectionRenderer output parity > linkList keeps its output for every lay
     "panel": null,
   },
   "editorial · panel glass": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "b32410d707bc5957",
     "panel": null,
   },
   "editorial · panel none": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "b32410d707bc5957",
     "panel": null,
   },
   "editorial · panel solid": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "b32410d707bc5957",
     "panel": null,
   },
   "editorial · panel unset": {
-    "hash": "b1d605ffd0bc4025",
+    "hash": "b32410d707bc5957",
     "panel": null,
   },
   "stacked · panel glass": {

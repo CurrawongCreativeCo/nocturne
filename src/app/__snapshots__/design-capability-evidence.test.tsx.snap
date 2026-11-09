@@ -11,6 +11,8 @@ exports[`design capability evidence > badgeRow.icon.item: the probe changes the 
 
 exports[`design capability evidence > badgeRow.icon.section: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > blogPostCards.action.card: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `
@@ -114,6 +116,17 @@ exports[`design capability evidence > embed.motion.section: the probe changes th
 exports[`design capability evidence > embed.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > events.action.card.featured@featured: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > events.action.card@list: the probe changes the registered target 1`] = `
+[
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
+  "<svg aria-hidden="true" class="size-6 shrink-0 mt-5 hidden text-ink-muted sm:block" data-action-direction="inline" data-action-distance="legacy-large" data-action-glyph="chevron" data-action-motion="nudge" data-link-arrow="chevron" fill="none" focusable="false" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" stroke="currentColor" viewBox="0 0 24 24">",
 ]
 `;
 
@@ -229,7 +242,7 @@ exports[`design capability evidence > events.motion.section@featured: the probe 
 
 exports[`design capability evidence > events.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "668f9fe35c01a726 (7192 characters)",
+  "fc07ac391b2c35d3 (7368 characters)",
 ]
 `;
 
@@ -740,8 +753,8 @@ exports[`design capability evidence > linkList.action.card@cards: the probe chan
 
 exports[`design capability evidence > linkList.action.card@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "c18e7c7d0e523c55 (1344 characters)",
+  "2f73c3747fe969e1 (1344 characters)",
 ]
 `;
 
@@ -761,8 +774,8 @@ exports[`design capability evidence > linkList.action.item@cards: the probe chan
 
 exports[`design capability evidence > linkList.action.item@editorial: the probe changes the registered target 1`] = `
 [
-  "9967a0716e65fa63 (1293 characters)",
-  "e830ea3209458395 (1293 characters)",
+  "c18e7c7d0e523c55 (1344 characters)",
+  "2f73c3747fe969e1 (1344 characters)",
 ]
 `;
 
@@ -829,7 +842,7 @@ exports[`design capability evidence > linkList.divider.section@compact: the prob
 
 exports[`design capability evidence > linkList.divider.section@editorial: the probe changes the registered target 1`] = `
 [
-  "bee329c9f9f718d6 (4574 characters)",
+  "69ee390f7b9004e0 (4676 characters)",
 ]
 `;
 
@@ -1110,7 +1123,7 @@ exports[`design capability evidence > linkList.motion.section@compact: the probe
 
 exports[`design capability evidence > linkList.motion.section@editorial: the probe changes the registered target 1`] = `
 [
-  "d828dba020ef4fc0 (6572 characters)",
+  "b86ebc6f0b5d3543 (6827 characters)",
 ]
 `;
 
@@ -2150,6 +2163,12 @@ exports[`design capability evidence > stats.text.card.number@cards: the probe ch
   "<span class="inline-block tabular-nums text-h1 font-semibold relative" data-text-role="number" style="min-width:2ch">",
 ]
 `;
+
+exports[`design capability evidence > team.action.card@grid: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.action.card@list: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > team.action.card@slider: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > team.edge.section@grid: the probe changes the registered target 1`] = `
 [

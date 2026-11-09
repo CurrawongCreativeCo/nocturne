@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
 import { Suspense, type ReactNode } from 'react'
 
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { ctaClassName } from '@/components/ui/cta-link'
 import { PlainText } from '@/components/ui/plain-text'
 import { resolveLink } from '@/components/ui/resolve-link'
@@ -14,6 +15,7 @@ import { hasEvents } from '@/config/profile'
 import { dayBadge, formatWhen, timeAttribute } from '@/lib/events/format'
 import { repeatLabel } from '@/lib/events/recurrence'
 import { requestTime } from '@/lib/request-time'
+import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { type resolveCardDesign } from '@/lib/sanity/card-design'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
@@ -153,6 +155,49 @@ export function EventSummary({
       className={body.className}
       style={body.style}
       textRole="body"
+    />
+  )
+}
+
+/** Whether the event has a page its card links to (the title link is stretched over the card). */
+export function isEventLinked(entry: Entry): boolean {
+  return Boolean(stegaClean(entry.event.slug)) && hasEvents()
+}
+
+/** What each layout draws at the end of a linked card until Cards › Indicator says otherwise. */
+export const OWN_LIST_ACTION: OwnAction = {
+  glyph: 'chevron',
+  motion: 'nudge',
+  distance: 'legacy-large',
+}
+export const OWN_FEATURED_ACTION: OwnAction = { glyph: 'none', motion: 'nudge' }
+
+/**
+ * The indicator at the end of a linked event card or row (components/ui/action-indicator.tsx). The
+ * card is the one link, so this is decoration; `className` is the layout's own placement, which keeps
+ * the List's chevron out of small screens.
+ */
+export function EventIndicator({
+  cardDesign,
+  own,
+  className,
+  legacyChevron = false,
+}: {
+  cardDesign: EventsContext['cardDesign']
+  own: OwnAction
+  className?: string
+  legacyChevron?: boolean
+}) {
+  const action = resolveCardAction(cardDesign, own)
+  return (
+    <ActionIndicator
+      glyph={action.glyph}
+      external={false}
+      motion={action.motion}
+      distance={action.distance}
+      colour={action.colour}
+      legacyChevron={legacyChevron}
+      className={className}
     />
   )
 }

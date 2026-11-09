@@ -1,5 +1,5 @@
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { buttonFeedback } from '@/components/ui/cta-link'
-import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { servedThumbnail } from '@/lib/sanity/link-thumbnail-framing'
 import { ringSurfaceLook } from '@/lib/sanity/surface-options'
@@ -125,10 +125,12 @@ const layout: LinkListLayout = {
           >
             <LinkText link={link} design={design} own={text(link.large)} className="flex-1" />
             <span className="text-ink-muted group-hover:text-ink" style={arrowStyle}>
-              <LinkArrow
-                arrow={arrow}
+              <ActionIndicator
+                glyph={arrow}
                 external={link.kind === 'external'}
-                className="size-5 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+                motion="nudge"
+                distance="legacy-small"
+                className="size-5"
               />
             </span>
           </span>
