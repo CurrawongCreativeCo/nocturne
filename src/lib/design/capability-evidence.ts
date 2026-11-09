@@ -224,6 +224,8 @@ interface CardFamilyEvidence {
   look?: string
   /** What this call proves. Default: everything. A look that draws no card proves only its text. */
   parts?: readonly ('surface' | 'text' | 'header' | 'mark')[]
+  /** Also proves depth and glow (task 146): opt in once the family draws it through resolveCardDepth. */
+  depth?: boolean
 }
 
 /**
@@ -334,6 +336,16 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
       target: textRoleTarget(role),
       change: 'attributes',
       probe: { [`headerDesign.${role}.size`]: 'large' },
+    })),
+    ...(config.depth ? scopes : []).map((scope): CapabilityEvidence => ({
+      id: `${component}.depth.${scope}${named}`,
+      ...common(scope, cardLayouts ?? layouts),
+      capability: 'depth',
+      field: pathOf(scope, 'shadow'),
+      resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
+      target: cardTarget,
+      change: 'attributes',
+      probe: { [probeOf(scope, 'shadow')]: 'floating' },
     })),
     ...(proves('mark') ? scopes : []).map((scope): CapabilityEvidence => ({
       id: `${component}.mark.${scope}${named}`,
@@ -1029,6 +1041,20 @@ export const EVIDENCE: readonly Evidence[] = [
     base: TESTIMONIAL_CONTENT,
     probe: { 'cardDesign.border': 'thick' },
   },
+  {
+    id: 'testimonials.depth.card',
+    component: 'testimonials',
+    capability: 'depth',
+    scope: 'card',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'cardDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
+    render: TESTIMONIALS,
+    target: 'figure',
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { 'cardDesign.shadow': 'floating' },
+  },
   ...(['quote', 'attribution', 'label'] as const).map((role): CapabilityEvidence => ({
     id: `testimonials.text.card.${role}`,
     component: 'testimonials',
@@ -1249,6 +1275,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'price', 'body', 'label', 'description'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     item: { array: 'plans' },
+    depth: true,
   }),
   iconContainerEvidence({
     component: 'pricingTable',

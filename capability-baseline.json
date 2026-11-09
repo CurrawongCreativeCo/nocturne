@@ -140,13 +140,6 @@
     },
     {
       "component": "testimonials",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": ["grid", "slider"],
-      "closingTask": 146
-    },
-    {
-      "component": "testimonials",
       "capability": "framing",
       "scope": "card",
       "part": "avatar",
@@ -222,20 +215,6 @@
       "scope": "section",
       "layouts": [null],
       "closingTask": 151
-    },
-    {
-      "component": "pricingTable",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 146
-    },
-    {
-      "component": "pricingTable",
-      "capability": "depth",
-      "scope": "item",
-      "layouts": [null],
-      "closingTask": 146
     },
     {
       "component": "pricingTable",
