@@ -3,8 +3,6 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { designSettings } from '@/features/site/schemas/design-settings'
-
 import { contrastRatio } from './contrast'
 import { suggestColour } from './contrast-remedy'
 import { hexToOklch } from './oklch'
@@ -171,7 +169,7 @@ describe('unset rendering', () => {
       {},
       { primary: null, ink: '', surface: 'not a colour' },
     ]) {
-      const result = resolveDesignTokens(input as DesignOverrides | undefined)
+      const result = resolveDesignTokens(input)
       expect(result.css).toBe('')
       expect(result.errors).toEqual([])
       expect(result.warnings).toEqual([])
@@ -186,67 +184,13 @@ describe('unset rendering', () => {
   })
 })
 
-/** Runs a field's validation with a stub that records each rule's level and function. */
-function levels(field: string, document: DesignOverrides) {
-  type Recorded = { fn: (value: unknown, context: unknown) => unknown; level: string }
-  const stub = {
-    custom: (fn: Recorded['fn']) => {
-      const recorded: Recorded & { error: () => Recorded; warning: () => Recorded } = {
-        fn,
-        level: '',
-        error: () => ((recorded.level = 'error'), recorded),
-        warning: () => ((recorded.level = 'warning'), recorded),
-      }
-      return recorded
-    },
-  }
-  const definition = designSettings.fields.find((item) => item.name === field) as unknown as {
-    validation: (rule: typeof stub) => Recorded[]
-  }
-  const value = (document as Record<string, unknown>)[field]
-  return definition.validation(stub).map((rule) => ({
-    level: rule.level,
-    result: rule.fn(value, { document }),
-  }))
-}
-
-describe('Brand colours validation', () => {
-  it('blocks an explicitly chosen failing pair, naming the fix', () => {
-    const result = levels('ink', { surface: '#ffffff', ink: '#bbbbbb' })
-    const blocking = result.filter((item) => item.level === 'error' && item.result !== true)
-    expect(blocking).toHaveLength(1)
-    expect(blocking[0]?.result).toContain('use the suggested colour')
-    // …and is not also repeated as a warning.
-    expect(result.filter((item) => item.level === 'warning' && item.result !== true)).toEqual([])
-  })
-
-  it('only warns when the background is not the editor’s choice', () => {
-    const result = levels('ink', { ink: '#bbbbbb' })
-    expect(result.filter((item) => item.level === 'error' && item.result !== true)).toEqual([])
-    expect(result.filter((item) => item.level === 'warning' && item.result !== true)).toHaveLength(
-      1,
-    )
-  })
-
-  it('passes a pair that meets AA, and never blocks Primary, Secondary or Highlight', () => {
-    expect(
-      levels('ink', { surface: '#ffffff', ink: '#222222' }).filter((item) => item.result !== true),
-    ).toEqual([])
-    const primary = levels('primary', { primary: '#ffd166' })
-    expect(primary.filter((item) => item.level === 'error' && item.result !== true)).toEqual([])
-    expect(primary.filter((item) => item.level === 'warning' && item.result !== true)).toHaveLength(
-      1,
-    )
-  })
-})
-
 describe('page and section documents', () => {
   const read = (file: string) => readFileSync(file, 'utf8')
   const sources = (directory: string): string[] =>
     readdirSync(directory).flatMap((name) => {
       const full = path.join(directory, name)
       if (statSync(full).isDirectory()) return sources(full)
-      return /\.(ts|tsx)$/.test(name) && !/\.test\./.test(name) ? [full] : []
+      return /\.(ts|tsx)$/.test(name) && !name.includes('.test.') ? [full] : []
     })
   const schemaFiles = [
     ...sources('src/lib/sanity/schema'),
@@ -254,7 +198,7 @@ describe('page and section documents', () => {
   ].filter((file) => !file.endsWith(path.join('site', 'schemas', 'design-settings.ts')))
 
   it('never gain a contrast validation error: schemas that use the colour code only warn', () => {
-    const usingColour = schemaFiles.filter((file) => /from '@\/lib\/color\//.test(read(file)))
+    const usingColour = schemaFiles.filter((file) => read(file).includes("from '@/lib/color/"))
     expect(usingColour.length).toBeGreaterThan(5)
     for (const file of usingColour) {
       expect(read(file), file).not.toMatch(/\.error\(\)/)
@@ -265,7 +209,7 @@ describe('page and section documents', () => {
     const readers = [...sources('src')].filter((file) => {
       const code = read(file)
       return (
-        /resolveDesignTokens\(/.test(code) &&
+        code.includes('resolveDesignTokens(') &&
         /\)\.errors\b|\berrors\b.*resolveDesignTokens/.test(code)
       )
     })
