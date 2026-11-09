@@ -1,6 +1,7 @@
 import { stegaClean } from 'next-sanity'
 
 import { colorHex } from '@/config/tokens.generated'
+import { siteDecisionVars, type SiteDecisionInput } from '@/lib/design/site-decisions'
 
 import { adjustLightnessForContrast, contrastRatio } from './contrast'
 import { brandGradients, type GradientInput } from './gradients'
@@ -12,7 +13,7 @@ export type BaseColours = Readonly<Record<keyof typeof colorHex, string>>
 export const DEFAULT_BASE: BaseColours = colorHex
 
 /** Studio "Design settings" values as stored (and as the settings query returns them). */
-export interface DesignOverrides {
+export interface DesignOverrides extends SiteDecisionInput {
   appearance?: string | null
   primary?: string | null
   secondary?: string | null
@@ -338,6 +339,9 @@ export function resolveDesignTokens(
     if (colours[key] !== base[key]) vars[CSS_VARIABLES[key]] = colours[key]
   }
   if (dark) vars['color-scheme'] = 'dark'
+  // Site-wide decisions (density, shape): token variables beyond colour, after the colours so the
+  // output of a site that sets none is byte-for-byte what it was.
+  Object.assign(vars, siteDecisionVars(input))
 
   for (const check of checks) {
     const [field] = check.fields
