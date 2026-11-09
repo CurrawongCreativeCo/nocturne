@@ -34100,6 +34100,30 @@
         "clientEditable": false
       },
       {
+        "path": "headingStyle",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "editorial",
+            "title": "Editorial"
+          },
+          {
+            "value": "modern",
+            "title": "Modern"
+          },
+          {
+            "value": "classic",
+            "title": "Classic"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
         "path": "cardDepth",
         "kind": "string",
         "required": false,

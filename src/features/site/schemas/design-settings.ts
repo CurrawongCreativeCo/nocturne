@@ -4,6 +4,10 @@ import { defineField, defineType, type StringRule } from 'sanity'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
 import {
+  EDITORIAL_FONT_NOTE,
+  HEADING_STYLE_DESCRIPTIONS,
+  HEADING_STYLE_OPTIONS,
+  HEADING_STYLE_TITLES,
   DENSITIES,
   DENSITY_DESCRIPTIONS,
   DENSITY_TITLES,
@@ -15,6 +19,10 @@ import { SHADOW_DESCRIPTIONS, SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import {
+  HeadingClassicThumbnail,
+  HeadingEditorialThumbnail,
+  HeadingModernThumbnail,
+  HeadingStandardThumbnail,
   DensityAiryThumbnail,
   DensityCompactThumbnail,
   DensityStandardThumbnail,
@@ -140,6 +148,26 @@ export const designSettings = defineType({
       initialValue: null,
       required: false,
       defaultValue: () => 'soft',
+      hidden: hiddenFromClients,
+    }),
+    presetField({
+      name: 'headingStyle',
+      title: 'Heading style',
+      description: `The character of every heading: size, weight and letter spacing together. The fonts stay as built. ${EDITORIAL_FONT_NOTE} Leave it empty to keep the headings the site has now.`,
+      options: HEADING_STYLE_OPTIONS.map((value) => ({
+        value,
+        title: HEADING_STYLE_TITLES[value],
+        description: HEADING_STYLE_DESCRIPTIONS[value],
+        thumbnail: {
+          standard: HeadingStandardThumbnail,
+          editorial: HeadingEditorialThumbnail,
+          modern: HeadingModernThumbnail,
+          classic: HeadingClassicThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'standard',
       hidden: hiddenFromClients,
     }),
     defineField({

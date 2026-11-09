@@ -1,8 +1,9 @@
 import { colorHex } from '@/config/tokens.generated'
 
+import { HEIGHT, WIDTH } from './wireframe'
+import { TODAY, headingStyleOf, type HeadingStyleName } from '../../../design/heading-styles'
 import type { Density, Shape } from '../../../design/site-decision-options'
 import type { PresetThumbnailProps } from '../preset-field'
-import { HEIGHT, WIDTH } from './wireframe'
 
 /**
  * Three bands of content stacked on a page: the gap between them is the option. Drawn in the site's
@@ -91,4 +92,53 @@ export const ShapeSharpThumbnail = (_props: PresetThumbnailProps) => (
 export const ShapeSoftThumbnail = (_props: PresetThumbnailProps) => <ShapeThumbnail shape="soft" />
 export const ShapeRoundThumbnail = (_props: PresetThumbnailProps) => (
   <ShapeThumbnail shape="round" />
+)
+
+/**
+ * A heading and two lines of text set at the style's weight, tracking and size (the table the site
+ * reads, heading-styles.ts). Drawn as text in the system font, because that is the point: the style
+ * changes the heading's character, not its font.
+ */
+function HeadingStyleThumbnail({ name }: { name: HeadingStyleName }) {
+  const style = name === 'standard' ? TODAY : headingStyleOf(name)
+  const size = 30 * style.scale.h2
+  return (
+    <svg
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+      width="100%"
+      height="100%"
+      aria-hidden="true"
+      focusable="false"
+      data-wireframe={`heading-style-${name}`}
+      style={{ display: 'block' }}
+    >
+      <rect width={WIDTH} height={HEIGHT} fill={colorHex.surface} />
+      <text
+        x={20}
+        y={58}
+        fontSize={size}
+        fontWeight={style.weight}
+        letterSpacing={style.tracking}
+        fontFamily="system-ui, sans-serif"
+        fill={colorHex.ink}
+      >
+        Aa Title
+      </text>
+      <rect x={20} y={74} width={112} height={3} rx={1.5} fill={colorHex.inkMuted} />
+      <rect x={20} y={83} width={86} height={3} rx={1.5} fill={colorHex.inkMuted} />
+    </svg>
+  )
+}
+
+export const HeadingStandardThumbnail = (_props: PresetThumbnailProps) => (
+  <HeadingStyleThumbnail name="standard" />
+)
+export const HeadingEditorialThumbnail = (_props: PresetThumbnailProps) => (
+  <HeadingStyleThumbnail name="editorial" />
+)
+export const HeadingModernThumbnail = (_props: PresetThumbnailProps) => (
+  <HeadingStyleThumbnail name="modern" />
+)
+export const HeadingClassicThumbnail = (_props: PresetThumbnailProps) => (
+  <HeadingStyleThumbnail name="classic" />
 )

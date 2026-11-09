@@ -84,6 +84,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       line,
       density,
       shape,
+      headingStyle,
       cardDepth,
       gradients[] { name, angle, stops }
     },
