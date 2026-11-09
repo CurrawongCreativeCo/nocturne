@@ -1,13 +1,13 @@
 import { declareCapabilities } from '@/lib/design/capabilities'
 import { backgroundFraming, NOT_APPLICABLE } from '@/lib/design/common-policies'
 
-/** The embed's design capabilities (task 275). Its surface and depth close in task 148 (148 item 6). */
+/** The embed's design capabilities (task 275). Its surface and depth are the Cards box (tasks 156 and 146), adopted in task 148. */
 export const embedCapabilities = declareCapabilities({
-  surface: { policy: 'required', scope: 'card', closingTask: 148 },
+  surface: { policy: 'required', scope: 'card' },
   text: NOT_APPLICABLE.headerTextOnly,
   header: { policy: 'required', scope: 'section', roles: ['eyebrow', 'heading', 'intro'] },
   mark: NOT_APPLICABLE.functional,
-  depth: { policy: 'required', scope: 'card', closingTask: 148 },
+  depth: { policy: 'required', scope: 'card' },
   icon: NOT_APPLICABLE.noIcon,
   action: NOT_APPLICABLE.noWholeCardLink,
   framing: backgroundFraming(),

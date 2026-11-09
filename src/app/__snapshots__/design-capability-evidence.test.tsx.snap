@@ -91,6 +91,12 @@ exports[`design capability evidence > ctaBanner.overlay.section: the probe chang
 ]
 `;
 
+exports[`design capability evidence > embed.depth.card: the probe changes the registered target 1`] = `
+[
+  "<div class="flex flex-col items-center justify-center gap-3 rounded-card bg-surface-alt p-6 text-center shadow-(--card-depth,0_0_#0000) ring-1 ring-line" style="min-height:480px">",
+]
+`;
+
 exports[`design capability evidence > embed.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -123,13 +129,19 @@ exports[`design capability evidence > embed.header.section.intro: the probe chan
 
 exports[`design capability evidence > embed.motion.section: the probe changes the registered target 1`] = `
 [
-  "08d19df0a8b76dbf (1137 characters)",
+  "a5b9237cb663a984 (1169 characters)",
 ]
 `;
 
 exports[`design capability evidence > embed.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > embed.surface.card: the probe changes the registered target 1`] = `
+[
+  "<div class="flex flex-col items-center justify-center gap-3 rounded-card bg-surface-alt p-6 text-center shadow-(--card-depth,0_0_#0000) ring-1 ring-line" style="min-height:480px">",
 ]
 `;
 
@@ -510,6 +522,8 @@ exports[`design capability evidence > featuresGrid.overlay.section: the probe ch
 ]
 `;
 
+exports[`design capability evidence > formSection.depth.card: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > formSection.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -553,6 +567,8 @@ exports[`design capability evidence > formSection.overlay.section: the probe cha
   "f501d402d038b60f (452 characters)",
 ]
 `;
+
+exports[`design capability evidence > formSection.surface.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > gallery.edge.section@grid: the probe changes the registered target 1`] = `
 [
@@ -1742,6 +1758,8 @@ exports[`design capability evidence > mediaText.slots.supporting@side: the probe
 
 exports[`design capability evidence > mediaText.slots.supporting@stacked: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > newsletterSignup.depth.card: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > newsletterSignup.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -1785,6 +1803,8 @@ exports[`design capability evidence > newsletterSignup.overlay.section: the prob
   "f501d402d038b60f (452 characters)",
 ]
 `;
+
+exports[`design capability evidence > newsletterSignup.surface.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > pricingTable.depth.card: the probe changes the registered target 1`] = `
 [

@@ -24,19 +24,19 @@ exports[`SectionRenderer output parity > ctaBanner keeps its output for every la
 exports[`SectionRenderer output parity > embed keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "7adbe637ed0ba6e9",
+    "hash": "bc633ab9ae32a1ac",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "e9bb81abd6c6a244",
+    "hash": "f03e0629b1c857f2",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "e5d4977ffe7564c8",
+    "hash": "e3852c544d2a8be5",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "e9bb81abd6c6a244",
+    "hash": "f03e0629b1c857f2",
     "panel": null,
   },
 }

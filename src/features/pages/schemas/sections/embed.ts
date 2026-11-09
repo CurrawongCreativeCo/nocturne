@@ -25,6 +25,7 @@ import {
 } from '@/lib/sanity/schema/thumbnails/embed-thumbnails'
 
 import { embedCapabilities } from './embed-capabilities'
+import { formCardField } from './form-card-field'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -128,6 +129,11 @@ export const embed = defineType({
         hidden: ({ parent }) => !(parent as Parent)?.provider,
       }),
       headerDesignField(),
+      formCardField({
+        subject: 'the embedded content’s card',
+        unset: 'Empty keeps the card as it is drawn now.',
+        colour: 'muted',
+      }),
       accessField,
     ],
     // How this section starts when added. Keep it equal to DEFAULTS in the component.

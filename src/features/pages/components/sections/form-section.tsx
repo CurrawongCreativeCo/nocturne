@@ -6,6 +6,7 @@ import { sectionTraits, type SectionDefaults } from '@/components/ui/section-sty
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
+import { FormCard } from './form-card'
 import type { SectionProps } from '../../types'
 
 const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
@@ -35,7 +36,9 @@ export function FormSection({ data, isFirst, renderForm }: SectionProps<'formSec
         className={`mb-10 ${textAlign}`}
         headingId={headingId}
       />
-      {renderForm?.(form, title ? headingId : undefined)}
+      <FormCard cardDesign={data.cardDesign}>
+        {renderForm?.(form, title ? headingId : undefined)}
+      </FormCard>
     </SectionFrame>
   )
 }
