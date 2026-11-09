@@ -107,6 +107,7 @@ export const faq = defineType({
         ],
         surface: { hidden: notCards },
         markHidden: notCards,
+        depth: { hidden: notCards },
       }),
       accessField,
     ],

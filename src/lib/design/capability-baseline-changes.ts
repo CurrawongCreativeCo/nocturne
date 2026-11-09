@@ -131,8 +131,10 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
     component: 'eventDetailsCard',
     capability: 'depth',
     scope: 'card',
-    reason: 'The card draws a fixed shadow, with no depth control yet.',
-    closingTask: 146,
+    reason:
+      'The card follows the site-wide Card depth (task 146), but has no depth control of its own: it has no document to store a shadow level and glow in. Task 280 gives the view one. Owner decision, 9 November 2026: closing task moved from 146 to 280.',
+    reviewed: '2026-11-09',
+    closingTask: 280,
   },
   ...viewText(
     'servicePage',

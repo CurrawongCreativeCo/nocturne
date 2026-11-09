@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
+import { parseHtml } from '@/lib/design/capability-harness'
 import type { SanityImageData } from '@/types/sanity'
 
 import { QuoteCard } from './quote-card'
@@ -56,5 +57,51 @@ describe('QuoteCard avatar', () => {
     const html = draw({ ring: 'line' } as never, { ...ITEM, avatar: null as never })
     expect(html).not.toContain('data-profile-image')
     expect(html).toContain('Sam')
+  })
+})
+
+describe('QuoteCard depth', () => {
+  const card = (cardDesign?: Record<string, unknown>) => {
+    const html = renderToStaticMarkup(
+      <QuoteCard item={ITEM as never} cardDesign={cardDesign as never} />,
+    )
+    const element = parseHtml(html).querySelector('figure')
+    return {
+      className: element?.className ?? '',
+      depth: element?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1],
+    }
+  }
+
+  it('keeps its original shadow while nothing is chosen, reading the site’s Card depth if one is set', () => {
+    for (const design of [undefined, {}, { shadow: null, glow: null }]) {
+      const { className, depth } = card(design)
+      expect(className).toBe(
+        'flex h-full w-full flex-col rounded-card bg-surface p-8 shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line',
+      )
+      expect(depth).toBeUndefined()
+    }
+  })
+
+  it('draws a chosen level in place of the shadow, replacing the site’s Card depth', () => {
+    const { className, depth } = card({ shadow: 'floating' })
+    expect(className).toContain('shadow-(--depth-shadow)')
+    expect(className).not.toContain('--card-depth')
+    expect(depth).toBe('var(--shadow-floating)')
+  })
+
+  it('keeps an explicit Soft Soft, through its own token', () => {
+    expect(card({ shadow: 'soft' }).depth).toBe('var(--shadow-soft, var(--shadow-card))')
+  })
+
+  it('keeps the site’s or original shadow under a glow chosen alone', () => {
+    expect(card({ glow: 'strong' }).depth).toMatch(
+      /^var\(--card-depth, var\(--shadow-card\)\), var\(--depth-glow-strong\)/,
+    )
+  })
+
+  it('draws no shadow on a transparent card', () => {
+    expect(
+      card({ background: { colour: 'transparent' }, shadow: 'raised' }).className,
+    ).not.toContain('shadow-')
   })
 })

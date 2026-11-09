@@ -14,6 +14,7 @@ import { SocialLinks } from '@/components/ui/social-links'
 import { addressLines, directionsUrl, embedUrl } from '@/lib/location-links'
 import { groupOpeningHours } from '@/lib/opening-hours'
 import { resolveCardDesign, type CardDesign } from '@/lib/sanity/card-design'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveIconDesign, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
@@ -32,7 +33,7 @@ const CARD_COLUMNS: Record<number, string> = {
   3: 'md:grid-cols-2 lg:grid-cols-3',
 }
 
-const PANEL = 'rounded-card bg-surface-alt p-8 ring-1 ring-line'
+const PANEL = `rounded-card bg-surface-alt p-8 ${CARD_SHADOW_CLASS.free} ring-1 ring-line`
 const OWN_SURFACE = {
   background: 'bg-surface-alt',
   border: 'ring-1 ring-line',
@@ -183,6 +184,8 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
             as="div"
             className={`${PANEL} ${index === 0 ? 'border-t-4 border-accent' : ''}`}
             own={OWN_SURFACE}
+            shadow={CARD_SHADOW_CLASS.free}
+            depth={resolveCardDepth([data.cardDesign], OWN_SHADOW.siteCardFree)}
             design={look.surface}
             mark={{ input: data.cardDesign?.mark, scope: 'card', tone, levels: [data.cardDesign] }}
           >

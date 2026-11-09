@@ -166,11 +166,11 @@ export const CAPABILITY_EXCEPTIONS: readonly CapabilityException[] = [
       'links[].design.shadow',
     ],
     justification:
-      'Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.',
+      'Legacy stored paths that differ from the shared depthFields builder (`depthDesign.*` and `links[].design.shadow`, against `shadow`, `glow` and `glowColour`), so replacing them would rename saved values. They carry the depth (and picture depth) marker and are read through resolveDepth. Owner decision, 9 November 2026: keep the stored values and replace the fields in task 281. No data is migrated.',
     reviewer: OWNER,
     reviewed: APPROVED,
     status: 'temporary',
-    removalTask: 146,
+    removalTask: 281,
     nature: 'design',
     marked: {
       'depthDesign.linkShadow': 'depth',

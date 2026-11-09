@@ -18,6 +18,7 @@ import {
   experimentRunning,
   footerSocialOn,
   blogSettingsDesigned,
+  blogSettingsLifted,
   markerUnset,
   navigationNested,
   releaseVersions,
@@ -45,7 +46,7 @@ let usersMeCalls = 0
 const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon, markerUnset }
 let settingsPatch = null
 
-/** The designSettings variant being served (`light` or `dark`), or null for none; POST /__fixture/design/<off|light|dark>. */
+/** The designSettings variant being served (`light`, `dark`, or a site-wide Card depth), or null for none; POST /__fixture/design/<off|light|dark|card-raised|card-floating>. */
 let designPatch = null
 
 /** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */
@@ -54,7 +55,7 @@ let experimentPatch = null
 /** Whether the footer's social icons are on; switched by POST /__fixture/footer-social/<on|off>. */
 let footerSocialPatch = null
 
-/** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|off>. */
+/** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|lift|off>. */
 let blogSettingsPatch = null
 
 /** Whether the header menu has dropdowns; switched by POST /__fixture/navigation/<flat|nested>. */
@@ -128,7 +129,9 @@ createServer(async (req, res) => {
     res.writeHead(204).end()
     return
   }
-  const design = /^\/__fixture\/design\/(off|light|dark)$/.exec(url.pathname)?.[1]
+  const design = /^\/__fixture\/design\/(off|light|dark|card-raised|card-floating)$/.exec(
+    url.pathname,
+  )?.[1]
   if (req.method === 'POST' && design) {
     designPatch = design === 'off' ? null : designSettingsVariants[design]
     res.writeHead(204).end()
@@ -140,9 +143,14 @@ createServer(async (req, res) => {
     res.writeHead(204).end()
     return
   }
-  const blogSettings = /^\/__fixture\/blog-settings\/(on|off)$/.exec(url.pathname)?.[1]
+  const blogSettings = /^\/__fixture\/blog-settings\/(on|lift|off)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && blogSettings) {
-    blogSettingsPatch = blogSettings === 'on' ? blogSettingsDesigned : null
+    blogSettingsPatch =
+      blogSettings === 'on'
+        ? blogSettingsDesigned
+        : blogSettings === 'lift'
+          ? blogSettingsLifted
+          : null
     res.writeHead(204).end()
     return
   }

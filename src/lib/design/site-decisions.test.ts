@@ -1,12 +1,36 @@
 import { describe, expect, it } from 'vitest'
 
+import { SHADOW_LEVELS } from '@/lib/sanity/depth-options'
+
 import { SITE_DECISIONS, siteDecisionVars, type SiteDecision } from './site-decisions'
 import { FIXTURE_DECISIONS, density, shape } from './site-decisions-fixtures'
 
 describe('the production registry', () => {
-  it('registers nothing until the owning tasks do, so no site changes', () => {
-    expect(Object.keys(SITE_DECISIONS)).toEqual([])
-    expect(siteDecisionVars({ density: 'airy', shape: 'round' })).toEqual({})
+  it('registers Card depth, and nothing for density or shape until 216b', () => {
+    expect(Object.keys(SITE_DECISIONS)).toEqual(['cardDepth'])
+  })
+
+  it('defines --card-depth only for a chosen level, Soft included, and never touches --shadow-card', () => {
+    expect(siteDecisionVars({})).toEqual({})
+    expect(siteDecisionVars({ cardDepth: null })).toEqual({})
+    expect(siteDecisionVars({ cardDepth: 'unheard-of' })).toEqual({})
+    expect(siteDecisionVars({ cardDepth: 'flat' })).toEqual({ '--card-depth': '0 0 #0000' })
+    expect(siteDecisionVars({ cardDepth: 'soft' })).toEqual({
+      '--card-depth': 'var(--shadow-soft, var(--shadow-card))',
+    })
+    expect(siteDecisionVars({ cardDepth: 'raised' })).toEqual({
+      '--card-depth': 'var(--shadow-raised)',
+    })
+    expect(siteDecisionVars({ cardDepth: 'floating' })).toEqual({
+      '--card-depth': 'var(--shadow-floating)',
+    })
+    for (const choice of Object.values(SITE_DECISIONS.cardDepth.choices)) {
+      expect(Object.keys(choice)).not.toContain('--shadow-card')
+    }
+  })
+
+  it('offers the same four levels as a section’s own depth, so the choices line up', () => {
+    expect(Object.keys(SITE_DECISIONS.cardDepth.choices)).toEqual([...SHADOW_LEVELS])
   })
 })
 

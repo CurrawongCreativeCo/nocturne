@@ -131,3 +131,33 @@ describe('FAQ’s Studio controls', () => {
     expect(hiddenOn('cards', 'body')).toBe(false)
   })
 })
+
+describe('FAQ: depth and glow on the Cards item style', () => {
+  const depthOf = (card: Element | null | undefined) =>
+    card?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1]
+  const cards = (document: Document) => [...document.querySelectorAll('div.relative.rounded-card')]
+
+  it('keeps the card’s shadow until a level is chosen, reading the site’s Card depth if one is set', async () => {
+    const found = cards(await draw({ cardDesign: { itemStyle: 'cards' } }))
+    expect(found.length).toBeGreaterThan(0)
+    for (const card of found) {
+      expect(card.className).toContain('shadow-(--card-depth,var(--shadow-card))')
+      expect(depthOf(card)).toBeUndefined()
+    }
+  })
+
+  it('draws a chosen level and glow on every card', async () => {
+    const found = cards(
+      await draw({ cardDesign: { itemStyle: 'cards', shadow: 'raised', glow: 'strong' } }),
+    )
+    for (const card of found) {
+      expect(card.className).toContain('shadow-(--depth-shadow)')
+      expect(depthOf(card)).toMatch(/^var\(--shadow-raised\), var\(--depth-glow-strong\)/)
+    }
+  })
+
+  it('draws no card, so no depth, in the Divided list', async () => {
+    const document = await draw({ cardDesign: { shadow: 'raised' } })
+    expect(document.body.innerHTML).not.toContain('--depth-shadow')
+  })
+})

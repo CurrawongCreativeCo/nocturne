@@ -28,6 +28,14 @@ export const blogSettings = defineType({
       inherits: 'the default card',
       // The whole card links, so it can end in an indicator: none until one is chosen.
       action: { inherits: 'no indicator' },
+      // Draws once the card has a fill or border to cast it: until then there is nothing to see.
+      depth: {
+        lift: {},
+        hidden: ({ parent }) => {
+          const design = parent as { background?: { colour?: string }; border?: string } | undefined
+          return !design?.background?.colour && !design?.border
+        },
+      },
     }),
   ],
   preview: {

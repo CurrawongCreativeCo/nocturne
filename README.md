@@ -1489,7 +1489,7 @@ the same check as `src/types/sanity.types.ts`.
 | `type`   | `display`, `h1`, `h2`, `h3`, `h4`, `lead`, `body`, `small`: a fluid `clamp()` size, line height and letter spacing each                                     | `text-display`, `text-h1`, `text-h2`, `text-lead`, `text-small`...                                            |
 | `space`  | `section-y-compact`, `section-y`, `section-y-spacious`, `gutter`, `measure`, plus `measure-narrow` and `content` (widths)                                   | `py-section-compact`, `py-section`, `py-section-spacious`, `px-gutter`, `max-w-measure`, `max-w-content`      |
 | `radius` | `sm`, `control` (inputs, small buttons), `card`, `panel` (banners), `button`, `pill`                                                                        | `rounded-sm`, `rounded-control`, `rounded-card`, `rounded-panel`, `rounded-button`, `rounded-pill`            |
-| `shadow` | `card`, `raised`                                                                                                                                            | `shadow-card`, `shadow-raised`                                                                                |
+| `shadow` | `card`, `raised`, and optionally `soft`, `floating`                                                                                                         | `shadow-card`, `shadow-raised`, `shadow-soft`, `shadow-floating`                                              |
 | `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`, `marquee-per-logo` (seconds per logo, optional)                 | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS             |
 
 Two optional groups sit beside these: `emphasis` (heading emphasis) and `glass` (frosted rows, see
@@ -2481,21 +2481,21 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C…     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R…    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R…    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R✓    | –    | C…     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
 | Form (`formSection`)                     | R…      | –    | R✓     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R…    | C✓   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Newsletter signup (`newsletterSignup`)   | R…      | –    | R✓     | R✓   | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C…*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R…    | R✓   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R…    | –    | R✓     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Embed (`embed`)                          | R…      | –    | R✓     | –    | R…    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R…*   | –    | R✓*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2507,18 +2507,17 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R…      | –    | –      | –     |
 | Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
-| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R…    | –    | R✓     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
+| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R✓    | –    | R✓     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 234      | 0               | 80      |
-| Conditional                                              | 5        | 0               | 39      |
+| Required                                                 | 242      | 0               | 72      |
+| Conditional                                              | 7        | 0               | 37      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 146          | 9                | 3                   |
 | 147          | 5                | 3                   |
 | 148          | 6                | 3                   |
 | 151          | 22               | 0                   |
@@ -2526,10 +2525,10 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 159          | 3                | 8                   |
 | 177          | 9                | 20                  |
 | 213          | 7                | 0                   |
-| 276          | 2                | 2                   |
-| 280          | 16               | 0                   |
+| 276          | 2                | 3                   |
+| 280          | 17               | 0                   |
 
-**Evidence.** 252 capability entries, 485 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 262 capability entries, 498 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -2582,7 +2581,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 281          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.                                                                                                                                                                                                                                                                                                                                                                             |
 | `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 281          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                                                                                                                                                                                                                                                                                                                                                                                         |
 | `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 281          | The social icon container and colour, overlapping the icon capability. Task 158 draws them through the shared IconContainer, but the stored paths (style, iconColour, background, backgroundStrength, border, borderColour) differ from the shared builder’s (iconShape, iconBackground, iconBorder …), so replacing the field would rename saved values. Owner decision, 8 November 2026: preserve the stored values and replace the field in task 281, which gains this in its scope. |
-| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 146          | Written inline, because depthFields does not exist yet. They carry the depth (and picture depth) marker.                                                                                                                                                                                                                                                                                                                                                                                |
+| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 281          | Legacy stored paths that differ from the shared depthFields builder (`depthDesign.*` and `links[].design.shadow`, against `shadow`, `glow` and `glowColour`), so replacing them would rename saved values. They carry the depth (and picture depth) marker and are read through resolveDepth. Owner decision, 9 November 2026: keep the stored values and replace the fields in task 281. No data is migrated.                                                                          |
 | `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 281          | Written inline, under the stored names arrowStyle and arrowColour, which the shared actionFields (task 137) does not use. They carry the action indicator marker. Task 281 migrates them with the Link list’s other legacy design (owner-approved expansion of task 281, 8 November 2026); showArrows stays read until then.                                                                                                                                                            |
 | `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                                                                                                                                                                                                                                                                                                                                                                                              |
 
@@ -4412,6 +4411,18 @@ One component, `IconContainer` (`src/components/ui/icon-container.tsx`, task 158
 The Link list's own _Social icons_ box (`socialDesign`) keeps its stored paths (`style`, `iconColour`, `background`, `border`, which differ from the shared builder's) and stays a reviewed temporary exception until task 281, which replaces the field and gains this in its scope. It draws through `IconContainer`.
 
 `src/app/footer-team-icons.test.tsx` holds the footer's and a team page's six controls to the property each names (corners, colour, fill, strength, border, border colour), and `social-links.test.tsx` pins the social icons' classes.
+
+### Depth and glow on cards
+
+A shadow level, an optional glow and, on a card that is one link, a hover lift (task 146). The shared pieces are in `src/lib/sanity/depth-options.ts` (`depthLook` for a box, `depthFilter` for a picture, `resolveCardDepth` and `resolveCardLift` for a card) and `depthFields` (`surface-design.ts`, a registered shared builder), which adds _Shadow_, _Glow_, _Glow colour_ and, where cards link, _Hover lift_ to a family's Cards box (`shadow`, `glow`, `glowColour`, `lift`; agency only, every control inheriting). Pictures are task 147's and buttons and forms task 148's.
+
+- **Order.** A plan's own Appearance, then the section's Cards box, then the site's **Card depth** (Brand colours: Flat, Soft, Raised or Floating), then what the family draws today. Each property is taken from the first level that chose it, so a section's Soft stays Soft whatever the site chose (it draws the `shadow-soft` token, which has today's card shadow), and a plan set to Flat is flat under a Raised site.
+- **Unset changes nothing.** The site's Card depth is the CSS variable `--card-depth`, defined only when a level is chosen (`site-decisions.ts`, `SITE_DECISIONS.cardDepth`) and read only by cards, as `var(--card-depth, <what the family draws>)`. `--shadow-card` is never remapped, so a social button or anything else that draws the card shadow without being a card keeps it. The card classes changed (`shadow-card` to `shadow-(--card-depth,var(--shadow-card))`, and a shadow-free card gains `shadow-(--card-depth,0_0_#0000)`), and the computed shadow is the same.
+- **Which cards.** Testimonials, Pricing (and each plan), Team (cards and rows), Events (Featured), Location (the cards without a map image), the CTA banner (a depth-only Cards box: its fill is its tone), FAQ (Cards style), Stats (Cards layout), Blog post cards (from Blog settings) and, for the site's Card depth only, the event details card, whose own control waits for task 280. A post card draws no surface until a fill or border is chosen, so depth waits for one too. Features grid has no card yet (task 276).
+- **Glow** is decorative and off until chosen; it is added to the card's own shadow (or the site's), in a theme colour that follows the section's tone.
+- **Hover lift** (None or Lift) applies only to a card that links to a page: Team (a member with a page), Events (Featured, an event with a page) and Blog post cards. It rises 4 px and shows a deeper shadow under the pointer or keyboard focus (`:has(a:focus-visible)`, as the action indicator does), with CSS only (`.card-lift` in `globals.css`): the card is wrapped (`CardSurface lift`) so an `overflow-hidden` card can't clip the shadow layer, which is drawn once and only fades in. Transform and opacity animate, never `box-shadow`. Visitors who ask for less motion see no lift. Unset keeps what a card did: Team cards still rise with the Motion library's `HoverLift`, and choosing None or Lift replaces it.
+- **Link list** keeps its own `depthDesign.*` and `links[].design.shadow` paths, read through `resolveDepth` (now built on `depthLook` and `depthFilter`); they are a reviewed temporary exception until task 281 moves them. An explicit Soft now draws `var(--shadow-soft, var(--shadow-card))`, the same pixels.
+- **Tests.** `depth-options.test.ts`, `site-decisions.test.ts`, each family's own tests, the Task 275 evidence (`<family>.depth.card`, `pricingTable.depth.item`), and in the browser `design-settings.spec.ts` (computed shadows under each site-wide Card depth), `card-lift.spec.ts` and `blog-card-design.spec.ts` (hover, keyboard focus, reduced motion and axe).
 
 ### Action indicator
 

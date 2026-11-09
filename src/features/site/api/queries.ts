@@ -82,6 +82,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       ink,
       inkMuted,
       line,
+      cardDepth,
       gradients[] { name, angle, stops }
     },
     // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).

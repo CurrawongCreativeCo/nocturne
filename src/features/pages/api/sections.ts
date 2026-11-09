@@ -162,8 +162,12 @@ export const logoCloudFragment = /* groq */ `
  * The title, meta and body roles, a fill and a mark: the Team's box for its cards and rows, and the Events
  * section's (whose Featured layout draws the one card).
  */
+/** A card's shadow level and glow (depthFields). */
+const depthProjection = /* groq */ `shadow, glow, glowColour { colour, hex }, lift`
+
 const teamCardDesignProjection = /* groq */ `
   ${surfaceProjection},
+  ${depthProjection},
   title { ${roleStyleProjection} },
   meta { ${roleStyleProjection} },
   body { ${roleStyleProjection} },
@@ -176,6 +180,7 @@ const teamCardDesignProjection = /* groq */ `
 /** Pricing's card design at section level and, behind the plan's Appearance switch, at item level. */
 const pricingCardDesignProjection = /* groq */ `
   ${surfaceProjection},
+  ${depthProjection},
   title { ${roleStyleProjection} },
   price { ${roleStyleProjection} },
   body { ${roleStyleProjection} },
@@ -202,6 +207,7 @@ export const testimonialsFragment = /* groq */ `
     ${headerDesignProjection},
     cardDesign {
       ${surfaceProjection},
+      ${depthProjection},
       quote {
         ${textStyleProjection},
         fontStyle,
@@ -238,6 +244,7 @@ export const faqFragment = /* groq */ `
     cardDesign {
       itemStyle,
       ${surfaceProjection},
+      ${depthProjection},
       title { ${roleStyleProjection} },
       body { ${roleStyleProjection} },
       mark { ${decorativeMarkFields} }
@@ -257,6 +264,7 @@ export const ctaBannerFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     ${headerDesignProjection},
+    cardDesign { ${depthProjection} },
     text,
     ctas[] { ${ctaFields} },
     tone
@@ -325,6 +333,7 @@ export const statsFragment = /* groq */ `
     ${headerDesignProjection},
     cardDesign {
       ${surfaceProjection},
+      ${depthProjection},
       number { ${roleStyleProjection} },
       label { ${roleStyleProjection} },
       mark { ${decorativeMarkFields} }
@@ -358,6 +367,7 @@ export const locationFragment = /* groq */ `
     ${headerDesignProjection},
     cardDesign {
       ${surfaceProjection},
+      ${depthProjection},
       title { ${roleStyleProjection} },
       body { ${roleStyleProjection} },
       meta { ${roleStyleProjection} },

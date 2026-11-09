@@ -7,6 +7,7 @@ import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { resolveCardDesign, type CardDesign } from '@/lib/sanity/card-design'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 import { graph } from '@/lib/structured-data/graph'
@@ -25,7 +26,7 @@ const SUMMARY =
 const OWN_BODY = { size: 'text-body', weight: 'regular', colour: 'text-ink-muted' } as const
 
 /** The Cards item style's surface. The question opens in place, so a chosen fill has no hover shade. */
-const CARD = 'relative rounded-card bg-surface shadow-card ring-1 ring-line'
+const CARD = `relative rounded-card bg-surface ${CARD_SHADOW_CLASS.shadowed} ring-1 ring-line`
 const OWN_SURFACE = { background: 'bg-surface', border: 'ring-1 ring-line', still: true }
 
 type Item = SectionProps<'faq'>['data']['items'][number]
@@ -105,7 +106,8 @@ export function Faq({ data, isFirst, page }: SectionProps<'faq'>) {
               as="div"
               className={CARD}
               own={OWN_SURFACE}
-              shadow="shadow-card"
+              shadow={CARD_SHADOW_CLASS.shadowed}
+              depth={resolveCardDepth([data.cardDesign], OWN_SHADOW.siteCard)}
               design={look.surface}
               mark={{
                 input: data.cardDesign?.mark,

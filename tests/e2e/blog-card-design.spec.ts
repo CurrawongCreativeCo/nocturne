@@ -23,7 +23,7 @@ const PAGES = ['/blog', '/blog/category/news']
 const CARD = 'main article'
 
 /** Switches the design, then expires the cached settings the way the Sanity webhook does. */
-async function useDesign(request: APIRequestContext, design: 'on' | 'off') {
+async function useDesign(request: APIRequestContext, design: 'on' | 'lift' | 'off') {
   const control = await request.post(
     `http://localhost:${FAKE_SANITY_PORT}/__fixture/blog-settings/${design}`,
   )
@@ -146,4 +146,68 @@ test('switching the design off restores the plain card', async ({ page, request 
   await settled(page, '/blog', false)
   await expect(page.locator('[data-decorative-mark]')).toHaveCount(0)
   await expect(page.locator(CARD).first()).toHaveClass(/^group relative flex h-full flex-col$/)
+})
+
+/**
+ * Depth, glow and Hover lift from Blog settings (task 146). A post card is one link, so with Lift chosen
+ * every card is wrapped in a block that rises under the pointer and keyboard focus; the shadow in place of
+ * none comes from the chosen level, over the card's border.
+ */
+test.describe('with a shadow, a glow and Lift', () => {
+  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' })
+
+  const wrapper = (page: Page) => page.locator('main .card-lift').first()
+  const rise = (element: ReturnType<typeof wrapper>) =>
+    element.evaluate((node) => {
+      const value = getComputedStyle(node).transform
+      return value === 'none' ? 0 : -Number.parseFloat(value.split(',')[5] ?? '0')
+    })
+
+  test.beforeEach(async ({ request }) => {
+    await useDesign(request, 'lift')
+  })
+
+  test('every card draws the chosen shadow and rises on hover and keyboard focus', async ({
+    page,
+  }) => {
+    await settled(page, '/blog')
+    const cards = page.locator(CARD)
+    expect(await cards.count()).toBeGreaterThan(0)
+    for (const card of await cards.all()) {
+      const shadow = await card.evaluate((element) => getComputedStyle(element).boxShadow)
+      expect(shadow).toContain('0px 10px 15px -3px')
+      expect(shadow).toMatch(/0px 0px 18px 0px/)
+    }
+    expect(await rise(wrapper(page))).toBe(0)
+    await wrapper(page).hover()
+    await expect.poll(() => rise(wrapper(page))).toBe(4)
+    await page.mouse.move(0, 0)
+    await expect.poll(() => rise(wrapper(page))).toBe(0)
+    const link = wrapper(page).locator('a').first()
+    for (let step = 0; step < 120; step++) {
+      await page.keyboard.press('Tab')
+      if (await link.evaluate((element) => element === document.activeElement)) break
+    }
+    await expect.poll(() => rise(wrapper(page))).toBe(4)
+  })
+
+  test.describe('and reduced motion', () => {
+    test.use({ reducedMotion: 'reduce' })
+
+    test('nothing moves', async ({ page }) => {
+      await settled(page, '/blog')
+      await wrapper(page).hover()
+      await page.waitForTimeout(400)
+      expect(await rise(wrapper(page))).toBe(0)
+    })
+  })
+
+  test('axe finds nothing, and the card is still one link', async ({ page }) => {
+    await settled(page, '/blog')
+    const results = await new AxeBuilder({ page }).include('main').analyze()
+    expect(
+      results.violations.flatMap(({ id, nodes }) => nodes.map((node) => `${id}: ${node.html}`)),
+    ).toEqual([])
+    await expect(wrapper(page).locator('a')).toHaveCount(1)
+  })
 })

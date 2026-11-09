@@ -202,3 +202,31 @@ describe('Events’ action indicator', () => {
     expect(arrows(await draw('agenda', { cardDesign: { actionStyle: 'arrow' } }))).toHaveLength(0)
   })
 })
+
+describe('Events depth and glow', () => {
+  const card = (document: Document) => document.querySelector('article.relative.rounded-card')
+  const depthOf = (element: Element | null) =>
+    element?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1]
+
+  it('keeps the featured card’s shadow until a level is chosen', async () => {
+    const element = card(await draw('featured'))
+    expect(element?.className).toContain('shadow-(--card-depth,var(--shadow-card))')
+    expect(depthOf(element)).toBeUndefined()
+  })
+
+  it('draws a chosen level and glow on the featured card', async () => {
+    const element = card(
+      await draw('featured', { cardDesign: { shadow: 'raised', glow: 'strong' } }),
+    )
+    expect(element?.className).toContain('shadow-(--depth-shadow)')
+    expect(depthOf(element)).toMatch(/^var\(--shadow-raised\), var\(--depth-glow-strong\)/)
+  })
+
+  it('draws no card, so no depth, on the list and agenda layouts', async () => {
+    for (const layout of ['list', 'agenda'] as const) {
+      const document = await draw(layout, { cardDesign: { shadow: 'floating' } })
+      expect(card(document)).toBeNull()
+      expect(document.body.innerHTML).not.toContain('--depth-shadow')
+    }
+  })
+})

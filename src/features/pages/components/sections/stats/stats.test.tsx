@@ -55,7 +55,7 @@ describe('Stats: the Cards layout', () => {
   it('keeps its card, accent rule and type with nothing set', async () => {
     const card = (await draw('cards')).querySelector('ul.grid > li')
     expect(card?.className).toContain(
-      'rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line',
+      'rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line',
     )
     expect(card?.querySelector('[data-text-role="number"]')?.className).toContain(
       'text-h1 font-semibold',
@@ -114,5 +114,34 @@ describe('Stats’ Studio controls', () => {
     expect(hiddenOn(undefined)).toBe(true)
     expect(hiddenOn('inline')).toBe(true)
     expect(hiddenOn('cards')).toBe(false)
+  })
+})
+
+describe('Stats: depth and glow on the Cards layout', () => {
+  const depthOf = (card: Element | null | undefined) =>
+    card?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1]
+
+  it('draws no shadow of its own, reading the site’s Card depth only when one is chosen', async () => {
+    const card = (await draw('cards')).querySelector('ul.grid > li')
+    expect(card?.className).toContain('shadow-(--card-depth,0_0_#0000)')
+    expect(depthOf(card)).toBeUndefined()
+  })
+
+  it('draws a chosen level and glow on every card', async () => {
+    const cards = [
+      ...(
+        await draw('cards', { cardDesign: { shadow: 'floating', glow: 'soft' } })
+      ).querySelectorAll('ul.grid > li'),
+    ]
+    expect(cards.length).toBeGreaterThan(0)
+    for (const card of cards) {
+      expect(card.className).toContain('shadow-(--depth-shadow)')
+      expect(depthOf(card)).toMatch(/^var\(--shadow-floating\), var\(--depth-glow-soft\)/)
+    }
+  })
+
+  it('draws no card, so no depth, on the inline layout', async () => {
+    const document = await draw('inline', { cardDesign: { shadow: 'floating' } })
+    expect(document.body.innerHTML).not.toContain('--depth-shadow')
   })
 })

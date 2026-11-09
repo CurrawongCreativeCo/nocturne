@@ -57,7 +57,7 @@ describe.each(LAYOUTS)('Team on the %s layout', (layout) => {
     expect(found.length).toBeGreaterThan(1)
     for (const card of found) {
       expect(card.className).toContain(
-        'relative rounded-card bg-surface shadow-card ring-1 ring-line',
+        'relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line',
       )
     }
   })
@@ -122,5 +122,54 @@ describe('Team’s header', () => {
       'eyebrow',
     )
     expect(document.querySelector('h2')?.getAttribute('data-text-role')).not.toBe('heading')
+  })
+})
+
+describe('Team depth and glow', () => {
+  const depthOf = (card: Element | undefined) =>
+    card?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1]
+
+  for (const layout of LAYOUTS) {
+    it(`${layout}: keeps the card’s shadow until a level is chosen, then draws it on every card`, async () => {
+      for (const card of cards(await draw(layout))) {
+        expect(card.className).toContain('shadow-(--card-depth,var(--shadow-card))')
+        expect(depthOf(card)).toBeUndefined()
+      }
+      const chosen = cards(await draw(layout, { cardDesign: { shadow: 'floating', glow: 'soft' } }))
+      expect(chosen.length).toBeGreaterThan(0)
+      for (const card of chosen) {
+        expect(card.className).toContain('shadow-(--depth-shadow)')
+        expect(depthOf(card)).toMatch(/^var\(--shadow-floating\), var\(--depth-glow-soft\)/)
+      }
+    })
+  }
+
+  it('keeps an explicit Soft through its own token', async () => {
+    const [card] = cards(await draw('grid', { cardDesign: { shadow: 'soft' } }))
+    expect(depthOf(card)).toBe('var(--shadow-soft, var(--shadow-card))')
+  })
+})
+
+describe('Team hover lift', () => {
+  const wrappers = (document: Document) => document.querySelectorAll('.card-lift')
+
+  it('draws no lift wrapper until Lift is chosen, whatever else is chosen', async () => {
+    for (const cardDesign of [undefined, {}, { lift: 'none' }, { shadow: 'raised' }]) {
+      const document = await draw('grid', cardDesign ? { cardDesign } : {})
+      expect(wrappers(document)).toHaveLength(0)
+    }
+  })
+
+  it('wraps only the cards that link to a member’s page, once Lift is chosen', async () => {
+    const document = await draw('grid', { cardDesign: { lift: 'lift' } })
+    const linked = cards(document).filter((card) => card.querySelector('a'))
+    expect(wrappers(document)).toHaveLength(linked.length)
+    for (const wrapper of wrappers(document)) {
+      expect(wrapper.querySelectorAll('a')).toHaveLength(1)
+    }
+    // The cards that go nowhere don't lift.
+    expect(
+      cards(document).filter((card) => !card.closest('.card-lift') && card.querySelector('a')),
+    ).toEqual([])
   })
 })

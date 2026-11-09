@@ -3,6 +3,12 @@ import { SanityImage } from '@/components/ui/sanity-image'
 import type { SectionDefaults } from '@/components/ui/section-style'
 import { resolveCardAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
+import {
+  CARD_SHADOW_CLASS,
+  OWN_SHADOW,
+  resolveCardDepth,
+  resolveCardLift,
+} from '@/lib/sanity/depth-options'
 
 import {
   DateBadge,
@@ -43,9 +49,11 @@ const layout: EventsLayout = {
       <div className={rest.length > 0 ? 'grid items-start gap-8 lg:grid-cols-[3fr_2fr]' : ''}>
         <CardSurface
           as="article"
-          className={`relative flex flex-col overflow-hidden rounded-card bg-surface shadow-card ring-1 ring-line${group(first)}`}
+          className={`relative flex flex-col overflow-hidden rounded-card bg-surface ${CARD_SHADOW_CLASS.shadowed} ring-1 ring-line${group(first)}`}
           own={OWN_SURFACE}
-          shadow="shadow-card"
+          shadow={CARD_SHADOW_CLASS.shadowed}
+          lift={resolveCardLift([cardDesign]) === 'lift' && isEventLinked(first)}
+          depth={resolveCardDepth([cardDesign], OWN_SHADOW.siteCard)}
           design={look.surface}
           mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
         >

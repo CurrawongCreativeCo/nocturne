@@ -3,19 +3,19 @@
 exports[`SectionRenderer output parity > ctaBanner keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
   "single layout · panel none": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
   "single layout · panel unset": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
 }
@@ -61,19 +61,19 @@ exports[`SectionRenderer output parity > events keeps its output for every layou
     "panel": null,
   },
   "featured · panel glass": {
-    "hash": "f1fedaab0b3c87d9",
+    "hash": "4de16348b49351c6",
     "panel": "tinted",
   },
   "featured · panel none": {
-    "hash": "3967f3d9372798f4",
+    "hash": "f8739c40d0679ad8",
     "panel": null,
   },
   "featured · panel solid": {
-    "hash": "daed030ff39e3f02",
+    "hash": "52b3afb86414e4a2",
     "panel": "solid",
   },
   "featured · panel unset": {
-    "hash": "3967f3d9372798f4",
+    "hash": "f8739c40d0679ad8",
     "panel": null,
   },
   "list · panel glass": {
@@ -283,7 +283,7 @@ exports[`SectionRenderer output parity > hero keeps its output for every layout 
 exports[`SectionRenderer output parity > keeps draft-mode output, with edit markers in the layout and panel values 1`] = `
 {
   "ctaBanner · single layout": {
-    "hash": "dbce8a4b46a1e23a",
+    "hash": "07ca53418715538a",
     "panel": null,
   },
   "hero · full-bleed": {
@@ -316,7 +316,7 @@ exports[`SectionRenderer output parity > keeps draft-mode output, with edit mark
 exports[`SectionRenderer output parity > keeps output behind the members gate 1`] = `
 {
   "ctaBanner · single layout": {
-    "hash": "64533d42f312ce9a",
+    "hash": "1a5aa3ea3a90b7e9",
     "panel": null,
   },
   "hero · full-bleed": {
@@ -418,19 +418,19 @@ exports[`SectionRenderer output parity > linkList keeps its output for every lay
 exports[`SectionRenderer output parity > location keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "5fb4abecca769a8f",
+    "hash": "a2fc54d277be5b49",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "e6d69067d3d837b5",
+    "hash": "34a092a36caf1fa1",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "0bdd582d4929c16a",
+    "hash": "b59a0652206128e7",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "e6d69067d3d837b5",
+    "hash": "34a092a36caf1fa1",
     "panel": null,
   },
 }
@@ -550,19 +550,19 @@ exports[`SectionRenderer output parity > newsletterSignup keeps its output for e
 exports[`SectionRenderer output parity > pricingTable keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "22a7c5fb2435de18",
+    "hash": "3495ca8b9b3464c0",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "23fa38d36c6cc0a7",
+    "hash": "0f89f55aba0733fe",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "65f8a3204a48022b",
+    "hash": "0f384a1548f9a93a",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "23fa38d36c6cc0a7",
+    "hash": "0f89f55aba0733fe",
     "panel": null,
   },
 }
@@ -629,19 +629,19 @@ exports[`SectionRenderer output parity > richText keeps its output for every lay
 exports[`SectionRenderer output parity > stats keeps its output for every layout and stored panel choice 1`] = `
 {
   "cards · panel glass": {
-    "hash": "6f207302d0ebfa0a",
+    "hash": "2b8a549ba5a6afb4",
     "panel": "tinted",
   },
   "cards · panel none": {
-    "hash": "fe46398dd47f7003",
+    "hash": "549f9625171359df",
     "panel": null,
   },
   "cards · panel solid": {
-    "hash": "0054b27ca168a5d1",
+    "hash": "351bfcbb5c9c4a0f",
     "panel": "solid",
   },
   "cards · panel unset": {
-    "hash": "fe46398dd47f7003",
+    "hash": "549f9625171359df",
     "panel": null,
   },
   "inline · panel glass": {
@@ -666,51 +666,51 @@ exports[`SectionRenderer output parity > stats keeps its output for every layout
 exports[`SectionRenderer output parity > team keeps its output for every layout and stored panel choice 1`] = `
 {
   "grid · panel glass": {
-    "hash": "d6974c044e31298c",
+    "hash": "3d077aa1f2508423",
     "panel": "tinted",
   },
   "grid · panel none": {
-    "hash": "619c4352cd9ea3cd",
+    "hash": "123f1ee32748df3a",
     "panel": null,
   },
   "grid · panel solid": {
-    "hash": "d17d6c2832909683",
+    "hash": "54ebd8d729778075",
     "panel": "solid",
   },
   "grid · panel unset": {
-    "hash": "619c4352cd9ea3cd",
+    "hash": "123f1ee32748df3a",
     "panel": null,
   },
   "list · panel glass": {
-    "hash": "5e0cddfc75ada966",
+    "hash": "bb36278be41659a2",
     "panel": "tinted",
   },
   "list · panel none": {
-    "hash": "abf035653e415407",
+    "hash": "c82fd51fc24374a8",
     "panel": null,
   },
   "list · panel solid": {
-    "hash": "c5842e5f81a201d0",
+    "hash": "4bbd190ccadb68b1",
     "panel": "solid",
   },
   "list · panel unset": {
-    "hash": "abf035653e415407",
+    "hash": "c82fd51fc24374a8",
     "panel": null,
   },
   "slider · panel glass": {
-    "hash": "ff8229751132efcb",
+    "hash": "c7f45cc5bd9544e3",
     "panel": "tinted",
   },
   "slider · panel none": {
-    "hash": "df77ef3b662e6fcb",
+    "hash": "c9bdaad9b219905a",
     "panel": null,
   },
   "slider · panel solid": {
-    "hash": "d00c06e41e296059",
+    "hash": "51f1efc7c549e4fb",
     "panel": "solid",
   },
   "slider · panel unset": {
-    "hash": "df77ef3b662e6fcb",
+    "hash": "c9bdaad9b219905a",
     "panel": null,
   },
 }
@@ -719,35 +719,35 @@ exports[`SectionRenderer output parity > team keeps its output for every layout 
 exports[`SectionRenderer output parity > testimonials keeps its output for every layout and stored panel choice 1`] = `
 {
   "grid · panel glass": {
-    "hash": "8d90e503b5c4bf34",
+    "hash": "d5c8f9f4c9c84734",
     "panel": "tinted",
   },
   "grid · panel none": {
-    "hash": "80becd00e90b0013",
+    "hash": "f686216e5ac1a1b0",
     "panel": null,
   },
   "grid · panel solid": {
-    "hash": "c682b6c8ffb0e580",
+    "hash": "68985f5370056e3a",
     "panel": "solid",
   },
   "grid · panel unset": {
-    "hash": "80becd00e90b0013",
+    "hash": "f686216e5ac1a1b0",
     "panel": null,
   },
   "slider · panel glass": {
-    "hash": "fcf0c8bc218de13b",
+    "hash": "7f384b7db84ac445",
     "panel": "tinted",
   },
   "slider · panel none": {
-    "hash": "3ab2fd677de9dd77",
+    "hash": "9d8487d15736c016",
     "panel": null,
   },
   "slider · panel solid": {
-    "hash": "1e606fa8ae884695",
+    "hash": "be39a38c3c57b096",
     "panel": "solid",
   },
   "slider · panel unset": {
-    "hash": "3ab2fd677de9dd77",
+    "hash": "9d8487d15736c016",
     "panel": null,
   },
 }

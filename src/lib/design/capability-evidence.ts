@@ -224,6 +224,10 @@ interface CardFamilyEvidence {
   look?: string
   /** What this call proves. Default: everything. A look that draws no card proves only its text. */
   parts?: readonly ('surface' | 'text' | 'header' | 'mark')[]
+  /** Also proves depth and glow (task 146): opt in once the family draws it through resolveCardDepth. */
+  depth?: boolean
+  /** What a family needs set before it draws a shadow at all (a post card needs a fill or border). */
+  depthBase?: Patch
 }
 
 /**
@@ -334,6 +338,17 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
       target: textRoleTarget(role),
       change: 'attributes',
       probe: { [`headerDesign.${role}.size`]: 'large' },
+    })),
+    ...(config.depth ? scopes : []).map((scope): CapabilityEvidence => ({
+      id: `${component}.depth.${scope}${named}`,
+      ...common(scope, cardLayouts ?? layouts),
+      base: { ...baseOf(scope), ...config.depthBase },
+      capability: 'depth',
+      field: pathOf(scope, 'shadow'),
+      resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
+      target: cardTarget,
+      change: 'attributes',
+      probe: { [probeOf(scope, 'shadow')]: 'floating' },
     })),
     ...(proves('mark') ? scopes : []).map((scope): CapabilityEvidence => ({
       id: `${component}.mark.${scope}${named}`,
@@ -861,6 +876,9 @@ export const EVIDENCE: readonly Evidence[] = [
     cardTarget: 'article',
     base: {},
     roles: ['meta', 'title', 'body'],
+    depth: true,
+    // A post card draws no surface until one is chosen, and a shadow needs one to sit on.
+    depthBase: { 'settings.cardDesign.border': 'thin' },
   }),
   // The glyph at the end of a post card (task 137): none until Blog settings chooses one.
   {
@@ -1029,6 +1047,20 @@ export const EVIDENCE: readonly Evidence[] = [
     base: TESTIMONIAL_CONTENT,
     probe: { 'cardDesign.border': 'thick' },
   },
+  {
+    id: 'testimonials.depth.card',
+    component: 'testimonials',
+    capability: 'depth',
+    scope: 'card',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'cardDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
+    render: TESTIMONIALS,
+    target: 'figure',
+    change: 'attributes',
+    base: TESTIMONIAL_CONTENT,
+    probe: { 'cardDesign.shadow': 'floating' },
+  },
   ...(['quote', 'attribution', 'label'] as const).map((role): CapabilityEvidence => ({
     id: `testimonials.text.card.${role}`,
     component: 'testimonials',
@@ -1192,6 +1224,7 @@ export const EVIDENCE: readonly Evidence[] = [
     cardTarget: 'div.relative.rounded-card',
     base: { 'cardDesign.itemStyle': 'cards' },
     roles: ['title', 'body'],
+    depth: true,
   }),
   ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
   // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
@@ -1204,6 +1237,20 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // The banner's one card: its depth is the only thing its Cards box offers (its fill is the tone).
+  {
+    id: 'ctaBanner.depth.card',
+    component: 'ctaBanner',
+    capability: 'depth',
+    scope: 'card',
+    field: 'cardDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
+    render: 'src/features/pages/components/sections/cta-banner.tsx',
+    target: 'div.rounded-panel',
+    change: 'attributes',
+    base: { eyebrow: 'Ready?', text: 'An intro.' },
+    probe: { 'cardDesign.shadow': 'floating' },
+  },
   ...frameEvidence('ctaBanner', { mark: true, overlay: true, edge: true, motion: true }),
   ...cardFamilyEvidence({
     component: 'formSection',
@@ -1249,6 +1296,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'price', 'body', 'label', 'description'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     item: { array: 'plans' },
+    depth: true,
   }),
   iconContainerEvidence({
     component: 'pricingTable',
@@ -1299,6 +1347,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'In numbers', intro: 'An intro.' },
     roles: ['number', 'label'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   ...frameEvidence('stats', {
     mark: ['inline', 'cards'],
@@ -1334,6 +1383,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Find us', intro: 'An intro.', mapImage: null },
     roles: ['title', 'body', 'meta'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   ...cardFamilyEvidence({
     component: 'location',
@@ -1367,6 +1417,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Our people', text: 'An intro.' },
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   // The glyph at the end of a card or row that links to a member's page (task 137): none until chosen.
   {
@@ -1470,6 +1521,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'What’s on', text: 'An intro.' },
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   // The glyph at the end of a linked card (task 137). The List draws a chevron with nothing chosen, so a
   // choice changes it; Featured draws none, so a choice makes one appear.

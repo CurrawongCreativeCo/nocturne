@@ -113,6 +113,7 @@ export const stats = defineType({
         defaults: STATS_ROLE_COLOURS,
         inherits: 'the card’s own',
         boxHidden: notCards,
+        depth: {},
       }),
       accessField,
       // Shown first in the Content tab.
