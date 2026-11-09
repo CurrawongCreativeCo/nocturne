@@ -9,8 +9,8 @@ import { SITE_DECISIONS, siteDecisionVars, type SiteDecision } from './site-deci
 import { FIXTURE_DECISIONS, density, shape } from './site-decisions-fixtures'
 
 describe('the production registry', () => {
-  it('registers density, shape and Card depth', () => {
-    expect(Object.keys(SITE_DECISIONS)).toEqual(['density', 'shape', 'cardDepth'])
+  it('registers density, shape, heading style and Card depth', () => {
+    expect(Object.keys(SITE_DECISIONS)).toEqual(['density', 'shape', 'headingStyle', 'cardDepth'])
   })
 
   it('defines --card-depth only for a chosen level, Soft included, and never touches --shadow-card', () => {

@@ -751,3 +751,16 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
     }
   }
 }
+
+/*
+ * Site-wide heading weight (README, "Brand colours and design"; task 216). `--heading-weight` is set on
+ * :root only when Brand colours has a Heading style other than Standard. This rule is outside every
+ * layer so it beats the components' `font-semibold` and friends; while the variable is undefined,
+ * `revert-layer` hands the weight back to those layers, so nothing changes until a style is chosen.
+ */
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--heading-weight, revert-layer);
+}

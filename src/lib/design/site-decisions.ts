@@ -10,6 +10,8 @@
  * tokens.json defines until a different choice is made.
  */
 
+import { HEADING_STYLES, headingStyleVariables } from './heading-styles'
+
 /** CSS variable name → value, for the variables a choice changes. Empty means "as tokens.json". */
 export type SiteDecisionVars = Readonly<Record<string, string>>
 
@@ -67,8 +69,20 @@ const shape = decision('shape', {
   round: { '--radius-card': '1.75rem', '--radius-panel': '2.25rem', '--radius-control': '0.75rem' },
 })
 
-/** The decisions the site honours, by name. Heading style (216b stage 2) registers here too. */
-export const SITE_DECISIONS = { density, shape, cardDepth }
+/**
+ * How the headings look, site-wide (task 216, provisional): size, letter spacing and weight, from the
+ * one table in heading-styles.ts. Standard, unset and an unknown choice emit nothing. `--heading-weight`
+ * is read by one rule in globals.css that falls back to each heading's own weight while it is undefined.
+ */
+const headingStyle = decision('headingStyle', {
+  standard: {},
+  editorial: headingStyleVariables(HEADING_STYLES.editorial),
+  modern: headingStyleVariables(HEADING_STYLES.modern),
+  classic: headingStyleVariables(HEADING_STYLES.classic),
+})
+
+/** The decisions the site honours, by name. */
+export const SITE_DECISIONS = { density, shape, headingStyle, cardDepth }
 
 export type SiteDecisionName = keyof typeof SITE_DECISIONS
 
