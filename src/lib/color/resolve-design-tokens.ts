@@ -4,7 +4,7 @@ import { colorHex } from '@/config/tokens.generated'
 import { siteDecisionVars, type SiteDecisionInput } from '@/lib/design/site-decisions'
 
 import { adjustLightnessForContrast, contrastRatio } from './contrast'
-import { brandGradients, gradientInk, type GradientInput } from './gradients'
+import { brandGradients, gradientInk, gradientSamples, type GradientInput } from './gradients'
 import { HEX_PATTERN, hexToOklch, oklchToHex } from './oklch'
 
 /** The generated token colours, camelCase hex (what `colorHex` in tokens.generated.ts holds). */
@@ -394,6 +394,21 @@ export function resolveDesignTokens(
         // Hover and press lay a veil of the colour opposite the text over the gradient. That moves the
         // fill away from the text colour, so the contrast only improves and the text is never touched.
         vars['--button-fill-veil'] = ink.ink === '#ffffff' ? '#000000' : '#ffffff'
+        // The button still draws, but where most of the gradient is close to the section behind it the
+        // edge disappears (the label alone marks the button). Warn per background, as 216 does for the rest.
+        const samples = gradientSamples(gradient.stops)
+        for (const [label, background] of [
+          ['the page background', colours.surface],
+          ['the inverse background', colours.surfaceInverse],
+        ] as const) {
+          const faint = samples.filter((sample) => contrastRatio(sample, background) < UI_RATIO)
+          if (faint.length > samples.length / 2) {
+            warnings.push({
+              field: 'buttonGradient',
+              message: `Most of "${gradient.name}" is under ${UI_RATIO}:1 against ${label}, so a main button on it loses its edge. Choose a gradient that stands out from both backgrounds, or add Depth or Glow.`,
+            })
+          }
+        }
       } else {
         warnings.push({
           field: 'buttonGradient',

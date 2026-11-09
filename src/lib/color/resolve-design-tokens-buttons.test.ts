@@ -99,6 +99,9 @@ describe('depth, glow and the secondary style', () => {
   })
 })
 
+const buttonWarnings = (resolved: ReturnType<typeof resolveDesignTokens>) =>
+  resolved.warnings.filter((warning) => warning.field === 'buttonGradient')
+
 describe('Brand gradient fill', () => {
   const resolve = (chosen: ReturnType<typeof gradient>, extra = {}) =>
     resolveDesignTokens({
@@ -108,13 +111,32 @@ describe('Brand gradient fill', () => {
       ...extra,
     })
 
+  it('still draws, but warns, when most of the gradient is close to a section background', () => {
+    // Navy is invisible on the near-black inverse background; Dawn on the white page.
+    const night = resolve(DARK_TO_NAVY)
+    expect(night.vars['--button-fill']).toBeDefined()
+    expect(buttonWarnings(night).map((warning) => warning.message)).toEqual([
+      expect.stringContaining('the inverse background'),
+    ])
+    const dawn = resolve(LIGHT, { buttonGradient: 'dawn' })
+    expect(dawn.vars['--button-fill']).toBeDefined()
+    expect(buttonWarnings(dawn).map((warning) => warning.message)).toEqual([
+      expect.stringContaining('the page background'),
+    ])
+    expect(night.errors).toEqual([])
+    // A mid-tone gradient stands out from both.
+    const clear = resolve(gradient('Night', ['#2563eb', '#7c3aed']))
+    expect(buttonWarnings(clear)).toEqual([])
+  })
+
   it('uses the chosen gradient’s own CSS and a text colour that reads along all of it', () => {
     const resolved = resolve(DARK_TO_NAVY)
     expect(resolved.vars['--button-fill']).toBe('linear-gradient(90deg, #0b1d3a, #1f3b73)')
     expect(resolved.vars['--button-fill-ink']).toBe('#ffffff')
-    expect(resolved.warnings).toEqual([])
     // Dark gradient, white text: the hover and press veil is black, which only widens the contrast.
     expect(resolved.vars['--button-fill-veil']).toBe('#000000')
+    // Its only warning is that navy is close to the near-black inverse background (checked above).
+    expect(buttonWarnings(resolved)).toHaveLength(1)
     for (const sample of gradientSamples(['#0b1d3a', '#1f3b73'])) {
       expect(contrastRatio('#ffffff', sample)).toBeGreaterThanOrEqual(4.5)
     }

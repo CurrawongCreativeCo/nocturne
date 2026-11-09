@@ -184,7 +184,7 @@ describe('Buttons on Brand colours (task 148)', () => {
       run({
         buttonFill: 'gradient',
         buttonGradient: 'night',
-        gradients: [{ name: 'Night', angle: 90, stops: ['#0b1d3a', '#1f3b73'] }],
+        gradients: [{ name: 'Night', angle: 90, stops: ['#2563eb', '#7c3aed'] }],
       }),
     ).toBe(true)
   })
