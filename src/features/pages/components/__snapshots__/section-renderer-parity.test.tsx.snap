@@ -550,19 +550,19 @@ exports[`SectionRenderer output parity > newsletterSignup keeps its output for e
 exports[`SectionRenderer output parity > pricingTable keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "22a7c5fb2435de18",
+    "hash": "3495ca8b9b3464c0",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "23fa38d36c6cc0a7",
+    "hash": "0f89f55aba0733fe",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "65f8a3204a48022b",
+    "hash": "0f384a1548f9a93a",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "23fa38d36c6cc0a7",
+    "hash": "0f89f55aba0733fe",
     "panel": null,
   },
 }
@@ -719,35 +719,35 @@ exports[`SectionRenderer output parity > team keeps its output for every layout 
 exports[`SectionRenderer output parity > testimonials keeps its output for every layout and stored panel choice 1`] = `
 {
   "grid · panel glass": {
-    "hash": "8d90e503b5c4bf34",
+    "hash": "d5c8f9f4c9c84734",
     "panel": "tinted",
   },
   "grid · panel none": {
-    "hash": "80becd00e90b0013",
+    "hash": "f686216e5ac1a1b0",
     "panel": null,
   },
   "grid · panel solid": {
-    "hash": "c682b6c8ffb0e580",
+    "hash": "68985f5370056e3a",
     "panel": "solid",
   },
   "grid · panel unset": {
-    "hash": "80becd00e90b0013",
+    "hash": "f686216e5ac1a1b0",
     "panel": null,
   },
   "slider · panel glass": {
-    "hash": "fcf0c8bc218de13b",
+    "hash": "7f384b7db84ac445",
     "panel": "tinted",
   },
   "slider · panel none": {
-    "hash": "3ab2fd677de9dd77",
+    "hash": "9d8487d15736c016",
     "panel": null,
   },
   "slider · panel solid": {
-    "hash": "1e606fa8ae884695",
+    "hash": "be39a38c3c57b096",
     "panel": "solid",
   },
   "slider · panel unset": {
-    "hash": "3ab2fd677de9dd77",
+    "hash": "9d8487d15736c016",
     "panel": null,
   },
 }
