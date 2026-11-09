@@ -5,7 +5,7 @@ import { IntentLink } from 'sanity/router'
 
 import { apiVersion } from '@/config/env'
 
-import { CONTENT_HEALTH_QUERY } from '../content-health/api/query'
+import { SPACING_USAGE_QUERY } from '../api/spacing-usage-query'
 import {
   countOverrides,
   describeSpacingCount,
@@ -72,9 +72,9 @@ export function SpacingUsageView({ state }: { state: SpacingUsageState }) {
 }
 
 /**
- * A note under Density: how many sections set their own spacing, with links to them. One Studio
- * request when the document opens, the same one Content health and the panel usage note make; the
- * public site makes none.
+ * A note under Density: how many sections set their own spacing, with links to them. One narrow
+ * Studio request when the document opens (`SPACING_USAGE_QUERY`: only the sections that chose Compact
+ * or Spacious); the public site makes none.
  */
 export function SpacingUsageNote() {
   const client = useClient({ apiVersion })
@@ -84,7 +84,7 @@ export function SpacingUsageNote() {
     const controller = new AbortController()
     client
       // `raw` returns drafts beside published documents, as Content health does.
-      .fetch(CONTENT_HEALTH_QUERY, {}, { perspective: 'raw', signal: controller.signal })
+      .fetch(SPACING_USAGE_QUERY, {}, { perspective: 'raw', signal: controller.signal })
       .then((data) => {
         setState({ status: 'ready', documents: findSpacingOverrides(data) })
       })

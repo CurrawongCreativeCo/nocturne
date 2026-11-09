@@ -28053,6 +28053,183 @@ export type SETTINGS_QUERY_RESULT = {
   verificationMarker: null | string
 } | null
 
+// Source: src/features/studio/api/spacing-usage-query.ts
+// Variable: SPACING_USAGE_QUERY
+// Query: {  "pages": *[_type == "page"] {    _id,    title,    "pageBuilder": pageBuilder[style.spacing in ["compact", "spacious"]] {      _key,      _type,      title,      "style": { "spacing": style.spacing }    }  },  "sharedSections": *[_type == "sharedSection"] {    _id,    title,    "section": select(      section.style.spacing in ["compact", "spacious"] => section {        _key,        _type,        title,        "style": { "spacing": style.spacing }      }    )  }}
+export type SPACING_USAGE_QUERY_RESULT = {
+  pages: Array<{
+    _id: string
+    title: string
+    pageBuilder: Array<
+      | {
+          _key: string
+          _type: 'ctaBanner'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'embed'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'events'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'faq'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'featuresGrid'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'formSection'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'gallery'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'hero'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'linkList'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'location'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'logoCloud'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'mediaText'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'newsletterSignup'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'pricingTable'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'process'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'richText'
+          title: null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'stats'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'team'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'testimonials'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+      | {
+          _key: string
+          _type: 'video'
+          title: string | null
+          style: {
+            spacing: 'compact' | 'default' | 'spacious' | null
+          }
+        }
+    > | null
+  }>
+  sharedSections: Array<{
+    _id: string
+    title: string
+    section: null
+  }>
+}
+
 // Source: src/features/studio/content-health/api/query.ts
 // Variable: CONTENT_HEALTH_QUERY
 // Query: {  "pages": *[_type == "page"] {    _id,    title,    "slug": slug.current,    "metaDescription": seo.metaDescription,    pageBuilder  },  "sharedSections": *[_type == "sharedSection"] {    _id,    title,    section  },  "panels": *[_type == "panel"] {    _id,    title  },  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {    _id,    headerNav,    headerCta,    footerNav  },  "redirects": *[_type == "redirect"] {    _id,    source,    destination  }}
@@ -28932,6 +29109,7 @@ declare global {
     '\n  *[_type == "service" && slug.current == $slug][0] {\n    _id,\n    _type,\n    _updatedAt,\n    name,\n    "slug": slug.current,\n    summary,\n    image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n    body[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n    audience,\n    priceFrom,\n    priceUnit,\n    faqs[] { _key, question, answer },\n    "hasSections": count(sections[access != "members"]) > 0,\n    "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,\n    enquiry { label, variant, link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n } },\n    locations[defined(@->slug.current)]->{ _id, name, kind, "slug": slug.current },\n    evidence[defined(@->slug.current) && @->access != "members"]->{ _id, _type, title, "slug": slug.current },\n    "people": *[_type == "teamMember" && references(^._id)]\n      | order(coalesce(order, 999999) asc, name asc) {\n      _id,\n      name,\n      role,\n      "slug": slug.current\n    },\n    "articles": *[_type == "post" && defined(slug.current) && references(^._id)]\n      | order(publishedAt desc, _id desc) [0...6] {\n      _id,\n      title,\n      "slug": slug.current\n    }\n  }\n': SERVICE_QUERY_RESULT
     '\n  *[_type == "service" && defined(slug.current)] | order(name asc) {\n    "slug": slug.current,\n    _updatedAt\n  }\n': SERVICE_INDEX_QUERY_RESULT
     '\n  *[_id in ["siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "settings"]][0] {\n    "identity": coalesce(*[_id == "siteIdentity"][0], *[_id == "settings"][0]) {\n      title,\n      description,\n      logo { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n      ogImage { asset->{ _id } },\n      // Only when the editor chose their own icon: the default icon needs no data.\n      "browserIcon": select(\n        browserIcon.choice in ["upload", "logo"] && defined(browserIcon.image.asset) => {\n          "image": browserIcon.image { asset, crop, hotspot },\n          "padding": coalesce(browserIcon.padding, "none"),\n          "background": coalesce(browserIcon.background, "transparent")\n        }\n      ),\n      allowAiCrawlers,\n      verificationMarker\n    },\n    "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {\n      headerNav[] { \n  \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n,\n  children[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n }\n },\n      headerCta { \n  _key,\n  label,\n  variant,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerNav[] { \n  _key,\n  label,\n  link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n },\n      footerText,\n      \n  footerShowSocial,\n  footerSocialStyle,\n  footerIconDesign { \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n }\n\n    },\n    "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {\n      message,\n      link { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      startsAt,\n      endsAt,\n      dismissible\n    },\n    "consent": coalesce(*[_id == "cookieBanner"][0], *[_id == "settings"][0].consent) {\n      title,\n      message,\n      privacyLabel,\n      privacyLink { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n },\n      analyticsText,\n      marketingText\n    },\n    // Brand colours and gradients (resolveDesignTokens turns them into CSS variables in SiteShell).\n    "design": *[_id == "designSettings"][0] {\n      appearance,\n      primary,\n      secondary,\n      highlight,\n      surface,\n      surfaceAlt,\n      surfaceInverse,\n      ink,\n      inkMuted,\n      line,\n      density,\n      shape,\n      headingStyle,\n      cardDepth,\n      gradients[] { name, angle, stops }\n    },\n    // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).\n    "business": *[_id == "businessInfo"][0] {\n      tradingName,\n      legalName,\n      abn,\n      phone,\n      publicEmail,\n      address { street, suburb, state, postcode },\n      timeZone,\n      businessType,\n      businessTypeOther,\n      geo { lat, lng },\n      openingHours[] { _key, days, opens, closes, closed },\n      specialHours[] { _key, date, closed, opens, closes, note },\n      serviceAreas,\n      socialLinks[] { _key, platform, url },\n      priceRange\n    }\n  } {\n    "title": identity.title,\n    "description": identity.description,\n    "logo": identity.logo,\n    "ogImage": identity.ogImage,\n    "browserIcon": identity.browserIcon,\n    "announcement": announcement,\n    "headerNav": navigation.headerNav,\n    "headerCta": navigation.headerCta,\n    "footerNav": navigation.footerNav,\n    "footerText": navigation.footerText,\n    "footerShowSocial": navigation.footerShowSocial == true,\n    "footerSocialStyle": navigation.footerSocialStyle,\n    "footerIconDesign": navigation.footerIconDesign,\n    "consent": consent,\n    "design": design,\n    "business": business,\n    "allowAiCrawlers": identity.allowAiCrawlers != false,\n    "verificationMarker": identity.verificationMarker\n  }\n': SETTINGS_QUERY_RESULT
+    '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "pageBuilder": pageBuilder[style.spacing in ["compact", "spacious"]] {\n      _key,\n      _type,\n      title,\n      "style": { "spacing": style.spacing }\n    }\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    "section": select(\n      section.style.spacing in ["compact", "spacious"] => section {\n        _key,\n        _type,\n        title,\n        "style": { "spacing": style.spacing }\n      }\n    )\n  }\n}': SPACING_USAGE_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "panels": *[_type == "panel"] {\n    _id,\n    title\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '{\n  "recent": *[!(_type match "system.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt desc)[0...60] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "drafts": *[_id in path("drafts.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt asc)[0...200] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "enquiries": {\n    "new": count(*[_type == "enquiry" && status == "new"]),\n    "total": count(*[_type == "enquiry"])\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  }\n}': START_HERE_QUERY_RESULT
     '\n  *[_type == "teamMember" && slug.current == $slug][0] {\n    \n  _id,\n  _type,\n  _updatedAt,\n  name,\n  role,\n  "slug": slug.current,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  shortBio,\n  bio[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n  qualifications,\n  publicEmail,\n  phone,\n  socialLinks[] { _key, platform, url },\n  socialDisplay\n,\n    "pageSettings": *[_id == "teamPageSettings"][0] { \n  iconDesign { \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n }\n }\n  }\n': TEAM_MEMBER_QUERY_RESULT

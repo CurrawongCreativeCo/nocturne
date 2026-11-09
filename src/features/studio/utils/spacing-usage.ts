@@ -1,8 +1,8 @@
 /**
  * Which sections set their own spacing, for the note under Density on Brand colours (task 216b). A
  * section that chose Compact or Spacious keeps it whatever the site's Density is; one left on Default
- * (stored as `default`, or nothing) follows it, so only the first two are counted. Reads the same
- * documents as Content health, drafts included (the content editors see). Pure, so it is unit tested;
+ * (stored as `default`, or nothing) follows it, so only the first two are counted. Reads the result of
+ * `SPACING_USAGE_QUERY` (pages and shared sections, drafts included: the content editors see). Pure, so it is unit tested;
  * the component only fetches and draws.
  */
 import { resolveVersions } from '../content-health/utils/detect'

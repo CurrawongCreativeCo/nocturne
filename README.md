@@ -1635,8 +1635,9 @@ Studio access; see _Studio roles and permissions_).
 
   - **In Studio**, a preview under the colour mock-up shows a heading, body text, a button and a card at the chosen
     density, shape and heading style, and above the form a note counts the sections that set their own spacing (Compact
-    or Spacious, drafts included) with a link to each. It uses the Content health query already made in Studio; the
-    public site makes no extra request.
+    or Spacious, drafts included) with a link to each. It makes one narrow Studio-only query (`SPACING_USAGE_QUERY`: each
+    page's and shared section's title, and only the sections that chose Compact or Spacious); the public site makes no
+    request for it.
   - **Keep site-wide design changes in their own release.** A release publishes all or nothing, so a density, shape or
     heading change should not ride along with unrelated content.
 - **Font pairings** (`src/config/font-pairings.ts`) are vetted display and body pairs, as data only: nothing here loads
