@@ -106,7 +106,7 @@ export const designSettings = defineType({
       name: 'density',
       title: 'Density',
       description:
-        'How much room the site gives its sections and side margins. A section that chooses Compact or Spacious keeps its own spacing. Leave it empty to keep the spacing the site has now.',
+        'How much room the site gives its sections and side margins. Sections left on Default follow it; a section that chooses Compact or Spacious keeps its own spacing. Leave it empty to keep the spacing the site has now.',
       options: DENSITIES.map((value) => ({
         value,
         title: DENSITY_TITLES[value],

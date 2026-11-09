@@ -1100,6 +1100,8 @@ export const sectionStyle = defineType({
     defineField({
       name: 'spacing',
       title: 'Space above and below',
+      description:
+        'Default follows the site’s Density (Brand colours). Compact and Spacious keep their own spacing whatever the site’s Density is.',
       type: 'string',
       fieldset: 'layoutOptions',
       initialValue: 'default',

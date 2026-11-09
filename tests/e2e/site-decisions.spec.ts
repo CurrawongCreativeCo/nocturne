@@ -37,11 +37,12 @@ const section = (page: Page, name: string) =>
   page
     .locator('#main-content section')
     .filter({ has: page.getByRole('heading', { name: `Spacing ${name}` }) })
+/** The quote card: a `figure` drawn with `rounded-card`, one in each fixture section. */
+const card = (page: Page, name: string) => section(page, name).locator('figure')
 const px = (locator: Locator, property: 'paddingTop' | 'borderTopLeftRadius') =>
   locator.evaluate((element, name) => Number.parseFloat(getComputedStyle(element)[name]), property)
 const paddingOf = (page: Page, name: string) => px(section(page, name), 'paddingTop')
-const radiusOf = (page: Page, name: string) =>
-  px(section(page, name).locator('[class*="rounded-card"]').first(), 'borderTopLeftRadius')
+const radiusOf = (page: Page, name: string) => px(card(page, name), 'borderTopLeftRadius')
 
 /** The first request after an expiry may still get the old copy, so it is polled. */
 const read = (page: Page, value: () => Promise<number>) => async () => {
@@ -50,6 +51,9 @@ const read = (page: Page, value: () => Promise<number>) => async () => {
 }
 
 test.describe('Density', () => {
+  // Spacious is a clamp() of the viewport width, so it is read here and compared under each density.
+  let spacious = 0
+
   test('with nothing set, Default and unset sections use today’s 96px and Compact 64px', async ({
     page,
     request,
@@ -59,6 +63,8 @@ test.describe('Density', () => {
     expect(await paddingOf(page, 'unset')).toBe(96)
     expect(await paddingOf(page, 'default')).toBe(96)
     expect(await paddingOf(page, 'compact')).toBe(64)
+    spacious = await paddingOf(page, 'spacious')
+    expect(spacious).toBeGreaterThanOrEqual(128)
   })
 
   test('Airy gives a section with no spacing set more vertical padding, and a Compact section keeps its own', async ({
@@ -70,7 +76,8 @@ test.describe('Density', () => {
     // Explicit spacing overrides the site's density (task 216 acceptance).
     expect(await paddingOf(page, 'compact')).toBe(64)
     expect(await paddingOf(page, 'default')).toBe(120)
-    expect(await paddingOf(page, 'spacious')).toBeGreaterThanOrEqual(128)
+    // Likewise a section that chose Spacious.
+    expect(await paddingOf(page, 'spacious')).toBe(spacious)
   })
 
   test('Compact tightens a section with no spacing set, and a Compact section stays 64px', async ({
@@ -80,6 +87,8 @@ test.describe('Density', () => {
     await usePalette(request, 'density-compact')
     await expect.poll(read(page, () => paddingOf(page, 'unset'))).toBe(72)
     expect(await paddingOf(page, 'compact')).toBe(64)
+    expect(await paddingOf(page, 'default')).toBe(72)
+    expect(await paddingOf(page, 'spacious')).toBe(spacious)
   })
 
   test('the choice is in the first response: no client script or flash is needed', async ({
@@ -100,6 +109,7 @@ test.describe('Shape', () => {
     await usePalette(request, 'off')
     await page.goto('/site-decisions')
     expect(await radiusOf(page, 'unset')).toBe(16)
+    expect(await radiusOf(page, 'compact')).toBe(16)
   })
 
   test('Round changes --radius-card to 28px on every card, whatever its section spacing', async ({
@@ -119,6 +129,7 @@ test.describe('Shape', () => {
   test('Sharp gives 4px corners, and Density is untouched by it', async ({ page, request }) => {
     await usePalette(request, 'shape-sharp')
     await expect.poll(read(page, () => radiusOf(page, 'unset'))).toBe(4)
+    expect(await radiusOf(page, 'compact')).toBe(4)
     expect(await paddingOf(page, 'unset')).toBe(96)
   })
 
