@@ -1416,7 +1416,7 @@ export const designSettingsVariants = {
     cardDepth: 'floating',
     _updatedAt: UPDATED,
   },
-  // Site-wide Density and Shape (tests/e2e/site-decisions.spec.ts).
+  // Site-wide Density, Shape and Heading style (tests/e2e/site-decisions.spec.ts).
   'density-airy': {
     _id: 'designSettings',
     _type: 'designSettings',
@@ -1439,6 +1439,24 @@ export const designSettingsVariants = {
     _id: 'designSettings',
     _type: 'designSettings',
     shape: 'sharp',
+    _updatedAt: UPDATED,
+  },
+  'heading-editorial': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'editorial',
+    _updatedAt: UPDATED,
+  },
+  'heading-modern': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'modern',
+    _updatedAt: UPDATED,
+  },
+  'heading-classic': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'classic',
     _updatedAt: UPDATED,
   },
 }

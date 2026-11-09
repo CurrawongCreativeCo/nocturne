@@ -5,7 +5,7 @@ import { FAKE_SANITY_PORT, REVALIDATE_SECRET } from './constants'
 import { test } from './fixtures/test'
 
 /**
- * Site-wide Density and Shape (README, "Brand colours and design"; task 216b). `/site-decisions` has the
+ * Site-wide Density, Shape and Heading style (README, "Brand colours and design"; task 216b). `/site-decisions` has the
  * same quote section four times: with no spacing chosen and with Compact, Default and Spacious. A density
  * moves the Default spacing (and so a section with nothing chosen); a section that chose Compact or
  * Spacious keeps its own. A shape moves `--radius-card`. With nothing set the page is what tokens.json
@@ -14,7 +14,15 @@ import { test } from './fixtures/test'
 test.describe.configure({ mode: 'serial' })
 test.skip(({ isMobile }) => isMobile, 'Desktop only')
 
-type Palette = 'off' | 'density-airy' | 'density-compact' | 'shape-round' | 'shape-sharp'
+type Palette =
+  | 'off'
+  | 'density-airy'
+  | 'density-compact'
+  | 'shape-round'
+  | 'shape-sharp'
+  | 'heading-editorial'
+  | 'heading-modern'
+  | 'heading-classic'
 
 /** Serves a palette, then expires the cached settings the way the Sanity webhook does. */
 async function usePalette(request: APIRequestContext, palette: Palette) {
@@ -101,6 +109,98 @@ test.describe('Density', () => {
         return /--spacing-section:\s*7\.5rem/.test(await response.text())
       })
       .toBe(true)
+  })
+})
+
+/**
+ * Heading style: the fixture's h2 is 36px at desktop widths (the top of its clamp), 600 weight and
+ * -0.025em today. Provisional values (task 216b): Editorial 500, -0.04em, 110%; Modern 700, -0.03em;
+ * Classic 600, -0.01em, 95%.
+ */
+test.describe('Heading style', () => {
+  const heading = (page: Page) => page.getByRole('heading', { name: 'Spacing unset', level: 2 })
+  const look = (page: Page) =>
+    heading(page).evaluate((element) => {
+      const style = getComputedStyle(element)
+      return {
+        weight: style.fontWeight,
+        size: Number.parseFloat(style.fontSize),
+        tracking: Number.parseFloat(style.letterSpacing),
+      }
+    })
+  const lookIs = (page: Page, weight: string, size: number, em: number) => async () => {
+    await page.goto('/site-decisions')
+    const now = await look(page)
+    return (
+      now.weight === weight &&
+      Math.abs(now.size - size) < 0.05 &&
+      Math.abs(now.tracking - em * size) < 0.05
+    )
+  }
+
+  test('with nothing set, the heading is today’s: 600, 36px and -0.9px', async ({
+    page,
+    request,
+  }) => {
+    await usePalette(request, 'off')
+    await page.goto('/site-decisions')
+    expect(await look(page)).toEqual({ weight: '600', size: 36, tracking: -0.9 })
+    const root = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--heading-weight'),
+    )
+    expect(root).toBe('')
+  })
+
+  test('Editorial changes the h2’s weight, letter spacing and size', async ({ page, request }) => {
+    await usePalette(request, 'heading-editorial')
+    await expect.poll(lookIs(page, '500', 39.6, -0.04)).toBe(true)
+  })
+
+  test('Modern is heavier and tighter at the same size', async ({ page, request }) => {
+    await usePalette(request, 'heading-modern')
+    await expect.poll(lookIs(page, '700', 36, -0.03)).toBe(true)
+  })
+
+  test('Classic is a little smaller at today’s weight, with less tightening', async ({
+    page,
+    request,
+  }) => {
+    await usePalette(request, 'heading-classic')
+    await expect.poll(lookIs(page, '600', 34.2, -0.01)).toBe(true)
+  })
+
+  test('a style reaches every section heading, and the fonts are untouched', async ({
+    page,
+    request,
+  }) => {
+    const family = () => heading(page).evaluate((element) => getComputedStyle(element).fontFamily)
+    await usePalette(request, 'off')
+    await page.goto('/site-decisions')
+    const before = await family()
+    await usePalette(request, 'heading-modern')
+    await expect.poll(lookIs(page, '700', 36, -0.03)).toBe(true)
+    for (const name of ['compact', 'default', 'spacious']) {
+      const weight = await page
+        .getByRole('heading', { name: `Spacing ${name}`, level: 2 })
+        .evaluate((element) => getComputedStyle(element).fontWeight)
+      expect(weight).toBe('700')
+    }
+    expect(await family()).toBe(before)
+  })
+
+  test('the choice is in the first response: no client script or flash is needed', async ({
+    request,
+  }) => {
+    await usePalette(request, 'heading-editorial')
+    await expect
+      .poll(async () =>
+        /--heading-weight:\s*500/.test(await (await request.get('/site-decisions')).text()),
+      )
+      .toBe(true)
+  })
+
+  test.afterAll(async ({ request }) => {
+    await usePalette(request, 'off')
   })
 })
 
