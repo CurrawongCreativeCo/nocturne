@@ -47,6 +47,7 @@ export const blogSettingsFields = /* groq */ `
     shadow,
     glow,
     glowColour { colour, hex },
+    lift,
     meta { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
     title { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
     body { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },

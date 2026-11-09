@@ -22,6 +22,7 @@ export function CardSurface({
   own,
   shadow = '',
   depth,
+  lift = false,
   drawnClass,
   design,
   mark,
@@ -35,6 +36,11 @@ export function CardSurface({
   shadow?: string
   /** A chosen shadow level or glow (resolveCardDepth), put in place of `shadow`. A transparent card has no edge for it, so it drops it too. */
   depth?: ElementDepth
+  /**
+   * The card is one link and lifts under the pointer or keyboard focus (resolveCardLift). Wraps it in a
+   * block that carries the movement and a shadow layer, so an `overflow-hidden` card can't clip either.
+   */
+  lift?: boolean
   /** Added once a fill or border is chosen, for a family with no surface of its own (a post card's corners and padding). */
   drawnClass?: string
   design: SurfaceDesign
@@ -61,7 +67,16 @@ export function CardSurface({
     style: lifted ? { ...look.style, ...lifted.style } : look.style,
   }
   // Only present with a mark: an empty slot would shift every useId inside the card.
-  return mark && hasMark
-    ? createElement(as, props, <DecorativeMark {...mark} nested />, children)
-    : createElement(as, props, children)
+  const card =
+    mark && hasMark
+      ? createElement(as, props, <DecorativeMark {...mark} nested />, children)
+      : createElement(as, props, children)
+  return lift ? (
+    <div className="card-lift">
+      <span aria-hidden="true" className="card-lift__shadow" />
+      {card}
+    </div>
+  ) : (
+    card
+  )
 }

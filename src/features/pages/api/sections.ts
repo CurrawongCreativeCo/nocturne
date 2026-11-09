@@ -163,7 +163,7 @@ export const logoCloudFragment = /* groq */ `
  * section's (whose Featured layout draws the one card).
  */
 /** A card's shadow level and glow (depthFields). */
-const depthProjection = /* groq */ `shadow, glow, glowColour { colour, hex }`
+const depthProjection = /* groq */ `shadow, glow, glowColour { colour, hex }, lift`
 
 const teamCardDesignProjection = /* groq */ `
   ${surfaceProjection},

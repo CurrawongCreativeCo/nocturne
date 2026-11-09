@@ -227,11 +227,17 @@ export function resolveDepth(input: DepthInput | null | undefined): ResolvedDept
   }
 }
 
+export const LIFT_LEVELS = ['none', 'lift'] as const
+export type LiftLevel = (typeof LIFT_LEVELS)[number]
+
+export const LIFT_TITLES: Record<LiftLevel, string> = { none: 'None', lift: 'Lift' }
+
 /** One level of a card's stored depth: an item's, then the section's Cards box. */
 export interface CardDepthLevel {
   shadow?: string | null
   glow?: string | null
   glowColour?: ThemeColourInput | null
+  lift?: string | null
 }
 
 /**
@@ -263,4 +269,19 @@ export function resolveCardDepth(
     },
     own,
   )
+}
+
+/**
+ * Whether a card lifts under the pointer: the first level that chose None or Lift. Undefined while
+ * nothing is chosen, which is "as the family draws it". The card must also be one link: a lift on a card
+ * that goes nowhere promises something it can't do, so callers ask only of linked cards.
+ */
+export function resolveCardLift(
+  levels: readonly (CardDepthLevel | null | undefined)[],
+): LiftLevel | undefined {
+  for (const level of levels) {
+    const chosen = level ? pick(LIFT_LEVELS, level.lift) : undefined
+    if (chosen) return chosen
+  }
+  return undefined
 }

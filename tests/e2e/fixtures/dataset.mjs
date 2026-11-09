@@ -1547,6 +1547,20 @@ export const blogSettingsDesigned = {
   },
 }
 
+/**
+ * The same, with a Raised shadow, a glow and Lift (tests/e2e/blog-card-design.spec.ts): every post card is
+ * one link, so every card lifts.
+ */
+export const blogSettingsLifted = {
+  ...blogSettingsDesigned,
+  cardDesign: {
+    ...blogSettingsDesigned.cardDesign,
+    shadow: 'raised',
+    glow: 'soft',
+    lift: 'lift',
+  },
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 
@@ -4973,6 +4987,35 @@ documents.push(
           }),
           plan('price_Pro1', { features: ['Unlimited projects'] }),
         ],
+      },
+      // Hover lift (tests/e2e/card-lift.spec.ts): a team card that links to a member's page, with Lift
+      // chosen; the same card with None (which replaces the Motion rise it has when nothing is chosen);
+      // and one with nothing chosen, which keeps that rise and draws no lift wrapper.
+      {
+        _key: 'cd-team-lift',
+        _type: 'team',
+        variant: 'grid',
+        selection: 'picked',
+        title: 'Team lift',
+        cardDesign: { _type: 'object', lift: 'lift' },
+        members: [{ _key: 'lift-dev', ...ref('teamMember-dev') }],
+      },
+      {
+        _key: 'cd-team-none',
+        _type: 'team',
+        variant: 'grid',
+        selection: 'picked',
+        title: 'Team none',
+        cardDesign: { _type: 'object', lift: 'none' },
+        members: [{ _key: 'none-dev', ...ref('teamMember-dev') }],
+      },
+      {
+        _key: 'cd-team-unset',
+        _type: 'team',
+        variant: 'grid',
+        selection: 'picked',
+        title: 'Team unset',
+        members: [{ _key: 'unset-dev', ...ref('teamMember-dev') }],
       },
       {
         _key: 'cd-social',

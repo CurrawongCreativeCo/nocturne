@@ -158,7 +158,14 @@ interface CardFieldsConfig {
    * The card's shadow level and glow (task 146, depthFields): inherit the section's, then the site's
    * Card depth, then what the family draws. Off for a family that has not adopted it.
    */
-  depth?: { hidden?: ConditionalPropertyCallback; inherits?: string } | false
+  depth?:
+    | {
+        hidden?: ConditionalPropertyCallback
+        inherits?: string
+        /** Offers Hover lift, for a family whose cards link to a page. */
+        lift?: { hidden?: ConditionalPropertyCallback } | false
+      }
+    | false
   /** What each role is drawn in until one is chosen, for the background's contrast warning. */
   defaults?: RoleDefaultColours
   /** The array an item's design sits in, for the item-level contrast warning. */
@@ -276,6 +283,7 @@ export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
       ? depthFields({
           fieldset: 'depth',
           hidden: both(hidden, depth.hidden),
+          lift: depth.lift,
           inherits:
             depth.inherits ??
             (inItem

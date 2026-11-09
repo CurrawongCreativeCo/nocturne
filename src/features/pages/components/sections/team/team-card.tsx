@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { stegaClean } from 'next-sanity'
+import type { ElementType } from 'react'
 
 import { HoverLift } from '@/components/motion/hover-lift'
 import { ActionIndicator } from '@/components/ui/action-indicator'
@@ -11,7 +12,12 @@ import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
-import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import {
+  CARD_SHADOW_CLASS,
+  OWN_SHADOW,
+  resolveCardDepth,
+  resolveCardLift,
+} from '@/lib/sanity/depth-options'
 import { resolveImageDesign } from '@/lib/sanity/image-design-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
 import { hasImageDesign } from '@/lib/sanity/team-portrait'
@@ -108,13 +114,27 @@ function MemberName({
 }
 
 /** Portrait on top, then name, role and short bio. Fills the height it is given (grid and slider). */
+/**
+ * How a card or row moves. Unset keeps the Motion hover rise it always had; choosing None or Lift
+ * replaces it, and Lift then applies only to a card that links to a member's page.
+ */
+function liftOf(member: Member, cardDesign: CardProps['cardDesign']) {
+  const chosen = resolveCardLift([cardDesign])
+  return {
+    as: (chosen === undefined ? HoverLift : 'div') as ElementType,
+    lift: chosen === 'lift' && isLinked(member),
+  }
+}
+
 export function TeamCard({ member, design, headingLevel, eager, cardDesign, tone }: CardProps) {
   // The default portrait fills the top of the card; a shape of its own (a circle, an arch) sits inside it.
   const inset = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE).shape !== 'square'
   const look = resolveCardDesign(cardDesign, ROLES)
+  const motion = liftOf(member, cardDesign)
   return (
     <CardSurface
-      as={HoverLift}
+      as={motion.as}
+      lift={motion.lift}
       className={`${surface} flex h-full w-full flex-col overflow-hidden${groupOf(member, cardDesign)}`}
       own={OWN_SURFACE}
       shadow={CARD_SHADOW_CLASS.shadowed}
@@ -205,9 +225,11 @@ export function TeamRow({
 }: CardProps & { portrait?: Portrait }) {
   const legacy = hasImageDesign(stegaClean(design))
   const look = resolveCardDesign(cardDesign, ROLES)
+  const motion = liftOf(member, cardDesign)
   return (
     <CardSurface
-      as={HoverLift}
+      as={motion.as}
+      lift={motion.lift}
       className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6${groupOf(member, cardDesign)}`}
       own={OWN_SURFACE}
       shadow={CARD_SHADOW_CLASS.shadowed}

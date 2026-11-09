@@ -7,6 +7,7 @@ import {
   depthLook,
   glowTargetsOf,
   resolveCardDepth,
+  resolveCardLift,
   resolveDepth,
 } from './depth-options'
 
@@ -179,5 +180,19 @@ describe('resolveCardDepth', () => {
     expect(
       resolveCardDepth([{ shadow: 'enormous', glow: 'blinding' }], OWN_SHADOW.siteCard),
     ).toBeUndefined()
+  })
+})
+
+describe('resolveCardLift', () => {
+  it('is undefined while nothing is chosen, so the family keeps its own movement', () => {
+    expect(resolveCardLift([])).toBeUndefined()
+    expect(resolveCardLift([undefined, null, {}, { lift: null }])).toBeUndefined()
+    expect(resolveCardLift([{ lift: 'bounce' }])).toBeUndefined()
+  })
+
+  it('takes the first level that chose None or Lift, so None turns a section’s Lift off', () => {
+    expect(resolveCardLift([{ lift: 'lift' }])).toBe('lift')
+    expect(resolveCardLift([{ lift: 'none' }, { lift: 'lift' }])).toBe('none')
+    expect(resolveCardLift([{}, { lift: 'lift' }])).toBe('lift')
   })
 })

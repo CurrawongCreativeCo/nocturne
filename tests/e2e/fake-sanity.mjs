@@ -18,6 +18,7 @@ import {
   experimentRunning,
   footerSocialOn,
   blogSettingsDesigned,
+  blogSettingsLifted,
   markerUnset,
   navigationNested,
   releaseVersions,
@@ -54,7 +55,7 @@ let experimentPatch = null
 /** Whether the footer's social icons are on; switched by POST /__fixture/footer-social/<on|off>. */
 let footerSocialPatch = null
 
-/** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|off>. */
+/** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|lift|off>. */
 let blogSettingsPatch = null
 
 /** Whether the header menu has dropdowns; switched by POST /__fixture/navigation/<flat|nested>. */
@@ -142,9 +143,14 @@ createServer(async (req, res) => {
     res.writeHead(204).end()
     return
   }
-  const blogSettings = /^\/__fixture\/blog-settings\/(on|off)$/.exec(url.pathname)?.[1]
+  const blogSettings = /^\/__fixture\/blog-settings\/(on|lift|off)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && blogSettings) {
-    blogSettingsPatch = blogSettings === 'on' ? blogSettingsDesigned : null
+    blogSettingsPatch =
+      blogSettings === 'on'
+        ? blogSettingsDesigned
+        : blogSettings === 'lift'
+          ? blogSettingsLifted
+          : null
     res.writeHead(204).end()
     return
   }

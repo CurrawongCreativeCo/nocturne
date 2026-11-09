@@ -6,6 +6,8 @@ import {
   GLOW_COLOUR_CHOICES,
   GLOW_LEVELS,
   GLOW_TITLES,
+  LIFT_LEVELS,
+  LIFT_TITLES,
   SHADOW_DESCRIPTIONS,
   SHADOW_LEVELS,
   SHADOW_TITLES,
@@ -508,10 +510,13 @@ export function depthFields({
   hidden,
   inherits = 'the site’s Card depth, or the layout’s own shadow',
   fieldset,
+  lift,
 }: {
   hidden?: ConditionalPropertyCallback
   inherits?: string
   fieldset?: string
+  /** Offered where the whole card is one link: it rises under the pointer and keyboard focus. */
+  lift?: { hidden?: ConditionalPropertyCallback } | false
 }) {
   const glowOff: ConditionalPropertyCallback = (context) => {
     const glow = (context.parent as { glow?: string } | undefined)?.glow
@@ -550,5 +555,20 @@ export function depthFields({
       fieldset,
       hidden: glowOff,
     }),
+    ...(lift
+      ? [
+          choiceField({
+            name: 'lift',
+            title: 'Hover lift',
+            description:
+              'The card rises a little under the pointer and keyboard focus, and only cards that link to a page lift. Visitors who ask for less motion see none.',
+            values: LIFT_LEVELS,
+            titles: LIFT_TITLES,
+            inherits: 'the layout’s own movement',
+            fieldset,
+            hidden: (context) => (hidden?.(context) ?? false) || (lift.hidden?.(context) ?? false),
+          }),
+        ]
+      : []),
   ].map((field) => builtBy('depthFields', field, 'depth'))
 }

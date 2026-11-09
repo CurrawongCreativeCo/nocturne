@@ -9743,11 +9743,26 @@
                 "reachable": true
               },
               "closingTask": 146,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "cardDesign.shadow"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "faq.depth.card.cards",
+              "field": "cardDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/faq.tsx",
+              "target": "div.relative.rounded-card",
+              "cases": [
+                "faq.depth.card.cards"
+              ]
+            }
+          ]
         },
         "icon": {
           "notApplicable": "The chevron is a disclosure state, not an icon choice (137)"
@@ -20946,6 +20961,23 @@
           "kind": "string",
           "required": null,
           "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.lift",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "lift",
+              "title": "Lift"
+            }
+          ],
+          "capability": "depth",
           "clientEditable": false
         },
         {
@@ -32402,6 +32434,23 @@
           "kind": "string",
           "required": null,
           "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.lift",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "lift",
+              "title": "Lift"
+            }
+          ],
+          "capability": "depth",
           "clientEditable": false
         },
         {

@@ -82,4 +82,30 @@ describe('CardSurface', () => {
       expect(html).not.toContain('--depth-shadow')
     })
   })
+
+  describe('lift', () => {
+    const drawLift = (lift: boolean) =>
+      renderToStaticMarkup(
+        <CardSurface
+          as="figure"
+          className={CLASSES}
+          own={OWN}
+          shadow="shadow-card"
+          design={{}}
+          lift={lift}
+        >
+          x
+        </CardSurface>,
+      )
+
+    it('draws the card exactly as before unless it lifts', () => {
+      expect(drawLift(false)).toBe(`<figure class="${CLASSES}">x</figure>`)
+    })
+
+    it('wraps a lifting card in a block that carries the movement, with a decorative shadow layer behind it', () => {
+      expect(drawLift(true)).toBe(
+        `<div class="card-lift"><span aria-hidden="true" class="card-lift__shadow"></span><figure class="${CLASSES}">x</figure></div>`,
+      )
+    })
+  })
 })

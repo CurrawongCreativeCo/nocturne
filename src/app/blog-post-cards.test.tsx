@@ -135,6 +135,23 @@ describe('a post card’s depth and glow', () => {
   })
 })
 
+describe('a post card’s hover lift', () => {
+  it('draws no lift wrapper until Lift is chosen, and None keeps the card as it was', async () => {
+    for (const design of [undefined, { lift: 'none' }]) {
+      expect((await draw(design)).querySelector('.card-lift')).toBeNull()
+    }
+  })
+
+  it('wraps the card, which is one link, in the lift block when Lift is chosen', async () => {
+    const document = await draw({ lift: 'lift' })
+    const wrapper = document.querySelector('.card-lift')
+    expect(wrapper?.querySelector(':scope > .card-lift__shadow')?.getAttribute('aria-hidden')).toBe(
+      'true',
+    )
+    expect(wrapper?.querySelectorAll('article a')).toHaveLength(1)
+  })
+})
+
 describe('Blog settings in the contract', () => {
   const schema = COMPONENT_SCHEMAS.get('blogPostCards')
 

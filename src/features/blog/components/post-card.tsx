@@ -9,7 +9,12 @@ import { postPath } from '@/config/paths'
 import { formatDate } from '@/lib/format-date'
 import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
-import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import {
+  CARD_SHADOW_CLASS,
+  OWN_SHADOW,
+  resolveCardDepth,
+  resolveCardLift,
+} from '@/lib/sanity/depth-options'
 import { textRoleProps } from '@/lib/sanity/text-role'
 
 import type { BlogCardDesign, PostCardData } from '../types'
@@ -65,6 +70,7 @@ export function PostCard({
       own={OWN_SURFACE}
       drawnClass={surfaced && !depth ? `${DRAWN} ${CARD_SHADOW_CLASS.free}` : DRAWN}
       depth={depth}
+      lift={resolveCardLift([cardDesign]) === 'lift'}
       design={look.surface}
       mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >

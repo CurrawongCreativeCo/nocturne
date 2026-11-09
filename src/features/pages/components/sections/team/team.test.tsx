@@ -149,3 +149,27 @@ describe('Team depth and glow', () => {
     expect(depthOf(card)).toBe('var(--shadow-soft, var(--shadow-card))')
   })
 })
+
+describe('Team hover lift', () => {
+  const wrappers = (document: Document) => document.querySelectorAll('.card-lift')
+
+  it('draws no lift wrapper until Lift is chosen, whatever else is chosen', async () => {
+    for (const cardDesign of [undefined, {}, { lift: 'none' }, { shadow: 'raised' }]) {
+      const document = await draw('grid', cardDesign ? { cardDesign } : {})
+      expect(wrappers(document)).toHaveLength(0)
+    }
+  })
+
+  it('wraps only the cards that link to a member’s page, once Lift is chosen', async () => {
+    const document = await draw('grid', { cardDesign: { lift: 'lift' } })
+    const linked = cards(document).filter((card) => card.querySelector('a'))
+    expect(wrappers(document)).toHaveLength(linked.length)
+    for (const wrapper of wrappers(document)) {
+      expect(wrapper.querySelectorAll('a')).toHaveLength(1)
+    }
+    // The cards that go nowhere don't lift.
+    expect(
+      cards(document).filter((card) => !card.closest('.card-lift') && card.querySelector('a')),
+    ).toEqual([])
+  })
+})

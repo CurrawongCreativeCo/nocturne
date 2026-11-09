@@ -707,3 +707,47 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
     stroke-dashoffset: 0;
   }
 }
+
+/*
+ * Hover lift (task 146): a card that is one link rises a little and gains a deeper shadow under the
+ * pointer or keyboard focus. The card is wrapped (`.card-lift`, CardSurface) so nothing clips the shadow
+ * layer, which is drawn once and only fades in: transform and opacity animate, never box-shadow.
+ * Visitors who ask for less motion get no lift at all, and a touch screen never hovers. Focus is the
+ * link's own outline, drawn as it always was.
+ */
+@layer components {
+  .card-lift {
+    position: relative;
+    height: 100%;
+  }
+  .card-lift__shadow {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-floating);
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card-lift {
+      transition: transform var(--duration-fast) var(--ease-out);
+    }
+    .card-lift__shadow {
+      transition: opacity var(--duration-fast) var(--ease-out);
+    }
+    @media (hover: hover) {
+      .card-lift:hover {
+        transform: translateY(-0.25rem);
+      }
+      .card-lift:hover > .card-lift__shadow {
+        opacity: 1;
+      }
+    }
+    .card-lift:has(a:focus-visible) {
+      transform: translateY(-0.25rem);
+    }
+    .card-lift:has(a:focus-visible) > .card-lift__shadow {
+      opacity: 1;
+    }
+  }
+}
