@@ -81,8 +81,55 @@ const headingStyle = decision('headingStyle', {
   classic: headingStyleVariables(HEADING_STYLES.classic),
 })
 
+/**
+ * The main button's shadow (task 148). Sets `--button-depth`, which only buttons read, so `--shadow-*`
+ * and every card are untouched. Flat is today's look and emits nothing. Soft and Raised reuse the
+ * card shadow levels (tokens.json), so the two stay one scale.
+ */
+const buttonDepth = decision('buttonDepth', {
+  flat: {},
+  soft: { '--button-depth': 'var(--shadow-soft, var(--shadow-card))' },
+  raised: { '--button-depth': 'var(--shadow-raised)' },
+})
+
+/**
+ * The main button's glow (task 148): the halo size and strength of Task 146's glow tokens, in the
+ * Primary colour (`--color-accent`, 146's default). Sets `--button-glow`; the secondary button never
+ * reads it. Off is today's look and emits nothing.
+ */
+const glowOf = (level: 'soft' | 'strong') =>
+  `var(--depth-glow-${level}) color-mix(in oklch, var(--color-accent) var(--depth-glow-${level}-strength), transparent)`
+
+const buttonGlow = decision('buttonGlow', {
+  off: {},
+  soft: { '--button-glow': glowOf('soft') },
+  strong: { '--button-glow': glowOf('strong') },
+})
+
+/**
+ * The secondary button's style (task 148). Soft fill swaps the outline for a tint of the button's own
+ * text colour (`currentcolor`, so it follows every section's tone, which a `:root` variable would
+ * not). Outline is today's look and emits nothing.
+ */
+const secondaryButton = decision('secondaryButton', {
+  outline: {},
+  soft: {
+    '--button-secondary-fill': 'color-mix(in oklch, currentcolor 10%, transparent)',
+    '--button-secondary-fill-hover': 'color-mix(in oklch, currentcolor 18%, transparent)',
+    '--button-secondary-ring': 'transparent',
+  },
+})
+
 /** The decisions the site honours, by name. */
-export const SITE_DECISIONS = { density, shape, headingStyle, cardDepth }
+export const SITE_DECISIONS = {
+  density,
+  shape,
+  headingStyle,
+  cardDepth,
+  buttonDepth,
+  buttonGlow,
+  secondaryButton,
+}
 
 export type SiteDecisionName = keyof typeof SITE_DECISIONS
 

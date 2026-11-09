@@ -4,7 +4,7 @@ import { colorHex } from '@/config/tokens.generated'
 import { siteDecisionVars, type SiteDecisionInput } from '@/lib/design/site-decisions'
 
 import { adjustLightnessForContrast, contrastRatio } from './contrast'
-import { brandGradients, type GradientInput } from './gradients'
+import { brandGradients, gradientInk, type GradientInput } from './gradients'
 import { HEX_PATTERN, hexToOklch, oklchToHex } from './oklch'
 
 /** The generated token colours, camelCase hex (what `colorHex` in tokens.generated.ts holds). */
@@ -25,6 +25,10 @@ export interface DesignOverrides extends SiteDecisionInput {
   inkMuted?: string | null
   line?: string | null
   gradients?: readonly (GradientInput | null)[] | null
+  /** Brand colours → Buttons: `gradient` fills the main button from the gradient named by `buttonGradient`. */
+  buttonFill?: string | null
+  /** The slug of one of `gradients` (as a section's Gradient stores it). */
+  buttonGradient?: string | null
 }
 
 /** Text needs 4.5:1 (WCAG 2.2 AA); borders, icons and large text need 3:1. */
@@ -368,6 +372,32 @@ export function resolveDesignTokens(
         })
       }
     })
+  }
+
+  // 6b. The main button's Brand gradient (task 148). Anything that cannot be drawn with readable text
+  // leaves the Solid button and says why in a warning (never an error, as for every derived pair).
+  if (input.buttonFill === 'gradient') {
+    const slug = input.buttonGradient
+    const gradient = brandGradients(input.gradients).find((item) => item.slug === slug)
+    if (!gradient) {
+      warnings.push({
+        field: 'buttonGradient',
+        message: slug
+          ? 'This gradient is no longer in Advanced, so the main button stays Solid. Choose another gradient.'
+          : 'Choose a gradient for the main button. Until then it stays Solid.',
+      })
+    } else {
+      const ink = gradientInk(gradient.stops, TEXT_RATIO)
+      if (ink) {
+        vars['--button-fill'] = gradient.css
+        vars['--button-fill-ink'] = ink.ink
+      } else {
+        warnings.push({
+          field: 'buttonGradient',
+          message: `No single text colour reaches ${TEXT_RATIO}:1 along "${gradient.name}" (checked at every stop, each midpoint and between), so the main button stays Solid. Choose a gradient whose colours are all light or all dark.`,
+        })
+      }
+    }
   }
 
   // 7. Only what differs from tokens.json is emitted.
