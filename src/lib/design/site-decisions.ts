@@ -20,56 +20,21 @@ export interface SiteDecision<Choice extends string = string> {
   readonly choices: Readonly<Record<Choice, SiteDecisionVars>>
 }
 
-const decision = <Choice extends string>(
+export const decision = <Choice extends string>(
   field: string,
   choices: Record<Choice, SiteDecisionVars>,
 ): SiteDecision<Choice> => ({ field, choices })
 
 /**
- * How much room sections and the page edge leave. Section spacing (compact, default, spacious) stays
- * relative: a section's own choice still picks its step, and the steps move together.
+ * The decisions the site honours, by name. Empty until the tasks that own them register theirs:
+ * density and shape (216b), Card depth (146). Each is one `decision(...)` entry here.
  */
-const density = decision('density', {
-  compact: {
-    '--spacing-section-compact': '2.5rem',
-    '--spacing-section': '4rem',
-    '--spacing-section-spacious': 'clamp(5rem, 1rem + 16vw, 8rem)',
-    '--spacing-gutter': '1.25rem',
-  },
-  standard: {},
-  airy: {
-    '--spacing-section-compact': '5.5rem',
-    '--spacing-section': '8rem',
-    '--spacing-section-spacious': 'clamp(10rem, 3rem + 28vw, 15rem)',
-    '--spacing-gutter': '2rem',
-  },
-})
-
-/** How round corners are. `soft` is today's look. Buttons and pills follow the card's character. */
-const shape = decision('shape', {
-  sharp: {
-    '--radius-sm': '0',
-    '--radius-control': '0.125rem',
-    '--radius-card': '0.125rem',
-    '--radius-panel': '0.25rem',
-    '--radius-button': '0.125rem',
-    '--radius-pill': '0.125rem',
-  },
-  soft: {},
-  round: {
-    '--radius-sm': '0.5rem',
-    '--radius-control': '1rem',
-    '--radius-card': '1.75rem',
-    '--radius-panel': '2.25rem',
-  },
-})
-
-/** The decisions the site honours, by name. Task 146 adds Card depth here. */
-export const SITE_DECISIONS = { density, shape } as const
+export const SITE_DECISIONS = {} satisfies Readonly<Record<string, SiteDecision>>
 
 export type SiteDecisionName = keyof typeof SITE_DECISIONS
 
-/** The choices stored on Brand colours, as the settings query returns them. */
+/** The choices stored on Brand colours, as the settings query returns them. Empty until a decision is registered. */
+// eslint-disable-next-line @typescript-eslint/no-generated-empty-object-type
 export type SiteDecisionInput = Partial<Record<SiteDecisionName, string | null>>
 
 /**
