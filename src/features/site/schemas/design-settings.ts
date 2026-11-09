@@ -3,8 +3,25 @@ import { defineField, defineType, type StringRule } from 'sanity'
 
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
+import {
+  DENSITIES,
+  DENSITY_DESCRIPTIONS,
+  DENSITY_TITLES,
+  SHAPES,
+  SHAPE_DESCRIPTIONS,
+  SHAPE_TITLES,
+} from '@/lib/design/site-decision-options'
 import { SHADOW_DESCRIPTIONS, SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { hiddenFromClients } from '@/lib/sanity/roles'
+import { presetField } from '@/lib/sanity/schema/preset-field'
+import {
+  DensityAiryThumbnail,
+  DensityCompactThumbnail,
+  DensityStandardThumbnail,
+  ShapeRoundThumbnail,
+  ShapeSharpThumbnail,
+  ShapeSoftThumbnail,
+} from '@/lib/sanity/schema/thumbnails/site-decision-thumbnails'
 
 import { ColourInput } from '../components/colour-input'
 import { DesignSettingsInput } from '../components/design-settings-input'
@@ -85,6 +102,46 @@ export const designSettings = defineType({
       'A supporting colour for highlights, tags and gradients.',
     ),
     colourField('highlight', 'Highlight', 'Optional. A bright accent for marking a word or badge.'),
+    presetField({
+      name: 'density',
+      title: 'Density',
+      description:
+        'How much room the site gives its sections and side margins. A section that chooses Compact or Spacious keeps its own spacing. Leave it empty to keep the spacing the site has now.',
+      options: DENSITIES.map((value) => ({
+        value,
+        title: DENSITY_TITLES[value],
+        description: DENSITY_DESCRIPTIONS[value],
+        thumbnail: {
+          compact: DensityCompactThumbnail,
+          standard: DensityStandardThumbnail,
+          airy: DensityAiryThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'standard',
+      hidden: hiddenFromClients,
+    }),
+    presetField({
+      name: 'shape',
+      title: 'Shape',
+      description:
+        'How rounded cards, panels and form controls are, across the site. Buttons keep their shape. Leave it empty to keep the corners the site has now.',
+      options: SHAPES.map((value) => ({
+        value,
+        title: SHAPE_TITLES[value],
+        description: SHAPE_DESCRIPTIONS[value],
+        thumbnail: {
+          sharp: ShapeSharpThumbnail,
+          soft: ShapeSoftThumbnail,
+          round: ShapeRoundThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'soft',
+      hidden: hiddenFromClients,
+    }),
     defineField({
       name: 'cardDepth',
       title: 'Card depth',

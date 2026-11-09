@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { resolveSectionStyle } from '@/components/ui/section-style'
-
 import { SHADOW_LEVELS } from '@/lib/sanity/depth-options'
 
 import { SITE_DECISIONS, siteDecisionVars, type SiteDecision } from './site-decisions'
