@@ -133,6 +133,10 @@ export const shadowLevelOf = (value: string | null | undefined): ShadowLevel | u
 export const glowLevelOf = (value: string | null | undefined): GlowLevel =>
   pick(GLOW_LEVELS, value) ?? 'off'
 
+/** A glow level that was chosen (Off included), or undefined while it is inherited. */
+export const glowChoiceOf = (value: string | null | undefined): GlowLevel | undefined =>
+  pick(GLOW_LEVELS, value)
+
 /** The ticked targets that exist; Links when none are. */
 export function glowTargetsOf(values: DepthInput['glowTargets']): GlowTarget[] {
   const chosen = GLOW_TARGETS.filter((target) =>
@@ -221,4 +225,42 @@ export function resolveDepth(input: DepthInput | null | undefined): ResolvedDept
     social: (own) => depthLook({ level: social, glow: glowFor('social'), glowColour }, own),
     picture: depthFilter({ level: picture, glow: glowFor('picture'), glowColour }),
   }
+}
+
+/** One level of a card's stored depth: an item's, then the section's Cards box. */
+export interface CardDepthLevel {
+  shadow?: string | null
+  glow?: string | null
+  glowColour?: ThemeColourInput | null
+}
+
+/**
+ * A card's depth. Each property comes from the first level that chose it (an item over its section's
+ * Cards box); an empty property inherits, ending at the site's Card depth (`--card-depth`, through
+ * `own`) and then the family's own shadow. `own` is one of `OWN_SHADOW.siteCard` or `siteCardFree`.
+ * Undefined while nothing is chosen, so the family draws exactly what it did.
+ */
+export function resolveCardDepth(
+  levels: readonly (CardDepthLevel | null | undefined)[],
+  own: string,
+): ElementDepth | undefined {
+  const first = <T>(read: (level: CardDepthLevel) => T | undefined) => {
+    for (const level of levels) {
+      const value = level ? read(level) : undefined
+      if (value !== undefined) return value
+    }
+    return undefined
+  }
+  const glow = first((level) => glowChoiceOf(level.glow))
+  return depthLook(
+    {
+      level: first((level) => shadowLevelOf(level.shadow)),
+      glow,
+      glowColour: first((level) => {
+        const colour = stegaClean(level.glowColour?.colour)
+        return colour && colour !== 'inherit' ? level.glowColour : undefined
+      }),
+    },
+    own,
+  )
 }

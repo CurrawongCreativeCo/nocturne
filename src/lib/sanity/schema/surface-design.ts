@@ -2,6 +2,14 @@ import { defineField, type ConditionalProperty, type ConditionalPropertyCallback
 
 import type { TextRole } from '@/lib/design/capabilities'
 
+import {
+  GLOW_COLOUR_CHOICES,
+  GLOW_LEVELS,
+  GLOW_TITLES,
+  SHADOW_DESCRIPTIONS,
+  SHADOW_LEVELS,
+  SHADOW_TITLES,
+} from '../depth-options'
 import type { DesignSummaryConfig } from '../design-summary'
 import {
   INLINE_CASE_TITLES,
@@ -488,4 +496,59 @@ export function actionFields({
       hidden: hiddenOr(none),
     }),
   ].map((field) => builtBy('actionFields', field, 'action'))
+}
+
+/**
+ * A card's shadow level and glow (task 146), stored beside the card's other design as `shadow`, `glow`
+ * and `glowColour`: the names a Link list link already stores, so one resolver reads both. Empty
+ * inherits the section's, then the site's Card depth, then what the family draws; a glow is off until
+ * chosen. `fieldset` is where the Cards box groups them (Pictures belong to task 147, buttons to 148).
+ */
+export function depthFields({
+  hidden,
+  inherits = 'the site’s Card depth, or the layout’s own shadow',
+  fieldset,
+}: {
+  hidden?: ConditionalPropertyCallback
+  inherits?: string
+  fieldset?: string
+}) {
+  const glowOff: ConditionalPropertyCallback = (context) => {
+    const glow = (context.parent as { glow?: string } | undefined)?.glow
+    return (hidden?.(context) ?? false) || (glow !== 'soft' && glow !== 'strong')
+  }
+  return [
+    choiceField({
+      name: 'shadow',
+      title: 'Shadow',
+      description: SHADOW_LEVELS.map(
+        (level) => `${SHADOW_TITLES[level]}: ${SHADOW_DESCRIPTIONS[level]}`,
+      ).join(' '),
+      values: SHADOW_LEVELS,
+      titles: SHADOW_TITLES,
+      inherits,
+      fieldset,
+      hidden,
+    }),
+    choiceField({
+      name: 'glow',
+      title: 'Glow',
+      description: 'A soft halo around the card. Decorative, and strongest on a dark background.',
+      values: GLOW_LEVELS,
+      titles: GLOW_TITLES,
+      inherits: 'no glow',
+      fieldset,
+      hidden,
+    }),
+    themeColourField({
+      name: 'glowColour',
+      title: 'Glow colour',
+      usage: 'graphic',
+      decorative: true,
+      inherits: 'Primary',
+      choices: GLOW_COLOUR_CHOICES,
+      fieldset,
+      hidden: glowOff,
+    }),
+  ].map((field) => builtBy('depthFields', field, 'depth'))
 }

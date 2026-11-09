@@ -6,6 +6,7 @@ import {
   depthFilter,
   depthLook,
   glowTargetsOf,
+  resolveCardDepth,
   resolveDepth,
 } from './depth-options'
 
@@ -132,5 +133,51 @@ describe('the card shadow classes', () => {
   it('read the site’s Card depth with the family’s own shadow as the fallback', () => {
     expect(CARD_SHADOW_CLASS.shadowed).toBe('shadow-(--card-depth,var(--shadow-card))')
     expect(CARD_SHADOW_CLASS.free).toBe('shadow-(--card-depth,0_0_#0000)')
+  })
+})
+
+describe('resolveCardDepth', () => {
+  const value = (depth: ReturnType<typeof resolveCardDepth>) =>
+    (depth?.style as Record<string, string> | undefined)?.['--depth-shadow']
+  const SOFT = 'var(--shadow-soft, var(--shadow-card))'
+
+  it('is undefined while nothing is chosen, at every level', () => {
+    expect(resolveCardDepth([], OWN_SHADOW.siteCard)).toBeUndefined()
+    expect(resolveCardDepth([undefined, null, {}], OWN_SHADOW.siteCard)).toBeUndefined()
+    expect(
+      resolveCardDepth([{ shadow: null, glow: null, glowColour: { colour: 'inherit' } }], 'x'),
+    ).toBeUndefined()
+  })
+
+  it('takes each property from the first level that chose it: item, then section', () => {
+    const section = { shadow: 'floating', glow: 'soft' }
+    expect(value(resolveCardDepth([{ shadow: 'flat' }, section], OWN_SHADOW.siteCard))).toMatch(
+      /^0 0 #0000, var\(--depth-glow-soft\)/,
+    )
+    expect(value(resolveCardDepth([{}, section], OWN_SHADOW.siteCard))).toMatch(
+      /^var\(--shadow-floating\), var\(--depth-glow-soft\)/,
+    )
+  })
+
+  it('lets an item turn the section’s glow off', () => {
+    expect(
+      value(resolveCardDepth([{ glow: 'off' }, { shadow: 'raised', glow: 'strong' }], 'x')),
+    ).toBe('var(--shadow-raised)')
+  })
+
+  it('keeps an explicit section Soft Soft whatever the site chose', () => {
+    expect(value(resolveCardDepth([undefined, { shadow: 'soft' }], OWN_SHADOW.siteCard))).toBe(SOFT)
+  })
+
+  it('keeps the site’s (or the family’s) own shadow under a glow chosen alone', () => {
+    expect(value(resolveCardDepth([{ glow: 'soft' }], OWN_SHADOW.siteCardFree))).toMatch(
+      /^var\(--card-depth, 0 0 #0000\), /,
+    )
+  })
+
+  it('ignores stored values the schema never offered', () => {
+    expect(
+      resolveCardDepth([{ shadow: 'enormous', glow: 'blinding' }], OWN_SHADOW.siteCard),
+    ).toBeUndefined()
   })
 })
