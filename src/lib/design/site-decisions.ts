@@ -16,7 +16,11 @@ export type SiteDecisionVars = Readonly<Record<string, string>>
 export interface SiteDecision<Choice extends string = string> {
   /** The Brand colours field (designSettings) that holds the choice. */
   readonly field: string
-  /** Every choice and the variables it sets. The choice that matches tokens.json sets none. */
+  /**
+   * Every choice and the variables it sets. A choice that matches today's look may set none (a layout
+   * decision's default), or define a variable that is otherwise undefined, so "chosen" differs from
+   * "unset" (Card depth's Soft sets `--card-depth`).
+   */
   readonly choices: Readonly<Record<Choice, SiteDecisionVars>>
 }
 
@@ -26,15 +30,27 @@ export const decision = <Choice extends string>(
 ): SiteDecision<Choice> => ({ field, choices })
 
 /**
- * The decisions the site honours, by name. Empty until the tasks that own them register theirs:
- * density and shape (216b), Card depth (146). Each is one `decision(...)` entry here.
+ * How far cards lift off the page, site-wide (task 146). Sets `--card-depth`, which only card families
+ * read (`CARD_SHADOW_CLASS`, lib/sanity/depth-options.ts), so `--shadow-card` and everything else that
+ * uses it (social buttons) is untouched. Unset leaves the variable
+ * undefined and each family draws what it always did; a section's or item's own choice wins over it.
  */
-export const SITE_DECISIONS = {} satisfies Readonly<Record<string, SiteDecision>>
+const cardDepth = decision('cardDepth', {
+  flat: { '--card-depth': '0 0 #0000' },
+  soft: { '--card-depth': 'var(--shadow-soft, var(--shadow-card))' },
+  raised: { '--card-depth': 'var(--shadow-raised)' },
+  floating: { '--card-depth': 'var(--shadow-floating)' },
+})
+
+/**
+ * The decisions the site honours, by name. Density and shape (216b) register here too, each as one
+ * `decision(...)` entry.
+ */
+export const SITE_DECISIONS = { cardDepth }
 
 export type SiteDecisionName = keyof typeof SITE_DECISIONS
 
-/** The choices stored on Brand colours, as the settings query returns them. Empty until a decision is registered. */
-// eslint-disable-next-line @typescript-eslint/no-generated-empty-object-type
+/** The choices stored on Brand colours, as the settings query returns them. */
 export type SiteDecisionInput = Partial<Record<SiteDecisionName, string | null>>
 
 /**
