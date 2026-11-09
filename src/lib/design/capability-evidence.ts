@@ -226,6 +226,8 @@ interface CardFamilyEvidence {
   parts?: readonly ('surface' | 'text' | 'header' | 'mark')[]
   /** Also proves depth and glow (task 146): opt in once the family draws it through resolveCardDepth. */
   depth?: boolean
+  /** What a family needs set before it draws a shadow at all (a post card needs a fill or border). */
+  depthBase?: Patch
 }
 
 /**
@@ -340,6 +342,7 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
     ...(config.depth ? scopes : []).map((scope): CapabilityEvidence => ({
       id: `${component}.depth.${scope}${named}`,
       ...common(scope, cardLayouts ?? layouts),
+      base: { ...baseOf(scope), ...config.depthBase },
       capability: 'depth',
       field: pathOf(scope, 'shadow'),
       resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
@@ -873,6 +876,9 @@ export const EVIDENCE: readonly Evidence[] = [
     cardTarget: 'article',
     base: {},
     roles: ['meta', 'title', 'body'],
+    depth: true,
+    // A post card draws no surface until one is chosen, and a shadow needs one to sit on.
+    depthBase: { 'settings.cardDesign.border': 'thin' },
   }),
   // The glyph at the end of a post card (task 137): none until Blog settings chooses one.
   {

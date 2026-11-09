@@ -9,6 +9,7 @@ import { postPath } from '@/config/paths'
 import { formatDate } from '@/lib/format-date'
 import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
 import { textRoleProps } from '@/lib/sanity/text-role'
 
 import type { BlogCardDesign, PostCardData } from '../types'
@@ -51,13 +52,19 @@ export function PostCard({
   const author = authorName(post.author)
   const look = resolveCardDesign(cardDesign, ROLES)
   const action = resolveCardAction(cardDesign, OWN_ACTION)
+  // A card with no fill or border has nothing for a shadow to sit on, so depth waits for a surface. Then
+  // the site's Card depth reaches it, and a depth chosen here replaces it.
+  const { background, border } = look.surface
+  const surfaced = background !== 'transparent' && (Boolean(background) || Boolean(border))
+  const depth = surfaced ? resolveCardDepth([cardDesign], OWN_SHADOW.siteCardFree) : undefined
 
   return (
     <CardSurface
       as="article"
       className="group relative flex h-full flex-col"
       own={OWN_SURFACE}
-      drawnClass={DRAWN}
+      drawnClass={surfaced && !depth ? `${DRAWN} ${CARD_SHADOW_CLASS.free}` : DRAWN}
+      depth={depth}
       design={look.surface}
       mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >

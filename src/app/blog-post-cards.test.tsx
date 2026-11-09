@@ -102,6 +102,39 @@ describe('a post card with a design', () => {
   })
 })
 
+describe('a post card’s depth and glow', () => {
+  const depthOf = (card: Element | null) =>
+    card?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1]
+
+  it('draws no shadow class while it has no fill or border, whatever depth is chosen', async () => {
+    const card = (await draw({ shadow: 'floating', glow: 'soft' })).querySelector('article')
+    expect(card?.className).toBe('group relative flex h-full flex-col')
+    expect(depthOf(card ?? null)).toBeUndefined()
+  })
+
+  it('reads the site’s Card depth once a border is chosen, and nothing before one is', async () => {
+    const card = (await draw({ border: 'thin' })).querySelector('article')
+    expect(card?.className).toContain('shadow-(--card-depth,0_0_#0000)')
+    expect(depthOf(card ?? null)).toBeUndefined()
+  })
+
+  it('draws a chosen level and glow once it has a surface, in place of the site’s depth', async () => {
+    const card = (await draw({ border: 'thin', shadow: 'raised', glow: 'strong' })).querySelector(
+      'article',
+    )
+    expect(card?.className).toContain('shadow-(--depth-shadow)')
+    expect(card?.className).not.toContain('--card-depth')
+    expect(depthOf(card ?? null)).toMatch(/^var\(--shadow-raised\), var\(--depth-glow-strong\)/)
+  })
+
+  it('draws none on a transparent card', async () => {
+    const card = (
+      await draw({ background: { colour: 'transparent' }, shadow: 'raised' })
+    ).querySelector('article')
+    expect(card?.className).not.toContain('shadow-')
+  })
+})
+
 describe('Blog settings in the contract', () => {
   const schema = COMPONENT_SCHEMAS.get('blogPostCards')
 

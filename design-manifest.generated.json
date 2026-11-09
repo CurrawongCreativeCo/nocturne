@@ -34776,11 +34776,26 @@
                 "policy": "required",
                 "scope": "card",
                 "closingTask": 146,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.cardDesign.shadow"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "blogPostCards.depth.card",
+                "field": "settings.cardDesign.shadow",
+                "resolvers": [
+                  "@/lib/sanity/depth-options#resolveCardDepth"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "article",
+                "cases": [
+                  "blogPostCards.depth.card"
+                ]
+              }
+            ]
           },
           "icon": {
             "notApplicable": "Draws no icon from the set"
