@@ -108,14 +108,15 @@ const buttonGlow = decision('buttonGlow', {
 
 /**
  * The secondary button's style (task 148). Soft fill swaps the outline for a tint of the button's own
- * text colour (`currentcolor`, so it follows every section's tone, which a `:root` variable would
+ * text colour (`currentColor`, so it follows every section's tone, which a `:root` variable would
  * not). Outline is today's look and emits nothing.
  */
 const secondaryButton = decision('secondaryButton', {
   outline: {},
   soft: {
-    '--button-secondary-fill': 'color-mix(in oklch, currentcolor 10%, transparent)',
-    '--button-secondary-fill-hover': 'color-mix(in oklch, currentcolor 18%, transparent)',
+    '--button-secondary-fill': 'color-mix(in srgb, currentColor 10%, transparent)',
+    '--button-secondary-fill-hover': 'color-mix(in srgb, currentColor 18%, transparent)',
+    '--button-secondary-fill-active': 'color-mix(in srgb, currentColor 26%, transparent)',
     '--button-secondary-ring': 'transparent',
   },
 })

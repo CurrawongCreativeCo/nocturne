@@ -10,17 +10,22 @@ import type { CtaData } from '@/types/sanity'
  * The light primary button uses the `cta` colour: near-black by default, the Primary brand colour once
  * the Studio's Design settings set one.
  * Dark surfaces also switch the focus ring to the inverse ink so it stays visible.
+ *
+ * The site-wide button style (Brand colours → Buttons, task 148) rides on hook classes whose rules are
+ * in globals.css: `cta-fill` (Brand gradient and its text colour) and `cta-soft` (the secondary's Soft
+ * fill) in the colours below, and `cta-primary-depth` (shadow and glow, main button only) in the full
+ * class list. They do nothing until the style is chosen.
  */
 const variants = {
   dark: {
     primary:
-      'bg-ink-inverse text-surface-inverse hover:bg-ink-inverse/85 active:bg-ink-inverse/70 focus-visible:outline-ink-inverse',
+      'bg-ink-inverse text-surface-inverse hover:bg-ink-inverse/85 active:bg-ink-inverse/70 focus-visible:outline-ink-inverse cta-fill',
     secondary:
-      'ring-1 ring-inset ring-ink-inverse/40 text-ink-inverse hover:bg-ink-inverse/10 active:bg-ink-inverse/20 focus-visible:outline-ink-inverse',
+      'ring-1 ring-inset ring-ink-inverse/40 text-ink-inverse hover:bg-ink-inverse/10 active:bg-ink-inverse/20 focus-visible:outline-ink-inverse cta-soft',
   },
   light: {
-    primary: 'bg-cta text-cta-ink hover:bg-cta/85 active:bg-cta/70',
-    secondary: 'ring-1 ring-inset ring-line text-ink hover:bg-surface-alt active:bg-line',
+    primary: 'bg-cta text-cta-ink hover:bg-cta/85 active:bg-cta/70 cta-fill',
+    secondary: 'ring-1 ring-inset ring-line text-ink hover:bg-surface-alt active:bg-line cta-soft',
   },
 } as const
 
@@ -44,7 +49,9 @@ export function ctaClassName(
   variant: keyof (typeof variants)['dark'] = 'primary',
   size: keyof typeof sizes = 'md',
 ) {
-  return `inline-flex items-center justify-center rounded-button text-small font-semibold ${buttonFeedback} ${sizes[size]} ${ctaColours(surface, variant)}`
+  // Depth and glow are the main button's alone; the secondary never gets the hook.
+  const depth = variant === 'primary' ? ' cta-primary-depth' : ''
+  return `inline-flex items-center justify-center rounded-button text-small font-semibold ${buttonFeedback} ${sizes[size]} ${ctaColours(surface, variant)}${depth}`
 }
 
 interface Props {

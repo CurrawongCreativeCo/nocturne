@@ -4,7 +4,7 @@ import { set, unset, type StringInputProps } from 'sanity'
 import type { BrandGradient } from '@/lib/color/gradients'
 import type { PresetThumbnailProps } from '@/lib/sanity/schema/preset-field'
 
-import { useBrandGradients } from './use-brand-gradients'
+import { useBrandGradients, useDocumentGradients } from './use-brand-gradients'
 import { assignRef } from '../preset-picker/assign-ref'
 import type { GridOption } from '../preset-picker/option-grid'
 import { PickerView } from '../preset-picker/picker-view'
@@ -42,10 +42,29 @@ export function gradientOptions(
   return options
 }
 
-/** The picker for a string field with `options.gradientPicker` (see section-style.ts). */
+/** The picker for a string field with `options.gradientPicker` (see section-style.ts): published gradients. */
 export function GradientPickerInput(props: StringInputProps) {
-  const { schemaType, value, onChange, readOnly, elementProps } = props
-  const gradients = useBrandGradients()
+  return <GradientPicker {...props} gradients={useBrandGradients()} />
+}
+
+/**
+ * The picker for a field with `options.documentGradients`: the gradients of the Brand colours
+ * document being edited, drafts included, because that document is what the field sits in and the
+ * resolver reads the same draft. Elsewhere the published list is right (a section can only use what
+ * the site defines), so this is opt-in.
+ */
+export function DocumentGradientPickerInput(props: StringInputProps) {
+  return <GradientPicker {...props} gradients={useDocumentGradients()} />
+}
+
+function GradientPicker({
+  schemaType,
+  value,
+  onChange,
+  readOnly,
+  elementProps,
+  gradients,
+}: StringInputProps & { gradients: BrandGradient[] | null }) {
   const stored = typeof value === 'string' && value !== '' ? value : null
   const options = useMemo(() => gradientOptions(gradients ?? [], stored), [gradients, stored])
 

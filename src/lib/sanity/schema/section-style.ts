@@ -289,6 +289,8 @@ declare module 'sanity' {
   interface StringOptions {
     /** The field holds the slug of a brand gradient: the Studio draws the picker (features/studio/components/gradient-picker). */
     gradientPicker?: boolean
+    /** Like `gradientPicker`, but lists the gradients of the Brand colours document being edited, drafts included (Brand colours → Buttons). */
+    documentGradients?: boolean
     /** A six-digit hex with the Brand colours input's picker and no contrast check (features/site/components/colour-input). */
     colourPicker?: boolean
     /** The gradient overlay's shape: the Studio adds a preview over the section's own picture (features/studio/components/overlay-preview). */

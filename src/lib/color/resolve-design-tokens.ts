@@ -391,6 +391,9 @@ export function resolveDesignTokens(
       if (ink) {
         vars['--button-fill'] = gradient.css
         vars['--button-fill-ink'] = ink.ink
+        // Hover and press lay a veil of the colour opposite the text over the gradient. That moves the
+        // fill away from the text colour, so the contrast only improves and the text is never touched.
+        vars['--button-fill-veil'] = ink.ink === '#ffffff' ? '#000000' : '#ffffff'
       } else {
         warnings.push({
           field: 'buttonGradient',
@@ -408,6 +411,10 @@ export function resolveDesignTokens(
   // Site-wide decisions (density, shape): token variables beyond colour, after the colours so the
   // output of a site that sets none is byte-for-byte what it was.
   Object.assign(vars, siteDecisionVars(input))
+  // The main button's depth and glow are one box-shadow list, so the button reads a single variable
+  // (and, while neither is chosen, none: the rule then hands back to the button's own classes).
+  const buttonShadows = [vars['--button-depth'], vars['--button-glow']].filter(Boolean)
+  if (buttonShadows.length > 0) vars['--button-shadow'] = buttonShadows.join(', ')
 
   const errors: DesignWarning[] = []
   for (const check of checks) {

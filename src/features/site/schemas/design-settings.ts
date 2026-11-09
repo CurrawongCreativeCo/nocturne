@@ -263,7 +263,7 @@ export const designSettings = defineType({
       description:
         'One of the gradients from Advanced. Shown once the fill is Brand gradient and Advanced has a gradient to choose.',
       fieldset: 'buttons',
-      options: { gradientPicker: true },
+      options: { documentGradients: true },
       hidden: (context) =>
         hiddenFromClients(context) ||
         (context.document as { buttonFill?: string } | undefined)?.buttonFill !== 'gradient',

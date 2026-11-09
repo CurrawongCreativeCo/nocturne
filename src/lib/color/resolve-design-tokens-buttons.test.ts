@@ -67,9 +67,29 @@ describe('depth, glow and the secondary style', () => {
 
   it('Soft fill tints the button’s own text colour and drops the outline; nothing sets a glow', () => {
     const vars = siteDecisionVars({ secondaryButton: 'soft' })
-    expect(vars['--button-secondary-fill']).toContain('currentcolor')
+    expect(vars['--button-secondary-fill']).toBe(
+      'color-mix(in srgb, currentColor 10%, transparent)',
+    )
+    expect(vars['--button-secondary-fill-hover']).toBe(
+      'color-mix(in srgb, currentColor 18%, transparent)',
+    )
     expect(vars['--button-secondary-ring']).toBe('transparent')
     expect(Object.keys(vars).some((name) => name.includes('glow'))).toBe(false)
+  })
+
+  it('joins depth and glow into the one box-shadow list the button reads', () => {
+    expect(resolveDesignTokens({}).vars).not.toHaveProperty('--button-shadow')
+    expect(resolveDesignTokens({ buttonDepth: 'flat', buttonGlow: 'off' }).vars).not.toHaveProperty(
+      '--button-shadow',
+    )
+    expect(resolveDesignTokens({ buttonDepth: 'raised' }).vars['--button-shadow']).toBe(
+      'var(--shadow-raised)',
+    )
+    expect(resolveDesignTokens({ buttonGlow: 'soft' }).vars['--button-shadow']).toBe(
+      siteDecisionVars({ buttonGlow: 'soft' })['--button-glow'],
+    )
+    const both = resolveDesignTokens({ buttonDepth: 'soft', buttonGlow: 'strong' }).vars
+    expect(both['--button-shadow']).toBe(`${both['--button-depth']}, ${both['--button-glow']}`)
   })
 
   it('reaches the page CSS', () => {
@@ -93,6 +113,8 @@ describe('Brand gradient fill', () => {
     expect(resolved.vars['--button-fill']).toBe('linear-gradient(90deg, #0b1d3a, #1f3b73)')
     expect(resolved.vars['--button-fill-ink']).toBe('#ffffff')
     expect(resolved.warnings).toEqual([])
+    // Dark gradient, white text: the hover and press veil is black, which only widens the contrast.
+    expect(resolved.vars['--button-fill-veil']).toBe('#000000')
     for (const sample of gradientSamples(['#0b1d3a', '#1f3b73'])) {
       expect(contrastRatio('#ffffff', sample)).toBeGreaterThanOrEqual(4.5)
     }
@@ -101,6 +123,7 @@ describe('Brand gradient fill', () => {
   it('picks the dark ink over a light three-stop gradient, checking both transitions', () => {
     const resolved = resolve(LIGHT, { buttonGradient: 'dawn' })
     expect(resolved.vars['--button-fill-ink']).toBe('#030712')
+    expect(resolved.vars['--button-fill-veil']).toBe('#ffffff')
     expect(gradientSamples(['#ffe9c7', '#ffd1dc', '#fff6a8'])).toContain('#ffd1dc')
   })
 
@@ -148,7 +171,12 @@ describe('Brand gradient fill', () => {
   it('leaves the other colours and the Solid button’s colours alone', () => {
     const solid = resolveDesignTokens({ primary: '#0b6e4f', gradients: [DARK_TO_NAVY] })
     const gradientOn = resolve(DARK_TO_NAVY, { primary: '#0b6e4f' })
-    const { '--button-fill': _fill, '--button-fill-ink': _ink, ...rest } = gradientOn.vars
+    const {
+      '--button-fill': _fill,
+      '--button-fill-ink': _ink,
+      '--button-fill-veil': _veil,
+      ...rest
+    } = gradientOn.vars
     expect(rest).toEqual(solid.vars)
   })
 })

@@ -128,7 +128,8 @@ describe('Buttons on Brand colours (task 148)', () => {
 
   it('offers the gradient picker only while the fill is Brand gradient', () => {
     const item = field('buttonGradient')
-    expect(item?.options).toMatchObject({ gradientPicker: true })
+    expect(item?.options).toMatchObject({ documentGradients: true })
+    expect(item?.options).not.toHaveProperty('gradientPicker')
     expect(item?.initialValue).toBeUndefined()
     for (const buttonFill of [undefined, 'solid']) {
       expect(hidden(item, { ...asAgency, document: { buttonFill } })).toBe(true)

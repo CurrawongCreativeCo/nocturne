@@ -15,7 +15,10 @@ import { PresetPickerInput } from './preset-picker-input'
 import { AnchorPickerInput } from '../anchor-picker/anchor-picker-input'
 import { DesignSummaryInput } from '../design-summary-input'
 import { FrameReferenceInput } from '../frame-reference-input'
-import { GradientPickerInput } from '../gradient-picker/gradient-picker-input'
+import {
+  DocumentGradientPickerInput,
+  GradientPickerInput,
+} from '../gradient-picker/gradient-picker-input'
 import { HeadingGradientInput } from '../gradient-picker/heading-gradient-input'
 import { IconPickerInput } from '../icon-picker-input'
 import { InheritableChoiceInput } from '../inheritable-choice-input'
@@ -71,6 +74,9 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
     }
     if (isStringInputProps(props) && props.schemaType.options?.gradientPicker === true) {
       return <GradientPickerInput {...props} />
+    }
+    if (isStringInputProps(props) && props.schemaType.options?.documentGradients === true) {
+      return <DocumentGradientPickerInput {...props} />
     }
     if (isArrayOfObjectsInputProps(props) && props.schemaType.options?.slot === true) {
       return <SlotInput {...props} />

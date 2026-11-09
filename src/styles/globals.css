@@ -764,3 +764,51 @@ h2,
 h3 {
   font-weight: var(--heading-weight, revert-layer);
 }
+
+/*
+ * Site-wide button style (README, "Brand colours and design"; task 148). `CtaLink` and `ctaClassName`
+ * carry these hooks; every variable is set on :root only when Brand colours → Buttons chooses
+ * something, so while it is unset each declaration is `revert-layer` and the button keeps the classes
+ * it always had. Outside every layer, like the heading weight above, so they beat those classes.
+ *
+ * - `.cta-fill` (main button, either surface): the Brand gradient and the text colour chosen to read
+ *   along all of it. Hover and press lay a veil over the gradient; the text colour never changes, and no
+ *   filter touches it.
+ * - `.cta-primary-depth`: the main button's shadow and glow, one box-shadow list. Outlines are drawn
+ *   outside the box-shadow, so keyboard focus keeps the global `:focus-visible` outline.
+ * - `.cta-soft` (secondary button): a tint of its own text colour instead of the outline. It has no
+ *   shadow or glow hook at all.
+ */
+.cta-fill {
+  background-image: var(--button-fill, revert-layer);
+  color: var(--button-fill-ink, revert-layer);
+}
+.cta-fill:hover {
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--button-fill-veil) 14%, transparent),
+      color-mix(in srgb, var(--button-fill-veil) 14%, transparent)
+    ),
+    var(--button-fill, revert-layer);
+}
+.cta-fill:active {
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--button-fill-veil) 28%, transparent),
+      color-mix(in srgb, var(--button-fill-veil) 28%, transparent)
+    ),
+    var(--button-fill, revert-layer);
+}
+.cta-primary-depth {
+  box-shadow: var(--button-shadow, revert-layer);
+}
+.cta-soft {
+  background-color: var(--button-secondary-fill, revert-layer);
+  --tw-ring-color: var(--button-secondary-ring, revert-layer);
+}
+.cta-soft:hover {
+  background-color: var(--button-secondary-fill-hover, revert-layer);
+}
+.cta-soft:active {
+  background-color: var(--button-secondary-fill-active, revert-layer);
+}
