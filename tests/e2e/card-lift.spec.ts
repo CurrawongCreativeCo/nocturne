@@ -90,17 +90,6 @@ test.describe('a linked card with Lift chosen', () => {
     expect(layer.hidden).toBe('true')
     await expect(lifted(page).locator('a')).toHaveCount(1)
   })
-
-  test('has no accessibility violations on the lifted card’s section', async ({ page }) => {
-    await page.goto('/card-depth')
-    const { violations } = await new AxeBuilder({ page })
-      .include('#main-content section:has(.card-lift)')
-      .withTags(WCAG)
-      .analyze()
-    expect(
-      violations.flatMap(({ id, nodes }) => nodes.map((node) => `${id}: ${node.html}`)),
-    ).toEqual([])
-  })
 })
 
 test.describe('cards with None, or nothing, chosen', () => {
@@ -137,5 +126,25 @@ test.describe('with reduced motion', () => {
     await page.waitForTimeout(400)
     expect(await rise(lifted(page))).toBe(0)
     expect(await layerOpacity(lifted(page))).toBe(0)
+  })
+})
+
+/**
+ * The whole page, with the lifted cards on it. Run with reduced motion (the suite's default): with motion
+ * on, a section fades in as it scrolls into view (`data-reveal`), and axe measures text that is still
+ * almost transparent (1.2:1 on the first run of this page), which says nothing about the design.
+ */
+test.describe('accessibility of the whole page', () => {
+  test.use({ reducedMotion: 'reduce' })
+
+  test('has no violations, with Lift, None and nothing chosen on it', async ({ page }) => {
+    await page.goto('/card-depth')
+    const { violations } = await new AxeBuilder({ page })
+      .include('#main-content')
+      .withTags(WCAG)
+      .analyze()
+    expect(
+      violations.flatMap(({ id, nodes }) => nodes.map((node) => `${id}: ${node.html}`)),
+    ).toEqual([])
   })
 })

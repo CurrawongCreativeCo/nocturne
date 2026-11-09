@@ -2518,7 +2518,6 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 146          | 1                | 1                   |
 | 147          | 5                | 3                   |
 | 148          | 6                | 3                   |
 | 151          | 22               | 0                   |
@@ -2526,8 +2525,8 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 159          | 3                | 8                   |
 | 177          | 9                | 20                  |
 | 213          | 7                | 0                   |
-| 276          | 2                | 2                   |
-| 280          | 16               | 0                   |
+| 276          | 2                | 3                   |
+| 280          | 17               | 0                   |
 
 **Evidence.** 262 capability entries, 498 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 

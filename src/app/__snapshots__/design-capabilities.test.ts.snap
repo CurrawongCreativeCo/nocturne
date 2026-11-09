@@ -68,7 +68,7 @@ exports[`the design capability contract > eventDetailsCard: reports what it offe
     "surface required card: pending (280)",
     "text required card: pending (280)",
     "mark required card: pending (280)",
-    "depth required card: pending (146)",
+    "depth required card: pending (280)",
   ],
   "sources": [],
 }
@@ -144,7 +144,7 @@ exports[`the design capability contract > featuresGrid: reports what it offers t
     "text required card: pending (276)",
     "header required section: verified",
     "mark required section: verified",
-    "depth conditional card: pending (146)",
+    "depth conditional card: pending (276)",
     "icon required card: verified",
     "action conditional card: pending (276)",
     "framing conditional section/background: pending (177)",

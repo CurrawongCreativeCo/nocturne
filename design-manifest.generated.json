@@ -5553,7 +5553,7 @@
                 "kind": "variant",
                 "when": "A layout or look draws its items on a card (the grid has no such option today)"
               },
-              "closingTask": 146,
+              "closingTask": 276,
               "fields": [],
               "availability": "pending"
             }
@@ -35202,7 +35202,7 @@
               {
                 "policy": "required",
                 "scope": "card",
-                "closingTask": 146,
+                "closingTask": 280,
                 "fields": [],
                 "availability": "pending"
               }

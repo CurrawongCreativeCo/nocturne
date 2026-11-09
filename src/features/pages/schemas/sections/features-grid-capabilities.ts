@@ -12,7 +12,9 @@ export const featuresGridCapabilities = declareCapabilities({
   text: { policy: 'required', scope: 'card', roles: ['title', 'body'], closingTask: 276 },
   header: { policy: 'required', scope: 'section', roles: ['eyebrow', 'heading', 'intro'] },
   mark: { policy: 'required', scope: 'section' },
-  depth: { policy: 'conditional', scope: 'card', trigger: ON_A_CARD },
+  // The Features grid draws no card yet, so there is nothing for depth to act on. It comes with the
+  // cards family, as its surface does (owner decision, 9 November 2026).
+  depth: { policy: 'conditional', scope: 'card', trigger: ON_A_CARD, closingTask: 276 },
   icon: { policy: 'required', scope: 'card' },
   action: {
     policy: 'conditional',
