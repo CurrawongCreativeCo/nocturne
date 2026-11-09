@@ -70,10 +70,10 @@ describe('Pricing: what an unset plan draws', () => {
   it('keeps the card’s own classes, the highlighted plan’s ring included', async () => {
     const [plain, highlighted] = cards(await draw([plan('a'), plan('b', { highlighted: true })]))
     expect(plain?.className).toBe(
-      'flex flex-col rounded-card bg-surface p-8 ring-1 ring-line ring-inset',
+      'flex flex-col rounded-card bg-surface p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line ring-inset',
     )
     expect(highlighted?.className).toBe(
-      'flex flex-col rounded-card bg-surface p-8 ring-2 ring-ink ring-inset',
+      'flex flex-col rounded-card bg-surface p-8 shadow-(--card-depth,0_0_#0000) ring-2 ring-ink ring-inset',
     )
     expect(roleOf(plain, 'price')?.className).toBe('text-4xl font-semibold tracking-tight')
   })
@@ -204,5 +204,66 @@ describe('Pricing: the card design and a plan’s own', () => {
         el.getAttribute('data-decorative-mark'),
       ),
     ).toEqual(['item', 'card'])
+  })
+})
+
+describe('Pricing: depth and glow', () => {
+  const depthOf = (card: Element | undefined) =>
+    card?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1]
+
+  it('draws no shadow of its own, and reads the site’s Card depth only if one is chosen', async () => {
+    for (const card of cards(await draw([plan('a'), plan('b', { highlighted: true })]))) {
+      expect(card.className).toContain('shadow-(--card-depth,0_0_#0000)')
+      expect(card.className).not.toContain('shadow-card')
+      expect(card.className).not.toContain('shadow-(--depth-shadow)')
+      expect(depthOf(card)).toBeUndefined()
+    }
+  })
+
+  it('applies the section’s Cards box to every plan, in place of the site’s depth', async () => {
+    const section = { cardDesign: { shadow: 'raised' } }
+    for (const card of cards(await draw([plan('a'), plan('b')], section))) {
+      expect(card.className).toContain('shadow-(--depth-shadow)')
+      expect(card.className).not.toContain('--card-depth')
+      expect(depthOf(card)).toBe('var(--shadow-raised)')
+    }
+  })
+
+  it('lets one customised plan be Flat while the others keep the section’s depth', async () => {
+    const section = { cardDesign: { shadow: 'raised' } }
+    const [flat, other, last] = cards(
+      await draw(
+        [
+          plan('a', { design: { appearance: 'custom', shadow: 'flat' } }),
+          plan('b'),
+          plan('c', { design: { shadow: 'flat' } }),
+        ],
+        section,
+      ),
+    )
+    expect(depthOf(flat)).toBe('0 0 #0000')
+    expect(depthOf(other)).toBe('var(--shadow-raised)')
+    // Saved but not customised: the page ignores it.
+    expect(depthOf(last)).toBe('var(--shadow-raised)')
+  })
+
+  it('keeps a section’s explicit Soft through its own token', async () => {
+    const [card] = cards(await draw([plan('a')], { cardDesign: { shadow: 'soft' } }))
+    expect(depthOf(card)).toBe('var(--shadow-soft, var(--shadow-card))')
+  })
+
+  it('adds a glow to the (site or no) shadow when only a glow is chosen', async () => {
+    const [card] = cards(await draw([plan('a')], { cardDesign: { glow: 'soft' } }))
+    expect(depthOf(card)).toMatch(/^var\(--card-depth, 0 0 #0000\), var\(--depth-glow-soft\)/)
+  })
+
+  it('draws no shadow on a transparent plan, as it draws none of its other chrome', async () => {
+    const [card] = cards(
+      await draw([plan('a')], {
+        cardDesign: { background: { colour: 'transparent' }, shadow: 'floating' },
+      }),
+    )
+    expect(card?.className).not.toContain('shadow-')
+    expect(depthOf(card)).toBeUndefined()
   })
 })

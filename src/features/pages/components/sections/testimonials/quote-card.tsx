@@ -5,6 +5,7 @@ import { siteLanguage } from '@/config/env'
 import { formatDate } from '@/lib/format-date'
 import { plainTextParagraphs } from '@/lib/plain-text'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
 import { highlightLook, textRoleProps } from '@/lib/sanity/text-role'
 import { themeColourCss } from '@/lib/sanity/theme-colour'
@@ -31,7 +32,7 @@ const AVATAR_SCALE: ProfileImageScale = {
 const ROLES = ['quote', 'attribution', 'label'] as const
 
 /** What the card draws with nothing chosen. Each role's own look, for its steps and swaps. */
-const CARD = 'flex h-full w-full flex-col rounded-card bg-surface p-8 shadow-card ring-1 ring-line'
+const CARD = `flex h-full w-full flex-col rounded-card bg-surface p-8 ${CARD_SHADOW_CLASS.shadowed} ring-1 ring-line`
 const OWN_SURFACE = { background: 'bg-surface', border: 'ring-1 ring-line', still: true }
 const OWN_QUOTE = { size: 'text-lead', weight: 'regular', colour: 'text-ink' } as const
 const OWN_NAME = { size: 'text-body', weight: 'semibold' } as const
@@ -63,7 +64,8 @@ export function QuoteCard({
       as="figure"
       className={CARD}
       own={OWN_SURFACE}
-      shadow="shadow-card"
+      shadow={CARD_SHADOW_CLASS.shadowed}
+      depth={resolveCardDepth([cardDesign], OWN_SHADOW.siteCard)}
       design={design.surface}
       mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >

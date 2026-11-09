@@ -23,6 +23,7 @@ import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import {
   actionFields,
+  depthFields,
   iconDesignFields,
   surfaceFields,
   textRoleField,
@@ -153,6 +154,11 @@ interface CardFieldsConfig {
    * words what unset means ("the layout’s own").
    */
   action?: { hidden?: ConditionalPropertyCallback; inherits?: string } | false
+  /**
+   * The card's shadow level and glow (task 146, depthFields): inherit the section's, then the site's
+   * Card depth, then what the family draws. Off for a family that has not adopted it.
+   */
+  depth?: { hidden?: ConditionalPropertyCallback; inherits?: string } | false
   /** What each role is drawn in until one is chosen, for the background's contrast warning. */
   defaults?: RoleDefaultColours
   /** The array an item's design sits in, for the item-level contrast warning. */
@@ -223,7 +229,17 @@ export function withCardTextContrast<T extends FieldDefinition>(
 
 /** The fields of a card's design: fill and border, one object per role, a mark. */
 export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
-  const { inherits, inItem, roles, surface = {}, mark = true, markHidden, hidden, action } = config
+  const {
+    inherits,
+    inItem,
+    roles,
+    surface = {},
+    mark = true,
+    markHidden,
+    hidden,
+    action,
+    depth,
+  } = config
   return [
     ...(surface === false
       ? []
@@ -256,12 +272,29 @@ export function cardDesignFields(config: CardFieldsConfig): FieldDefinition[] {
         ]
       : []),
     ...(action ? actionFields({ ...action, hidden: both(hidden, action.hidden) }) : []),
+    ...(depth
+      ? depthFields({
+          fieldset: 'depth',
+          hidden: both(hidden, depth.hidden),
+          inherits:
+            depth.inherits ??
+            (inItem
+              ? 'the section’s Cards box, then the site’s Card depth'
+              : 'the site’s Card depth, or the shadow the layout draws'),
+        })
+      : []),
   ]
 }
 
 const actionFieldset = {
   name: 'action',
   title: 'Indicator',
+  options: { collapsible: true, collapsed: true },
+}
+
+const depthFieldset = {
+  name: 'depth',
+  title: 'Depth and glow',
   options: { collapsible: true, collapsed: true },
 }
 
@@ -304,7 +337,11 @@ export function cardDesignField({
       collapsed: false,
       ...(presets ? presetsOption(presets) : {}),
     },
-    fieldsets: [textFieldset(textDescription), ...(config.action ? [actionFieldset] : [])],
+    fieldsets: [
+      textFieldset(textDescription),
+      ...(config.action ? [actionFieldset] : []),
+      ...(config.depth ? [depthFieldset] : []),
+    ],
     fields: [...lead, ...cardDesignFields(config)],
   })
 }
@@ -336,7 +373,7 @@ export function itemDesignField({
         mark: config.mark ?? true,
       }),
     },
-    fieldsets: [textFieldset()],
+    fieldsets: [textFieldset(), ...(config.depth ? [depthFieldset] : [])],
     fields: [
       itemAppearanceField({ inheritLabel: 'Use the section’s card design' }),
       ...cardDesignFields({

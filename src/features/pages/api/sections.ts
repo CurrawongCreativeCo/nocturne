@@ -173,9 +173,13 @@ const teamCardDesignProjection = /* groq */ `
   actionColour { colour, hex }
 `
 
+/** A card's shadow level and glow (depthFields). */
+const depthProjection = /* groq */ `shadow, glow, glowColour { colour, hex }`
+
 /** Pricing's card design at section level and, behind the plan's Appearance switch, at item level. */
 const pricingCardDesignProjection = /* groq */ `
   ${surfaceProjection},
+  ${depthProjection},
   title { ${roleStyleProjection} },
   price { ${roleStyleProjection} },
   body { ${roleStyleProjection} },
@@ -202,6 +206,7 @@ export const testimonialsFragment = /* groq */ `
     ${headerDesignProjection},
     cardDesign {
       ${surfaceProjection},
+      ${depthProjection},
       quote {
         ${textStyleProjection},
         fontStyle,

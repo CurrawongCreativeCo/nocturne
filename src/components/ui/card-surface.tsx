@@ -1,6 +1,7 @@
 import { createElement, type ElementType, type ReactNode } from 'react'
 
 import { DecorativeMark, type DecorativeMarkProps } from '@/components/ui/decorative-mark'
+import type { ElementDepth } from '@/lib/sanity/depth-options'
 import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
 import {
   ringSurfaceLook,
@@ -20,6 +21,7 @@ export function CardSurface({
   className,
   own,
   shadow = '',
+  depth,
   drawnClass,
   design,
   mark,
@@ -31,6 +33,8 @@ export function CardSurface({
   /** Which of those classes are the surface's. */
   own: OwnRingSurface
   shadow?: string
+  /** A chosen shadow level or glow (resolveCardDepth), put in place of `shadow`. A transparent card has no edge for it, so it drops it too. */
+  depth?: ElementDepth
   /** Added once a fill or border is chosen, for a family with no surface of its own (a post card's corners and padding). */
   drawnClass?: string
   design: SurfaceDesign
@@ -45,9 +49,16 @@ export function CardSurface({
     `${own.background} ${own.border}`,
     look.style ? look.className : `${own.background} ${own.border}`,
   )
+  const transparent = design.background === 'transparent'
+  const lifted = depth && !transparent ? depth : undefined
+  const surface = transparent
+    ? swapClasses(swapped, shadow, '')
+    : lifted
+      ? swapClasses(swapped, shadow, lifted.className)
+      : swapped
   const props = {
-    className: `${design.background === 'transparent' ? swapClasses(swapped, shadow, '') : swapped}${look.style && drawnClass ? ` ${drawnClass}` : ''}${hasMark ? ' relative isolate' : ''}`,
-    style: look.style,
+    className: `${surface}${look.style && drawnClass ? ` ${drawnClass}` : ''}${hasMark ? ' relative isolate' : ''}`,
+    style: lifted ? { ...look.style, ...lifted.style } : look.style,
   }
   // Only present with a mark: an empty slot would shift every useId inside the card.
   return mark && hasMark

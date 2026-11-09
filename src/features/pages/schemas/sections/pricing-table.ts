@@ -160,6 +160,7 @@ export const pricingTable = defineType({
                 roles: PLAN_ROLES,
                 defaults: PLAN_ROLE_COLOURS,
                 itemArray: 'plans',
+                depth: {},
               }),
             ],
             preview: {
@@ -211,6 +212,7 @@ export const pricingTable = defineType({
         roles: PLAN_ROLES,
         defaults: PLAN_ROLE_COLOURS,
         inherits: 'the default plan card',
+        depth: {},
       }),
       accessField,
     ],

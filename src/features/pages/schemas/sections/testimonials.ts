@@ -187,6 +187,7 @@ export const testimonials = defineType({
         roles: [{ role: 'quote', highlight: true }, { role: 'attribution' }, { role: 'label' }],
         inherits: 'the default card',
         defaults: TESTIMONIAL_ROLE_COLOURS,
+        depth: {},
       }),
       avatarDesignField({
         name: 'avatarDesign',

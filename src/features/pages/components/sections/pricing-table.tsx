@@ -10,6 +10,7 @@ import { sectionTraits, type SectionDefaults } from '@/components/ui/section-sty
 import { siteLanguage } from '@/config/env'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { cardMarkChoice, isCustomised, resolveItemCardDesign } from '@/lib/sanity/card-design'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveIconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
@@ -112,10 +113,15 @@ export function PricingTable({ data, isFirst, renderCheckout }: SectionProps<'pr
             <CardSurface
               key={plan._key}
               as="li"
-              className={`flex flex-col rounded-card bg-surface p-8 ${
+              className={`flex flex-col rounded-card bg-surface p-8 ${CARD_SHADOW_CLASS.free} ${
                 plan.highlighted ? 'ring-2 ring-ink ring-inset' : 'ring-1 ring-line ring-inset'
               }`}
               own={plan.highlighted ? OWN_HIGHLIGHTED_SURFACE : OWN_SURFACE}
+              shadow={CARD_SHADOW_CLASS.free}
+              depth={resolveCardDepth(
+                [isCustomised(plan.design) ? plan.design : undefined, data.cardDesign],
+                OWN_SHADOW.siteCardFree,
+              )}
               design={design.surface}
               mark={{
                 input: mark.input,
