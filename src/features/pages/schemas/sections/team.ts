@@ -139,6 +139,7 @@ export const team = defineType({
         inherits: 'the default card',
         // Draws only on a card or row that links to a member's page.
         action: { inherits: 'no indicator' },
+        depth: {},
       }),
       accessField,
       // Shown first in the Content tab.

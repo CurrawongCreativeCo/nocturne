@@ -115,6 +115,7 @@ export const events = defineType({
         markHidden: notFeatured,
         // The List draws a chevron today, the Featured layout nothing: that is what unset means.
         action: { hidden: isAgenda },
+        depth: { hidden: notFeatured },
       }),
       accessField,
       // Shown first in the Content tab.

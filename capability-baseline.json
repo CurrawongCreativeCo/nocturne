@@ -289,13 +289,6 @@
     },
     {
       "component": "team",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 146
-    },
-    {
-      "component": "team",
       "capability": "framing",
       "scope": "card",
       "part": "portrait",
@@ -357,13 +350,6 @@
       "scope": "card",
       "layouts": ["stacked"],
       "closingTask": 159
-    },
-    {
-      "component": "events",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": ["featured"],
-      "closingTask": 146
     },
     {
       "component": "events",

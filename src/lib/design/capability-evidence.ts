@@ -1394,6 +1394,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Our people', text: 'An intro.' },
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   // The glyph at the end of a card or row that links to a member's page (task 137): none until chosen.
   {
@@ -1497,6 +1498,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'What’s on', text: 'An intro.' },
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   // The glyph at the end of a linked card (task 137). The List draws a chevron with nothing chosen, so a
   // choice changes it; Featured draws none, so a choice makes one appear.

@@ -162,8 +162,12 @@ export const logoCloudFragment = /* groq */ `
  * The title, meta and body roles, a fill and a mark: the Team's box for its cards and rows, and the Events
  * section's (whose Featured layout draws the one card).
  */
+/** A card's shadow level and glow (depthFields). */
+const depthProjection = /* groq */ `shadow, glow, glowColour { colour, hex }`
+
 const teamCardDesignProjection = /* groq */ `
   ${surfaceProjection},
+  ${depthProjection},
   title { ${roleStyleProjection} },
   meta { ${roleStyleProjection} },
   body { ${roleStyleProjection} },
@@ -172,9 +176,6 @@ const teamCardDesignProjection = /* groq */ `
   actionMotion,
   actionColour { colour, hex }
 `
-
-/** A card's shadow level and glow (depthFields). */
-const depthProjection = /* groq */ `shadow, glow, glowColour { colour, hex }`
 
 /** Pricing's card design at section level and, behind the plan's Appearance switch, at item level. */
 const pricingCardDesignProjection = /* groq */ `

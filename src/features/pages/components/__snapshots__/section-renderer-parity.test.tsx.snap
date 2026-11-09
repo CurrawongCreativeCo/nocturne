@@ -61,19 +61,19 @@ exports[`SectionRenderer output parity > events keeps its output for every layou
     "panel": null,
   },
   "featured · panel glass": {
-    "hash": "f1fedaab0b3c87d9",
+    "hash": "4de16348b49351c6",
     "panel": "tinted",
   },
   "featured · panel none": {
-    "hash": "3967f3d9372798f4",
+    "hash": "f8739c40d0679ad8",
     "panel": null,
   },
   "featured · panel solid": {
-    "hash": "daed030ff39e3f02",
+    "hash": "52b3afb86414e4a2",
     "panel": "solid",
   },
   "featured · panel unset": {
-    "hash": "3967f3d9372798f4",
+    "hash": "f8739c40d0679ad8",
     "panel": null,
   },
   "list · panel glass": {
@@ -666,51 +666,51 @@ exports[`SectionRenderer output parity > stats keeps its output for every layout
 exports[`SectionRenderer output parity > team keeps its output for every layout and stored panel choice 1`] = `
 {
   "grid · panel glass": {
-    "hash": "d6974c044e31298c",
+    "hash": "3d077aa1f2508423",
     "panel": "tinted",
   },
   "grid · panel none": {
-    "hash": "619c4352cd9ea3cd",
+    "hash": "123f1ee32748df3a",
     "panel": null,
   },
   "grid · panel solid": {
-    "hash": "d17d6c2832909683",
+    "hash": "54ebd8d729778075",
     "panel": "solid",
   },
   "grid · panel unset": {
-    "hash": "619c4352cd9ea3cd",
+    "hash": "123f1ee32748df3a",
     "panel": null,
   },
   "list · panel glass": {
-    "hash": "5e0cddfc75ada966",
+    "hash": "bb36278be41659a2",
     "panel": "tinted",
   },
   "list · panel none": {
-    "hash": "abf035653e415407",
+    "hash": "c82fd51fc24374a8",
     "panel": null,
   },
   "list · panel solid": {
-    "hash": "c5842e5f81a201d0",
+    "hash": "4bbd190ccadb68b1",
     "panel": "solid",
   },
   "list · panel unset": {
-    "hash": "abf035653e415407",
+    "hash": "c82fd51fc24374a8",
     "panel": null,
   },
   "slider · panel glass": {
-    "hash": "ff8229751132efcb",
+    "hash": "c7f45cc5bd9544e3",
     "panel": "tinted",
   },
   "slider · panel none": {
-    "hash": "df77ef3b662e6fcb",
+    "hash": "c9bdaad9b219905a",
     "panel": null,
   },
   "slider · panel solid": {
-    "hash": "d00c06e41e296059",
+    "hash": "51f1efc7c549e4fb",
     "panel": "solid",
   },
   "slider · panel unset": {
-    "hash": "df77ef3b662e6fcb",
+    "hash": "c9bdaad9b219905a",
     "panel": null,
   },
 }

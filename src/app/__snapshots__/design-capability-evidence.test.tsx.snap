@@ -130,6 +130,12 @@ exports[`design capability evidence > events.action.card@list: the probe changes
 ]
 `;
 
+exports[`design capability evidence > events.depth.card@featured: the probe changes the registered target 1`] = `
+[
+  "<article class="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
+]
+`;
+
 exports[`design capability evidence > events.edge.section@agenda: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -236,7 +242,7 @@ exports[`design capability evidence > events.motion.section@agenda: the probe ch
 
 exports[`design capability evidence > events.motion.section@featured: the probe changes the registered target 1`] = `
 [
-  "3719767cdbebc5e8 (5230 characters)",
+  "d84a03f01010b0b0 (5259 characters)",
 ]
 `;
 
@@ -266,7 +272,7 @@ exports[`design capability evidence > events.overlay.section@list: the probe cha
 
 exports[`design capability evidence > events.surface.card@featured: the probe changes the registered target 1`] = `
 [
-  "<article class="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-card ring-1 ring-line">",
+  "<article class="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
 ]
 `;
 
@@ -2184,6 +2190,31 @@ exports[`design capability evidence > team.action.card@list: the probe changes t
 
 exports[`design capability evidence > team.action.card@slider: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > team.depth.card@grid: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+]
+`;
+
+exports[`design capability evidence > team.depth.card@list: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+]
+`;
+
+exports[`design capability evidence > team.depth.card@slider: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+]
+`;
+
 exports[`design capability evidence > team.edge.section@grid: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -2290,19 +2321,19 @@ exports[`design capability evidence > team.mark.section@slider: the probe change
 
 exports[`design capability evidence > team.motion.section@grid: the probe changes the registered target 1`] = `
 [
-  "f50f74fe6d57b509 (3092 characters)",
+  "2db2259c29848162 (3208 characters)",
 ]
 `;
 
 exports[`design capability evidence > team.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "a8dd3ff2ea1cdc5f (3259 characters)",
+  "f77267dfe3f746fa (3375 characters)",
 ]
 `;
 
 exports[`design capability evidence > team.motion.section@slider: the probe changes the registered target 1`] = `
 [
-  "db585223a4db2896 (2747 characters)",
+  "bd7d05c5c24587a7 (2805 characters)",
   "194d073417972434 (61 characters)",
 ]
 `;
@@ -2327,26 +2358,26 @@ exports[`design capability evidence > team.overlay.section@slider: the probe cha
 
 exports[`design capability evidence > team.surface.card@grid: the probe changes the registered target 1`] = `
 [
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
 ]
 `;
 
 exports[`design capability evidence > team.surface.card@list: the probe changes the registered target 1`] = `
 [
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex items-start gap-5 p-4 sm:gap-8 sm:p-6">",
 ]
 `;
 
 exports[`design capability evidence > team.surface.card@slider: the probe changes the registered target 1`] = `
 [
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
 ]
 `;
 

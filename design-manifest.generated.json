@@ -20438,6 +20438,98 @@
           "clientEditable": false
         },
         {
+          "path": "cardDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -31779,6 +31871,98 @@
         },
         {
           "path": "cardDesign.actionColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.hex",
           "kind": "string",
           "required": null,
           "max": null,

@@ -11,6 +11,7 @@ import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
 import { resolveImageDesign } from '@/lib/sanity/image-design-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
 import { hasImageDesign } from '@/lib/sanity/team-portrait'
@@ -22,7 +23,7 @@ import type { SectionProps } from '../../../types'
 
 export type Member = NonNullable<SectionProps<'team'>['data']['members']>[number]
 
-const surface = 'relative rounded-card bg-surface shadow-card ring-1 ring-line'
+const surface = `relative rounded-card bg-surface ${CARD_SHADOW_CLASS.shadowed} ring-1 ring-line`
 
 /** The card's and the row's own surface: the whole card is the link, so a chosen fill has no hover shade. */
 const OWN_SURFACE = { background: 'bg-surface', border: 'ring-1 ring-line', still: true }
@@ -116,7 +117,8 @@ export function TeamCard({ member, design, headingLevel, eager, cardDesign, tone
       as={HoverLift}
       className={`${surface} flex h-full w-full flex-col overflow-hidden${groupOf(member, cardDesign)}`}
       own={OWN_SURFACE}
-      shadow="shadow-card"
+      shadow={CARD_SHADOW_CLASS.shadowed}
+      depth={resolveCardDepth([cardDesign], OWN_SHADOW.siteCard)}
       design={look.surface}
       mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >
@@ -208,7 +210,8 @@ export function TeamRow({
       as={HoverLift}
       className={`${surface} flex items-start gap-5 p-4 sm:gap-8 sm:p-6${groupOf(member, cardDesign)}`}
       own={OWN_SURFACE}
-      shadow="shadow-card"
+      shadow={CARD_SHADOW_CLASS.shadowed}
+      depth={resolveCardDepth([cardDesign], OWN_SHADOW.siteCard)}
       design={look.surface}
       mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >

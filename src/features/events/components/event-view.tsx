@@ -22,6 +22,7 @@ import {
 } from '@/lib/events/recurrence'
 import { zoneAbbreviation } from '@/lib/events/time-zone'
 import { requestTime } from '@/lib/request-time'
+import { CARD_SHADOW_CLASS } from '@/lib/sanity/depth-options'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { graph } from '@/lib/structured-data/graph'
 import { eventId } from '@/lib/structured-data/ids'
@@ -80,7 +81,7 @@ export async function EventView({ slug, ...mode }: { slug: string } & FetchMode)
         <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-14">
           <aside
             aria-labelledby="event-details-heading"
-            className="rounded-card bg-surface p-6 shadow-card ring-1 ring-line lg:order-2"
+            className={`rounded-card bg-surface p-6 ${CARD_SHADOW_CLASS.shadowed} ring-1 ring-line lg:order-2`}
           >
             <h2 id="event-details-heading" className="text-h4 font-semibold">
               Event details
