@@ -39,6 +39,12 @@ exports[`design capability evidence > blogPostCards.text.card.title: the probe c
 ]
 `;
 
+exports[`design capability evidence > ctaBanner.depth.card: the probe changes the registered target 1`] = `
+[
+  "<div class="rounded-panel px-8 py-section-compact shadow-(--card-depth,0_0_#0000) text-ink sm:px-16 text-center" data-tone="accent">",
+]
+`;
+
 exports[`design capability evidence > ctaBanner.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -67,7 +73,7 @@ exports[`design capability evidence > ctaBanner.mark.section: the probe changes 
 
 exports[`design capability evidence > ctaBanner.motion.section: the probe changes the registered target 1`] = `
 [
-  "03267cdce461a78e (1594 characters)",
+  "de16fde492c2be02 (1626 characters)",
 ]
 `;
 
@@ -1369,6 +1375,14 @@ exports[`design capability evidence > linkList.text.item.label@stacked: the prob
 ]
 `;
 
+exports[`design capability evidence > location.depth.card.cards: the probe changes the registered target 1`] = `
+[
+  "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line border-t-4 border-accent">",
+  "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line ">",
+  "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line ">",
+]
+`;
+
 exports[`design capability evidence > location.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -1407,7 +1421,7 @@ exports[`design capability evidence > location.mark.section: the probe changes t
 
 exports[`design capability evidence > location.motion.section: the probe changes the registered target 1`] = `
 [
-  "591c19c5778c869a (2889 characters)",
+  "7f79e3d7d65ecba3 (2985 characters)",
 ]
 `;
 
@@ -1419,9 +1433,9 @@ exports[`design capability evidence > location.overlay.section: the probe change
 
 exports[`design capability evidence > location.surface.card.cards: the probe changes the registered target 1`] = `
 [
-  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line border-t-4 border-accent">",
-  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line ">",
-  "<div class="rounded-card bg-surface-alt p-8 ring-1 ring-line ">",
+  "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line border-t-4 border-accent">",
+  "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line ">",
+  "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line ">",
 ]
 `;
 

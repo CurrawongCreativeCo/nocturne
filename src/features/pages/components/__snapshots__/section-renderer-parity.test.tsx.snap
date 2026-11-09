@@ -3,19 +3,19 @@
 exports[`SectionRenderer output parity > ctaBanner keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
   "single layout · panel none": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
   "single layout · panel unset": {
-    "hash": "98bd7482306bcdcb",
+    "hash": "f4e2f9ebb4172e12",
     "panel": null,
   },
 }
@@ -283,7 +283,7 @@ exports[`SectionRenderer output parity > hero keeps its output for every layout 
 exports[`SectionRenderer output parity > keeps draft-mode output, with edit markers in the layout and panel values 1`] = `
 {
   "ctaBanner · single layout": {
-    "hash": "dbce8a4b46a1e23a",
+    "hash": "07ca53418715538a",
     "panel": null,
   },
   "hero · full-bleed": {
@@ -316,7 +316,7 @@ exports[`SectionRenderer output parity > keeps draft-mode output, with edit mark
 exports[`SectionRenderer output parity > keeps output behind the members gate 1`] = `
 {
   "ctaBanner · single layout": {
-    "hash": "64533d42f312ce9a",
+    "hash": "1a5aa3ea3a90b7e9",
     "panel": null,
   },
   "hero · full-bleed": {
@@ -418,19 +418,19 @@ exports[`SectionRenderer output parity > linkList keeps its output for every lay
 exports[`SectionRenderer output parity > location keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "5fb4abecca769a8f",
+    "hash": "a2fc54d277be5b49",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "e6d69067d3d837b5",
+    "hash": "34a092a36caf1fa1",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "0bdd582d4929c16a",
+    "hash": "b59a0652206128e7",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "e6d69067d3d837b5",
+    "hash": "34a092a36caf1fa1",
     "panel": null,
   },
 }

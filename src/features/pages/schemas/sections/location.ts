@@ -130,6 +130,7 @@ export const location = defineType({
         inherits: 'the section’s own',
         surface: { hidden: hasPicture },
         markHidden: hasPicture,
+        depth: { hidden: hasPicture },
       }),
       accessField,
     ],

@@ -176,13 +176,6 @@
     },
     {
       "component": "ctaBanner",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 146
-    },
-    {
-      "component": "ctaBanner",
       "capability": "glass",
       "scope": "section",
       "layouts": [null],
@@ -272,13 +265,6 @@
       "scope": "section",
       "layouts": ["grid", "masonry", "slider"],
       "closingTask": 151
-    },
-    {
-      "component": "location",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 146
     },
     {
       "component": "location",

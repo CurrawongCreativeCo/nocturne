@@ -58,9 +58,11 @@ describe('Location: the details on cards, without a map image', () => {
   it('keeps its panels and the accent rule on the first, with nothing set', async () => {
     const [first, second] = panels(await draw())
     expect(first?.className).toBe(
-      'rounded-card bg-surface-alt p-8 ring-1 ring-line border-t-4 border-accent',
+      'rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line border-t-4 border-accent',
     )
-    expect(second?.className.trim()).toBe('rounded-card bg-surface-alt p-8 ring-1 ring-line')
+    expect(second?.className.trim()).toBe(
+      'rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line',
+    )
   })
 
   it('takes the fill, border and mark on every panel, keeping the accent rule', async () => {
@@ -152,5 +154,26 @@ describe('Location’s Studio controls', () => {
       expect(hiddenWith({ asset: { _ref: 'x' } }, name)).toBe(true)
     }
     expect(hiddenWith({ asset: { _ref: 'x' } }, 'title')).toBe(false)
+  })
+})
+
+describe('Location depth and glow', () => {
+  const depthOf = (card: Element | undefined) =>
+    card?.getAttribute('style')?.match(/--depth-shadow:([^;]*)/)?.[1]
+
+  it('draws no shadow of its own, reading the site’s Card depth only when one is chosen', async () => {
+    const found = panels(await draw())
+    expect(found.length).toBeGreaterThan(0)
+    for (const card of found) {
+      expect(card.className).toContain('shadow-(--card-depth,0_0_#0000)')
+      expect(depthOf(card)).toBeUndefined()
+    }
+  })
+
+  it('draws a chosen level and glow on every card, in place of the site’s depth', async () => {
+    for (const card of panels(await draw({ cardDesign: { shadow: 'raised', glow: 'soft' } }))) {
+      expect(card.className).toContain('shadow-(--depth-shadow)')
+      expect(depthOf(card)).toMatch(/^var\(--shadow-raised\), var\(--depth-glow-soft\)/)
+    }
   })
 })

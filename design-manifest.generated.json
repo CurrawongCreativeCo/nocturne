@@ -10332,6 +10332,104 @@
           "clientEditable": false
         },
         {
+          "path": "cardDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -10477,11 +10575,26 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "cardDesign.shadow"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "ctaBanner.depth.card",
+              "field": "cardDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/cta-banner.tsx",
+              "target": "div.rounded-panel",
+              "cases": [
+                "ctaBanner.depth.card"
+              ]
+            }
+          ]
         },
         "icon": {
           "notApplicable": "Draws no icon from the set"
@@ -18590,6 +18703,98 @@
           "clientEditable": false
         },
         {
+          "path": "cardDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "depth",
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "cardDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -18874,11 +19079,26 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "cardDesign.shadow"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "location.depth.card.cards",
+              "field": "cardDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/location/index.tsx",
+              "target": "div.rounded-card.p-8",
+              "cases": [
+                "location.depth.card.cards"
+              ]
+            }
+          ]
         },
         "icon": {
           "policies": [
@@ -20871,15 +21091,32 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
-              "fields": [],
+              "fields": [
+                "cardDesign.shadow"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending",
-                "list": "pending"
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "team.depth.card",
+              "field": "cardDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/team/team-card.tsx",
+              "target": "div.relative.rounded-card",
+              "cases": [
+                "team.depth.card@grid",
+                "team.depth.card@slider",
+                "team.depth.card@list"
+              ]
+            }
+          ]
         },
         "icon": {
           "notApplicable": "Its social icons are on member pages, not in this section"
@@ -32327,7 +32564,9 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
-              "fields": [],
+              "fields": [
+                "cardDesign.shadow"
+              ],
               "availability": {
                 "list": {
                   "notApplicable": "Rows have no card"
@@ -32335,11 +32574,24 @@
                 "agenda": {
                   "notApplicable": "Rows have no card"
                 },
-                "featured": "pending"
+                "featured": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "events.depth.card",
+              "field": "cardDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/events/events-parts.tsx",
+              "target": "article.relative.rounded-card",
+              "cases": [
+                "events.depth.card@featured"
+              ]
+            }
+          ]
         },
         "icon": {
           "notApplicable": "Not applicable (158 item 3)"

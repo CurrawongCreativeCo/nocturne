@@ -1230,6 +1230,20 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // The banner's one card: its depth is the only thing its Cards box offers (its fill is the tone).
+  {
+    id: 'ctaBanner.depth.card',
+    component: 'ctaBanner',
+    capability: 'depth',
+    scope: 'card',
+    field: 'cardDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
+    render: 'src/features/pages/components/sections/cta-banner.tsx',
+    target: 'div.rounded-panel',
+    change: 'attributes',
+    base: { eyebrow: 'Ready?', text: 'An intro.' },
+    probe: { 'cardDesign.shadow': 'floating' },
+  },
   ...frameEvidence('ctaBanner', { mark: true, overlay: true, edge: true, motion: true }),
   ...cardFamilyEvidence({
     component: 'formSection',
@@ -1361,6 +1375,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Find us', intro: 'An intro.', mapImage: null },
     roles: ['title', 'body', 'meta'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   ...cardFamilyEvidence({
     component: 'location',

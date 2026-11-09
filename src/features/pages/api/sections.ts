@@ -263,6 +263,7 @@ export const ctaBannerFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     ${headerDesignProjection},
+    cardDesign { ${depthProjection} },
     text,
     ctas[] { ${ctaFields} },
     tone
@@ -364,6 +365,7 @@ export const locationFragment = /* groq */ `
     ${headerDesignProjection},
     cardDesign {
       ${surfaceProjection},
+      ${depthProjection},
       title { ${roleStyleProjection} },
       body { ${roleStyleProjection} },
       meta { ${roleStyleProjection} },

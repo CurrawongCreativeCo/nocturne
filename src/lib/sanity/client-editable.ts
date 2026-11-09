@@ -243,7 +243,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   ctaBanner: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'ctas', 'tone'],
-    agencyOnly: ['headerDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
   },
   formSection: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'form'],
