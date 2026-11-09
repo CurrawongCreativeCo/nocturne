@@ -45,6 +45,8 @@ exports[`design capability evidence > blogPostCards.text.card.title: the probe c
 ]
 `;
 
+exports[`design capability evidence > ctaBanner.action.item: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > ctaBanner.depth.card: the probe changes the registered target 1`] = `
 [
   "<div class="rounded-panel px-8 py-section-compact shadow-(--card-depth,0_0_#0000) text-ink sm:px-16 text-center" data-tone="accent">",
@@ -79,7 +81,7 @@ exports[`design capability evidence > ctaBanner.mark.section: the probe changes 
 
 exports[`design capability evidence > ctaBanner.motion.section: the probe changes the registered target 1`] = `
 [
-  "de16fde492c2be02 (1626 characters)",
+  "7718dabbd550b569 (1660 characters)",
 ]
 `;
 
@@ -248,19 +250,19 @@ exports[`design capability evidence > events.mark.section@list: the probe change
 
 exports[`design capability evidence > events.motion.section@agenda: the probe changes the registered target 1`] = `
 [
-  "e2864f0d8915a9c1 (4776 characters)",
+  "066296aaff6be421 (4785 characters)",
 ]
 `;
 
 exports[`design capability evidence > events.motion.section@featured: the probe changes the registered target 1`] = `
 [
-  "d84a03f01010b0b0 (5259 characters)",
+  "8b88a2e8be6c8786 (5268 characters)",
 ]
 `;
 
 exports[`design capability evidence > events.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "fc07ac391b2c35d3 (7368 characters)",
+  "d4fb651c9ba8bc82 (7377 characters)",
 ]
 `;
 
@@ -687,6 +689,14 @@ exports[`design capability evidence > gallery.overlay.section@slider: the probe 
 ]
 `;
 
+exports[`design capability evidence > hero.action.item@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.action.item@full-bleed: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.action.item@overlay: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.action.item@split: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > hero.edge.section@editorial: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -739,19 +749,19 @@ exports[`design capability evidence > hero.mark.section@split: the probe changes
 
 exports[`design capability evidence > hero.motion.section@editorial: the probe changes the registered target 1`] = `
 [
-  "d3c08f8a72871f3c (1670 characters)",
+  "e194d2b7bb5ad517 (1704 characters)",
 ]
 `;
 
 exports[`design capability evidence > hero.motion.section@full-bleed: the probe changes the registered target 1`] = `
 [
-  "74cd0311f04b965b (1775 characters)",
+  "f0c53af5981c98b8 (1809 characters)",
 ]
 `;
 
 exports[`design capability evidence > hero.motion.section@overlay: the probe changes the registered target 1`] = `
 [
-  "eb1c0641dd178399 (1723 characters)",
+  "67e0fe5eeedbf8e1 (1757 characters)",
 ]
 `;
 
@@ -1154,7 +1164,7 @@ exports[`design capability evidence > linkList.motion.section@editorial: the pro
 
 exports[`design capability evidence > linkList.motion.section@stacked: the probe changes the registered target 1`] = `
 [
-  "d264213487436920 (6339 characters)",
+  "0511a60b7fa8f523 (6348 characters)",
 ]
 `;
 
@@ -1434,7 +1444,7 @@ exports[`design capability evidence > location.mark.section: the probe changes t
 
 exports[`design capability evidence > location.motion.section: the probe changes the registered target 1`] = `
 [
-  "7f79e3d7d65ecba3 (2985 characters)",
+  "f0b119faa398912c (3012 characters)",
 ]
 `;
 
@@ -1582,6 +1592,12 @@ exports[`design capability evidence > logoCloud.overlay.section@marquee: the pro
 ]
 `;
 
+exports[`design capability evidence > mediaText.action.item@overlay: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.action.item@side: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.action.item@stacked: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > mediaText.edge.section@overlay: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -1680,19 +1696,19 @@ exports[`design capability evidence > mediaText.mark.section@stacked: the probe 
 
 exports[`design capability evidence > mediaText.motion.section@overlay: the probe changes the registered target 1`] = `
 [
-  "27cdbff68f33dfc4 (1063 characters)",
+  "f0ee835e73f6aafe (1089 characters)",
 ]
 `;
 
 exports[`design capability evidence > mediaText.motion.section@side: the probe changes the registered target 1`] = `
 [
-  "c86230300c74dac8 (1333 characters)",
+  "4c72030016a2ec84 (1359 characters)",
 ]
 `;
 
 exports[`design capability evidence > mediaText.motion.section@stacked: the probe changes the registered target 1`] = `
 [
-  "86c93e7e3c0260c4 (1311 characters)",
+  "e00e691569b32231 (1337 characters)",
 ]
 `;
 

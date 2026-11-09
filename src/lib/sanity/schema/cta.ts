@@ -1,6 +1,9 @@
 import { LaunchIcon } from '@sanity/icons/Launch'
 import { defineField, defineType } from 'sanity'
 
+import { hiddenFromClients } from '@/lib/sanity/roles'
+import { actionFields } from '@/lib/sanity/schema/surface-design'
+
 /** Editor-facing names for the stored button styles: what each looks like, not the code's word for it. */
 const CTA_STYLE_TITLES: Record<string, string> = {
   primary: 'Filled',
@@ -12,6 +15,15 @@ export const cta = defineType({
   title: 'Call to action',
   type: 'object',
   icon: LaunchIcon,
+  fieldsets: [
+    {
+      name: 'action',
+      title: 'Indicator',
+      description:
+        'The arrow or chevron at the end of this button (agency only). None leaves the button as it is.',
+      options: { collapsible: true, collapsed: true },
+    },
+  ],
   fields: [
     defineField({ name: 'label', type: 'string', validation: (rule) => rule.required().max(40) }),
     defineField({ name: 'link', type: 'link', validation: (rule) => rule.required() }),
@@ -28,6 +40,9 @@ export const cta = defineType({
       },
       validation: (rule) => rule.required(),
     }),
+    // The shared indicator fields (task 137), agency only. None until chosen: a button draws no
+    // indicator today, so stored buttons are unchanged.
+    ...actionFields({ hidden: hiddenFromClients, inherits: 'none' }),
   ],
   preview: {
     select: { title: 'label', variant: 'variant' },

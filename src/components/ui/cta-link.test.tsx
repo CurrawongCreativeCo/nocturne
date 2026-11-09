@@ -143,3 +143,59 @@ describe('the site-wide button rules (globals.css)', () => {
     }
   })
 })
+
+describe('the button indicator (task 148, shared action fields on the cta object)', () => {
+  const withIndicator = (extra: Record<string, unknown>) =>
+    ({ ...cta('primary'), ...extra }) as unknown as Omit<CtaData, '_key'>
+  const render = (data: Omit<CtaData, '_key'>, surface: 'dark' | 'light' = 'light') =>
+    renderToStaticMarkup(<CtaLink cta={data} surface={surface} />)
+
+  it('draws nothing, and adds no class, while no indicator is chosen (stored buttons are unchanged)', () => {
+    for (const extra of [
+      {},
+      { actionStyle: null },
+      { actionStyle: 'none' },
+      { actionStyle: 'bogus' },
+    ]) {
+      const html = render(withIndicator(extra))
+      expect(html).not.toContain('<svg')
+      expect(classesOf(html)?.split(' ')).not.toContain('group')
+      expect(classesOf(html)).not.toContain('gap-2')
+    }
+  })
+
+  it('draws the chosen glyph after the label, decoratively, on both surfaces', () => {
+    for (const surface of ['dark', 'light'] as const) {
+      const html = render(withIndicator({ actionStyle: 'arrow', actionMotion: 'nudge' }), surface)
+      expect(html).toContain('data-link-arrow="arrow"')
+      expect(html).toContain('aria-hidden="true"')
+      expect(html).toContain('data-action-motion="nudge"')
+      expect(html.indexOf('Book now')).toBeLessThan(html.indexOf('<svg'))
+      // The link is the group the indicator's hover and focus motion follows.
+      expect(classesOf(html)?.split(' ')).toContain('group')
+      expect(html).toContain('href="https://example.com/book"')
+      expect(html).toContain('data-track-event="cta_click"')
+    }
+  })
+
+  it('moves no indicator unless a motion is chosen, and takes the chosen colour', () => {
+    expect(render(withIndicator({ actionStyle: 'chevron' }))).not.toContain('data-action-motion')
+    expect(
+      render(withIndicator({ actionStyle: 'arrow', actionColour: { colour: 'accent' } })),
+    ).toContain('color:')
+  })
+
+  it('draws the diagonal arrow for a link that leaves the site, and the plain one on this site', () => {
+    expect(render(withIndicator({ actionStyle: 'external' }))).toContain('data-action-glyph="out"')
+    const internal = {
+      link: { linkType: 'internal', slug: 'about' },
+      actionStyle: 'external',
+    }
+    expect(render(withIndicator(internal))).toContain('data-action-glyph="arrow"')
+  })
+
+  it('does not change the label’s accessible name', () => {
+    const html = render(withIndicator({ actionStyle: 'arrow' }))
+    expect(html.replace(/<svg[\s\S]*?<\/svg>/, '')).toContain('>Book now</a>')
+  })
+})

@@ -27,8 +27,8 @@ export const heroCapabilities = declareCapabilities<HeroLayout>({
     policy: 'conditional',
     scope: 'item',
     trigger: CALL_TO_ACTION,
-    // The trailing indicator on the buttons is task 148's (owner-approved 8 November 2026).
-    closingTask: 148,
+    // The trailing indicator on the buttons: the shared action fields on the cta object (task 148).
+    note: 'Drawn by CtaLink from the button’s own Indicator fields',
   },
   framing: [
     {

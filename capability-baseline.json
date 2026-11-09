@@ -538,13 +538,6 @@
   "conditional": [
     {
       "component": "hero",
-      "capability": "action",
-      "scope": "item",
-      "layouts": ["overlay", "split", "editorial", "full-bleed"],
-      "closingTask": 148
-    },
-    {
-      "component": "hero",
       "capability": "framing",
       "scope": "section",
       "part": "background",
@@ -558,13 +551,6 @@
       "part": "background",
       "layouts": [null],
       "closingTask": 177
-    },
-    {
-      "component": "mediaText",
-      "capability": "action",
-      "scope": "item",
-      "layouts": ["side", "stacked", "overlay"],
-      "closingTask": 148
     },
     {
       "component": "mediaText",
@@ -640,13 +626,6 @@
       "part": "background",
       "layouts": [null],
       "closingTask": 177
-    },
-    {
-      "component": "ctaBanner",
-      "capability": "action",
-      "scope": "item",
-      "layouts": [null],
-      "closingTask": 148
     },
     {
       "component": "ctaBanner",

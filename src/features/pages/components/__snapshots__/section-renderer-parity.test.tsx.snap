@@ -3,19 +3,19 @@
 exports[`SectionRenderer output parity > ctaBanner keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "f4e2f9ebb4172e12",
+    "hash": "e604d37c9fd36eff",
     "panel": null,
   },
   "single layout · panel none": {
-    "hash": "f4e2f9ebb4172e12",
+    "hash": "e604d37c9fd36eff",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "f4e2f9ebb4172e12",
+    "hash": "e604d37c9fd36eff",
     "panel": null,
   },
   "single layout · panel unset": {
-    "hash": "f4e2f9ebb4172e12",
+    "hash": "e604d37c9fd36eff",
     "panel": null,
   },
 }
@@ -45,51 +45,51 @@ exports[`SectionRenderer output parity > embed keeps its output for every layout
 exports[`SectionRenderer output parity > events keeps its output for every layout and stored panel choice 1`] = `
 {
   "agenda · panel glass": {
-    "hash": "25ca04a58d80fb42",
+    "hash": "c6bf5a4daf622858",
     "panel": "tinted",
   },
   "agenda · panel none": {
-    "hash": "fb8975afd16d86ff",
+    "hash": "28dfc8f6e76033ac",
     "panel": null,
   },
   "agenda · panel solid": {
-    "hash": "eb986a3824fdd106",
+    "hash": "718708e11b01039a",
     "panel": "solid",
   },
   "agenda · panel unset": {
-    "hash": "fb8975afd16d86ff",
+    "hash": "28dfc8f6e76033ac",
     "panel": null,
   },
   "featured · panel glass": {
-    "hash": "4de16348b49351c6",
+    "hash": "bf7d7daaee85ee60",
     "panel": "tinted",
   },
   "featured · panel none": {
-    "hash": "f8739c40d0679ad8",
+    "hash": "d8377a95057584be",
     "panel": null,
   },
   "featured · panel solid": {
-    "hash": "52b3afb86414e4a2",
+    "hash": "601c0a514ada2163",
     "panel": "solid",
   },
   "featured · panel unset": {
-    "hash": "f8739c40d0679ad8",
+    "hash": "d8377a95057584be",
     "panel": null,
   },
   "list · panel glass": {
-    "hash": "b5dc17c9e419700a",
+    "hash": "4d0172db42504dd2",
     "panel": "tinted",
   },
   "list · panel none": {
-    "hash": "b10c3f3c226b291a",
+    "hash": "1eabfb7a873a46ad",
     "panel": null,
   },
   "list · panel solid": {
-    "hash": "0d67e492ef3ff22e",
+    "hash": "96a818e6b98b4b54",
     "panel": "solid",
   },
   "list · panel unset": {
-    "hash": "b10c3f3c226b291a",
+    "hash": "1eabfb7a873a46ad",
     "panel": null,
   },
 }
@@ -214,51 +214,51 @@ exports[`SectionRenderer output parity > gallery keeps its output for every layo
 exports[`SectionRenderer output parity > hero keeps its output for every layout and stored panel choice 1`] = `
 {
   "editorial · panel glass": {
-    "hash": "21f40f419a4fbc18",
+    "hash": "a4ff279e8403ae5a",
     "panel": "tinted",
   },
   "editorial · panel none": {
-    "hash": "b19322ffb282f53c",
+    "hash": "b51d5440ef5494a7",
     "panel": null,
   },
   "editorial · panel solid": {
-    "hash": "f8b39c805b5f2098",
+    "hash": "3e4b11a7ba19ae2a",
     "panel": "solid",
   },
   "editorial · panel unset": {
-    "hash": "b19322ffb282f53c",
+    "hash": "b51d5440ef5494a7",
     "panel": null,
   },
   "full-bleed · panel glass": {
-    "hash": "76308aca5c82d7b0",
+    "hash": "b779d193914b8319",
     "panel": null,
   },
   "full-bleed · panel none": {
-    "hash": "76308aca5c82d7b0",
+    "hash": "b779d193914b8319",
     "panel": null,
   },
   "full-bleed · panel solid": {
-    "hash": "76308aca5c82d7b0",
+    "hash": "b779d193914b8319",
     "panel": null,
   },
   "full-bleed · panel unset": {
-    "hash": "76308aca5c82d7b0",
+    "hash": "b779d193914b8319",
     "panel": null,
   },
   "overlay · panel glass": {
-    "hash": "48285eeca83de3d2",
+    "hash": "78b3103124040e17",
     "panel": "frosted",
   },
   "overlay · panel none": {
-    "hash": "344bb16f97e1dad0",
+    "hash": "5876b71f70693585",
     "panel": null,
   },
   "overlay · panel solid": {
-    "hash": "21d84557922ac587",
+    "hash": "fa431f64fdb7d9c0",
     "panel": "solid",
   },
   "overlay · panel unset": {
-    "hash": "344bb16f97e1dad0",
+    "hash": "5876b71f70693585",
     "panel": null,
   },
   "split · panel glass": {
@@ -283,11 +283,11 @@ exports[`SectionRenderer output parity > hero keeps its output for every layout 
 exports[`SectionRenderer output parity > keeps draft-mode output, with edit markers in the layout and panel values 1`] = `
 {
   "ctaBanner · single layout": {
-    "hash": "07ca53418715538a",
+    "hash": "d49b6dd6874626e7",
     "panel": null,
   },
   "hero · full-bleed": {
-    "hash": "06c1696b154e0c82",
+    "hash": "430b8589d76bde6a",
     "panel": null,
   },
   "hero · split": {
@@ -299,11 +299,11 @@ exports[`SectionRenderer output parity > keeps draft-mode output, with edit mark
     "panel": null,
   },
   "linkList · stacked": {
-    "hash": "ea3694a3bb952f0f",
+    "hash": "92785789999c5b82",
     "panel": null,
   },
   "mediaText · side": {
-    "hash": "3728a1ba49291dce",
+    "hash": "10fc0278178efebc",
     "panel": "tinted",
   },
   "richText · single layout": {
@@ -316,11 +316,11 @@ exports[`SectionRenderer output parity > keeps draft-mode output, with edit mark
 exports[`SectionRenderer output parity > keeps output behind the members gate 1`] = `
 {
   "ctaBanner · single layout": {
-    "hash": "1a5aa3ea3a90b7e9",
+    "hash": "51524442dc551c49",
     "panel": null,
   },
   "hero · full-bleed": {
-    "hash": "69e7d1cb29f55c0f",
+    "hash": "e5ac5867e20ebae8",
     "panel": null,
   },
   "hero · split": {
@@ -332,11 +332,11 @@ exports[`SectionRenderer output parity > keeps output behind the members gate 1`
     "panel": null,
   },
   "linkList · stacked": {
-    "hash": "b0ee1c698345377e",
+    "hash": "14e5e29fe0f5f944",
     "panel": null,
   },
   "mediaText · side": {
-    "hash": "2ead3c10919cabb3",
+    "hash": "cca743e6bcb8a168",
     "panel": "tinted",
   },
   "richText · single layout": {
@@ -397,19 +397,19 @@ exports[`SectionRenderer output parity > linkList keeps its output for every lay
     "panel": null,
   },
   "stacked · panel glass": {
-    "hash": "152dfedcfdf9d39b",
+    "hash": "7c0d9533a83feb30",
     "panel": null,
   },
   "stacked · panel none": {
-    "hash": "152dfedcfdf9d39b",
+    "hash": "7c0d9533a83feb30",
     "panel": null,
   },
   "stacked · panel solid": {
-    "hash": "152dfedcfdf9d39b",
+    "hash": "7c0d9533a83feb30",
     "panel": null,
   },
   "stacked · panel unset": {
-    "hash": "152dfedcfdf9d39b",
+    "hash": "7c0d9533a83feb30",
     "panel": null,
   },
 }
@@ -418,19 +418,19 @@ exports[`SectionRenderer output parity > linkList keeps its output for every lay
 exports[`SectionRenderer output parity > location keeps its output for every layout and stored panel choice 1`] = `
 {
   "single layout · panel glass": {
-    "hash": "a2fc54d277be5b49",
+    "hash": "1312fa34ce6a4c16",
     "panel": "tinted",
   },
   "single layout · panel none": {
-    "hash": "34a092a36caf1fa1",
+    "hash": "64040420b3ecf765",
     "panel": null,
   },
   "single layout · panel solid": {
-    "hash": "b59a0652206128e7",
+    "hash": "4023c96119c38eda",
     "panel": "solid",
   },
   "single layout · panel unset": {
-    "hash": "34a092a36caf1fa1",
+    "hash": "64040420b3ecf765",
     "panel": null,
   },
 }
@@ -476,51 +476,51 @@ exports[`SectionRenderer output parity > logoCloud keeps its output for every la
 exports[`SectionRenderer output parity > mediaText keeps its output for every layout and stored panel choice 1`] = `
 {
   "overlay · panel glass": {
-    "hash": "b0aed869c20e060e",
+    "hash": "1e5f95e77f844c29",
     "panel": "frosted",
   },
   "overlay · panel none": {
-    "hash": "b234e67c754af9cb",
+    "hash": "ddfcf5aec43d7be7",
     "panel": null,
   },
   "overlay · panel solid": {
-    "hash": "27cd274655449b05",
+    "hash": "bd3ee01f03626b16",
     "panel": "solid",
   },
   "overlay · panel unset": {
-    "hash": "b234e67c754af9cb",
+    "hash": "ddfcf5aec43d7be7",
     "panel": null,
   },
   "side · panel glass": {
-    "hash": "e4d3cb3cf0408c0f",
+    "hash": "9e2c192523771000",
     "panel": "tinted",
   },
   "side · panel none": {
-    "hash": "d80ac066fb0541de",
+    "hash": "18577803af2bf544",
     "panel": null,
   },
   "side · panel solid": {
-    "hash": "ca798095f7b2b70a",
+    "hash": "4d645c2467e70a77",
     "panel": "solid",
   },
   "side · panel unset": {
-    "hash": "d80ac066fb0541de",
+    "hash": "18577803af2bf544",
     "panel": null,
   },
   "stacked · panel glass": {
-    "hash": "9d8dc2941af6d3bd",
+    "hash": "b08fe1eb2fb5c82f",
     "panel": "tinted",
   },
   "stacked · panel none": {
-    "hash": "e05b4467ee158c3d",
+    "hash": "49c262fde3294c15",
     "panel": null,
   },
   "stacked · panel solid": {
-    "hash": "5c8057039becbb00",
+    "hash": "b8801ae2e6341c81",
     "panel": "solid",
   },
   "stacked · panel unset": {
-    "hash": "e05b4467ee158c3d",
+    "hash": "49c262fde3294c15",
     "panel": null,
   },
 }

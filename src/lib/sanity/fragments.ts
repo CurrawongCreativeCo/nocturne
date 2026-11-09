@@ -67,10 +67,14 @@ export const linkFields = /* groq */ `
   bookingUrl
 `
 
+/** A button's optional indicator (task 148): the shared action fields stored on the `cta` object. */
+export const ctaIndicatorFields = /* groq */ `actionStyle, actionMotion, actionColour { colour, hex }`
+
 export const ctaFields = /* groq */ `
   _key,
   label,
   variant,
+  ${ctaIndicatorFields},
   link { ${linkFields} }
 `
 

@@ -1111,6 +1111,106 @@
           "clientEditable": true
         },
         {
+          "path": "ctas[].actionStyle",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "chevron",
+              "title": "Chevron"
+            },
+            {
+              "value": "arrow",
+              "title": "Arrow"
+            },
+            {
+              "value": "external",
+              "title": "External link"
+            },
+            {
+              "value": "none",
+              "title": "None"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionMotion",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "nudge",
+              "title": "Nudge"
+            },
+            {
+              "value": "lift",
+              "title": "Lift"
+            },
+            {
+              "value": "draw",
+              "title": "Draw"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour",
+          "kind": "object",
+          "required": false,
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "backgroundImage",
           "kind": "image",
           "required": null,
@@ -2598,17 +2698,36 @@
                 "path": "ctas",
                 "reachable": true
               },
-              "closingTask": 148,
-              "fields": [],
+              "closingTask": 137,
+              "fields": [
+                "ctas[].actionStyle"
+              ],
               "availability": {
-                "overlay": "pending",
-                "split": "pending",
-                "editorial": "pending",
-                "full-bleed": "pending"
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "hero.action.item",
+              "field": "ctas[].actionStyle",
+              "resolvers": [
+                "@/lib/sanity/card-action#resolveCardAction",
+                "@/components/ui/action-indicator#ActionIndicator"
+              ],
+              "render": "src/components/ui/cta-link.tsx",
+              "target": "a [data-link-arrow]",
+              "cases": [
+                "hero.action.item@overlay",
+                "hero.action.item@split",
+                "hero.action.item@editorial",
+                "hero.action.item@full-bleed"
+              ]
+            }
+          ]
         },
         "framing": {
           "policies": [
@@ -3291,6 +3410,106 @@
             }
           ],
           "clientEditable": true
+        },
+        {
+          "path": "ctas[].actionStyle",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "chevron",
+              "title": "Chevron"
+            },
+            {
+              "value": "arrow",
+              "title": "Arrow"
+            },
+            {
+              "value": "external",
+              "title": "External link"
+            },
+            {
+              "value": "none",
+              "title": "None"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionMotion",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "nudge",
+              "title": "Nudge"
+            },
+            {
+              "value": "lift",
+              "title": "Lift"
+            },
+            {
+              "value": "draw",
+              "title": "Draw"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour",
+          "kind": "object",
+          "required": false,
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
         },
         {
           "path": "media",
@@ -4300,16 +4519,34 @@
                 "path": "ctas",
                 "reachable": true
               },
-              "closingTask": 148,
-              "fields": [],
+              "closingTask": 137,
+              "fields": [
+                "ctas[].actionStyle"
+              ],
               "availability": {
-                "side": "pending",
-                "stacked": "pending",
-                "overlay": "pending"
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "mediaText.action.item",
+              "field": "ctas[].actionStyle",
+              "resolvers": [
+                "@/lib/sanity/card-action#resolveCardAction",
+                "@/components/ui/action-indicator#ActionIndicator"
+              ],
+              "render": "src/components/ui/cta-link.tsx",
+              "target": "a [data-link-arrow]",
+              "cases": [
+                "mediaText.action.item@side",
+                "mediaText.action.item@stacked",
+                "mediaText.action.item@overlay"
+              ]
+            }
+          ]
         },
         "framing": {
           "policies": [
@@ -10065,6 +10302,106 @@
           "clientEditable": true
         },
         {
+          "path": "ctas[].actionStyle",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "chevron",
+              "title": "Chevron"
+            },
+            {
+              "value": "arrow",
+              "title": "Arrow"
+            },
+            {
+              "value": "external",
+              "title": "External link"
+            },
+            {
+              "value": "none",
+              "title": "None"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionMotion",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "nudge",
+              "title": "Nudge"
+            },
+            {
+              "value": "lift",
+              "title": "Lift"
+            },
+            {
+              "value": "draw",
+              "title": "Draw"
+            }
+          ],
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour",
+          "kind": "object",
+          "required": false,
+          "capability": "action",
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "ctas[].actionColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "tone",
           "kind": "string",
           "required": true,
@@ -10717,12 +11054,28 @@
                 "path": "ctas",
                 "reachable": true
               },
-              "closingTask": 148,
-              "fields": [],
-              "availability": "pending"
+              "closingTask": 137,
+              "fields": [
+                "ctas[].actionStyle"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "ctaBanner.action.item",
+              "field": "ctas[].actionStyle",
+              "resolvers": [
+                "@/lib/sanity/card-action#resolveCardAction",
+                "@/components/ui/action-indicator#ActionIndicator"
+              ],
+              "render": "src/components/ui/cta-link.tsx",
+              "target": "a [data-link-arrow]",
+              "cases": [
+                "ctaBanner.action.item"
+              ]
+            }
+          ]
         },
         "framing": {
           "policies": [
