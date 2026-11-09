@@ -1224,6 +1224,7 @@ export const EVIDENCE: readonly Evidence[] = [
     cardTarget: 'div.relative.rounded-card',
     base: { 'cardDesign.itemStyle': 'cards' },
     roles: ['title', 'body'],
+    depth: true,
   }),
   ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
   // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
@@ -1346,6 +1347,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'In numbers', intro: 'An intro.' },
     roles: ['number', 'label'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    depth: true,
   }),
   ...frameEvidence('stats', {
     mark: ['inline', 'cards'],

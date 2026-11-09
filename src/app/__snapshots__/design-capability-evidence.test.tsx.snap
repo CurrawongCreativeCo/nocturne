@@ -370,6 +370,13 @@ exports[`design capability evidence > events.text.card.title@list: the probe cha
 ]
 `;
 
+exports[`design capability evidence > faq.depth.card.cards: the probe changes the registered target 1`] = `
+[
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
+]
+`;
+
 exports[`design capability evidence > faq.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -418,8 +425,8 @@ exports[`design capability evidence > faq.overlay.section: the probe changes the
 
 exports[`design capability evidence > faq.surface.card.cards: the probe changes the registered target 1`] = `
 [
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line">",
-  "<div class="relative rounded-card bg-surface shadow-card ring-1 ring-line">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
+  "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
 ]
 `;
 
@@ -2087,6 +2094,15 @@ exports[`design capability evidence > siteFooter.icon.section: the probe changes
 ]
 `;
 
+exports[`design capability evidence > stats.depth.card@cards: the probe changes the registered target 1`] = `
+[
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
+]
+`;
+
 exports[`design capability evidence > stats.edge.section@cards: the probe changes the registered target 1`] = `
 [
   "<body>",
@@ -2155,7 +2171,7 @@ exports[`design capability evidence > stats.mark.section@inline: the probe chang
 
 exports[`design capability evidence > stats.motion.section@cards: the probe changes the registered target 1`] = `
 [
-  "8e2399d8157c2a80 (1756 characters)",
+  "e366c861419e7e13 (1884 characters)",
 ]
 `;
 
@@ -2179,10 +2195,10 @@ exports[`design capability evidence > stats.overlay.section@inline: the probe ch
 
 exports[`design capability evidence > stats.surface.card@cards: the probe changes the registered target 1`] = `
 [
-  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
-  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
-  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
-  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
+  "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
 ]
 `;
 

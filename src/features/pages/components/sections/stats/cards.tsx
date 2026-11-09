@@ -4,6 +4,7 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { StatFigure } from '@/components/ui/stat-figure'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
@@ -64,8 +65,10 @@ export function StatsCards({ data, isFirst }: SectionProps<'stats'>) {
           <CardSurface
             key={item._key}
             as="li"
-            className={`rounded-card border-t-4 border-accent bg-surface-alt p-8 ring-1 ring-line ${align === 'center' ? 'text-center' : ''}`}
+            className={`rounded-card border-t-4 border-accent bg-surface-alt p-8 ${CARD_SHADOW_CLASS.free} ring-1 ring-line ${align === 'center' ? 'text-center' : ''}`}
             own={OWN_SURFACE}
+            shadow={CARD_SHADOW_CLASS.free}
+            depth={resolveCardDepth([data.cardDesign], OWN_SHADOW.siteCardFree)}
             design={look.surface}
             mark={{ input: data.cardDesign?.mark, scope: 'card', tone, levels: [data.cardDesign] }}
           >

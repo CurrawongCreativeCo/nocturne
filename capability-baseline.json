@@ -635,13 +635,6 @@
     },
     {
       "component": "faq",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 146
-    },
-    {
-      "component": "faq",
       "capability": "framing",
       "scope": "section",
       "part": "background",
@@ -693,13 +686,6 @@
       "part": "background",
       "layouts": [null],
       "closingTask": 177
-    },
-    {
-      "component": "stats",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": ["cards"],
-      "closingTask": 146
     },
     {
       "component": "stats",

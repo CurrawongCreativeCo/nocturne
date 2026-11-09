@@ -244,6 +244,7 @@ export const faqFragment = /* groq */ `
     cardDesign {
       itemStyle,
       ${surfaceProjection},
+      ${depthProjection},
       title { ${roleStyleProjection} },
       body { ${roleStyleProjection} },
       mark { ${decorativeMarkFields} }
@@ -332,6 +333,7 @@ export const statsFragment = /* groq */ `
     ${headerDesignProjection},
     cardDesign {
       ${surfaceProjection},
+      ${depthProjection},
       number { ${roleStyleProjection} },
       label { ${roleStyleProjection} },
       mark { ${decorativeMarkFields} }

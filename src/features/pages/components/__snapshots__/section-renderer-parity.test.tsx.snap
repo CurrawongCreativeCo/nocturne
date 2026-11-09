@@ -629,19 +629,19 @@ exports[`SectionRenderer output parity > richText keeps its output for every lay
 exports[`SectionRenderer output parity > stats keeps its output for every layout and stored panel choice 1`] = `
 {
   "cards · panel glass": {
-    "hash": "6f207302d0ebfa0a",
+    "hash": "2b8a549ba5a6afb4",
     "panel": "tinted",
   },
   "cards · panel none": {
-    "hash": "fe46398dd47f7003",
+    "hash": "549f9625171359df",
     "panel": null,
   },
   "cards · panel solid": {
-    "hash": "0054b27ca168a5d1",
+    "hash": "351bfcbb5c9c4a0f",
     "panel": "solid",
   },
   "cards · panel unset": {
-    "hash": "fe46398dd47f7003",
+    "hash": "549f9625171359df",
     "panel": null,
   },
   "inline · panel glass": {
