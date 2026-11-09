@@ -1,6 +1,9 @@
 import type { SiteDecision } from './site-decisions'
 
-/** Test fixtures only. The real density and shape values are task 216b's to decide. */
+/**
+ * Test fixtures only: they exercise the registry mechanism with made-up values. The real density and
+ * shape choices are in `SITE_DECISIONS` (site-decisions.ts).
+ */
 export const density = {
   field: 'density',
   choices: {

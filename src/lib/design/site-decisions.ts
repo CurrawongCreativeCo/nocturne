@@ -43,10 +43,32 @@ const cardDepth = decision('cardDepth', {
 })
 
 /**
- * The decisions the site honours, by name. Density and shape (216b) register here too, each as one
- * `decision(...)` entry.
+ * How much room the site gives its sections (task 216). Moves only `--spacing-section`, the vertical
+ * padding of a section left on Default (and one with no choice at all, which resolves to Default), and
+ * `--spacing-gutter`. A section that explicitly chose Compact or Spacious reads
+ * `--spacing-section-compact` or `-spacious`, which no density touches, so its own choice wins.
+ * Compact is 75% and Airy 125% of tokens.json (6rem and 1.5rem); Standard is today's values, so it
+ * emits nothing.
  */
-export const SITE_DECISIONS = { cardDepth }
+const density = decision('density', {
+  compact: { '--spacing-section': '4.5rem', '--spacing-gutter': '1.125rem' },
+  standard: {},
+  airy: { '--spacing-section': '7.5rem', '--spacing-gutter': '1.875rem' },
+})
+
+/**
+ * How rounded the site's cards, panels and controls are (task 216). Buttons and pills stay fully
+ * round, as the Button's own shape does. Soft is today's look (1rem, 1.5rem and 0.5rem), so it emits
+ * nothing.
+ */
+const shape = decision('shape', {
+  sharp: { '--radius-card': '0.25rem', '--radius-panel': '0.5rem', '--radius-control': '0.25rem' },
+  soft: {},
+  round: { '--radius-card': '1.75rem', '--radius-panel': '2.25rem', '--radius-control': '0.75rem' },
+})
+
+/** The decisions the site honours, by name. Heading style (216b stage 2) registers here too. */
+export const SITE_DECISIONS = { density, shape, cardDepth }
 
 export type SiteDecisionName = keyof typeof SITE_DECISIONS
 
