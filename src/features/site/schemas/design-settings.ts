@@ -73,6 +73,7 @@ export const designSettings = defineType({
   title: 'Brand colours',
   type: 'document',
   icon: ColorWheelIcon,
+  options: { spacingUsage: true },
   components: { input: DesignSettingsInput },
   fieldsets: [
     {

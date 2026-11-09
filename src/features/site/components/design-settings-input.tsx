@@ -5,8 +5,12 @@ import { useFormValue, type ObjectInputProps } from 'sanity'
 
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
 
+import { SiteDecisionPreview } from './site-decision-preview'
+
 /**
- * A small mock-up of the site in the colours being edited, above the form. It reads the same
+ * A small mock-up of the site in the colours being edited, above the form, then one of the chosen
+ * density, shape and heading style. The count of sections that set their own spacing sits above it
+ * (`options.spacingUsage`, shown by the Studio-wide input). It reads the same
  * resolveDesignTokens the site does, so it is a faithful (if simplified) preview; the Presentation
  * tool shows the real pages. The colours are the editor's, so they are inline on purpose.
  */
@@ -116,6 +120,7 @@ export function DesignSettingsInput(props: ObjectInputProps) {
           </div>
         </Stack>
       </Card>
+      <SiteDecisionPreview vars={vars} headingStyle={document?.headingStyle} colours={colours} />
       {props.renderDefault(props)}
     </Stack>
   )

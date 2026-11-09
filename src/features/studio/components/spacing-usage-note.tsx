@@ -1,6 +1,6 @@
 import { Card, Spinner, Stack, Text } from '@sanity/ui'
 import { useEffect, useState } from 'react'
-import { useClient } from 'sanity'
+import { useClient, type ObjectInputProps } from 'sanity'
 import { IntentLink } from 'sanity/router'
 
 import { apiVersion } from '@/config/env'
@@ -97,4 +97,14 @@ export function SpacingUsageNote() {
   }, [client])
 
   return <SpacingUsageView state={state} />
+}
+
+/** The Brand colours root input: the count note, then the form as usual. */
+export function SpacingUsageInput(props: ObjectInputProps) {
+  return (
+    <Stack gap={4}>
+      <SpacingUsageNote />
+      {props.renderDefault(props)}
+    </Stack>
+  )
 }
