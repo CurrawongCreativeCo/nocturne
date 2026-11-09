@@ -8313,14 +8313,30 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
-              "fields": [],
+              "fields": [
+                "cardDesign.shadow"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "testimonials.depth.card",
+              "field": "cardDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/testimonials",
+              "target": "figure",
+              "cases": [
+                "testimonials.depth.card@grid",
+                "testimonials.depth.card@slider"
+              ]
+            }
+          ]
         },
         "icon": {
           "notApplicable": "Not applicable (158 item 3)"
@@ -14107,18 +14123,47 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 146,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "cardDesign.shadow"
+              ],
+              "availability": "verified"
             },
             {
               "policy": "required",
               "scope": "item",
               "closingTask": 146,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "plans[].design.shadow"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "pricingTable.depth.card",
+              "field": "cardDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/pricing-table.tsx",
+              "target": "ul.grid > li",
+              "cases": [
+                "pricingTable.depth.card"
+              ]
+            },
+            {
+              "id": "pricingTable.depth.item",
+              "field": "plans[].design.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolveCardDepth"
+              ],
+              "render": "src/features/pages/components/sections/pricing-table.tsx",
+              "target": "ul.grid > li",
+              "cases": [
+                "pricingTable.depth.item"
+              ]
+            }
+          ]
         },
         "icon": {
           "policies": [
