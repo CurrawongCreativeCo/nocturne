@@ -356,7 +356,7 @@ export function evidenceProblems(
       }
     }
     if (isCapabilityEvidence(entry)) {
-      if (entry.role && !entry.target.includes(textRoleTarget(entry.role))) {
+      if (entry.role && entry.target !== textRoleTarget(entry.role)) {
         problem(
           `it proves the ${entry.role} role, but its target (${entry.target}) isn't that role's own element.`,
           `Target ${textRoleTarget(entry.role)}, and draw that attribute on the element the role styles.`,

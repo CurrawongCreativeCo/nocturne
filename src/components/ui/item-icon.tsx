@@ -3,6 +3,7 @@ import { stegaClean } from 'next-sanity'
 import { BadgeIcon } from '@/components/ui/badge-icon'
 import { IconContainer } from '@/components/ui/icon-container'
 import { SanityImage } from '@/components/ui/sanity-image'
+import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
 import type { IconDesign, OwnIcon } from '@/lib/sanity/surface-options'
 
 /** A set icon with nothing chosen: the glyph on its own, in the accent, in the picture's box. */
@@ -18,7 +19,8 @@ type Picture = Parameters<typeof SanityImage>[0]['image']
 /**
  * A card's or step's icon (task 158): the set icon if one is chosen, in the shared container, else
  * the uploaded icon or image, drawn whole as it always was. So the set icon wins when both are
- * stored, and content that never chose one renders exactly as before.
+ * stored, and content that never chose one renders exactly as before. A stored name the set doesn't
+ * have (an icon since removed) counts as none, so the upload still shows.
  */
 export function ItemIcon({
   name,
@@ -29,7 +31,8 @@ export function ItemIcon({
   image?: Picture
   design: IconDesign
 }) {
-  const setIcon = stegaClean(name)
+  const cleaned = stegaClean(name)
+  const setIcon = BADGE_ICONS.find(({ value }) => value === cleaned)?.value
   if (setIcon) {
     return (
       <IconContainer design={design} own={SET_ICON_OWN} size="mb-4 size-12" keepBox>

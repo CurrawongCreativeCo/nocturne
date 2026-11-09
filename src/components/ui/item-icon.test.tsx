@@ -1,3 +1,4 @@
+import { vercelStegaCombine } from '@vercel/stega'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -33,5 +34,31 @@ describe('ItemIcon', () => {
   it('draws nothing of its own without a set icon, so the upload renders whole as before', () => {
     const html = renderToStaticMarkup(<ItemIcon name={null} design={{ shape: 'circle' }} />)
     expect(html).not.toContain('data-icon-shape')
+  })
+
+  it('falls back to the upload for a name the set doesn’t have', () => {
+    const html = renderToStaticMarkup(
+      <ItemIcon name="removed-icon" image={upload} design={{ shape: 'circle' }} />,
+    )
+    expect(html).toContain('data-upload')
+    expect(html).not.toContain('data-icon-shape')
+    expect(html).not.toContain('<svg')
+  })
+
+  it('draws nothing of its own for an unknown name with no upload', () => {
+    const html = renderToStaticMarkup(<ItemIcon name="removed-icon" design={{ shape: 'circle' }} />)
+    expect(html).not.toContain('data-icon-shape')
+  })
+
+  it('still reads a set icon name carrying stega encoding', () => {
+    const html = renderToStaticMarkup(
+      <ItemIcon
+        name={vercelStegaCombine('star', { origin: 'sanity.io', href: '/x' })}
+        image={upload}
+        design={{}}
+      />,
+    )
+    expect(html).toContain('<svg')
+    expect(html).not.toContain('data-upload')
   })
 })

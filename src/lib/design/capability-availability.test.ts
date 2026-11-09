@@ -201,6 +201,23 @@ describe('evidenceProblems', () => {
     ])
   })
 
+  it('refuses a role target that adds another selector to the role’s own', () => {
+    const base: CapabilityEvidence = { ...glassEvidence, layouts: ['open'], role: 'eyebrow' }
+    for (const target of [
+      '[data-text-role="eyebrow"], article',
+      'article [data-text-role="eyebrow"]',
+      '[data-text-role="eyebrow"] span',
+    ]) {
+      expect(messages([{ ...base, target }])).toEqual([
+        `Evidence fixtureCards.glass.section: it proves the eyebrow role, but its target (${target}) isn't that role's own element.`,
+      ])
+    }
+    // The exact selector draws no target problem (the fixture's glass card has other things to say).
+    expect(messages([{ ...base, target: '[data-text-role="eyebrow"]' }])).not.toContainEqual(
+      expect.stringContaining("isn't that role's own element"),
+    )
+  })
+
   it('refuses a claim on a layout the schema hides, or the declaration excludes', () => {
     expect(messages([glassEvidence])).toEqual([
       "Evidence fixtureCards.glass.section: the schema doesn't offer style.panel on boxed (style.panel is hidden for this layout and state).",
