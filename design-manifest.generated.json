@@ -33050,6 +33050,30 @@
         "clientEditable": false
       },
       {
+        "path": "cardDepth",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "flat",
+            "title": "Flat: No shadow: sits on the page."
+          },
+          {
+            "value": "soft",
+            "title": "Soft: A faint shadow, close to the page."
+          },
+          {
+            "value": "raised",
+            "title": "Raised: Lifts clearly off the page."
+          },
+          {
+            "value": "floating",
+            "title": "Floating: A deep, soft shadow, as if hovering."
+          }
+        ],
+        "clientEditable": false
+      },
+      {
         "path": "surface",
         "kind": "string",
         "required": null,
@@ -33192,6 +33216,7 @@
     ],
     "shadow": [
       "card",
+      "soft",
       "raised",
       "floating"
     ],

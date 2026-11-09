@@ -3,6 +3,8 @@ import { defineField, defineType, type StringRule } from 'sanity'
 
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
+import { SHADOW_DESCRIPTIONS, SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
+import { hiddenFromClients } from '@/lib/sanity/roles'
 
 import { ColourInput } from '../components/colour-input'
 import { DesignSettingsInput } from '../components/design-settings-input'
@@ -83,6 +85,20 @@ export const designSettings = defineType({
       'A supporting colour for highlights, tags and gradients.',
     ),
     colourField('highlight', 'Highlight', 'Optional. A bright accent for marking a word or badge.'),
+    defineField({
+      name: 'cardDepth',
+      title: 'Card depth',
+      type: 'string',
+      description:
+        'How far cards lift off the page, on every card that does not choose its own depth. Leave it empty to keep each card as it is drawn now. Soft is the shadow most cards have today.',
+      hidden: hiddenFromClients,
+      options: {
+        list: SHADOW_LEVELS.map((level) => ({
+          title: `${SHADOW_TITLES[level]}: ${SHADOW_DESCRIPTIONS[level]}`,
+          value: level,
+        })),
+      },
+    }),
     colourField('surface', 'Background', 'The page background.', 'advanced'),
     colourField(
       'surfaceAlt',
