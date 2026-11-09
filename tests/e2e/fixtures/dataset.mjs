@@ -1403,6 +1403,19 @@ export const designSettingsVariants = {
     highlight: '#ffd166',
     _updatedAt: UPDATED,
   },
+  // Only a site-wide Card depth (tests/e2e/design-settings.spec.ts, "Card depth").
+  'card-raised': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    cardDepth: 'raised',
+    _updatedAt: UPDATED,
+  },
+  'card-floating': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    cardDepth: 'floating',
+    _updatedAt: UPDATED,
+  },
 }
 
 /**
@@ -4916,6 +4929,69 @@ documents.push(
         profile: { _type: 'object', name: 'Nothing chosen' },
         socialSource: 'none',
         links: [linkItem('depth-p', 'Plain link', external('https://example.com/p'))],
+      },
+    ],
+  },
+  {
+    // Card depth (tests/e2e/design-settings.spec.ts): quote cards and pricing plans with nothing
+    // chosen, a section that chooses Soft, a plan that is Flat while the others are not, and a social
+    // button, which draws the card shadow without being a card and must not follow the site's depth.
+    _id: 'page-card-depth',
+    _type: 'page',
+    title: 'Card depth',
+    slug: { _type: 'slug', current: 'card-depth' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'cd-quote-unset',
+        _type: 'testimonials',
+        title: 'Quotes unset',
+        items: [{ _key: key(), quote: 'Great.', name: 'Alex', role: 'CEO' }],
+      },
+      {
+        _key: 'cd-quote-soft',
+        _type: 'testimonials',
+        title: 'Quotes soft',
+        cardDesign: { _type: 'object', shadow: 'soft' },
+        items: [{ _key: key(), quote: 'Great.', name: 'Sam', role: 'CEO' }],
+      },
+      {
+        _key: 'cd-plans-unset',
+        _type: 'pricingTable',
+        title: 'Plans unset',
+        plans: [plan('price_Starter1', { features: ['One project'] })],
+      },
+      {
+        _key: 'cd-plans-flat',
+        _type: 'pricingTable',
+        title: 'Plans flat',
+        plans: [
+          plan('price_Starter1', {
+            features: ['One project'],
+            design: { _type: 'object', appearance: 'custom', shadow: 'flat' },
+          }),
+          plan('price_Pro1', { features: ['Unlimited projects'] }),
+        ],
+      },
+      {
+        _key: 'cd-social',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: { _type: 'object', name: 'Social buttons' },
+        socialDesign: { _type: 'object', style: 'circle' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        links: [linkItem('cd-l', 'A link', external('https://example.com/l'))],
       },
     ],
   },

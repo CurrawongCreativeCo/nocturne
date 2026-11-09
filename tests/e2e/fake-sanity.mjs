@@ -45,7 +45,7 @@ let usersMeCalls = 0
 const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon, markerUnset }
 let settingsPatch = null
 
-/** The designSettings variant being served (`light` or `dark`), or null for none; POST /__fixture/design/<off|light|dark>. */
+/** The designSettings variant being served (`light`, `dark`, or a site-wide Card depth), or null for none; POST /__fixture/design/<off|light|dark|card-raised|card-floating>. */
 let designPatch = null
 
 /** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */
@@ -128,7 +128,9 @@ createServer(async (req, res) => {
     res.writeHead(204).end()
     return
   }
-  const design = /^\/__fixture\/design\/(off|light|dark)$/.exec(url.pathname)?.[1]
+  const design = /^\/__fixture\/design\/(off|light|dark|card-raised|card-floating)$/.exec(
+    url.pathname,
+  )?.[1]
   if (req.method === 'POST' && design) {
     designPatch = design === 'off' ? null : designSettingsVariants[design]
     res.writeHead(204).end()

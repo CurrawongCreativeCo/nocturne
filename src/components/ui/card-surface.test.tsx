@@ -1,5 +1,8 @@
+import type { CSSProperties } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+
+import type { ElementDepth } from '@/lib/sanity/depth-options'
 
 import { CardSurface } from './card-surface'
 
@@ -33,5 +36,50 @@ describe('CardSurface', () => {
   it('drops the shadow on a transparent card, which has no edge to cast it', () => {
     expect(draw({ background: 'transparent' })).not.toContain('shadow-card')
     expect(draw({ background: 'red' })).toContain('shadow-card')
+  })
+
+  describe('depth', () => {
+    const depth: ElementDepth = {
+      className: 'shadow-(--depth-shadow)',
+      style: { '--depth-shadow': 'var(--shadow-floating)' } as CSSProperties,
+    }
+    const drawWith = (
+      design: Parameters<typeof CardSurface>[0]['design'],
+      shadow = 'shadow-card',
+    ) =>
+      renderToStaticMarkup(
+        <CardSurface
+          as="figure"
+          className={shadow ? CLASSES : CLASSES.replace('shadow-card', '')}
+          own={OWN}
+          shadow={shadow}
+          depth={depth}
+          design={design}
+        >
+          x
+        </CardSurface>,
+      )
+
+    it('puts a chosen depth in place of the family’s shadow, keeping the border', () => {
+      const html = drawWith({})
+      expect(html).toContain('shadow-(--depth-shadow)')
+      expect(html).not.toContain('shadow-card')
+      expect(html).toContain('ring-1 ring-line')
+      expect(html).toContain('--depth-shadow:var(--shadow-floating)')
+    })
+
+    it('adds it to a family that draws no shadow', () => {
+      expect(drawWith({}, '')).toContain('shadow-(--depth-shadow)')
+    })
+
+    it('keeps the surface’s own style beside it', () => {
+      expect(drawWith({ background: 'red' })).toMatch(/style="[^"]*--depth-shadow/)
+    })
+
+    it('drops it with the rest of the shadow on a transparent card', () => {
+      const html = drawWith({ background: 'transparent' })
+      expect(html).not.toContain('shadow-')
+      expect(html).not.toContain('--depth-shadow')
+    })
   })
 })
