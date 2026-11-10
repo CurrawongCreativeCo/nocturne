@@ -1412,6 +1412,104 @@
           "clientEditable": false
         },
         {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "secondaryImage",
           "kind": "image",
           "required": null,
@@ -2782,12 +2880,14 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 147,
-              "fields": [],
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
               "availability": {
                 "overlay": {
                   "notApplicable": "Its picture is the background: backgrounds are excluded (147)"
                 },
-                "split": "pending",
+                "split": "verified",
                 "editorial": {
                   "notApplicable": "Its small picture isn’t on task 147’s list"
                 },
@@ -2797,7 +2897,20 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "hero.pictureDepth.section",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/hero/hero-picture.tsx",
+              "target": "[data-framed-image]",
+              "cases": [
+                "hero.pictureDepth.section@split"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [
@@ -3894,6 +4007,104 @@
           "clientEditable": false
         },
         {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "imagePosition",
           "kind": "string",
           "required": true,
@@ -4579,17 +4790,33 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 147,
-              "fields": [],
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
               "availability": {
-                "side": "pending",
-                "stacked": "pending",
+                "side": "verified",
+                "stacked": "verified",
                 "overlay": {
                   "notApplicable": "Its picture is the background: backgrounds are excluded (147)"
                 }
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "mediaText.pictureDepth.section",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "[data-framed-image]",
+              "cases": [
+                "mediaText.pictureDepth.section@side",
+                "mediaText.pictureDepth.section@stacked"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [
@@ -8141,6 +8368,104 @@
           "clientEditable": false
         },
         {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -8620,14 +8945,30 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 147,
-              "fields": [],
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "testimonials.pictureDepth.card",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/testimonials/quote-card.tsx",
+              "target": "[data-profile-image]",
+              "cases": [
+                "testimonials.pictureDepth.card@grid",
+                "testimonials.pictureDepth.card@slider"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [
@@ -17908,6 +18249,104 @@
           "clientEditable": false
         },
         {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "headerDesign",
           "kind": "object",
           "required": false,
@@ -18528,15 +18967,43 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 147,
-              "fields": [],
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
               "availability": {
-                "grid": "pending",
-                "masonry": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "gallery.pictureDepth.masonry",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/gallery/shared.tsx",
+              "target": "button[aria-haspopup=\"dialog\"]",
+              "cases": [
+                "gallery.pictureDepth.masonry@masonry"
+              ]
+            },
+            {
+              "id": "gallery.pictureDepth.card",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/gallery/shared.tsx",
+              "target": "[data-framed-image]",
+              "cases": [
+                "gallery.pictureDepth.card@grid",
+                "gallery.pictureDepth.card@slider"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [
@@ -19930,6 +20397,104 @@
           "clientEditable": false
         },
         {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -20296,11 +20861,26 @@
                 "reachable": true
               },
               "closingTask": 147,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "location.pictureDepth.section",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/location/index.tsx",
+              "target": "section img",
+              "cases": [
+                "location.pictureDepth.section"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [
@@ -20856,6 +21436,104 @@
         },
         {
           "path": "portraitDesign.ringColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
           "kind": "string",
           "required": null,
           "max": null,
@@ -22348,15 +23026,44 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 147,
-              "fields": [],
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending",
-                "list": "pending"
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "team.pictureDepth.card",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth",
+                "@/lib/sanity/depth-options#pictureClearance"
+              ],
+              "render": "src/features/pages/components/sections/team/team-card.tsx",
+              "target": "div.relative.rounded-card img",
+              "cases": [
+                "team.pictureDepth.card@grid",
+                "team.pictureDepth.card@slider"
+              ]
+            },
+            {
+              "id": "team.pictureDepth.row",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/team/team-card.tsx",
+              "target": "[data-profile-image]",
+              "cases": [
+                "team.pictureDepth.row@list"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [
@@ -33659,6 +34366,104 @@
           "clientEditable": false
         },
         {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -34145,7 +34950,9 @@
                 "when": "The featured event has a picture"
               },
               "closingTask": 147,
-              "fields": [],
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
               "availability": {
                 "list": {
                   "notApplicable": "Draws no event picture"
@@ -34153,11 +34960,25 @@
                 "agenda": {
                   "notApplicable": "Draws no event picture"
                 },
-                "featured": "pending"
+                "featured": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "events.pictureDepth.card",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth",
+                "@/lib/sanity/depth-options#pictureClearance"
+              ],
+              "render": "src/features/pages/components/sections/events/featured.tsx",
+              "target": "article.relative.rounded-card img",
+              "cases": [
+                "events.pictureDepth.card@featured"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [
@@ -36448,11 +37269,26 @@
                   "reachable": true
                 },
                 "closingTask": 147,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.pictureDepthDesign.shadow"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "blogPostCards.pictureDepth.card",
+                "field": "settings.pictureDepthDesign.shadow",
+                "resolvers": [
+                  "@/lib/sanity/depth-options#resolvePictureDepth"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "article img",
+                "cases": [
+                  "blogPostCards.pictureDepth.card"
+                ]
+              }
+            ]
           },
           "overlay": {
             "notApplicable": "No background picture"

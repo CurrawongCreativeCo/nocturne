@@ -933,6 +933,21 @@ export const EVIDENCE: readonly Evidence[] = [
     // A post card draws no surface until one is chosen, and a shadow needs one to sit on.
     depthBase: { 'settings.cardDesign.border': 'thin' },
   }),
+  // A shadow and glow on the post card's picture (task 147), for a post that has one (the fixture post does): Blog
+  // settings' own `pictureDepthDesign`, beside the card's design. It needs no surface, only the picture.
+  {
+    id: 'blogPostCards.pictureDepth.card',
+    component: 'blogPostCards',
+    capability: 'pictureDepth',
+    scope: 'card',
+    field: 'settings.pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/blog/components/post-card.tsx',
+    target: 'article img',
+    change: 'attributes',
+    base: {},
+    probe: { 'settings.pictureDepthDesign.shadow': 'floating' },
+  },
   // The glyph at the end of a post card (task 137): none until Blog settings chooses one.
   {
     id: 'blogPostCards.action.card',
@@ -981,6 +996,22 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['overlay', 'split', 'editorial', 'full-bleed'],
     motion: ['overlay', 'split', 'editorial', 'full-bleed'],
   }),
+  // A shadow and glow on Split's picture (task 147). A decorative frame gives the picture the still outer
+  // box (`data-framed-image`) the filter goes on; the probe chooses Floating.
+  {
+    id: 'hero.pictureDepth.section',
+    component: 'hero',
+    capability: 'pictureDepth',
+    scope: 'section',
+    layouts: ['split'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/hero/hero-picture.tsx',
+    target: '[data-framed-image]',
+    change: 'attributes',
+    base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   {
     id: 'hero.slots.supporting',
     component: 'hero',
@@ -1017,6 +1048,23 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['side', 'stacked', 'overlay'],
     motion: ['side', 'stacked', 'overlay'],
   }),
+  // A shadow and glow on the section's picture (task 147). The design gives it a decorative frame, so the
+  // picture has the still outer box (`data-framed-image`) the filter goes on, with the frame inside it;
+  // the probe chooses Floating. A plain picture, which has no box, is covered by framed-image.test.ts.
+  {
+    id: 'mediaText.pictureDepth.section',
+    component: 'mediaText',
+    capability: 'pictureDepth',
+    scope: 'section',
+    layouts: ['side', 'stacked'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/media-text.tsx',
+    target: '[data-framed-image]',
+    change: 'attributes',
+    base: { media: SLOT_IMAGE, imageDesign: { appearance: 'framed' } },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   {
     id: 'mediaText.slots.media',
     component: 'mediaText',
@@ -1124,6 +1172,27 @@ export const EVIDENCE: readonly Evidence[] = [
     change: 'attributes',
     base: TESTIMONIAL_CONTENT,
     probe: { 'cardDesign.border': 'thick' },
+  },
+  // A shadow and glow on the author's picture (task 147): the avatar's outer element, at both layouts.
+  {
+    id: 'testimonials.pictureDepth.card',
+    component: 'testimonials',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/testimonials/quote-card.tsx',
+    target: '[data-profile-image]',
+    change: 'attributes',
+    base: {
+      ...TESTIMONIAL_CONTENT,
+      items: (TESTIMONIAL_CONTENT.items as Record<string, unknown>[]).map((item) => ({
+        ...item,
+        avatar: PICTURE,
+      })),
+    },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
   },
   {
     id: 'testimonials.depth.card',
@@ -1456,6 +1525,38 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // Masonry draws a plain picture inside its button, which is the tile's outline: the filter goes on the button
+  // (the tile's own hook, `aria-haspopup`, is what every tile has and nothing else does).
+  {
+    id: 'gallery.pictureDepth.masonry',
+    component: 'gallery',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['masonry'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/gallery/shared.tsx',
+    target: 'button[aria-haspopup="dialog"]',
+    change: 'attributes',
+    base: { eyebrow: 'Our work', intro: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
+  // A shadow and glow on every tile (task 147). Grid and Slider draw each tile through FramedImage, whose still box
+  // (`data-framed-image`) carries the filter; Masonry has its own entry below.
+  {
+    id: 'gallery.pictureDepth.card',
+    component: 'gallery',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['grid', 'slider'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/gallery/shared.tsx',
+    target: '[data-framed-image]',
+    change: 'attributes',
+    base: { eyebrow: 'Our work', intro: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   ...frameEvidence('gallery', {
     mark: ['grid', 'masonry', 'slider'],
     overlay: ['grid', 'masonry', 'slider'],
@@ -1484,6 +1585,21 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { mapImage: PICTURE },
     roles: ['title', 'body', 'meta'],
   }),
+  // A shadow and glow on the map picture (task 147), which the section has only when a map image is set: the
+  // trigger. The filter follows the picture's own ring and corners, so the probe changes the <img>.
+  {
+    ...LOCATION,
+    id: 'location.pictureDepth.section',
+    capability: 'pictureDepth',
+    scope: 'section',
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    target: 'section img',
+    change: 'attributes',
+    base: { mapImage: PICTURE },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   iconContainerEvidence({
     component: 'location',
     scope: 'section',
@@ -1509,6 +1625,41 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
   }),
+  // A shadow and glow on the portraits (task 147). The cards and slides draw a flush portrait, which is inset
+  // by the room the depth needs; the list's small portrait is `ProfileImage`, which needs none.
+  {
+    id: 'team.pictureDepth.card',
+    component: 'team',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['grid', 'slider'],
+    field: 'pictureDepthDesign.shadow',
+    // The filter, and the room made for it: a flush portrait is inset by `pictureClearance`, which also
+    // takes the card's corners, so the claim is both.
+    resolvers: [
+      { module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' },
+      { module: '@/lib/sanity/depth-options', export: 'pictureClearance' },
+    ],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    target: 'div.relative.rounded-card img',
+    change: 'attributes',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
+  {
+    id: 'team.pictureDepth.row',
+    component: 'team',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['list'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    target: '[data-profile-image]',
+    change: 'attributes',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   // The glyph at the end of a card or row that links to a member's page (task 137): none until chosen.
   {
     id: 'team.action.card',
@@ -1619,6 +1770,26 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
   }),
+  // A shadow and glow on the Featured card's picture (task 147), for an event that has one (the gallery's first
+  // event does). The picture is inset by the room the depth needs, so the filter and `pictureClearance` are both
+  // claimed: disconnecting either stops the probe changing the picture.
+  {
+    id: 'events.pictureDepth.card',
+    component: 'events',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['featured'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [
+      { module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' },
+      { module: '@/lib/sanity/depth-options', export: 'pictureClearance' },
+    ],
+    render: 'src/features/pages/components/sections/events/featured.tsx',
+    target: 'article.relative.rounded-card img',
+    change: 'attributes',
+    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   // The glyph at the end of a linked card (task 137). The List draws a chevron with nothing chosen, so a
   // choice changes it; Featured draws none, so a choice makes one appear.
   ...(['list', 'featured'] as const).map((layout): CapabilityEvidence => ({

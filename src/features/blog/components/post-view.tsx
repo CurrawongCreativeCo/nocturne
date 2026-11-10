@@ -15,14 +15,14 @@ import { articleId } from '@/lib/structured-data/ids'
 
 import { ArticleJsonLd } from './article-json-ld'
 import { PostCard } from './post-card'
-import { getBlogCardDesign, getPost } from '../api/get-posts'
+import { getBlogCardSettings, getPost } from '../api/get-posts'
 import type { PostData } from '../types'
 import { authorName } from '../utils/author'
 
 export async function PostView({ slug, ...mode }: { slug: string } & FetchMode) {
-  const [post, cardDesign] = await Promise.all([
+  const [post, { cardDesign, pictureDepth }] = await Promise.all([
     getPost({ slug, ...mode }),
-    getBlogCardDesign(mode),
+    getBlogCardSettings(mode),
   ])
   if (!post) notFound()
 
@@ -84,7 +84,13 @@ export async function PostView({ slug, ...mode }: { slug: string } & FetchMode) 
             <ul className="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
               {post.related.map((related) => (
                 <li key={related._id}>
-                  <PostCard post={related} headingLevel="h3" cardDesign={cardDesign} tone="alt" />
+                  <PostCard
+                    post={related}
+                    headingLevel="h3"
+                    cardDesign={cardDesign}
+                    pictureDepth={pictureDepth}
+                    tone="alt"
+                  />
                 </li>
               ))}
             </ul>

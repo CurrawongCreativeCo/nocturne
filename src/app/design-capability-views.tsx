@@ -2,7 +2,7 @@ import { createElement } from 'react'
 
 import { blogSettingsFields, postCardFields } from '@/features/blog/api/queries'
 import { PostCard } from '@/features/blog/components/post-card'
-import type { BlogCardDesign, PostCardData } from '@/features/blog/types'
+import type { BlogCardDesign, BlogPictureDepth, PostCardData } from '@/features/blog/types'
 import {
   fixtureDocuments,
   projectFragment,
@@ -55,8 +55,14 @@ export const VIEW_DRAWERS: Readonly<Record<string, ViewDrawer>> = {
         ...(state.settings as Record<string, unknown>),
         _id: 'blogSettings',
         _type: 'blogSettings',
-      })) as { cardDesign?: BlogCardDesign }
-      return renderToHtml(createElement(PostCard, { post, cardDesign: settings.cardDesign }))
+      })) as { cardDesign?: BlogCardDesign; pictureDepthDesign?: BlogPictureDepth }
+      return renderToHtml(
+        createElement(PostCard, {
+          post,
+          cardDesign: settings.cardDesign,
+          pictureDepth: settings.pictureDepthDesign,
+        }),
+      )
     },
   },
   siteFooter: {

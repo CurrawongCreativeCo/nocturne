@@ -13,6 +13,7 @@ import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   TeamGridThumbnail,
   TeamListThumbnail,
@@ -130,6 +131,8 @@ export const team = defineType({
           !teamPortraitControls((parent ?? {}) as Parameters<typeof teamPortraitControls>[0])
             .portrait,
       }),
+      // A shadow and glow on the portraits (task 147), beside Image design and Portrait so it works with either.
+      pictureDepthFields({}),
       headerDesignField(),
       cardDesignField({
         description:

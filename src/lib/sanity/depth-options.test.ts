@@ -9,6 +9,10 @@ import {
   resolveCardDepth,
   resolveCardLift,
   resolveDepth,
+  pictureClearance,
+  pictureInset,
+  pictureInsetBeyond,
+  resolvePictureDepth,
 } from './depth-options'
 
 const shadowOf = (depth: ReturnType<ReturnType<typeof resolveDepth>['links']>) =>
@@ -194,5 +198,184 @@ describe('resolveCardLift', () => {
     expect(resolveCardLift([{ lift: 'lift' }])).toBe('lift')
     expect(resolveCardLift([{ lift: 'none' }, { lift: 'lift' }])).toBe('none')
     expect(resolveCardLift([{}, { lift: 'lift' }])).toBe('lift')
+  })
+})
+
+describe('resolvePictureDepth', () => {
+  it('is undefined while nothing is chosen, so the picture is drawn as it was', () => {
+    expect(resolvePictureDepth(undefined)).toBeUndefined()
+    expect(resolvePictureDepth(null)).toBeUndefined()
+    expect(resolvePictureDepth({})).toBeUndefined()
+    expect(resolvePictureDepth({ glowColour: { colour: 'highlight' } })).toBeUndefined()
+  })
+
+  it('treats Flat, Glow Off and values the schema does not offer as unset', () => {
+    expect(resolvePictureDepth({ shadow: 'flat' })).toBeUndefined()
+    expect(resolvePictureDepth({ glow: 'off' })).toBeUndefined()
+    expect(resolvePictureDepth({ shadow: 'flat', glow: 'off' })).toBeUndefined()
+    expect(resolvePictureDepth({ shadow: 'enormous', glow: 'blazing' })).toBeUndefined()
+  })
+
+  it('draws each level through the shared picture-shadow tokens', () => {
+    for (const level of ['soft', 'raised', 'floating'] as const) {
+      const depth = resolvePictureDepth({ shadow: level })
+      expect(depth?.className).toBe('[filter:var(--depth-filter)]')
+      expect(depth?.style).toEqual({ '--depth-filter': `var(--depth-picture-${level})` })
+    }
+  })
+
+  it('draws a glow with no shadow, and a shadow with no glow', () => {
+    const glowOnly = resolvePictureDepth({ glow: 'strong' })
+    expect(String(glowOnly?.style['--depth-filter' as keyof typeof glowOnly.style])).toMatch(
+      /^drop-shadow\(0 0 14px color-mix\(in oklch, .+ var\(--depth-glow-strong-strength\), transparent\)\)$/,
+    )
+    const shadowOnly = resolvePictureDepth({ shadow: 'raised', glow: 'off' })
+    expect(shadowOnly?.style).toEqual({ '--depth-filter': 'var(--depth-picture-raised)' })
+  })
+
+  it('puts the shadow first and the glow after it, in the glow colour chosen', () => {
+    const depth = resolvePictureDepth({
+      shadow: 'floating',
+      glow: 'soft',
+      glowColour: { colour: 'highlight' },
+    })
+    const filter = String(depth?.style['--depth-filter' as keyof typeof depth.style])
+    expect(filter.startsWith('var(--depth-picture-floating) drop-shadow(0 0 9px')).toBe(true)
+    expect(filter).toContain('highlight')
+  })
+
+  it('reads the same as the Link list’s picture for the same choice', () => {
+    expect(resolvePictureDepth({ shadow: 'raised', glow: 'soft' })).toEqual(
+      resolveDepth({ pictureShadow: 'raised', glow: 'soft', glowTargets: ['picture'] }).picture,
+    )
+  })
+
+  it('ignores the site’s Card depth and any card level: nothing above it exists', () => {
+    expect(resolvePictureDepth({ shadow: 'soft' })?.style).not.toHaveProperty('--card-depth')
+  })
+})
+
+describe('pictureClearance and pictureInset', () => {
+  it('is undefined while nothing is chosen, however that is stored', () => {
+    for (const input of [
+      undefined,
+      null,
+      {},
+      { shadow: 'flat' },
+      { glow: 'off' },
+      { shadow: 'flat', glow: 'off' },
+      { shadow: 'enormous', glow: 'blazing' },
+    ]) {
+      expect(pictureClearance(input), JSON.stringify(input)).toBeUndefined()
+    }
+  })
+
+  it('never gives a shadow less than the approved first values', () => {
+    expect(pictureClearance({ shadow: 'soft' })?.side).toBe(8)
+    expect(pictureClearance({ shadow: 'raised' })?.side).toBe(16)
+    expect(pictureClearance({ shadow: 'floating' })?.side).toBe(28)
+    for (const [level, least] of [
+      ['soft', 8],
+      ['raised', 16],
+      ['floating', 28],
+    ] as const) {
+      for (const glow of ['off', 'soft', 'strong']) {
+        expect(
+          pictureClearance({ shadow: level, glow })?.side,
+          `${level} ${glow}`,
+        ).toBeGreaterThanOrEqual(least)
+      }
+    }
+  })
+
+  it('gives a glow alone, and a glow with a shadow, the room measured for that combination', () => {
+    expect(pictureClearance({ glow: 'soft' })).toEqual({ side: 12, top: 12 })
+    expect(pictureClearance({ glow: 'strong' })).toEqual({ side: 22, top: 22 })
+    expect(pictureClearance({ shadow: 'flat', glow: 'strong' })).toEqual({ side: 22, top: 22 })
+    expect(pictureClearance({ shadow: 'floating', glow: 'strong' })).toEqual({ side: 34, top: 24 })
+  })
+
+  it('needs more as the shadow, and then the glow, get stronger', () => {
+    const order = ['soft', 'raised', 'floating'] as const
+    for (const glow of ['off', 'soft', 'strong'] as const) {
+      const sides = order.map((level) => pictureClearance({ shadow: level, glow })?.side ?? 0)
+      expect(sides, glow).toEqual([...sides].sort((a, b) => a - b))
+    }
+    for (const level of order) {
+      const sides = (['off', 'soft', 'strong'] as const).map(
+        (glow) => pictureClearance({ shadow: level, glow })?.side ?? 0,
+      )
+      expect(sides, level).toEqual([...sides].sort((a, b) => a - b))
+    }
+  })
+
+  it('splits the room so a square slot keeps its height: top plus bottom is twice the side', () => {
+    expect(pictureInset({ side: 28, top: 12 })).toEqual({ side: 28, top: 12, bottom: 44 })
+    expect(pictureInset({ side: 8, top: 4 })).toEqual({ side: 8, top: 4, bottom: 12 })
+    for (const level of ['soft', 'raised', 'floating'] as const) {
+      for (const glow of ['off', 'soft', 'strong'] as const) {
+        const room = pictureClearance({ shadow: level, glow })
+        if (!room) continue
+        const { side, top, bottom } = pictureInset(room)
+        expect(top + bottom, `${level} ${glow}`).toBe(2 * side)
+        expect(top, `${level} ${glow}`).toBe(room.top)
+        expect(bottom, `${level} ${glow}`).toBeGreaterThanOrEqual(0)
+      }
+    }
+  })
+
+  it('keeps a wider picture’s ratio, and cuts the top back to what fits', () => {
+    // The total is exact, not rounded: 2 x 28 x 9/16 is 31.5, and a slot 0.5px off moves the text below it.
+    expect(pictureInset({ side: 28, top: 12 }, 9 / 16)).toEqual({ side: 28, top: 12, bottom: 19.5 })
+    expect(pictureInset({ side: 34, top: 24 }, 9 / 16)).toEqual({
+      side: 34,
+      top: 24,
+      bottom: 14.25,
+    })
+    // Little vertical room: the top takes it all, the bottom none, never a negative.
+    expect(pictureInset({ side: 4, top: 12 }, 9 / 16)).toEqual({ side: 4, top: 4.5, bottom: 0 })
+  })
+})
+
+describe('pictureInsetBeyond', () => {
+  const margin = { side: 24, top: 24 }
+
+  it('is undefined while the margin a portrait already has is enough', () => {
+    expect(pictureInsetBeyond({ side: 16, top: 6 }, margin)).toBeUndefined()
+    expect(pictureInsetBeyond({ side: 22, top: 22 }, margin)).toBeUndefined()
+    expect(pictureInsetBeyond({ side: 24, top: 12 }, margin)).toBeUndefined()
+  })
+
+  it('widens the sides and gives back the height a square picture loses', () => {
+    expect(pictureInsetBeyond({ side: 28, top: 12 }, margin)).toEqual({
+      side: 28,
+      top: 24,
+      bottom: 8,
+    })
+    expect(pictureInsetBeyond({ side: 34, top: 24 }, margin)).toEqual({
+      side: 34,
+      top: 24,
+      bottom: 20,
+    })
+  })
+
+  it('gives back more for a taller picture: an arch loses 5/4 of the width', () => {
+    expect(pictureInsetBeyond({ side: 34, top: 24 }, margin, 5 / 4)).toEqual({
+      side: 34,
+      top: 24,
+      bottom: 25,
+    })
+  })
+
+  it('keeps the slot’s height for any width: top + picture + bottom is the same before and after', () => {
+    for (const width of [300, 364, 395, 480]) {
+      for (const ratio of [1, 5 / 4]) {
+        const room = pictureInsetBeyond({ side: 34, top: 24 }, margin, ratio)
+        expect(room).toBeDefined()
+        const before = 24 + ratio * (width - 48)
+        const after = (room?.top ?? 0) + ratio * (width - 2 * 34) + (room?.bottom ?? 0)
+        expect(after).toBeCloseTo(before, 6)
+      }
+    }
   })
 })

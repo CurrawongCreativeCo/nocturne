@@ -16,6 +16,7 @@ import { presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle, variantField } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   SplitMediaLeftThumbnail,
   SplitMediaRightThumbnail,
@@ -221,6 +222,10 @@ export const mediaText = defineType({
       }),
       // Shape, motion inside the frame and decorative frames: agency only, in the Design tab.
       imageDesignField({
+        hidden: ({ parent }: { parent?: { variant?: string } }) => isOverlay(parent ?? {}),
+      }),
+      // A shadow and glow on the picture (task 147), beside Image design so it never moves with it.
+      pictureDepthFields({
         hidden: ({ parent }: { parent?: { variant?: string } }) => isOverlay(parent ?? {}),
       }),
       defineField({

@@ -55,7 +55,8 @@ export const blogSettingsFields = /* groq */ `
     actionStyle,
     actionMotion,
     actionColour { colour, hex }
-  }
+  },
+  pictureDepthDesign { shadow, glow, glowColour { colour, hex } }
 `
 
 export const BLOG_SETTINGS_QUERY = defineQuery(/* groq */ `

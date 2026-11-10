@@ -52,6 +52,9 @@ const headerDesignProjection = /* groq */ `
   }
 `
 
+/** A framed picture's shadow level and glow (pictureDepthFields, task 147). */
+const pictureDepthProjection = /* groq */ `pictureDepthDesign { shadow, glow, glowColour { colour, hex } }`
+
 export const heroFragment = /* groq */ `
   _type == "hero" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -73,6 +76,7 @@ export const heroFragment = /* groq */ `
     proportion,
     imageShape,
     imageDesign { ${imageDesignFields} },
+    ${pictureDepthProjection},
     secondaryImage { ${imageFields} },
     supporting[] { ${heroSupportingFields} },
     showGreeting,
@@ -114,6 +118,7 @@ export const mediaTextFragment = /* groq */ `
     media[] { ${splitMediaFields} },
     supporting[] { ${splitSupportingFields} },
     imageDesign { ${imageDesignFields} },
+    ${pictureDepthProjection},
     imagePosition,
     variant
   }
@@ -218,6 +223,7 @@ export const testimonialsFragment = /* groq */ `
       mark { ${decorativeMarkFields} }
     },
     avatarDesign { ${avatarDesignFields} },
+    ${pictureDepthProjection},
     items[] {
       _key,
       quote,
@@ -355,6 +361,7 @@ export const galleryFragment = /* groq */ `
     ${headerDesignProjection},
     columns,
     imageDesign { ${imageDesignFields} },
+    ${pictureDepthProjection},
     images[] { _key, caption, ${imageFields} }
   }
 `
@@ -377,6 +384,7 @@ export const locationFragment = /* groq */ `
     },
     iconDesign { ${iconDesignFields} },
     mapImage { ${imageFields} },
+    ${pictureDepthProjection},
     showHours,
     showOpenNow,
     showContact,
@@ -417,6 +425,7 @@ export const teamFragment = /* groq */ `
     cardDesign { ${teamCardDesignProjection} },
     imageDesign { ${imageDesignFields} },
     portraitDesign { ${avatarDesignFields} },
+    ${pictureDepthProjection},
     "members": select(
       selection == "picked" => members[defined(@->_id)]->{ ${teamCardFields} },
       *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { ${teamCardFields} }
@@ -619,6 +628,7 @@ export const eventsFragment = /* groq */ `
     text,
     ${headerDesignProjection},
     cardDesign { ${teamCardDesignProjection} },
+    ${pictureDepthProjection},
     count,
     "hasCategoryFilter": defined(category),
     seeAllLabel,

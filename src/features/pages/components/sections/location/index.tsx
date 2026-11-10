@@ -14,7 +14,12 @@ import { SocialLinks } from '@/components/ui/social-links'
 import { addressLines, directionsUrl, embedUrl } from '@/lib/location-links'
 import { groupOpeningHours } from '@/lib/opening-hours'
 import { resolveCardDesign, type CardDesign } from '@/lib/sanity/card-design'
-import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import {
+  CARD_SHADOW_CLASS,
+  OWN_SHADOW,
+  resolveCardDepth,
+  resolvePictureDepth,
+} from '@/lib/sanity/depth-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveIconDesign, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
@@ -134,12 +139,16 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
 
   if (hasImage) {
     // The picture beside the details, which stack in a column; narrower screens put it below them.
+    // A shadow and glow on the picture itself (task 147): the filter follows its ring and corners, and a picture
+    // with none chosen is exactly the plain <img> it was.
+    const depth = resolvePictureDepth(data.pictureDepthDesign)
     const picture = (
       <SanityImage
         image={mapImage}
         width={1200}
         sizes="(min-width: 1024px) 50vw, 100vw"
-        className="h-auto w-full rounded-card object-cover ring-1 ring-line"
+        className={`h-auto w-full rounded-card object-cover ring-1 ring-line${depth ? ` ${depth.className}` : ''}`}
+        style={depth?.style}
       />
     )
     return (

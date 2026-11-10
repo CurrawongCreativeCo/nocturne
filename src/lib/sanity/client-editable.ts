@@ -207,6 +207,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     agencyOnly: [
       'eyebrowDesign',
       'imageDesign',
+      'pictureDepthDesign',
       'supporting',
       'access',
       'style',
@@ -223,7 +224,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     // The layout (`variant`, set by the presets) and the extra block are the agency's; clients change
     // the words, the buttons and the picture or video in the media slot.
     editable: ['eyebrow', 'heading', 'title', 'body', 'ctas', 'media', 'image', 'imagePosition'],
-    agencyOnly: ['headerDesign', 'variant', 'supporting', 'imageDesign', 'access', 'style'],
+    agencyOnly: [
+      'headerDesign',
+      'variant',
+      'supporting',
+      'imageDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+    ],
   },
   featuresGrid: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'columns', 'items'],
@@ -235,7 +244,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   testimonials: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
-    agencyOnly: ['variant', 'cardDesign', 'headerDesign', 'avatarDesign', 'access', 'style'],
+    agencyOnly: [
+      'variant',
+      'cardDesign',
+      'headerDesign',
+      'avatarDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+    ],
   },
   faq: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
@@ -263,7 +280,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   gallery: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'images'],
-    agencyOnly: ['headerDesign', 'variant', 'imageDesign', 'access', 'style', 'columns'],
+    agencyOnly: [
+      'headerDesign',
+      'variant',
+      'imageDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+      'columns',
+    ],
   },
   location: {
     editable: [
@@ -278,7 +303,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'showSocial',
       'directionsLabel',
     ],
-    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
+    agencyOnly: [
+      'headerDesign',
+      'iconDesign',
+      'cardDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+      'interactiveMap',
+    ],
   },
   team: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'selection', 'members'],
@@ -288,6 +321,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'cardDesign',
       'imageDesign',
       'portraitDesign',
+      'pictureDepthDesign',
       'access',
       'style',
     ],
@@ -348,7 +382,16 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   events: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'seeAllLink', 'seeAllLabel'],
-    agencyOnly: ['variant', 'headerDesign', 'cardDesign', 'access', 'style', 'category', 'count'],
+    agencyOnly: [
+      'variant',
+      'headerDesign',
+      'cardDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+      'category',
+      'count',
+    ],
   },
   navItem: {
     editable: ['label', 'link', 'children'],

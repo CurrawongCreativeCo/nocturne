@@ -10,6 +10,7 @@ import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   GalleryGridThumbnail,
   GalleryMasonryThumbnail,
@@ -112,6 +113,9 @@ export const gallery = defineType({
       imageDesignField({
         hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant === 'masonry',
       }),
+      // A shadow and glow on every tile (task 147), beside Image design so it never moves with it: on every layout,
+      // Masonry too (which has no Image design to hold it).
+      pictureDepthFields({}),
       headerDesignField(),
       accessField,
       // Shown first in the Content tab.

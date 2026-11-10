@@ -14,6 +14,7 @@ import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
@@ -312,6 +313,8 @@ export const hero = defineType({
       }),
       // Split's picture: its shape, how it moves inside its frame and decorative frames (agency only, Design tab).
       imageDesignField({ hidden: notSplit }),
+      // A shadow and glow on Split's picture (task 147), beside Image design so it never moves with it.
+      pictureDepthFields({ hidden: notSplit }),
       // A small picture beside the oversized heading; the Editorial layout is the only one to use it.
       imageField({
         name: 'secondaryImage',

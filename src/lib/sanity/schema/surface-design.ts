@@ -24,6 +24,7 @@ import {
   LINK_ARROW_TITLES,
   LINK_ARROWS,
 } from '../link-arrow-options'
+import { hiddenFromClients } from '../roles'
 import {
   BORDER_COLOUR_CHOICES,
   ICON_COLOUR_CHOICES,
@@ -571,4 +572,71 @@ export function depthFields({
         ]
       : []),
   ].map((field) => builtBy('depthFields', field, 'depth'))
+}
+
+/**
+ * A framed picture's shadow and glow (task 147), as one `pictureDepthDesign` object beside the picture's
+ * other design: `shadow`, `glow` and `glowColour`, the names `depthFields` uses, read by
+ * `resolvePictureDepth`. It is an object of its own, not part of Image design, so a layout whose Image
+ * design is hidden (Gallery Masonry) or replaced (a Team list's Portrait) can still offer it. Agency
+ * only. Empty everywhere means no shadow and no glow: the picture is drawn as it always was.
+ */
+export function pictureDepthFields({
+  name = 'pictureDepthDesign',
+  title = 'Picture depth and glow',
+  description = 'A shadow and glow that follow the picture’s outline, frame included. Empty is none.',
+  group = 'design',
+  hidden,
+}: {
+  name?: string
+  title?: string
+  description?: string
+  group?: string
+  hidden?: ConditionalPropertyCallback
+}) {
+  const glowOff: ConditionalPropertyCallback = (context) => {
+    const glow = (context.parent as { glow?: string } | undefined)?.glow
+    return glow !== 'soft' && glow !== 'strong'
+  }
+  const leaves = [
+    choiceField({
+      name: 'shadow',
+      title: 'Shadow',
+      description: SHADOW_LEVELS.map(
+        (level) => `${SHADOW_TITLES[level]}: ${SHADOW_DESCRIPTIONS[level]}`,
+      ).join(' '),
+      values: SHADOW_LEVELS,
+      titles: SHADOW_TITLES,
+      inherits: 'no shadow',
+    }),
+    choiceField({
+      name: 'glow',
+      title: 'Glow',
+      description:
+        'A soft halo around the picture. Decorative, and strongest on a dark background.',
+      values: GLOW_LEVELS,
+      titles: GLOW_TITLES,
+      inherits: 'no glow',
+    }),
+    themeColourField({
+      name: 'glowColour',
+      title: 'Glow colour',
+      usage: 'graphic',
+      decorative: true,
+      inherits: 'Primary',
+      choices: GLOW_COLOUR_CHOICES,
+      hidden: glowOff,
+    }),
+  ].map((field) => builtBy('pictureDepthFields', field, 'pictureDepth'))
+  const box = defineField({
+    name,
+    title,
+    description,
+    type: 'object',
+    group,
+    options: { collapsible: true, collapsed: true },
+    hidden: (context) => hiddenFromClients(context) || (hidden?.(context) ?? false),
+    fields: leaves,
+  })
+  return builtBy('pictureDepthFields', box)
 }

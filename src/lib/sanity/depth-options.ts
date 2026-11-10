@@ -206,6 +206,102 @@ export function depthFilter(input: DepthLookInput): ElementDepth | undefined {
     : undefined
 }
 
+/** A picture's stored `pictureDepthDesign` object as a query returns it (task 147): untrusted, so every value is checked. */
+export interface PictureDepthInput {
+  shadow?: string | null
+  glow?: string | null
+  glowColour?: ThemeColourInput | null
+}
+
+/** The room a picture's shadow and glow need, in px, on each side and above it (a shadow falls downwards). */
+export interface PictureClearance {
+  side: number
+  top: number
+}
+
+/**
+ * How much room a picture's shadow and glow need before a card that clips (Team, Events Featured) cuts them off,
+ * by shadow level and glow. Measured in Chromium on the real cards (task 147): the distance from the picture's
+ * edge at which the fade is down to a tint of 8/255 against the card (about 3%, the same as the card's own ring),
+ * plus 2px, rounded up to an even number; the approved first values (Soft 8, Raised 16, Floating 28) are the
+ * least any level gets. A glow's fade is much longer than its blur radius, and a glow added to a shadow lengthens
+ * the shadow's own tail, so a combination is its own measurement, not the larger of the two. One table, so no
+ * family makes up its own.
+ *
+ * These values depend on the filter tokens (`depth.picture-*` and `depth.glow-*`, scripts/build-tokens.mjs) and on
+ * `glowFilter`'s blur. If either changes, the clearances must be measured again before anything else: a test in
+ * scripts/build-tokens.test.mjs pins the tokens and fails with this instruction when they move.
+ */
+export const PICTURE_CLEARANCE: Record<
+  ShadowLevel,
+  Record<GlowLevel, PictureClearance | undefined>
+> = {
+  flat: { off: undefined, soft: { side: 12, top: 12 }, strong: { side: 22, top: 22 } },
+  soft: { off: { side: 8, top: 4 }, soft: { side: 14, top: 12 }, strong: { side: 22, top: 22 } },
+  raised: { off: { side: 16, top: 6 }, soft: { side: 18, top: 14 }, strong: { side: 26, top: 22 } },
+  floating: {
+    off: { side: 28, top: 12 },
+    soft: { side: 30, top: 18 },
+    strong: { side: 34, top: 24 },
+  },
+}
+
+/**
+ * The room the picture's chosen depth needs, or undefined while there is none (nothing chosen, Flat with Glow
+ * Off, or values the schema does not offer).
+ */
+export function pictureClearance(
+  input: PictureDepthInput | null | undefined,
+): PictureClearance | undefined {
+  return PICTURE_CLEARANCE[shadowLevelOf(input?.shadow) ?? 'flat'][glowLevelOf(input?.glow)]
+}
+
+/**
+ * Where that room goes in a slot that must keep its size: `side` on each side, `top` above, and the rest of the
+ * slot's vertical padding below, so the picture keeps its ratio and the slot its height. `ratio` is the picture's
+ * height over its width (1 for a square, 9/16 for a 16:9 picture): the padding a ratio-keeping inset adds is
+ * twice the side's room times that ratio, exactly: a rounded figure would leave the slot half a pixel too tall
+ * or short and move the text below it. A top that would not fit is cut back to what does.
+ */
+export function pictureInset({ side, top }: PictureClearance, ratio = 1) {
+  const vertical = Number((2 * side * ratio).toFixed(2))
+  const above = Math.min(top, vertical)
+  return { side, top: above, bottom: Number((vertical - above).toFixed(2)) }
+}
+
+/**
+ * A picture that already sits inside its card with a fixed margin (Team's shaped portraits: 24px at the sides and
+ * above, none below) and needs more room at the sides than that: the sides grow to the clearance, the picture
+ * narrows with them, and the bottom takes up exactly what its height lost, so the slot keeps its height. `ratio` is
+ * the picture's height over its width (1 for a circle, 5/4 for an arch). Undefined while the margin is enough.
+ */
+export function pictureInsetBeyond(
+  { side }: PictureClearance,
+  existing: { side: number; top: number },
+  ratio = 1,
+) {
+  if (side <= existing.side) return undefined
+  // Slot height before: top + ratio x (width - 2 x existing side). After: top + ratio x (width - 2 x side) + bottom.
+  const bottom = Number((ratio * 2 * (side - existing.side)).toFixed(2))
+  return { side, top: existing.top, bottom }
+}
+
+/**
+ * A framed picture's depth (Image + text, Hero, Team, Gallery, Testimonials, Location, Events, post
+ * cards): the shared filter, from the picture's own `pictureDepthDesign`. There is no level above it, so the
+ * site's Card depth never reaches a picture. Undefined while neither a shadow nor a glow is chosen, so
+ * the picture is drawn exactly as it was; an unknown or legacy value is the same as unset.
+ */
+export function resolvePictureDepth(
+  input: PictureDepthInput | null | undefined,
+): ElementDepth | undefined {
+  return depthFilter({
+    level: shadowLevelOf(input?.shadow),
+    glow: glowChoiceOf(input?.glow),
+    glowColour: input?.glowColour,
+  })
+}
+
 /**
  * Turns the Depth and glow box into what each element draws. Box elements are functions of the
  * shadow they draw on their own (`OWN_SHADOW`), kept when only a glow is set.

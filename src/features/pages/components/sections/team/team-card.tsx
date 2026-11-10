@@ -15,10 +15,14 @@ import { resolveCardDesign } from '@/lib/sanity/card-design'
 import {
   CARD_SHADOW_CLASS,
   OWN_SHADOW,
+  pictureClearance,
+  pictureInset,
+  pictureInsetBeyond,
   resolveCardDepth,
   resolveCardLift,
+  resolvePictureDepth,
 } from '@/lib/sanity/depth-options'
-import { resolveImageDesign } from '@/lib/sanity/image-design-options'
+import { forcedAspect, resolveImageDesign } from '@/lib/sanity/image-design-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
 import { hasImageDesign } from '@/lib/sanity/team-portrait'
 import { textRoleProps } from '@/lib/sanity/text-role'
@@ -44,11 +48,17 @@ type Design = SectionProps<'team'>['data']['imageDesign']
 
 /** A portrait's corners are the card's until the design names a shape. */
 const PORTRAIT_SHAPE = { fallbackShape: 'square' } as const
+/** The margin a shaped portrait sits in already: 24px at the sides and above (`px-6 pt-6`), none below. */
+const SHAPED_MARGIN = { side: 24, top: 24 } as const
+/** A flush portrait that is inset for its shadow (task 147) has the card's corners until the design names a shape. */
+const INSET_PORTRAIT_SHAPE = { fallbackShape: 'standard' } as const
 
 interface CardProps {
   member: Member
   /** The section's `imageDesign`: shape, motion and frame for every portrait. */
   design?: Design
+  /** The section's `pictureDepthDesign`: a shadow and glow on every portrait (task 147). */
+  pictureDepth?: SectionProps<'team'>['data']['pictureDepthDesign']
   /** The member's name is a heading: one level under the section's title (or its own level without one). */
   headingLevel: 'h2' | 'h3'
   /** Preload the portrait (the first card of a section at the top of the page). */
@@ -126,9 +136,29 @@ function liftOf(member: Member, cardDesign: CardProps['cardDesign']) {
   }
 }
 
-export function TeamCard({ member, design, headingLevel, eager, cardDesign, tone }: CardProps) {
+export function TeamCard({
+  member,
+  design,
+  pictureDepth,
+  headingLevel,
+  eager,
+  cardDesign,
+  tone,
+}: CardProps) {
   // The default portrait fills the top of the card; a shape of its own (a circle, an arch) sits inside it.
-  const inset = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE).shape !== 'square'
+  const { shape } = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE)
+  const inset = shape !== 'square'
+  // The card clips, so a portrait's shadow would be cut off at the card's edge. When a depth is chosen the
+  // portrait is inset by the room that depth needs, inside the space it already has: the card keeps its size
+  // and the portrait its ratio. A flush portrait gets all of it. One that is already inset (24px at the sides
+  // and above) keeps that, and takes more at the sides only where its depth needs more than 24px, the bottom
+  // giving back exactly the height the narrower portrait loses. Unset changes nothing.
+  const clearance = pictureClearance(pictureDepth)
+  const room = clearance && !inset ? pictureInset(clearance) : undefined
+  const wider =
+    clearance && inset
+      ? pictureInsetBeyond(clearance, SHAPED_MARGIN, forcedAspect(shape) === '4/5' ? 5 / 4 : 1)
+      : undefined
   const look = resolveCardDesign(cardDesign, ROLES)
   const motion = liftOf(member, cardDesign)
   return (
@@ -142,11 +172,21 @@ export function TeamCard({ member, design, headingLevel, eager, cardDesign, tone
       design={look.surface}
       mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >
-      <div className={inset ? 'px-6 pt-6' : undefined}>
+      <div
+        className={room ? 'aspect-square' : wider ? undefined : inset ? 'px-6 pt-6' : undefined}
+        style={
+          room
+            ? { padding: `${room.top}px ${room.side}px ${room.bottom}px` }
+            : wider
+              ? { padding: `${wider.top}px ${wider.side}px ${wider.bottom}px` }
+              : undefined
+        }
+      >
         <FramedImage
           image={member.portrait}
           design={design}
-          context={PORTRAIT_SHAPE}
+          depth={resolvePictureDepth(pictureDepth)}
+          context={room ? INSET_PORTRAIT_SHAPE : PORTRAIT_SHAPE}
           width={600}
           height={600}
           sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
@@ -217,6 +257,7 @@ const PORTRAIT_SCALE: ProfileImageScale = {
 export function TeamRow({
   member,
   design,
+  pictureDepth,
   portrait,
   headingLevel,
   eager,
@@ -243,6 +284,7 @@ export function TeamRow({
           design={resolveAvatar(portrait, 'rounded')}
           scale={PORTRAIT_SCALE}
           colour={themeColourCss(portrait?.ringColour)}
+          depth={resolvePictureDepth(pictureDepth)}
           preload={eager}
           className="shrink-0"
         />
@@ -252,6 +294,7 @@ export function TeamRow({
             image={member.portrait}
             // Too small to move in; the shape and frame still apply.
             design={{ ...design, motion: 'none' }}
+            depth={resolvePictureDepth(pictureDepth)}
             context={{ fallbackShape: 'standard' }}
             width={256}
             height={256}

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
+import { resolvePictureDepth } from '@/lib/sanity/depth-options'
 import { PROFILE_FRAME_INSET_PCT } from '@/lib/sanity/image-frame-geometry'
 import {
   PROFILE_BORDERS,
@@ -117,5 +118,47 @@ describe('ProfileImage', () => {
   it("insets a framed picture by the geometry's 14%", () => {
     expect(PROFILE_FRAME_INSET_PCT).toBe(14)
     expect(draw({ border: 'frame', frameUrl: FRAME_URL })).toContain('inset-[14%]')
+  })
+
+  describe('picture depth', () => {
+    const depth = resolvePictureDepth({ shadow: 'raised', glow: 'strong' })
+    const drawWith = (
+      input: Parameters<typeof resolveProfileImage>[0],
+      extra: { depth?: typeof depth; className?: string } = {},
+    ) =>
+      renderToStaticMarkup(
+        <ProfileImage image={IMAGE} design={resolveProfileImage(input)} scale={SCALE} {...extra} />,
+      )
+    const BORDERS = [
+      ['none', {}],
+      ['a solid ring', { border: 'line' }],
+      ['a gradient ring', { border: 'gradient' }],
+      ['a decorative frame', { border: 'frame', frameUrl: FRAME_URL }],
+    ] as const
+
+    it('changes nothing while unset, with every border', () => {
+      for (const [name, input] of BORDERS) {
+        expect(drawWith(input, { depth: undefined }), name).toBe(drawWith(input))
+        expect(drawWith(input), name).not.toContain('depth-filter')
+      }
+    })
+
+    it('puts the filter on the outer element, so it follows the ring or frame as well', () => {
+      for (const [name, input] of BORDERS) {
+        const html = drawWith(input, { depth })
+        const outer = /<span[^>]*data-profile-image[^>]*>/.exec(html)?.[0] ?? ''
+        expect(outer, name).toContain('[filter:var(--depth-filter)]')
+        expect(outer, name).toContain('--depth-filter:')
+        expect(outer, name).toContain('data-profile-image')
+        // Only that element: the picture, ring and frame inside it are not filtered themselves.
+        expect(html.slice(html.indexOf(outer) + outer.length), name).not.toContain('depth-filter')
+      }
+    })
+
+    it('keeps the ring’s own variables and the caller’s placement beside the filter', () => {
+      const html = drawWith({ border: 'line' }, { depth, className: 'mx-auto' })
+      expect(html).toContain('--ring-width')
+      expect(html).toContain('mx-auto')
+    })
   })
 })

@@ -21,6 +21,12 @@ exports[`design capability evidence > blogPostCards.depth.card: the probe change
 
 exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > blogPostCards.pictureDepth.card: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="aspect-video w-full rounded-card object-cover" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=40,0,1120,630&w=800&h=450&fit=crop&auto=format">",
+]
+`;
+
 exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `
 [
   "<article class="group relative flex h-full flex-col">",
@@ -293,6 +299,12 @@ exports[`design capability evidence > events.overlay.section@featured: the probe
 exports[`design capability evidence > events.overlay.section@list: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > events.pictureDepth.card@featured: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="aspect-video w-full object-cover" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=40,0,1120,630&w=1200&h=675&fit=crop&auto=format">",
 ]
 `;
 
@@ -705,6 +717,48 @@ exports[`design capability evidence > gallery.overlay.section@slider: the probe 
 ]
 `;
 
+exports[`design capability evidence > gallery.pictureDepth.card@grid: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+]
+`;
+
+exports[`design capability evidence > gallery.pictureDepth.card@slider: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+]
+`;
+
+exports[`design capability evidence > gallery.pictureDepth.masonry@masonry: the probe changes the registered target 1`] = `
+[
+  "<button aria-haspopup="dialog" aria-label="Open image 1 of 9: gallery-masonry picture 1" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 2 of 9: gallery-masonry picture 2" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 3 of 9: gallery-masonry picture 3" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 4 of 9: gallery-masonry picture 4" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 5 of 9: gallery-masonry picture 5" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 6 of 9: gallery-masonry picture 6" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 7 of 9: gallery-masonry picture 7" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 8 of 9: gallery-masonry picture 8" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+  "<button aria-haspopup="dialog" aria-label="Open image 9 of 9: gallery-masonry picture 9" class="group block w-full overflow-hidden rounded-card bg-surface-alt" type="button">",
+]
+`;
+
 exports[`design capability evidence > hero.action.item@editorial: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > hero.action.item@full-bleed: the probe changes the registered target 1`] = `[]`;
@@ -784,6 +838,12 @@ exports[`design capability evidence > hero.motion.section@overlay: the probe cha
 exports[`design capability evidence > hero.motion.section@split: the probe changes the registered target 1`] = `
 [
   "f5ea95615c76cb68 (1205 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.pictureDepth.section@split: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3] w-full max-h-96 lg:max-h-none" data-framed-image="framed">",
 ]
 `;
 
@@ -1470,6 +1530,12 @@ exports[`design capability evidence > location.overlay.section: the probe change
 ]
 `;
 
+exports[`design capability evidence > location.pictureDepth.section: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="h-auto w-full rounded-card object-cover ring-1 ring-line" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?w=1200&h=630&fit=crop&auto=format">",
+]
+`;
+
 exports[`design capability evidence > location.surface.card.cards: the probe changes the registered target 1`] = `
 [
   "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line border-t-4 border-accent">",
@@ -1737,6 +1803,18 @@ exports[`design capability evidence > mediaText.overlay.section@side: the probe 
 exports[`design capability evidence > mediaText.overlay.section@stacked: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.pictureDepth.section@side: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3]" data-framed-image="framed">",
+]
+`;
+
+exports[`design capability evidence > mediaText.pictureDepth.section@stacked: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-video" data-framed-image="framed">",
 ]
 `;
 
@@ -2428,6 +2506,31 @@ exports[`design capability evidence > team.overlay.section@slider: the probe cha
 ]
 `;
 
+exports[`design capability evidence > team.pictureDepth.card@grid: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+]
+`;
+
+exports[`design capability evidence > team.pictureDepth.card@slider: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+]
+`;
+
+exports[`design capability evidence > team.pictureDepth.row@list: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+]
+`;
+
 exports[`design capability evidence > team.surface.card@grid: the probe changes the registered target 1`] = `
 [
   "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
@@ -2655,6 +2758,18 @@ exports[`design capability evidence > testimonials.overlay.section@grid: the pro
 exports[`design capability evidence > testimonials.overlay.section@slider: the probe changes the registered target 1`] = `
 [
   "6d05cdc2f4558242 (456 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.pictureDepth.card@grid: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit shrink-0" data-profile-image="circle">",
+]
+`;
+
+exports[`design capability evidence > testimonials.pictureDepth.card@slider: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit shrink-0" data-profile-image="circle">",
 ]
 `;
 

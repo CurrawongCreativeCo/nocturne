@@ -9,6 +9,7 @@ import { RichText } from '@/components/ui/rich-text'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { chooseMedia, drawnSplitLayout, videoHasSource } from '@/features/pages/utils/split-layout'
+import { resolvePictureDepth } from '@/lib/sanity/depth-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
@@ -151,6 +152,7 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
       <FramedImage
         image={image}
         design={data.imageDesign}
+        depth={resolvePictureDepth(data.pictureDepthDesign)}
         context={{
           isFirst,
           sectionTravel: parallax ? travelForSpeed(parallax.speed) : undefined,

@@ -2,6 +2,7 @@ import { CogIcon } from '@sanity/icons/Cog'
 import { defineType } from 'sanity'
 
 import { cardDesignField } from '@/lib/sanity/schema/card-design-fields'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 
 /** The text roles a post card draws (post-card-capabilities.ts), and what each is drawn in. */
 export const POST_CARD_ROLES = [{ role: 'meta' }, { role: 'title' }, { role: 'body' }] as const
@@ -36,6 +37,13 @@ export const blogSettings = defineType({
           return !design?.background?.colour && !design?.border
         },
       },
+    }),
+    // A shadow and glow on each post card's picture (task 147): a card with no picture has nothing to draw it on,
+    // and the card's own depth above is a separate choice. Agency only.
+    pictureDepthFields({
+      title: 'Post card pictures',
+      description:
+        'A shadow and glow that follow the picture’s outline, on every post card that has a picture. Empty is none.',
     }),
   ],
   preview: {

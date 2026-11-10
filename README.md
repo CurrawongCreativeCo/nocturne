@@ -2539,26 +2539,26 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
-| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R…*     | R…*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R…*     | R✓*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
 | Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R…*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R✓*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R…      | R✓         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R✓    | –    | C✓     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
 | Form (`formSection`)                     | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R…         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R…         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R✓         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Embed (`embed`)                          | R✓      | –    | R✓     | –    | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C✓*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2570,18 +2570,17 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R…      | –    | –      | –     |
 | Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
-| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R✓    | –    | R✓     | R…      | C…         | –       | C…    | –       | –    | –      | –     |
+| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R✓    | –    | R✓     | R…      | C✓         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 248      | 0               | 66      |
-| Conditional                                              | 10       | 0               | 34      |
+| Required                                                 | 253      | 0               | 61      |
+| Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 147          | 5                | 3                   |
 | 151          | 22               | 0                   |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
@@ -2590,7 +2589,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 276          | 2                | 3                   |
 | 280          | 17               | 0                   |
 
-**Evidence.** 271 capability entries, 512 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 281 capability entries, 526 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -3594,17 +3593,18 @@ for the reason given under _Parallax_ above.
 </LazySlider>
 ```
 
-| Prop            | What it does                                                                                                                 |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `label`         | Names the carousel for screen readers (required).                                                                            |
-| `perView`       | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count. |
-| `gap`           | Space (1.5 rem) between slides.                                                                                              |
-| `autoplay`      | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                  |
-| `initialIndex`  | The slide to start on, read once when the slider first measures itself (the lightbox opens on the picture clicked).          |
-| `onIndexChange` | Called with the position at the start and after every move. Pass a stable function.                                          |
-| `dots`          | The "Go to slide n" dots. On by default; the lightbox turns them off because a gallery can have 60 pictures.                 |
-| `directionLock` | Locks a drag to the axis it starts on, for a slider inside something that drags the other way (the lightbox).                |
-| `ref`           | A `SliderHandle` with `previous()` and `next()`, for a parent that handles keys itself.                                      |
+| Prop            | What it does                                                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`         | Names the carousel for screen readers (required).                                                                                                     |
+| `perView`       | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count.                          |
+| `gap`           | Space (1.5 rem) between slides.                                                                                                                       |
+| `autoplay`      | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                                           |
+| `initialIndex`  | The slide to start on, read once when the slider first measures itself (the lightbox opens on the picture clicked).                                   |
+| `onIndexChange` | Called with the position at the start and after every move. Pass a stable function.                                                                   |
+| `dots`          | The "Go to slide n" dots. On by default; the lightbox turns them off because a gallery can have 60 pictures.                                          |
+| `directionLock` | Locks a drag to the axis it starts on, for a slider inside something that drags the other way (the lightbox).                                         |
+| `bleed`         | More room around the slides for a shadow (picture depth, task 147): `true` adds 12px below, `{ x, top, bottom }` sets each side (px). Off by default. |
+| `ref`           | A `SliderHandle` with `previous()` and `next()`, for a parent that handles keys itself.                                                               |
 
 - **How it moves.** The track is an `m.div` with `drag="x"` and a motion value for `x`. On release `snapIndex`
   (`slider-snap.ts`, pure and unit tested) picks the slide from the drag distance plus a short projection of the
@@ -4475,7 +4475,7 @@ The Link list's own _Social icons_ box (`socialDesign`) keeps its stored paths (
 
 ### Depth and glow on cards
 
-A shadow level, an optional glow and, on a card that is one link, a hover lift (task 146). The shared pieces are in `src/lib/sanity/depth-options.ts` (`depthLook` for a box, `depthFilter` for a picture, `resolveCardDepth` and `resolveCardLift` for a card) and `depthFields` (`surface-design.ts`, a registered shared builder), which adds _Shadow_, _Glow_, _Glow colour_ and, where cards link, _Hover lift_ to a family's Cards box (`shadow`, `glow`, `glowColour`, `lift`; agency only, every control inheriting). Pictures are task 147's; buttons, forms and the embed are task 148's (see _Buttons_).
+A shadow level, an optional glow and, on a card that is one link, a hover lift (task 146). The shared pieces are in `src/lib/sanity/depth-options.ts` (`depthLook` for a box, `depthFilter` for a picture, `resolveCardDepth` and `resolveCardLift` for a card) and `depthFields` (`surface-design.ts`, a registered shared builder), which adds _Shadow_, _Glow_, _Glow colour_ and, where cards link, _Hover lift_ to a family's Cards box (`shadow`, `glow`, `glowColour`, `lift`; agency only, every control inheriting). Pictures are task 147's (see _Picture depth and glow_); buttons, forms and the embed are task 148's (see _Buttons_).
 
 - **Order.** A plan's own Appearance, then the section's Cards box, then the site's **Card depth** (Brand colours: Flat, Soft, Raised or Floating), then what the family draws today. Each property is taken from the first level that chose it, so a section's Soft stays Soft whatever the site chose (it draws the `shadow-soft` token, which has today's card shadow), and a plan set to Flat is flat under a Raised site.
 - **Unset changes nothing.** The site's Card depth is the CSS variable `--card-depth`, defined only when a level is chosen (`site-decisions.ts`, `SITE_DECISIONS.cardDepth`) and read only by cards, as `var(--card-depth, <what the family draws>)`. `--shadow-card` is never remapped, so a social button or anything else that draws the card shadow without being a card keeps it. The card classes changed (`shadow-card` to `shadow-(--card-depth,var(--shadow-card))`, and a shadow-free card gains `shadow-(--card-depth,0_0_#0000)`), and the computed shadow is the same.
@@ -4484,6 +4484,66 @@ A shadow level, an optional glow and, on a card that is one link, a hover lift (
 - **Hover lift** (None or Lift) applies only to a card that links to a page: Team (a member with a page), Events (Featured, an event with a page) and Blog post cards. It rises 4 px and shows a deeper shadow under the pointer or keyboard focus (`:has(a:focus-visible)`, as the action indicator does), with CSS only (`.card-lift` in `globals.css`): the card is wrapped (`CardSurface lift`) so an `overflow-hidden` card can't clip the shadow layer, which is drawn once and only fades in. Transform and opacity animate, never `box-shadow`. Visitors who ask for less motion see no lift. Unset keeps what a card did: Team cards still rise with the Motion library's `HoverLift`, and choosing None or Lift replaces it.
 - **Link list** keeps its own `depthDesign.*` and `links[].design.shadow` paths, read through `resolveDepth` (now built on `depthLook` and `depthFilter`); they are a reviewed temporary exception until task 281 moves them. An explicit Soft now draws `var(--shadow-soft, var(--shadow-card))`, the same pixels.
 - **Tests.** `depth-options.test.ts`, `site-decisions.test.ts`, each family's own tests, the Task 275 evidence (`<family>.depth.card`, `pricingTable.depth.item`), and in the browser `design-settings.spec.ts` (computed shadows under each site-wide Card depth), `card-lift.spec.ts` and `blog-card-design.spec.ts` (hover, keyboard focus, reduced motion and axe).
+
+### Picture depth and glow
+
+A shadow and an optional glow on a picture (task 147), drawn as a CSS `drop-shadow` filter so it follows the picture's real outline (a round crop, a ring, a decorative frame) instead of its box. It reuses Task 146's pieces: `depthFilter()` and the `depth.picture-*` and `depth.glow-*` tokens (`src/lib/sanity/depth-options.ts`, `scripts/build-tokens.mjs`).
+
+**Editors and agencies.** Each consumer below has an agency-only, collapsed **Picture depth and glow** box (`pictureDepthDesign`, built by `pictureDepthFields` in `surface-design.ts`, a registered shared builder): _Shadow_ (Flat, Soft, Raised, Floating), _Glow_ (Off, Soft, Strong) and _Glow colour_ (the theme colours the glow offers). Clients cannot see it. Blog settings holds the post cards' as **Post card pictures**.
+
+| Consumer        | Offered                                              | Where the filter goes                                                                                      |
+| --------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Image + text    | Side and Stacked (Required)                          | `FramedImage`'s still box, or the `<img>` of a plain picture                                               |
+| Hero            | Split (Required)                                     | The same, inside the entrance wrapper                                                                      |
+| Testimonials    | Grid and Slider (Required)                           | `ProfileImage`'s outer element, so it follows a ring or frame                                              |
+| Team            | Grid, Slider and List (Required)                     | The portrait (`FramedImage`) with an inset (below); the List's `ProfileImage` outer element, with no inset |
+| Gallery         | Grid, Slider and Masonry (Required)                  | Grid and Slider: each tile's still box inside its button. Masonry: the tile's button, which is its outline |
+| Location        | Conditional: a map image is set                      | The map picture itself, keeping its ring and corners                                                       |
+| Events          | Conditional: the Featured card's event has a picture | The picture, inset (below)                                                                                 |
+| Blog post cards | Conditional: the post has a main image               | The card's picture, never the card                                                                         |
+
+**Not offered**, and why: the Link list's profile picture keeps its own legacy fields (`depthDesign.pictureShadow`, a temporary exception until task 281); logos and wordmarks, background pictures, dividers and frame artwork are not framed pictures; Hero Overlay, Full-bleed and Editorial and Image + text Overlay draw their picture as a background or too small to carry it; the Slot image block is drawn by its host section; the Gallery's lightbox shows the picture itself, never a tile's shadow.
+
+**Unset changes nothing.** Empty, Flat with Glow Off, and any value the schema does not offer all draw exactly what the picture drew before: the markup is byte-identical (checked for every consumer, with and without an Image design, and in every layout). There is no level above the picture's own, so the site's Card depth and a card's own depth never reach a picture, and a picture's depth never reaches its card. Flat and Off are stored but look the same as unset, because none of these pictures draws a shadow of its own.
+
+**The filter sits on the still box, never on what moves.** Under Image design's motion or a section's Parallax the picture moves inside its frame (`FramedImage`); the filter is on the frame, which is stationary, so the shadow does not move with the picture. A plain picture has no box and carries it on the `<img>`. The Location's map has no frame of its own, so under the section's Parallax the whole picture drifts and the shadow with it. The Hero's entrance animates a wrapper around the picture and is untouched.
+
+**Room for the shadow.** A card that clips (Team's and Events Featured's) would cut a flush picture's shadow off at its edge. When a depth is chosen the picture is inset inside the space it already has, by the room that depth needs (`PICTURE_CLEARANCE`, `pictureClearance`, `pictureInset` and `pictureInsetBeyond` in `depth-options.ts`): the card keeps its height, the picture its ratio (1:1 for Team, 16:9 for Events) and the text its place, and the vertical padding is exact, not rounded (a half pixel moves the text). A portrait that a shape or frame already insets keeps its 24px and takes more at the sides only where its depth needs more. The rooms are measured, not estimated: the distance at which each fade falls to a tint of 8/255 (about 3%, the card's own ring) in Chromium, plus 2px, with the first approved sizes as a floor.
+
+| Shadow   | Glow Off | Soft glow | Strong glow |
+| -------- | -------- | --------- | ----------- |
+| Flat     | none     | 12 / 12   | 22 / 22     |
+| Soft     | 8 / 4    | 14 / 12   | 22 / 22     |
+| Raised   | 16 / 6   | 18 / 14   | 26 / 22     |
+| Floating | 28 / 12  | 30 / 18   | 34 / 24     |
+
+(Side / top, in px.) These depend on the filter tokens. `scripts/build-tokens.test.mjs` pins them and fails, with instructions, if the picture shadows or glows change: measure the clearances again first.
+
+**Slider.** A Gallery tile has no card around it, so the shared `Slider`'s 12px of room would cut its shadow. `bleed` takes sizes: `{ x, top, bottom }`. The viewport grows by the same amount it is pulled back by, so slide widths, scroll distances and the page's layout are unchanged, and a slider that asks for none is byte-identical. The Gallery asks only when a depth is chosen: 22px at the sides, 36px above and 72px below (the controls draw over it). `bleed={true}` is the Testimonials' 12px extra below its cards.
+
+**Known limitation: the Gallery Slider's outer edge.** The sides are capped at 22px: the page gutter and the slide gap are both 24px, and more would scroll the page or show the next slide's edge. Floating with a Strong glow reaches about 32px, so at the first slide's left edge and the last slide's right edge a faint tail (about 22/255, 9%) is cut off in a straight line. On a narrow screen that edge is 2px from the screen's edge and invisible; on a screen wider than the page's content it shows mid-page. Above and below, the fade is complete (under 3/255). An edge fade would hide it but is new behaviour that touches picture content and focus rings, so it is not part of this task. Check it on a real site (issue #172) before choosing to accept it or add one.
+
+**Performance.** A filter on a parallax picture costs raster and compositing time. Measured on a production build of two identical long pages (Image + text with Image design motion, and with the section's Parallax preset; three sections each) with and without Floating, in Chromium (headless shell, Pixel 7 profile, 4x CPU throttle, 24px scrolled per frame):
+
+| Frame pacing (7 interleaved pairs, about 1,300 frames per cell) | Median | p95  | p99  | Frames over 25 ms, per run | Over 50 ms |
+| --------------------------------------------------------------- | ------ | ---- | ---- | -------------------------- | ---------- |
+| Design parallax, no filter                                      | 16.7   | 16.8 | 16.8 | 2, 0, 0, 0, 0, 0, 0        | 0          |
+| Design parallax, Floating                                       | 16.7   | 16.7 | 16.8 | 0, 0, 0, 1, 0, 0, 0        | 0          |
+| Section parallax, no filter                                     | 16.7   | 16.8 | 16.8 | 0, 1, 1, 2, 0, 0, 1        | 0          |
+| Section parallax, Floating                                      | 16.7   | 16.7 | 16.8 | 1, 1, 0, 1, 1, 0, 0        | 0          |
+
+| Chrome trace (median of 5 runs; ranges never overlapped) | Raster tasks | Raster time | Draw time | Compositing | Paint |
+| -------------------------------------------------------- | ------------ | ----------- | --------- | ----------- | ----- |
+| Design parallax, no filter                               | 111          | 36 ms       | 377 ms    | 120 ms      | 5 ms  |
+| Design parallax, Floating                                | 206          | 738 ms      | 1,474 ms  | 123 ms      | 5 ms  |
+| Design parallax, Floating + Strong glow                  | 174          | 1,407 ms    | 3,351 ms  | 151 ms      | 4 ms  |
+| Section parallax, no filter                              | 126          | 42 ms       | 393 ms    | 128 ms      | 8 ms  |
+| Section parallax, Floating                               | 241          | 720 ms      | 1,540 ms  | 139 ms      | 6 ms  |
+| Section parallax, Floating + Strong glow                 | 210          | 1,482 ms    | 3,533 ms  | 162 ms      | 6 ms  |
+
+Over about 190 frames that is roughly 2 ms of draw work per frame without the filter, 8 ms with Floating and 18 ms with Floating and a Strong glow. Read this carefully: frame pacing did not change (every frame sat on the 60 Hz interval), but raster time rose about 17 to 20 times and draw time about 4 times, and more again with a Strong glow. **That is not proof of smooth scrolling on a phone**: headless Chromium has no real GPU (it rasterises in software), the CPU throttle may not reach the GPU process, the trace did not expose presented or dropped frames, and work on different threads is not a frame's duration. Floating stays available for parallax pictures provisionally; Floating with a Strong glow on a moving picture is the high-risk combination. If real-device testing shows jank, the smallest restriction is probably no glow on a moving picture before no Floating. The fixture pages `picture-depth-perf-off` and `picture-depth-perf-floating` (tests/e2e/fixtures/dataset.mjs) reproduce the comparison; the measuring scripts were throwaway and are not kept. The real-device check is tracked in issue #172.
+
+**Tests.** `depth-options.test.ts` (levels, clearance, the exact inset), `picture-depth-fields.test.ts` and `picture-depth-scope.test.ts` (the builder, and that a section-level object satisfies a card-scoped capability), `framed-image.test.ts` and `profile-image.test.tsx`, a `*-depth.test.tsx` for each consumer (unset parity in every branch, the filter's place, accessibility), and `tests/e2e/picture-depth*.spec.ts` (and the Blog's in `blog-card-design.spec.ts`) in a real browser: the filter's place, the card's size and text unchanged, the stationary frame under parallax, reduced motion, no JavaScript, axe, hydration and layout shift. Whether a shadow is cut off is read from screenshots (`picture-depth-helpers.ts`): with and without the filter, so the difference is the shadow itself, at the edges of whatever clips, with a control that clips on purpose to show the reading sees it. The Task 275 evidence for every pair is `<component>.pictureDepth.*` in `capability-evidence.ts`.
 
 ### Action indicator
 

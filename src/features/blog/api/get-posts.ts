@@ -24,14 +24,20 @@ import { pagePath, pageRange } from '../utils/pagination'
 const BLOG_TAGS = [TAGS.post, TAGS.author, TAGS.teamMember, TAGS.category]
 const POST_TAGS = [...BLOG_TAGS, TAGS.page]
 
-/** The post cards' design (Blog settings). Empty, or no document yet, is what the blog always drew. */
-export async function getBlogCardDesign(mode: FetchMode = PUBLISHED) {
+/**
+ * The post cards' design and their pictures' depth (Blog settings), from the one query. Empty, or no document
+ * yet, is what the blog always drew.
+ */
+export async function getBlogCardSettings(mode: FetchMode = PUBLISHED) {
   const { data } = await cachedSanityFetch({
     query: BLOG_SETTINGS_QUERY,
     ...mode,
     tags: [TAGS.blogSettings],
   })
-  return data?.cardDesign ?? undefined
+  return {
+    cardDesign: data?.cardDesign ?? undefined,
+    pictureDepth: data?.pictureDepthDesign ?? undefined,
+  }
 }
 
 /** `generateStaticParams` can't be empty under Cache Components; this slug is never a post (404). */

@@ -60,13 +60,6 @@
     },
     {
       "component": "hero",
-      "capability": "pictureDepth",
-      "scope": "section",
-      "layouts": ["split"],
-      "closingTask": 147
-    },
-    {
-      "component": "hero",
       "capability": "overlay",
       "scope": "section",
       "layouts": ["overlay", "full-bleed"],
@@ -93,13 +86,6 @@
       "scope": "section",
       "layouts": [null],
       "closingTask": 151
-    },
-    {
-      "component": "mediaText",
-      "capability": "pictureDepth",
-      "scope": "section",
-      "layouts": ["side", "stacked"],
-      "closingTask": 147
     },
     {
       "component": "mediaText",
@@ -145,13 +131,6 @@
       "part": "avatar",
       "layouts": ["grid", "slider"],
       "closingTask": 177
-    },
-    {
-      "component": "testimonials",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": ["grid", "slider"],
-      "closingTask": 147
     },
     {
       "component": "testimonials",
@@ -226,13 +205,6 @@
     },
     {
       "component": "gallery",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": ["grid", "masonry", "slider"],
-      "closingTask": 147
-    },
-    {
-      "component": "gallery",
       "capability": "divider",
       "scope": "section",
       "layouts": ["grid", "masonry", "slider"],
@@ -252,13 +224,6 @@
       "part": "portrait",
       "layouts": ["grid", "slider", "list"],
       "closingTask": 177
-    },
-    {
-      "component": "team",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 147
     },
     {
       "component": "team",
@@ -657,13 +622,6 @@
     },
     {
       "component": "location",
-      "capability": "pictureDepth",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 147
-    },
-    {
-      "component": "location",
       "capability": "glass",
       "scope": "card",
       "layouts": [null],
@@ -726,24 +684,10 @@
     },
     {
       "component": "events",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": ["featured"],
-      "closingTask": 147
-    },
-    {
-      "component": "events",
       "capability": "glass",
       "scope": "card",
       "layouts": ["featured"],
       "closingTask": 159
-    },
-    {
-      "component": "blogPostCards",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 147
     },
     {
       "component": "blogPostCards",

@@ -45,6 +45,8 @@ export interface EventsContext {
   cardDesign?: EventsData['cardDesign']
   /** The section's tone, which the Featured card's mark is measured against. */
   tone?: string
+  /** The section's `pictureDepthDesign`: a shadow and glow on the Featured card's picture (task 147). */
+  pictureDepth?: EventsData['pictureDepthDesign']
 }
 
 /** The text roles every layout draws (events-capabilities.ts). */
@@ -332,6 +334,7 @@ export function EventsView({
     level: sectionTitle(data) ? 'h3' : 'h2',
     cardDesign: data.cardDesign,
     tone,
+    pictureDepth: data.pictureDepthDesign,
   }
 
   return (

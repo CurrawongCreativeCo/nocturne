@@ -12,6 +12,7 @@ import {
   splitImageShare,
   splitProportion,
 } from '@/features/pages/utils/hero-split'
+import { resolvePictureDepth } from '@/lib/sanity/depth-options'
 import { appearanceFromHeroShape, resolveImageDesign } from '@/lib/sanity/image-design-options'
 
 import { HeroPicture } from './hero-picture'
@@ -75,6 +76,7 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
         image={data.backgroundImage}
         plan={parts.image}
         design={data.imageDesign}
+        depth={resolvePictureDepth(data.pictureDepthDesign)}
         fallbackShape={fallbackShape}
         isFirst={isFirst}
         aspect="4/3"

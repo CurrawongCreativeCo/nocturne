@@ -1659,6 +1659,28 @@ export const blogSettingsLifted = {
   },
 }
 
+/**
+ * Picture depth on the post cards (tests/e2e/blog-card-design.spec.ts): Blog settings with a depth on the pictures
+ * only (a card draws no surface of its own), and, while one is on, a post with no picture (the index's newest).
+ */
+const depthSettings = (fields) => ({ _id: 'blogSettings', _type: 'blogSettings', ...fields })
+const pictureDepthOf = (fields) => ({ _type: 'object', ...fields })
+export const blogSettingsPictureDepth = {
+  raised: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'raised' }) }),
+  floating: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'floating' }) }),
+  // With a card of its own as well, so the picture's depth is shown beside a surface, a border and padding.
+  glow: depthSettings({
+    cardDesign: { border: 'thin' },
+    pictureDepthDesign: pictureDepthOf({ shadow: 'floating', glow: 'strong' }),
+  }),
+  glowOnly: depthSettings({ pictureDepthDesign: pictureDepthOf({ glow: 'strong' }) }),
+  flat: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'flat', glow: 'off' }) }),
+}
+export const blogPostWithoutPicture = {
+  ...blogPost('a-post-with-no-picture', 'A post with no picture', '2026-10-20T09:00:00Z'),
+  mainImage: undefined,
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 
@@ -3319,6 +3341,403 @@ documents.push({
 })
 
 /**
+ * Picture depth on Image + text (tests/e2e/picture-depth.spec.ts): one section with nothing chosen,
+ * then each level, a glow alone, and a still frame around moving pictures. Not indexed.
+ */
+const depthText = (n) => ({
+  _key: `depth-text-${n}`,
+  _type: 'richText',
+  body: [
+    block([`Depth text ${n}`], { style: 'h2' }),
+    block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+  ],
+})
+const depthSection = (id, title, extra) =>
+  galleryMediaText(id, title, {
+    variant: 'side',
+    ctas: [],
+    media: [slotImageItem(id)],
+    ...extra,
+  })
+const pictureDepth = (fields) => ({ _type: 'object', ...fields })
+documents.push({
+  _id: 'page-picture-depth',
+  _type: 'page',
+  title: 'Picture depth',
+  slug: { _type: 'slug', current: 'picture-depth' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthSection('depth-none', 'Nothing chosen'),
+    depthText(1),
+    depthSection('depth-floating', 'Floating with a soft glow', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthText(2),
+    {
+      ...depthSection('depth-stacked', 'Raised, stacked and framed', {
+        variant: 'stacked',
+        pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+        imageDesign: imageDesign({ appearance: 'framed', frame: 'corner-brackets' }),
+      }),
+    },
+    depthText(3),
+    depthSection('depth-glow', 'A strong glow on a circle', {
+      pictureDepthDesign: pictureDepth({
+        glow: 'strong',
+        glowColour: { _type: 'object', colour: 'highlight' },
+      }),
+      imageDesign: imageDesign({ appearance: 'circle' }),
+    }),
+    depthText(4),
+    depthSection('depth-flat', 'Flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(5),
+    depthSection('depth-moving', 'Floating on a moving picture', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+    }),
+    depthText(6),
+    depthSection('depth-section-parallax', 'Floating under section parallax', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      style: { _type: 'sectionStyle', motion: 'parallax' },
+    }),
+    depthText(7),
+  ],
+})
+
+/**
+ * Picture depth on the Hero's Split layout (tests/e2e/picture-depth-hero.spec.ts): nothing chosen, a plain
+ * picture, an entrance, a moving picture and the hero's own parallax, then the layouts that must ignore it.
+ */
+const depthHero = (id, title, extra) =>
+  galleryHero(id, { variant: 'split', title, ctas: [], heading: undefined, ...extra })
+documents.push({
+  _id: 'page-picture-depth-hero',
+  _type: 'page',
+  title: 'Picture depth, hero',
+  slug: { _type: 'slug', current: 'picture-depth-hero' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthHero('depth-hero-none', 'Hero nothing chosen'),
+    depthText(2),
+    depthHero('depth-hero-plain', 'Hero floating plain', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthText(3),
+    depthHero('depth-hero-flat', 'Hero flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(4),
+    depthHero('depth-hero-entrance', 'Hero floating entrance', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      partMotion: { enabled: true, imagePreset: 'rise' },
+    }),
+    depthText(5),
+    depthHero('depth-hero-moving', 'Hero floating moving', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+    }),
+    depthText(6),
+    depthHero('depth-hero-parallax', 'Hero floating parallax', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      partMotion: { enabled: true, imagePreset: 'parallax' },
+    }),
+    depthText(7),
+    galleryHero('depth-hero-overlay', {
+      variant: 'overlay',
+      title: 'Hero overlay ignores it',
+      ctas: [],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    galleryHero('depth-hero-editorial', {
+      variant: 'editorial',
+      title: 'Hero editorial ignores it',
+      ctas: [],
+      secondaryImage: image('Small picture'),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+  ],
+})
+
+/**
+ * Picture depth on the Testimonials' avatars (tests/e2e/picture-depth-testimonials.spec.ts): a grid and a
+ * slider, each with nothing chosen and with Floating on a large, ringed avatar, plus the other levels.
+ */
+const depthQuotes = (id, count) => sliderQuotes(id).slice(0, count)
+const depthTestimonials = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'testimonials',
+  variant,
+  title,
+  items: depthQuotes(id, variant === 'slider' ? 6 : 3),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-testimonials',
+  _type: 'page',
+  title: 'Picture depth, testimonials',
+  slug: { _type: 'slug', current: 'picture-depth-testimonials' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthTestimonials('depth-t-grid-none', 'Grid nothing chosen', 'grid'),
+    depthTestimonials('depth-t-grid-floating', 'Grid floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthTestimonials('depth-t-grid-flat', 'Grid flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthTestimonials('depth-t-grid-raised', 'Grid raised ring', 'grid', {
+      avatarDesign: { _type: 'object', size: 'large', ring: 'line' },
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthTestimonials('depth-t-grid-glow', 'Grid glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthText(2),
+    depthTestimonials('depth-t-slider-none', 'Slider nothing chosen', 'slider'),
+    depthTestimonials('depth-t-slider-floating', 'Slider floating', 'slider', {
+      avatarDesign: { _type: 'object', size: 'large', ring: 'gradient' },
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
+ * Picture depth on Events Featured (tests/e2e/picture-depth-events.spec.ts): the workshop category's next event
+ * has a picture; the talk category's has none. The spec serves a real photograph for the picture.
+ */
+const depthEvents = (id, title, category, extra = {}) => ({
+  _key: id,
+  _type: 'events',
+  variant: 'featured',
+  title,
+  category: ref(`eventCategory-${category}`),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-events',
+  _type: 'page',
+  title: 'Picture depth, events',
+  slug: { _type: 'slug', current: 'picture-depth-events' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthEvents('depth-events-none', 'Events nothing chosen', 'workshop'),
+    depthEvents('depth-events-soft', 'Events soft', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthEvents('depth-events-raised', 'Events raised', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthEvents('depth-events-floating', 'Events floating', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthEvents('depth-events-glow', 'Events floating strong glow', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthEvents('depth-events-glow-only', 'Events strong glow only', 'workshop', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthEvents('depth-events-flat', 'Events flat and glow off', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(2),
+    depthEvents('depth-events-no-picture-none', 'Events no picture nothing chosen', 'talk'),
+    depthEvents('depth-events-no-picture', 'Events no picture floating', 'talk', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
+ * Picture depth on the Gallery (tests/e2e/picture-depth-gallery.spec.ts): grids and sliders of six pictures with
+ * nothing chosen and at each depth level, and a section of a transparent picture and a cropped one.
+ */
+const depthGallery = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'gallery',
+  variant,
+  title,
+  images: galleryImages(id, 6),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-gallery',
+  _type: 'page',
+  title: 'Picture depth, gallery',
+  slug: { _type: 'slug', current: 'picture-depth-gallery' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthGallery('depth-g-none', 'Gallery nothing chosen', 'grid'),
+    depthGallery('depth-g-soft', 'Gallery soft', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthGallery('depth-g-raised', 'Gallery raised', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthGallery('depth-g-floating', 'Gallery floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-glow', 'Gallery floating strong glow', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-glow-only', 'Gallery strong glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthGallery('depth-g-flat', 'Gallery flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthGallery('depth-g-circle', 'Gallery circle floating', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-odd', 'Gallery transparent and cropped', 'grid', {
+      images: [
+        { ...pattern(), _key: 'odd-transparent', alt: 'A transparent picture' },
+        {
+          _type: 'image',
+          _key: 'odd-cropped',
+          alt: 'A cropped picture',
+          asset: ref(IMAGE_ASSET_ID),
+          crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.2, right: 0.2 },
+        },
+        ...galleryImages('depth-g-odd', 1),
+      ],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-masonry-none', 'Gallery masonry nothing chosen', 'masonry'),
+    depthGallery('depth-g-masonry-floating', 'Gallery masonry floating', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-masonry-glow', 'Gallery masonry floating strong glow', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-masonry-flat', 'Gallery masonry flat and glow off', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthGallery('depth-g-masonry-odd', 'Gallery masonry transparent and cropped', 'masonry', {
+      images: [
+        { ...pattern(), _key: 'modd-transparent', alt: 'A transparent picture' },
+        {
+          _type: 'image',
+          _key: 'modd-cropped',
+          alt: 'A cropped picture',
+          asset: ref(IMAGE_ASSET_ID),
+          crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.2, right: 0.2 },
+        },
+        ...galleryImages('depth-g-modd', 1),
+      ],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+    depthGallery('depth-g-slider-none', 'Gallery slider nothing chosen', 'slider'),
+    depthGallery('depth-g-slider-glow', 'Gallery slider floating strong glow', 'slider', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
+ * Picture depth on the Location's map picture (tests/e2e/picture-depth-location.spec.ts): a section with a map image
+ * at each depth level, the click-to-load map, and sections with no map image (the details on cards).
+ */
+const depthLocation = (id, title, extra = {}) => ({
+  _key: id,
+  _type: 'location',
+  title,
+  showHours: false,
+  showContact: true,
+  directionsLabel: 'Get directions',
+  mapImage: image('A map of Newtown'),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-location',
+  _type: 'page',
+  title: 'Picture depth, location',
+  slug: { _type: 'slug', current: 'picture-depth-location' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthLocation('depth-l-none', 'Location nothing chosen'),
+    depthLocation('depth-l-soft', 'Location soft', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthLocation('depth-l-raised', 'Location raised', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthLocation('depth-l-floating', 'Location floating', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-glow', 'Location floating strong glow', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthLocation('depth-l-glow-only', 'Location strong glow only', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthLocation('depth-l-flat', 'Location flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthLocation('depth-l-interactive', 'Location interactive floating', {
+      interactiveMap: true,
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-parallax', 'Location parallax floating', {
+      style: { _type: 'sectionStyle', motion: 'parallax' },
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-no-picture-none', 'Location no picture nothing chosen', {
+      mapImage: undefined,
+    }),
+    depthLocation('depth-l-no-picture', 'Location no picture floating', {
+      mapImage: undefined,
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+  ],
+})
+
+/**
+ * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
+ * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
+ */
+for (const [slug, floating] of [
+  ['picture-depth-perf-off', false],
+  ['picture-depth-perf-floating', true],
+]) {
+  const depth = floating ? { pictureDepthDesign: pictureDepth({ shadow: 'floating' }) } : {}
+  documents.push({
+    _id: `page-${slug}`,
+    _type: 'page',
+    title: slug,
+    slug: { _type: 'slug', current: slug },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      depthText(1),
+      ...[1, 2, 3].flatMap((n) => [
+        depthSection(`perf-design-${n}`, `Design parallax ${n}`, {
+          ...depth,
+          imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+        }),
+        depthText(n + 1),
+        depthSection(`perf-preset-${n}`, `Section parallax ${n}`, {
+          ...depth,
+          style: { _type: 'sectionStyle', motion: 'parallax' },
+        }),
+        depthText(n + 4),
+      ]),
+    ],
+  })
+}
+
+/**
  * Animated hero parts on real pages (tests/e2e/hero-parts.spec.ts), for what the gallery cannot show:
  * a MotionProvider, so the parts really play. The first page's hero is the first section (its heading
  * and picture never start hidden); the second page starts with text, so its hero is further down.
@@ -3636,6 +4055,82 @@ const teamMember = (id, name, role, extra = {}) => ({
   ...extra,
 })
 const memberSlug = (current) => ({ slug: { _type: 'slug', current } })
+
+/**
+ * Picture depth on Team (tests/e2e/picture-depth-team.spec.ts): a grid, a slider and a list of three members whose
+ * portraits are a real photograph (tests/e2e/fixtures/portrait-photo.jpg: NASA photo S69-31741, public domain,
+ * which the spec serves in place of the fixtures' flat picture), shown with nothing chosen and at each depth level.
+ */
+const depthTeam = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'team',
+  variant,
+  title,
+  selection: 'picked',
+  // The existing members. A slider needs more than it shows at once (three, from a wide screen), or it has no arrows.
+  members: (variant === 'slider' ? ['ann', 'ben', 'cara', 'dev'] : ['ann', 'ben', 'cara']).map(
+    (m) => ref(`teamMember-${m}`),
+  ),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-team',
+  _type: 'page',
+  title: 'Picture depth, team',
+  slug: { _type: 'slug', current: 'picture-depth-team' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthTeam('depth-team-none', 'Team nothing chosen', 'grid'),
+    depthTeam('depth-team-soft', 'Team soft', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthTeam('depth-team-raised', 'Team raised', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthTeam('depth-team-floating', 'Team floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthTeam('depth-team-glow', 'Team floating strong glow', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthTeam('depth-team-glow-only', 'Team strong glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthTeam('depth-team-flat', 'Team flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthTeam('depth-team-circle', 'Team circle floating', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthTeam('depth-team-circle-none', 'Team circle nothing chosen', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+    }),
+    depthTeam('depth-team-arch-none', 'Team arch nothing chosen', 'grid', {
+      imageDesign: imageDesign({ appearance: 'arch' }),
+    }),
+    depthTeam('depth-team-circle-glow', 'Team circle floating strong glow', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthTeam('depth-team-arch-glow', 'Team arch floating strong glow', 'grid', {
+      imageDesign: imageDesign({ appearance: 'arch' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+    depthTeam('depth-team-slider-none', 'Team slider nothing chosen', 'slider'),
+    depthTeam('depth-team-slider-glow', 'Team slider floating strong glow', 'slider', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+    depthTeam('depth-team-list-none', 'Team list nothing chosen', 'list'),
+    depthTeam('depth-team-list-glow', 'Team list floating strong glow', 'list', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(4),
+  ],
+})
 
 documents.push(
   teamMember('ann', 'Ann Lee', 'Principal solicitor', {

@@ -6,8 +6,11 @@ import { resolveCardDesign } from '@/lib/sanity/card-design'
 import {
   CARD_SHADOW_CLASS,
   OWN_SHADOW,
+  pictureClearance,
+  pictureInset,
   resolveCardDepth,
   resolveCardLift,
+  resolvePictureDepth,
 } from '@/lib/sanity/depth-options'
 
 import {
@@ -34,10 +37,16 @@ const OWN_SURFACE = { background: 'bg-surface', border: 'ring-1 ring-line', stil
 const layout: EventsLayout = {
   defaults: DEFAULTS,
   placeholderClassName: 'min-h-96 rounded-card bg-surface-alt motion-safe:animate-pulse',
-  render: ([first, ...rest], { level, cardDesign, tone }) => {
+  render: ([first, ...rest], { level, cardDesign, tone, pictureDepth }) => {
     if (!first) return null
     const look = resolveCardDesign(cardDesign, EVENT_ROLES)
     const hasPicture = Boolean(first.event.image?.asset)
+    // The card clips, so a flush picture's shadow would be cut off at its edge. With a depth chosen the picture is
+    // inset by the room that depth needs, inside the 16:9 space it already has: the card keeps its height and
+    // the text its place. No picture, no depth: the date badge stays as it is. Unset changes nothing.
+    const clearance = hasPicture ? pictureClearance(pictureDepth) : undefined
+    const room = clearance === undefined ? undefined : pictureInset(clearance, 9 / 16)
+    const depth = hasPicture ? resolvePictureDepth(pictureDepth) : undefined
     // Nothing is drawn, and no group is needed, unless Cards › Indicator chooses one.
     const indicated = resolveCardAction(cardDesign, OWN_FEATURED_ACTION).glyph !== 'none'
     const group = (entry: typeof first) => (indicated && isEventLinked(entry) ? ' group' : '')
@@ -58,13 +67,29 @@ const layout: EventsLayout = {
           mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
         >
           {hasPicture ? (
-            <SanityImage
-              image={first.event.image}
-              width={1200}
-              height={675}
-              sizes="(min-width: 1024px) 60vw, 100vw"
-              className="aspect-video w-full object-cover"
-            />
+            room ? (
+              <div
+                className="aspect-video"
+                style={{ padding: `${room.top}px ${room.side}px ${room.bottom}px` }}
+              >
+                <SanityImage
+                  image={first.event.image}
+                  width={1200}
+                  height={675}
+                  sizes="(min-width: 1024px) 60vw, 100vw"
+                  className={`aspect-video w-full rounded-card object-cover ${depth?.className ?? ''}`.trim()}
+                  style={depth?.style}
+                />
+              </div>
+            ) : (
+              <SanityImage
+                image={first.event.image}
+                width={1200}
+                height={675}
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                className="aspect-video w-full object-cover"
+              />
+            )
           ) : (
             <div className="flex aspect-video w-full items-center justify-center bg-surface-alt">
               <DateBadge entry={first} className="size-28" />
