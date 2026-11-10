@@ -1664,7 +1664,8 @@ what differs from `tokens.json`, on the server, so there is no flash and no Java
 affected.
 
 The **primary button** (`CtaLink`, the form, search and sign-in buttons) uses the `cta` colour, which is near-black
-by default and becomes Primary once one is set. Use `bg-accent` where you want the accent itself.
+by default and becomes Primary once one is set. Use `bg-accent` where you want the accent itself. Its fill, depth and
+glow, and the secondary button's style, are chosen under Brand colours → Buttons (see _Buttons_).
 
 ### CMS branding
 
@@ -2648,15 +2649,14 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 
 **Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Each has the tasks that will add its capabilities.
 
-| Not covered by the contract | Capabilities it will need | Capability tasks                                                     | Declared by          |
-| --------------------------- | ------------------------- | -------------------------------------------------------------------- | -------------------- |
-| Site header                 | Glass                     | 159                                                                  | Its capability tasks |
-| Mobile drawer               | Glass                     | 7 (Optional quick actions)                                           | Its capability tasks |
-| Buttons (CtaLink)           | Surface, Depth, Action    | 148, 137 (Task 148 also adopts the search form’s hand-styled button) | Its capability tasks |
-| Booking facade              | Surface, Depth            | 148 (Once task 95 exists)                                            | Its capability tasks |
-| Event pages                 | Framing, Divider          | 177, 151                                                             | Its capability tasks |
-| Blog post page              | Framing                   | 177                                                                  | Its capability tasks |
-| Location pages              | Surface, Text             | 278                                                                  | Its capability tasks |
+| Not covered by the contract | Capabilities it will need | Capability tasks                         | Declared by          |
+| --------------------------- | ------------------------- | ---------------------------------------- | -------------------- |
+| Site header                 | Glass                     | 159                                      | Its capability tasks |
+| Mobile drawer               | Glass                     | 7 (Optional quick actions)               | Its capability tasks |
+| Booking facade              | Surface, Depth            | 148 (Waits for task 95, which builds it) | Its capability tasks |
+| Event pages                 | Framing, Divider          | 177, 151                                 | Its capability tasks |
+| Blog post page              | Framing                   | 177                                      | Its capability tasks |
+| Location pages              | Surface, Text             | 278                                      | Its capability tasks |
 
 <!-- design-capabilities:end -->
 
@@ -4475,7 +4475,7 @@ The Link list's own _Social icons_ box (`socialDesign`) keeps its stored paths (
 
 ### Depth and glow on cards
 
-A shadow level, an optional glow and, on a card that is one link, a hover lift (task 146). The shared pieces are in `src/lib/sanity/depth-options.ts` (`depthLook` for a box, `depthFilter` for a picture, `resolveCardDepth` and `resolveCardLift` for a card) and `depthFields` (`surface-design.ts`, a registered shared builder), which adds _Shadow_, _Glow_, _Glow colour_ and, where cards link, _Hover lift_ to a family's Cards box (`shadow`, `glow`, `glowColour`, `lift`; agency only, every control inheriting). Pictures are task 147's and buttons and forms task 148's.
+A shadow level, an optional glow and, on a card that is one link, a hover lift (task 146). The shared pieces are in `src/lib/sanity/depth-options.ts` (`depthLook` for a box, `depthFilter` for a picture, `resolveCardDepth` and `resolveCardLift` for a card) and `depthFields` (`surface-design.ts`, a registered shared builder), which adds _Shadow_, _Glow_, _Glow colour_ and, where cards link, _Hover lift_ to a family's Cards box (`shadow`, `glow`, `glowColour`, `lift`; agency only, every control inheriting). Pictures are task 147's; buttons, forms and the embed are task 148's (see _Buttons_).
 
 - **Order.** A plan's own Appearance, then the section's Cards box, then the site's **Card depth** (Brand colours: Flat, Soft, Raised or Floating), then what the family draws today. Each property is taken from the first level that chose it, so a section's Soft stays Soft whatever the site chose (it draws the `shadow-soft` token, which has today's card shadow), and a plan set to Flat is flat under a Raised site.
 - **Unset changes nothing.** The site's Card depth is the CSS variable `--card-depth`, defined only when a level is chosen (`site-decisions.ts`, `SITE_DECISIONS.cardDepth`) and read only by cards, as `var(--card-depth, <what the family draws>)`. `--shadow-card` is never remapped, so a social button or anything else that draws the card shadow without being a card keeps it. The card classes changed (`shadow-card` to `shadow-(--card-depth,var(--shadow-card))`, and a shadow-free card gains `shadow-(--card-depth,0_0_#0000)`), and the computed shadow is the same.
@@ -4493,8 +4493,48 @@ The arrow at the end of a card that is one link (task 137). One component, `Acti
 - **CSS only, no client JavaScript** (`globals.css`, `[data-action-motion]`). The nearest `.group` puts the indicator in its hover, focus or pressed state. Focus counts both when the link is the card (`.group:focus-visible`) and when a link stretched inside a card that cannot take focus is focused (`.group:has(a:focus-visible)`), so hover and keyboard focus give the same feedback. Motion plays only under `prefers-reduced-motion: no-preference`, moves once per state change and never loops. Nudge and Lift move 3 px.
 - **Kept as they were.** With nothing chosen a place draws what it always drew: the Link list's Stacked, Cards and Glass rows nudge 2 px and Editorial 4 px; the Events List keeps its own chevron path, 4 px nudge and small-screen hiding (`legacy-small`, `legacy-large` and `legacyChevron` are internal, not Studio options). Choosing a motion moves a place to the preset's distance.
 - **Choosing it.** `actionFields` (`surface-design.ts`, a registered shared builder) adds _Indicator_, _Indicator motion_ and _Indicator colour_ (`actionStyle`, `actionMotion`, `actionColour`) to a family's Cards box, agency only, and `resolveCardAction` (`src/lib/sanity/card-action.ts`) turns them into what is drawn, over the place's own default. **Events** (List: a chevron; Featured: none; Agenda: not applicable), **Team** (Grid, Slider and List rows, on a card that links to a member's page) and **Blog post cards** (_Blog settings > Post cards_) default to none apart from the Events List. Accordion chevrons, sliders and the lightbox are not action indicators.
-- **Link list.** It keeps `linkDesign.arrowStyle`, `arrowColour` and the per-link equivalents under their stored names, with the hidden `showArrows` still read; they are a temporary exception until task 281 moves them onto the shared fields. CTA buttons (hero, Image + text, CTA banner) close with task 148 and Features grid cards with task 276.
+- **Link list.** It keeps `linkDesign.arrowStyle`, `arrowColour` and the per-link equivalents under their stored names, with the hidden `showArrows` still read; they are a temporary exception until task 281 moves them onto the shared fields. CTA buttons (hero, Image + text, CTA banner) draw it from the `cta` object's own fields (see _Buttons_), and Features grid cards close with task 276.
 - **Tests.** `action-indicator*.test.tsx` hold the markup, the CSS rules and the focus selector against both structures (a link that is the whole card, a stretched link); each family has its own tests and evidence (`events.action.card`, `team.action.card`, `blogPostCards.action.card`). `tests/e2e/action-indicator.spec.ts` checks hover, keyboard focus, right-to-left and reduced motion in a browser (run by CI).
+
+### Buttons
+
+The site's buttons share one style, chosen once under **Brand colours → Buttons** (task 148; agency only, collapsed, every choice optional). Nothing is set per section.
+
+| Control                | Choices                             | Default |
+| ---------------------- | ----------------------------------- | ------- |
+| Main button fill       | Solid, Brand gradient               | Solid   |
+| Main button gradient   | One of the gradients under Advanced | –       |
+| Main button depth      | Flat, Soft, Raised                  | Flat    |
+| Main button glow       | Off, Soft, Strong                   | Off     |
+| Secondary button style | Outline, Soft fill                  | Outline |
+
+The secondary button never has a shadow or glow. Each choice is a CSS variable set on `:root` only when it differs from today's look (`SITE_DECISIONS`, `resolveDesignTokens`), so an unset site renders and styles exactly what it did.
+
+- **Where it is read.** `CtaLink`, `ctaClassName` and `ctaColours` (`src/components/ui/button-style.ts`, re-exported by `cta-link.tsx`; the module has no imports, so the contact and search forms use it without joining their client bundles) add the hooks `cta-fill`, `cta-primary-depth` and `cta-soft`. Their rules (`globals.css`, outside every layer) read `--button-*` and hand back with `revert-layer` while a variable is unset. The Link list's featured link takes the fill only: its depth is the Link list's own.
+- **Brand gradient.** It names a gradient from Advanced (`brandGradients`; deleted or invalid ones fall back to Solid). `resolveDesignTokens` blends it the way `linear-gradient()` does (sRGB), samples every stop, each midpoint and 16 points per transition, and picks the text colour that reaches 4.5:1 along all of it. If none does, the button stays Solid and Brand colours says why. These are warnings, never errors, as for every derived pair; a second warning says when most of the gradient is under 3:1 against the page or the inverse background, where the button would lose its edge (the label still identifies it). Hover and press lay a veil of the colour opposite the text over the gradient, so the text colour never changes and no filter is used.
+- **Depth and glow.** One `box-shadow` list (`--button-shadow`), the card shadow scale and Task 146's glow sizes in Primary. Soft and Raised also give **hover depth** in Task 146's technique: the deeper shadow is a layer that only fades in (opacity) and the button rises 2 px (`translate`); `box-shadow` is never animated. It follows the pointer (where there is one) and keyboard focus, and reduced motion gets none of it. The global focus outline is drawn outside the shadow on every tone.
+- **Soft fill.** A tint of the button's own text colour (`color-mix(in srgb, currentColor 10%, transparent)`, 18% on hover, 26% pressed), so it follows every tone. A tint moves the fill towards the text, which would take white text on a mid-tone Primary under 4.5:1 (axe found it on the CTA banner's brand card), so on a section or card in the Primary colour (`data-tone="accent"`) the secondary keeps its outline.
+- **Indicator.** The `cta` object carries the shared `actionFields` (_Indicator_, _Indicator motion_, _Indicator colour_; agency only, None by default), so a saved button is unchanged. `CtaLink` draws it through `ActionIndicator` and becomes its `group` only then; each button is its own group, so hover or focus on one never moves its neighbour's.
+- **Form, Newsletter and Embed cards.** The shared Cards box (`cardDesignField`: Task 156's surface fields and Task 146's depth fields; agency only, empty by default). A form draws **no wrapper** until its section chooses a surface or a depth (a site Card depth alone is not a choice); a depth alone draws the standard card (the Location details card's tinted, outlined look); a transparent card draws no shadow; once there is a card, the site's Card depth reaches it. The Embed facade is a card already: it takes the same fields through its lazy boundary (the server works out its classes and style, `cardSurfaceProps`), and the site's Card depth reaches it. After the click, the provider's iframe keeps its own ring.
+- **Shared coverage.** Buttons are one shared component, not a section, so the contract does not declare it: its Required pairs (Hero, Image + text and CTA banner action; Form, Newsletter and Embed surface and depth) are verified on those sections by evidence (`<section>.action.item`, `<section>.surface.card`, `<section>.depth.card`), and the style itself by the tests below. The Booking facade stays in "Not covered yet" until task 95 builds it; its Cards box is this one.
+
+**Candidate inventory** (every `CtaLink` consumer, `ctaClassName` consumer and hand-styled button, and the form and facade cards):
+
+| Candidate                                                                             | Status       | Why                                                                                         |
+| ------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| Hero, Image + text and CTA banner buttons (`CtaGroup`)                                | Offered now  | Fill, depth, glow, secondary style and the indicator                                        |
+| Header button (desktop and mobile), event registration, service enquiry (`CtaLink`)   | Offered now  | Same component; they read the style, and the indicator where their fields are set           |
+| Location section and page directions, Events "see all" (`ctaClassName`)               | Offered now  | Same classes                                                                                |
+| Link list featured link (`ctaColours`)                                                | Offered now  | Fill only; its shadow and glow are the Link list's own (task 281 moves them)                |
+| Search form and contact form submit buttons                                           | Offered now  | Now `ctaClassName('light')`                                                                 |
+| Form, Newsletter and Embed cards                                                      | Offered now  | The shared Cards box                                                                        |
+| Quick-search dialog submit                                                            | On request   | Compatible (`bg-cta`); a dialog control the first rollout leaves alone                      |
+| Sign-in, sign-out, sign-in prompt and error-page buttons                              | On request   | Compatible; system pages, not brand surfaces                                                |
+| Embed facade's own "load" and "Cookie settings" buttons                               | On request   | Compatible (ink buttons); they are the provider card's controls                             |
+| Booking facade                                                                        | Not suitable | Does not exist until task 95 builds it; it will then take the same Cards box                |
+| Social icon buttons, slider and lightbox controls, accordion triggers, Link list rows | Not suitable | Icons and controls, not calls to action; each has its own design (task 158, Not applicable) |
+
+**Tests.** `resolve-design-tokens-buttons.test.ts` (variables, unset parity, gradient sampling, fallback, warnings), `cta-link.test.tsx` (classes, hooks, indicator and the `globals.css` rules), `search-form.test.tsx`, `contact-form.test.tsx`, `form-card.test.tsx`, `embed-facade-card.test.ts`, `form-card-field.test.ts`, the Task 275 evidence, and in the browser `tests/e2e/button-style.spec.ts` (run by CI after every other spec): defaults, the gradient, depth, glow and a soft secondary on every tone, hover, press, keyboard focus, reduced motion, neighbouring indicators, form cards, the embed and axe. A sibling check of the compiled CSS in Chromium found the faint-gradient case behind the second warning.
 
 ### Decorative marks
 

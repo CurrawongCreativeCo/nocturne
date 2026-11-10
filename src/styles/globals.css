@@ -847,3 +847,14 @@ h3 {
 .cta-soft:active {
   background-color: var(--button-secondary-fill-active, revert-layer);
 }
+/*
+ * A tint of the text colour moves the fill towards the text, so under white text on a mid-tone Primary it
+ * takes the contrast below 4.5:1 (axe found it on the CTA banner's brand card). A section or card in the
+ * Primary colour keeps the secondary's outline instead.
+ */
+[data-tone='accent'] .cta-soft,
+[data-tone='accent'] .cta-soft:hover,
+[data-tone='accent'] .cta-soft:active {
+  background-color: revert-layer;
+  --tw-ring-color: revert-layer;
+}

@@ -318,16 +318,10 @@ export const FUTURE_COVERAGE = [
   { part: 'Site header', needs: ['glass'], tasks: [159] },
   { part: 'Mobile drawer', needs: ['glass'], tasks: [7], note: 'Optional quick actions' },
   {
-    part: 'Buttons (CtaLink)',
-    needs: ['surface', 'depth', 'action'],
-    tasks: [148, 137],
-    note: 'Task 148 also adopts the search form’s hand-styled button',
-  },
-  {
     part: 'Booking facade',
     needs: ['surface', 'depth'],
     tasks: [148],
-    note: 'Once task 95 exists',
+    note: 'Waits for task 95, which builds it',
   },
   { part: 'Event pages', needs: ['framing', 'divider'], tasks: [177, 151] },
   { part: 'Blog post page', needs: ['framing'], tasks: [177] },

@@ -4,7 +4,7 @@ import { NOT_APPLICABLE } from '@/lib/design/common-policies'
 /**
  * The search page's form, status line and results (`search/components/search-view.tsx`; task 156 declares
  * it). Results are plain rows, so only their text takes roles, closing in 280 (a design for the view).
- * The search button is hand-styled and is recorded under task 148's Buttons (CtaLink), not here.
+ * The search button is the shared main button (task 148), a component of its own rather than a design capability of this listing.
  */
 export const searchResultsCapabilities = declareCapabilities({
   surface: notApplicable('Results are rows, with no card'),

@@ -24,7 +24,7 @@ export const servicePageCapabilities = declareCapabilities({
   depth: NOT_APPLICABLE.noShadowSurface,
   icon: NOT_APPLICABLE.noIcon,
   action: notApplicable(
-    'No link covers a whole card. Its enquiry button is Buttons (CtaLink), tasks 148 and 137',
+    'No link covers a whole card. Its enquiry button is a CtaLink, which draws the shared button style (task 148) and indicator (task 137)',
   ),
   framing: { policy: 'required', scope: 'section' },
   pictureDepth: notApplicable('Draws no shadow or glow on its picture'),

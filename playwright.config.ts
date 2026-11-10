@@ -25,6 +25,8 @@ const PANEL_PALETTE_SPEC = /section-panel-rendering\.spec\.ts/
 const NAV_SUBMENUS_SPEC = /nav-submenus\.spec\.ts/
 // Gives the blog's post cards a design, which every blog page would show.
 const BLOG_CARD_SPEC = /blog-card-design\.spec\.ts/
+// Serves the site-wide button style, which every page's buttons would show.
+const BUTTON_STYLE_SPEC = /button-style\.spec\.ts/
 const ISOLATED_SPECS = [
   EXPERIMENTS_SPEC,
   DESIGN_SPEC,
@@ -32,6 +34,7 @@ const ISOLATED_SPECS = [
   PANEL_PALETTE_SPEC,
   NAV_SUBMENUS_SPEC,
   BLOG_CARD_SPEC,
+  BUTTON_STYLE_SPEC,
 ]
 
 /**
@@ -123,6 +126,15 @@ export default defineConfig({
       name: 'blog-card-design',
       testMatch: BLOG_CARD_SPEC,
       dependencies: ['nav-submenus'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Gradient main buttons with depth and glow on every page, and cards on a form, a signup form and an
+      // embed; after `blog-card-design` so no other test, and no visual baseline, ever sees them. It
+      // switches the style off again when it ends.
+      name: 'button-style',
+      testMatch: BUTTON_STYLE_SPEC,
+      dependencies: ['blog-card-design'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

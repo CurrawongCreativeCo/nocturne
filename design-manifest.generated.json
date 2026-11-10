@@ -36640,7 +36640,7 @@
             "notApplicable": "Draws no icon from the set"
           },
           "action": {
-            "notApplicable": "No link covers a whole card. Its enquiry button is Buttons (CtaLink), tasks 148 and 137"
+            "notApplicable": "No link covers a whole card. Its enquiry button is a CtaLink, which draws the shared button style (task 148) and indicator (task 137)"
           },
           "framing": {
             "policies": [
@@ -37001,19 +37001,6 @@
           "note": "Optional quick actions"
         },
         {
-          "part": "Buttons (CtaLink)",
-          "needs": [
-            "surface",
-            "depth",
-            "action"
-          ],
-          "tasks": [
-            148,
-            137
-          ],
-          "note": "Task 148 also adopts the search form’s hand-styled button"
-        },
-        {
           "part": "Booking facade",
           "needs": [
             "surface",
@@ -37022,7 +37009,7 @@
           "tasks": [
             148
           ],
-          "note": "Once task 95 exists"
+          "note": "Waits for task 95, which builds it"
         },
         {
           "part": "Event pages",

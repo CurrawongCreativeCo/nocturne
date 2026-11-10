@@ -104,7 +104,9 @@ describe('CtaLink', () => {
 describe('the site-wide button rules (globals.css)', () => {
   const css = readFileSync('src/styles/globals.css', 'utf8')
   // After the rule's own comment, which names the things the rules must not use.
-  const block = css.slice(css.indexOf('*/', css.indexOf('Site-wide button style')) + 2)
+  const block = css
+    .slice(css.indexOf('*/', css.indexOf('Site-wide button style')) + 2)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
   const rules = [...block.matchAll(/(\.cta-[\w:.-]+)\s*\{([^}]*)\}/g)].map(
     ([, selector, body]) => ({ selector: selector ?? '', body: body ?? '' }),
   )
@@ -117,7 +119,7 @@ describe('the site-wide button rules (globals.css)', () => {
   })
 
   it('hands back to the button’s own classes while its variable is unset', () => {
-    expect(rules).toHaveLength(14)
+    expect(rules).toHaveLength(15)
     for (const { selector, body } of rules) {
       for (const declaration of body.split(';').filter((line) => line.includes('var(--button'))) {
         if (selector.includes(':hover') || selector.includes(':active')) {
@@ -135,8 +137,8 @@ describe('the site-wide button rules (globals.css)', () => {
 
   it('touches no filter, outline or text style, and gives the secondary no shadow', () => {
     expect(block).not.toMatch(/filter|brightness|outline|text-shadow|font/)
-    const soft = rules.filter(({ selector }) => selector.startsWith('.cta-soft'))
-    expect(soft.length).toBe(3)
+    const soft = rules.filter(({ selector }) => selector.includes('.cta-soft'))
+    expect(soft.length).toBe(4)
     for (const { body } of soft) expect(body).not.toMatch(/box-shadow|glow|--button-shadow|hover-/)
     const shadowed = rules.filter(({ body }) => body.includes('box-shadow'))
     expect(shadowed.map(({ selector }) => selector)).toEqual([
@@ -168,6 +170,16 @@ describe('the site-wide button rules (globals.css)', () => {
     expect(listed).toBe('color,background-color,transform')
     const added = SITE_DECISIONS.buttonDepth.choices.soft['--button-hover-transition']
     expect(added).toBe(`${listed?.split(',').join(', ')}, translate`)
+  })
+
+  it('keeps the secondary’s outline on a section or card in the Primary colour, where a tint of white fails 4.5:1', () => {
+    const accent = [...block.matchAll(/\[data-tone='accent'\] \.cta-soft[^{]*\{([^}]*)\}/g)]
+    expect(accent.length).toBeGreaterThan(0)
+    const body = accent.map(([, declarations]) => declarations).join(';')
+    expect(body).toContain('background-color: revert-layer')
+    expect(body).toContain('--tw-ring-color: revert-layer')
+    expect(block).toMatch(/\[data-tone='accent'\] \.cta-soft:hover/)
+    expect(block).toMatch(/\[data-tone='accent'\] \.cta-soft:active/)
   })
 
   it('veils the gradient on hover and press, never recolouring the text', () => {
