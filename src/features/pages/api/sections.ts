@@ -626,6 +626,7 @@ export const eventsFragment = /* groq */ `
     text,
     ${headerDesignProjection},
     cardDesign { ${teamCardDesignProjection} },
+    ${pictureDepthProjection},
     count,
     "hasCategoryFilter": defined(category),
     seeAllLabel,

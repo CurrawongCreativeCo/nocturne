@@ -3485,6 +3485,54 @@ documents.push({
 })
 
 /**
+ * Picture depth on Events Featured (tests/e2e/picture-depth-events.spec.ts): the workshop category's next event
+ * has a picture; the talk category's has none. The spec serves a real photograph for the picture.
+ */
+const depthEvents = (id, title, category, extra = {}) => ({
+  _key: id,
+  _type: 'events',
+  variant: 'featured',
+  title,
+  category: ref(`eventCategory-${category}`),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-events',
+  _type: 'page',
+  title: 'Picture depth, events',
+  slug: { _type: 'slug', current: 'picture-depth-events' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthEvents('depth-events-none', 'Events nothing chosen', 'workshop'),
+    depthEvents('depth-events-soft', 'Events soft', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthEvents('depth-events-raised', 'Events raised', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthEvents('depth-events-floating', 'Events floating', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthEvents('depth-events-glow', 'Events floating strong glow', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthEvents('depth-events-glow-only', 'Events strong glow only', 'workshop', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthEvents('depth-events-flat', 'Events flat and glow off', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(2),
+    depthEvents('depth-events-no-picture-none', 'Events no picture nothing chosen', 'talk'),
+    depthEvents('depth-events-no-picture', 'Events no picture floating', 'talk', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
  * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
  * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
  */

@@ -698,13 +698,6 @@
     },
     {
       "component": "events",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": ["featured"],
-      "closingTask": 147
-    },
-    {
-      "component": "events",
       "capability": "glass",
       "scope": "card",
       "layouts": ["featured"],

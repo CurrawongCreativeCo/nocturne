@@ -95,7 +95,7 @@ exports[`the design capability contract > events: reports what it offers today 1
     "framing conditional section/background @list: pending (177)",
     "framing conditional section/background @agenda: pending (177)",
     "framing conditional section/background @featured: pending (177)",
-    "pictureDepth conditional card @featured: pending (147)",
+    "pictureDepth conditional card @featured: verified",
     "overlay required section @list: verified",
     "overlay required section @agenda: verified",
     "overlay required section @featured: verified",

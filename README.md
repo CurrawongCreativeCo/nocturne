@@ -2558,7 +2558,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Embed (`embed`)                          | R✓      | –    | R✓     | –    | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C…*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C✓*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2575,13 +2575,13 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
 | Required                                                 | 252      | 0               | 62      |
-| Conditional                                              | 10       | 0               | 34      |
+| Conditional                                              | 11       | 0               | 33      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 147          | 1                | 3                   |
+| 147          | 1                | 2                   |
 | 151          | 22               | 0                   |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
@@ -2590,7 +2590,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 276          | 2                | 3                   |
 | 280          | 17               | 0                   |
 
-**Evidence.** 276 capability entries, 520 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 277 capability entries, 521 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 

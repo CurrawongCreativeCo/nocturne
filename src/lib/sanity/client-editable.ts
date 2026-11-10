@@ -366,7 +366,16 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   events: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'seeAllLink', 'seeAllLabel'],
-    agencyOnly: ['variant', 'headerDesign', 'cardDesign', 'access', 'style', 'category', 'count'],
+    agencyOnly: [
+      'variant',
+      'headerDesign',
+      'cardDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+      'category',
+      'count',
+    ],
   },
   navItem: {
     editable: ['label', 'link', 'children'],

@@ -13,6 +13,7 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   EventsAgendaThumbnail,
   EventsFeaturedThumbnail,
@@ -116,6 +117,12 @@ export const events = defineType({
         // The List draws a chevron today, the Featured layout nothing: that is what unset means.
         action: { hidden: isAgenda },
         depth: { hidden: notFeatured, lift: {} },
+      }),
+      // A shadow and glow on the Featured card's picture (task 147); the other layouts draw no picture.
+      pictureDepthFields({
+        // The object sits on the section itself, so its parent is the section (the Cards box is one deeper).
+        hidden: ({ parent }) =>
+          ((parent as { variant?: string } | undefined)?.variant ?? 'list') !== 'featured',
       }),
       accessField,
       // Shown first in the Content tab.

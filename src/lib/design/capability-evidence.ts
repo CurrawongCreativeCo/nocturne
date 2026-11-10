@@ -1708,6 +1708,26 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
   }),
+  // A shadow and glow on the Featured card's picture (task 147), for an event that has one (the gallery's first
+  // event does). The picture is inset by the room the depth needs, so the filter and `pictureClearance` are both
+  // claimed: disconnecting either stops the probe changing the picture.
+  {
+    id: 'events.pictureDepth.card',
+    component: 'events',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['featured'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [
+      { module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' },
+      { module: '@/lib/sanity/depth-options', export: 'pictureClearance' },
+    ],
+    render: 'src/features/pages/components/sections/events/featured.tsx',
+    target: 'article.relative.rounded-card img',
+    change: 'attributes',
+    base: { eyebrow: 'What’s on', text: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   // The glyph at the end of a linked card (task 137). The List draws a chevron with nothing chosen, so a
   // choice changes it; Featured draws none, so a choice makes one appear.
   ...(['list', 'featured'] as const).map((layout): CapabilityEvidence => ({
