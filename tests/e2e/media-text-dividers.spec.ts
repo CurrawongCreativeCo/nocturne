@@ -55,16 +55,20 @@ test.describe('Image + text dividers', () => {
     }
   })
 
-  test('a section with none chosen draws none and keeps a smaller gap under the title', async ({
+  test('a section with none chosen draws none and keeps the body’s original margins', async ({
     page,
   }) => {
     const root = section(page, 'No divider')
     await expect(divider(root)).toHaveCount(0)
-    const heading = await root.getByRole('heading', { name: 'No divider' }).boundingBox()
-    const body = await firstBlock(root).boundingBox()
-    if (!heading || !body) throw new Error('Missing boxes')
-    // The body's usual `mt-4`, not the divider's 24px either side.
-    expect(Math.round(body.y - (heading.y + heading.height))).toBeLessThan(24)
+    // Computed margins, not the gap they produce (which depends on margin collapsing): the control keeps
+    // the body's `mt-4` and its paragraph's `my-4`; the divider's sections have neither.
+    const margins = (locator: Locator) =>
+      locator.evaluate((node) => getComputedStyle(node).marginTop)
+    expect(await margins(root.locator('[data-text-role="intro"]'))).toBe('16px')
+    expect(await margins(firstBlock(root))).toBe('16px')
+    const drawn = section(page, 'Side divider')
+    expect(await margins(drawn.locator('[data-text-role="intro"]'))).toBe('0px')
+    expect(await margins(firstBlock(drawn))).toBe('0px')
   })
 
   test('follows the alignment: Stacked and a centred section centre it, Side starts', async ({

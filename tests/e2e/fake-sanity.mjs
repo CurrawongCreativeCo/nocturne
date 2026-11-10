@@ -16,6 +16,7 @@ import {
   designSettingsVariants,
   documents,
   experimentRunning,
+  footerDividerOn,
   footerSocialOn,
   blogPostWithoutPicture,
   blogSettingsDesigned,
@@ -59,6 +60,9 @@ let experimentPatch = null
 /** Whether the footer's social icons are on; switched by POST /__fixture/footer-social/<on|off>. */
 let footerSocialPatch = null
 
+/** Whether the footer has a divider above its bottom row; switched by POST /__fixture/footer-divider/<on|off>. */
+let footerDividerPatch = null
+
 /** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|lift|off>. */
 let blogSettingsPatch = null
 
@@ -97,6 +101,9 @@ function datasetFor(perspective, variant) {
     )
     .map((doc) =>
       footerSocialPatch && doc._id === 'siteNavigation' ? { ...doc, ...footerSocialPatch } : doc,
+    )
+    .map((doc) =>
+      footerDividerPatch && doc._id === 'siteNavigation' ? { ...doc, ...footerDividerPatch } : doc,
     )
     .map((doc) =>
       navigationPatch && doc._id === 'siteNavigation' ? { ...doc, ...navigationPatch } : doc,
@@ -154,6 +161,12 @@ createServer(async (req, res) => {
   const footerSocial = /^\/__fixture\/footer-social\/(on|off)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && footerSocial) {
     footerSocialPatch = footerSocial === 'on' ? footerSocialOn : null
+    res.writeHead(204).end()
+    return
+  }
+  const footerDivider = /^\/__fixture\/footer-divider\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && footerDivider) {
+    footerDividerPatch = footerDivider === 'on' ? footerDividerOn : null
     res.writeHead(204).end()
     return
   }

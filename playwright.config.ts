@@ -27,6 +27,8 @@ const NAV_SUBMENUS_SPEC = /nav-submenus\.spec\.ts/
 const BLOG_CARD_SPEC = /blog-card-design\.spec\.ts/
 // Serves the site-wide button style, which every page's buttons would show.
 const BUTTON_STYLE_SPEC = /button-style\.spec\.ts/
+// Gives the footer a divider, which every page's footer would show.
+const FOOTER_DIVIDER_SPEC = /footer-divider\.spec\.ts/
 const ISOLATED_SPECS = [
   EXPERIMENTS_SPEC,
   DESIGN_SPEC,
@@ -35,6 +37,7 @@ const ISOLATED_SPECS = [
   NAV_SUBMENUS_SPEC,
   BLOG_CARD_SPEC,
   BUTTON_STYLE_SPEC,
+  FOOTER_DIVIDER_SPEC,
 ]
 
 /**
@@ -135,6 +138,14 @@ export default defineConfig({
       name: 'button-style',
       testMatch: BUTTON_STYLE_SPEC,
       dependencies: ['blog-card-design'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // A divider above the footer's bottom row on every page; after `button-style` so no other test, and no
+      // visual baseline, ever sees one. It switches the divider off again when it ends.
+      name: 'footer-divider',
+      testMatch: FOOTER_DIVIDER_SPEC,
+      dependencies: ['button-style'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

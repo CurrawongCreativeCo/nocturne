@@ -942,6 +942,22 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { 'navigation.footerShowSocial': true, 'navigation.footerSocialStyle': 'circle' },
     shape: 'square',
   }),
+  // The footer's divider (task 151): `navigation.footerDividerDesign` is drawn above its bottom row. The probe
+  // chooses a line; the base has no social row or business details, so the divider replaces the footer's own
+  // top border (the unit tests cover the other two cases).
+  {
+    id: 'siteFooter.divider.section',
+    component: 'siteFooter',
+    capability: 'divider',
+    scope: 'section',
+    field: 'navigation.footerDividerDesign',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: {},
+    probe: { 'navigation.footerDividerDesign': { _type: 'decorativeDivider', style: 'line' } },
+  },
   iconContainerEvidence({
     component: 'teamMemberPage',
     scope: 'section',

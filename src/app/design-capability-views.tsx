@@ -7,7 +7,7 @@ import {
   fixtureDocuments,
   projectFragment,
 } from '@/features/pages/components/section-renderer.fixtures'
-import { footerSocialFields } from '@/features/site/api/queries'
+import { footerDividerFields, footerSocialFields } from '@/features/site/api/queries'
 import { FooterView } from '@/features/site/components/footer-view'
 import { teamMemberFields, teamPageSettingsFields } from '@/features/team/api/team-member-fields'
 import { TeamMemberPage } from '@/features/team/components/team-member-page'
@@ -72,7 +72,7 @@ export const VIEW_DRAWERS: Readonly<Record<string, ViewDrawer>> = {
       business: await fixture('businessInfo'),
     }),
     draw: async (state) => {
-      const navigation = (await projectFragment(footerSocialFields, {
+      const navigation = (await projectFragment(`${footerSocialFields}, ${footerDividerFields}`, {
         ...(state.navigation as Record<string, unknown>),
         _id: 'siteNavigation',
         _type: 'siteNavigation',

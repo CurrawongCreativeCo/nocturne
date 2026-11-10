@@ -1681,6 +1681,11 @@ export const blogPostWithoutPicture = {
   mainImage: undefined,
 }
 
+/** Navigation with a divider above the footer's bottom row (tests/e2e/footer-divider.spec.ts). */
+export const footerDividerOn = {
+  footerDividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 

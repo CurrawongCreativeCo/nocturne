@@ -1,12 +1,14 @@
 import { stegaClean, type StegaBranded } from 'next-sanity'
 import type { ReactNode } from 'react'
 
+import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { OpenNowBadge } from '@/components/ui/open-now-badge'
 import { OpeningHours } from '@/components/ui/opening-hours'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { SocialLinks } from '@/components/ui/social-links'
 import { parseAuPhone } from '@/lib/au-phone'
 import { DEFAULT_TIME_ZONE, groupOpeningHours, upcomingSpecialHours } from '@/lib/opening-hours'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { socialStyleOf } from '@/lib/sanity/social-style-options'
 import { resolveIconDesign } from '@/lib/sanity/surface-options'
 import type { SETTINGS_QUERY_RESULT } from '@/types/sanity.types'
@@ -34,14 +36,24 @@ export function FooterView({
   const business = cleanBusiness(settings?.business)
   const timeZone = business?.timeZone ?? DEFAULT_TIME_ZONE
   const footerIcon = resolveIconDesign(settings?.footerIconDesign)
+  // The divider above the bottom row (task 151) replaces the fixed line directly above it, so the two are
+  // never both drawn: the social row has none, so with it the divider has nothing to replace; else the
+  // business block's bottom border; else (nothing above it) the footer's own top border.
+  const divider = resolveDivider(settings?.footerDividerDesign)
+  const showSocial = Boolean(
+    settings?.footerShowSocial && business?.socialLinks?.some((link) => link.url),
+  )
+  const replacesBusinessRule = Boolean(divider && business && !showSocial)
+  const replacesTopRule = Boolean(divider && !business && !showSocial)
 
   return (
-    <footer className="border-t border-line bg-surface-alt">
+    <footer className={replacesTopRule ? 'bg-surface-alt' : 'border-t border-line bg-surface-alt'}>
       {business && (
         <BusinessDetails
           business={business}
           timeZone={timeZone}
           specialDays={upcomingSpecialHours(business.specialHours, today)}
+          ruled={!replacesBusinessRule}
         />
       )}
       {settings?.footerShowSocial && business?.socialLinks?.some((link) => link.url) && (
@@ -52,6 +64,13 @@ export function FooterView({
             colour={footerIcon.colour}
             design={footerIcon}
           />
+        </div>
+      )}
+      {divider && (
+        // `flow-root` keeps the divider's own 24px above and below inside the footer, so they never
+        // collapse out of it; the rows around it use padding, which has nothing to collapse with.
+        <div className="mx-auto flow-root max-w-content px-gutter">
+          <DecorativeDivider divider={divider} />
         </div>
       )}
       <div className="mx-auto flex max-w-content flex-col gap-6 px-gutter py-12 md:flex-row md:items-center md:justify-between">
@@ -89,10 +108,13 @@ function BusinessDetails({
   business,
   timeZone,
   specialDays,
+  ruled,
 }: {
   business: Business
   timeZone: string
   specialDays: ReturnType<typeof upcomingSpecialHours>
+  /** The fixed line under the details: not drawn when the footer's divider takes its place. */
+  ruled: boolean
 }) {
   const { address, abn, publicEmail } = business
   const phone = business.phone ? parseAuPhone(business.phone) : null
@@ -100,7 +122,7 @@ function BusinessDetails({
   const locality = [address?.suburb, address?.state, address?.postcode].filter(Boolean).join(' ')
 
   return (
-    <div className="border-b border-line">
+    <div className={ruled ? 'border-b border-line' : undefined}>
       <div className="mx-auto grid max-w-content gap-8 px-gutter py-12 md:grid-cols-3">
         <div className="flex flex-col gap-2 text-small text-ink-muted">
           <p className="font-display text-h4 text-ink">{business.tradingName}</p>

@@ -595,7 +595,7 @@ exports[`the design capability contract > siteFooter: reports what it offers tod
 {
   "capabilities": [
     "icon required section: verified",
-    "divider required section: pending (151)",
+    "divider required section: verified",
   ],
   "sources": [],
 }

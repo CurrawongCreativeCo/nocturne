@@ -44710,11 +44710,26 @@
                 "policy": "required",
                 "scope": "section",
                 "closingTask": 151,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "navigation.footerDividerDesign"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "siteFooter.divider.section",
+                "field": "navigation.footerDividerDesign",
+                "resolvers": [
+                  "@/lib/sanity/divider-options#resolveDivider"
+                ],
+                "render": "src/components/ui/decorative-divider.tsx",
+                "target": "[data-decorative-divider]",
+                "cases": [
+                  "siteFooter.divider.section"
+                ]
+              }
+            ]
           },
           "edge": {
             "notApplicable": "Not a section, so it has no edge"
