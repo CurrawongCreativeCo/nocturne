@@ -3623,6 +3623,66 @@ documents.push({
 })
 
 /**
+ * Picture depth on the Location's map picture (tests/e2e/picture-depth-location.spec.ts): a section with a map image
+ * at each depth level, the click-to-load map, and sections with no map image (the details on cards).
+ */
+const depthLocation = (id, title, extra = {}) => ({
+  _key: id,
+  _type: 'location',
+  title,
+  showHours: false,
+  showContact: true,
+  directionsLabel: 'Get directions',
+  mapImage: image('A map of Newtown'),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-location',
+  _type: 'page',
+  title: 'Picture depth, location',
+  slug: { _type: 'slug', current: 'picture-depth-location' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthLocation('depth-l-none', 'Location nothing chosen'),
+    depthLocation('depth-l-soft', 'Location soft', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthLocation('depth-l-raised', 'Location raised', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthLocation('depth-l-floating', 'Location floating', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-glow', 'Location floating strong glow', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthLocation('depth-l-glow-only', 'Location strong glow only', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthLocation('depth-l-flat', 'Location flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthLocation('depth-l-interactive', 'Location interactive floating', {
+      interactiveMap: true,
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-parallax', 'Location parallax floating', {
+      style: { _type: 'sectionStyle', motion: 'parallax' },
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-no-picture-none', 'Location no picture nothing chosen', {
+      mapImage: undefined,
+    }),
+    depthLocation('depth-l-no-picture', 'Location no picture floating', {
+      mapImage: undefined,
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+  ],
+})
+
+/**
  * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
  * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
  */

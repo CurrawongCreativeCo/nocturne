@@ -622,13 +622,6 @@
     },
     {
       "component": "location",
-      "capability": "pictureDepth",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 147
-    },
-    {
-      "component": "location",
       "capability": "glass",
       "scope": "card",
       "layouts": [null],

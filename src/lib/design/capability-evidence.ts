@@ -1570,6 +1570,21 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { mapImage: PICTURE },
     roles: ['title', 'body', 'meta'],
   }),
+  // A shadow and glow on the map picture (task 147), which the section has only when a map image is set: the
+  // trigger. The filter follows the picture's own ring and corners, so the probe changes the <img>.
+  {
+    ...LOCATION,
+    id: 'location.pictureDepth.section',
+    capability: 'pictureDepth',
+    scope: 'section',
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/location/index.tsx',
+    target: 'section img',
+    change: 'attributes',
+    base: { mapImage: PICTURE },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   iconContainerEvidence({
     component: 'location',
     scope: 'section',

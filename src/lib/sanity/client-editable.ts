@@ -303,7 +303,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'showSocial',
       'directionsLabel',
     ],
-    agencyOnly: ['headerDesign', 'iconDesign', 'cardDesign', 'access', 'style', 'interactiveMap'],
+    agencyOnly: [
+      'headerDesign',
+      'iconDesign',
+      'cardDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+      'interactiveMap',
+    ],
   },
   team: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'selection', 'members'],

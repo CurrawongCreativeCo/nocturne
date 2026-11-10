@@ -1524,6 +1524,12 @@ exports[`design capability evidence > location.overlay.section: the probe change
 ]
 `;
 
+exports[`design capability evidence > location.pictureDepth.section: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="h-auto w-full rounded-card object-cover ring-1 ring-line" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?w=1200&h=630&fit=crop&auto=format">",
+]
+`;
+
 exports[`design capability evidence > location.surface.card.cards: the probe changes the registered target 1`] = `
 [
   "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line border-t-4 border-accent">",

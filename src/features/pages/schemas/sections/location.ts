@@ -20,6 +20,7 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 
 import { locationCapabilities } from './location-capabilities'
 
@@ -131,6 +132,11 @@ export const location = defineType({
         surface: { hidden: hasPicture },
         markHidden: hasPicture,
         depth: { hidden: hasPicture },
+      }),
+      // A shadow and glow on the map picture (task 147): there only while the section has one.
+      pictureDepthFields({
+        hidden: ({ parent }) =>
+          !(parent as { mapImage?: { asset?: unknown } } | undefined)?.mapImage?.asset,
       }),
       accessField,
     ],

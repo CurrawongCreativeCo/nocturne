@@ -392,7 +392,7 @@ exports[`the design capability contract > location: reports what it offers today
     "depth required card: verified",
     "icon required section: verified",
     "framing conditional section/background: pending (177)",
-    "pictureDepth conditional section: pending (147)",
+    "pictureDepth conditional section: verified",
     "overlay required section: verified",
     "glass required section: verified",
     "glass conditional card: pending (159)",

@@ -384,6 +384,7 @@ export const locationFragment = /* groq */ `
     },
     iconDesign { ${iconDesignFields} },
     mapImage { ${imageFields} },
+    ${pictureDepthProjection},
     showHours,
     showOpenNow,
     showContact,
