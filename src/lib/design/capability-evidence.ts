@@ -1041,6 +1041,23 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
   },
+  // The hero's divider (task 151): `divider` is drawn under the title by HeroText, in every layout, once
+  // the hero has a title and a description or buttons. The gallery's first Split hero has only a title, so
+  // the base gives every layout the same description.
+  {
+    id: 'hero.divider.section',
+    component: 'hero',
+    layouts: ['overlay', 'split', 'editorial', 'full-bleed'],
+    capability: 'divider',
+    scope: 'section',
+    field: 'dividerDesign',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: { description: 'A short introduction.' },
+    probe: { dividerDesign: { _type: 'decorativeDivider', style: 'line' } },
+  },
   {
     id: 'hero.slots.supporting',
     component: 'hero',

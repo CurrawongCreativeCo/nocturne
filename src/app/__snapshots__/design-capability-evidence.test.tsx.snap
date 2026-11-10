@@ -789,6 +789,14 @@ exports[`design capability evidence > hero.action.item@overlay: the probe change
 
 exports[`design capability evidence > hero.action.item@split: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > hero.divider.section@editorial: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.divider.section@full-bleed: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.divider.section@overlay: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > hero.divider.section@split: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > hero.edge.section@editorial: the probe changes the registered target 1`] = `
 [
   "<body>",

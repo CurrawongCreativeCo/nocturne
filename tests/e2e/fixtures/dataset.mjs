@@ -5577,6 +5577,34 @@ documents.push(
     ],
   },
   {
+    // A divider under a hero's title (tests/e2e/hero-dividers.spec.ts): one hero in each layout, each with
+    // an intro and buttons, and a Full background hero with none chosen to compare spacing against.
+    _id: 'page-hero-dividers',
+    _type: 'page',
+    title: 'Hero dividers',
+    slug: { _type: 'slug', current: 'hero-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['overlay', 'Hero overlay', true],
+      ['split', 'Hero split', true],
+      ['editorial', 'Hero editorial', true],
+      ['full-bleed', 'Hero panel', true],
+      ['overlay', 'Hero control', false],
+    ].map(([variant, title, divider], index) => ({
+      _key: `hrd-${index}`,
+      _type: 'hero',
+      variant,
+      title,
+      description: 'An introduction under the divider.',
+      ctas: [cta('Get started', internal('page-about'))],
+      ...(variant === 'editorial' ? {} : { backgroundImage: image('') }),
+      ...(divider
+        ? { dividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' } }
+        : {}),
+    })),
+  },
+  {
     // The blur preview is only for opaque pictures (tests/e2e/image-placeholder.spec.ts): a transparent
     // logo as the profile picture and as a wordmark, and an opaque photo as a picture.
     _id: 'page-image-placeholders',

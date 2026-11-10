@@ -206,6 +206,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     ],
     agencyOnly: [
       'eyebrowDesign',
+      'dividerDesign',
       'imageDesign',
       'pictureDepthDesign',
       'supporting',

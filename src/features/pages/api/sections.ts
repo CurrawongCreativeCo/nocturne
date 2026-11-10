@@ -77,6 +77,7 @@ export const heroFragment = /* groq */ `
       textColour { colour, hex },
       separatorColour { colour, hex }
     },
+    dividerDesign { ${decorativeDividerFields} },
     title,
     heading,
     "headingPlain": pt::text(heading),

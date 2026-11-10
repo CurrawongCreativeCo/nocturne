@@ -67,13 +67,6 @@
     },
     {
       "component": "hero",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["overlay", "split", "editorial", "full-bleed"],
-      "closingTask": 151
-    },
-    {
-      "component": "hero",
       "capability": "slots",
       "scope": "section",
       "part": "placement",

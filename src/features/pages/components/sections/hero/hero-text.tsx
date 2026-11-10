@@ -3,6 +3,7 @@ import { Suspense, type ReactNode } from 'react'
 import { MotionDiv, MotionP, MotionSpan } from '@/components/motion/motion-elements'
 import { partProps, type PartPlan } from '@/components/motion/part-motion'
 import { CtaGroup } from '@/components/ui/cta-link'
+import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { InlineList } from '@/components/ui/inline-list'
 import { PARAGRAPH_GAP, PlainLines } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
@@ -10,6 +11,7 @@ import { ctaSurfaceFor, type SectionTone } from '@/components/ui/section-style'
 import { resolveHeroEyebrowDesign } from '@/features/pages/utils/hero-eyebrow'
 import type { HeroPart } from '@/features/pages/utils/hero-parts'
 import { plainTextParagraphs } from '@/lib/plain-text'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { inlineListItems } from '@/lib/sanity/inline-list-options'
 
 import type { SectionProps } from '../../../types'
@@ -68,6 +70,15 @@ export function HeroText({
   const eyebrowMotion = partProps(parts.eyebrow)
   // One paragraph is the `<p>` it always was; several share the same motion and spacing.
   const paragraphs = plainTextParagraphs(description)
+  // The divider (task 151) sits between the title and what follows it: drawn only with a title and a
+  // description or buttons. Its own space (`my-6`) collapses with the description's `mt-6`, the buttons'
+  // `mt-10` and the greeting's `mt-4`, so none of them is edited and an unset hero is unchanged.
+  const divider = resolveDivider(data.dividerDesign)
+  // `pt::text` of an unset heading is null, though TypeGen types it as a string.
+  const hasTitle = ([headingPlain, title] as (string | null | undefined)[]).some((text) =>
+    text?.trim(),
+  )
+  const showDivider = Boolean(divider && hasTitle && (paragraphs.length > 0 || ctas?.length))
   const descriptionClass = `mt-6 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`
 
   return (
@@ -96,6 +107,7 @@ export function HeroText({
       ) : null}
       {/* `heading` first; `title` is the old plain string, still read until the content migration has run. */}
       {headingMotion ? <MotionDiv {...headingMotion}>{richHeading}</MotionDiv> : richHeading}
+      {showDivider && divider ? <DecorativeDivider divider={divider} block={block} /> : null}
       {/* Request-time (cookie) content: the page stays prerendered around this boundary. */}
       {showGreeting && <Suspense fallback={null}>{greeting}</Suspense>}
       {/* Not the h1 or the image: they are the LCP candidates and must paint without waiting for JS. */}

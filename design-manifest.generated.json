@@ -977,6 +977,372 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -2975,16 +3341,34 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "dividerDesign"
+              ],
               "availability": {
-                "overlay": "pending",
-                "split": "pending",
-                "editorial": "pending",
-                "full-bleed": "pending"
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "hero.divider.section",
+              "field": "dividerDesign",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "hero.divider.section@overlay",
+                "hero.divider.section@split",
+                "hero.divider.section@editorial",
+                "hero.divider.section@full-bleed"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
