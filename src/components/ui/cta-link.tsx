@@ -7,60 +7,15 @@ import { trackAttributes } from '@/lib/analytics/track-script'
 import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import type { CtaData } from '@/types/sanity'
 
-/**
- * Button styles per background: `dark` for hero/dark banners, `light` for surface or surface-alt sections.
- * The light primary button uses the `cta` colour: near-black by default, the Primary brand colour once
- * the Studio's Design settings set one.
- * Dark surfaces also switch the focus ring to the inverse ink so it stays visible.
- *
- * The site-wide button style (Brand colours → Buttons, task 148) rides on hook classes whose rules are
- * in globals.css: `cta-fill` (Brand gradient and its text colour) and `cta-soft` (the secondary's Soft
- * fill) in the colours below, and `cta-primary-depth` (shadow and glow, main button only) in the full
- * class list. They do nothing until the style is chosen.
- */
-const variants = {
-  dark: {
-    primary:
-      'bg-ink-inverse text-surface-inverse hover:bg-ink-inverse/85 active:bg-ink-inverse/70 focus-visible:outline-ink-inverse cta-fill',
-    secondary:
-      'ring-1 ring-inset ring-ink-inverse/40 text-ink-inverse hover:bg-ink-inverse/10 active:bg-ink-inverse/20 focus-visible:outline-ink-inverse cta-soft',
-  },
-  light: {
-    primary: 'bg-cta text-cta-ink hover:bg-cta/85 active:bg-cta/70 cta-fill',
-    secondary: 'ring-1 ring-inset ring-line text-ink hover:bg-surface-alt active:bg-line cta-soft',
-  },
-} as const
+import { ctaClassName, type ButtonSize, type ButtonSurface } from './button-style'
 
-/** One short transition (motion tokens) and a small press. None of it under reduced motion. */
-export const buttonFeedback =
-  'transition-[color,background-color,transform] duration-(--duration-fast) ease-out motion-safe:active:scale-[0.98] motion-reduce:transition-none'
-
-const sizes = { md: 'px-6 py-3', sm: 'px-4 py-2' } as const
-
-/** Just the colours of a button style, for a button that has its own shape (a link list's featured link). */
-export function ctaColours(
-  surface: keyof typeof variants,
-  variant: keyof (typeof variants)['dark'] = 'primary',
-) {
-  return variants[surface][variant]
-}
-
-/** The button classes of a CTA, for a plain `<a>` or `<button>` that isn't a Sanity link (e.g. Google Maps directions). */
-export function ctaClassName(
-  surface: keyof typeof variants,
-  variant: keyof (typeof variants)['dark'] = 'primary',
-  size: keyof typeof sizes = 'md',
-) {
-  // Depth and glow are the main button's alone; the secondary never gets the hook.
-  const depth = variant === 'primary' ? ' cta-primary-depth' : ''
-  return `inline-flex items-center justify-center rounded-button text-small font-semibold ${buttonFeedback} ${sizes[size]} ${ctaColours(surface, variant)}${depth}`
-}
+export { buttonFeedback, ctaClassName, ctaColours } from './button-style'
 
 interface Props {
   /** `_key` is only needed in lists; a standalone CTA (e.g. the header button) has none. */
   cta: Omit<CtaData, '_key'>
-  surface?: keyof typeof variants
-  size?: keyof typeof sizes
+  surface?: ButtonSurface
+  size?: ButtonSize
   className?: string
 }
 

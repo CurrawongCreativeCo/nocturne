@@ -82,14 +82,34 @@ const headingStyle = decision('headingStyle', {
 })
 
 /**
+ * Hover depth for the main button (task 148), in Task 146's technique (`.card-lift`, globals.css): the deeper
+ * shadow is drawn once, on a layer that only fades in (opacity), and the button itself rises a little
+ * (`translate`); box-shadow is never animated. These variables switch the layer, its position and the lift
+ * on; `globals.css` holds the rules, and reduced motion gets none of it. The transition list is the
+ * button's own (`buttonFeedback`) with `translate` added, which a test keeps in step.
+ */
+function hoverDepth(deeper: string): SiteDecisionVars {
+  return {
+    '--button-hover-shadow': deeper,
+    '--button-hover-position': 'relative',
+    '--button-hover-content': '""',
+    '--button-hover-translate': '0 -2px',
+    '--button-hover-transition': 'color, background-color, transform, translate',
+  }
+}
+
+/**
  * The main button's shadow (task 148). Sets `--button-depth`, which only buttons read, so `--shadow-*`
  * and every card are untouched. Flat is today's look and emits nothing. Soft and Raised reuse the
  * card shadow levels (tokens.json), so the two stay one scale.
  */
 const buttonDepth = decision('buttonDepth', {
   flat: {},
-  soft: { '--button-depth': 'var(--shadow-soft, var(--shadow-card))' },
-  raised: { '--button-depth': 'var(--shadow-raised)' },
+  soft: {
+    '--button-depth': 'var(--shadow-soft, var(--shadow-card))',
+    ...hoverDepth('var(--shadow-raised)'),
+  },
+  raised: { '--button-depth': 'var(--shadow-raised)', ...hoverDepth('var(--shadow-floating)') },
 })
 
 /**

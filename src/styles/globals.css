@@ -774,8 +774,10 @@ h3 {
  * - `.cta-fill` (main button, either surface): the Brand gradient and the text colour chosen to read
  *   along all of it. Hover and press lay a veil over the gradient; the text colour never changes, and no
  *   filter touches it.
- * - `.cta-primary-depth`: the main button's shadow and glow, one box-shadow list. Outlines are drawn
- *   outside the box-shadow, so keyboard focus keeps the global `:focus-visible` outline.
+ * - `.cta-primary-depth`: the main button's shadow and glow, one box-shadow list, and (with a Soft or Raised
+ *   depth) hover depth: a deeper shadow on a layer that fades in and a small rise, for pointer and keyboard
+ *   focus, none under reduced motion. Outlines are drawn outside the box-shadow, so keyboard focus keeps the
+ *   global `:focus-visible` outline.
  * - `.cta-soft` (secondary button): a tint of its own text colour instead of the outline. It has no
  *   shadow or glow hook at all.
  */
@@ -801,6 +803,39 @@ h3 {
 }
 .cta-primary-depth {
   box-shadow: var(--button-shadow, revert-layer);
+  position: var(--button-hover-position, revert-layer);
+}
+/* Hover depth: a deeper shadow drawn once on a layer that only fades in, never an animated box-shadow. */
+.cta-primary-depth::after {
+  content: var(--button-hover-content, none);
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--button-hover-shadow, none);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cta-primary-depth {
+    transition-property: var(--button-hover-transition, revert-layer);
+  }
+  .cta-primary-depth::after {
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .cta-primary-depth:hover {
+      translate: var(--button-hover-translate, revert-layer);
+    }
+    .cta-primary-depth:hover::after {
+      opacity: 1;
+    }
+  }
+  .cta-primary-depth:focus-visible {
+    translate: var(--button-hover-translate, revert-layer);
+  }
+  .cta-primary-depth:focus-visible::after {
+    opacity: 1;
+  }
 }
 .cta-soft {
   background-color: var(--button-secondary-fill, revert-layer);

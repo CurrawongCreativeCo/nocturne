@@ -48,12 +48,26 @@ describe('button decisions leave an unset site as it was (task 148)', () => {
 
 describe('depth, glow and the secondary style', () => {
   it('Soft and Raised depth reuse the card shadow scale', () => {
-    expect(siteDecisionVars({ buttonDepth: 'soft' })).toEqual({
-      '--button-depth': 'var(--shadow-soft, var(--shadow-card))',
-    })
-    expect(siteDecisionVars({ buttonDepth: 'raised' })).toEqual({
-      '--button-depth': 'var(--shadow-raised)',
-    })
+    expect(siteDecisionVars({ buttonDepth: 'soft' })['--button-depth']).toBe(
+      'var(--shadow-soft, var(--shadow-card))',
+    )
+    expect(siteDecisionVars({ buttonDepth: 'raised' })['--button-depth']).toBe(
+      'var(--shadow-raised)',
+    )
+  })
+
+  it('hover depth is the next level up, on a faded layer, and only where there is a shadow to deepen', () => {
+    expect(siteDecisionVars({ buttonDepth: 'flat' })).toEqual({})
+    expect(siteDecisionVars({ buttonGlow: 'strong' })).not.toHaveProperty('--button-hover-shadow')
+    const soft = siteDecisionVars({ buttonDepth: 'soft' })
+    const raised = siteDecisionVars({ buttonDepth: 'raised' })
+    expect(soft['--button-hover-shadow']).toBe('var(--shadow-raised)')
+    expect(raised['--button-hover-shadow']).toBe('var(--shadow-floating)')
+    for (const vars of [soft, raised]) {
+      expect(vars['--button-hover-position']).toBe('relative')
+      expect(vars['--button-hover-content']).toBe('""')
+      expect(vars['--button-hover-translate']).toBe('0 -2px')
+    }
   })
 
   it('glow uses Task 146’s halo sizes and strengths in the Primary colour', () => {

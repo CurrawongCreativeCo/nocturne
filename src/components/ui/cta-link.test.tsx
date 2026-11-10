@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
+import { SITE_DECISIONS } from '@/lib/design/site-decisions'
 import type { CtaData } from '@/types/sanity'
 
 import { buttonFeedback, ctaClassName, ctaColours, CtaLink } from './cta-link'
@@ -116,22 +117,57 @@ describe('the site-wide button rules (globals.css)', () => {
   })
 
   it('hands back to the button’s own classes while its variable is unset', () => {
-    expect(rules).toHaveLength(7)
+    expect(rules).toHaveLength(14)
     for (const { selector, body } of rules) {
       for (const declaration of body.split(';').filter((line) => line.includes('var(--button'))) {
-        if (selector.includes(':hover') || selector.includes(':active')) continue
-        expect(declaration, selector).toContain('revert-layer')
+        if (selector.includes(':hover') || selector.includes(':active')) {
+          // Only a rule that changes nothing without its variable may be skipped: the hover/press
+          // rules hand back too, or fall to the property's initial value where the classes set none.
+          expect(declaration, selector).toMatch(/revert-layer|--button-fill/)
+          continue
+        }
+        // The hover-depth layer has no classes of its own to hand back to: none, or no content, is "off".
+        const layer = selector.includes('::after')
+        expect(declaration, selector).toContain(layer ? 'none' : 'revert-layer')
       }
     }
   })
 
-  it('touches no filter, outline, text style or opacity, and gives the secondary no shadow', () => {
-    expect(block).not.toMatch(/filter|brightness|outline|opacity|text-shadow|font/)
+  it('touches no filter, outline or text style, and gives the secondary no shadow', () => {
+    expect(block).not.toMatch(/filter|brightness|outline|text-shadow|font/)
     const soft = rules.filter(({ selector }) => selector.startsWith('.cta-soft'))
     expect(soft.length).toBe(3)
-    for (const { body } of soft) expect(body).not.toMatch(/box-shadow|glow|--button-shadow/)
+    for (const { body } of soft) expect(body).not.toMatch(/box-shadow|glow|--button-shadow|hover-/)
     const shadowed = rules.filter(({ body }) => body.includes('box-shadow'))
-    expect(shadowed.map(({ selector }) => selector)).toEqual(['.cta-primary-depth'])
+    expect(shadowed.map(({ selector }) => selector)).toEqual([
+      '.cta-primary-depth',
+      '.cta-primary-depth::after',
+    ])
+  })
+
+  it('draws hover depth with a faded layer and a rise: opacity and translate, never an animated box-shadow', () => {
+    const motion = block.slice(block.indexOf('@media (prefers-reduced-motion: no-preference)'))
+    // Every rule that fades or moves is inside the no-preference query; nothing outside it does.
+    const outside = block.slice(0, block.indexOf('@media (prefers-reduced-motion: no-preference)'))
+    expect(outside).not.toMatch(/transition|translate|:hover::after|:focus-visible/)
+    expect(motion).toMatch(/transition: opacity var\(--duration-fast\) var\(--ease-out\)/)
+    expect(motion).toMatch(/translate: var\(--button-hover-translate, revert-layer\)/)
+    const transitions = [...css.matchAll(/transition(?:-property)?:[^;]*;/g)]
+      .map(([match]) => match)
+      .filter((match) => match.includes('--button-hover') || match.includes('opacity var'))
+    expect(transitions.length).toBeGreaterThan(0)
+    for (const transition of transitions) expect(transition).not.toMatch(/box-shadow/)
+    expect(/@keyframes[^{]*\{[^}]*box-shadow/.exec(css)).toBeNull()
+    // The layer fades in for the pointer (where there is one) and for keyboard focus, not otherwise.
+    expect(motion).toContain('@media (hover: hover)')
+    expect(motion).toContain('.cta-primary-depth:focus-visible::after')
+  })
+
+  it('keeps the button’s own transition list and adds only translate to it', () => {
+    const listed = /transition-\[([^\]]*)\]/.exec(buttonFeedback)?.[1]
+    expect(listed).toBe('color,background-color,transform')
+    const added = SITE_DECISIONS.buttonDepth.choices.soft['--button-hover-transition']
+    expect(added).toBe(`${listed?.split(',').join(', ')}, translate`)
   })
 
   it('veils the gradient on hover and press, never recolouring the text', () => {
